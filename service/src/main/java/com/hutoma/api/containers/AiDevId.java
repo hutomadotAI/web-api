@@ -1,4 +1,4 @@
-package com.hutoma.api.connectors;
+package com.hutoma.api.containers;
 
 import java.util.UUID;
 

@@ -2,8 +2,8 @@ package com.hutoma.api.tests.service;
 
 import com.hutoma.api.common.TestDataHelper;
 import com.hutoma.api.connectors.AIServices;
-import com.hutoma.api.connectors.Database;
-import com.hutoma.api.connectors.DatabaseEntitiesIntents;
+import com.hutoma.api.connectors.db.DatabaseEntitiesIntents;
+import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.sub.IntentVariable;
 import com.hutoma.api.containers.sub.WebHook;
@@ -35,8 +35,8 @@ public class TestServiceIntents extends ServiceTestBase {
     private IMemoryIntentHandler fakeMemoryIntentHandler;
 
     @Test
-    public void testSaveIntent() throws Database.DatabaseException {
-        when(this.fakeDatabase.getAI(any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
+    public void testSaveIntent() throws DatabaseException {
+        when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
         ApiIntent intent = TestIntentLogic.getIntent();
         intent.setUserSays(Collections.singletonList(
                 String.join("", Collections.nCopies(250, "A"))));

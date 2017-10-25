@@ -2,11 +2,16 @@ package com.hutoma.api;
 
 import com.hutoma.api.access.RateLimitCheck;
 import com.hutoma.api.common.*;
-import com.hutoma.api.connectors.*;
-import com.hutoma.api.connectors.db.DatabaseCall;
-import com.hutoma.api.connectors.db.DatabaseConnectionPool;
-import com.hutoma.api.connectors.db.DatabaseTransaction;
-import com.hutoma.api.connectors.db.TransactionalDatabaseCall;
+import com.hutoma.api.connectors.AIChatServices;
+import com.hutoma.api.connectors.AIQueueServices;
+import com.hutoma.api.connectors.AIServices;
+import com.hutoma.api.connectors.AiStrings;
+import com.hutoma.api.connectors.AnalyticsESConnector;
+import com.hutoma.api.connectors.EntityRecognizerService;
+import com.hutoma.api.connectors.FacebookConnector;
+import com.hutoma.api.connectors.HTMLExtractor;
+import com.hutoma.api.connectors.WebHooks;
+import com.hutoma.api.connectors.db.*;
 import com.hutoma.api.containers.facebook.FacebookMachineID;
 import com.hutoma.api.controllers.ControllerAiml;
 import com.hutoma.api.controllers.ControllerRnn;
@@ -68,6 +73,20 @@ public class ServerBinder extends AbstractBinder {
         // API Access specialized logger
         bind(AccessLogger.class).to(AccessLogger.class).in(Singleton.class);
 
+        // database
+        bind(Database.class).to(Database.class);
+        bind(DatabaseAI.class).to(DatabaseAI.class);
+        bind(DatabaseUser.class).to(DatabaseUser.class);
+        bind(DatabaseMarketplace.class).to(DatabaseMarketplace.class);
+        bind(DatabaseEntitiesIntents.class).to(DatabaseEntitiesIntents.class);
+        bind(DatabaseAiStatusUpdates.class).to(DatabaseAiStatusUpdates.class);
+        bind(DatabaseIntegrations.class).to(DatabaseIntegrations.class);
+        bind(DatabaseBackends.class).to(DatabaseBackends.class);
+
+        bind(DatabaseTransaction.class).to(DatabaseTransaction.class);
+        bind(DatabaseCall.class).to(DatabaseCall.class);
+        bind(TransactionalDatabaseCall.class).to(TransactionalDatabaseCall.class);
+
         // business logic
         bind(AdminLogic.class).to(AdminLogic.class);
         bind(AILogic.class).to(AILogic.class);
@@ -88,12 +107,6 @@ public class ServerBinder extends AbstractBinder {
 
         // other
         bind(JsonSerializer.class).to(JsonSerializer.class);
-        bind(Database.class).to(Database.class);
-        bind(DatabaseEntitiesIntents.class).to(DatabaseEntitiesIntents.class);
-        bind(DatabaseAiStatusUpdates.class).to(DatabaseAiStatusUpdates.class);
-        bind(DatabaseTransaction.class).to(DatabaseTransaction.class);
-        bind(DatabaseCall.class).to(DatabaseCall.class);
-        bind(TransactionalDatabaseCall.class).to(TransactionalDatabaseCall.class);
         bind(Tools.class).to(Tools.class);
         bind(HTMLExtractor.class).to(HTMLExtractor.class);
         bind(Validate.class).to(Validate.class);

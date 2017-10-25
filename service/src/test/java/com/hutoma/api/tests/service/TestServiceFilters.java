@@ -1,6 +1,6 @@
 package com.hutoma.api.tests.service;
 
-import com.hutoma.api.connectors.Database;
+import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.sub.RateLimitStatus;
 import com.hutoma.api.endpoints.AIIntegrationEndpoint;
 import com.hutoma.api.logic.AIIntegrationLogic;
@@ -20,7 +20,7 @@ public class TestServiceFilters extends ServiceTestBase {
     private static final String BASEPATH = "/ai/integration";
 
     @Test
-    public void testGetNormal() throws Database.DatabaseException {
+    public void testGetNormal() throws DatabaseException {
         when(this.fakeDatabase.checkRateLimit(any(), anyString(), anyDouble(), anyDouble()))
                 .thenReturn(new RateLimitStatus(false, 1.0, true));
         final Response response = target(BASEPATH).request().headers(defaultHeaders).get();
@@ -28,7 +28,7 @@ public class TestServiceFilters extends ServiceTestBase {
     }
 
     @Test
-    public void testRateLimited() throws Database.DatabaseException {
+    public void testRateLimited() throws DatabaseException {
         when(this.fakeDatabase.checkRateLimit(any(), anyString(), anyDouble(), anyDouble()))
                 .thenReturn(new RateLimitStatus(true, 1.0, true));
         final Response response = target(BASEPATH).request().headers(defaultHeaders).get();
@@ -36,7 +36,7 @@ public class TestServiceFilters extends ServiceTestBase {
     }
 
     @Test
-    public void testAccountDisabled() throws Database.DatabaseException {
+    public void testAccountDisabled() throws DatabaseException {
         when(this.fakeDatabase.checkRateLimit(any(), anyString(), anyDouble(), anyDouble()))
                 .thenReturn(new RateLimitStatus(false, 1.0, false));
         final Response response = target(BASEPATH).request().headers(defaultHeaders).get();
@@ -44,7 +44,7 @@ public class TestServiceFilters extends ServiceTestBase {
     }
 
     @Test
-    public void testAccountDisabledAndRateLimited() throws Database.DatabaseException {
+    public void testAccountDisabledAndRateLimited() throws DatabaseException {
         when(this.fakeDatabase.checkRateLimit(any(), anyString(), anyDouble(), anyDouble()))
                 .thenReturn(new RateLimitStatus(true, 1.0, false));
         final Response response = target(BASEPATH).request().headers(defaultHeaders).get();
@@ -52,7 +52,7 @@ public class TestServiceFilters extends ServiceTestBase {
     }
 
     @Test
-    public void testMissingAuthHeaderGives401() throws Database.DatabaseException {
+    public void testMissingAuthHeaderGives401() throws DatabaseException {
         final Response response = target(BASEPATH).request().get();
         Assert.assertEquals(HttpURLConnection.HTTP_UNAUTHORIZED, response.getStatus());
     }

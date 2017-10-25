@@ -3,8 +3,9 @@ package com.hutoma.api.memory;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Pair;
-import com.hutoma.api.connectors.Database;
-import com.hutoma.api.connectors.DatabaseEntitiesIntents;
+import com.hutoma.api.connectors.db.DatabaseEntitiesIntents;
+import com.hutoma.api.connectors.db.Database;
+import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.ApiEntity;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.sub.IntentVariable;
@@ -68,7 +69,7 @@ public class TestMemoryIntentHandler {
     }
 
     @Test
-    public void testGetIntent() throws Database.DatabaseException {
+    public void testGetIntent() throws DatabaseException {
         ApiIntent intent = new ApiIntent(INTENT_NAME, "", "");
         when(this.fakeDatabaseEntities.getIntent(any(), any())).thenReturn(intent);
         ApiIntent result = this.memoryIntentHandler.getIntent(AIID, INTENT_NAME);
@@ -76,14 +77,14 @@ public class TestMemoryIntentHandler {
     }
 
     @Test
-    public void testGetIntent_dbException() throws Database.DatabaseException {
-        when(this.fakeDatabaseEntities.getIntent(any(), any())).thenThrow(Database.DatabaseException.class);
+    public void testGetIntent_dbException() throws DatabaseException {
+        when(this.fakeDatabaseEntities.getIntent(any(), any())).thenThrow(DatabaseException.class);
         Assert.assertNull(this.memoryIntentHandler.getIntent(AIID, INTENT_NAME));
     }
 
     @Test
     @UseDataProvider("recognizeIntentDataProvider")
-    public void testRecognizeIntent(String response) throws Database.DatabaseException {
+    public void testRecognizeIntent(String response) throws DatabaseException {
         MemoryIntent mi = setDummyMemoryIntent(response);
         Assert.assertNotNull(mi);
         Assert.assertEquals(INTENT_NAME, mi.getName());
@@ -97,7 +98,7 @@ public class TestMemoryIntentHandler {
     }
 
     @Test
-    public void testIntentVariableFulfilled() throws Database.DatabaseException {
+    public void testIntentVariableFulfilled() throws DatabaseException {
         final String entityName = "name";
         final String entityValue = "a";
         MemoryIntent mi = new MemoryIntent(INTENT_NAME, AIID, CHATID,
@@ -109,26 +110,26 @@ public class TestMemoryIntentHandler {
     }
 
     @Test
-    public void testIntentUpdate() throws Database.DatabaseException {
+    public void testIntentUpdate() throws DatabaseException {
         MemoryIntent mi = this.setDummyMemoryIntent("");
         this.memoryIntentHandler.updateStatus(mi);
         try {
             // This seems to count once for the invocation above and another for this
-            verify(this.fakeDatabase, atMost(2)).updateMemoryIntent(mi, this.fakeSerializer);
-        } catch (Database.DatabaseException dbe) {
+            verify(this.fakeDatabaseEntities, atMost(2)).updateMemoryIntent(mi, this.fakeSerializer);
+        } catch (DatabaseException dbe) {
             Assert.fail(dbe.getMessage());
         }
     }
 
     @Test
-    public void testMemoryIntentULoadNotExistYet() throws Database.DatabaseException {
+    public void testMemoryIntentULoadNotExistYet() throws DatabaseException {
         final String entityName = "entity1";
         ApiIntent apiIntent = new ApiIntent(INTENT_NAME, "in", "out");
         IntentVariable iv = new IntentVariable(entityName, DEVID_UUID, true, 1, null, false, "");
         ApiEntity apiEntity = new ApiEntity(entityName, DEVID_UUID, Arrays.asList("a", "b"), false);
         apiIntent.addVariable(iv);
         when(this.fakeDatabaseEntities.getIntent(any(), anyString())).thenReturn(apiIntent);
-        when(this.fakeDatabase.getMemoryIntent(anyString(), any(), any(), any())).thenReturn(null);
+        when(this.fakeDatabaseEntities.getMemoryIntent(anyString(), any(), any(), any())).thenReturn(null);
         when(this.fakeDatabaseEntities.getEntity(any(), anyString())).thenReturn(apiEntity);
         MemoryIntent mi = this.memoryIntentHandler.parseAiResponseForIntent(AIID, CHATID, DEFAULT_INTENT);
         Assert.assertNotNull(mi.getVariables());
@@ -138,32 +139,32 @@ public class TestMemoryIntentHandler {
     }
 
     @Test()
-    public void testIntentUpdateDBException() throws Database.DatabaseException {
+    public void testIntentUpdateDBException() throws DatabaseException {
         MemoryIntent mi = this.setDummyMemoryIntent("");
-        Database.DatabaseException exception = new Database.DatabaseException(new Throwable());
-        when(this.fakeDatabase.updateMemoryIntent(any(), any())).thenThrow(exception);
+        DatabaseException exception = new DatabaseException(new Throwable());
+        when(this.fakeDatabaseEntities.updateMemoryIntent(any(), any())).thenThrow(exception);
         this.memoryIntentHandler.updateStatus(mi);
         verify(this.fakeLogger).logException(anyString(), any());
     }
 
     @Test()
-    public void testGetCurrentStateForChatDBException() throws Database.DatabaseException {
-        Database.DatabaseException exception = new Database.DatabaseException(new Throwable());
-        when(this.fakeDatabase.getMemoryIntentsForChat(any(), any(), any())).thenThrow(exception);
+    public void testGetCurrentStateForChatDBException() throws DatabaseException {
+        DatabaseException exception = new DatabaseException(new Throwable());
+        when(this.fakeDatabaseEntities.getMemoryIntentsForChat(any(), any(), any())).thenThrow(exception);
         this.memoryIntentHandler.getCurrentIntentsStateForChat(AIID, CHATID);
         verify(this.fakeLogger).logException(anyString(), any());
     }
 
     @Test
-    public void testLoadIntentForAiDBException() throws Database.DatabaseException {
-        Database.DatabaseException exception = new Database.DatabaseException(new Throwable());
-        when(this.fakeDatabase.getMemoryIntent(anyString(), any(), any(), any())).thenThrow(exception);
+    public void testLoadIntentForAiDBException() throws DatabaseException {
+        DatabaseException exception = new DatabaseException(new Throwable());
+        when(this.fakeDatabaseEntities.getMemoryIntent(anyString(), any(), any(), any())).thenThrow(exception);
         this.memoryIntentHandler.parseAiResponseForIntent(AIID, CHATID, DEFAULT_INTENT);
         verify(this.fakeLogger).logException(anyString(), any());
     }
 
     @Test(expected = IllegalStateException.class)
-    public void testLoadIntentForAi_duplicateLabels_throwsException() throws Database.DatabaseException {
+    public void testLoadIntentForAi_duplicateLabels_throwsException() throws DatabaseException {
         final String label = "theLabel";
         MemoryVariable var1 = new MemoryVariable("var1", "val", true, Collections.singletonList("sys.test"),
                 Collections.singletonList("Prompt"), 1, 0, true, false, label);
@@ -224,38 +225,38 @@ public class TestMemoryIntentHandler {
     }
 
     @Test
-    public void testIntentDeleteAllAIIntents() throws Database.DatabaseException {
+    public void testIntentDeleteAllAIIntents() throws DatabaseException {
         this.memoryIntentHandler.deleteAllIntentsForAi(AIID);
-        verify(this.fakeDatabase).deleteAllMemoryIntents(AIID);
+        verify(this.fakeDatabaseEntities).deleteAllMemoryIntents(AIID);
     }
 
     @Test
-    public void testIntentDeleteAllAIIntentsDbException() throws Database.DatabaseException {
-        Database.DatabaseException exception = new Database.DatabaseException(new Throwable());
-        when(this.fakeDatabase.deleteAllMemoryIntents(any())).thenThrow(exception);
+    public void testIntentDeleteAllAIIntentsDbException() throws DatabaseException {
+        DatabaseException exception = new DatabaseException(new Throwable());
+        when(this.fakeDatabaseEntities.deleteAllMemoryIntents(any())).thenThrow(exception);
         this.memoryIntentHandler.deleteAllIntentsForAi(AIID);
         verify(this.fakeLogger).logException(anyString(), any());
     }
 
     @Test
-    public void testIntent_clearIntents() throws Database.DatabaseException {
+    public void testIntent_clearIntents() throws DatabaseException {
         List<MemoryIntent> intents = Collections.singletonList(setDummyMemoryIntent("response"));
         this.memoryIntentHandler.clearIntents(intents);
         verify(this.fakeDatabaseEntities).deleteMemoryIntent(intents.get(0));
     }
 
     @Test
-    public void testIntent_clearIntents_dbException() throws Database.DatabaseException {
+    public void testIntent_clearIntents_dbException() throws DatabaseException {
         List<MemoryIntent> intents = Collections.singletonList(setDummyMemoryIntent("response"));
-        when(this.fakeDatabaseEntities.deleteMemoryIntent(any())).thenThrow(Database.DatabaseException.class);
+        when(this.fakeDatabaseEntities.deleteMemoryIntent(any())).thenThrow(DatabaseException.class);
         this.memoryIntentHandler.clearIntents(intents);
         verify(this.fakeLogger).logException(anyString(), any());
     }
 
-    private MemoryIntent setDummyMemoryIntent(final String response) throws Database.DatabaseException {
+    private MemoryIntent setDummyMemoryIntent(final String response) throws DatabaseException {
         MemoryIntent mi = new MemoryIntent(INTENT_NAME, AIID, CHATID,
                 Collections.singletonList(new MemoryVariable("name", Arrays.asList("a", "b", "c"))));
-        when(this.fakeDatabase.getMemoryIntent(any(), any(), any(), any())).thenReturn(mi);
+        when(this.fakeDatabaseEntities.getMemoryIntent(any(), any(), any(), any())).thenReturn(mi);
         return this.memoryIntentHandler.parseAiResponseForIntent(AIID, CHATID, response);
     }
 }

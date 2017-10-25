@@ -8,8 +8,9 @@ import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.TestDataHelper;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.AIServices;
-import com.hutoma.api.connectors.Database;
-import com.hutoma.api.connectors.DatabaseAiStatusUpdates;
+import com.hutoma.api.connectors.db.DatabaseAiStatusUpdates;
+import com.hutoma.api.connectors.db.DatabaseException;
+import com.hutoma.api.connectors.db.DatabaseUser;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.AiStatus;
 import com.hutoma.api.containers.sub.BackendEngineStatus;
@@ -39,6 +40,7 @@ public class TestAIServicesLogic {
     private static final java.lang.String ALT_ENDPOINTID = "wrong server";
     private JsonSerializer fakeSerializer;
     private DatabaseAiStatusUpdates fakeDatabase;
+    private DatabaseUser fakeDatabaseUser;
     private Config fakeConfig;
     private Tools fakeTools;
     private AIServices fakeServices;
@@ -50,10 +52,11 @@ public class TestAIServicesLogic {
     private BackendEngineStatus backendStatus;
 
     @Before
-    public void setup() throws Database.DatabaseException {
+    public void setup() throws DatabaseException {
         this.fakeSerializer = mock(JsonSerializer.class);
         this.fakeConfig = mock(Config.class);
         this.fakeDatabase = mock(DatabaseAiStatusUpdates.class);
+        this.fakeDatabaseUser = mock(DatabaseUser.class);
         this.fakeTools = new FakeTimerTools();
         this.fakeServicesStatusLogger = mock(AiServiceStatusLogger.class);
         this.fakeServices = mock(AIServices.class);
@@ -73,7 +76,7 @@ public class TestAIServicesLogic {
     }
 
     @Test
-    public void testUpdateAiStatus() throws Database.DatabaseException {
+    public void testUpdateAiStatus() throws DatabaseException {
         AiStatus status = new AiStatus(TestDataHelper.DEVID, TestDataHelper.AIID,
                 TrainingStatus.AI_READY_TO_TRAIN, AI_ENGINE,
                 0.0, 0.0, "hash",
@@ -84,7 +87,7 @@ public class TestAIServicesLogic {
     }
 
     @Test
-    public void testUpdateAiStatus_db_returns_nothing() throws Database.DatabaseException {
+    public void testUpdateAiStatus_db_returns_nothing() throws DatabaseException {
         AiStatus status = new AiStatus(TestDataHelper.DEVID, TestDataHelper.AIID,
                 TrainingStatus.AI_TRAINING, AI_ENGINE,
                 0.0, 0.0, "hash",
@@ -95,30 +98,30 @@ public class TestAIServicesLogic {
     }
 
     @Test
-    public void testUpdateAiStatus_dbException() throws Database.DatabaseException {
+    public void testUpdateAiStatus_dbException() throws DatabaseException {
         AiStatus status = new AiStatus(TestDataHelper.DEVID, TestDataHelper.AIID,
                 TrainingStatus.AI_TRAINING, AI_ENGINE,
                 0.0, 0.0, "hash",
                 TestDataHelper.SESSIONID);
-        when(this.fakeDatabase.updateAIStatus(anyObject())).thenThrow(Database.DatabaseException.class);
+        when(this.fakeDatabase.updateAIStatus(anyObject())).thenThrow(DatabaseException.class);
         ApiResult result = this.aiServicesLogic.updateAIStatus(status);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
 
     @Test
-    public void testUpdateAiStatus_doubleNaN() throws Database.DatabaseException {
+    public void testUpdateAiStatus_doubleNaN() throws DatabaseException {
         AiStatus status = new AiStatus(TestDataHelper.DEVID, TestDataHelper.AIID,
                 TrainingStatus.AI_READY_TO_TRAIN, AI_ENGINE,
                 0.0, 0.0, "hash",
                 TestDataHelper.SESSIONID);
-        when(this.fakeDatabase.updateAIStatus(anyObject())).thenThrow(Database.DatabaseException.class);
+        when(this.fakeDatabase.updateAIStatus(anyObject())).thenThrow(DatabaseException.class);
         status.setTrainingError(Double.NaN);
         ApiResult result = this.aiServicesLogic.updateAIStatus(status);
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
     }
 
     @Test
-    public void testUpdateAiStatus_hashCode() throws Database.DatabaseException {
+    public void testUpdateAiStatus_hashCode() throws DatabaseException {
         AiStatus status = new AiStatus(TestDataHelper.DEVID, TestDataHelper.AIID,
                 TrainingStatus.AI_READY_TO_TRAIN, BackendServerType.WNET,
                 0.0, 0.0, "hash",
@@ -130,7 +133,7 @@ public class TestAIServicesLogic {
     }
 
     @Test
-    public void testUpdateAiStatus_badSession() throws Database.DatabaseException {
+    public void testUpdateAiStatus_badSession() throws DatabaseException {
         AiStatus status = new AiStatus(TestDataHelper.DEVID, TestDataHelper.AIID,
                 TrainingStatus.AI_READY_TO_TRAIN, AI_ENGINE,
                 0.0, 0.0, "hash",
@@ -141,7 +144,7 @@ public class TestAIServicesLogic {
     }
 
     @Test
-    public void testUpdateAiStatus_deletedbot() throws Database.DatabaseException {
+    public void testUpdateAiStatus_deletedbot() throws DatabaseException {
         AiStatus status = new AiStatus(TestDataHelper.DEVID, TestDataHelper.AIID,
                 TrainingStatus.AI_TRAINING, AI_ENGINE,
                 0.0, 0.0, "hash",
@@ -152,7 +155,7 @@ public class TestAIServicesLogic {
     }
 
     @Test
-    public void testUpdateAiStatus_badStateTransition() throws Database.DatabaseException {
+    public void testUpdateAiStatus_badStateTransition() throws DatabaseException {
         AiStatus status = new AiStatus(TestDataHelper.DEVID, TestDataHelper.AIID,
                 TrainingStatus.AI_UNDEFINED, AI_ENGINE,
                 0.0, 0.0, "hash",
@@ -163,7 +166,7 @@ public class TestAIServicesLogic {
     }
 
     @Test
-    public void testUpdateAiStatus_botGetsRequeued() throws Database.DatabaseException {
+    public void testUpdateAiStatus_botGetsRequeued() throws DatabaseException {
         AiStatus status = new AiStatus(TestDataHelper.DEVID, TestDataHelper.AIID,
                 TrainingStatus.AI_TRAINING_QUEUED, AI_ENGINE,
                 0.0, 0.0, "hash",
@@ -175,7 +178,7 @@ public class TestAIServicesLogic {
     }
 
     @Test
-    public void testUpdateAiStatus_reject_wrongServer_ifTraining() throws Database.DatabaseException {
+    public void testUpdateAiStatus_reject_wrongServer_ifTraining() throws DatabaseException {
         AiStatus status = new AiStatus(TestDataHelper.DEVID, TestDataHelper.AIID,
                 TrainingStatus.AI_UNDEFINED, AI_ENGINE,
                 0.0, 0.0, "hash",
@@ -185,7 +188,7 @@ public class TestAIServicesLogic {
     }
 
     @Test
-    public void testUpdateAiStatus_accept_differentServer() throws Database.DatabaseException {
+    public void testUpdateAiStatus_accept_differentServer() throws DatabaseException {
         this.backendStatus = new BackendEngineStatus(TestDataHelper.AIID,
                 TrainingStatus.AI_READY_TO_TRAIN, 0.0, 0.0,
                 QueueAction.NONE, ENDPOINTID, new DateTime(0));
@@ -199,7 +202,7 @@ public class TestAIServicesLogic {
     }
 
     @Test
-    public void testUpdateAiStatus_reject_wrongServer_ifQueueToTrain() throws Database.DatabaseException {
+    public void testUpdateAiStatus_reject_wrongServer_ifQueueToTrain() throws DatabaseException {
         this.backendStatus = new BackendEngineStatus(TestDataHelper.AIID,
                 TrainingStatus.AI_TRAINING_QUEUED, 0.0, 0.0,
                 QueueAction.NONE, ENDPOINTID, new DateTime(0));
@@ -213,7 +216,7 @@ public class TestAIServicesLogic {
     }
 
     @Test
-    public void testUpdateAiStatus_ignore_status_trainingstopped() throws Database.DatabaseException {
+    public void testUpdateAiStatus_ignore_status_trainingstopped() throws DatabaseException {
         AiStatus status = new AiStatus(TestDataHelper.DEVID, TestDataHelper.AIID,
                 TrainingStatus.AI_TRAINING_STOPPED, AI_ENGINE,
                 0.0, 0.0, "hash",

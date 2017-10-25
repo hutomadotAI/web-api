@@ -3,8 +3,6 @@ package com.hutoma.api.connectors.db;
 import com.hutoma.api.common.AiServiceStatusLogger;
 import com.hutoma.api.common.FakeTimerTools;
 import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.connectors.Database;
-import com.hutoma.api.connectors.DatabaseAiStatusUpdates;
 import com.hutoma.api.containers.sub.BackendServerType;
 import com.hutoma.api.containers.sub.ServerAiEntry;
 import com.hutoma.api.containers.sub.TrainingStatus;
@@ -49,7 +47,7 @@ public class TestSyncDatabase {
     UUID devid1;
 
     @Before
-    public void setup() throws Database.DatabaseException {
+    public void setup() throws DatabaseException {
         this.parameterList = new ArrayList<>();
         this.serializer = new JsonSerializer();
         this.tools = new FakeTimerTools();
@@ -235,7 +233,7 @@ public class TestSyncDatabase {
     }
 
     private DatabaseAiStatusUpdates fakeDatabaseCalls(List<FakeRecord> records)
-            throws Database.DatabaseException, SQLException {
+            throws DatabaseException, SQLException {
         DatabaseTransaction transaction = mock(DatabaseTransaction.class);
         when(this.transactionProvider.get()).thenReturn(transaction);
         DatabaseCall databaseCall = mock(DatabaseCall.class);

@@ -8,6 +8,10 @@ import com.hutoma.api.common.TestDataHelper;
 import com.hutoma.api.common.ThreadPool;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.common.TrackedThreadSubPool;
+import com.hutoma.api.connectors.db.DatabaseAiStatusUpdates;
+import com.hutoma.api.connectors.db.DatabaseEntitiesIntents;
+import com.hutoma.api.connectors.db.DatabaseException;
+import com.hutoma.api.connectors.db.DatabaseUser;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.ApiResult;
@@ -50,6 +54,7 @@ public class TestAiServices {
 
     private JsonSerializer fakeSerializer;
     private DatabaseAiStatusUpdates fakeDatabase;
+    private DatabaseUser fakeDatabaseUser;
     private DatabaseEntitiesIntents fakeDatabaseEntitiesIntents;
     private Config fakeConfig;
     private ILogger fakeLogger;
@@ -71,6 +76,7 @@ public class TestAiServices {
         this.fakeSerializer = mock(JsonSerializer.class);
         this.fakeConfig = mock(Config.class);
         this.fakeDatabase = mock(DatabaseAiStatusUpdates.class);
+        this.fakeDatabaseUser = mock(DatabaseUser.class);
         this.fakeDatabaseEntitiesIntents = mock(DatabaseEntitiesIntents.class);
         this.fakeLogger = mock(ILogger.class);
         this.fakeTools = mock(Tools.class);
@@ -88,23 +94,23 @@ public class TestAiServices {
                 TestDataHelper.getEndpointFor(WNET_ENDPOINT));
         when(this.fakeControllerRnn.getBackendEndpoint(any(), any())).thenReturn(
                 TestDataHelper.getEndpointFor(RNN_ENDPOINT));
-        this.aiServices = new AIServices(this.fakeDatabase, this.fakeDatabaseEntitiesIntents, this.fakeLogger, this.fakeSerializer,
+        this.aiServices = new AIServices(this.fakeDatabaseUser, this.fakeDatabase, this.fakeDatabaseEntitiesIntents, this.fakeLogger, this.fakeSerializer,
                 this.fakeTools, this.fakeConfig, this.fakeClient, new TrackedThreadSubPool(threadPool),
                 this.fakeControllerWnet, this.fakeControllerRnn, this.fakeQueueServices);
     }
 
     @Test
-    public void testDeleteDev() throws AIServices.AiServicesException, Database.DatabaseException {
+    public void testDeleteDev() throws AIServices.AiServicesException, DatabaseException {
         testCommand((a, b) -> this.aiServices.deleteDev(DEVID), HttpMethod.DELETE);
     }
 
     @Test(expected = AIServices.AiServicesException.class)
-    public void testDeleteDev_serverError() throws AIServices.AiServicesException, Database.DatabaseException {
+    public void testDeleteDev_serverError() throws AIServices.AiServicesException, DatabaseException {
         testCommand_serverError((a, b) -> this.aiServices.deleteDev(DEVID), HttpMethod.DELETE);
     }
 
     @Test(expected = AIServices.AiServicesException.class)
-    public void testDeleteDev_response_noEntity() throws AIServices.AiServicesException, Database.DatabaseException {
+    public void testDeleteDev_response_noEntity() throws AIServices.AiServicesException, DatabaseException {
         testCommand_response_noEntity((a, b) -> this.aiServices.deleteDev(DEVID), HttpMethod.DELETE);
     }
 
@@ -132,7 +138,7 @@ public class TestAiServices {
     }
 
     @Test
-    public void testGetTrainingMaterialsCommon() throws Database.DatabaseException {
+    public void testGetTrainingMaterialsCommon() throws DatabaseException {
         final String userTrainingFile = "line1\nline2";
         final ApiIntent intent = TestIntentLogic.getIntent();
         when(this.fakeDatabase.getAI(any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
@@ -147,7 +153,7 @@ public class TestAiServices {
     }
 
     @Test
-    public void testGetTrainingMaterialsCommon_noIntents() throws Database.DatabaseException {
+    public void testGetTrainingMaterialsCommon_noIntents() throws DatabaseException {
         final String userTrainingFile = "line1\nline2";
         when(this.fakeDatabase.getAI(any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
         when(this.fakeDatabase.getAiTrainingFile(any())).thenReturn(userTrainingFile);
@@ -157,47 +163,47 @@ public class TestAiServices {
     }
 
     @Test
-    public void testGetTrainingMaterialsCommon_aiNotFound() throws Database.DatabaseException {
+    public void testGetTrainingMaterialsCommon_aiNotFound() throws DatabaseException {
         when(this.fakeDatabase.getAI(any(), any(), any())).thenReturn(null);
         String trainingFile = this.aiServices.getTrainingMaterialsCommon(DEVID, AIID, this.fakeSerializer);
         Assert.assertNull(trainingFile);
     }
 
-    @Test(expected = Database.DatabaseException.class)
-    public void testGetTrainingMaterialsCommon_getAiException() throws Database.DatabaseException {
-        when(this.fakeDatabase.getAI(any(), any(), any())).thenThrow(Database.DatabaseException.class);
+    @Test(expected = DatabaseException.class)
+    public void testGetTrainingMaterialsCommon_getAiException() throws DatabaseException {
+        when(this.fakeDatabase.getAI(any(), any(), any())).thenThrow(DatabaseException.class);
         this.aiServices.getTrainingMaterialsCommon(DEVID, AIID, this.fakeSerializer);
     }
 
-    @Test(expected = Database.DatabaseException.class)
-    public void testGetTrainingMaterialsCommon_getAiTrainingFileException() throws Database.DatabaseException {
+    @Test(expected = DatabaseException.class)
+    public void testGetTrainingMaterialsCommon_getAiTrainingFileException() throws DatabaseException {
         when(this.fakeDatabase.getAI(any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
-        when(this.fakeDatabase.getAiTrainingFile(any())).thenThrow(Database.DatabaseException.class);
+        when(this.fakeDatabase.getAiTrainingFile(any())).thenThrow(DatabaseException.class);
         this.aiServices.getTrainingMaterialsCommon(DEVID, AIID, this.fakeSerializer);
     }
 
-    @Test(expected = Database.DatabaseException.class)
-    public void testGetTrainingMaterialsCommon_getIntentsException() throws Database.DatabaseException {
+    @Test(expected = DatabaseException.class)
+    public void testGetTrainingMaterialsCommon_getIntentsException() throws DatabaseException {
         final String userTrainingFile = "line1\nline2";
         when(this.fakeDatabase.getAI(any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
         when(this.fakeDatabase.getAiTrainingFile(any())).thenReturn(userTrainingFile);
-        when(this.fakeDatabaseEntitiesIntents.getIntents(any(), any())).thenThrow(Database.DatabaseException.class);
+        when(this.fakeDatabaseEntitiesIntents.getIntents(any(), any())).thenThrow(DatabaseException.class);
         this.aiServices.getTrainingMaterialsCommon(DEVID, AIID, this.fakeSerializer);
     }
 
-    @Test(expected = Database.DatabaseException.class)
-    public void testGetTrainingMaterialsCommon_getIntentException() throws Database.DatabaseException {
+    @Test(expected = DatabaseException.class)
+    public void testGetTrainingMaterialsCommon_getIntentException() throws DatabaseException {
         final String userTrainingFile = "line1\nline2";
         final ApiIntent intent = TestIntentLogic.getIntent();
         when(this.fakeDatabase.getAI(any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
         when(this.fakeDatabase.getAiTrainingFile(any())).thenReturn(userTrainingFile);
         when(this.fakeDatabaseEntitiesIntents.getIntents(any(), any())).thenReturn(Collections.singletonList(intent.getIntentName()));
-        when(this.fakeDatabaseEntitiesIntents.getIntent(any(), any())).thenThrow(Database.DatabaseException.class);
+        when(this.fakeDatabaseEntitiesIntents.getIntent(any(), any())).thenThrow(DatabaseException.class);
         this.aiServices.getTrainingMaterialsCommon(DEVID, AIID, this.fakeSerializer);
     }
 
     private void testCommand(CheckedByConsumer<UUID, UUID> logicMethod, String verb)
-            throws AIServices.AiServicesException, Database.DatabaseException {
+            throws AIServices.AiServicesException, DatabaseException {
         JerseyInvocation.Builder builder = getFakeBuilder();
         switch (verb) {
             case HttpMethod.POST:
@@ -216,7 +222,7 @@ public class TestAiServices {
     }
 
     private void testCommand_serverError(CheckedByConsumer<UUID, UUID> logicMethod, String verb)
-            throws AIServices.AiServicesException, Database.DatabaseException {
+            throws AIServices.AiServicesException, DatabaseException {
         JerseyInvocation.Builder builder = getFakeBuilder();
         switch (verb) {
             case HttpMethod.POST:
@@ -235,7 +241,7 @@ public class TestAiServices {
     }
 
     private void testCommand_response_noEntity(CheckedByConsumer<UUID, UUID> logicMethod, String verb)
-            throws AIServices.AiServicesException, Database.DatabaseException {
+            throws AIServices.AiServicesException, DatabaseException {
         JerseyInvocation.Builder builder = getFakeBuilder();
         switch (verb) {
             case HttpMethod.POST:

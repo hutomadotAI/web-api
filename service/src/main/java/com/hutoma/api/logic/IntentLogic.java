@@ -4,8 +4,9 @@ import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.LogMap;
-import com.hutoma.api.connectors.Database;
-import com.hutoma.api.connectors.DatabaseEntitiesIntents;
+import com.hutoma.api.connectors.db.Database;
+import com.hutoma.api.connectors.db.DatabaseEntitiesIntents;
+import com.hutoma.api.connectors.db.DatabaseAI;
 import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiIntent;
@@ -31,13 +32,13 @@ public class IntentLogic {
     private final Config config;
     private final ILogger logger;
     private final DatabaseEntitiesIntents databaseEntitiesIntents;
-    private final Database databaseAi;
+    private final DatabaseAI databaseAi;
     private final TrainingLogic trainingLogic;
     private final JsonSerializer jsonSerializer;
 
     @Inject
     public IntentLogic(final Config config, final ILogger logger, final DatabaseEntitiesIntents databaseEntitiesIntents,
-                       final Database databaseAi, final TrainingLogic trainingLogic,
+                       final DatabaseAI databaseAi, final TrainingLogic trainingLogic,
                        final JsonSerializer jsonSerializer) {
         this.config = config;
         this.logger = logger;
@@ -69,7 +70,7 @@ public class IntentLogic {
         final String devidString = devid.toString();
         try {
             LogMap logMap = LogMap.map("AIID", aiid).put("IntentName", intentName);
-            boolean aiidValid = this.databaseEntitiesIntents.checkAIBelongsToDevId(devid, aiid);
+            boolean aiidValid = this.databaseAi.checkAIBelongsToDevId(devid, aiid);
             if (!aiidValid) {
                 return ApiError.getBadRequest("AI not found for this Dev ID");
             }

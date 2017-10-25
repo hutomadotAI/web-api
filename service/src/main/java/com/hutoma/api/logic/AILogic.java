@@ -8,10 +8,12 @@ import com.hutoma.api.common.LogMap;
 import com.hutoma.api.common.Pair;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.AIServices;
-import com.hutoma.api.connectors.Database;
-import com.hutoma.api.connectors.DatabaseEntitiesIntents;
 import com.hutoma.api.connectors.ServerConnector;
 import com.hutoma.api.connectors.WebHooks;
+import com.hutoma.api.connectors.db.DatabaseAI;
+import com.hutoma.api.connectors.db.DatabaseEntitiesIntents;
+import com.hutoma.api.connectors.db.DatabaseException;
+import com.hutoma.api.connectors.db.DatabaseMarketplace;
 import com.hutoma.api.connectors.db.DatabaseTransaction;
 import com.hutoma.api.containers.*;
 import com.hutoma.api.containers.sub.AiBot;
@@ -49,8 +51,9 @@ public class AILogic {
     private static final String LOGFROM = "ailogic";
     private final Config config;
     private final JsonSerializer jsonSerializer;
-    private final Database database;
+    private final DatabaseAI databaseAi;
     private final DatabaseEntitiesIntents databaseEntitiesIntents;
+    private final DatabaseMarketplace databaseMarketplace;
     private final AIServices aiServices;
     private final ILogger logger;
     private final Tools tools;
@@ -59,14 +62,16 @@ public class AILogic {
     private Provider<AIIntegrationLogic> integrationLogicProvider;
 
     @Inject
-    public AILogic(final Config config, final JsonSerializer jsonSerializer, final Database database,
+    public AILogic(final Config config, final JsonSerializer jsonSerializer, final DatabaseAI databaseAi,
                    final DatabaseEntitiesIntents databaseEntitiesIntents,
+                   final DatabaseMarketplace databaseMarketplace,
                    final AIServices aiServices, final ILogger logger, final Tools tools, final Validate validate,
                    final Provider<AIIntegrationLogic> integrationLogicProvider,
                    final Provider<DatabaseTransaction> transactionProvider) {
         this.config = config;
         this.jsonSerializer = jsonSerializer;
-        this.database = database;
+        this.databaseAi = databaseAi;
+        this.databaseMarketplace = databaseMarketplace;
         this.databaseEntitiesIntents = databaseEntitiesIntents;
         this.logger = logger;
         this.tools = tools;
@@ -99,7 +104,7 @@ public class AILogic {
                     .signWith(SignatureAlgorithm.HS256, encodingKey)
                     .compact();
 
-            UUID namedAiid = this.database.createAI(
+            UUID namedAiid = this.databaseAi.createAI(
                     aiUUID,
                     name,
                     description,
@@ -143,7 +148,7 @@ public class AILogic {
         final String devIdString = devId.toString();
         try {
             LogMap logMap = LogMap.map("AIID", aiid);
-            ApiAi ai = this.database.getAI(devId, aiid, this.jsonSerializer);
+            ApiAi ai = this.databaseAi.getAI(devId, aiid, this.jsonSerializer);
             if (ai == null) {
                 this.logger.logUserTraceEvent(LOGFROM, "UpdateAI - AI not found", devIdString, logMap);
                 return ApiError.getNotFound();
@@ -153,7 +158,7 @@ public class AILogic {
                         devIdString, logMap);
                 return ApiError.getBadRequest(BOT_RO_MESSAGE);
             }
-            if (!this.database.updateAI(
+            if (!this.databaseAi.updateAI(
                     devId,
                     aiid,
                     description,
@@ -179,7 +184,7 @@ public class AILogic {
     public ApiResult getAIs(final UUID devId) {
         final String devIdString = devId.toString();
         try {
-            List<ApiAi> aiList = this.database.getAllAIs(devId, this.jsonSerializer);
+            List<ApiAi> aiList = this.databaseAi.getAllAIs(devId, this.jsonSerializer);
             if (aiList.isEmpty()) {
                 this.logger.logUserTraceEvent(LOGFROM, "GetAIs - empty list", devIdString);
                 return ApiError.getNotFound();
@@ -209,7 +214,7 @@ public class AILogic {
 
         AiBotConfigDefinition definition = aiBotConfigWithDefinition.getDefinitions();
         try {
-            ApiAi ai = this.database.getAI(devid, aiid, this.jsonSerializer);
+            ApiAi ai = this.databaseAi.getAI(devid, aiid, this.jsonSerializer);
             if (ai == null) {
                 this.logger.logUserTraceEvent(LOGFROM, "setAiBotConfigDescription - AI not found",
                         devIdString, logMap);
@@ -220,7 +225,7 @@ public class AILogic {
                 return ApiError.getBadRequest(BOT_RO_MESSAGE);
             }
 
-            if (!this.database.setBotConfigDefinition(devid, aiid, definition, this.jsonSerializer)) {
+            if (!this.databaseAi.setBotConfigDefinition(devid, aiid, definition, this.jsonSerializer)) {
                 this.logger.logUserErrorEvent(LOGFROM, "setAiBotConfigDescription - failed to write to db",
                         devIdString, logMap);
                 return ApiError.getBadRequest("Failed to write API key description");
@@ -248,12 +253,12 @@ public class AILogic {
         }
 
         try {
-            if (!this.database.checkAIBelongsToDevId(devid, aiid)) {
+            if (!this.databaseAi.checkAIBelongsToDevId(devid, aiid)) {
                 this.logger.logUserTraceEvent(LOGFROM, "setAiConfig - AI not owned", devIdString, logMap);
                 return ApiError.getNotFound();
             }
 
-            ApiAi ai = this.database.getAI(devid, aiid, this.jsonSerializer);
+            ApiAi ai = this.databaseAi.getAI(devid, aiid, this.jsonSerializer);
             if (ai == null) {
                 this.logger.logUserTraceEvent(LOGFROM, "setAiConfig - AI not found", devIdString, logMap);
                 return ApiError.getNotFound();
@@ -266,7 +271,7 @@ public class AILogic {
             UUID linkedDevid = devid;
             UUID linkedAiid = aiid;
             if (botId != 0) {
-                Pair<UUID, UUID> linkedDevidAiid = this.database.getIsBotLinkedToAi(devid, aiid, botId);
+                Pair<UUID, UUID> linkedDevidAiid = this.databaseAi.getIsBotLinkedToAi(devid, aiid, botId);
                 if (linkedDevidAiid == null) {
                     return ApiError.getNotFound();
                 }
@@ -274,7 +279,7 @@ public class AILogic {
                 linkedAiid = linkedDevidAiid.getB();
             }
 
-            AiBotConfigDefinition definition = this.database.getBotConfigDefinition(linkedDevid, linkedAiid,
+            AiBotConfigDefinition definition = this.databaseAi.getBotConfigDefinition(linkedDevid, linkedAiid,
                     this.jsonSerializer);
             AiBotConfigWithDefinition withDefinition = new AiBotConfigWithDefinition(aiBotConfig, definition);
             try {
@@ -284,7 +289,7 @@ public class AILogic {
                         logMap.put("Message", configException.getMessage()));
                 return ApiError.getBadRequest(configException.getMessage());
             }
-            if (this.database.setAiBotConfig(devid, aiid, botId, aiBotConfig, this.jsonSerializer)) {
+            if (this.databaseAi.setAiBotConfig(devid, aiid, botId, aiBotConfig, this.jsonSerializer)) {
                 this.logger.logUserTraceEvent(LOGFROM, "setAiConfig", devIdString,
                         logMap.put("BotId", botId));
                 return new ApiResult().setSuccessStatus();
@@ -301,7 +306,7 @@ public class AILogic {
         try {
             LogMap logMap = LogMap.map("AIID", aiid);
             String newSecret = this.tools.generateRandomHexString(WebHooks.HMAC_SECRET_LENGTH);
-            boolean isOk = this.database.setWebhookSecretForBot(aiid, newSecret);
+            boolean isOk = this.databaseAi.setWebhookSecretForBot(aiid, newSecret);
             if (isOk) {
                 this.logger.logUserTraceEvent(LOGFROM, "regenerateWebhookSecret", devIdString, logMap);
                 return new ApiResult().setSuccessStatus(newSecret);
@@ -321,9 +326,9 @@ public class AILogic {
         try {
             LogMap logMap = LogMap.map("AIID", aiid);
             // Only delete the AI when it doesn't have a bot that has been purchased already
-            AiBot bot = this.database.getPublishedBotForAI(devid, aiid);
+            AiBot bot = this.databaseMarketplace.getPublishedBotForAI(devid, aiid);
             if (bot != null) {
-                if (this.database.hasBotBeenPurchased(bot.getBotId())) {
+                if (this.databaseMarketplace.hasBotBeenPurchased(bot.getBotId())) {
                     this.logger.logUserTraceEvent(LOGFROM,
                             "DeleteAI - cannot delete due to bot having been purchased by others",
                             devIdString, logMap.put("BotId", bot.getBotId()));
@@ -331,12 +336,12 @@ public class AILogic {
                 }
 
                 // Un-publish the bot
-                this.database.updateBotPublishingState(bot.getBotId(), AiBot.PublishingState.REMOVED);
+                this.databaseMarketplace.updateBotPublishingState(bot.getBotId(), AiBot.PublishingState.REMOVED);
                 this.logger.logUserTraceEvent(LOGFROM, "DeleteAI - unpublished bot", devIdString,
                         logMap.put("BotId", bot.getBotId()));
             }
 
-            ApiAi ai = this.database.getAI(devid, aiid, this.jsonSerializer);
+            ApiAi ai = this.databaseAi.getAI(devid, aiid, this.jsonSerializer);
             if (ai == null) {
                 this.logger.logUserTraceEvent(LOGFROM, "DeleteAI - not found", devIdString, logMap);
                 return ApiError.getNotFound();
@@ -346,7 +351,7 @@ public class AILogic {
                 return ApiError.getBadRequest(BOT_RO_MESSAGE);
             }
 
-            this.database.deleteAi(devid, aiid);
+            this.databaseAi.deleteAi(devid, aiid);
 
             // if there are integrations, get rid of them
             this.integrationLogicProvider.get().deleteIntegrations(aiid, devid);
@@ -377,8 +382,8 @@ public class AILogic {
     public ApiResult getLinkedBots(final UUID devId, final UUID aiid) {
         try {
             this.logger.logUserTraceEvent(LOGFROM, "GetLinkedBots", devId.toString(), LogMap.map("AIID", aiid));
-            return new ApiAiBotList(this.database.getBotsLinkedToAi(devId, aiid)).setSuccessStatus();
-        } catch (Database.DatabaseException ex) {
+            return new ApiAiBotList(this.databaseAi.getBotsLinkedToAi(devId, aiid)).setSuccessStatus();
+        } catch (DatabaseException ex) {
             this.logger.logUserExceptionEvent(LOGFROM, "GetLinkedBots", devId.toString(), ex);
             return ApiError.getInternalServerError();
         }
@@ -388,7 +393,7 @@ public class AILogic {
         final String devIdString = devid.toString();
         try {
             LogMap logMap = LogMap.map("AIID", aiid);
-            ApiLinkedBotData data = this.database.getLinkedBotData(devid, aiid, botId, this.jsonSerializer);
+            ApiLinkedBotData data = this.databaseAi.getLinkedBotData(devid, aiid, botId, this.jsonSerializer);
             if (data == null) {
                 this.logger.logUserTraceEvent(LOGFROM, "getLinkedBotData - not found", devIdString, logMap);
                 return ApiError.getNotFound();
@@ -411,20 +416,20 @@ public class AILogic {
         final String devIdString = devId.toString();
         try {
             LogMap logMap = LogMap.map("AIID", aiid).put("BotId", botId);
-            AiBot botDetails = this.database.getBotDetails(botId);
+            AiBot botDetails = this.databaseMarketplace.getBotDetails(botId);
             if (botDetails == null) {
                 this.logger.logUserTraceEvent(LOGFROM, "LinkBotToAI - bot not found", devIdString, logMap);
                 return ApiError.getBadRequest(String.format("Bot %d not found.", botId));
             }
             // If bot is now owned (purchased or built by the dev) then it can't be linked
             if (!botDetails.getDevId().equals(devId)) {
-                List<AiBot> purchased = this.database.getPurchasedBots(devId);
+                List<AiBot> purchased = this.databaseMarketplace.getPurchasedBots(devId);
                 if (purchased.stream().noneMatch(b -> b.getBotId() == botId)) {
                     this.logger.logUserTraceEvent(LOGFROM, "LinkBotToAI - bot not owned", devIdString, logMap);
                     return ApiError.getBadRequest(String.format("Bot %d not owned", botId));
                 }
             }
-            ApiAi ai = this.database.getAI(devId, aiid, this.jsonSerializer);
+            ApiAi ai = this.databaseAi.getAI(devId, aiid, this.jsonSerializer);
             if (ai == null) {
                 this.logger.logUserTraceEvent(LOGFROM, "LinkBotToAI - AI not found", devIdString, logMap);
                 return ApiError.getNotFound();
@@ -437,7 +442,7 @@ public class AILogic {
                 this.logger.logUserTraceEvent(LOGFROM, "LinkBotToAI - bot is not a skill", devIdString, logMap);
                 return ApiError.getBadRequest(String.format("Bot %d not a Skill", botId));
             }
-            List<AiBot> linked = this.database.getBotsLinkedToAi(devId, aiid);
+            List<AiBot> linked = this.databaseAi.getBotsLinkedToAi(devId, aiid);
             if (!skipValidation && linked.size() >= this.config.getMaxLinkedBotsPerAi()) {
                 this.logger.logUserTraceEvent(LOGFROM,
                         "LinkBotToAI - reached maximum allowed number of bots to be linked", devIdString, logMap);
@@ -449,14 +454,14 @@ public class AILogic {
                 return ApiError.getBadRequest(String.format("Bot %d already linked to AI.", botId));
             }
             this.aiServices.stopTrainingIfNeeded(devId, aiid);
-            if (this.database.linkBotToAi(devId, aiid, botId, transaction)) {
+            if (this.databaseAi.linkBotToAi(devId, aiid, botId, transaction)) {
                 this.logger.logUserTraceEvent(LOGFROM, "LinkBotToAI", devIdString, logMap);
                 return new ApiResult().setSuccessStatus();
             } else {
                 this.logger.logUserTraceEvent(LOGFROM, "LinkBotToAI - bot not found", devIdString, logMap);
                 return ApiError.getNotFound("Bot not found.");
             }
-        } catch (Database.DatabaseException ex) {
+        } catch (DatabaseException ex) {
             this.logger.logUserExceptionEvent(LOGFROM, "LinkBotToAI", devIdString, ex);
             return ApiError.getInternalServerError();
         }
@@ -476,7 +481,7 @@ public class AILogic {
             }
 
             // Check if this AI can be updated
-            ApiAi ai = this.database.getAI(devId, aiid, this.jsonSerializer);
+            ApiAi ai = this.databaseAi.getAI(devId, aiid, this.jsonSerializer);
             if (ai == null) {
                 this.logger.logUserTraceEvent(LOGFROM, "updateLinkedBots - AI not found", devIdString, logMap);
                 return ApiError.getNotFound();
@@ -487,7 +492,7 @@ public class AILogic {
             }
 
             // Determine which bots to link and unlink
-            List<AiBot> botsLinked = this.database.getBotsLinkedToAi(devId, aiid);
+            List<AiBot> botsLinked = this.databaseAi.getBotsLinkedToAi(devId, aiid);
             List<AiBot> botsToRemove = botsLinked.stream().filter(x -> !botSet.contains(x.getBotId()))
                     .collect(Collectors.toList());
             List<Integer> botIdsLinked = botsLinked.stream().map(AiBot::getBotId).collect(Collectors.toList());
@@ -533,7 +538,7 @@ public class AILogic {
                 return new ApiResult().setSuccessStatus();
             }
 
-        } catch (Database.DatabaseException ex) {
+        } catch (DatabaseException ex) {
             this.logger.logUserExceptionEvent(LOGFROM, "updateLinkedBots", devIdString, ex);
             return ApiError.getInternalServerError();
         }
@@ -548,7 +553,7 @@ public class AILogic {
         final String devIdString = devId.toString();
         try {
             LogMap logMap = LogMap.map("AIID", aiid).put("BotId", botId);
-            ApiAi ai = this.database.getAI(devId, aiid, this.jsonSerializer);
+            ApiAi ai = this.databaseAi.getAI(devId, aiid, this.jsonSerializer);
             if (ai == null) {
                 this.logger.logUserTraceEvent(LOGFROM, "UnlinkBotFromAI - AI not found", devIdString, logMap);
                 return ApiError.getNotFound();
@@ -558,7 +563,7 @@ public class AILogic {
                 return ApiError.getBadRequest(BOT_RO_MESSAGE);
             }
 
-            if (this.database.unlinkBotFromAi(devId, aiid, botId, transaction)) {
+            if (this.databaseAi.unlinkBotFromAi(devId, aiid, botId, transaction)) {
                 this.aiServices.stopTrainingIfNeeded(devId, aiid);
                 this.logger.logUserTraceEvent(LOGFROM, "UnlinkBotFromAI", devIdString, logMap);
                 return new ApiResult().setSuccessStatus();
@@ -567,7 +572,7 @@ public class AILogic {
                         devIdString, logMap);
                 return ApiError.getNotFound("Bot not found, or not currently linked.");
             }
-        } catch (Database.DatabaseException ex) {
+        } catch (DatabaseException ex) {
             this.logger.logUserExceptionEvent(LOGFROM, "UnlinkBotFromAI", devIdString, ex);
             return ApiError.getInternalServerError();
         }
@@ -577,14 +582,14 @@ public class AILogic {
         final String devIdString = devId.toString();
         try {
             LogMap logMap = LogMap.map("AIID", aiid);
-            AiBot bot = this.database.getPublishedBotForAI(devId, aiid);
+            AiBot bot = this.databaseMarketplace.getPublishedBotForAI(devId, aiid);
             if (bot == null) {
                 this.logger.logUserTraceEvent(LOGFROM, "GetPublishedBotForAI - not found", devIdString, logMap);
                 return ApiError.getNotFound();
             }
             this.logger.logUserTraceEvent(LOGFROM, "GetPublishedBotForAI", devIdString, logMap);
             return new ApiAiBot(bot).setSuccessStatus();
-        } catch (Database.DatabaseException ex) {
+        } catch (DatabaseException ex) {
             this.logger.logUserExceptionEvent(LOGFROM, "GetPublishedBotForAI", devIdString, ex);
             return ApiError.getInternalServerError();
         }
@@ -594,7 +599,7 @@ public class AILogic {
         final String devIdString = devId.toString();
         try {
             BotStructure botStructure = BotStructureSerializer.serialize(
-                    devId, aiid, this.database, this.databaseEntitiesIntents, this.jsonSerializer);
+                    devId, aiid, this.databaseAi, this.databaseEntitiesIntents, this.jsonSerializer);
 
             LogMap logMap = LogMap.map("AIID", aiid);
             if (botStructure == null) {
@@ -604,7 +609,7 @@ public class AILogic {
             this.logger.logUserTraceEvent(LOGFROM, "Export bot", devIdString, logMap);
             return new ApiBotStructure(botStructure).setSuccessStatus();
 
-        } catch (Database.DatabaseException ex) {
+        } catch (DatabaseException ex) {
             this.logger.logUserExceptionEvent(LOGFROM, "Failed to export bot data.", devIdString, ex);
         } catch (Exception ex) {
             this.logger.logUserExceptionEvent(LOGFROM, "Failed to populate bot structure for export.", devIdString, ex);
@@ -700,13 +705,13 @@ public class AILogic {
         final String devIdString = devid.toString();
         try {
             LogMap logMap = LogMap.map("AIID", aiid);
-            ApiAi ai = this.database.getAI(devid, aiid, this.jsonSerializer);
+            ApiAi ai = this.databaseAi.getAI(devid, aiid, this.jsonSerializer);
             if (ai == null) {
                 this.logger.logUserTraceEvent(LOGFROM,
                         String.format("%s - not found", logTag), devIdString, logMap);
                 return ApiError.getNotFound();
             } else {
-                List<AiBot> linkedBots = this.database.getBotsLinkedToAi(devid, aiid);
+                List<AiBot> linkedBots = this.databaseAi.getBotsLinkedToAi(devid, aiid);
                 if (!linkedBots.isEmpty()) {
                     ai.setLinkedBots(linkedBots.stream().map(AiBot::getBotId).collect(Collectors.toList()));
                 }
@@ -760,7 +765,7 @@ public class AILogic {
         try {
             // Add the entities that the user doesn't currently have.
             userEntities = this.databaseEntitiesIntents.getEntities(devId);
-        } catch (Database.DatabaseException ex) {
+        } catch (DatabaseException ex) {
             throw new BotImportException("Can't retrieve users existing entities.");
         }
 
@@ -777,7 +782,7 @@ public class AILogic {
                     this.databaseEntitiesIntents.writeEntity(devId, e.getEntityName(), e);
                 }
             }
-        } catch (Database.DatabaseException ex) {
+        } catch (DatabaseException ex) {
             throw new BotImportException("Failed to create new entities from imported bot.");
         }
 
@@ -793,13 +798,13 @@ public class AILogic {
                             webHook.getEndpoint(), webHook.isEnabled());
                 }
             }
-        } catch (Database.DatabaseException ex) {
+        } catch (DatabaseException ex) {
             throw new BotImportException("Failed to write intents for imported bot.");
         }
 
-        // Add the training file to the database.
+        // Add the training file to the databaseAi.
         try {
-            this.databaseEntitiesIntents.updateAiTrainingFile(aiid, importedBot.getTrainingFile());
+            this.databaseAi.updateAiTrainingFile(aiid, importedBot.getTrainingFile());
         } catch (Exception e) {
             throw new BotImportException("Failed to add training file for imported bot.");
         }

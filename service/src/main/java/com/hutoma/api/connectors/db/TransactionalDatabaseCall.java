@@ -2,7 +2,6 @@ package com.hutoma.api.connectors.db;
 
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
-import com.hutoma.api.connectors.Database;
 
 import java.sql.Connection;
 import javax.inject.Inject;
@@ -12,7 +11,7 @@ import javax.inject.Inject;
  */
 public class TransactionalDatabaseCall extends DatabaseCall {
 
-    Connection transactionConnection = null;
+    private Connection transactionConnection = null;
 
     @Inject
     public TransactionalDatabaseCall(ILogger logger, Config config, DatabaseConnectionPool pool) {
@@ -25,7 +24,7 @@ public class TransactionalDatabaseCall extends DatabaseCall {
     }
 
     @Override
-    protected Connection getConnection() throws Database.DatabaseException {
+    protected Connection getConnection() throws DatabaseException {
         return this.transactionConnection;
     }
 

@@ -2,7 +2,7 @@ package com.hutoma.api.tests.service;
 
 import com.hutoma.api.common.DeveloperInfoHelper;
 import com.hutoma.api.common.TestDataHelper;
-import com.hutoma.api.connectors.Database;
+import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.ApiAiBot;
 import com.hutoma.api.containers.ApiAiBotList;
 import com.hutoma.api.containers.sub.AiBot;
@@ -65,29 +65,29 @@ public class TestServiceAiBotstore extends ServiceTestBase {
 
     // TODO: remove when we're only using Skills and Templates
     @Test
-    public void testGetPublishedBots() throws Database.DatabaseException {
+    public void testGetPublishedBots() throws DatabaseException {
         testGetBotsDetailsByType(BOTSTORE_BASEPATH, AiBot.PublishingType.SKILL);
     }
 
     @Test
-    public void testGetPublishedSkills() throws Database.DatabaseException {
+    public void testGetPublishedSkills() throws DatabaseException {
         testGetBotsDetailsByType(BOTSTORE_BASEPATH + "/skills", AiBot.PublishingType.SKILL);
     }
 
     @Test
-    public void testGetPublishedTemplates() throws Database.DatabaseException {
+    public void testGetPublishedTemplates() throws DatabaseException {
         testGetBotsDetailsByType(BOTSTORE_BASEPATH + "/templates", AiBot.PublishingType.TEMPLATE);
     }
 
     @Test
-    public void testGetPublishedBots_invalid_devId() throws Database.DatabaseException {
+    public void testGetPublishedBots_invalid_devId() throws DatabaseException {
         final Response response = target(BOTSTORE_BASEPATH).request().headers(noDevIdHeaders).get();
         Assert.assertEquals(HttpURLConnection.HTTP_UNAUTHORIZED, response.getStatus());
     }
 
     @Test
-    public void testGetBotDetails() throws Database.DatabaseException {
-        when(this.fakeDatabase.getBotDetails(BOTID)).thenReturn(SAMPLEBOT);
+    public void testGetBotDetails() throws DatabaseException {
+        when(this.fakeDatabaseMarketplace.getBotDetails(BOTID)).thenReturn(SAMPLEBOT);
         final Response response = target(BOTSTORE_BOTPATH).request().headers(defaultHeaders).get();
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
         ApiAiBot bot = deserializeResponse(response, ApiAiBot.class);
@@ -96,30 +96,30 @@ public class TestServiceAiBotstore extends ServiceTestBase {
     }
 
     @Test
-    public void testGetBotDetails_invalid_devId() throws Database.DatabaseException {
+    public void testGetBotDetails_invalid_devId() throws DatabaseException {
         final Response response = target(BOTSTORE_BOTPATH).request().headers(noDevIdHeaders).get();
         Assert.assertEquals(HttpURLConnection.HTTP_UNAUTHORIZED, response.getStatus());
     }
 
     @Test
-    public void testGetBotTemplate() throws Database.DatabaseException {
+    public void testGetBotTemplate() throws DatabaseException {
         AiBot bot = new AiBot(SAMPLEBOT);
         bot.setPublishingType(AiBot.PublishingType.TEMPLATE);
-        when(this.fakeDatabase.getBotDetails(anyInt())).thenReturn(bot);
-        when(this.fakeDatabase.getBotTemplate(anyInt())).thenReturn(TestAIBotstoreLogic.getBotStructureTemplate());
+        when(this.fakeDatabaseMarketplace.getBotDetails(anyInt())).thenReturn(bot);
+        when(this.fakeDatabaseMarketplace.getBotTemplate(anyInt())).thenReturn(TestAIBotstoreLogic.getBotStructureTemplate());
         final Response response = target(BOTSTORE_BOTTEMPLATEPATH).request().headers(defaultHeaders).get();
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
     }
 
     @Test
-    public void testGetBotTemplate_invalid_devId() throws Database.DatabaseException {
+    public void testGetBotTemplate_invalid_devId() throws DatabaseException {
         final Response response = target(BOTSTORE_BOTTEMPLATEPATH).request().headers(noDevIdHeaders).get();
         Assert.assertEquals(HttpURLConnection.HTTP_UNAUTHORIZED, response.getStatus());
     }
 
     @Test
-    public void testGetPurchasedBots() throws Database.DatabaseException {
-        when(this.fakeDatabase.getPurchasedBots(any())).thenReturn(Collections.singletonList(SAMPLEBOT));
+    public void testGetPurchasedBots() throws DatabaseException {
+        when(this.fakeDatabaseMarketplace.getPurchasedBots(any())).thenReturn(Collections.singletonList(SAMPLEBOT));
         final Response response = target(BOTSTORE_PURCHASEDPATH).request().headers(defaultHeaders).get();
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
         ApiAiBotList list = deserializeResponse(response, ApiAiBotList.class);
@@ -128,33 +128,33 @@ public class TestServiceAiBotstore extends ServiceTestBase {
     }
 
     @Test
-    public void testGetPurchasedBots_invalid_devId() throws Database.DatabaseException {
+    public void testGetPurchasedBots_invalid_devId() throws DatabaseException {
         final Response response = target(BOTSTORE_PURCHASEDPATH).request().headers(noDevIdHeaders).get();
         Assert.assertEquals(HttpURLConnection.HTTP_UNAUTHORIZED, response.getStatus());
     }
 
     @Test
-    public void testPurchaseBot() throws Database.DatabaseException {
-        when(this.fakeDatabase.getBotDetails(anyInt())).thenReturn(SAMPLEBOT);
-        when(this.fakeDatabase.getPurchasedBots(any())).thenReturn(Collections.emptyList());
-        when(this.fakeDatabase.purchaseBot(any(), anyInt())).thenReturn(true);
+    public void testPurchaseBot() throws DatabaseException {
+        when(this.fakeDatabaseMarketplace.getBotDetails(anyInt())).thenReturn(SAMPLEBOT);
+        when(this.fakeDatabaseMarketplace.getPurchasedBots(any())).thenReturn(Collections.emptyList());
+        when(this.fakeDatabaseMarketplace.purchaseBot(any(), anyInt())).thenReturn(true);
         final Response response = target(BOTSTORE_PURCHASEBOTPATH).request().headers(defaultHeaders).post(null);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
     }
 
     @Test
-    public void testPurchaseBot_invalid_devId() throws Database.DatabaseException {
+    public void testPurchaseBot_invalid_devId() throws DatabaseException {
         final Response response = target(BOTSTORE_PURCHASEBOTPATH).request().headers(noDevIdHeaders).post(null);
         Assert.assertEquals(HttpURLConnection.HTTP_UNAUTHORIZED, response.getStatus());
     }
 
     @Test
-    public void testPublishBot() throws Database.DatabaseException {
+    public void testPublishBot() throws DatabaseException {
         final int newBotId = 76832;
-        when(this.fakeDatabase.getDeveloperInfo(any())).thenReturn(DeveloperInfoHelper.DEVINFO);
-        when(this.fakeDatabase.getAI(any(), any(), any())).thenReturn(
+        when(this.fakeDatabaseMarketplace.getDeveloperInfo(any())).thenReturn(DeveloperInfoHelper.DEVINFO);
+        when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(
                 TestDataHelper.getAi(TrainingStatus.AI_TRAINING_COMPLETE, false));
-        when(this.fakeDatabase.publishBot(any(), any())).thenReturn(newBotId);
+        when(this.fakeDatabaseMarketplace.publishBot(any(), any())).thenReturn(newBotId);
         final Response response = target(BOTSTORE_BASEPATH)
                 .request()
                 .headers(defaultHeaders)
@@ -166,7 +166,7 @@ public class TestServiceAiBotstore extends ServiceTestBase {
     }
 
     @Test
-    public void testPublishBot_invalid_devId() throws Database.DatabaseException {
+    public void testPublishBot_invalid_devId() throws DatabaseException {
         final Response response = target(BOTSTORE_BASEPATH)
                 .request()
                 .headers(noDevIdHeaders)
@@ -175,29 +175,29 @@ public class TestServiceAiBotstore extends ServiceTestBase {
     }
 
     @Test
-    public void testGetBotIcon() throws Database.DatabaseException, IOException {
-        when(this.fakeDatabase.getBotIconPath(anyInt())).thenReturn(BOT_ICON_PATH);
+    public void testGetBotIcon() throws DatabaseException, IOException {
+        when(this.fakeDatabaseMarketplace.getBotIconPath(anyInt())).thenReturn(BOT_ICON_PATH);
         Response response = target(BOTSTORE_BOTICONPATH).request().headers(defaultHeaders).get();
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
         Assert.assertEquals(BOT_ICON_PATH, response.readEntity(String.class));
     }
 
     @Test
-    public void testGetBotIcon_invalid_devId() throws Database.DatabaseException, IOException {
+    public void testGetBotIcon_invalid_devId() throws DatabaseException, IOException {
         final Response response = target(BOTSTORE_BOTICONPATH).request().headers(noDevIdHeaders).get();
         Assert.assertEquals(HttpURLConnection.HTTP_UNAUTHORIZED, response.getStatus());
     }
 
     @Test
-    public void testUploadBotIcon() throws Database.DatabaseException, IOException {
+    public void testUploadBotIcon() throws DatabaseException, IOException {
 
         // this test will never pass in windows because of posix file system commands
         org.junit.Assume.assumeTrue(!SystemUtils.IS_OS_WINDOWS);
 
-        when(this.fakeDatabase.saveBotIconPath(any(), anyInt(), any())).thenReturn(true);
+        when(this.fakeDatabaseMarketplace.saveBotIconPath(any(), anyInt(), any())).thenReturn(true);
         AiBot bot = new AiBot(SAMPLEBOT);
         bot.setDevId(DEVID);
-        when(this.fakeDatabase.getBotDetails(anyInt())).thenReturn(bot);
+        when(this.fakeDatabaseMarketplace.getBotDetails(anyInt())).thenReturn(bot);
         FormDataMultiPart multipart = generateIconMultipartEntity();
         final Response response = target(BOTSTORE_BOTICONPATH)
                 .register(MultiPartFeature.class)
@@ -210,7 +210,7 @@ public class TestServiceAiBotstore extends ServiceTestBase {
     }
 
     @Test
-    public void testUploadBotIcon_invalid_devId() throws Database.DatabaseException, IOException {
+    public void testUploadBotIcon_invalid_devId() throws DatabaseException, IOException {
         FormDataMultiPart multipart = generateIconMultipartEntity();
         final Response response = target(BOTSTORE_BOTICONPATH)
                 .register(MultiPartFeature.class)
@@ -221,7 +221,7 @@ public class TestServiceAiBotstore extends ServiceTestBase {
         Assert.assertEquals(HttpURLConnection.HTTP_UNAUTHORIZED, response.getStatus());
     }
 
-    private void testGetBotsDetailsByType(final String path, final AiBot.PublishingType publishingType) throws Database.DatabaseException{
+    private void testGetBotsDetailsByType(final String path, final AiBot.PublishingType publishingType) throws DatabaseException{
         AiBot botSkill = new AiBot(SAMPLEBOT);
         botSkill.setBotId(1);
         botSkill.setPublishingType(AiBot.PublishingType.SKILL);
@@ -229,7 +229,7 @@ public class TestServiceAiBotstore extends ServiceTestBase {
         botTemplate.setBotId(2);
         botTemplate.setPublishingType(AiBot.PublishingType.TEMPLATE);
         AiBot expectedBot = publishingType == AiBot.PublishingType.SKILL ? botSkill : botTemplate;
-        when(this.fakeDatabase.getPublishedBots(publishingType)).thenReturn(Collections.singletonList(expectedBot));
+        when(this.fakeDatabaseMarketplace.getPublishedBots(publishingType)).thenReturn(Collections.singletonList(expectedBot));
         final Response response = target(path).request().headers(defaultHeaders).get();
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
         ApiAiBotList list = deserializeResponse(response, ApiAiBotList.class);

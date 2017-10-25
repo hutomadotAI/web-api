@@ -3,6 +3,9 @@ package com.hutoma.api.connectors;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Tools;
+import com.hutoma.api.connectors.db.DatabaseAI;
+import com.hutoma.api.connectors.db.DatabaseException;
+import com.hutoma.api.connectors.db.DatabaseMarketplace;
 import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.containers.sub.WebHook;
@@ -36,7 +39,8 @@ public class TestWebhooks {
     private static final UUID DEVID = UUID.fromString("ef1593e6-503f-481c-a1fd-071a32c69271");
     private static final ChatRequestInfo CHATINFO = new ChatRequestInfo(DEVID, AIID, CHATID, "hi", null);
     private JsonSerializer serializer;
-    private Database fakeDatabase;
+    private DatabaseAI fakeDatabase;
+    private DatabaseMarketplace fakeDatabaseMarketplace;
     private ILogger fakeLogger;
     private JerseyClient fakeClient;
     private Tools fakeTools;
@@ -46,20 +50,21 @@ public class TestWebhooks {
     @Before
     public void setup() throws ServerMetadata.NoServerAvailable {
         this.serializer = mock(JsonSerializer.class);
-        this.fakeDatabase = mock(Database.class);
+        this.fakeDatabase = mock(DatabaseAI.class);
+        this.fakeDatabaseMarketplace = mock(DatabaseMarketplace.class);
         this.fakeLogger = mock(ILogger.class);
         this.fakeClient = mock(JerseyClient.class);
         this.fakeTools = mock(Tools.class);
 
-        this.webHooks = new WebHooksWrapper(this.fakeDatabase, this.fakeLogger, this.serializer, this.fakeClient,
-                this.fakeTools);
+        this.webHooks = new WebHooksWrapper(this.fakeDatabase, this.fakeDatabaseMarketplace, this.fakeLogger,
+                this.serializer, this.fakeClient, this.fakeTools);
     }
 
     /*
      * activeWebhookExists returns true if a webhook exists for an intent, and is enabled.
      */
     @Test
-    public void testGetWebHook_PassThrough() throws Database.DatabaseException {
+    public void testGetWebHook_PassThrough() throws DatabaseException {
         MemoryIntent mi = new MemoryIntent("intent1", AIID, CHATID, null);
         WebHook wh = new WebHook(UUID.randomUUID(), "testName", "https://fakewebhookaddress/webhook", true);
         when(this.fakeDatabase.getWebHook(any(), any())).thenReturn(wh);
@@ -73,7 +78,7 @@ public class TestWebhooks {
      */
     @Test
     public void testExecuteWebHook_InvalidIntent()
-            throws Database.DatabaseException, IOException, WebHooks.WebHookInternalException {
+            throws DatabaseException, IOException, WebHooks.WebHookInternalException {
         WebHook wh = new WebHook(UUID.randomUUID(), "testName", "https://fakewebhookaddress/webhook", false);
         ChatResult chatResult = new ChatResult("Hi");
 
@@ -88,7 +93,7 @@ public class TestWebhooks {
      */
     @Test
     public void testExecuteWebHook_InvalidEndpoint()
-            throws Database.DatabaseException, IOException, WebHooks.WebHookInternalException {
+            throws DatabaseException, IOException, WebHooks.WebHookInternalException {
         WebHook wh = new WebHook(UUID.randomUUID(), "testName", "", false);
         MemoryIntent mi = new MemoryIntent("intent1", AIID, CHATID, null);
         ChatResult chatResult = new ChatResult("Hi");
@@ -107,7 +112,7 @@ public class TestWebhooks {
      */
     @Test
     public void testExecuteWebHook_ValidResponse()
-            throws Database.DatabaseException, IOException, WebHooks.WebHookException {
+            throws DatabaseException, IOException, WebHooks.WebHookException {
         WebHook wh = new WebHook(UUID.randomUUID(), "testName", "https://fakewebhookaddress/webhook", false);
         when(this.fakeDatabase.getWebhookSecretForBot(any())).thenReturn("123456");
         when(this.fakeTools.generateRandomHexString(anyInt())).thenReturn("deadf00d");
@@ -131,7 +136,7 @@ public class TestWebhooks {
      */
     @Test
     public void testExecuteWebHook_HttpNoHash()
-            throws Database.DatabaseException, IOException, WebHooks.WebHookException {
+            throws DatabaseException, IOException, WebHooks.WebHookException {
         WebHook wh = new WebHook(UUID.randomUUID(), "testName", "http://fakewebhookaddress/webhook", false);
         when(this.fakeDatabase.getWebhookSecretForBot(any())).thenReturn("123456");
         MemoryIntent mi = new MemoryIntent("intent1", AIID, CHATID, null);
@@ -152,7 +157,7 @@ public class TestWebhooks {
     */
     @Test
     public void testExecuteWebHook_generateSecretifNull()
-            throws Database.DatabaseException, IOException, WebHooks.WebHookException {
+            throws DatabaseException, IOException, WebHooks.WebHookException {
         WebHook wh = new WebHook(UUID.randomUUID(), "testName", "https://fakewebhookaddress/webhook", false);
         when(this.fakeDatabase.getWebhookSecretForBot(any())).thenReturn(null);
         when(this.fakeTools.generateRandomHexString(anyInt())).thenReturn("deadf00d");
@@ -176,7 +181,7 @@ public class TestWebhooks {
      */
     @Test
     public void testExecuteWebHook_NoWebHook()
-            throws Database.DatabaseException, IOException, WebHooks.WebHookException {
+            throws DatabaseException, IOException, WebHooks.WebHookException {
         MemoryIntent mi = new MemoryIntent("intent1", AIID, CHATID, null);
         ChatResult chatResult = new ChatResult("Hi");
 
@@ -189,7 +194,7 @@ public class TestWebhooks {
      */
     @Test
     public void testExecuteWebHook_ResponseDeserialiseFailed()
-            throws Database.DatabaseException, IOException, WebHooks.WebHookException {
+            throws DatabaseException, IOException, WebHooks.WebHookException {
         WebHook wh = new WebHook(UUID.randomUUID(), "testName", "https://fakewebhookaddress/webhook", false);
         MemoryIntent mi = new MemoryIntent("intent1", AIID, CHATID, null);
         ChatResult chatResult = new ChatResult("Hi");
@@ -209,7 +214,7 @@ public class TestWebhooks {
      */
     @Test
     public void testExecuteWebHook_InvalidErrorCode()
-            throws Database.DatabaseException, IOException, WebHooks.WebHookInternalException {
+            throws DatabaseException, IOException, WebHooks.WebHookInternalException {
         WebHook wh = new WebHook(UUID.randomUUID(), "testName", "https://fakewebhookaddress/webhook", false);
         MemoryIntent mi = new MemoryIntent("intent1", AIID, CHATID, null);
         ChatResult chatResult = new ChatResult("Hi");
@@ -228,11 +233,11 @@ public class TestWebhooks {
      */
     @Test
     public void testExecuteWebHook_FailureLookupConfig()
-            throws Database.DatabaseException, IOException, WebHooks.WebHookInternalException {
+            throws DatabaseException, IOException, WebHooks.WebHookInternalException {
         WebHook wh = new WebHook(UUID.randomUUID(), "testName", "https://fakewebhookaddress/webhook", false);
         MemoryIntent mi = new MemoryIntent("intent1", AIID, CHATID, null);
         ChatResult chatResult = new ChatResult("Hi");
-        when(this.fakeDatabase.getBotConfigForWebhookCall(any(), any(), any(), any())).thenThrow(new Database.DatabaseException("BAD CALL"));
+        when(this.fakeDatabase.getBotConfigForWebhookCall(any(), any(), any(), any())).thenThrow(new DatabaseException("BAD CALL"));
 
         assertThatExceptionOfType(WebHooks.WebHookInternalException.class)
                 .isThrownBy(() -> this.webHooks.executeIntentWebHook(wh, mi, chatResult, CHATINFO));
@@ -247,7 +252,7 @@ public class TestWebhooks {
      */
     @Test
     public void testHashWebHook_CalculatesOk()
-            throws Database.DatabaseException, IOException, WebHooks.WebHookInternalException {
+            throws DatabaseException, IOException, WebHooks.WebHookInternalException {
         String hashString = this.webHooks.getMessageHash("123456", "ThisIsAMessage".getBytes());
 
         // Here's what Python calculated this should be using HMAC SHA256
@@ -271,10 +276,11 @@ public class TestWebhooks {
 
     public static class WebHooksWrapper extends WebHooks {
 
-        public WebHooksWrapper(final Database database, final ILogger logger,
+        public WebHooksWrapper(final DatabaseAI databaseAi, final DatabaseMarketplace databaseMarketplace,
+                               final ILogger logger,
                                final JsonSerializer serializer, final JerseyClient jerseyClient,
                                final Tools tools) {
-            super(database, logger, serializer, jerseyClient, tools);
+            super(databaseAi, databaseMarketplace, logger, serializer, jerseyClient, tools);
         }
 
         @Override

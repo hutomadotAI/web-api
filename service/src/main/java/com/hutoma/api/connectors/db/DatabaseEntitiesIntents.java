@@ -1,16 +1,14 @@
-package com.hutoma.api.connectors;
+package com.hutoma.api.connectors.db;
 
+import com.google.gson.internal.LinkedTreeMap;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.common.LogMap;
-import com.hutoma.api.connectors.db.DatabaseCall;
-import com.hutoma.api.connectors.db.DatabaseTransaction;
-import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.ApiEntity;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.sub.Entity;
 import com.hutoma.api.containers.sub.IntentVariable;
-import com.hutoma.api.memory.MemoryIntentHandler;
+import com.hutoma.api.containers.sub.MemoryIntent;
+import com.hutoma.api.containers.sub.MemoryVariable;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -26,7 +24,7 @@ import javax.inject.Provider;
 /**
  * Created by David MG on 20/10/2016.
  */
-public class DatabaseEntitiesIntents extends Database {
+public class DatabaseEntitiesIntents extends DatabaseAI {
 
     @Inject
     public DatabaseEntitiesIntents(ILogger logger, Provider<DatabaseCall> callProvider,
@@ -299,6 +297,73 @@ public class DatabaseEntitiesIntents extends Database {
         }
     }
 
+    public boolean updateMemoryIntent(final MemoryIntent intent, final JsonSerializer jsonSerializer)
+            throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            String variables = jsonSerializer.serialize(intent.getVariables());
+            call.initialise("updateMemoryIntent", 5)
+                    .add(intent.getName())
+                    .add(intent.getAiid())
+                    .add(intent.getChatId())
+                    .add(variables)
+                    .add(intent.isFulfilled());
+            return call.executeUpdate() > 0;
+        }
+    }
+
+    public MemoryIntent getMemoryIntent(final String intentName, final UUID aiid, UUID chatId,
+                                        final JsonSerializer jsonSerializer)
+            throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("getMemoryIntent", 3)
+                    .add(intentName).add(aiid).add(chatId);
+            ResultSet rs = call.executeQuery();
+            try {
+                if (rs.next()) {
+                    return loadMemoryIntent(rs, jsonSerializer);
+                }
+                return null;
+            } catch (SQLException sqle) {
+                throw new DatabaseException(sqle);
+            }
+        }
+    }
+
+    public List<MemoryIntent> getMemoryIntentsForChat(final UUID aiid, final UUID chatId,
+                                                      final JsonSerializer jsonSerializer)
+            throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("getMemoryIntentsForChat", 2).add(aiid).add(chatId);
+            ResultSet rs = call.executeQuery();
+            List<MemoryIntent> intents = new ArrayList<>();
+            try {
+                while (rs.next()) {
+                    intents.add(loadMemoryIntent(rs, jsonSerializer));
+                }
+            } catch (SQLException sqle) {
+                throw new DatabaseException(sqle);
+            }
+            return intents;
+        }
+    }
+
+    public boolean deleteAllMemoryIntents(final UUID aiid) throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("deleteAllMemoryIntents", 1).add(aiid);
+            return call.executeUpdate() > 0;
+        }
+    }
+
+    public boolean deleteMemoryIntent(final MemoryIntent intent) throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("deleteMemoryIntent", 3)
+                    .add(intent.getName())
+                    .add(intent.getAiid())
+                    .add(intent.getChatId());
+            return call.executeUpdate() > 0;
+        }
+    }
+
     /***
      * * Synchronise "user says" between database and new data
      * @param devid
@@ -515,6 +580,38 @@ public class DatabaseEntitiesIntents extends Database {
         transaction.getDatabaseCall().initialise("deleteIntentVariable", 3)
                 .add(devid).add(aiid).add(variable.getId())
                 .executeUpdate();
+    }
+
+    private static MemoryIntent loadMemoryIntent(final ResultSet rs, final JsonSerializer jsonSerializer)
+            throws DatabaseException {
+        try {
+            List<LinkedTreeMap<String, Object>> list =
+                    jsonSerializer.deserializeList(rs.getString("variables"));
+            List<MemoryVariable> variables = new ArrayList<>();
+            for (LinkedTreeMap<String, Object> e : list) {
+                @SuppressWarnings("unchecked")
+                MemoryVariable memoryVariable = new MemoryVariable(
+                        e.get("entity").toString(),
+                        e.containsKey("value") ? e.get("value").toString() : null,
+                        (boolean) e.get("mandatory"),
+                        (List<String>) e.get("entity_keys"),
+                        (List<String>) e.get("prompts"),
+                        (int) Math.round((double) e.get("max_prompts")),
+                        (int) Math.round((double) e.get("times_prompted")),
+                        (boolean) e.get("system_entity"),
+                        (boolean) e.get("persistent"),
+                        e.containsKey("label") ? e.get("label").toString() : "");
+                memoryVariable.setRequested((boolean) e.get("requested"));
+                variables.add(memoryVariable);
+            }
+            return new MemoryIntent(rs.getString("name"),
+                    UUID.fromString(rs.getString("aiid")),
+                    UUID.fromString(rs.getString("chatId")),
+                    variables,
+                    rs.getBoolean("isFulfilled"));
+        } catch (SQLException sqle) {
+            throw new DatabaseException(sqle);
+        }
     }
 
     /***

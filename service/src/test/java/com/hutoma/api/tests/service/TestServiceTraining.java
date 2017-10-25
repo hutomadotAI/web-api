@@ -1,7 +1,7 @@
 package com.hutoma.api.tests.service;
 
 import com.hutoma.api.common.TestDataHelper;
-import com.hutoma.api.connectors.Database;
+import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.endpoints.TrainingEndpoint;
@@ -43,23 +43,23 @@ public class TestServiceTraining extends ServiceTestBase {
     }
 
     @Test
-    public void testTrainingUpload() throws Database.DatabaseException, IOException {
+    public void testTrainingUpload() throws DatabaseException, IOException {
         doReturn(1000).when(this.fakeConfig).getMaxUploadSizeKb();
-        when(this.fakeDatabaseEntitiesIntents.updateAiTrainingFile(any(), any())).thenReturn(true);
-        when(this.fakeDatabaseEntitiesIntents.getAI(any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
+        when(this.fakeDatabaseAi.updateAiTrainingFile(any(), any())).thenReturn(true);
+        when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
         when(this.fakeAiServices.getTrainingMaterialsCommon(any(), any(), any())).thenReturn("Q1\nA1");
         Response response = upload(String.valueOf(TrainingLogic.TrainingType.TEXT.type()));
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
     }
 
     @Test
-    public void testTrainingUpload_invalidSourceType() throws Database.DatabaseException, IOException {
+    public void testTrainingUpload_invalidSourceType() throws DatabaseException, IOException {
         Response response = upload("-999");
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.getStatus());
     }
 
     @Test
-    public void testTrainingUpload_invalid_devId() throws Database.DatabaseException, IOException {
+    public void testTrainingUpload_invalid_devId() throws DatabaseException, IOException {
         FormDataMultiPart multipart = generateTrainingUpload();
         final Response response = target(TRAINING_BASEPATH)
                 .register(MultiPartFeature.class)
@@ -72,53 +72,53 @@ public class TestServiceTraining extends ServiceTestBase {
     }
 
     @Test
-    public void testTrainingStart() throws Database.DatabaseException, IOException {
-        when(this.fakeDatabaseEntitiesIntents.getAI(any(), any(), any())).thenReturn(
+    public void testTrainingStart() throws DatabaseException, IOException {
+        when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(
                 TestDataHelper.getAi(TrainingStatus.AI_TRAINING_STOPPED, false));
         final Response response = testTraining("start", defaultHeaders);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
     }
 
     @Test
-    public void testTrainingStart_invalid_devId() throws Database.DatabaseException, IOException {
+    public void testTrainingStart_invalid_devId() throws DatabaseException, IOException {
         final Response response = testTraining("start", noDevIdHeaders);
         Assert.assertEquals(HttpURLConnection.HTTP_UNAUTHORIZED, response.getStatus());
     }
 
     @Test
-    public void testTrainingStop() throws Database.DatabaseException, IOException {
-        when(this.fakeDatabaseEntitiesIntents.getAI(any(), any(), any())).thenReturn(
+    public void testTrainingStop() throws DatabaseException, IOException {
+        when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(
                 TestDataHelper.getAi(TrainingStatus.AI_TRAINING, false));
         final Response response = testTraining("stop", defaultHeaders);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
     }
 
     @Test
-    public void testTrainingStop_invalid_devId() throws Database.DatabaseException, IOException {
+    public void testTrainingStop_invalid_devId() throws DatabaseException, IOException {
         final Response response = testTraining("stop", noDevIdHeaders);
         Assert.assertEquals(HttpURLConnection.HTTP_UNAUTHORIZED, response.getStatus());
     }
 
     @Test
-    public void testTrainingUpdate() throws Database.DatabaseException, IOException {
-        when(this.fakeDatabaseEntitiesIntents.getAI(any(), any(), any())).thenReturn(
+    public void testTrainingUpdate() throws DatabaseException, IOException {
+        when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(
                 TestDataHelper.getAi(TrainingStatus.AI_TRAINING, false));
-        when(this.fakeDatabaseEntitiesIntents.getAiTrainingFile(any())).thenReturn("Q1\nA1");
+        when(this.fakeDatabaseAi.getAiTrainingFile(any())).thenReturn("Q1\nA1");
         final Response response = testTraining("update", defaultHeaders);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
     }
 
     @Test
-    public void testTrainingUpdate_invalid_devId() throws Database.DatabaseException, IOException {
-        when(this.fakeDatabaseEntitiesIntents.getAI(any(), any(), any())).thenReturn(
+    public void testTrainingUpdate_invalid_devId() throws DatabaseException, IOException {
+        when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(
                 TestDataHelper.getAi(TrainingStatus.AI_TRAINING, false));
         final Response response = testTraining("update", noDevIdHeaders);
         Assert.assertEquals(HttpURLConnection.HTTP_UNAUTHORIZED, response.getStatus());
     }
 
     @Test
-    public void testGetTrainingMaterials() throws Database.DatabaseException, IOException {
-        when(this.fakeDatabaseEntitiesIntents.getAI(any(), any(), any())).thenReturn(
+    public void testGetTrainingMaterials() throws DatabaseException, IOException {
+        when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(
                 TestDataHelper.getAi(TrainingStatus.AI_TRAINING_COMPLETE, false));
         when(this.fakeAiServices.getTrainingMaterialsCommon(any(), any(), any())).thenReturn("Q1\nA1");
         final Response response = target(TRAINING_BASEPATH)
@@ -130,7 +130,7 @@ public class TestServiceTraining extends ServiceTestBase {
     }
 
     @Test
-    public void testGetTrainingMaterials_invalid_devId() throws Database.DatabaseException, IOException {
+    public void testGetTrainingMaterials_invalid_devId() throws DatabaseException, IOException {
         final Response response = target(TRAINING_BASEPATH)
                 .path("materials")
                 .request()
@@ -140,10 +140,10 @@ public class TestServiceTraining extends ServiceTestBase {
     }
 
     @Test
-    public void testTrainingUpdate_intentOnly() throws Database.DatabaseException, IOException {
-        when(this.fakeDatabaseEntitiesIntents.getAI(any(), any(), any())).thenReturn(
+    public void testTrainingUpdate_intentOnly() throws DatabaseException, IOException {
+        when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(
                 TestDataHelper.getAi(TrainingStatus.AI_TRAINING, false));
-        when(this.fakeDatabaseEntitiesIntents.getAiTrainingFile(any())).thenReturn(null);
+        when(this.fakeDatabaseAi.getAiTrainingFile(any())).thenReturn(null);
         ApiIntent intent = new ApiIntent("intent1", "", "");
         intent.setUserSays(Collections.singletonList("userSays"));
         intent.setResponses(Collections.singletonList("response"));
@@ -154,7 +154,7 @@ public class TestServiceTraining extends ServiceTestBase {
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
     }
 
-    private Response testTraining(final String path, final MultivaluedHashMap<String, Object> headers) throws Database.DatabaseException {
+    private Response testTraining(final String path, final MultivaluedHashMap<String, Object> headers) throws DatabaseException {
         when(this.fakeAiServices.getTrainingMaterialsCommon(any(), any(), any())).thenReturn("Q1\nA1");
         return target(TRAINING_BASEPATH)
                 .path(path)

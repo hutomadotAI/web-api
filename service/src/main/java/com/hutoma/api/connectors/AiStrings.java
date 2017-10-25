@@ -1,6 +1,7 @@
 package com.hutoma.api.connectors;
 
 import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.connectors.db.DatabaseAI;
 import com.hutoma.api.containers.ApiAi;
 
 import java.util.List;
@@ -13,12 +14,12 @@ import javax.inject.Inject;
  */
 public class AiStrings {
 
-    private final Database database;
+    private final DatabaseAI database;
     private final JsonSerializer serializer;
     private final Random randomGenerator;
 
     @Inject
-    public AiStrings(final Database database, final JsonSerializer serializer) {
+    public AiStrings(final DatabaseAI database, final JsonSerializer serializer) {
         this.database = database;
         this.serializer = serializer;
         randomGenerator = new Random();

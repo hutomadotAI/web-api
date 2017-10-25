@@ -2,8 +2,9 @@ package com.hutoma.api.memory;
 
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.connectors.Database;
-import com.hutoma.api.connectors.DatabaseEntitiesIntents;
+import com.hutoma.api.connectors.db.DatabaseEntitiesIntents;
+import com.hutoma.api.connectors.db.Database;
+import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.ApiEntity;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.sub.IntentVariable;
@@ -58,8 +59,8 @@ public class MemoryIntentHandler implements IMemoryIntentHandler {
 
     public List<MemoryIntent> getCurrentIntentsStateForChat(final UUID aiid, final UUID chatId) {
         try {
-            return this.database.getMemoryIntentsForChat(aiid, chatId, this.jsonSerializer);
-        } catch (Database.DatabaseException e) {
+            return this.databaseIntents.getMemoryIntentsForChat(aiid, chatId, this.jsonSerializer);
+        } catch (DatabaseException e) {
             this.logger.logException(LOGFROM, e);
         }
         return null;
@@ -70,8 +71,8 @@ public class MemoryIntentHandler implements IMemoryIntentHandler {
      */
     public void updateStatus(final MemoryIntent intent) {
         try {
-            this.database.updateMemoryIntent(intent, this.jsonSerializer);
-        } catch (Database.DatabaseException e) {
+            this.databaseIntents.updateMemoryIntent(intent, this.jsonSerializer);
+        } catch (DatabaseException e) {
             this.logger.logException(LOGFROM, e);
         }
     }
@@ -81,8 +82,8 @@ public class MemoryIntentHandler implements IMemoryIntentHandler {
      */
     public void deleteAllIntentsForAi(final UUID aiid) {
         try {
-            this.database.deleteAllMemoryIntents(aiid);
-        } catch (Database.DatabaseException e) {
+            this.databaseIntents.deleteAllMemoryIntents(aiid);
+        } catch (DatabaseException e) {
             this.logger.logException(LOGFROM, e);
         }
     }
@@ -95,7 +96,7 @@ public class MemoryIntentHandler implements IMemoryIntentHandler {
             for (MemoryIntent intent : intents) {
                 this.databaseIntents.deleteMemoryIntent(intent);
             }
-        } catch (Database.DatabaseException e) {
+        } catch (DatabaseException e) {
             this.logger.logException(LOGFROM, e);
         }
     }
@@ -106,7 +107,7 @@ public class MemoryIntentHandler implements IMemoryIntentHandler {
     public ApiIntent getIntent(final UUID aiid, final String intentName) {
         try {
             return this.databaseIntents.getIntent(aiid, intentName);
-        } catch (Database.DatabaseException e) {
+        } catch (DatabaseException e) {
             this.logger.logException(LOGFROM, e);
         }
         return null;
@@ -116,7 +117,7 @@ public class MemoryIntentHandler implements IMemoryIntentHandler {
                                          final String intentName) {
         MemoryIntent intent = null;
         try {
-            intent = this.database.getMemoryIntent(intentName, aiid, chatId, this.jsonSerializer);
+            intent = this.databaseIntents.getMemoryIntent(intentName, aiid, chatId, this.jsonSerializer);
             if (intent == null) {
                 ApiIntent apiIntent = this.databaseIntents.getIntent(aiid, intentName);
                 List<MemoryVariable> variables = new ArrayList<>();
@@ -140,9 +141,9 @@ public class MemoryIntentHandler implements IMemoryIntentHandler {
                 }
                 intent = new MemoryIntent(intentName, aiid, chatId, variables, false);
                 // write it to the db
-                this.database.updateMemoryIntent(intent, this.jsonSerializer);
+                this.databaseIntents.updateMemoryIntent(intent, this.jsonSerializer);
             }
-        } catch (Database.DatabaseException e) {
+        } catch (DatabaseException e) {
             this.logger.logException(LOGFROM, e);
         }
         return intent;

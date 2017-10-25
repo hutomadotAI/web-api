@@ -1,7 +1,7 @@
 package com.hutoma.api.logic;
 
 import com.hutoma.api.common.Pair;
-import com.hutoma.api.connectors.Database;
+import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.ApiChat;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.ApiResult;
@@ -240,7 +240,7 @@ public class TestChatLogicIntents extends TestChatBase {
      */
     @Test
     public void testChat_multiLineIntent_fulfilledFromPersistence()
-            throws RequestBase.AiControllerException, Database.DatabaseException {
+            throws RequestBase.AiControllerException, DatabaseException {
         MemoryIntent mi = getMultiEntityMemoryIntentForPrompt(3, "prompt");
 
         // Make sure all variables are clean
@@ -283,7 +283,7 @@ public class TestChatLogicIntents extends TestChatBase {
      */
     @Test
     public void testChat_multiLineIntent_notFulfilledWithNonPersistedValue()
-            throws RequestBase.AiControllerException, Database.DatabaseException {
+            throws RequestBase.AiControllerException, DatabaseException {
         MemoryIntent mi = getMultiEntityMemoryIntentForPrompt(3, "prompt");
 
         // Make sure all variables are clean
@@ -321,7 +321,7 @@ public class TestChatLogicIntents extends TestChatBase {
      */
     @Test
     public void testChat_multiLineIntent_fulfilled()
-            throws RequestBase.AiControllerException, Database.DatabaseException {
+            throws RequestBase.AiControllerException, DatabaseException {
         MemoryIntent mi = getMemoryIntentForPrompt(3, "prompt");
 
         // Make sure all variables are clean
@@ -368,7 +368,7 @@ public class TestChatLogicIntents extends TestChatBase {
      */
     @Test
     public void testChat_multiLineIntent_promptsExhausted()
-            throws RequestBase.AiControllerException, Database.DatabaseException {
+            throws RequestBase.AiControllerException, DatabaseException {
         final int maxPrompts = 3;
         MemoryIntent mi = getMemoryIntentForPrompt(maxPrompts, "prompt");
         // Make sure all variables are clean
@@ -405,7 +405,7 @@ public class TestChatLogicIntents extends TestChatBase {
      */
     @Test
     public void testChat_multiVariable_promptsExhausted_intentReset()
-            throws RequestBase.AiControllerException, Database.DatabaseException {
+            throws RequestBase.AiControllerException, DatabaseException {
         final int maxPrompts = 1;
         MemoryVariable mv1 = new MemoryVariable(
                 "var1",
@@ -456,7 +456,7 @@ public class TestChatLogicIntents extends TestChatBase {
      */
     @Test
     public void testChat_intent_sameEntity_multipleVars_promptsForDisambiguationFirst()
-            throws RequestBase.AiControllerException, Database.DatabaseException, IOException {
+            throws RequestBase.AiControllerException, DatabaseException, IOException {
         final String intentName = "intent1";
         final String sameEntityName = "sameEntityName";
         MemoryVariable mv1 = new MemoryVariable("entity1", null, true, Collections.singletonList("1"),

@@ -4,8 +4,8 @@ import com.hutoma.api.common.AiServiceStatusLogger;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.ThreadSubPool;
-import com.hutoma.api.connectors.Database;
-import com.hutoma.api.connectors.DatabaseAiStatusUpdates;
+import com.hutoma.api.connectors.db.DatabaseAiStatusUpdates;
+import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.sub.BackendServerType;
 import com.hutoma.api.containers.sub.ServerAiEntry;
 import com.hutoma.api.containers.sub.ServerRegistration;
@@ -51,7 +51,7 @@ public class ControllerAiml extends ControllerBase {
     public void synchroniseDBStatuses(final DatabaseAiStatusUpdates database,
                                       final JsonSerializer jsonSerializer, final BackendServerType serverType,
                                       final Map<UUID, ServerAiEntry> statusData)
-            throws Database.DatabaseException {
+            throws DatabaseException {
         // do nothing.
         // AIML AIs are placeholders and should not be synced
     }

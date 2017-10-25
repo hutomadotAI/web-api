@@ -1,6 +1,6 @@
 package com.hutoma.api.tests.service;
 
-import com.hutoma.api.connectors.Database;
+import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.ApiIntegrationList;
 import com.hutoma.api.containers.sub.Integration;
 import com.hutoma.api.endpoints.AIIntegrationEndpoint;
@@ -22,8 +22,8 @@ public class TestServiceIntegrations extends ServiceTestBase {
     private static final String BASEPATH = "/ai/integration";
 
     @Test
-    public void testGetIntegrations() throws Database.DatabaseException {
-        when(this.fakeDatabase.getAiIntegrationList()).thenReturn(Collections.singletonList(
+    public void testGetIntegrations() throws DatabaseException {
+        when(this.fakeDatabaseIntegrations.getAiIntegrationList()).thenReturn(Collections.singletonList(
                 new Integration(1, "", "", "", true)));
         final Response response = target(BASEPATH).request().headers(defaultHeaders).get();
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
@@ -32,8 +32,8 @@ public class TestServiceIntegrations extends ServiceTestBase {
     }
 
     @Test
-    public void testGetIntegrations_NotFound() throws Database.DatabaseException {
-        when(this.fakeDatabase.getAiIntegrationList()).thenReturn(new ArrayList<Integration>());
+    public void testGetIntegrations_NotFound() throws DatabaseException {
+        when(this.fakeDatabaseIntegrations.getAiIntegrationList()).thenReturn(new ArrayList<Integration>());
         final Response response = target(BASEPATH).request().headers(defaultHeaders).get();
         Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, response.getStatus());
     }

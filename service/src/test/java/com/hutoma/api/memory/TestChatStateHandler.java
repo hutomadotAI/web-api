@@ -2,7 +2,8 @@ package com.hutoma.api.memory;
 
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.connectors.Database;
+import com.hutoma.api.connectors.db.DatabaseAI;
+import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.sub.ChatState;
 
 import org.joda.time.DateTime;
@@ -24,7 +25,7 @@ import static org.mockito.Mockito.*;
  */
 public class TestChatStateHandler {
 
-    private Database fakeDatabase;
+    private DatabaseAI fakeDatabaseAi;
     private ILogger fakeLogger;
     private ChatStateHandler chatStateHandler;
     private JsonSerializer fakeJsonSerializer;
@@ -37,42 +38,42 @@ public class TestChatStateHandler {
 
     @Before
     public void setup() {
-        this.fakeDatabase = mock(Database.class);
+        this.fakeDatabaseAi = mock(DatabaseAI.class);
         this.fakeLogger = mock(ILogger.class);
-        this.chatStateHandler = new ChatStateHandler(fakeDatabase, fakeLogger, fakeJsonSerializer);
+        this.chatStateHandler = new ChatStateHandler(fakeDatabaseAi, fakeLogger, fakeJsonSerializer);
     }
 
     @Test
-    public void testChatStateHandler_getState() throws Database.DatabaseException {
+    public void testChatStateHandler_getState() throws DatabaseException {
         final String topic = "theTopic";
         final DateTime timestamp = DateTime.now();
         ChatState chatState = new ChatState(timestamp, topic, "theHistory", AIID, new HashMap<>(), 0.5d);
-        when(this.fakeDatabase.getChatState(any(), any(), any(), any())).thenReturn(chatState);
+        when(this.fakeDatabaseAi.getChatState(any(), any(), any(), any())).thenReturn(chatState);
         ChatState result = this.chatStateHandler.getState(DEVID_UUID, AIID, UUID.randomUUID());
         assertChatStateEquals(chatState, result);
     }
 
     @Test
-    public void testChatStateHandler_getState_dbException() throws Database.DatabaseException {
-        when(this.fakeDatabase.getChatState(any(), any(), any(), any())).thenThrow(Database.DatabaseException.class);
+    public void testChatStateHandler_getState_dbException() throws DatabaseException {
+        when(this.fakeDatabaseAi.getChatState(any(), any(), any(), any())).thenThrow(DatabaseException.class);
         ChatState result = this.chatStateHandler.getState(DEVID_UUID, AIID, UUID.randomUUID());
         assertChatStateEquals(ChatState.getEmpty(), result);
         verify(this.fakeLogger).logUserExceptionEvent(anyString(), any(), anyString(), any());
     }
 
     @Test
-    public void testChatStateHandler_saveState() throws Database.DatabaseException {
+    public void testChatStateHandler_saveState() throws DatabaseException {
         final UUID chatId = UUID.randomUUID();
         ChatState chatState = new ChatState(DateTime.now(), "theTopic", "theHistory", AIID, new HashMap<>(), 0.5d);
         this.chatStateHandler.saveState(DEVID_UUID, chatId, chatState);
-        verify(this.fakeDatabase).saveChatState(DEVID_UUID, chatId, chatState, fakeJsonSerializer);
+        verify(this.fakeDatabaseAi).saveChatState(DEVID_UUID, chatId, chatState, fakeJsonSerializer);
     }
 
     @Test
-    public void testChatStateHandler_saveState_dbException() throws Database.DatabaseException {
+    public void testChatStateHandler_saveState_dbException() throws DatabaseException {
         final UUID chatId = UUID.randomUUID();
         ChatState chatState = new ChatState(DateTime.now(), "theTopic", "theHistory", AIID, new HashMap<>(), 0.5d);
-        when(this.fakeDatabase.saveChatState(any(), any(), any(), any())).thenThrow(Database.DatabaseException.class);
+        when(this.fakeDatabaseAi.saveChatState(any(), any(), any(), any())).thenThrow(DatabaseException.class);
         this.chatStateHandler.saveState(DEVID_UUID, chatId, chatState);
         verify(this.fakeLogger).logUserExceptionEvent(anyString(), any(), anyString(), any());
     }

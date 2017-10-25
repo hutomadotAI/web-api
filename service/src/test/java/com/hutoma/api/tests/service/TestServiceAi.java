@@ -2,7 +2,7 @@ package com.hutoma.api.tests.service;
 
 import com.hutoma.api.common.TestDataHelper;
 import com.hutoma.api.connectors.AIServices;
-import com.hutoma.api.connectors.Database;
+import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.ApiAiBotList;
 import com.hutoma.api.containers.ApiAiList;
@@ -56,9 +56,9 @@ public class TestServiceAi extends ServiceTestBase {
     }
 
     @Test
-    public void testGetAIs() throws Database.DatabaseException {
+    public void testGetAIs() throws DatabaseException {
         ApiAi ai = TestDataHelper.getAI();
-        when(this.fakeDatabase.getAllAIs(any(), any())).thenReturn(Collections.singletonList(ai));
+        when(this.fakeDatabaseAi.getAllAIs(any(), any())).thenReturn(Collections.singletonList(ai));
         final Response response = target(AI_BASEPATH).request().headers(defaultHeaders).get();
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
         ApiAiList list = deserializeResponse(response, ApiAiList.class);
@@ -67,9 +67,9 @@ public class TestServiceAi extends ServiceTestBase {
     }
 
     @Test
-    public void testGetAI() throws Database.DatabaseException {
+    public void testGetAI() throws DatabaseException {
         ApiAi ai = TestDataHelper.getAI();
-        when(this.fakeDatabase.getAI(any(), any(), any())).thenReturn(ai);
+        when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(ai);
         final Response response = target(AI_PATH).request().headers(defaultHeaders).get();
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
         ApiAi responseAi = deserializeResponse(response, ApiAi.class);
@@ -77,39 +77,39 @@ public class TestServiceAi extends ServiceTestBase {
     }
 
     public ApiAi checkMaskedTrainingStatus(
-            TrainingStatus trainingStatus, double trainingProgress) throws Database.DatabaseException {
+            TrainingStatus trainingStatus, double trainingProgress) throws DatabaseException {
         BackendStatus status = new BackendStatus();
         status.setEngineStatus(BackendServerType.WNET, new BackendEngineStatus(
                 trainingStatus, 0.0, trainingProgress));
         status.setEngineStatus(BackendServerType.RNN, new BackendEngineStatus(
                 trainingStatus, 0.0, trainingProgress));
-        when(this.fakeDatabase.getAI(any(), any(), any())).thenReturn(TestDataHelper.getAi(status));
+        when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(TestDataHelper.getAi(status));
         final Response response = target(AI_PATH).request().headers(defaultHeaders).get();
         return deserializeResponse(response, ApiAi.class);
     }
 
     @Test
-    public void testGetSingle_QueuedNotMasked() throws Database.DatabaseException {
+    public void testGetSingle_QueuedNotMasked() throws DatabaseException {
         ApiAi result = checkMaskedTrainingStatus(TrainingStatus.AI_TRAINING_QUEUED, 0.0);
         Assert.assertEquals(TrainingStatus.AI_TRAINING_QUEUED, result.getSummaryStatusPublic());
     }
 
     @Test
-    public void testGetSingle_QueuedMasked() throws Database.DatabaseException {
+    public void testGetSingle_QueuedMasked() throws DatabaseException {
         ApiAi result = checkMaskedTrainingStatus(TrainingStatus.AI_TRAINING_QUEUED, 0.1);
         Assert.assertEquals(TrainingStatus.AI_TRAINING, result.getSummaryStatusPublic());
     }
 
     @Test
-    public void testDeleteAI() throws Database.DatabaseException {
-        when(this.fakeDatabase.deleteAi(any(), any())).thenReturn(true);
-        when(this.fakeDatabase.getAI(any(), any(), any())).thenReturn(TestDataHelper.getAI());
+    public void testDeleteAI() throws DatabaseException {
+        when(this.fakeDatabaseAi.deleteAi(any(), any())).thenReturn(true);
+        when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(TestDataHelper.getAI());
         final Response response = target(AI_PATH).request().headers(defaultHeaders).delete();
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
     }
 
     @Test
-    public void testDeleteAI_clientToken_forbidden() throws Database.DatabaseException {
+    public void testDeleteAI_clientToken_forbidden() throws DatabaseException {
         UUID aiid = UUID.randomUUID();
         MultivaluedHashMap<String, Object> authHeaders = getClientAuthHeaders(UUID.randomUUID(), aiid);
         final Response response = target(AI_BASEPATH + "/" + aiid).request().headers(authHeaders).delete();
@@ -117,19 +117,19 @@ public class TestServiceAi extends ServiceTestBase {
     }
 
     @Test
-    public void testCreateAI() throws Database.DatabaseException {
+    public void testCreateAI() throws DatabaseException {
         final UUID uuid = UUID.fromString("00000000-0000-0000-0000-000000000000");
         when(this.fakeTools.createNewRandomUUID()).thenReturn(uuid);
-        TestDataHelper.mockDatabaseCreateAI(this.fakeDatabase, uuid);
+        TestDataHelper.mockDatabaseCreateAI(this.fakeDatabaseAi, uuid);
         final Response response = target(AI_BASEPATH).request().headers(defaultHeaders).post(
                 Entity.form(getCreateAiRequestParams()));
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
     }
 
     @Test
-    public void testUpdateAI() throws Database.DatabaseException {
-        when(this.fakeDatabase.getAI(any(), any(), any())).thenReturn(TestDataHelper.getAI());
-        when(this.fakeDatabase.updateAI(any(), any(), anyString(), anyBoolean(),
+    public void testUpdateAI() throws DatabaseException {
+        when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(TestDataHelper.getAI());
+        when(this.fakeDatabaseAi.updateAI(any(), any(), anyString(), anyBoolean(),
                 any(), anyString(), anyDouble(), anyInt(), anyInt(), any(), any())).thenReturn(true);
         final Response response = target(AI_PATH).request().headers(defaultHeaders).post(
                 Entity.form(getCreateAiRequestParams()));
@@ -169,8 +169,8 @@ public class TestServiceAi extends ServiceTestBase {
     }
 
     @Test
-    public void testGetLinkedBots() throws Database.DatabaseException {
-        when(this.fakeDatabase.getBotsLinkedToAi(any(), any())).thenReturn(Collections.singletonList(SAMPLEBOT));
+    public void testGetLinkedBots() throws DatabaseException {
+        when(this.fakeDatabaseAi.getBotsLinkedToAi(any(), any())).thenReturn(Collections.singletonList(SAMPLEBOT));
         final Response response = target(BOTS_BASEPATH).request().headers(defaultHeaders).get();
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
         ApiAiBotList botList = deserializeResponse(response, ApiAiBotList.class);
@@ -179,18 +179,18 @@ public class TestServiceAi extends ServiceTestBase {
     }
 
     @Test
-    public void testGetLinkedBots_devId_invalid() throws Database.DatabaseException {
+    public void testGetLinkedBots_devId_invalid() throws DatabaseException {
         final Response response = target(BOTS_BASEPATH).request().headers(noDevIdHeaders).get();
         Assert.assertEquals(HttpURLConnection.HTTP_UNAUTHORIZED, response.getStatus());
     }
 
     @Test
-    public void testLinkBotToAi() throws Database.DatabaseException {
-        when(this.fakeDatabase.getAI(any(), any(), any())).thenReturn(TestDataHelper.getAi(TestDataHelper.getTrainingCompleted()));
-        when(this.fakeDatabase.getBotDetails(anyInt())).thenReturn(SAMPLEBOT);
-        when(this.fakeDatabase.getPurchasedBots(any())).thenReturn(Collections.singletonList(SAMPLEBOT));
-        when(this.fakeDatabase.getBotsLinkedToAi(any(), any())).thenReturn(Collections.emptyList());
-        when(this.fakeDatabase.linkBotToAi(any(), any(), anyInt(), any())).thenReturn(true);
+    public void testLinkBotToAi() throws DatabaseException {
+        when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(TestDataHelper.getAi(TestDataHelper.getTrainingCompleted()));
+        when(this.fakeDatabaseMarketplace.getBotDetails(anyInt())).thenReturn(SAMPLEBOT);
+        when(this.fakeDatabaseMarketplace.getPurchasedBots(any())).thenReturn(Collections.singletonList(SAMPLEBOT));
+        when(this.fakeDatabaseAi.getBotsLinkedToAi(any(), any())).thenReturn(Collections.emptyList());
+        when(this.fakeDatabaseAi.linkBotToAi(any(), any(), anyInt(), any())).thenReturn(true);
         final Response response = target(BOT_PATH)
                 .request()
                 .headers(defaultHeaders)
@@ -199,7 +199,7 @@ public class TestServiceAi extends ServiceTestBase {
     }
 
     @Test
-    public void testLinkBotToAi_devId_invalid() throws Database.DatabaseException {
+    public void testLinkBotToAi_devId_invalid() throws DatabaseException {
         final Response response = target(BOT_PATH)
                 .request()
                 .headers(noDevIdHeaders)
@@ -208,38 +208,38 @@ public class TestServiceAi extends ServiceTestBase {
     }
 
     @Test
-    public void testUnlinkBotFromAi() throws Database.DatabaseException {
-        when(this.fakeDatabase.getAI(any(), any(), any())).thenReturn(TestDataHelper.getAi(TestDataHelper.getTrainingCompleted()));
-        when(this.fakeDatabase.unlinkBotFromAi(any(), any(), anyInt(), any())).thenReturn(true);
+    public void testUnlinkBotFromAi() throws DatabaseException {
+        when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(TestDataHelper.getAi(TestDataHelper.getTrainingCompleted()));
+        when(this.fakeDatabaseAi.unlinkBotFromAi(any(), any(), anyInt(), any())).thenReturn(true);
         final Response response = target(BOT_PATH).request().headers(defaultHeaders).delete();
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
     }
 
     @Test
-    public void testUnlLinkBotFromAi_devId_invalid() throws Database.DatabaseException {
+    public void testUnlLinkBotFromAi_devId_invalid() throws DatabaseException {
         final Response response = target(BOT_PATH).request().headers(noDevIdHeaders).delete();
         Assert.assertEquals(HttpURLConnection.HTTP_UNAUTHORIZED, response.getStatus());
     }
 
     @Test
-    public void testGetPublishedBotForAI() throws Database.DatabaseException {
-        when(this.fakeDatabase.getPublishedBotForAI(any(), any())).thenReturn(SAMPLEBOT);
+    public void testGetPublishedBotForAI() throws DatabaseException {
+        when(this.fakeDatabaseMarketplace.getPublishedBotForAI(any(), any())).thenReturn(SAMPLEBOT);
         final Response response = target(BOT_BASEPATH).request().headers(defaultHeaders).get();
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
     }
 
     @Test
-    public void testGetPublishedBotForAI_devId_invalid() throws Database.DatabaseException {
+    public void testGetPublishedBotForAI_devId_invalid() throws DatabaseException {
         final Response response = target(BOT_BASEPATH).request().headers(noDevIdHeaders).get();
         Assert.assertEquals(HttpURLConnection.HTTP_UNAUTHORIZED, response.getStatus());
     }
 
     @Test
-    public void testCloneBot() throws Database.DatabaseException {
+    public void testCloneBot() throws DatabaseException {
         final UUID aiid = UUID.randomUUID();
-        when(this.fakeDatabase.getAI(any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
+        when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
         when(this.fakeTools.createNewRandomUUID()).thenReturn(aiid);
-        TestDataHelper.mockDatabaseCreateAI(this.fakeDatabase, aiid);
+        TestDataHelper.mockDatabaseCreateAI(this.fakeDatabaseAi, aiid);
           final Response response = target(BOT_CLONE_PATH)
                 .request()
                 .headers(defaultHeaders)
@@ -248,7 +248,7 @@ public class TestServiceAi extends ServiceTestBase {
     }
 
     @Test
-    public void testCloneBot_devId_invalid() throws Database.DatabaseException {
+    public void testCloneBot_devId_invalid() throws DatabaseException {
         final Response response = target(BOT_CLONE_PATH)
                 .request()
                 .headers(noDevIdHeaders)
@@ -257,18 +257,18 @@ public class TestServiceAi extends ServiceTestBase {
     }
 
     @Test
-    public void testUpdateBotList() throws Database.DatabaseException {
+    public void testUpdateBotList() throws DatabaseException {
         AiBot bot1 = new AiBot(SAMPLEBOT);
         bot1.setBotId(1);
         bot1.setPublishingType(AiBot.PublishingType.SKILL);
         AiBot bot2 = new AiBot(SAMPLEBOT);
         bot2.setBotId(2);
         bot2.setPublishingType(AiBot.PublishingType.SKILL);
-        when(this.fakeDatabase.getAI(any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
-        when(this.fakeDatabase.getBotDetails(bot1.getBotId())).thenReturn(bot1);
-        when(this.fakeDatabase.getBotDetails(bot2.getBotId())).thenReturn(bot2);
-        when(this.fakeDatabase.getPurchasedBots(any())).thenReturn(Arrays.asList(bot1, bot2));
-        when(this.fakeDatabase.linkBotToAi(any(), any(), anyInt(), any())).thenReturn(true);
+        when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
+        when(this.fakeDatabaseMarketplace.getBotDetails(bot1.getBotId())).thenReturn(bot1);
+        when(this.fakeDatabaseMarketplace.getBotDetails(bot2.getBotId())).thenReturn(bot2);
+        when(this.fakeDatabaseMarketplace.getPurchasedBots(any())).thenReturn(Arrays.asList(bot1, bot2));
+        when(this.fakeDatabaseAi.linkBotToAi(any(), any(), anyInt(), any())).thenReturn(true);
         final Response response = target(BOTS_BASEPATH)
                 .queryParam("bot_list", bot1.getBotId(), bot2.getBotId())
                 .request()
@@ -278,7 +278,7 @@ public class TestServiceAi extends ServiceTestBase {
     }
 
     @Test
-    public void testUpdateBotList_devId_invalid() throws Database.DatabaseException {
+    public void testUpdateBotList_devId_invalid() throws DatabaseException {
         final Response response = target(BOTS_BASEPATH)
                 .queryParam("bot_list", 1)
                 .request()

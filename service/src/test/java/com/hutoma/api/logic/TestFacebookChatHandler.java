@@ -5,9 +5,10 @@ import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.TestDataHelper;
 import com.hutoma.api.common.Tools;
-import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.FacebookConnector;
 import com.hutoma.api.connectors.FacebookException;
+import com.hutoma.api.connectors.db.DatabaseException;
+import com.hutoma.api.connectors.db.DatabaseIntegrations;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.facebook.FacebookIntegrationMetadata;
 import com.hutoma.api.containers.facebook.FacebookMessageNode;
@@ -74,7 +75,7 @@ public class TestFacebookChatHandler {
     private FacebookChatHandler chatHandler;
     private Config fakeConfig;
     private JsonSerializer serializer;
-    private Database fakeDatabase;
+    private DatabaseIntegrations fakeDatabaseIntegrations;
     private ILogger fakeLogger;
     private FacebookConnector fakeConnector;
     private FacebookToken fakeToken;
@@ -93,15 +94,15 @@ public class TestFacebookChatHandler {
             + "\"recipient\":{\"id\":\"632106133664550\"},\"timestamp\":1498224297854}]}]}";
 
     @Before
-    public void setup() throws Database.DatabaseException, FacebookException, ChatLogic.ChatFailedException {
+    public void setup() throws DatabaseException, FacebookException, ChatLogic.ChatFailedException {
         this.fakeConfig = mock(Config.class);
         this.serializer = new JsonSerializer();
-        this.fakeDatabase = mock(Database.class);
+        this.fakeDatabaseIntegrations = mock(DatabaseIntegrations.class);
         this.fakeLogger = mock(ILogger.class);
         this.fakeConnector = mock(FacebookConnector.class);
 
         this.fakeIntegrationRecord = mock(IntegrationRecord.class);
-        when(this.fakeDatabase.getIntegrationResource(any(), any())).thenReturn(this.fakeIntegrationRecord);
+        when(this.fakeDatabaseIntegrations.getIntegrationResource(any(), any())).thenReturn(this.fakeIntegrationRecord);
 
         FacebookIntegrationMetadata metadata = new FacebookIntegrationMetadata().connect(
                 "access", "username", DateTime.now().plusHours(1));
@@ -119,7 +120,7 @@ public class TestFacebookChatHandler {
         when(this.fakeChatLogicProvider.get()).thenReturn(this.fakeChatLogic);
         when(this.fakeChatLogic.chatFacebook(Matchers.eq(TestDataHelper.AIID), any(), any(), any(), any()))
                 .thenAnswer(invocation -> this.chatResult);
-        this.chatHandler = new FacebookChatHandler(this.fakeDatabase, this.fakeLogger,
+        this.chatHandler = new FacebookChatHandler(this.fakeDatabaseIntegrations, this.fakeLogger,
                 this.serializer, this.fakeConnector, this.fakeChatLogicProvider, mock(Tools.class));
 
         this.chatHandler.initialise(
@@ -128,7 +129,7 @@ public class TestFacebookChatHandler {
 
     @Test
     public void testChat_BadRecipient() throws Exception {
-        when(this.fakeDatabase.getIntegrationResource(any(), any())).thenReturn(null);
+        when(this.fakeDatabaseIntegrations.getIntegrationResource(any(), any())).thenReturn(null);
         this.chatHandler.call();
         verifyZeroInteractions(this.fakeChatLogic);
         verifyZeroInteractions(this.fakeConnector);

@@ -2,7 +2,6 @@ package com.hutoma.api.connectors.db;
 
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
-import com.hutoma.api.connectors.Database;
 
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
@@ -55,7 +54,7 @@ public class DatabaseConnectionPool {
         this.dataSource.setPoolProperties(poolProperties);
     }
 
-    public Connection borrowConnection() throws Database.DatabaseException {
+    public Connection borrowConnection() throws DatabaseException {
         int activeConnections = this.dataSource.getActive();
         this.logger.logDebug(LOGFROM, "idle/active/maxactive " + this.dataSource.getIdle() + "/"
                 + activeConnections + "/" + this.maxActiveConnections);
@@ -66,7 +65,7 @@ public class DatabaseConnectionPool {
         try {
             return this.dataSource.getConnection();
         } catch (SQLException e) {
-            throw new Database.DatabaseException(e);
+            throw new DatabaseException(e);
         }
     }
 

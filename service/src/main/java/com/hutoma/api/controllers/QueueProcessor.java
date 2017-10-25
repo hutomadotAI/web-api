@@ -5,9 +5,9 @@ import com.hutoma.api.common.Config;
 import com.hutoma.api.common.LogMap;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.AIQueueServices;
-import com.hutoma.api.connectors.Database;
-import com.hutoma.api.connectors.DatabaseAiStatusUpdates;
+import com.hutoma.api.connectors.db.DatabaseAiStatusUpdates;
 import com.hutoma.api.connectors.ServerConnector;
+import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.sub.BackendEngineStatus;
 import com.hutoma.api.containers.sub.BackendServerType;
 import com.hutoma.api.containers.sub.QueueAction;
@@ -159,7 +159,7 @@ public class QueueProcessor extends TimerTask {
             try {
                 this.database.updateControllerState(this.serverType, serverCount,
                         totalTrainingCapacity, availableTrainingSlots, totalChatCapacity);
-            } catch (Database.DatabaseException e) {
+            } catch (DatabaseException e) {
                 this.logger.logException(this.logFrom, e);
                 // if we didn't manage to update the db then change the string
                 // so that it will come up as changed=true next time
@@ -237,7 +237,7 @@ public class QueueProcessor extends TimerTask {
                         String.format("DROP delete that failed on backend %s with error %s",
                                 server.getServerIdentifier(), logMessage));
             }
-        } catch (Database.DatabaseException e1) {
+        } catch (DatabaseException e1) {
             this.logger.logException(this.logFrom, e1);
         }
     }
@@ -289,7 +289,7 @@ public class QueueProcessor extends TimerTask {
                 this.database.updateAIStatus(this.serverType, queued.getAiid(), TrainingStatus.AI_ERROR,
                         server.getServerIdentifier(), 0.0, 0.0);
             }
-        } catch (Database.DatabaseException e1) {
+        } catch (DatabaseException e1) {
             this.logger.logException(this.logFrom, e1);
         }
     }
@@ -340,7 +340,7 @@ public class QueueProcessor extends TimerTask {
                                 "After %d minutes without a training progress update, requeuing %s for training",
                                 since.getSeconds() / 60, interrupted.getAiid().toString()), logMap);
                     });
-        } catch (Database.DatabaseException exception) {
+        } catch (DatabaseException exception) {
             this.logger.logException(this.logFrom, exception);
         }
     }
@@ -376,7 +376,7 @@ public class QueueProcessor extends TimerTask {
         BackendEngineStatus currentStatus = null;
         try {
             currentStatus = this.database.getAiQueueStatus(this.serverType, queued.getAiid());
-        } catch (Database.DatabaseException e) {
+        } catch (DatabaseException e) {
             this.logger.logException(this.logFrom, e);
         }
 
@@ -396,7 +396,7 @@ public class QueueProcessor extends TimerTask {
 
         } catch (ServerConnector.AiServicesException e) {
             handleDeleteTaskFailure(queued, server, e);
-        } catch (Database.DatabaseException e) {
+        } catch (DatabaseException e) {
             this.logger.logError(this.logFrom,
                     String.format("db exception while deleting AI status: %s", e.toString()));
         }
@@ -416,7 +416,7 @@ public class QueueProcessor extends TimerTask {
         BackendEngineStatus currentStatus = null;
         try {
             currentStatus = this.database.getAiQueueStatus(this.serverType, queued.getAiid());
-        } catch (Database.DatabaseException e) {
+        } catch (DatabaseException e) {
             this.logger.logException(this.logFrom, e);
         }
 
@@ -442,16 +442,16 @@ public class QueueProcessor extends TimerTask {
                     currentStatus.getTrainingProgress(), currentStatus.getTrainingError());
         } catch (ServerConnector.AiServicesException e) {
             handleTrainTaskFailure(queued, server, e);
-        } catch (Database.DatabaseException e) {
+        } catch (DatabaseException e) {
             this.logger.logError(this.logFrom, String.format("failed to set endpoint in status: %s", e.toString()));
         }
     }
 
     /***
      * Check the queue state and run a task if there is one
-     * @throws Database.DatabaseException
+     * @throws DatabaseException
      */
-    protected void processQueue() throws Database.DatabaseException {
+    protected void processQueue() throws DatabaseException {
 
         // get a summary of training slots from the database
         List<ServerEndpointTrainingSlots> slotList = this.database.getQueueSlotCounts(this.serverType,

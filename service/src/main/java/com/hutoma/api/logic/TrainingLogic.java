@@ -5,8 +5,9 @@ import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.LogMap;
 import com.hutoma.api.connectors.AIServices;
-import com.hutoma.api.connectors.DatabaseEntitiesIntents;
 import com.hutoma.api.connectors.HTMLExtractor;
+import com.hutoma.api.connectors.db.DatabaseAI;
+import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiResult;
@@ -33,7 +34,6 @@ import javax.inject.Inject;
 
 import static com.hutoma.api.common.ResultEvent.UPLOAD_MISSING_RESPONSE;
 import static com.hutoma.api.common.ResultEvent.UPLOAD_NO_CONTENT;
-import static com.hutoma.api.connectors.Database.DatabaseException;
 
 /**
  * Logic to handle AI training.
@@ -49,20 +49,21 @@ public class TrainingLogic {
     private final Config config;
     private final AIServices aiServices;
     private final HTMLExtractor htmlExtractor;
-    private final DatabaseEntitiesIntents database;
+    private final DatabaseAI databaseAi;
     private final ILogger logger;
     private final Validate validate;
     private final IMemoryIntentHandler memoryIntentHandler;
     private final JsonSerializer jsonSerializer;
 
     @Inject
-    public TrainingLogic(Config config, AIServices aiServices, HTMLExtractor htmlExtractor,
-                         DatabaseEntitiesIntents database, ILogger logger, Validate validate,
-                         IMemoryIntentHandler memoryIntentHandler, JsonSerializer jsonSerializer) {
+    public TrainingLogic(final Config config, final AIServices aiServices, final HTMLExtractor htmlExtractor,
+                         final DatabaseAI databaseAi, final ILogger logger,
+                         final Validate validate, final IMemoryIntentHandler memoryIntentHandler,
+                         final JsonSerializer jsonSerializer) {
         this.config = config;
         this.aiServices = aiServices;
         this.htmlExtractor = htmlExtractor;
-        this.database = database;
+        this.databaseAi = databaseAi;
         this.logger = logger;
         this.validate = validate;
         this.memoryIntentHandler = memoryIntentHandler;
@@ -78,7 +79,7 @@ public class TrainingLogic {
         LogMap logMap = LogMap.map("AIID", aiid);
 
         try {
-            ApiAi ai = this.database.getAI(devid, aiid, this.jsonSerializer);
+            ApiAi ai = this.databaseAi.getAI(devid, aiid, this.jsonSerializer);
             if (ai == null) {
                 this.logger.logUserTraceEvent(LOGFROM, "UploadFile - AI not found", devidString, logMap);
                 return ApiError.getNotFound();
@@ -110,7 +111,7 @@ public class TrainingLogic {
                         this.logger.logUserTraceEvent(LOGFROM, "UploadFile - file parsing errors", devidString, logMap);
                         return ApiError.getBadRequest("File parsing errors", result.getEvents());
                     }
-                    if (!this.database.updateAiTrainingFile(aiid, result.getTrainingText())) {
+                    if (!this.databaseAi.updateAiTrainingFile(aiid, result.getTrainingText())) {
                         this.logger.logUserTraceEvent(LOGFROM, "UploadFile - AI not found", devidString, logMap);
                         return ApiError.getNotFound();
                     }
@@ -133,7 +134,7 @@ public class TrainingLogic {
                     }
                     checkMaxUploadFileSize(fileDetail, maxUploadFileSize);
                     source = getFile(maxUploadFileSize, uploadedInputStream);
-                    if (!this.database.updateAiTrainingFile(aiid, String.join(EOL, source))) {
+                    if (!this.databaseAi.updateAiTrainingFile(aiid, String.join(EOL, source))) {
                         this.logger.logUserTraceEvent(LOGFROM, "UploadDocument - AI not found", devidString, logMap);
                         return ApiError.getNotFound("ai not found");
                     }
@@ -145,7 +146,7 @@ public class TrainingLogic {
 
                 // 2 = training file is a webpage
                 case WEBPAGE:
-                    if (!this.database.updateAiTrainingFile(aiid, getTextFromUrl(url, maxUploadFileSize))) {
+                    if (!this.databaseAi.updateAiTrainingFile(aiid, getTextFromUrl(url, maxUploadFileSize))) {
                         this.logger.logUserTraceEvent(LOGFROM, "UploadWebPage - AI not found", devidString, logMap);
                         return ApiError.getNotFound("Bot not found");
                     }
@@ -196,7 +197,7 @@ public class TrainingLogic {
         LogMap logMap = LogMap.map("AIID", aiid);
         final String devidString = devid.toString();
         try {
-            ai = this.database.getAI(devid, aiid, this.jsonSerializer);
+            ai = this.databaseAi.getAI(devid, aiid, this.jsonSerializer);
         } catch (DatabaseException ex) {
             this.logger.logUserExceptionEvent(LOGFROM, "StartTraining", devidString, ex);
             return ApiError.getInternalServerError();
@@ -252,7 +253,7 @@ public class TrainingLogic {
         final String devidString = devid.toString();
         try {
             LogMap logMap = LogMap.map("AIID", aiid);
-            ApiAi ai = this.database.getAI(devid, aiid, this.jsonSerializer);
+            ApiAi ai = this.databaseAi.getAI(devid, aiid, this.jsonSerializer);
             if (ai == null) {
                 this.logger.logUserTraceEvent(LOGFROM, "StopTraining - AI not found", devidString, logMap);
                 return ApiError.getNotFound();
@@ -292,7 +293,7 @@ public class TrainingLogic {
         final String devidString = devid.toString();
         try {
             LogMap logMap = LogMap.map("AIID", aiid);
-            ApiAi ai = this.database.getAI(devid, aiid, this.jsonSerializer);
+            ApiAi ai = this.databaseAi.getAI(devid, aiid, this.jsonSerializer);
             if (ai == null) {
                 this.logger.logUserTraceEvent(LOGFROM, "UpdateTraining - AI not found", devidString, logMap);
                 return ApiError.getNotFound();

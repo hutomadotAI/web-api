@@ -3,8 +3,7 @@ package com.hutoma.api.logic;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.connectors.AIServices;
-import com.hutoma.api.connectors.Database;
+import com.hutoma.api.connectors.db.DatabaseUser;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiResult;
 
@@ -18,11 +17,11 @@ public class InviteLogic {
     private static final String LOGFROM = "invitelogic";
     private final Config config;
     private final JsonSerializer jsonSerializer;
-    private final Database database;
+    private final DatabaseUser database;
     private final ILogger logger;
 
     @Inject
-    public InviteLogic(Config config, JsonSerializer jsonSerializer, Database database,
+    public InviteLogic(Config config, JsonSerializer jsonSerializer, DatabaseUser database,
                       ILogger logger) {
         this.config = config;
         this.jsonSerializer = jsonSerializer;

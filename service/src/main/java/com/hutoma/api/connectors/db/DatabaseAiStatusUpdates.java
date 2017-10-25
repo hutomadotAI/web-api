@@ -1,11 +1,9 @@
-package com.hutoma.api.connectors;
+package com.hutoma.api.connectors.db;
 
 import com.google.gson.JsonParseException;
 import com.hutoma.api.common.AiServiceStatusLogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.LogMap;
-import com.hutoma.api.connectors.db.DatabaseCall;
-import com.hutoma.api.connectors.db.DatabaseTransaction;
 import com.hutoma.api.containers.sub.BackendEngineStatus;
 import com.hutoma.api.containers.sub.BackendServerType;
 import com.hutoma.api.containers.sub.QueueAction;
@@ -23,7 +21,7 @@ import java.util.UUID;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
-public class DatabaseAiStatusUpdates extends Database {
+public class DatabaseAiStatusUpdates extends DatabaseAI {
 
     protected static final String LOGFROM = "db_status";
 
@@ -115,7 +113,7 @@ public class DatabaseAiStatusUpdates extends Database {
                     .executeQuery();
 
             if (rs.next()) {
-                backendEngineStatus = this.getBackendEngineStatus(rs).getB();
+                backendEngineStatus = DatabaseBackends.getBackendEngineStatus(rs).getB();
             }
 
             transaction.commit();
@@ -143,7 +141,7 @@ public class DatabaseAiStatusUpdates extends Database {
                     .add(aiid)
                     .executeQuery();
             if (rs.next()) {
-                backendEngineStatus = getBackendEngineStatus(rs).getB();
+                backendEngineStatus = DatabaseBackends.getBackendEngineStatus(rs).getB();
                 // also read the devid and the deleted flag from the ai table
                 final String devId = rs.getString("dev_id");
                 final UUID devIdUuid = UUID.fromString(devId);
@@ -180,7 +178,7 @@ public class DatabaseAiStatusUpdates extends Database {
                     .executeQuery();
 
             while (rs.next()) {
-                BackendEngineStatus lapsed = getBackendEngineStatus(rs).getB();
+                BackendEngineStatus lapsed = DatabaseBackends.getBackendEngineStatus(rs).getB();
                 slots.add(lapsed);
 
                 transaction.getDatabaseCall().initialise("queueRecover", 4)

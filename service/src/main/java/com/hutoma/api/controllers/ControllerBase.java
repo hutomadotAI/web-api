@@ -4,8 +4,8 @@ import com.hutoma.api.common.AiServiceStatusLogger;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.ThreadSubPool;
-import com.hutoma.api.connectors.Database;
-import com.hutoma.api.connectors.DatabaseAiStatusUpdates;
+import com.hutoma.api.connectors.db.DatabaseAiStatusUpdates;
+import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.sub.BackendServerType;
 import com.hutoma.api.containers.sub.ServerAiEntry;
 import com.hutoma.api.containers.sub.ServerRegistration;
@@ -94,12 +94,12 @@ public abstract class ControllerBase extends ServerMetadata {
      * @param jsonSerializer need to pass a serializer because the controller is a singleton
      * @param serverType what server is this?
      * @param statusData mapped data that the backe nd server has reported
-     * @throws Database.DatabaseException
+     * @throws DatabaseException
      */
     public void synchroniseDBStatuses(final DatabaseAiStatusUpdates database,
                                       final JsonSerializer jsonSerializer,
                                       final BackendServerType serverType,
-                                      final Map<UUID, ServerAiEntry> statusData) throws Database.DatabaseException {
+                                      final Map<UUID, ServerAiEntry> statusData) throws DatabaseException {
         database.synchroniseDBStatuses(jsonSerializer, serverType, statusData, this.botExclusionList);
     }
 

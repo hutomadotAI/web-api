@@ -1,9 +1,7 @@
-package com.hutoma.api.connectors;
+package com.hutoma.api.connectors.db;
 
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.connectors.db.DatabaseCall;
-import com.hutoma.api.connectors.db.DatabaseTransaction;
 import com.hutoma.api.containers.AiBotConfigDefinition;
 import com.hutoma.api.containers.sub.DeveloperInfo;
 import com.hutoma.api.containers.ui.ApiBotstoreCategoryItemList;
@@ -60,7 +58,7 @@ public class DatabaseUI extends Database {
                 while (rs.next()) {
                     BotstoreItem item = new BotstoreItem(
                             order++,
-                            this.getAiBotFromResultset(rs),
+                            DatabaseMarketplace.getAiBotFromResultset(rs),
                             this.getDeveloperInfoFromBotstoreList(rs),
                             false);
                     list.add(item);
@@ -89,7 +87,7 @@ public class DatabaseUI extends Database {
                         AiBotConfigDefinition.class);
                 BotstoreItem bi = new BotstoreItem(
                         0,
-                        this.getAiBotFromResultset(rs),
+                        DatabaseMarketplace.getAiBotFromResultset(rs),
                         this.getDeveloperInfoFromBotstoreList(rs),
                         false);
                 bi.setBotConfigDefinition(definition);
@@ -123,7 +121,7 @@ public class DatabaseUI extends Database {
                 }
                 BotstoreItem item = new BotstoreItem(
                         order++,
-                        this.getAiBotFromResultset(rs),
+                        DatabaseMarketplace.getAiBotFromResultset(rs),
                         this.getDeveloperInfoFromBotstoreList(rs),
                         false);
                 bots.add(item);

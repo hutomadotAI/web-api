@@ -1,6 +1,6 @@
 package com.hutoma.api.tests.service;
 
-import com.hutoma.api.connectors.Database;
+import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.ApiDeveloperInfo;
 import com.hutoma.api.containers.sub.DeveloperInfo;
 import com.hutoma.api.endpoints.DeveloperInfoEndpoint;
@@ -54,8 +54,8 @@ public class TestServiceDeveloperInfo extends ServiceTestBase {
     }
 
     @Test
-    public void testGetDeveloperInfo_ownInfo() throws Database.DatabaseException {
-        when(this.fakeDatabase.getDeveloperInfo(any())).thenReturn(DEVINFO);
+    public void testGetDeveloperInfo_ownInfo() throws DatabaseException {
+        when(this.fakeDatabaseMarketplace.getDeveloperInfo(any())).thenReturn(DEVINFO);
         final Response response = target(DEVINFO_PATH).request().headers(defaultHeaders).get();
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
         ApiDeveloperInfo info = deserializeResponse(response, ApiDeveloperInfo.class);
@@ -63,9 +63,10 @@ public class TestServiceDeveloperInfo extends ServiceTestBase {
         Assert.assertEquals(DEVINFO.getDevId(), info.getInfo().getDevId());
     }
 
-    public void testGetDeveloperInfo_otherDevInfo() throws Database.DatabaseException {
+    @Test
+    public void testGetDeveloperInfo_otherDevInfo() throws DatabaseException {
         final DeveloperInfo info = getDevInfo(UUID.randomUUID());
-        when(this.fakeDatabase.getDeveloperInfo(any())).thenReturn(info);
+        when(this.fakeDatabaseMarketplace.getDeveloperInfo(any())).thenReturn(info);
         final Response response = target(DEVINFO_BASEPATH + info.getDevId()).request().headers(defaultHeaders).get();
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
         ApiDeveloperInfo apiInfo = deserializeResponse(response, ApiDeveloperInfo.class);
@@ -75,8 +76,8 @@ public class TestServiceDeveloperInfo extends ServiceTestBase {
     }
 
     @Test
-    public void testPostDeveloperInfo() throws Database.DatabaseException {
-        when(this.fakeDatabase.setDeveloperInfo(any())).thenReturn(true);
+    public void testPostDeveloperInfo() throws DatabaseException {
+        when(this.fakeDatabaseMarketplace.setDeveloperInfo(any())).thenReturn(true);
         final Response response = target(DEVINFO_PATH)
                 .request()
                 .headers(defaultHeaders)
@@ -88,7 +89,7 @@ public class TestServiceDeveloperInfo extends ServiceTestBase {
     }
 
     @Test
-    public void testPostDeveloperInfo_nullParams() throws Database.DatabaseException {
+    public void testPostDeveloperInfo_nullParams() throws DatabaseException {
         final Response response = target(DEVINFO_PATH)
                 .request()
                 .headers(defaultHeaders)

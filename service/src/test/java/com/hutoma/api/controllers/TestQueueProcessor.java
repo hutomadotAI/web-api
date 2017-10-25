@@ -6,8 +6,8 @@ import com.hutoma.api.common.FakeTimerTools;
 import com.hutoma.api.common.Pair;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.AIQueueServices;
-import com.hutoma.api.connectors.Database;
-import com.hutoma.api.connectors.DatabaseAiStatusUpdates;
+import com.hutoma.api.connectors.db.DatabaseAiStatusUpdates;
+import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.sub.BackendEngineStatus;
 import com.hutoma.api.containers.sub.BackendServerType;
 import com.hutoma.api.containers.sub.QueueAction;
@@ -46,7 +46,7 @@ public class TestQueueProcessor {
     Pair<ArrayList<ServerEndpointTrainingSlots>, HashMap<String, ServerTracker>> fakeData;
 
     @Test
-    public void testQueue_RoundRobinAllocation() throws Database.DatabaseException {
+    public void testQueue_RoundRobinAllocation() throws DatabaseException {
         this.fakeData = create(null, ENDPOINT1, 0, 2, 0, true);
         this.fakeData = create(this.fakeData, ENDPOINT2, 0, 2, 0, true);
         this.fakeData = create(this.fakeData, ENDPOINT3, 0, 2, 0, true);
@@ -63,7 +63,7 @@ public class TestQueueProcessor {
     }
 
     @Test
-    public void testQueue_FreeSlot() throws Database.DatabaseException {
+    public void testQueue_FreeSlot() throws DatabaseException {
         this.fakeData = create(null, ENDPOINT1, 0, 1, 0, true);
         when(this.fakeDatabase.getQueueSlotCounts(any(), anyInt())).thenReturn(this.fakeData.getA());
         when(this.fakeController.getVerifiedEndpointMap()).thenReturn(this.fakeData.getB());
@@ -72,7 +72,7 @@ public class TestQueueProcessor {
     }
 
     @Test
-    public void testQueue_NoFreeSlots() throws Database.DatabaseException {
+    public void testQueue_NoFreeSlots() throws DatabaseException {
         this.fakeData = create(null, ENDPOINT1, 1, 1, 0, true);
         when(this.fakeDatabase.getQueueSlotCounts(any(), anyInt())).thenReturn(this.fakeData.getA());
         when(this.fakeController.getVerifiedEndpointMap()).thenReturn(this.fakeData.getB());
@@ -81,7 +81,7 @@ public class TestQueueProcessor {
     }
 
     @Test
-    public void testQueue_NoSlotsNoServers() throws Database.DatabaseException {
+    public void testQueue_NoSlotsNoServers() throws DatabaseException {
         when(this.fakeDatabase.getQueueSlotCounts(any(), anyInt())).thenReturn(new ArrayList<>());
         when(this.fakeController.getVerifiedEndpointMap()).thenReturn(new HashMap<>());
         this.qproc.processQueue();
@@ -89,14 +89,14 @@ public class TestQueueProcessor {
     }
 
     @Test
-    public void testQueue_NoServers() throws Database.DatabaseException {
+    public void testQueue_NoServers() throws DatabaseException {
         when(this.fakeController.getVerifiedEndpointMap()).thenReturn(new HashMap<>());
         this.qproc.processQueue();
         verify(this.fakeDatabase, Mockito.never()).queueTakeNext(any());
     }
 
     @Test
-    public void testQueue_NoSlotRecovery() throws Database.DatabaseException {
+    public void testQueue_NoSlotRecovery() throws DatabaseException {
         this.fakeData = create(null, ENDPOINT1, 0, 1, 0, true);
         when(this.fakeDatabase.getQueueSlotCounts(any(), anyInt())).thenReturn(this.fakeData.getA());
         when(this.fakeController.getVerifiedEndpointMap()).thenReturn(this.fakeData.getB());
@@ -105,7 +105,7 @@ public class TestQueueProcessor {
     }
 
     @Test
-    public void testQueue_RecoverSlots() throws Database.DatabaseException, InterruptedException {
+    public void testQueue_RecoverSlots() throws DatabaseException, InterruptedException {
         this.fakeData = create(null, ENDPOINT1, 0, 1, 1, true);
         when(this.fakeDatabase.getQueueSlotCounts(any(), anyInt())).thenReturn(this.fakeData.getA());
         when(this.fakeController.getVerifiedEndpointMap()).thenReturn(this.fakeData.getB());
@@ -116,7 +116,7 @@ public class TestQueueProcessor {
     }
 
     @Test
-    public void testQueue_TooEarlyToRecoverSlots() throws Database.DatabaseException, InterruptedException {
+    public void testQueue_TooEarlyToRecoverSlots() throws DatabaseException, InterruptedException {
         this.fakeData = create(null, ENDPOINT1, 0, 1, 1, true);
         when(this.fakeDatabase.getQueueSlotCounts(any(), anyInt())).thenReturn(this.fakeData.getA());
         when(this.fakeController.getVerifiedEndpointMap()).thenReturn(this.fakeData.getB());
@@ -127,7 +127,7 @@ public class TestQueueProcessor {
     }
 
     @Before
-    public void setup() throws Database.DatabaseException {
+    public void setup() throws DatabaseException {
         this.fakeConfig = mock(Config.class);
         when(this.fakeConfig.getProcessQueueDelayRecoveryForFirstSeconds()).thenReturn(1);
 
@@ -203,7 +203,7 @@ public class TestQueueProcessor {
         }
 
         @Override
-        public void processQueue() throws Database.DatabaseException {
+        public void processQueue() throws DatabaseException {
             super.processQueue();
         }
 

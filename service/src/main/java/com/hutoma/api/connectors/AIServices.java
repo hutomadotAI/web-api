@@ -7,6 +7,10 @@ import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.LogMap;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.common.TrackedThreadSubPool;
+import com.hutoma.api.connectors.db.DatabaseAI;
+import com.hutoma.api.connectors.db.DatabaseEntitiesIntents;
+import com.hutoma.api.connectors.db.DatabaseException;
+import com.hutoma.api.connectors.db.DatabaseUser;
 import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.sub.BackendServerType;
@@ -43,13 +47,14 @@ public class AIServices extends ServerConnector {
     private final DatabaseEntitiesIntents databaseEntitiesIntents;
 
     @Inject
-    public AIServices(final Database database, final DatabaseEntitiesIntents databaseEntitiesIntents, final ILogger logger,
+    public AIServices(final DatabaseUser databaseUser, final DatabaseAI databaseAi,
+                      final DatabaseEntitiesIntents databaseEntitiesIntents, final ILogger logger,
                       final JsonSerializer serializer,
                       final Tools tools, final Config config, final JerseyClient jerseyClient,
                       final TrackedThreadSubPool threadSubPool,
                       final ControllerWnet controllerWnet, final ControllerRnn controllerRnn,
                       final AIQueueServices queueServices) {
-        super(database, logger, serializer, tools, config, jerseyClient, threadSubPool);
+        super(databaseAi, databaseUser, logger, serializer, tools, config, jerseyClient, threadSubPool);
         this.controllerWnet = controllerWnet;
         this.controllerRnn = controllerRnn;
         this.queueServices = queueServices;
@@ -69,7 +74,7 @@ public class AIServices extends ServerConnector {
             this.controllerWnet.kickQueueProcessor();
             this.queueServices.userActionStartTraining(status, BackendServerType.RNN, devId, aiid);
             this.controllerRnn.kickQueueProcessor();
-        } catch (Database.DatabaseException e) {
+        } catch (DatabaseException e) {
             AiServicesException.throwWithSuppressed("failed to start training", e);
         }
     }
@@ -88,7 +93,7 @@ public class AIServices extends ServerConnector {
                     devId, aiid);
             this.queueServices.userActionStopTraining(backendStatus, BackendServerType.RNN, this.controllerRnn,
                     devId, aiid);
-        } catch (Database.DatabaseException e) {
+        } catch (DatabaseException e) {
             AiServicesException.throwWithSuppressed("failed to stop training", e);
         }
     }
@@ -109,7 +114,7 @@ public class AIServices extends ServerConnector {
             this.queueServices.userActionDelete(backendStatus, BackendServerType.RNN, this.controllerRnn,
                     devId, aiid);
             this.controllerRnn.kickQueueProcessor();
-        } catch (Database.DatabaseException e) {
+        } catch (DatabaseException e) {
             AiServicesException.throwWithSuppressed("failed to delete ai", e);
         }
     }
@@ -146,7 +151,7 @@ public class AIServices extends ServerConnector {
             this.queueServices.userActionUpload(backendStatus, BackendServerType.WNET, this.controllerWnet,
                     devId, aiid);
             this.queueServices.userActionUpload(backendStatus, BackendServerType.RNN, this.controllerRnn, devId, aiid);
-        } catch (Database.DatabaseException e) {
+        } catch (DatabaseException e) {
             AiServicesException.throwWithSuppressed("failed to upload training materials", e);
         }
 
@@ -190,17 +195,17 @@ public class AIServices extends ServerConnector {
         executeAndWait(callables);
     }
 
-    public String getTrainingMaterialsCommon(final UUID devid, final UUID aiid, final JsonSerializer jsonSerializer) throws Database.DatabaseException {
+    public String getTrainingMaterialsCommon(final UUID devid, final UUID aiid, final JsonSerializer jsonSerializer) throws DatabaseException {
         final String EOL = "\n";
         final String devidString = devid.toString();
         StringBuilder sb = new StringBuilder();
-        ApiAi ai = this.database.getAI(devid, aiid, jsonSerializer);
+        ApiAi ai = this.databaseAi.getAI(devid, aiid, jsonSerializer);
         if (ai == null) {
             this.logger.logUserTraceEvent(LOGFROM, "GetTrainingMaterialsCommon - AI not found", devidString,
                     LogMap.map("AIID", aiid));
             return null;
         }
-        String userTrainingFile = this.database.getAiTrainingFile(aiid);
+        String userTrainingFile = this.databaseAi.getAiTrainingFile(aiid);
         if (userTrainingFile != null && !userTrainingFile.isEmpty()) {
             sb.append(userTrainingFile);
         }
@@ -253,12 +258,12 @@ public class AIServices extends ServerConnector {
      * Stop the training if the AI was likely to have been training
      * @param devId
      * @param aiid
-     * @throws Database.DatabaseException
+     * @throws DatabaseException
      */
     public void stopTrainingIfNeeded(final UUID devId, final UUID aiid)
-            throws Database.DatabaseException {
+            throws DatabaseException {
         try {
-            ApiAi ai = this.database.getAI(devId, aiid, this.serializer);
+            ApiAi ai = this.databaseAi.getAI(devId, aiid, this.serializer);
             if (ai != null) {
                 stopTraining(ai.getBackendStatus(), devId, aiid);
             }

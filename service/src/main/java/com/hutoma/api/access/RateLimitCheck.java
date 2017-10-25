@@ -4,7 +4,8 @@ import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.LogMap;
-import com.hutoma.api.connectors.Database;
+import com.hutoma.api.connectors.db.Database;
+import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.sub.RateLimitStatus;
 import com.hutoma.api.validation.ParameterFilter;
@@ -132,13 +133,13 @@ public class RateLimitCheck implements ContainerRequestFilter {
      * @param rateKey
      * @param burst rate limiting param
      * @param frequency rate limiting param
-     * @throws Database.DatabaseException if db call fails
+     * @throws DatabaseException if db call fails
      * @throws RateLimitedException if we should fail the call due to limiting
      * @throws AccountDisabledException if the devid was not recognised or the account was disabled
      */
     private void checkRateLimitReached(final UUID devid, final RateKey rateKey, final double burst,
                                        final double frequency)
-            throws Database.DatabaseException, RateLimitedException, AccountDisabledException {
+            throws DatabaseException, RateLimitedException, AccountDisabledException {
         if (frequency == 0.0d) {
             throw new IllegalArgumentException("Frequency cannot be zero");
         }

@@ -6,8 +6,8 @@ import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.AIServices;
-import com.hutoma.api.connectors.Database;
-import com.hutoma.api.connectors.DatabaseAiStatusUpdates;
+import com.hutoma.api.connectors.db.DatabaseAiStatusUpdates;
+import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.ApiServerAcknowledge;
@@ -190,11 +190,11 @@ public class AIServicesLogic {
      * Load the old state and make sure the new one makes sense
      * @param statusUpdate
      * @return whether AI was found or not
-     * @throws Database.DatabaseException
+     * @throws DatabaseException
      * @throws StatusTransitionRejectedException
      */
     private boolean checkIfStatusTransitionIsValid(final AiStatus statusUpdate)
-            throws Database.DatabaseException, StatusTransitionRejectedException, OriginatingServerRejectedException,
+            throws DatabaseException, StatusTransitionRejectedException, OriginatingServerRejectedException,
             StatusTransitionIgnoredException {
 
         // load the status
@@ -329,7 +329,7 @@ public class AIServicesLogic {
     }
 
     private void synchroniseStatuses(ControllerBase controller, ServerRegistration registration)
-            throws Database.DatabaseException {
+            throws DatabaseException {
         Map<UUID, ServerAiEntry> result =
                 registration.getAiList().stream()
                         .collect(Collectors.toMap(ServerAiEntry::getAiid, Function.identity()));

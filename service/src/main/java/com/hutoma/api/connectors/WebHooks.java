@@ -6,6 +6,9 @@ import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.LogMap;
 import com.hutoma.api.common.Tools;
+import com.hutoma.api.connectors.db.DatabaseAI;
+import com.hutoma.api.connectors.db.DatabaseException;
+import com.hutoma.api.connectors.db.DatabaseMarketplace;
 import com.hutoma.api.containers.AiBotConfig;
 import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.containers.sub.MemoryIntent;
@@ -37,15 +40,18 @@ public class WebHooks {
     private static final String LOGFROM = "webhooks";
     private static final String HMAC_ALGORITHM = "HmacSHA256";
     protected final JsonSerializer serializer;
-    private final Database database;
+    private final DatabaseAI databaseAi;
+    private final DatabaseMarketplace databaseMarketplace;
     private final ILogger logger;
     private final JerseyClient jerseyClient;
     private final Tools tools;
 
     @Inject
-    public WebHooks(final Database database, final ILogger logger, final JsonSerializer serializer,
+    public WebHooks(final DatabaseAI databaseAi, final DatabaseMarketplace databaseMarketplace, final ILogger logger,
+                    final JsonSerializer serializer,
                     final JerseyClient jerseyClient, final Tools tools) {
-        this.database = database;
+        this.databaseAi = databaseAi;
+        this.databaseMarketplace = databaseMarketplace;
         this.logger = logger;
         this.serializer = serializer;
         this.jerseyClient = jerseyClient;
@@ -73,9 +79,9 @@ public class WebHooks {
 
         AiBotConfig config;
         try {
-            config = this.database.getBotConfigForWebhookCall(chatInfo.devId, chatInfo.aiid, intent.getAiid(),
+            config = this.databaseAi.getBotConfigForWebhookCall(chatInfo.devId, chatInfo.aiid, intent.getAiid(),
                     this.serializer);
-        } catch (Database.DatabaseException e) {
+        } catch (DatabaseException e) {
             throw new WebHookInternalException("Webhook aborted due to failure to load config", e);
         }
 
@@ -157,8 +163,8 @@ public class WebHooks {
     public WebHook getWebHookForIntent(final MemoryIntent intent, final UUID devId) {
         WebHook webHook = null;
         try {
-            webHook = this.database.getWebHook(intent.getAiid(), intent.getName());
-        } catch (Database.DatabaseException e) {
+            webHook = this.databaseAi.getWebHook(intent.getAiid(), intent.getName());
+        } catch (DatabaseException e) {
             this.logger.logUserExceptionEvent(LOGFROM, "WebHook Database Error", devId.toString(), e);
         }
 
@@ -195,14 +201,14 @@ public class WebHooks {
         if (isHttps) {
             String secret;
             try {
-                secret = this.database.getWebhookSecretForBot(aiid);
+                secret = this.databaseAi.getWebhookSecretForBot(aiid);
                 if (secret == null) {
                     this.logger.logUserWarnEvent(LOGFROM, "Webhook secret null, regenerating", devIdString,
                             LogMap.map("AIID", aiid));
                     secret = this.tools.generateRandomHexString(HMAC_SECRET_LENGTH);
-                    this.database.setWebhookSecretForBot(aiid, secret);
+                    this.databaseAi.setWebhookSecretForBot(aiid, secret);
                 }
-            } catch (Database.DatabaseException e) {
+            } catch (DatabaseException e) {
                 throw new WebHookInternalException("WebHook Database Error", e);
             }
 

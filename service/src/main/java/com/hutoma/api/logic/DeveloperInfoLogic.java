@@ -2,7 +2,7 @@ package com.hutoma.api.logic;
 
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.LogMap;
-import com.hutoma.api.connectors.Database;
+import com.hutoma.api.connectors.db.DatabaseMarketplace;
 import com.hutoma.api.containers.ApiDeveloperInfo;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiResult;
@@ -11,9 +11,8 @@ import com.hutoma.api.validation.Validate;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.UUID;
-
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 /**
@@ -24,10 +23,10 @@ public class DeveloperInfoLogic {
     private static final String LOGFROM = "developerinfologic";
 
     private final ILogger logger;
-    private final Database database;
+    private final DatabaseMarketplace database;
 
     @Inject
-    public DeveloperInfoLogic(final ILogger logger, final Database database) {
+    public DeveloperInfoLogic(final ILogger logger, final DatabaseMarketplace database) {
         this.logger = logger;
         this.database = database;
     }

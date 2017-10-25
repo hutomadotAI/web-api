@@ -8,9 +8,9 @@ import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.AIChatServices;
 import com.hutoma.api.connectors.AiStrings;
-import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.ServerConnector;
 import com.hutoma.api.connectors.WebHooks;
+import com.hutoma.api.connectors.db.DatabaseAI;
 import com.hutoma.api.containers.ApiChat;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.AiMinP;
@@ -59,7 +59,7 @@ public class TestChatBase {
     IEntityRecognizer fakeRecognizer;
     IMemoryIntentHandler fakeIntentHandler;
     WebHooks fakeWebHooks;
-    Database fakeDatabase;
+    DatabaseAI fakeDatabaseAi;
     ChatStateHandler fakeChatStateHandler;
     private ChatLogic chatLogic;
     private ChatLogger fakeChatTelemetryLogger;
@@ -74,7 +74,7 @@ public class TestChatBase {
         this.fakeRecognizer = mock(IEntityRecognizer.class);
         this.fakeIntentHandler = mock(IMemoryIntentHandler.class);
         this.fakeChatTelemetryLogger = mock(ChatLogger.class);
-        this.fakeDatabase = mock(Database.class);
+        this.fakeDatabaseAi = mock(DatabaseAI.class);
         this.fakeChatStateHandler = mock(ChatStateHandler.class);
         this.fakeConfig = mock(Config.class);
         this.fakeWebHooks = mock(WebHooks.class);

@@ -3,7 +3,8 @@ package com.hutoma.api.logic;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.connectors.Database;
+import com.hutoma.api.connectors.db.DatabaseException;
+import com.hutoma.api.connectors.db.DatabaseUser;
 import com.hutoma.api.containers.ApiResult;
 
 import org.junit.Assert;
@@ -23,7 +24,7 @@ public class TestInviteLogic {
     private final String userName = "user@hutoma.com";
     private JsonSerializer fakeSerializer;
     private Config fakeConfig;
-    private Database fakeDatabase;
+    private DatabaseUser fakeDatabase;
     private ILogger fakeLogger;
     private InviteLogic fakeInviteLogic;
 
@@ -31,7 +32,7 @@ public class TestInviteLogic {
     public void setup() {
         this.fakeSerializer = mock(JsonSerializer.class);
         this.fakeConfig = mock(Config.class);
-        this.fakeDatabase = mock(Database.class);
+        this.fakeDatabase = mock(DatabaseUser.class);
         this.fakeLogger = mock(ILogger.class);
         this.fakeInviteLogic = new InviteLogic(this.fakeConfig, this.fakeSerializer, this.fakeDatabase, this.fakeLogger);
     }
@@ -40,7 +41,7 @@ public class TestInviteLogic {
      * Validate that an invalid invite code will cause a 200.
      */
     @Test
-    public void testValidInviteCode_Success() throws Database.DatabaseException, java.sql.SQLException {
+    public void testValidInviteCode_Success() throws DatabaseException, java.sql.SQLException {
         when(this.fakeDatabase.inviteCodeValid(anyString())).thenReturn(true);
         final ApiResult result = this.fakeInviteLogic.validCode(this.inviteCode);
         Assert.assertEquals(200, result.getStatus().getCode());
@@ -50,7 +51,7 @@ public class TestInviteLogic {
      * Validate that an invalid invite code will cause a 404.
      */
     @Test
-    public void testValidInviteCode_Failure() throws Database.DatabaseException, java.sql.SQLException {
+    public void testValidInviteCode_Failure() throws DatabaseException, java.sql.SQLException {
         when(this.fakeDatabase.inviteCodeValid(anyString())).thenReturn(false);
         final ApiResult result = this.fakeInviteLogic.validCode(this.inviteCode);
         Assert.assertEquals(404, result.getStatus().getCode());
@@ -60,7 +61,7 @@ public class TestInviteLogic {
      * Validate that a valid invite code redeemed successfully returns 201.
      */
     @Test
-    public void testValidInviteCodeRedeemed_Success() throws Database.DatabaseException, java.sql.SQLException {
+    public void testValidInviteCodeRedeemed_Success() throws DatabaseException, java.sql.SQLException {
         when(this.fakeDatabase.inviteCodeValid(anyString())).thenReturn(true);
         when(this.fakeDatabase.redeemInviteCode(anyString(), anyString())).thenReturn(true);
         final ApiResult result = this.fakeInviteLogic.redeemCode(this.inviteCode, this.userName);
@@ -71,7 +72,7 @@ public class TestInviteLogic {
      * Validate that redeeming an invalid invite code returns 400.
      */
     @Test
-    public void testValidInviteCodeRedeemed_InvalidCode() throws Database.DatabaseException, java.sql.SQLException {
+    public void testValidInviteCodeRedeemed_InvalidCode() throws DatabaseException, java.sql.SQLException {
         when(this.fakeDatabase.redeemInviteCode(anyString(), anyString())).thenReturn(false);
         final ApiResult result = this.fakeInviteLogic.redeemCode(this.inviteCode, this.userName);
         Assert.assertEquals(400, result.getStatus().getCode());

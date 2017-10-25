@@ -5,6 +5,10 @@ import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.common.TrackedThreadSubPool;
+import com.hutoma.api.connectors.db.DatabaseAI;
+import com.hutoma.api.connectors.db.DatabaseException;
+import com.hutoma.api.connectors.db.DatabaseUser;
+import com.hutoma.api.containers.AiDevId;
 import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.sub.AiMinP;
 import com.hutoma.api.containers.sub.BackendServerType;
@@ -48,12 +52,13 @@ public class AIChatServices extends ServerConnector {
     private long requestDeadline;
 
     @Inject
-    public AIChatServices(final Database database, final ILogger logger, final JsonSerializer serializer,
+    public AIChatServices(final DatabaseAI database, final DatabaseUser databaseUser, final ILogger logger,
+                          final JsonSerializer serializer,
                           final Tools tools, final Config config, final JerseyClient jerseyClient,
                           final TrackedThreadSubPool threadSubPool,
                           final RequestWnet wnetController, final RequestRnn rnnController,
                           final RequestAiml aimlController) {
-        super(database, logger, serializer, tools, config, jerseyClient, threadSubPool);
+        super(database, databaseUser, logger, serializer, tools, config, jerseyClient, threadSubPool);
         this.requestWnet = wnetController;
         this.requestRnn = rnnController;
         this.requestAiml = aimlController;
@@ -194,8 +199,8 @@ public class AIChatServices extends ServerConnector {
     public List<AiMinP> getAIsLinkedToAi(final UUID devId, final UUID aiid)
             throws RequestBase.AiControllerException {
         try {
-            return this.database.getAisLinkedToAi(devId, aiid);
-        } catch (Database.DatabaseException ex) {
+            return this.databaseAi.getAisLinkedToAi(devId, aiid);
+        } catch (DatabaseException ex) {
             throw new RequestBase.AiControllerException("Couldn't get the list of linked bots");
         }
     }
@@ -212,8 +217,8 @@ public class AIChatServices extends ServerConnector {
         BackendStatus result = null;
         try {
             // try to get the real status from the database
-            result = this.database.getAIStatusReadOnly(devId, aiid);
-        } catch (Database.DatabaseException ex) {
+            result = this.databaseAi.getAIStatusReadOnly(devId, aiid);
+        } catch (DatabaseException ex) {
             // if it fails, log the error and keep the set null
             this.logger.logException(LOGFROM, ex);
         }
@@ -243,9 +248,9 @@ public class AIChatServices extends ServerConnector {
     public String getAIPassthroughUrl(UUID devid, UUID aiid) {
         String result = null;
         try {
-            ApiAi ai = this.database.getAI(devid, aiid, this.serializer);
+            ApiAi ai = this.databaseAi.getAI(devid, aiid, this.serializer);
             result = ai.getPassthroughUrl();
-        } catch (Database.DatabaseException e) {
+        } catch (DatabaseException e) {
             this.logger.logException("Database exception attempting to retrieve PassthroughUrl", e);
         }
         return result;

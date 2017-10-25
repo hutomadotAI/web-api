@@ -1,6 +1,7 @@
 package com.hutoma.api.common;
 
-import com.hutoma.api.connectors.Database;
+import com.hutoma.api.connectors.db.DatabaseAI;
+import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.AiBotConfigDefinition;
 import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.sub.AiBot;
@@ -42,7 +43,7 @@ public class TestDataHelper {
                 0, 0.0, 1, Locale.getDefault(), "UTC", null, "", DEFAULT_CHAT_RESPONSES, DEFAULT_API_KEY_DESC);
     }
 
-    public static void setupAiReadonlyMode(final Database fakeDatabase) throws Database.DatabaseException {
+    public static void setupAiReadonlyMode(final DatabaseAI fakeDatabase) throws DatabaseException {
         ApiAi ai = new ApiAi(TestDataHelper.getSampleAI());
         ai.setReadOnly(true);
         when(fakeDatabase.getAI(any(), any(), any())).thenReturn(ai);
@@ -103,7 +104,7 @@ public class TestDataHelper {
         };
     }
 
-    public static void mockDatabaseCreateAI(final Database fakeDatabase, final UUID createdAiid) throws Database.DatabaseException {
+    public static void mockDatabaseCreateAI(final DatabaseAI fakeDatabase, final UUID createdAiid) throws DatabaseException {
         when(fakeDatabase.createAI(any(), anyString(), anyString(), any(), anyBoolean(),
                 anyString(), anyObject(), anyObject(), anyDouble(), anyInt(),
                 anyInt(), anyObject())).thenReturn(createdAiid);

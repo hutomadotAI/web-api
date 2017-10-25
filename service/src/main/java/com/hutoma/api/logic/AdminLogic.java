@@ -5,7 +5,7 @@ import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.LogMap;
 import com.hutoma.api.connectors.AIServices;
-import com.hutoma.api.connectors.Database;
+import com.hutoma.api.connectors.db.DatabaseUser;
 import com.hutoma.api.containers.ApiAdmin;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiResult;
@@ -32,14 +32,14 @@ public class AdminLogic {
     private static final String LOGFROM = "adminlogic";
     private final Config config;
     private final JsonSerializer jsonSerializer;
-    private final Database database;
+    private final DatabaseUser database;
     private final ILogger logger;
     private final AIServices aiServices;
     private final AIBotStoreLogic botStoreLogic;
 
     @Inject
-    public AdminLogic(Config config, JsonSerializer jsonSerializer, Database database,
-                      ILogger logger, AIServices aiServices, final AIBotStoreLogic botStoreLogic) {
+    public AdminLogic(final Config config, final JsonSerializer jsonSerializer, final DatabaseUser database,
+                      final ILogger logger, final AIServices aiServices, final AIBotStoreLogic botStoreLogic) {
         this.config = config;
         this.jsonSerializer = jsonSerializer;
         this.database = database;

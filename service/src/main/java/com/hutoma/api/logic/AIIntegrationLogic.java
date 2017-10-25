@@ -5,9 +5,10 @@ import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.LogMap;
-import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.FacebookConnector;
 import com.hutoma.api.connectors.FacebookException;
+import com.hutoma.api.connectors.db.DatabaseException;
+import com.hutoma.api.connectors.db.DatabaseIntegrations;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiFacebookCustomisation;
 import com.hutoma.api.containers.ApiFacebookIntegration;
@@ -39,16 +40,16 @@ public class AIIntegrationLogic {
 
     private static final String LOGFROM = "integrations";
     private final Config config;
-    private final Database database;
+    private final DatabaseIntegrations databaseIntegrations;
     private final ILogger logger;
     private final FacebookConnector facebookConnector;
     private final JsonSerializer serializer;
 
     @Inject
-    public AIIntegrationLogic(Config config, Database database, JsonSerializer serializer,
+    public AIIntegrationLogic(Config config, DatabaseIntegrations databaseIntegrations, JsonSerializer serializer,
                               FacebookConnector facebookConnector, ILogger logger) {
         this.config = config;
-        this.database = database;
+        this.databaseIntegrations = databaseIntegrations;
         this.logger = logger;
         this.facebookConnector = facebookConnector;
         this.serializer = serializer;
@@ -57,7 +58,7 @@ public class AIIntegrationLogic {
     public ApiResult getIntegrations(final UUID devId) {
 
         try {
-            List<Integration> integrationList = this.database.getAiIntegrationList();
+            List<Integration> integrationList = this.databaseIntegrations.getAiIntegrationList();
             if (integrationList.size() == 0) {
                 this.logger.logDebug(LOGFROM, "no integrations found");
                 return ApiError.getNotFound();
@@ -77,7 +78,7 @@ public class AIIntegrationLogic {
                 .put("devid", devid);
         try {
 
-            IntegrationRecord updatedRecord = this.database.updateIntegrationRecord(aiid, devid,
+            IntegrationRecord updatedRecord = this.databaseIntegrations.updateIntegrationRecord(aiid, devid,
                     IntegrationType.FACEBOOK,
                     (record) -> {
                         // load a record if we have one
@@ -117,7 +118,7 @@ public class AIIntegrationLogic {
                 .put("aiid", aiid)
                 .put("devid", devid);
         try {
-            IntegrationRecord record = this.database.getIntegration(aiid, devid, IntegrationType.FACEBOOK);
+            IntegrationRecord record = this.databaseIntegrations.getIntegration(aiid, devid, IntegrationType.FACEBOOK);
             if (record != null) {
                 FacebookIntegrationMetadata metadata = (FacebookIntegrationMetadata) this.serializer.deserialize(
                         record.getData(), FacebookIntegrationMetadata.class);
@@ -155,7 +156,7 @@ public class AIIntegrationLogic {
 
         try {
             // load from the db
-            IntegrationRecord record = this.database.getIntegration(aiid, devid, IntegrationType.FACEBOOK);
+            IntegrationRecord record = this.databaseIntegrations.getIntegration(aiid, devid, IntegrationType.FACEBOOK);
 
             if (record != null) {
                 // interpret the JSON block of data
@@ -222,7 +223,7 @@ public class AIIntegrationLogic {
         } catch (FacebookException e) {
             this.logger.logError(LOGFROM, e.getMessage(), logMap);
             return ApiError.getInternalServerError(e.getMessage());
-        } catch (Database.DatabaseException dbe) {
+        } catch (DatabaseException dbe) {
             this.logger.logError(LOGFROM, dbe.getMessage(), logMap);
             return ApiError.getInternalServerError(dbe.getMessage());
         } catch (Exception e) {
@@ -260,11 +261,11 @@ public class AIIntegrationLogic {
             logMap.add("facebook_id", userNode.getId());
 
             // check if anyone else has already connected this Facebook account
-            boolean userAlreadyIntegrated = this.database.isIntegratedUserAlreadyRegistered(
+            boolean userAlreadyIntegrated = this.databaseIntegrations.isIntegratedUserAlreadyRegistered(
                     IntegrationType.FACEBOOK, userNode.getId(), devid);
 
             final FacebookToken finalToken = token;
-            this.database.updateIntegrationRecord(aiid, devid, IntegrationType.FACEBOOK,
+            this.databaseIntegrations.updateIntegrationRecord(aiid, devid, IntegrationType.FACEBOOK,
                     (record) -> {
 
                         // load a record if we have one
@@ -339,7 +340,7 @@ public class AIIntegrationLogic {
 
         String failReason;
         try {
-            IntegrationRecord record = this.database.getIntegration(aiid, devid, IntegrationType.FACEBOOK);
+            IntegrationRecord record = this.databaseIntegrations.getIntegration(aiid, devid, IntegrationType.FACEBOOK);
             if (record != null) {
                 FacebookIntegrationMetadata metadata = (FacebookIntegrationMetadata) this.serializer.deserialize(
                         record.getData(), FacebookIntegrationMetadata.class);
@@ -389,7 +390,7 @@ public class AIIntegrationLogic {
                 .put("action", "delete");
 
         try {
-            IntegrationRecord record = this.database.getIntegration(aiid, devid, IntegrationType.FACEBOOK);
+            IntegrationRecord record = this.databaseIntegrations.getIntegration(aiid, devid, IntegrationType.FACEBOOK);
             if (record == null) {
                 // there was no integration; nothing to delete
                 return;
@@ -407,13 +408,13 @@ public class AIIntegrationLogic {
                 unsubscribeToFacebookPage(logMap, record, metadata);
             } finally {
                 // delete the integration
-                this.database.deleteIntegration(aiid, devid, IntegrationType.FACEBOOK);
+                this.databaseIntegrations.deleteIntegration(aiid, devid, IntegrationType.FACEBOOK);
             }
             // log the result
             this.logger.logUserTraceEvent(LOGFROM, String.format("deleted facebook integration for bot %s",
                     aiid.toString()), devid.toString(), logMap);
 
-        } catch (Database.DatabaseException dbe) {
+        } catch (DatabaseException dbe) {
             this.logger.logUserExceptionEvent(LOGFROM, "error deleting facebook integration",
                     devid.toString(), dbe, logMap);
         } catch (FacebookException fe) {
@@ -478,13 +479,13 @@ public class AIIntegrationLogic {
      * @param integrationRecord
      * @param integrationMetadata
      * @return
-     * @throws Database.DatabaseException
+     * @throws DatabaseException
      * @throws FacebookException
      */
     private ApiResult disconnect(final LogMap logMap, final UUID devid, final UUID aiid,
                                  final IntegrationRecord integrationRecord,
                                  final FacebookIntegrationMetadata integrationMetadata)
-            throws Database.DatabaseException, FacebookException {
+            throws DatabaseException, FacebookException {
 
         // switch off customisations
         removeCustomisationsFromFacebook(integrationRecord, logMap);
@@ -492,7 +493,7 @@ public class AIIntegrationLogic {
         unsubscribeToFacebookPage(logMap, integrationRecord, integrationMetadata);
 
         // clear the database record
-        this.database.updateIntegrationRecord(aiid, devid, IntegrationType.FACEBOOK,
+        this.databaseIntegrations.updateIntegrationRecord(aiid, devid, IntegrationType.FACEBOOK,
                 (record) -> {
 
                     // load a record if we have one
@@ -561,14 +562,14 @@ public class AIIntegrationLogic {
      * @param integrationMetadata
      * @param page
      * @return
-     * @throws Database.DatabaseException
+     * @throws DatabaseException
      * @throws FacebookException
      */
     private ApiResult pageSelect(final LogMap logMap, final UUID devid, final UUID aiid,
                                  final IntegrationRecord integrationRecord,
                                  final FacebookIntegrationMetadata integrationMetadata,
                                  final String page)
-            throws Database.DatabaseException, FacebookException {
+            throws DatabaseException, FacebookException {
 
         logMap.add("facebook_page_id", page);
         // get a list of pages and filter out the one the user has selected
@@ -590,7 +591,7 @@ public class AIIntegrationLogic {
         logMap.add("facebook_page_name", pageNode.getName());
         logMap.add("facebook_user_name", integrationMetadata.getUserName());
 
-        IntegrationRecord updatedRecord = this.database.updateIntegrationRecord(aiid, devid, IntegrationType.FACEBOOK,
+        IntegrationRecord updatedRecord = this.databaseIntegrations.updateIntegrationRecord(aiid, devid, IntegrationType.FACEBOOK,
                 (record) -> {
                     // load a record if we have one
                     FacebookIntegrationMetadata metadata = null;

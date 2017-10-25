@@ -1,7 +1,7 @@
 package com.hutoma.api.logic;
 
-import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.WebHooks;
+import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.ApiChat;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiIntent;
@@ -35,7 +35,7 @@ public class TestChatLogicWebhooks extends TestChatBase {
      */
     @Test
     public void testChat_webHookTriggered()
-            throws RequestBase.AiControllerException, Database.DatabaseException, IOException, WebHooks.WebHookException {
+            throws RequestBase.AiControllerException, DatabaseException, IOException, WebHooks.WebHookException {
         final String intentName = "intent1";
         final String webHookResponse = "webhook executed";
 
@@ -45,7 +45,7 @@ public class TestChatLogicWebhooks extends TestChatBase {
 
         WebHook wh = new WebHook(UUID.randomUUID(), "testName", "https://fakewebhookaddress/webhook", true);
         WebHookResponse wr = new WebHookResponse(webHookResponse);
-        when(this.fakeDatabase.getWebHook(any(), any())).thenReturn(wh);
+        when(this.fakeDatabaseAi.getWebHook(any(), any())).thenReturn(wh);
         when(this.fakeWebHooks.getWebHookForIntent(any(), any())).thenReturn(VALID_WEBHOOK);
         when(this.fakeWebHooks.executeIntentWebHook(any(), any(), any(), any())).thenReturn(wr);
 
@@ -68,7 +68,7 @@ public class TestChatLogicWebhooks extends TestChatBase {
      */
     @Test
     public void testChat_webHookNullResponseHandled()
-            throws RequestBase.AiControllerException, Database.DatabaseException, IOException, WebHooks.WebHookException {
+            throws RequestBase.AiControllerException, DatabaseException, IOException, WebHooks.WebHookException {
         final String intentName = "intent1";
         final String webHookResponse = null;
         MemoryVariable mv = new MemoryVariable("var", Arrays.asList("a", "b"));
@@ -76,7 +76,7 @@ public class TestChatLogicWebhooks extends TestChatBase {
         MemoryIntent mi = new MemoryIntent(intentName, AIID, CHATID, Collections.singletonList(mv));
         WebHook wh = new WebHook(UUID.randomUUID(), "testName", "https://fakewebhookaddress/webhook", true);
         WebHookResponse wr = new WebHookResponse(webHookResponse);
-        when(this.fakeDatabase.getWebHook(any(), any())).thenReturn(wh);
+        when(this.fakeDatabaseAi.getWebHook(any(), any())).thenReturn(wh);
         when(this.fakeWebHooks.getWebHookForIntent(any(), any())).thenReturn(VALID_WEBHOOK);
         when(this.fakeWebHooks.executeIntentWebHook(any(), any(), any(), any())).thenReturn(wr);
         setupFakeChat(0.7d, MemoryIntentHandler.META_INTENT_TAG + intentName, 0.0d, AIMLRESULT, 0.3d, NEURALRESULT);
@@ -96,7 +96,7 @@ public class TestChatLogicWebhooks extends TestChatBase {
      */
     @Test
     public void testChat_inactiveWebHookIgnored()
-            throws RequestBase.AiControllerException, Database.DatabaseException, IOException, WebHooks.WebHookException {
+            throws RequestBase.AiControllerException, DatabaseException, IOException, WebHooks.WebHookException {
         final String intentName = "intent1";
         final String webHookResponse = "webhook executed";
 
@@ -127,7 +127,7 @@ public class TestChatLogicWebhooks extends TestChatBase {
      */
     @Test
     public void testChat_badWebHookHandled()
-            throws RequestBase.AiControllerException, Database.DatabaseException, IOException, WebHooks.WebHookException {
+            throws RequestBase.AiControllerException, DatabaseException, IOException, WebHooks.WebHookException {
 
         when(this.fakeWebHooks.executeIntentWebHook(any(), any(), any(), any()))
                 .thenThrow(new WebHooks.WebHookExternalException("It went wrong"));
@@ -137,7 +137,7 @@ public class TestChatLogicWebhooks extends TestChatBase {
 
     @Test
     public void testChat_webHookInternalFail()
-            throws RequestBase.AiControllerException, Database.DatabaseException, IOException, WebHooks.WebHookException {
+            throws RequestBase.AiControllerException, DatabaseException, IOException, WebHooks.WebHookException {
 
         when(this.fakeWebHooks.executeIntentWebHook(any(), any(), any(), any()))
                 .thenThrow(new WebHooks.WebHookInternalException("It went wrong internally"));

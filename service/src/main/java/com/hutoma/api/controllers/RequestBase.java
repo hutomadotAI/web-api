@@ -6,7 +6,7 @@ import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.common.TrackedThreadSubPool;
-import com.hutoma.api.connectors.AiDevId;
+import com.hutoma.api.containers.AiDevId;
 import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.containers.sub.ChatState;
 import com.hutoma.api.controllers.ControllerBase.RequestFor;

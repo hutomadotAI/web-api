@@ -4,8 +4,10 @@ import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.LogMap;
-import com.hutoma.api.connectors.Database;
-import com.hutoma.api.connectors.DatabaseEntitiesIntents;
+import com.hutoma.api.connectors.db.DatabaseEntitiesIntents;
+import com.hutoma.api.connectors.db.DatabaseAI;
+import com.hutoma.api.connectors.db.DatabaseException;
+import com.hutoma.api.connectors.db.DatabaseMarketplace;
 import com.hutoma.api.connectors.db.DatabaseTransaction;
 import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.ApiAiBot;
@@ -49,19 +51,22 @@ public class AIBotStoreLogic {
     static final long MAX_ICON_FILE_SIZE = 512 * 1024; // 512Kb
     private static final String LOGFROM = "botstorelogic";
     private static final Set<String> ALLOWED_ICON_EXT = new HashSet<>(Arrays.asList("png", "jpg", "jpeg"));
-    private final Database database;
+    private final DatabaseAI database;
     private final DatabaseEntitiesIntents databaseEntitiesIntents;
+    private final DatabaseMarketplace databaseMarketplace;
     private final ILogger logger;
     private final Config config;
     private final JsonSerializer jsonSerializer;
     private final Provider<DatabaseTransaction> databaseTransactionProvider;
 
     @Inject
-    public AIBotStoreLogic(final Database database, final DatabaseEntitiesIntents databaseEntitiesIntents,
+    public AIBotStoreLogic(final DatabaseAI database, final DatabaseEntitiesIntents databaseEntitiesIntents,
+                           final DatabaseMarketplace databaseMarketplace,
                            final Provider<DatabaseTransaction> databaseTransactionProvider,
                            final ILogger logger, final Config config, final JsonSerializer jsonSerializer) {
         this.database = database;
         this.databaseEntitiesIntents = databaseEntitiesIntents;
+        this.databaseMarketplace = databaseMarketplace;
         this.databaseTransactionProvider = databaseTransactionProvider;
         this.logger = logger;
         this.config = config;
@@ -82,11 +87,11 @@ public class AIBotStoreLogic {
 
     private ApiResult getPublishedBotByType(final UUID devId, final AiBot.PublishingType publishingType) {
         try {
-            List<AiBot> bots = this.database.getPublishedBots(publishingType);
+            List<AiBot> bots = this.databaseMarketplace.getPublishedBots(publishingType);
             this.logger.logUserTraceEvent(LOGFROM, "GetPublishedBots", devId.toString(),
                     LogMap.map("Num Bots", bots.size()));
             return new ApiAiBotList(bots).setSuccessStatus();
-        } catch (Database.DatabaseException e) {
+        } catch (DatabaseException e) {
             this.logger.logUserExceptionEvent(LOGFROM, "GetPublishedBots", devId.toString(), e);
             return ApiError.getInternalServerError();
         }
@@ -94,11 +99,11 @@ public class AIBotStoreLogic {
 
     public ApiResult getPurchasedBots(final UUID devId) {
         try {
-            List<AiBot> bots = this.database.getPurchasedBots(devId);
+            List<AiBot> bots = this.databaseMarketplace.getPurchasedBots(devId);
             this.logger.logUserTraceEvent(LOGFROM, "GetPurchasedBots", devId.toString(),
                     LogMap.map("Num Bots", bots.size()));
             return new ApiAiBotList(bots).setSuccessStatus();
-        } catch (Database.DatabaseException e) {
+        } catch (DatabaseException e) {
             this.logger.logUserExceptionEvent(LOGFROM, "GetPurchasedBots", devId.toString(), e);
             return ApiError.getInternalServerError();
         }
@@ -109,27 +114,27 @@ public class AIBotStoreLogic {
         try {
             LogMap logMap = LogMap.map("BotId", botId);
             // Check if the bot actually exists in the store
-            AiBot bot = this.database.getBotDetails(botId);
+            AiBot bot = this.databaseMarketplace.getBotDetails(botId);
             if (bot == null || bot.getPublishingState() != AiBot.PublishingState.PUBLISHED) {
                 this.logger.logUserTraceEvent(LOGFROM, String.format("Bot not %s",
                         bot == null ? "found" : "published"), devIdString, logMap);
                 return ApiError.getNotFound("Bot not found");
             }
             // Check if the bot has already been purchased
-            List<AiBot> alreadyPurchased = this.database.getPurchasedBots(devId);
+            List<AiBot> alreadyPurchased = this.databaseMarketplace.getPurchasedBots(devId);
             if (alreadyPurchased.stream().anyMatch(x -> x.getBotId() == botId)) {
                 this.logger.logUserTraceEvent(LOGFROM, "PurchaseBot - attempt purchase already owned bot", devIdString,
                         logMap);
                 return ApiError.getBadRequest("Bot already purchased");
             }
-            if (this.database.purchaseBot(devId, botId)) {
+            if (this.databaseMarketplace.purchaseBot(devId, botId)) {
                 this.logger.logUserTraceEvent(LOGFROM, "PurchaseBot", devIdString, logMap);
                 return new ApiResult().setSuccessStatus();
             } else {
                 this.logger.logUserErrorEvent(LOGFROM, "PurchaseBot - could not purchase", devIdString, logMap);
                 return ApiError.getInternalServerError();
             }
-        } catch (Database.DatabaseException e) {
+        } catch (DatabaseException e) {
             this.logger.logUserExceptionEvent(LOGFROM, "PurchaseBot", devIdString, e);
             return ApiError.getInternalServerError();
         }
@@ -139,7 +144,7 @@ public class AIBotStoreLogic {
         final String devIdString = devId.toString();
         try {
             LogMap logMap = LogMap.map("BotId", botId);
-            AiBot bot = this.database.getBotDetails(botId);
+            AiBot bot = this.databaseMarketplace.getBotDetails(botId);
             if (bot == null) {
                 this.logger.logUserTraceEvent(LOGFROM, "GetBotDetails - not found", devIdString, logMap);
                 return ApiError.getNotFound();
@@ -156,7 +161,7 @@ public class AIBotStoreLogic {
         final String devIdString = devId.toString();
         try {
             LogMap logMap = LogMap.map("BotId", botId);
-            AiBot bot = this.database.getBotDetails(botId);
+            AiBot bot = this.databaseMarketplace.getBotDetails(botId);
             if (bot == null) {
                 this.logger.logUserTraceEvent(LOGFROM, "GetBotTemplate - bot not found", devIdString, logMap);
                 return ApiError.getNotFound();
@@ -165,7 +170,7 @@ public class AIBotStoreLogic {
                 this.logger.logUserTraceEvent(LOGFROM, "GetBotTemplate - not a template", devIdString, logMap);
                 return ApiError.getBadRequest("Bot is not a template");
             }
-            String template = this.database.getBotTemplate(botId);
+            String template = this.databaseMarketplace.getBotTemplate(botId);
             if (template == null) {
                 this.logger.logUserTraceEvent(LOGFROM, "GetBotTemplate - template not found", devIdString, logMap);
                 return ApiError.getNotFound();
@@ -188,12 +193,12 @@ public class AIBotStoreLogic {
         final String devIdString = devId.toString();
         try {
             LogMap logMap = LogMap.map("AIID", aiid);
-            DeveloperInfo devInfo = this.database.getDeveloperInfo(devId);
+            DeveloperInfo devInfo = this.databaseMarketplace.getDeveloperInfo(devId);
             if (devInfo == null) {
                 this.logger.logUserTraceEvent(LOGFROM, "PublishBot - DevInfo not entered", devIdString, logMap);
                 return ApiError.getBadRequest("Please set the developer information first");
             }
-            AiBot bot = this.database.getPublishedBotForAI(devId, aiid);
+            AiBot bot = this.databaseMarketplace.getPublishedBotForAI(devId, aiid);
             if (bot != null) {
                 this.logger.logUserTraceEvent(LOGFROM, "PublishBot - AI already has published bot",
                         devIdString, logMap);
@@ -219,7 +224,7 @@ public class AIBotStoreLogic {
             int botId;
             if (publishingType == AiBot.PublishingType.TEMPLATE) {
                 try (DatabaseTransaction transaction = this.databaseTransactionProvider.get()) {
-                    botId = this.database.publishBot(bot, transaction);
+                    botId = this.databaseMarketplace.publishBot(bot, transaction);
                     if (botId == -1) {
                         transaction.rollback();
                         this.logger.logUserTraceEvent(LOGFROM, "PublishBot - invalid request", devIdString, logMap);
@@ -227,7 +232,7 @@ public class AIBotStoreLogic {
                     }
                     BotStructure botStructure = BotStructureSerializer.serialize(devId, aiid, this.database,
                             this.databaseEntitiesIntents, this.jsonSerializer);
-                    if (!this.database.addBotTemplate(botId, botStructure, transaction, this.jsonSerializer)) {
+                    if (!this.databaseMarketplace.addBotTemplate(botId, botStructure, transaction, this.jsonSerializer)) {
                         transaction.rollback();
                         this.logger.logUserTraceEvent(LOGFROM, "PublishBot - could not write the template",
                                 devIdString, logMap);
@@ -237,7 +242,7 @@ public class AIBotStoreLogic {
                     }
                 }
             } else {
-                botId = this.database.publishBot(bot, null);
+                botId = this.databaseMarketplace.publishBot(bot, null);
                 if (botId == -1) {
                     this.logger.logUserTraceEvent(LOGFROM, "PublishBot - invalid request", devIdString, logMap);
                     return ApiError.getBadRequest("Invalid publish request");
@@ -247,7 +252,7 @@ public class AIBotStoreLogic {
             bot.setBotId(botId);
             this.logger.logUserTraceEvent(LOGFROM, "PublishBot", devIdString, logMap.put("New BotId", botId));
             return new ApiAiBot(bot).setSuccessStatus();
-        } catch (Database.DatabaseException e) {
+        } catch (DatabaseException e) {
             this.logger.logUserExceptionEvent(LOGFROM, "PublishBot", devIdString, e);
             return ApiError.getInternalServerError();
         }
@@ -255,13 +260,13 @@ public class AIBotStoreLogic {
 
     public ApiResult getBotIcon(final int botId) {
         try {
-            String iconPath = this.database.getBotIconPath(botId);
+            String iconPath = this.databaseMarketplace.getBotIconPath(botId);
             if (iconPath != null) {
                 return new ApiString(iconPath).setSuccessStatus();
             } else {
                 return ApiError.getNotFound();
             }
-        } catch (Database.DatabaseException e) {
+        } catch (DatabaseException e) {
             this.logger.logUserExceptionEvent(LOGFROM, "GetBotIcon", "", e);
             return ApiError.getInternalServerError();
         }
@@ -273,7 +278,7 @@ public class AIBotStoreLogic {
         File tempFile = null;
         try {
             LogMap logMap = LogMap.map("BotId", botId);
-            AiBot bot = this.database.getBotDetails(botId);
+            AiBot bot = this.databaseMarketplace.getBotDetails(botId);
             if (bot == null || !bot.getDevId().equals(devId)) {
                 this.logger.logUserTraceEvent(LOGFROM, "UploadBotIcon - request uploading for other dev's bot",
                         devIdString, logMap);
@@ -313,11 +318,11 @@ public class AIBotStoreLogic {
             Files.setPosixFilePermissions(destFile.toPath(),
                     EnumSet.of(OWNER_WRITE, OWNER_READ, GROUP_READ, OTHERS_READ));
 
-            this.database.saveBotIconPath(devId, botId, destFilename);
+            this.databaseMarketplace.saveBotIconPath(devId, botId, destFilename);
             this.logger.logUserTraceEvent(LOGFROM, "UploadBotIcon", devIdString, logMap);
             return new ApiResult().setSuccessStatus();
 
-        } catch (Database.DatabaseException | IOException e) {
+        } catch (DatabaseException | IOException e) {
             this.logger.logUserExceptionEvent(LOGFROM, "UploadBotIcon", devIdString, e);
             return ApiError.getInternalServerError();
         } finally {

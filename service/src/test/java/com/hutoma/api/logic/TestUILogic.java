@@ -4,8 +4,9 @@ import com.hutoma.api.common.DeveloperInfoHelper;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.TestBotHelper;
-import com.hutoma.api.connectors.Database;
-import com.hutoma.api.connectors.DatabaseUI;
+import com.hutoma.api.connectors.db.DatabaseMarketplace;
+import com.hutoma.api.connectors.db.DatabaseUI;
+import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.ui.ApiBotstoreItem;
 import com.hutoma.api.containers.ui.ApiBotstoreItemList;
@@ -21,9 +22,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-import static com.hutoma.api.common.TestDataHelper.DEVID;
 import static com.hutoma.api.common.TestDataHelper.DEVID_UUID;
-import static org.mockito.Matchers.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -33,6 +34,7 @@ import static org.mockito.Mockito.when;
 public class TestUILogic {
 
     private DatabaseUI fakeDatabaseUi;
+    private DatabaseMarketplace fakeDatabaseMarketplace;
     private ILogger fakeLogger;
     private JsonSerializer fakeSerializer;
     private UILogic uiLogic;
@@ -40,12 +42,13 @@ public class TestUILogic {
     @Before
     public void setup() {
         this.fakeDatabaseUi = mock(DatabaseUI.class);
+        this.fakeDatabaseMarketplace = mock(DatabaseMarketplace.class);
         this.fakeLogger = mock(ILogger.class);
-        this.uiLogic = new UILogic(this.fakeDatabaseUi, this.fakeLogger, this.fakeSerializer);
+        this.uiLogic = new UILogic(this.fakeDatabaseUi, this.fakeDatabaseMarketplace, this.fakeLogger, this.fakeSerializer);
     }
 
     @Test
-    public void testGetBotstoreList() throws Database.DatabaseException {
+    public void testGetBotstoreList() throws DatabaseException {
         final int startItem = 0;
         final int pageSize = 100;
         ApiBotstoreItemList itemList = getItemList(startItem, pageSize, 1);
@@ -55,31 +58,31 @@ public class TestUILogic {
     }
 
     @Test
-    public void testGetBotstoreList_authenticated_botOwned() throws Database.DatabaseException {
+    public void testGetBotstoreList_authenticated_botOwned() throws DatabaseException {
         final int startItem = 0;
         final int pageSize = 100;
         ApiBotstoreItemList itemList = getItemList(startItem, pageSize, 1);
         when(this.fakeDatabaseUi.getBotstoreList(anyInt(), anyInt(), any(), any(), any())).thenReturn(itemList);
-        when(this.fakeDatabaseUi.getPurchasedBots(any())).thenReturn(Collections.singletonList(itemList.getItems().get(0).getMetadata()));
+        when(this.fakeDatabaseMarketplace.getPurchasedBots(any())).thenReturn(Collections.singletonList(itemList.getItems().get(0).getMetadata()));
         ApiBotstoreItemList result = (ApiBotstoreItemList) this.uiLogic.getBotstoreList(DEVID_UUID, startItem, pageSize, null, null, null);
         validateGetBotstoreListResponse(result, itemList.getItems());
         Assert.assertTrue(result.getItems().get(0).isOwned());
     }
 
     @Test
-    public void testGetBotstoreList_authenticated_botNowOwned() throws Database.DatabaseException {
+    public void testGetBotstoreList_authenticated_botNowOwned() throws DatabaseException {
         final int startItem = 0;
         final int pageSize = 100;
         ApiBotstoreItemList itemList = getItemList(startItem, pageSize, 1);
         when(this.fakeDatabaseUi.getBotstoreList(anyInt(), anyInt(), any(), any(), any())).thenReturn(itemList);
-        when(this.fakeDatabaseUi.getPurchasedBots(any())).thenReturn(Collections.emptyList());
+        when(this.fakeDatabaseMarketplace.getPurchasedBots(any())).thenReturn(Collections.emptyList());
         ApiBotstoreItemList result = (ApiBotstoreItemList) this.uiLogic.getBotstoreList(DEVID_UUID, startItem, pageSize, null, null, null);
         validateGetBotstoreListResponse(result, itemList.getItems());
         Assert.assertFalse(result.getItems().get(0).isOwned());
     }
 
     @Test
-    public void testGetBotstoreList_pagination() throws Database.DatabaseException {
+    public void testGetBotstoreList_pagination() throws DatabaseException {
         final int startItem = 0;
         final int pageSize = 5;
         final int totalItems = 9;
@@ -101,14 +104,14 @@ public class TestUILogic {
     }
 
     @Test
-    public void testGetBotstoreList_dbException() throws Database.DatabaseException {
-        when(this.fakeDatabaseUi.getBotstoreList(anyInt(), anyInt(), any(), any(), any())).thenThrow(Database.DatabaseException.class);
+    public void testGetBotstoreList_dbException() throws DatabaseException {
+        when(this.fakeDatabaseUi.getBotstoreList(anyInt(), anyInt(), any(), any(), any())).thenThrow(DatabaseException.class);
         ApiResult result = this.uiLogic.getBotstoreList(DEVID_UUID, 0, 100, null, null, null);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
 
     @Test
-    public void testGetBotstoreItem() throws Database.DatabaseException {
+    public void testGetBotstoreItem() throws DatabaseException {
         BotstoreItem item = new BotstoreItem(0, TestBotHelper.SAMPLEBOT, DeveloperInfoHelper.DEVINFO, false);
         when(this.fakeDatabaseUi.getBotstoreItem(anyInt(), any())).thenReturn(item);
         ApiBotstoreItem result = (ApiBotstoreItem) this.uiLogic.getBotstoreBot(null, TestBotHelper.SAMPLEBOT.getBotId());
@@ -116,34 +119,34 @@ public class TestUILogic {
     }
 
     @Test
-    public void testGetBotstoreItem_authenticated_notOwned() throws Database.DatabaseException {
+    public void testGetBotstoreItem_authenticated_notOwned() throws DatabaseException {
         BotstoreItem item = new BotstoreItem(0, TestBotHelper.SAMPLEBOT, DeveloperInfoHelper.DEVINFO, false);
         when(this.fakeDatabaseUi.getBotstoreItem(anyInt(), any())).thenReturn(item);
-        when(this.fakeDatabaseUi.getPurchasedBots(any())).thenReturn(Collections.emptyList());
+        when(this.fakeDatabaseMarketplace.getPurchasedBots(any())).thenReturn(Collections.emptyList());
         ApiBotstoreItem result = (ApiBotstoreItem) this.uiLogic.getBotstoreBot(DEVID_UUID, TestBotHelper.SAMPLEBOT.getBotId());
         validateGetBostoreItemResponse(result, item);
         Assert.assertFalse(result.getItem().isOwned());
     }
 
     @Test
-    public void testGetBotstoreItem_nonExistent() throws Database.DatabaseException {
+    public void testGetBotstoreItem_nonExistent() throws DatabaseException {
         when(this.fakeDatabaseUi.getBotstoreItem(anyInt(), any())).thenReturn(null);
         ApiResult result = this.uiLogic.getBotstoreBot(DEVID_UUID, TestBotHelper.SAMPLEBOT.getBotId());
         Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
     }
 
     @Test
-    public void testGetBotstoreItem_dbException() throws Database.DatabaseException {
-        when(this.fakeDatabaseUi.getBotstoreItem(anyInt(), any())).thenThrow(Database.DatabaseException.class);
+    public void testGetBotstoreItem_dbException() throws DatabaseException {
+        when(this.fakeDatabaseUi.getBotstoreItem(anyInt(), any())).thenThrow(DatabaseException.class);
         ApiResult result = this.uiLogic.getBotstoreBot(DEVID_UUID, TestBotHelper.SAMPLEBOT.getBotId());
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
 
     @Test
-    public void testGetBotstoreItem_authenticated_owned() throws Database.DatabaseException {
+    public void testGetBotstoreItem_authenticated_owned() throws DatabaseException {
         BotstoreItem item = new BotstoreItem(0, TestBotHelper.SAMPLEBOT, DeveloperInfoHelper.DEVINFO, false);
         when(this.fakeDatabaseUi.getBotstoreItem(anyInt(), any())).thenReturn(item);
-        when(this.fakeDatabaseUi.getPurchasedBots(any())).thenReturn(Collections.singletonList(TestBotHelper.SAMPLEBOT));
+        when(this.fakeDatabaseMarketplace.getPurchasedBots(any())).thenReturn(Collections.singletonList(TestBotHelper.SAMPLEBOT));
         ApiBotstoreItem result = (ApiBotstoreItem) this.uiLogic.getBotstoreBot(DEVID_UUID, TestBotHelper.SAMPLEBOT.getBotId());
         validateGetBostoreItemResponse(result, item);
         Assert.assertTrue(result.getItem().isOwned());

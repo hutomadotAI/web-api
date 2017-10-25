@@ -5,9 +5,10 @@ import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.LogMap;
 import com.hutoma.api.common.Tools;
-import com.hutoma.api.connectors.Database;
 import com.hutoma.api.connectors.FacebookConnector;
 import com.hutoma.api.connectors.FacebookException;
+import com.hutoma.api.connectors.db.DatabaseException;
+import com.hutoma.api.connectors.db.DatabaseIntegrations;
 import com.hutoma.api.containers.facebook.FacebookIntegrationMetadata;
 import com.hutoma.api.containers.facebook.FacebookMessageNode;
 import com.hutoma.api.containers.facebook.FacebookNotification;
@@ -31,7 +32,7 @@ public class FacebookChatHandler implements Callable {
     private static final String LOGFROM = "fbchathandler";
     private static final int FB_MESSAGE_SIZE_LIMIT = 640;
 
-    private final Database database;
+    private final DatabaseIntegrations databaseIntegrations;
     private final ILogger logger;
     private Provider<ChatLogic> chatLogicProvider;
     private FacebookConnector facebookConnector;
@@ -40,12 +41,12 @@ public class FacebookChatHandler implements Callable {
     private FacebookNotification.Messaging messaging;
 
     @Inject
-    public FacebookChatHandler(final Database database, final ILogger logger,
+    public FacebookChatHandler(final DatabaseIntegrations databaseIntegrations, final ILogger logger,
                                final JsonSerializer serializer,
                                final FacebookConnector facebookConnector,
                                final Provider<ChatLogic> chatLogicProvider,
                                final Tools tools) {
-        this.database = database;
+        this.databaseIntegrations = databaseIntegrations;
         this.logger = logger;
         this.chatLogicProvider = chatLogicProvider;
         this.facebookConnector = facebookConnector;
@@ -137,7 +138,7 @@ public class FacebookChatHandler implements Callable {
             }
 
             // look for and load the integration info from the database
-            IntegrationRecord integrationRecord = this.database.getIntegrationResource(
+            IntegrationRecord integrationRecord = this.databaseIntegrations.getIntegrationResource(
                     IntegrationType.FACEBOOK, recipientPageId);
 
             // no record? bail
@@ -228,9 +229,9 @@ public class FacebookChatHandler implements Callable {
                 }
             }
             // save the status in the integration record to feed it back to the user
-            this.database.updateIntegrationStatus(integrationRecord.getAiid(),
+            this.databaseIntegrations.updateIntegrationStatus(integrationRecord.getAiid(),
                     IntegrationType.FACEBOOK, status, chatSuccess);
-        } catch (Database.DatabaseException dbe) {
+        } catch (DatabaseException dbe) {
             this.logger.logException(LOGFROM, dbe);
         } catch (Exception e) {
             this.logger.logException(LOGFROM, e);

@@ -2,7 +2,6 @@ package com.hutoma.api.connectors.db;
 
 import com.hutoma.api.common.FakeProvider;
 import com.hutoma.api.common.ILogger;
-import com.hutoma.api.connectors.Database;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -28,7 +27,7 @@ public class TestDatabaseTransaction {
     TransactionalDatabaseCall call3;
 
     @Before
-    public void setup() throws Database.DatabaseException {
+    public void setup() throws DatabaseException {
         this.fakeLogger = mock(ILogger.class);
         this.fakeConnection = mock(Connection.class);
         this.fakeConnection2 = mock(Connection.class);
@@ -41,7 +40,7 @@ public class TestDatabaseTransaction {
     }
 
     @Test
-    public void testTransaction_Single() throws Database.DatabaseException, SQLException {
+    public void testTransaction_Single() throws DatabaseException, SQLException {
 
         try (DatabaseTransaction transaction = new DatabaseTransaction(this.fakeLogger, this.fakeConnectionPool, this.fakeCallProvider)) {
             transaction.getDatabaseCall().initialise("nothing", 0).executeUpdate();
@@ -56,7 +55,7 @@ public class TestDatabaseTransaction {
     }
 
     @Test
-    public void testTransaction_Double() throws Database.DatabaseException, SQLException {
+    public void testTransaction_Double() throws DatabaseException, SQLException {
 
         try (DatabaseTransaction transaction = new DatabaseTransaction(this.fakeLogger, this.fakeConnectionPool, this.fakeCallProvider)) {
             transaction.getDatabaseCall().initialise("nothing", 0).executeUpdate();
@@ -73,7 +72,7 @@ public class TestDatabaseTransaction {
     }
 
     @Test
-    public void testTransaction_Double_Rollback() throws Database.DatabaseException, SQLException {
+    public void testTransaction_Double_Rollback() throws DatabaseException, SQLException {
 
         try (DatabaseTransaction transaction = new DatabaseTransaction(this.fakeLogger, this.fakeConnectionPool, this.fakeCallProvider)) {
             transaction.getDatabaseCall().initialise("nothing", 0).executeUpdate();
@@ -90,7 +89,7 @@ public class TestDatabaseTransaction {
     }
 
     @Test
-    public void testTransaction_Double_AutoRollback() throws Database.DatabaseException, SQLException {
+    public void testTransaction_Double_AutoRollback() throws DatabaseException, SQLException {
 
         try (DatabaseTransaction transaction = new DatabaseTransaction(this.fakeLogger, this.fakeConnectionPool, this.fakeCallProvider)) {
             transaction.getDatabaseCall().initialise("nothing", 0).executeUpdate();
@@ -106,13 +105,13 @@ public class TestDatabaseTransaction {
     }
 
     @Test
-    public void testTransaction_FirstCallException() throws Database.DatabaseException, SQLException {
+    public void testTransaction_FirstCallException() throws DatabaseException, SQLException {
 
-        when(this.call1.executeUpdate()).thenThrow(new Database.DatabaseException(new Exception("test")));
+        when(this.call1.executeUpdate()).thenThrow(new DatabaseException(new Exception("test")));
         try (DatabaseTransaction transaction = new DatabaseTransaction(this.fakeLogger, this.fakeConnectionPool, this.fakeCallProvider)) {
             transaction.getDatabaseCall().initialise("nothing", 0).executeUpdate();
             transaction.getDatabaseCall().initialise("nothing", 0).executeUpdate();
-        } catch (Database.DatabaseException dde) {
+        } catch (DatabaseException dde) {
         }
 
         verify(this.call1).close();
@@ -124,13 +123,13 @@ public class TestDatabaseTransaction {
     }
 
     @Test
-    public void testTransaction_SecondCallException() throws Database.DatabaseException, SQLException {
+    public void testTransaction_SecondCallException() throws DatabaseException, SQLException {
 
-        when(this.call2.executeUpdate()).thenThrow(new Database.DatabaseException(new Exception("test")));
+        when(this.call2.executeUpdate()).thenThrow(new DatabaseException(new Exception("test")));
         try (DatabaseTransaction transaction = new DatabaseTransaction(this.fakeLogger, this.fakeConnectionPool, this.fakeCallProvider)) {
             transaction.getDatabaseCall().initialise("nothing", 0).executeUpdate();
             transaction.getDatabaseCall().initialise("nothing", 0).executeUpdate();
-        } catch (Database.DatabaseException dde) {
+        } catch (DatabaseException dde) {
         }
 
         verify(this.call2).close();
@@ -141,7 +140,7 @@ public class TestDatabaseTransaction {
         verifyZeroInteractions(this.fakeConnection2);
     }
 
-    TransactionalDatabaseCall mockDBCall() throws Database.DatabaseException {
+    TransactionalDatabaseCall mockDBCall() throws DatabaseException {
         TransactionalDatabaseCall call = mock(TransactionalDatabaseCall.class);
         when(call.setTransactionConnection(any())).thenReturn(call);
         when(call.initialise(anyString(), anyInt())).thenReturn(call);

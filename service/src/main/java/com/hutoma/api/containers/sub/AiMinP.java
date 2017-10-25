@@ -1,6 +1,6 @@
 package com.hutoma.api.containers.sub;
 
-import com.hutoma.api.connectors.AiDevId;
+import com.hutoma.api.containers.AiDevId;
 
 import java.util.UUID;
 

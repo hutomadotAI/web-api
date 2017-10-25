@@ -2,7 +2,8 @@ package com.hutoma.api.logic;
 
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.connectors.DatabaseUI;
+import com.hutoma.api.connectors.db.DatabaseMarketplace;
+import com.hutoma.api.connectors.db.DatabaseUI;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.AiBot;
@@ -23,12 +24,15 @@ import javax.inject.Inject;
 public class UILogic {
     private static final String LOGFROM = "uilogic";
     private final DatabaseUI databaseUi;
+    private final DatabaseMarketplace databaseMarketplace;
     private final ILogger logger;
     private final JsonSerializer serializer;
 
     @Inject
-    public UILogic(final DatabaseUI databaseUi, final ILogger logger, final JsonSerializer serializer) {
+    public UILogic(final DatabaseUI databaseUi, final DatabaseMarketplace databaseMarketplace, final ILogger logger,
+                   final JsonSerializer serializer) {
         this.databaseUi = databaseUi;
+        this.databaseMarketplace = databaseMarketplace;
         this.logger = logger;
         this.serializer = serializer;
     }
@@ -50,7 +54,7 @@ public class UILogic {
             ApiBotstoreItemList list = this.databaseUi.getBotstoreList(
                     startFrom, pageSize, filterList, orderField, orderDirection);
             if (devId != null) {
-                List<AiBot> ownedBots = this.databaseUi.getPurchasedBots(devId);
+                List<AiBot> ownedBots = this.databaseMarketplace.getPurchasedBots(devId);
                 HashSet<Integer> ownedSet = new HashSet<>();
                 ownedBots.forEach(x -> ownedSet.add(x.getBotId()));
                 for (int i = 0; i < list.getItems().size(); i++) {
@@ -77,7 +81,7 @@ public class UILogic {
         try {
             ApiBotstoreCategoryItemList map = this.databaseUi.getBotstoreItemsPerCategory(maxNumberOfItems);
             if (devId != null) {
-                List<AiBot> ownedBots = this.databaseUi.getPurchasedBots(devId);
+                List<AiBot> ownedBots = this.databaseMarketplace.getPurchasedBots(devId);
                 HashSet<Integer> ownedSet = new HashSet<>();
                 ownedBots.forEach(x -> ownedSet.add(x.getBotId()));
                 for (Map.Entry<String, List<BotstoreItem>> entry : map.getCategoriesMap().entrySet()) {
@@ -109,7 +113,7 @@ public class UILogic {
             }
 
             if (devId != null) {
-                List<AiBot> ownedBots = this.databaseUi.getPurchasedBots(devId);
+                List<AiBot> ownedBots = this.databaseMarketplace.getPurchasedBots(devId);
                 if (ownedBots.stream().anyMatch(x -> x.getBotId() == botId)) {
                     item.setOwned(true);
                 }

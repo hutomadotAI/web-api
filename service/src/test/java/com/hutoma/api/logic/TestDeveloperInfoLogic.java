@@ -1,7 +1,8 @@
 package com.hutoma.api.logic;
 
 import com.hutoma.api.common.ILogger;
-import com.hutoma.api.connectors.Database;
+import com.hutoma.api.connectors.db.DatabaseException;
+import com.hutoma.api.connectors.db.DatabaseMarketplace;
 import com.hutoma.api.containers.ApiDeveloperInfo;
 import com.hutoma.api.containers.ApiResult;
 
@@ -23,18 +24,18 @@ import static org.mockito.Mockito.when;
  */
 public class TestDeveloperInfoLogic {
 
-    private Database fakeDatabase;
+    private DatabaseMarketplace fakeDatabase;
     private DeveloperInfoLogic devInfoLogic;
 
     @Before
     public void setup() {
         ILogger fakeLogger = mock(ILogger.class);
-        this.fakeDatabase = mock(Database.class);
+        this.fakeDatabase = mock(DatabaseMarketplace.class);
         this.devInfoLogic = new DeveloperInfoLogic(fakeLogger, this.fakeDatabase);
     }
 
     @Test
-    public void testGet_Valid_requestOwnInfo() throws Database.DatabaseException {
+    public void testGet_Valid_requestOwnInfo() throws DatabaseException {
         when(this.fakeDatabase.getDeveloperInfo(any())).thenReturn(DEVINFO);
         ApiDeveloperInfo info = (ApiDeveloperInfo) this.devInfoLogic.getDeveloperInfo(DEVID_UUID, DEVID_UUID);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, info.getStatus().getCode());
@@ -43,7 +44,7 @@ public class TestDeveloperInfoLogic {
     }
 
     @Test
-    public void testGet_Valid_requestOthedDevInfo() throws Database.DatabaseException {
+    public void testGet_Valid_requestOthedDevInfo() throws DatabaseException {
         final UUID requesterDevId = UUID.randomUUID();
         when(this.fakeDatabase.getDeveloperInfo(any())).thenReturn(DEVINFO);
         ApiDeveloperInfo info = (ApiDeveloperInfo) this.devInfoLogic.getDeveloperInfo(requesterDevId, DEVID_UUID);
@@ -60,28 +61,28 @@ public class TestDeveloperInfoLogic {
     }
 
     @Test
-    public void testGet_notFound() throws Database.DatabaseException {
+    public void testGet_notFound() throws DatabaseException {
         when(this.fakeDatabase.getDeveloperInfo(any())).thenReturn(null);
         ApiResult info = this.devInfoLogic.getDeveloperInfo(DEVID_UUID, DEVID_UUID);
         Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, info.getStatus().getCode());
     }
 
     @Test
-    public void testGet_DBException() throws Database.DatabaseException {
-        when(this.fakeDatabase.getDeveloperInfo(any())).thenThrow(Database.DatabaseException.class);
+    public void testGet_DBException() throws DatabaseException {
+        when(this.fakeDatabase.getDeveloperInfo(any())).thenThrow(DatabaseException.class);
         ApiResult info = this.devInfoLogic.getDeveloperInfo(DEVID_UUID, DEVID_UUID);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, info.getStatus().getCode());
     }
 
     @Test
-    public void testSet_Valid() throws Database.DatabaseException {
+    public void testSet_Valid() throws DatabaseException {
         when(this.fakeDatabase.setDeveloperInfo(any())).thenReturn(true);
         ApiResult result = callSetDeveloperInfo();
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
     }
 
     @Test
-    public void testSet_requiredParamNull() throws Database.DatabaseException {
+    public void testSet_requiredParamNull() throws DatabaseException {
         ApiResult result = this.devInfoLogic.setDeveloperInfo(DEVID_UUID, null, DEVINFO.getCompany(),
                 DEVINFO.getEmail(), DEVINFO.getAddress(), DEVINFO.getPostCode(), DEVINFO.getCity(),
                 DEVINFO.getCountry(), DEVINFO.getWebsite());
@@ -89,7 +90,7 @@ public class TestDeveloperInfoLogic {
     }
 
     @Test
-    public void testSet_requiredParamEmpty() throws Database.DatabaseException {
+    public void testSet_requiredParamEmpty() throws DatabaseException {
         ApiResult result = this.devInfoLogic.setDeveloperInfo(DEVID_UUID, DEVINFO.getName(), "",
                 DEVINFO.getEmail(), DEVINFO.getAddress(), DEVINFO.getPostCode(), DEVINFO.getCity(),
                 DEVINFO.getCountry(), DEVINFO.getWebsite());
@@ -97,21 +98,21 @@ public class TestDeveloperInfoLogic {
     }
 
     @Test
-    public void testSet_DBException() throws Database.DatabaseException {
-        when(this.fakeDatabase.setDeveloperInfo(any())).thenThrow(Database.DatabaseException.class);
+    public void testSet_DBException() throws DatabaseException {
+        when(this.fakeDatabase.setDeveloperInfo(any())).thenThrow(DatabaseException.class);
         ApiResult result = callSetDeveloperInfo();
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
 
     @Test
-    public void testSet_DB_no_updates() throws Database.DatabaseException {
+    public void testSet_DB_no_updates() throws DatabaseException {
         when(this.fakeDatabase.setDeveloperInfo(any())).thenReturn(false);
         ApiResult result = callSetDeveloperInfo();
         Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
     }
 
     @Test
-    public void testSet_alreadyExists() throws Database.DatabaseException {
+    public void testSet_alreadyExists() throws DatabaseException {
         when(this.fakeDatabase.getDeveloperInfo(any())).thenReturn(DEVINFO);
         ApiResult result = callSetDeveloperInfo();
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());

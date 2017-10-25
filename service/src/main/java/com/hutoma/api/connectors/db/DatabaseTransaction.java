@@ -1,7 +1,6 @@
 package com.hutoma.api.connectors.db;
 
 import com.hutoma.api.common.ILogger;
-import com.hutoma.api.connectors.Database;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -32,9 +31,9 @@ public class DatabaseTransaction implements AutoCloseable {
     /***
      * Gets a DatabaseCall (wrapper for a single statetemnt) and sets it up for this transaction
      * @return
-     * @throws Database.DatabaseException
+     * @throws DatabaseException
      */
-    public DatabaseCall getDatabaseCall() throws Database.DatabaseException {
+    public DatabaseCall getDatabaseCall() throws DatabaseException {
         TransactionalDatabaseCall call = this.callprovider.get().setTransactionConnection(getTransactionConnection());
         // keep a record of this call as part of the transaction
         this.openCalls.add(call);
@@ -43,9 +42,9 @@ public class DatabaseTransaction implements AutoCloseable {
 
     /***
      * Commit the transaction if all has gone well
-     * @throws Database.DatabaseException
+     * @throws DatabaseException
      */
-    public void commit() throws Database.DatabaseException {
+    public void commit() throws DatabaseException {
         // if we made a DB call at all
         if (null != this.transactionConnection) {
             try {
@@ -54,16 +53,16 @@ public class DatabaseTransaction implements AutoCloseable {
                 this.transactionConnection.close();
                 this.transactionConnection = null;
             } catch (SQLException e) {
-                throw new Database.DatabaseException(e);
+                throw new DatabaseException(e);
             }
         }
     }
 
     /***
      * Rollback and cleanup
-     * @throws Database.DatabaseException
+     * @throws DatabaseException
      */
-    public void rollback() throws Database.DatabaseException {
+    public void rollback() throws DatabaseException {
         if (null != this.transactionConnection) {
             try {
                 // rollback, close and forget the connection
@@ -71,7 +70,7 @@ public class DatabaseTransaction implements AutoCloseable {
                 this.transactionConnection.close();
                 this.transactionConnection = null;
             } catch (SQLException e) {
-                throw new Database.DatabaseException(e);
+                throw new DatabaseException(e);
             }
         }
     }
@@ -86,7 +85,7 @@ public class DatabaseTransaction implements AutoCloseable {
         this.openCalls.forEach((call) -> call.close());
         try {
             rollback();
-        } catch (Database.DatabaseException e) {
+        } catch (DatabaseException e) {
             this.logger.logError(LOGFROM, "transaction rollback failed: " + e.toString());
         }
     }
@@ -95,16 +94,16 @@ public class DatabaseTransaction implements AutoCloseable {
      * Get the connection to be used for this transaction. If this is the first call then this method
      * borrows the connection from a pool and sets it up for a transaction
      * @return an open connection configured for a transaction
-     * @throws Database.DatabaseException
+     * @throws DatabaseException
      */
-    private Connection getTransactionConnection() throws Database.DatabaseException {
+    private Connection getTransactionConnection() throws DatabaseException {
         if (null == this.transactionConnection) {
             this.transactionConnection = this.pool.borrowConnection();
             // remove auto-commit so that we can commit explicitly
             try {
                 this.transactionConnection.setAutoCommit(false);
             } catch (SQLException e) {
-                throw new Database.DatabaseException(e);
+                throw new DatabaseException(e);
             }
         }
         return this.transactionConnection;

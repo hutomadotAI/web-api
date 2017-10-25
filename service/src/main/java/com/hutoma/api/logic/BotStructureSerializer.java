@@ -1,8 +1,9 @@
 package com.hutoma.api.logic;
 
 import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.connectors.Database;
-import com.hutoma.api.connectors.DatabaseEntitiesIntents;
+import com.hutoma.api.connectors.db.DatabaseEntitiesIntents;
+import com.hutoma.api.connectors.db.DatabaseAI;
+import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.ApiEntity;
 import com.hutoma.api.containers.ApiIntent;
@@ -18,10 +19,10 @@ public class BotStructureSerializer {
 
     private static final int BOT_SCHEMA_VERSION = 1;
 
-    public static BotStructure serialize(final UUID devId, final UUID aiid, final Database database,
+    public static BotStructure serialize(final UUID devId, final UUID aiid, final DatabaseAI database,
                                   final DatabaseEntitiesIntents databaseEntitiesIntents,
                                   final JsonSerializer jsonSerializer)
-            throws Database.DatabaseException {
+            throws DatabaseException {
 
         // Get the bot.
         ApiAi bot = database.getAI(devId, aiid, jsonSerializer);

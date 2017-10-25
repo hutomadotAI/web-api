@@ -2,7 +2,6 @@ package com.hutoma.api.connectors.db;
 
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
-import com.hutoma.api.connectors.Database;
 import com.hutoma.api.containers.sub.TrainingStatus;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
@@ -42,54 +41,54 @@ public class DatabaseCall implements AutoCloseable {
         this.logger = logger;
     }
 
-    public ResultSet executeQuery() throws Database.DatabaseException {
+    public ResultSet executeQuery() throws DatabaseException {
         checkParamsSet();
         try {
             return this.statement.executeQuery();
         } catch (SQLException e) {
-            throw new Database.DatabaseException(e);
+            throw new DatabaseException(e);
         }
     }
 
-    public boolean execute() throws Database.DatabaseException {
+    boolean execute() throws DatabaseException {
         checkParamsSet();
         try {
             return this.statement.execute();
         } catch (SQLException e) {
-            throw new Database.DatabaseException(e);
+            throw new DatabaseException(e);
         }
     }
 
-    public int executeUpdate() throws Database.DatabaseException {
+    int executeUpdate() throws DatabaseException {
         checkParamsSet();
         try {
             return this.statement.executeUpdate();
         } catch (java.sql.SQLIntegrityConstraintViolationException icve) {
             throw new Database.DatabaseIntegrityViolationException(icve);
         } catch (SQLException e) {
-            throw new Database.DatabaseException(e);
+            throw new DatabaseException(e);
         }
     }
 
-    public ResultSet getResultSet() throws Database.DatabaseException {
+    ResultSet getResultSet() throws DatabaseException {
         try {
             return this.statement.getResultSet();
         } catch (SQLException e) {
-            throw new Database.DatabaseException(e);
+            throw new DatabaseException(e);
         }
     }
 
-    public boolean hasMoreResults() throws Database.DatabaseException {
+    boolean hasMoreResults() throws DatabaseException {
         try {
             return this.statement.getMoreResults();
         } catch (SQLException e) {
-            throw new Database.DatabaseException(e);
+            throw new DatabaseException(e);
         }
     }
 
     @SuppressFBWarnings(value = "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING",
             justification = "Statement is dynamically built from a stored procedure name and uses parameterization")
-    public DatabaseCall initialise(String storedProcedureName, int numberOfParams) throws Database.DatabaseException {
+    public DatabaseCall initialise(String storedProcedureName, int numberOfParams) throws DatabaseException {
 
         this.paramCount = numberOfParams;
         this.paramSetIndex = 0;
@@ -112,101 +111,101 @@ public class DatabaseCall implements AutoCloseable {
             this.connection = getConnection();
             this.statement = this.connection.prepareStatement(sb.toString());
         } catch (SQLException e) {
-            throw new Database.DatabaseException(e);
+            throw new DatabaseException(e);
         }
         return this;
     }
 
-    public DatabaseCall add(String param) throws Database.DatabaseException {
+    public DatabaseCall add(String param) throws DatabaseException {
         checkPosition();
         try {
             this.statement.setString(++this.paramSetIndex, param);
         } catch (SQLException e) {
-            throw new Database.DatabaseException(e);
+            throw new DatabaseException(e);
         }
         return this;
     }
 
-    public DatabaseCall add(boolean param) throws Database.DatabaseException {
+    public DatabaseCall add(boolean param) throws DatabaseException {
         checkPosition();
         try {
             this.statement.setBoolean(++this.paramSetIndex, param);
         } catch (SQLException e) {
-            throw new Database.DatabaseException(e);
+            throw new DatabaseException(e);
         }
         return this;
     }
 
-    public DatabaseCall add(double param) throws Database.DatabaseException {
+    public DatabaseCall add(double param) throws DatabaseException {
         checkPosition();
         try {
             this.statement.setDouble(++this.paramSetIndex, param);
         } catch (SQLException e) {
-            throw new Database.DatabaseException(e);
+            throw new DatabaseException(e);
         }
         return this;
     }
 
-    public DatabaseCall add(UUID param) throws Database.DatabaseException {
+    public DatabaseCall add(UUID param) throws DatabaseException {
         return this.add(param.toString());
     }
 
-    public DatabaseCall add(TrainingStatus param) throws Database.DatabaseException {
+    public DatabaseCall add(TrainingStatus param) throws DatabaseException {
         checkPosition();
         try {
             this.statement.setString(++this.paramSetIndex, param.value());
         } catch (SQLException e) {
-            throw new Database.DatabaseException(e);
+            throw new DatabaseException(e);
         }
         return this;
     }
 
-    public DatabaseCall add(long param) throws Database.DatabaseException {
+    public DatabaseCall add(long param) throws DatabaseException {
         checkPosition();
         try {
             this.statement.setLong(++this.paramSetIndex, param);
         } catch (SQLException e) {
-            throw new Database.DatabaseException(e);
+            throw new DatabaseException(e);
         }
         return this;
     }
 
-    public DatabaseCall add(DateTime param) throws Database.DatabaseException {
+    public DatabaseCall add(DateTime param) throws DatabaseException {
         checkPosition();
         try {
             this.statement.setDate(++this.paramSetIndex, new java.sql.Date(param.getMillis()));
         } catch (SQLException e) {
-            throw new Database.DatabaseException(e);
+            throw new DatabaseException(e);
         }
         return this;
     }
 
-    public DatabaseCall add(int param) throws Database.DatabaseException {
+    public DatabaseCall add(int param) throws DatabaseException {
         checkPosition();
         try {
             this.statement.setInt(++this.paramSetIndex, param);
         } catch (SQLException e) {
-            throw new Database.DatabaseException(e);
+            throw new DatabaseException(e);
         }
         return this;
     }
 
-    public DatabaseCall add(final BigDecimal param) throws Database.DatabaseException {
+    public DatabaseCall add(final BigDecimal param) throws DatabaseException {
         checkPosition();
         try {
             this.statement.setBigDecimal(++this.paramSetIndex, param);
         } catch (SQLException e) {
-            throw new Database.DatabaseException(e);
+            throw new DatabaseException(e);
         }
         return this;
     }
 
-    public DatabaseCall add(final InputStream param) throws Database.DatabaseException {
+    public DatabaseCall add(final InputStream param) throws DatabaseException {
         checkPosition();
         try {
             this.statement.setBinaryStream(++this.paramSetIndex, param);
         } catch (SQLException e) {
-            throw new Database.DatabaseException(e);
+            throw new DatabaseException(e);
         }
         return this;
     }
@@ -224,23 +223,23 @@ public class DatabaseCall implements AutoCloseable {
         closeConnection();
     }
 
-    private void checkPosition() throws Database.DatabaseException {
+    private void checkPosition() throws DatabaseException {
         if (this.paramSetIndex >= this.paramCount) {
-            throw new Database.DatabaseException(new Exception("too many parameters added in call " + this.callName));
+            throw new DatabaseException(new Exception("too many parameters added in call " + this.callName));
         }
     }
 
-    private void checkParamsSet() throws Database.DatabaseException {
+    private void checkParamsSet() throws DatabaseException {
         if (this.paramSetIndex != this.paramCount) {
-            throw new Database.DatabaseException(new Exception("not enough parameters added in call " + this.callName));
+            throw new DatabaseException(new Exception("not enough parameters added in call " + this.callName));
         }
     }
 
-    protected Connection getConnection() throws Database.DatabaseException {
+    protected Connection getConnection() throws DatabaseException {
         return this.pool.borrowConnection();
     }
 
-    DatabaseCall addTimestamp() throws Database.DatabaseException {
+    DatabaseCall addTimestamp() throws DatabaseException {
         return add(DateTime.now());
     }
 

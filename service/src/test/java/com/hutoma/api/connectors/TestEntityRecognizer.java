@@ -3,6 +3,7 @@ package com.hutoma.api.connectors;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.sub.RecognizedEntity;
 
 import org.glassfish.grizzly.http.server.HttpServer;
@@ -67,7 +68,7 @@ public class TestEntityRecognizer {
     }
 
     @Test
-    public void testCallEntityRecognizer() throws AIServices.AiServicesException, Database.DatabaseException {
+    public void testCallEntityRecognizer() throws AIServices.AiServicesException, DatabaseException {
         List<RecognizedEntity> entities = this.erService.getEntities("anything not null");
         Assert.assertEquals(1, entities.size());
         Assert.assertEquals(ENTITY_CATEGORY, entities.get(0).getCategory());
@@ -77,7 +78,7 @@ public class TestEntityRecognizer {
     }
 
     @Test
-    public void testCallEntityRecognizer_serverError() throws AIServices.AiServicesException, Database.DatabaseException {
+    public void testCallEntityRecognizer_serverError() throws AIServices.AiServicesException, DatabaseException {
         List<RecognizedEntity> entities = this.erService.getEntities(null);
         Assert.assertEquals(0, entities.size());
     }
