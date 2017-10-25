@@ -5,11 +5,13 @@ import com.hutoma.api.common.Config;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.LogMap;
+import com.hutoma.api.common.ThreadSubPool;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.ApiServerAcknowledge;
 import com.hutoma.api.containers.sub.ServerRegistration;
 
 import org.glassfish.jersey.client.JerseyClient;
+import org.glassfish.jersey.client.JerseyInvocation;
 import org.glassfish.jersey.client.JerseyWebTarget;
 
 import java.net.HttpURLConnection;
@@ -17,17 +19,16 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.inject.Inject;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
 
 import static org.glassfish.jersey.client.ClientProperties.CONNECT_TIMEOUT;
+import static org.glassfish.jersey.client.ClientProperties.READ_TIMEOUT;
 
-
-/**
- * Created by David MG on 01/02/2017.
- */
 public class ServerTracker implements Callable, IServerEndpoint {
 
     private static final String LOGFROM = "servertracker";
@@ -37,6 +38,7 @@ public class ServerTracker implements Callable, IServerEndpoint {
     private final JerseyClient jerseyClient;
     private final JsonSerializer jsonSerializer;
     private final ILogger logger;
+    private final ThreadSubPool threadSubPool;
     protected UUID serverSessionID;
     protected AtomicBoolean endpointVerified;
     protected ServerRegistration registration;
@@ -48,11 +50,13 @@ public class ServerTracker implements Callable, IServerEndpoint {
     @Inject
     public ServerTracker(final Config config, final Tools tools,
                          final JerseyClient jerseyClient,
-                         final JsonSerializer jsonSerializer, final ILogger logger) {
+                         final JsonSerializer jsonSerializer, final ILogger logger,
+                         final ThreadSubPool threadSubPool) {
         this.config = config;
         this.tools = tools;
         this.jsonSerializer = jsonSerializer;
         this.logger = logger;
+        this.threadSubPool = threadSubPool;
 
         this.runFlag = new AtomicBoolean();
         this.endpointVerified = new AtomicBoolean(false);
@@ -233,6 +237,44 @@ public class ServerTracker implements Callable, IServerEndpoint {
     }
 
     /***
+     * Thread wrapper for the actually http call to send a heartbeat to the back-end server
+     * The web-request and clean-up are dealt with in a separate thread
+     * because the call can take up to 15 minutes regardless of timeout settings
+     * and this halts the servertracker thread, keeping the server alive artifically
+     */
+    private static class HeartbeatThreadWrapper implements Callable<Integer> {
+
+        // http call builder with everything already set except for the entity
+        private final JerseyInvocation.Builder builder;
+
+        // entity to send with the post call
+        private final Entity entity;
+
+        public HeartbeatThreadWrapper(final JerseyInvocation.Builder builder, final Entity entity) {
+            this.builder = builder;
+            this.entity = entity;
+        }
+
+        @Override
+        public Integer call() throws Exception {
+            Response response = null;
+            try {
+                // make the call
+                response = this.builder.post(this.entity);
+                // pull out the payload data to avoid memory leaks
+                response.bufferEntity();
+                // return only the status code
+                return Integer.valueOf(response.getStatus());
+            } finally {
+                // if we had a valid response object then close it
+                if (response != null) {
+                    response.close();
+                }
+            }
+        }
+    }
+
+    /***
      * Make a heartbeat call to the server
      * @return true for success, false otherwise
      */
@@ -242,22 +284,29 @@ public class ServerTracker implements Callable, IServerEndpoint {
                 .put("Type", this.registration.getServerType().value())
                 .put("Server", this.serverIdentity)
                 .put("SessionId", this.serverSessionID.toString());
-        Response response = null;
         try {
             JerseyWebTarget target = this.jerseyClient
                     .target(this.registration.getServerUrl())
                     .path("heartbeat");
 
-            response = target
+            HeartbeatThreadWrapper heartbeatWrapper = new HeartbeatThreadWrapper(target
                     .property(CONNECT_TIMEOUT, (int) this.config.getServerHeartbeatEveryMs())
-                    .request()
-                    .post(Entity.json(this.jsonSerializer.serialize(new ApiServerAcknowledge(this.serverSessionID))));
+                    .property(READ_TIMEOUT, (int) this.config.getServerHeartbeatEveryMs())
+                    .request(),
+                    Entity.json(this.jsonSerializer.serialize(new ApiServerAcknowledge(this.serverSessionID))));
+
+            // start the heartbeat call on a separate thread
+            Future<Integer> futureResponse = this.threadSubPool.submit(heartbeatWrapper);
+
+            // get the status code result of the heartbeat call
+            // but only wait a specified amount of time before failing with a TimeoutException
+            int responseStatus = futureResponse.get(this.config.getServerHeartbeatEveryMs(), TimeUnit.MILLISECONDS);
 
             // re-check session to see if it was closed while this heartbeat was in progress
             // if so, just bail out here
             if (this.runFlag.get()) {
 
-                if (response.getStatus() == HttpURLConnection.HTTP_OK) {
+                if (responseStatus == HttpURLConnection.HTTP_OK) {
                     this.logger.logDebug(LOGFROM,
                             String.format("heartbeat ping to %s succeeded", this.serverIdentity),
                             logMap.put("Status", "success"));
@@ -265,15 +314,15 @@ public class ServerTracker implements Callable, IServerEndpoint {
                 }
 
                 // bad request from a heartbeat means that the backend server has closed the session
-                if (response.getStatus() == HttpURLConnection.HTTP_BAD_REQUEST) {
+                if (responseStatus == HttpURLConnection.HTTP_BAD_REQUEST) {
                     this.endServerSession();
                     this.logger.logWarning(LOGFROM,
                             String.format("%s has closed the session remotely", this.serverIdentity),
-                            logMap.put("Status", Integer.toString(response.getStatus())));
+                            logMap.put("Status", Integer.toString(responseStatus)));
                 } else {
                     this.logger.logWarning(LOGFROM, String.format("heartbeat ping to %s failed with error %d",
-                            this.serverIdentity, response.getStatus()), logMap.put("Status",
-                            Integer.toString(response.getStatus())));
+                            this.serverIdentity, responseStatus), logMap.put("Status",
+                            Integer.toString(responseStatus)));
                 }
             }
         } catch (Exception e) {
@@ -282,10 +331,6 @@ public class ServerTracker implements Callable, IServerEndpoint {
                     logMap.put("Status", e.getMessage())
                             .put("Stack trace", CentralLogger.getStackTraceAsString(e.getStackTrace())));
 
-        } finally {
-            if (response != null) {
-                response.close();
-            }
         }
         return false;
     }

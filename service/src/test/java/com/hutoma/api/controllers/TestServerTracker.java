@@ -4,10 +4,10 @@ import com.hutoma.api.common.Config;
 import com.hutoma.api.common.FakeTimerTools;
 import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.common.ThreadSubPool;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.sub.BackendServerType;
 import com.hutoma.api.containers.sub.ServerRegistration;
-import com.hutoma.api.controllers.ServerTracker;
 
 import org.glassfish.jersey.client.JerseyClient;
 import org.junit.Assert;
@@ -34,7 +34,8 @@ public class TestServerTracker {
         when(this.fakeConfig.getServerHeartbeatEveryMs()).thenReturn(2000L);
         when(this.fakeConfig.getServerHeartbeatMinimumGapMs()).thenReturn(500L);
         this.testClass = new ServerTrackerUnderTest(this.fakeConfig, this.tools,
-                mock(JerseyClient.class), mock(JsonSerializer.class), mock(ILogger.class));
+                mock(JerseyClient.class), mock(JsonSerializer.class), mock(ILogger.class),
+                mock(ThreadSubPool.class));
         this.testClass.trackServer(new ServerRegistration(BackendServerType.WNET, "url", 1, 1));
     }
 
@@ -68,8 +69,10 @@ public class TestServerTracker {
 
         private long timeAfterWhichHeartbeatFails = 0;
 
-        public ServerTrackerUnderTest(final Config config, final Tools tools, final JerseyClient jerseyClient, final JsonSerializer jsonSerializer, final ILogger logger) {
-            super(config, tools, jerseyClient, jsonSerializer, logger);
+        public ServerTrackerUnderTest(final Config config, final Tools tools, final JerseyClient jerseyClient,
+                                      final JsonSerializer jsonSerializer, final ILogger logger,
+                                      final ThreadSubPool threadSubPool) {
+            super(config, tools, jerseyClient, jsonSerializer, logger, threadSubPool);
         }
 
         public void setTimeAfterWhichHeartbeatFails(final long timeAfterWhichHeartbeatFails) {
