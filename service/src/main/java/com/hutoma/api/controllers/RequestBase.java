@@ -29,6 +29,9 @@ import java.util.concurrent.TimeoutException;
 import javax.inject.Inject;
 import javax.ws.rs.core.Response;
 
+import static org.glassfish.jersey.client.ClientProperties.CONNECT_TIMEOUT;
+import static org.glassfish.jersey.client.ClientProperties.READ_TIMEOUT;
+
 /**
  * Base class for backend controllers.
  */
@@ -247,7 +250,10 @@ public abstract class RequestBase {
         final JerseyInvocation.Builder builder = target.request();
         return () -> {
             long startTime = RequestBase.this.tools.getTimestamp();
-            Response response = builder.get();
+            Response response = builder
+                    .property(CONNECT_TIMEOUT, (int) this.config.getBackendCombinedRequestTimeoutMs())
+                    .property(READ_TIMEOUT, (int) this.config.getBackendCombinedRequestTimeoutMs())
+                    .get();
             return new InvocationResult(aiid, response, endpoint,
                     RequestBase.this.tools.getTimestamp() - startTime);
         };
