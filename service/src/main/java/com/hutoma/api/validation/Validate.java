@@ -123,30 +123,34 @@ public class Validate {
     }
 
     /***
-     * * Throw a validation exception if any of the strings are too long
-     * @param maxLength
-     * @param paramName
-     * @param paramList
-     * @return
-     * @throws ParameterValidationException
-     */
-    List<String> validateFieldLengthsInList(final int maxLength, final String paramName, List<String> paramList)
-            throws ParameterValidationException {
-        for (String item : paramList) {
-            validateFieldLength(maxLength, paramName, item);
-        }
-        return paramList;
-    }
-
-    /***
      * For each string in the list, filter control characters and coalesce spaces
      * @param paramList list of strings
      * @return new list of strings
      */
-    public List<String> filterCoalesceSpacesInList(List<String> paramList) {
+    public List<String> filterControlCoalesceSpacesInList(List<String> paramList) {
         return paramList.stream()
                 .map(x -> filterControlAndCoalesceSpaces(x))
                 .collect(Collectors.toList());
+    }
+
+    /***
+     * Dedupe list, remove empty elements and throw an exception if the final list is empty
+     * @param paramList list
+     * @param paramName name of the parameter
+     * @return deduped list
+     * @throws ParameterValidationException
+     */
+    public List<String> dedupeAndEnsureNonEmptyList(List<String> paramList, String paramName)
+            throws ParameterValidationException {
+        List<String> distinct = paramList.stream()
+                .distinct()
+                .filter(entry -> !entry.isEmpty())
+                .collect(Collectors.toList());
+        if (distinct.isEmpty()) {
+            throw new ParameterValidationException(
+                    String.format("at least one %s required", paramName), paramName);
+        }
+        return distinct;
     }
 
     /***
@@ -231,6 +235,22 @@ public class Validate {
     }
 
     /***
+     * * Throw a validation exception if any of the strings are too long
+     * @param maxLength
+     * @param paramName
+     * @param paramList
+     * @return
+     * @throws ParameterValidationException
+     */
+    List<String> validateFieldLengthsInList(final int maxLength, final String paramName, List<String> paramList)
+            throws ParameterValidationException {
+        for (String item : paramList) {
+            validateFieldLength(maxLength, paramName, item);
+        }
+        return paramList;
+    }
+
+    /***
      * Validates an optional floating point number
      * @param paramName parameter name used for exception
      * @param min valid range lowest value
@@ -290,7 +310,7 @@ public class Validate {
             throws ParameterValidationException {
         List<Integer> list = new ArrayList<>();
         List<String> paramsList = Tools.getListFromMultipeValuedParam(params);
-        for (String param: paramsList) {
+        for (String param : paramsList) {
             list.add(validateInteger(paramName, param));
         }
         return list;
@@ -376,6 +396,11 @@ public class Validate {
     String validateOptionalDescription(final String paramName, final String param)
             throws ParameterValidationException {
         return validatePatternOptionalField(printableAscii, paramName, param);
+    }
+
+    String validateRequiredLabel(final String paramName, final String param)
+            throws ParameterValidationException {
+        return validatePattern(printableAscii, paramName, param);
     }
 
     String validateOptionalSanitizeRemoveAt(final String paramName, final String param)

@@ -37,6 +37,10 @@ public class TestDataHelper {
     public static final List<String> DEFAULT_CHAT_RESPONSES = Collections.singletonList(ChatLogic.COMPLETELY_LOST_RESULT);
     public static final AiBotConfigDefinition DEFAULT_API_KEY_DESC = new AiBotConfigDefinition(null);
 
+    public static String stringOfLength(int length) {
+        return String.join("", Collections.nCopies(length, "a"));
+    }
+
     public static ApiAi getSampleAI() {
         return new ApiAi(TestDataHelper.AIID.toString(), "token", "name", "desc", DateTime.now(), false,
                 new BackendStatus(), true,

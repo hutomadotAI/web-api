@@ -5,7 +5,6 @@ import com.hutoma.api.common.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.LogMap;
 import com.hutoma.api.common.Tools;
-import com.hutoma.api.containers.ApiBotStructure;
 import com.hutoma.api.containers.ApiEntity;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiFacebookCustomisation;
@@ -349,16 +348,19 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
         this.validateFieldLength(250, INTENTNAME, intent.getIntentName());
         this.validateAlphaNumPlusDashes(INTENTNAME, intent.getIntentName());
 
-        // for each response, filter and check against size limit
+        // for each response, filter, check against size limit, dedupe, remove empties, check one present
         intent.setResponses(
-                this.validateFieldLengthsInList(250, INTENT_RESPONSES,
-                        this.filterCoalesceSpacesInList(intent.getResponses())));
+                this.dedupeAndEnsureNonEmptyList(
+                        this.validateFieldLengthsInList(250, INTENT_RESPONSES,
+                                this.filterControlCoalesceSpacesInList(intent.getResponses())), INTENT_RESPONSES));
 
-        // for each user expression, filter and check against size limit
+        // for each expression, filter, check against size limit, dedupe, remove empties, check one present
         intent.setUserSays(
-                this.validateFieldLengthsInList(250, INTENT_USERSAYS,
-                        this.filterCoalesceSpacesInList(intent.getUserSays())));
+                this.dedupeAndEnsureNonEmptyList(
+                        this.validateFieldLengthsInList(250, INTENT_USERSAYS,
+                                this.filterControlCoalesceSpacesInList(intent.getUserSays())), INTENT_USERSAYS));
 
+        HashSet<String> labelsInUse = new HashSet<>();
         // for each variable
         if (null != intent.getVariables()) {
             for (IntentVariable variable : intent.getVariables()) {
@@ -367,13 +369,26 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
                 this.validateEntityName(ENTITYNAME, variable.getEntityName());
 
                 // the list of prompts
-                variable.setPrompts(
-                        this.validateFieldLengthsInList(250, INTENT_PROMPTLIST,
-                                this.filterCoalesceSpacesInList(variable.getPrompts())));
+                List<String> prompts = this.validateFieldLengthsInList(250, INTENT_PROMPTLIST,
+                        this.filterControlCoalesceSpacesInList(variable.getPrompts()));
+                if (variable.isRequired()) {
+                    prompts = this.dedupeAndEnsureNonEmptyList(prompts, INTENT_PROMPTLIST);
+                }
+                variable.setPrompts(prompts);
 
                 // the value
                 this.validateFieldLength(250, INTENT_VAR_VALUE, variable.getValue());
                 this.validateOptionalDescription(INTENT_VAR_VALUE, variable.getValue());
+
+                // the label
+                this.validateFieldLength(250, INTENT_VAR_LABEL, variable.getLabel());
+
+                // get a trimmed label, to use for uniqueness check
+                // also validate characters in the process
+                String label = this.validateRequiredLabel(INTENT_VAR_LABEL, variable.getLabel());
+                if (!labelsInUse.add(label)) {
+                    throw new ParameterValidationException("duplicate intent variable label", INTENT_VAR_LABEL);
+                }
             }
         }
 
