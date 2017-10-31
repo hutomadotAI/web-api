@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE suppressions PUBLIC
+        "-//Puppy Crawl//DTD Suppressions 1.1//EN"
+        "http://www.puppycrawl.com/dtds/suppressions_1_1.dtd">
+<suppressions>
+    <suppress checks=".*" files="test"/>
+
+    <!-- JavaDoc related -->
+    <suppress checks="Javadoc" files=".*\.java$"/>
+    <suppress checks="NonEmptyAtclauseDescriptionCheck" files=".*\.java$"/>
+
+    <!-- Imports -->
+    <suppress checks="AvoidStarImport" files=".*\.java$"/>
+    <suppress checks="ImportOrder" files=".*\.java$"/>
+
+    <!-- To allow defining "} while ()" -->
+    <suppress checks="RightCurly" files=".*\.java$"/>
+
+    <!-- Misc -->
+    <!-- <suppress checks="MagicNumber" files=".*\.java$"/> -->
+    <!-- allow AI as part of the name -->
+    <suppress checks="AbbreviationAsWordInName" files=".*\.java$"/>
+    <!-- Line length overriding our definition :) -->
+</suppressions>

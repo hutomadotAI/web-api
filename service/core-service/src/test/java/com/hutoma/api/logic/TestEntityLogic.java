@@ -1,0 +1,223 @@
+package com.hutoma.api.logic;
+
+import com.hutoma.api.common.Config;
+import com.hutoma.api.connectors.db.DatabaseEntitiesIntents;
+import com.hutoma.api.connectors.db.DatabaseException;
+import com.hutoma.api.connectors.db.DatabaseIntegrityViolationException;
+import com.hutoma.api.containers.ApiEntity;
+import com.hutoma.api.containers.ApiEntityList;
+import com.hutoma.api.containers.ApiResult;
+import com.hutoma.api.containers.sub.Entity;
+import com.hutoma.api.logging.ILogger;
+
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.OptionalInt;
+import java.util.UUID;
+
+import static com.hutoma.api.common.TestDataHelper.DEVID_UUID;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.*;
+
+/**
+ * Created by David MG on 06/10/2016.
+ */
+public class TestEntityLogic {
+
+    private final String ENTNAME = "entity";
+    private final OptionalInt ENTITY_ID = OptionalInt.of(123);
+    DatabaseEntitiesIntents fakeDatabase;
+    Config fakeConfig;
+    EntityLogic entityLogic;
+    ILogger fakeLogger;
+    TrainingLogic trainingLogic;
+
+    @Before
+    public void setup() {
+        this.fakeConfig = mock(Config.class);
+        this.fakeDatabase = mock(DatabaseEntitiesIntents.class);
+        this.fakeLogger = mock(ILogger.class);
+        this.trainingLogic = mock(TrainingLogic.class);
+        this.entityLogic = new EntityLogic(this.fakeConfig, this.fakeLogger, this.fakeDatabase, this.trainingLogic);
+    }
+
+    @Test
+    public void testGetEntities_Success() throws DatabaseException {
+        when(this.fakeDatabase.getEntities(any())).thenReturn(getEntitiesList());
+        final ApiResult result = this.entityLogic.getEntities(DEVID_UUID);
+        Assert.assertEquals(200, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testGetEntities_Success_Return() throws DatabaseException {
+        when(this.fakeDatabase.getEntities(any())).thenReturn(getEntitiesList());
+        final ApiResult result = this.entityLogic.getEntities(DEVID_UUID);
+        Assert.assertEquals(1, ((ApiEntityList) result).getEntities().size());
+        Assert.assertEquals(this.ENTNAME, ((ApiEntityList) result).getEntities().get(0).getName());
+    }
+
+    @Test
+    public void testGetEntities_NotFound() throws DatabaseException {
+        when(this.fakeDatabase.getEntities(any())).thenReturn(new ArrayList<>());
+        final ApiResult result = this.entityLogic.getEntities(DEVID_UUID);
+        Assert.assertEquals(404, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testGetEntities_Error() throws DatabaseException {
+        when(this.fakeDatabase.getEntities(any())).thenThrow(DatabaseException.class);
+        final ApiResult result = this.entityLogic.getEntities(DEVID_UUID);
+        Assert.assertEquals(500, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testGetEntity_Success() throws DatabaseException {
+        when(this.fakeDatabase.getEntity(any(), anyString())).thenReturn(getEntity());
+        final ApiResult result = this.entityLogic.getEntity(DEVID_UUID, this.ENTNAME);
+        Assert.assertEquals(200, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testGetEntity_Success_Return() throws DatabaseException {
+        when(this.fakeDatabase.getEntity(any(), anyString())).thenReturn(getEntity());
+        final ApiResult result = this.entityLogic.getEntity(DEVID_UUID, this.ENTNAME);
+        Assert.assertEquals(this.ENTNAME, ((ApiEntity) result).getEntityName());
+    }
+
+    @Test
+    /***
+     * If the caller gets a single entity that doesn't exist, then the return is "success" with
+     * an empty value list
+     */
+    public void testGetEntity_NotFound() throws DatabaseException {
+        when(this.fakeDatabase.getEntity(any(), anyString())).thenReturn(getEntityEmpty());
+        final ApiResult result = this.entityLogic.getEntity(DEVID_UUID, this.ENTNAME);
+        Assert.assertEquals(200, result.getStatus().getCode());
+        Assert.assertEquals(this.ENTNAME, ((ApiEntity) result).getEntityName());
+        Assert.assertEquals(0, ((ApiEntity) result).getEntityValueList().size());
+    }
+
+    @Test
+    public void testGetEntity_Error() throws DatabaseException {
+        when(this.fakeDatabase.getEntity(any(), anyString())).thenThrow(DatabaseException.class);
+        final ApiResult result = this.entityLogic.getEntity(DEVID_UUID, this.ENTNAME);
+        Assert.assertEquals(500, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testWriteEntity_Success() throws DatabaseException {
+        final ApiResult result = this.entityLogic.writeEntity(DEVID_UUID, this.ENTNAME, new ApiEntity(this.ENTNAME, DEVID_UUID));
+        Assert.assertEquals(200, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testWriteEntity_Error() throws DatabaseException {
+        doThrow(DatabaseException.class).when(this.fakeDatabase).writeEntity(any(), anyString(), any());
+        final ApiResult result = this.entityLogic.writeEntity(DEVID_UUID, this.ENTNAME, new ApiEntity(this.ENTNAME, DEVID_UUID));
+        Assert.assertEquals(500, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testWriteEntity_RenameClash() throws DatabaseException {
+        doThrow(new DatabaseIntegrityViolationException(new Exception("test"))).when(this.fakeDatabase).writeEntity(any(), anyString(), any());
+        final ApiResult result = this.entityLogic.writeEntity(DEVID_UUID, this.ENTNAME, new ApiEntity("nameclash", DEVID_UUID));
+        Assert.assertEquals(400, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testDeleteEntity_Success() throws DatabaseException {
+        when(this.fakeDatabase.getEntityIdForDev(any(), anyString())).thenReturn(this.ENTITY_ID);
+        when(this.fakeDatabase.deleteEntity(any(), anyInt())).thenReturn(true);
+        final ApiResult result = this.entityLogic.deleteEntity(DEVID_UUID, this.ENTNAME);
+        Assert.assertEquals(200, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testDeleteEntity_Error() throws DatabaseException {
+        when(this.fakeDatabase.getEntityIdForDev(any(), anyString())).thenReturn(this.ENTITY_ID);
+        when(this.fakeDatabase.deleteEntity(any(), anyInt())).thenThrow(DatabaseException.class);
+        final ApiResult result = this.entityLogic.deleteEntity(DEVID_UUID, this.ENTNAME);
+        Assert.assertEquals(500, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testDeleteEntity_NotFound() throws DatabaseException {
+        when(this.fakeDatabase.getEntityIdForDev(any(), anyString())).thenReturn(OptionalInt.empty());
+        when(this.fakeDatabase.deleteEntity(any(), anyInt())).thenReturn(false);
+        final ApiResult result = this.entityLogic.deleteEntity(DEVID_UUID, this.ENTNAME);
+        Assert.assertEquals(404, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testDeleteEntity_entityInUse_triggersStopTraining() throws DatabaseException {
+        UUID aiid = UUID.randomUUID();
+        when(this.fakeDatabase.getAisForEntity(DEVID_UUID, this.ENTNAME)).thenReturn(Collections.singletonList(aiid));
+        when(this.fakeDatabase.getEntityIdForDev(any(), anyString())).thenReturn(this.ENTITY_ID);
+        when(this.fakeDatabase.deleteEntity(any(), anyInt())).thenReturn(true);
+        this.entityLogic.deleteEntity(DEVID_UUID, this.ENTNAME);
+        verify(this.trainingLogic).stopTraining(DEVID_UUID, aiid);
+    }
+
+    @Test
+    public void testDeleteEntity_entityNotInUse_doesNotStopTraining() throws DatabaseException {
+        when(this.fakeDatabase.getAisForEntity(DEVID_UUID, this.ENTNAME)).thenReturn(new ArrayList<>());
+        when(this.fakeDatabase.getEntityIdForDev(any(), anyString())).thenReturn(this.ENTITY_ID);
+        when(this.fakeDatabase.deleteEntity(any(), anyInt())).thenReturn(true);
+        this.entityLogic.deleteEntity(DEVID_UUID, this.ENTNAME);
+        verify(this.trainingLogic, never()).stopTraining(any(), any());
+    }
+
+    @Test
+    public void testDeleteEntity_dbError_doesNotStopTraining() throws DatabaseException {
+        when(this.fakeDatabase.getAisForEntity(DEVID_UUID, this.ENTNAME)).thenReturn(Collections.singletonList(UUID.randomUUID()));
+        when(this.fakeDatabase.getEntityIdForDev(any(), anyString())).thenReturn(this.ENTITY_ID);
+        when(this.fakeDatabase.deleteEntity(any(), anyInt())).thenThrow(DatabaseException.class);
+        this.entityLogic.deleteEntity(DEVID_UUID, this.ENTNAME);
+        verify(this.trainingLogic, never()).stopTraining(any(), any());
+    }
+
+    @Test
+    public void testWriteEntity_entityInUse_triggersStopTraining() throws DatabaseException {
+        UUID aiid = UUID.randomUUID();
+        when(this.fakeDatabase.getAisForEntity(DEVID_UUID, this.ENTNAME)).thenReturn(Collections.singletonList(aiid));
+        this.entityLogic.writeEntity(DEVID_UUID, this.ENTNAME, getEntity());
+        verify(this.trainingLogic).stopTraining(DEVID_UUID, aiid);
+    }
+
+    @Test
+    public void testWriteEntity_dbError_doesNotStopTraining() throws DatabaseException {
+        UUID aiid = UUID.randomUUID();
+        when(this.fakeDatabase.getAisForEntity(any(), any())).thenThrow(DatabaseException.class);
+        this.entityLogic.writeEntity(DEVID_UUID, this.ENTNAME, getEntity());
+        verify(this.trainingLogic, never()).stopTraining(any(), any());
+    }
+
+    @Test
+    public void testWriteEntity_entityNotInUse_doesNotStopTraining() throws DatabaseException {
+        when(this.fakeDatabase.getAisForEntity(DEVID_UUID, this.ENTNAME)).thenReturn(new ArrayList<>());
+        this.entityLogic.writeEntity(DEVID_UUID, this.ENTNAME, getEntity());
+        verify(this.trainingLogic, never()).stopTraining(any(), any());
+    }
+
+
+    private List<Entity> getEntitiesList() {
+        return Collections.singletonList(new Entity(this.ENTNAME, false));
+    }
+
+    private ApiEntity getEntity() {
+        return new ApiEntity(this.ENTNAME, DEVID_UUID, Arrays.asList("oneval", "twoval"), false);
+    }
+
+    private ApiEntity getEntityEmpty() {
+        return new ApiEntity(this.ENTNAME, DEVID_UUID, Arrays.asList(new String[]{}), false);
+    }
+
+
+}
