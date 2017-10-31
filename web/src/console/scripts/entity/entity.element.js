@@ -132,14 +132,14 @@ function saveEntity() {
     });
 }
 
-window.onbeforeunload = function (e) {
-    var evt = e || window.event;
-    // For IE and Firefox prior to version 4
-    if (evt && dataChanged) {
-        evt.returnValue = 'Are you sure you want to leave this page?';
-    }
-    // For Safari
+window.addEventListener('beforeunload', function (e) {
     if (dataChanged) {
-        return 'Are you sure you want to leave this page?';
+        var message = 'Are you sure you want to leave this page?';
+        // For IE and Firefox prior to version 4
+        if (e || window.event) {
+            e.returnValue = message;
+        }
+        // For Safari
+        return message;
     }
-};
+});

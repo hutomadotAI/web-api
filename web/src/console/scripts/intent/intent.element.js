@@ -185,14 +185,14 @@ $('#boxPrompts').on('show.bs.modal', function (e) {
     loadPromptsForEntity(rowElement, e.currentTarget);
 });
 
-window.onbeforeunload = function (e) {
-    var e = e || window.event;
-    // For IE and Firefox prior to version 4
-    if (e && data_changed) {
-        e.returnValue = 'Are you sure you want to leave this page?';
-    }
-    // For Safari
+window.addEventListener('beforeunload', function (e) {
     if (data_changed) {
-        return 'Are you sure you want to leave this page?';
+        var message = 'Are you sure you want to leave this page?';
+        // For IE and Firefox prior to version 4
+        if (e || window.event) {
+            e.returnValue = message;
+        }
+        // For Safari
+        return message;
     }
-};
+});
