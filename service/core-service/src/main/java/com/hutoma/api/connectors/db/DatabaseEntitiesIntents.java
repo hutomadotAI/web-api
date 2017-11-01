@@ -72,20 +72,21 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
             try {
                 call.initialise("getEntityDetails", 2).add(devid).add(entityName);
                 rs = call.executeQuery();
-                boolean isSystem = false;
-                if (rs.next()) {
-                    isSystem = rs.getBoolean("isSystem");
-                }
-                final ArrayList<String> entityValues = new ArrayList<>();
-                // only custom entities have values as system entities are handled externally
-                if (!isSystem) {
-                    call.initialise("getEntityValues", 2).add(devid).add(entityName);
-                    rs = call.executeQuery();
-                    while (rs.next()) {
-                        entityValues.add(rs.getString("value"));
+                if (!rs.next()) {
+                    return null;
+                } else {
+                    boolean isSystem = rs.getBoolean("isSystem");
+                    final ArrayList<String> entityValues = new ArrayList<>();
+                    // only custom entities have values as system entities are handled externally
+                    if (!isSystem) {
+                        call.initialise("getEntityValues", 2).add(devid).add(entityName);
+                        rs = call.executeQuery();
+                        while (rs.next()) {
+                            entityValues.add(rs.getString("value"));
+                        }
                     }
+                    return new ApiEntity(entityName, devid, entityValues, isSystem);
                 }
-                return new ApiEntity(entityName, devid, entityValues, isSystem);
             } catch (final SQLException sqle) {
                 throw new DatabaseException(sqle);
             }
