@@ -195,7 +195,8 @@ public class AIServices extends ServerConnector {
         executeAndWait(callables);
     }
 
-    public String getTrainingMaterialsCommon(final UUID devid, final UUID aiid, final JsonSerializer jsonSerializer) throws DatabaseException {
+    public String getTrainingMaterialsCommon(final UUID devid, final UUID aiid, final JsonSerializer jsonSerializer)
+            throws DatabaseException {
         final String EOL = "\n";
         final String devidString = devid.toString();
         StringBuilder sb = new StringBuilder();

@@ -2,9 +2,11 @@ package com.hutoma.api.logic;
 
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.connectors.db.Database;
 import com.hutoma.api.connectors.db.DatabaseAI;
 import com.hutoma.api.connectors.db.DatabaseEntitiesIntents;
 import com.hutoma.api.connectors.db.DatabaseIntegrityViolationException;
+import com.hutoma.api.connectors.db.DatabaseTransaction;
 import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiIntent;
@@ -22,6 +24,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import javax.inject.Inject;
+import javax.inject.Provider;
+import javax.ws.rs.HEAD;
 
 /**
  * Created by David MG on 05/10/2016.
@@ -35,17 +39,20 @@ public class IntentLogic {
     private final DatabaseAI databaseAi;
     private final TrainingLogic trainingLogic;
     private final JsonSerializer jsonSerializer;
+    private final Provider<DatabaseTransaction> databaseTransactionProvider;
 
     @Inject
     public IntentLogic(final Config config, final ILogger logger, final DatabaseEntitiesIntents databaseEntitiesIntents,
                        final DatabaseAI databaseAi, final TrainingLogic trainingLogic,
-                       final JsonSerializer jsonSerializer) {
+                       final JsonSerializer jsonSerializer,
+                       final Provider<DatabaseTransaction> transactionProvider) {
         this.config = config;
         this.logger = logger;
         this.databaseEntitiesIntents = databaseEntitiesIntents;
         this.databaseAi = databaseAi;
         this.trainingLogic = trainingLogic;
         this.jsonSerializer = jsonSerializer;
+        this.databaseTransactionProvider = transactionProvider;
     }
 
     public ApiResult getIntents(final UUID devid, final UUID aiid) {
@@ -132,17 +139,27 @@ public class IntentLogic {
                 return ApiError.getBadRequest(
                         String.format("Duplicate label%s: %s", dupLabelsString.isEmpty() ? "" : "s", dupLabelsString));
             }
-            this.databaseEntitiesIntents.writeIntent(devid, aiid, intent.getIntentName(), intent);
-            WebHook webHook = intent.getWebHook();
-            if (webHook != null) {
-                if (this.databaseEntitiesIntents.getWebHook(aiid, intent.getIntentName()) != null) {
-                    this.databaseEntitiesIntents.updateWebHook(aiid, intent.getIntentName(), webHook.getEndpoint(),
-                            webHook.isEnabled());
-                    this.logger.logUserTraceEvent(LOGFROM, "UpdateWebHook", devidString, logMap);
-                } else {
-                    this.databaseEntitiesIntents.createWebHook(aiid, webHook.getIntentName(), webHook.getEndpoint(),
-                            webHook.isEnabled());
-                    this.logger.logUserTraceEvent(LOGFROM, "WriteWebHook", devidString, logMap);
+            try (DatabaseTransaction transaction = this.databaseTransactionProvider.get()) {
+                this.databaseEntitiesIntents.writeIntent(devid, aiid, intent.getIntentName(), intent, transaction);
+                WebHook webHook = intent.getWebHook();
+                if (webHook != null) {
+                    if (this.databaseEntitiesIntents.getWebHook(aiid, intent.getIntentName()) != null) {
+                        if (!this.databaseAi.updateWebHook(aiid, intent.getIntentName(),
+                                webHook.getEndpoint(), webHook.isEnabled(), transaction)) {
+                            this.logger.logUserErrorEvent(LOGFROM, "Failed to update webhook",
+                                    devidString, logMap);
+                            return ApiError.getInternalServerError();
+                        }
+                        this.logger.logUserTraceEvent(LOGFROM, "UpdateWebHook", devidString, logMap);
+                    } else {
+                        if (!this.databaseAi.createWebHook(aiid, webHook.getIntentName(),
+                                webHook.getEndpoint(), webHook.isEnabled(), transaction)) {
+                            this.logger.logUserErrorEvent(LOGFROM, "Failed to create webhook",
+                                    devidString, logMap);
+                            return ApiError.getInternalServerError();
+                        }
+                        this.logger.logUserTraceEvent(LOGFROM, "WriteWebHook", devidString, logMap);
+                    }
                 }
             }
             this.trainingLogic.stopTraining(devid, aiid);

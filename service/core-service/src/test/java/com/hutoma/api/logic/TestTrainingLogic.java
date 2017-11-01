@@ -173,20 +173,23 @@ public class TestTrainingLogic {
         when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(getAi(TrainingStatus.AI_READY_TO_TRAIN, true));
         when(this.fakeDatabaseAi.getAiTrainingFile(any())).thenReturn("training file");
         when(this.fakeAiServices.getTrainingMaterialsCommon(any(), any(), any())).thenReturn("training file");
+        when(this.fakeDatabaseAi.updateAiTrainingFile(any(), anyString())).thenReturn(true);
         ApiResult result = this.logic.uploadFile(DEVID_UUID, AIID, TrainingLogic.TrainingType.TEXT, UURL, stream, this.fakeContentDisposition);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
     }
 
     @Test
-    public void testTrain_DocSimple() {
+    public void testTrain_DocSimple() throws DatabaseException {
         InputStream stream = createUpload(SOMETEXT);
+        when(this.fakeDatabaseAi.updateAiTrainingFile(any(), anyString())).thenReturn(true);
         ApiResult result = this.logic.uploadFile(DEVID_UUID, AIID, TrainingLogic.TrainingType.DOCUMENT, UURL, stream, this.fakeContentDisposition);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
     }
 
     @Test
-    public void testTrain_UrlSimple() throws HTMLExtractor.HtmlExtractionException {
+    public void testTrain_UrlSimple() throws HTMLExtractor.HtmlExtractionException, DatabaseException {
         when(this.fakeExtractor.getTextFromUrl(anyString())).thenReturn(SOMETEXT);
+        when(this.fakeDatabaseAi.updateAiTrainingFile(any(), anyString())).thenReturn(true);
         ApiResult result = this.logic.uploadFile(DEVID_UUID, AIID, TrainingLogic.TrainingType.WEBPAGE, UURL, null, null);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
     }
@@ -532,6 +535,7 @@ public class TestTrainingLogic {
     public void testUploadTraining_serviceException() throws DatabaseException, ServerConnector.AiServicesException {
         when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(getAi(TrainingStatus.AI_TRAINING_COMPLETE, true));
         when(this.fakeAiServices.getTrainingMaterialsCommon(any(), any(), any())).thenReturn(SOMETEXT);
+        when(this.fakeDatabaseAi.updateAiTrainingFile(any(), anyString())).thenReturn(true);
         doThrow(ServerConnector.AiServicesException.class).when(this.fakeAiServices).uploadTraining(any(), any(), any(), anyString());
         ApiResult result = this.logic.uploadFile(DEVID_UUID, AIID, TrainingLogic.TrainingType.TEXT, null, createUpload(SOMETEXT), this.fakeContentDisposition);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
@@ -710,7 +714,7 @@ public class TestTrainingLogic {
     }
 
     private void makeDBFail(TrainingLogic.TrainingType trainingType) throws DatabaseException, HTMLExtractor.HtmlExtractionException {
-        doThrow(new DatabaseException(new Exception("test"))).when(this.fakeDatabaseAi).updateAiTrainingFile(any(), anyString());
+        doThrow(DatabaseException.class).when(this.fakeDatabaseAi).updateAiTrainingFile(any(), anyString());
         InputStream stream = createUpload(SOMETEXT);
         when(this.fakeExtractor.getTextFromUrl(anyString())).thenReturn(SOMETEXT);
         ApiResult result = this.logic.uploadFile(DEVID_UUID, AIID, trainingType, UURL, stream, this.fakeContentDisposition);

@@ -72,7 +72,7 @@ public class TestAILogic {
     private ILogger fakeLogger;
     private JsonSerializer fakeSerializer;
     private Validate fakeValidate;
-    private DatabaseTransaction databaseTransaction;
+    private DatabaseTransaction fakeTransaction;
 
     @Before
     public void setup() {
@@ -88,10 +88,10 @@ public class TestAILogic {
         this.fakeValidate = mock(Validate.class);
         this.fakeAiIntegrationLogicProvider = mock(Provider.class);
         this.fakeDatabaseTransactionProvider = mock(Provider.class);
-        this.databaseTransaction = mock(DatabaseTransaction.class);
+        this.fakeTransaction = mock(DatabaseTransaction.class);
 
         when(this.fakeAiIntegrationLogicProvider.get()).thenReturn(mock(AIIntegrationLogic.class));
-        when(this.fakeDatabaseTransactionProvider.get()).thenReturn(this.databaseTransaction);
+        when(this.fakeDatabaseTransactionProvider.get()).thenReturn(this.fakeTransaction);
 
         when(this.fakeConfig.getMaxLinkedBotsPerAi()).thenReturn(5);
         when(this.fakeTools.createNewRandomUUID()).thenReturn(UUID.fromString("00000000-0000-0000-0000-000000000000"));
@@ -122,7 +122,7 @@ public class TestAILogic {
     public void testCreate_DBFail_Error() throws DatabaseException {
         when(this.fakeDatabaseAi.createAI(any(), anyString(), anyString(), any(), anyBoolean(),
                 anyString(), anyObject(), anyObject(), anyDouble(), anyInt(),
-                anyInt(), anyObject())).thenThrow(DatabaseException.class);
+                anyInt(), anyObject(), any())).thenThrow(DatabaseException.class);
         ApiResult result = this.aiLogic.createAI(DEVID_UUID, "name", "description", true, 0, 0.0, 1, null, "");
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
@@ -136,14 +136,14 @@ public class TestAILogic {
 
     @Test
     public void testGetSingle_Valid() throws DatabaseException {
-        when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
+        when(this.fakeDatabaseAi.getAI(any(), any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
         ApiResult result = this.aiLogic.getSingleAI(VALIDDEVID, AIID);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
     }
 
     @Test
     public void testGetSingle_Valid_Return() throws DatabaseException {
-        when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
+        when(this.fakeDatabaseAi.getAI(any(), any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
         ApiAi result = (ApiAi) this.aiLogic.getSingleAI(VALIDDEVID, AIID);
         Assert.assertEquals(AIID.toString(), result.getAiid());
     }
@@ -159,8 +159,8 @@ public class TestAILogic {
 
     public ApiAi getSingleUIFields(TrainingStatus wnet, TrainingStatus rnn, boolean hasLinked) throws DatabaseException {
         ApiAi ai = TestDataHelper.getAi(TestDataHelper.getBackendStatus(wnet, rnn));
-        when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(ai);
-        when(this.fakeDatabaseAi.getBotsLinkedToAi(any(), any())).thenReturn(
+        when(this.fakeDatabaseAi.getAI(any(), any(), any(), any())).thenReturn(ai);
+        when(this.fakeDatabaseAi.getBotsLinkedToAi(any(), any(), any())).thenReturn(
                 hasLinked ? Collections.singletonList(TestDataHelper.getAiBot(1, "name"))
                         : Collections.EMPTY_LIST);
         return (ApiAi) this.aiLogic.getSingleAI(VALIDDEVID, AIID);
@@ -201,14 +201,14 @@ public class TestAILogic {
 
     @Test
     public void testGetSingle_DBFail_Error() throws DatabaseException {
-        when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenThrow(DatabaseException.class);
+        when(this.fakeDatabaseAi.getAI(any(), any(), any(), any())).thenThrow(DatabaseException.class);
         ApiResult result = this.aiLogic.getSingleAI(VALIDDEVID, AIID);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
 
     @Test
     public void testGetSingle_DB_NotFound() throws DatabaseException {
-        when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(null);
+        when(this.fakeDatabaseAi.getAI(any(), any(), any(), any())).thenReturn(null);
         ApiResult result = this.aiLogic.getSingleAI(VALIDDEVID, AIID);
         Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
     }
@@ -862,7 +862,9 @@ public class TestAILogic {
         // For when we read the original AI for export
         when(this.fakeDatabaseAi.getAI(DEVID_UUID, UUID.fromString(baseAi.getAiid()), this.fakeSerializer)).thenReturn(baseAi);
         // For when we read the imported AI
-        when(this.fakeDatabaseAi.getAI(DEVID_UUID, generatedAiid, this.fakeSerializer)).thenReturn(importedAi);
+        when(this.fakeDatabaseAi.getAI(DEVID_UUID, generatedAiid, fakeSerializer, fakeTransaction)).thenReturn(importedAi);
+        // For when we read it one last time to return it to the caller
+        when(this.fakeDatabaseAi.getAI(DEVID_UUID, generatedAiid, fakeSerializer, null)).thenReturn(importedAi);
         when(this.fakeDatabaseAi.getAiTrainingFile(any())).thenReturn(trainingFile);
         when(this.fakeTools.createNewRandomUUID()).thenReturn(generatedAiid);
         TestDataHelper.mockDatabaseCreateAI(this.fakeDatabaseAi, generatedAiid);
@@ -910,14 +912,14 @@ public class TestAILogic {
         when(this.fakeDatabaseAi.unlinkBotFromAi(any(), any(), anyInt(), any())).thenReturn(true);
         ApiResult result = this.aiLogic.updateLinkedBots(DEVID_UUID, AIID, Collections.singletonList(ownedBots.get(1).getBotId()));
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
-        verify(this.databaseTransaction).commit();
+        verify(this.fakeTransaction).commit();
     }
 
     @Test
     public void testUpdateLinkedBots_duplicatedInList() throws DatabaseException {
         ApiResult result = this.aiLogic.updateLinkedBots(DEVID_UUID, AIID, Arrays.asList(1, 2, 3, 2));
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
-        verify(this.databaseTransaction, never()).commit();
+        verify(this.fakeTransaction, never()).commit();
     }
 
     @Test
@@ -925,7 +927,7 @@ public class TestAILogic {
         when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(null);
         ApiResult result = this.aiLogic.updateLinkedBots(DEVID_UUID, AIID, Arrays.asList(1, 2));
         Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
-        verify(this.databaseTransaction, never()).commit();
+        verify(this.fakeTransaction, never()).commit();
     }
 
     @Test
@@ -935,7 +937,7 @@ public class TestAILogic {
         when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(ai);
         ApiResult result = this.aiLogic.updateLinkedBots(DEVID_UUID, AIID, Arrays.asList(1, 2));
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
-        verify(this.databaseTransaction, never()).commit();
+        verify(this.fakeTransaction, never()).commit();
     }
 
     @Test
@@ -947,7 +949,7 @@ public class TestAILogic {
         ApiResult result = this.aiLogic.updateLinkedBots(DEVID_UUID, AIID, Arrays.asList(1, 3, 4, 5, 6, 7));
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
         verify(this.fakeDatabaseAi, never()).linkBotToAi(any(), any(), anyInt(), any());
-        verify(this.databaseTransaction, never()).commit();
+        verify(this.fakeTransaction, never()).commit();
     }
 
     @Test
@@ -955,7 +957,7 @@ public class TestAILogic {
         when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenThrow(DatabaseException.class);
         ApiResult result = this.aiLogic.updateLinkedBots(DEVID_UUID, AIID, Arrays.asList(1, 2));
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
-        verify(this.databaseTransaction, never()).commit();
+        verify(this.fakeTransaction, never()).commit();
     }
 
     @Test
@@ -970,8 +972,8 @@ public class TestAILogic {
         // 99 is not owned so it cannot be linked
         ApiResult result = this.aiLogic.updateLinkedBots(DEVID_UUID, AIID, Arrays.asList(1, 99));
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
-        verify(this.databaseTransaction, never()).commit();
-        verify(this.databaseTransaction).rollback();
+        verify(this.fakeTransaction, never()).commit();
+        verify(this.fakeTransaction).rollback();
     }
 
     @Test
@@ -982,8 +984,8 @@ public class TestAILogic {
         when(this.fakeDatabaseAi.unlinkBotFromAi(any(), any(), anyInt(), any())).thenReturn(false);
         ApiResult result = this.aiLogic.updateLinkedBots(DEVID_UUID, AIID, Collections.singletonList(ownedBots.get(1).getBotId()));
         Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
-        verify(this.databaseTransaction, never()).commit();
-        verify(this.databaseTransaction).rollback();
+        verify(this.fakeTransaction, never()).commit();
+        verify(this.fakeTransaction).rollback();
     }
 
     @Test
@@ -996,11 +998,11 @@ public class TestAILogic {
         ApiResult result = this.aiLogic.updateLinkedBots(DEVID_UUID, AIID, Collections.emptyList());
 
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
-        verify(this.databaseTransaction).commit();
+        verify(this.fakeTransaction).commit();
         verify(this.fakeDatabaseAi, times(1))
-                .unlinkBotFromAi(DEVID_UUID, AIID, ownedBots.get(0).getBotId(), this.databaseTransaction);
+                .unlinkBotFromAi(DEVID_UUID, AIID, ownedBots.get(0).getBotId(), this.fakeTransaction);
         verify(this.fakeDatabaseAi, times(1))
-                .unlinkBotFromAi(DEVID_UUID, AIID, ownedBots.get(1).getBotId(), this.databaseTransaction);
+                .unlinkBotFromAi(DEVID_UUID, AIID, ownedBots.get(1).getBotId(), this.fakeTransaction);
     }
 
     @Test
@@ -1021,14 +1023,14 @@ public class TestAILogic {
         ApiResult result = this.aiLogic.updateLinkedBots(DEVID_UUID, AIID, newBotIds);
 
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
-        verify(this.databaseTransaction).commit();
+        verify(this.fakeTransaction).commit();
         for (int i = 0; i < ownedBots.size(); i++) {
             verify(this.fakeDatabaseAi, times(1))
-                    .unlinkBotFromAi(DEVID_UUID, AIID, ownedBots.get(0).getBotId(), this.databaseTransaction);
+                    .unlinkBotFromAi(DEVID_UUID, AIID, ownedBots.get(0).getBotId(), this.fakeTransaction);
         }
         for (int i = 0; i < newBotIds.size(); i++) {
             verify(this.fakeDatabaseAi, times(1))
-                    .linkBotToAi(DEVID_UUID, AIID, newBotIds.get(0), this.databaseTransaction);
+                    .linkBotToAi(DEVID_UUID, AIID, newBotIds.get(0), this.fakeTransaction);
         }
     }
 

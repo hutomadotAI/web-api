@@ -69,7 +69,7 @@ public class TestServiceAi extends ServiceTestBase {
     @Test
     public void testGetAI() throws DatabaseException {
         ApiAi ai = TestDataHelper.getAI();
-        when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(ai);
+        when(this.fakeDatabaseAi.getAI(any(), any(), any(), any())).thenReturn(ai);
         final Response response = target(AI_PATH).request().headers(defaultHeaders).get();
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
         ApiAi responseAi = deserializeResponse(response, ApiAi.class);
@@ -83,7 +83,7 @@ public class TestServiceAi extends ServiceTestBase {
                 trainingStatus, 0.0, trainingProgress));
         status.setEngineStatus(BackendServerType.RNN, new BackendEngineStatus(
                 trainingStatus, 0.0, trainingProgress));
-        when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(TestDataHelper.getAi(status));
+        when(this.fakeDatabaseAi.getAI(any(), any(), any(), any())).thenReturn(TestDataHelper.getAi(status));
         final Response response = target(AI_PATH).request().headers(defaultHeaders).get();
         return deserializeResponse(response, ApiAi.class);
     }
@@ -238,6 +238,7 @@ public class TestServiceAi extends ServiceTestBase {
     public void testCloneBot() throws DatabaseException {
         final UUID aiid = UUID.randomUUID();
         when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
+        when(this.fakeDatabaseAi.getAI(any(), any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
         when(this.fakeTools.createNewRandomUUID()).thenReturn(aiid);
         TestDataHelper.mockDatabaseCreateAI(this.fakeDatabaseAi, aiid);
           final Response response = target(BOT_CLONE_PATH)

@@ -2,7 +2,7 @@ package com.hutoma.api.tests.service;
 
 import com.hutoma.api.common.TestDataHelper;
 import com.hutoma.api.connectors.AIServices;
-import com.hutoma.api.connectors.db.DatabaseEntitiesIntents;
+import com.hutoma.api.connectors.db.Database;
 import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.sub.IntentVariable;
@@ -24,19 +24,19 @@ import java.util.UUID;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class TestServiceIntents extends ServiceTestBase {
 
     private static final String BASEPATH = "/intent/";
-    private DatabaseEntitiesIntents fakeDatabaseEntitiesIntents;
     private IMemoryIntentHandler fakeMemoryIntentHandler;
 
     @Test
     public void testSaveIntent() throws DatabaseException {
         when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
+        when(this.fakeDatabaseAi.createWebHook(any(), anyString(), anyString(), anyBoolean(), any())).thenReturn(true);
         ApiIntent intent = TestIntentLogic.getIntent();
         intent.setUserSays(Collections.singletonList(
                 String.join("", Collections.nCopies(250, "A"))));
@@ -110,11 +110,9 @@ public class TestServiceIntents extends ServiceTestBase {
         binder.bind(TrainingLogic.class).to(TrainingLogic.class);
         binder.bind(AILogic.class).to(AILogic.class);
 
-        this.fakeDatabaseEntitiesIntents = mock(DatabaseEntitiesIntents.class);
         this.fakeMemoryIntentHandler = mock(IMemoryIntentHandler.class);
         this.fakeAiServices = mock(AIServices.class);
 
-        binder.bindFactory(new InstanceFactory<>(this.fakeDatabaseEntitiesIntents)).to(DatabaseEntitiesIntents.class);
         binder.bindFactory(new InstanceFactory<>(this.fakeMemoryIntentHandler)).to(IMemoryIntentHandler.class);
         binder.bindFactory(new InstanceFactory<>(this.fakeAiServices)).to(AIServices.class);
         return binder;

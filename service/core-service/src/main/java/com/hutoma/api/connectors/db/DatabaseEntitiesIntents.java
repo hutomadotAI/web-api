@@ -1,7 +1,6 @@
 package com.hutoma.api.connectors.db;
 
 import com.google.gson.internal.LinkedTreeMap;
-import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.containers.ApiEntity;
 import com.hutoma.api.containers.ApiIntent;
@@ -9,6 +8,7 @@ import com.hutoma.api.containers.sub.Entity;
 import com.hutoma.api.containers.sub.IntentVariable;
 import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.containers.sub.MemoryVariable;
+import com.hutoma.api.logging.ILogger;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -180,7 +180,14 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
 
     public void writeEntity(final UUID devid, final String entityOldName, final ApiEntity entity)
             throws DatabaseException {
-        try (DatabaseTransaction transaction = this.transactionProvider.get()) {
+        this.writeEntity(devid, entityOldName, entity, null);
+    }
+
+    public void writeEntity(final UUID devid, final String entityOldName, final ApiEntity entity,
+                            final DatabaseTransaction databaseTransaction)
+            throws DatabaseException {
+        try (DatabaseTransaction transaction = databaseTransaction == null
+                ? this.transactionProvider.get() : databaseTransaction) {
 
             // add or update the entity
             transaction.getDatabaseCall().initialise("addUpdateEntity", 3)
@@ -213,8 +220,10 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
                         .add(devid).add(entity.getEntityName()).add(obsoleteEntityValue).executeUpdate();
             }
 
-            // commit everything
-            transaction.commit();
+            // commit everything - only if we didn't get passed a transaction
+            if (databaseTransaction == null) {
+                transaction.commit();
+            }
 
         } catch (SQLException e) {
             throw new DatabaseException(e);
@@ -245,6 +254,11 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
         }
     }
 
+    public void writeIntent(final UUID devid, final UUID aiid, final String intentName, final ApiIntent intent)
+            throws DatabaseException {
+        this.writeIntent(devid, aiid, intentName, intent, null);
+    }
+
     /***
      * Add a new complete intent to the database,
      * or update an intent previously called 'intentName' to the new intent.
@@ -255,11 +269,13 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
      * @param intent the new data
      * @throws DatabaseException
      */
-    public void writeIntent(final UUID devid, final UUID aiid, final String intentName, final ApiIntent intent)
+    public void writeIntent(final UUID devid, final UUID aiid, final String intentName, final ApiIntent intent,
+                            final DatabaseTransaction databaseTransaction)
             throws DatabaseException {
 
         // start the transaction
-        try (DatabaseTransaction transaction = this.transactionProvider.get()) {
+        try (DatabaseTransaction transaction = databaseTransaction == null
+             ? this.transactionProvider.get() : databaseTransaction) {
 
             // add or update the intent
             transaction.getDatabaseCall().initialise("addUpdateIntent", 6)
@@ -274,8 +290,10 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
             // synchronise variables and their prompts
             updateIntentVariables(devid, aiid, intent, transaction);
 
-            // commit everything
-            transaction.commit();
+            // commit everything - only if we weren't passed a transaction
+            if (databaseTransaction == null) {
+                transaction.commit();
+            }
 
         } catch (SQLException e) {
             throw new DatabaseException(e);

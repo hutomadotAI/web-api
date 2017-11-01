@@ -60,9 +60,10 @@ public class DatabaseAI extends Database  {
                          final String clientToken,
                          final Locale language, final String timezoneString,
                          final double confidence, final int personality, final int voice,
-                         final JsonSerializer jsonSerializer)
+                         final JsonSerializer jsonSerializer,
+                         final DatabaseTransaction transaction)
             throws DatabaseException {
-        try (DatabaseCall call = this.callProvider.get()) {
+        try (DatabaseCall call = transaction == null ? this.callProvider.get() : transaction.getDatabaseCall()) {
             call.initialise("addAi", 11)
                     .add(aiid)
                     .add(name)
@@ -194,9 +195,9 @@ public class DatabaseAI extends Database  {
         }
     }
 
-    public static ApiAi getAI(final UUID devid, final UUID aiid, final JsonSerializer serializer,
-                              final Provider<DatabaseTransaction> transactionProvider) throws DatabaseException {
-        try (DatabaseTransaction transaction = transactionProvider.get()) {
+    public ApiAi getAI(final UUID devid, final UUID aiid, final JsonSerializer serializer,
+                              final DatabaseTransaction transaction) throws DatabaseException {
+        try {
             // load the statuses first
             BackendStatus backendStatus = DatabaseBackends.getBackendStatus(devid, aiid, transaction.getDatabaseCall());
             // then load the AI
@@ -222,8 +223,8 @@ public class DatabaseAI extends Database  {
                 }
             }
             return apiAi;
-        } catch (final SQLException sqle) {
-            throw new DatabaseException(sqle);
+        } catch (SQLException ex) {
+            throw new DatabaseException(ex);
         }
     }
 
@@ -236,7 +237,9 @@ public class DatabaseAI extends Database  {
      */
     public ApiAi getAI(final UUID devid, final UUID aiid, final JsonSerializer serializer)
             throws DatabaseException {
-        return getAI(devid, aiid, serializer, this.transactionProvider);
+        try (DatabaseTransaction transaction = this.transactionProvider.get()) {
+            return getAI(devid, aiid, serializer, transaction);
+        }
     }
 
     public boolean checkAIBelongsToDevId(final UUID devId, final UUID aiid) throws DatabaseException {
@@ -275,7 +278,12 @@ public class DatabaseAI extends Database  {
     }
 
     public boolean updateAiTrainingFile(final UUID aiUUID, final String trainingData) throws DatabaseException {
-        try (DatabaseCall call = this.callProvider.get()) {
+        return updateAiTrainingFile(aiUUID, trainingData, null);
+    }
+
+    public boolean updateAiTrainingFile(final UUID aiUUID, final String trainingData,
+                                        final DatabaseTransaction transaction) throws DatabaseException {
+        try (DatabaseCall call = transaction == null ? this.callProvider.get() : transaction.getDatabaseCall()) {
             call.initialise("updateAiTrainingFile", 2).add(aiUUID).add(trainingData);
             return call.executeUpdate() > 0;
         }
@@ -376,9 +384,10 @@ public class DatabaseAI extends Database  {
         }
     }
 
-    public boolean createWebHook(final UUID aiid, final String intentName, final String endpoint, final boolean enabled)
+    public boolean createWebHook(final UUID aiid, final String intentName, final String endpoint, final boolean enabled,
+                                 final DatabaseTransaction transaction)
             throws DatabaseException {
-        try (DatabaseCall call = this.callProvider.get()) {
+        try (DatabaseCall call = transaction == null ? this.callProvider.get() : transaction.getDatabaseCall()) {
             call.initialise("addWebhook", 4)
                     .add(aiid)
                     .add(intentName)
@@ -407,9 +416,10 @@ public class DatabaseAI extends Database  {
         }
     }
 
-    public boolean updateWebHook(final UUID aiid, final String intentName, final String endpoint, final boolean enabled)
+    public boolean updateWebHook(final UUID aiid, final String intentName, final String endpoint, final boolean enabled,
+                                 final DatabaseTransaction transaction)
             throws DatabaseException {
-        try (DatabaseCall call = this.callProvider.get()) {
+        try (DatabaseCall call = transaction == null ? this.callProvider.get() : transaction.getDatabaseCall()) {
             call.initialise("updateWebhook", 4)
                     .add(aiid).add(intentName).add(endpoint).add(enabled);
             return call.executeUpdate() > 0;
@@ -424,7 +434,12 @@ public class DatabaseAI extends Database  {
     }
 
     public List<AiBot> getBotsLinkedToAi(final UUID devId, final UUID aiid) throws DatabaseException {
-        try (DatabaseCall call = this.callProvider.get()) {
+        return getBotsLinkedToAi(devId, aiid, null);
+    }
+
+    public List<AiBot> getBotsLinkedToAi(final UUID devId, final UUID aiid, final DatabaseTransaction transaction)
+            throws DatabaseException {
+        try (DatabaseCall call = transaction == null ? this.callProvider.get() : transaction.getDatabaseCall()) {
             call.initialise("getBotsLinkedToAi", 2).add(devId).add(aiid);
             final ResultSet rs = call.executeQuery();
             try {
@@ -559,7 +574,7 @@ public class DatabaseAI extends Database  {
                 String lockedAiid = rs.getString("locked_aiid");
                 double confidenceThreshold = rs.getDouble("confidence_threshold");
                 if (rs.wasNull()) {
-                    confidenceThreshold = DatabaseAI.getAI(devId, aiid, jsonSerializer, this.transactionProvider).
+                    confidenceThreshold = getAI(devId, aiid, jsonSerializer, this.transactionProvider.get()).
                             getConfidence();
                 }
                 return new ChatState(
@@ -572,7 +587,7 @@ public class DatabaseAI extends Database  {
                 );
             }
             ChatState chatState = ChatState.getEmpty();
-            chatState.setConfidenceThreshold(DatabaseAI.getAI(devId, aiid, jsonSerializer, this.transactionProvider)
+            chatState.setConfidenceThreshold(getAI(devId, aiid, jsonSerializer, this.transactionProvider.get())
                     .getConfidence());
             return chatState;
         } catch (SQLException ex) {

@@ -2,14 +2,13 @@ package com.hutoma.api.logic;
 
 import com.hutoma.api.access.Role;
 import com.hutoma.api.common.Config;
-import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.logging.LogMap;
 import com.hutoma.api.common.Pair;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.AIServices;
 import com.hutoma.api.connectors.ServerConnector;
 import com.hutoma.api.connectors.WebHooks;
+import com.hutoma.api.connectors.db.Database;
 import com.hutoma.api.connectors.db.DatabaseAI;
 import com.hutoma.api.connectors.db.DatabaseEntitiesIntents;
 import com.hutoma.api.connectors.db.DatabaseException;
@@ -20,6 +19,8 @@ import com.hutoma.api.containers.sub.AiBot;
 import com.hutoma.api.containers.sub.BotStructure;
 import com.hutoma.api.containers.sub.Entity;
 import com.hutoma.api.containers.sub.WebHook;
+import com.hutoma.api.logging.ILogger;
+import com.hutoma.api.logging.LogMap;
 import com.hutoma.api.validation.Validate;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -91,6 +92,21 @@ public class AILogic {
             final int voice,
             final Locale language,
             final String timezone) {
+        return this.createAI(devId, name, description, isPrivate, personality, confidence,
+                voice, language, timezone, null);
+    }
+
+    private ApiResult createAI(
+            final UUID devId,
+            final String name,
+            final String description,
+            final boolean isPrivate,
+            final int personality,
+            final double confidence,
+            final int voice,
+            final Locale language,
+            final String timezone,
+            final DatabaseTransaction transaction) {
         final String devIdString = devId.toString();
         try {
             String encodingKey = this.config.getEncodingKey();
@@ -116,7 +132,8 @@ public class AILogic {
                     confidence,
                     personality,
                     voice,
-                    this.jsonSerializer);
+                    this.jsonSerializer,
+                    transaction);
 
             // if the stored procedure returns a different aiid then it didn't
             // create the one we requested because of a name clash
@@ -198,7 +215,11 @@ public class AILogic {
     }
 
     public ApiResult getSingleAI(final UUID devid, final UUID aiid) {
-        return getAI(devid, aiid, "GetSingleAI", false);
+        return getSingleAI(devid, aiid, null);
+    }
+
+    private ApiResult getSingleAI(final UUID devid, final UUID aiid, final DatabaseTransaction transaction) {
+        return getAI(devid, aiid, "GetSingleAI", false, transaction);
     }
 
     public ApiResult setAiBotConfigDescription(final UUID devid, final UUID aiid,
@@ -624,7 +645,6 @@ public class AILogic {
         }
 
         ApiAi createdBot;
-
         try {
             createdBot = createImportedBot(devId, importedBot);
         } catch (BotImportException e) {
@@ -633,7 +653,6 @@ public class AILogic {
         }
 
         UUID uuidAiid = UUID.fromString(createdBot.getAiid());
-
         try {
             String trainingMaterials = this.aiServices.getTrainingMaterialsCommon(devId, uuidAiid, this.jsonSerializer);
             this.aiServices.uploadTraining(createdBot.getBackendStatus(), devId, uuidAiid, trainingMaterials);
@@ -702,16 +721,21 @@ public class AILogic {
     }
 
     private ApiResult getAI(final UUID devid, final UUID aiid, String logTag, boolean isCreate) {
+        return this.getAI(devid, aiid, logTag, isCreate, null);
+    }
+
+    private ApiResult getAI(final UUID devid, final UUID aiid, String logTag, boolean isCreate,
+                            final DatabaseTransaction transaction) {
         final String devIdString = devid.toString();
         try {
             LogMap logMap = LogMap.map("AIID", aiid);
-            ApiAi ai = this.databaseAi.getAI(devid, aiid, this.jsonSerializer);
+            ApiAi ai = this.databaseAi.getAI(devid, aiid, this.jsonSerializer, transaction);
             if (ai == null) {
                 this.logger.logUserTraceEvent(LOGFROM,
                         String.format("%s - not found", logTag), devIdString, logMap);
                 return ApiError.getNotFound();
             } else {
-                List<AiBot> linkedBots = this.databaseAi.getBotsLinkedToAi(devid, aiid);
+                List<AiBot> linkedBots = this.databaseAi.getBotsLinkedToAi(devid, aiid, transaction);
                 if (!linkedBots.isEmpty()) {
                     ai.setLinkedBots(linkedBots.stream().map(AiBot::getBotId).collect(Collectors.toList()));
                 }
@@ -726,7 +750,7 @@ public class AILogic {
 
     private ApiAi createImportedBot(final UUID devId, final BotStructure importedBot) throws BotImportException {
         // try to interpret the locale
-        Locale locale = null;
+        Locale locale;
         try {
             locale = Validate.validateLocale("locale", importedBot.getLanguage());
         } catch (Validate.ParameterValidationException e) {
@@ -734,79 +758,90 @@ public class AILogic {
             locale = DEFAULT_LOCALE;
         }
 
-        ApiResult result = this.createAI(
-                devId,
-                importedBot.getName(),
-                importedBot.getDescription(),
-                importedBot.isPrivate(),
-                importedBot.getPersonality(),
-                importedBot.getConfidence(),
-                importedBot.getVoice(),
-                locale,
-                importedBot.getTimezone());
+        ApiAi bot;
 
-        ApiAi bot = null;
+        try (DatabaseTransaction transaction = this.transactionProvider.get()) {
 
-        try {
-            bot = (ApiAi) result;
-        } catch (ClassCastException e) {
-            throw new BotImportException(result.getStatus().getInfo());
-        }
+            ApiResult result = this.createAI(
+                    devId,
+                    importedBot.getName(),
+                    importedBot.getDescription(),
+                    importedBot.isPrivate(),
+                    importedBot.getPersonality(),
+                    importedBot.getConfidence(),
+                    importedBot.getVoice(),
+                    locale,
+                    importedBot.getTimezone(),
+                    transaction);
 
-        UUID aiid = UUID.fromString(bot.getAiid());
 
-        try {
-            bot = (ApiAi) this.getSingleAI(devId, aiid);
-        } catch (Exception e) {
-            throw new BotImportException("Failed to retrieve newly imported bot.");
-        }
+            try {
+                bot = (ApiAi) result;
+            } catch (ClassCastException e) {
+                throw new BotImportException(result.getStatus().getInfo());
+            }
 
-        List<Entity> userEntities = null;
-        try {
-            // Add the entities that the user doesn't currently have.
-            userEntities = this.databaseEntitiesIntents.getEntities(devId);
-        } catch (DatabaseException ex) {
-            throw new BotImportException("Can't retrieve users existing entities.");
-        }
+            UUID aiid = UUID.fromString(bot.getAiid());
 
-        try {
-            for (ApiEntity e : importedBot.getEntities().values()) {
-                boolean hasEntity = false;
-                for (Entity ue : userEntities) {
-                    if (ue.getName().equals(e.getEntityName())) {
-                        hasEntity = true;
-                        break;
+            try {
+                bot = (ApiAi) this.getSingleAI(devId, aiid, transaction);
+            } catch (Exception e) {
+                throw new BotImportException("Failed to retrieve newly imported bot.");
+            }
+
+            List<Entity> userEntities = null;
+            try {
+                // Add the entities that the user doesn't currently have.
+                userEntities = this.databaseEntitiesIntents.getEntities(devId);
+            } catch (DatabaseException ex) {
+                throw new BotImportException("Can't retrieve users existing entities.");
+            }
+
+            try {
+                for (ApiEntity e : importedBot.getEntities().values()) {
+                    boolean hasEntity = false;
+                    for (Entity ue : userEntities) {
+                        if (ue.getName().equals(e.getEntityName())) {
+                            hasEntity = true;
+                            break;
+                        }
+                    }
+                    if (!hasEntity) {
+                        this.databaseEntitiesIntents.writeEntity(devId, e.getEntityName(), e, transaction);
                     }
                 }
-                if (!hasEntity) {
-                    this.databaseEntitiesIntents.writeEntity(devId, e.getEntityName(), e);
-                }
+            } catch (DatabaseException ex) {
+                throw new BotImportException("Failed to create new entities from imported bot.");
             }
-        } catch (DatabaseException ex) {
-            throw new BotImportException("Failed to create new entities from imported bot.");
-        }
 
-        // Import intents.
-        try {
-            for (ApiIntent intent : importedBot.getIntents()) {
-                UUID botAiid = UUID.fromString(bot.getAiid());
-                this.databaseEntitiesIntents.writeIntent(devId, botAiid,
-                        intent.getIntentName(), intent);
-                WebHook webHook = intent.getWebHook();
-                if (webHook != null) {
-                    this.databaseEntitiesIntents.createWebHook(botAiid, webHook.getIntentName(),
-                            webHook.getEndpoint(), webHook.isEnabled());
+            // Import intents.
+            try {
+                for (ApiIntent intent : importedBot.getIntents()) {
+                    UUID botAiid = UUID.fromString(bot.getAiid());
+                    this.databaseEntitiesIntents.writeIntent(devId, botAiid,
+                            intent.getIntentName(), intent, transaction);
+                    WebHook webHook = intent.getWebHook();
+                    if (webHook != null) {
+                        if (!this.databaseEntitiesIntents.createWebHook(botAiid, webHook.getIntentName(),
+                                webHook.getEndpoint(), webHook.isEnabled(), transaction)) {
+                            throw new BotImportException("Failed to create the webhook for the imported bot");
+                        }
+                    }
                 }
+            } catch (DatabaseException ex) {
+                throw new BotImportException("Failed to write intents for imported bot.");
             }
-        } catch (DatabaseException ex) {
-            throw new BotImportException("Failed to write intents for imported bot.");
-        }
 
-        // Add the training file to the databaseAi.
-        try {
-            this.databaseAi.updateAiTrainingFile(aiid, importedBot.getTrainingFile());
-        } catch (Exception e) {
-            throw new BotImportException("Failed to add training file for imported bot.");
+            // Add the training file to the database.
+            try {
+                this.databaseAi.updateAiTrainingFile(aiid, importedBot.getTrainingFile(), transaction);
+            } catch (Exception e) {
+                throw new BotImportException("Failed to add training file for imported bot.");
+            }
+
+            transaction.commit();
+        } catch (DatabaseException ex) {
+            throw new BotImportException("Failed to commit transaction.");
         }
 
         return bot;

@@ -3,10 +3,12 @@ package com.hutoma.api.logic;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.TestDataHelper;
+import com.hutoma.api.connectors.db.Database;
 import com.hutoma.api.connectors.db.DatabaseAI;
 import com.hutoma.api.connectors.db.DatabaseEntitiesIntents;
 import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.connectors.db.DatabaseIntegrityViolationException;
+import com.hutoma.api.connectors.db.DatabaseTransaction;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.ApiIntentList;
 import com.hutoma.api.containers.ApiResult;
@@ -23,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import javax.inject.Provider;
 
 import static com.hutoma.api.common.TestDataHelper.*;
 import static org.mockito.Matchers.any;
@@ -39,6 +42,8 @@ public class TestIntentLogic {
     private static final String TOPICOUT = "topicout";
     private DatabaseAI fakeDatabase;
     private DatabaseEntitiesIntents fakeDatabaseEntitiesIntents;
+    private Provider<DatabaseTransaction> fakeDatabaseTransactionProvider;
+    private DatabaseTransaction fakeDatabaseTransaction;
     private Config fakeConfig;
     private IntentLogic intentLogic;
     private ILogger fakeLogger;
@@ -55,12 +60,15 @@ public class TestIntentLogic {
     public void setup() throws DatabaseException {
         this.fakeConfig = mock(Config.class);
         this.fakeDatabaseEntitiesIntents = mock(DatabaseEntitiesIntents.class);
+        this.fakeDatabaseTransaction = mock(DatabaseTransaction.class);
+        this.fakeDatabaseTransactionProvider = mock (Provider.class);
         this.fakeDatabase = mock(DatabaseAI.class);
         this.fakeLogger = mock(ILogger.class);
         this.trainingLogic = mock(TrainingLogic.class);
         this.intentLogic = new IntentLogic(this.fakeConfig, this.fakeLogger, this.fakeDatabaseEntitiesIntents,
-                this.fakeDatabase, this.trainingLogic, mock(JsonSerializer.class));
+                this.fakeDatabase, this.trainingLogic, mock(JsonSerializer.class), this.fakeDatabaseTransactionProvider);
 
+        when(this.fakeDatabaseTransactionProvider.get()).thenReturn(this.fakeDatabaseTransaction);
         when(this.fakeDatabase.getAI(any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
     }
 
@@ -155,20 +163,21 @@ public class TestIntentLogic {
         WebHook wh = new WebHook(UUID.randomUUID(), "testName", "https://fakewebhook", true);
         ApiIntent intent = getIntent();
         intent.setWebHook(wh);
+        when(this.fakeDatabase.createWebHook(any(), anyString(), anyString(), anyBoolean(), any())).thenReturn(true);
         final ApiResult result = this.intentLogic.writeIntent(DEVID_UUID, AIID, intent);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
     }
 
     @Test
     public void testWriteIntent_NonExistentEntity() throws DatabaseException {
-        doThrow(new DatabaseEntitiesIntents.DatabaseEntityException("test")).when(this.fakeDatabaseEntitiesIntents).writeIntent(any(), any(), anyString(), any());
+        doThrow(DatabaseEntitiesIntents.DatabaseEntityException.class).when(this.fakeDatabaseEntitiesIntents).writeIntent(any(), any(), anyString(), any(), any());
         final ApiResult result = this.intentLogic.writeIntent(DEVID_UUID, AIID, getIntent());
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
     }
 
     @Test
     public void testWriteIntent_DuplicateName() throws DatabaseException {
-        doThrow(new DatabaseIntegrityViolationException(new Exception("test"))).when(this.fakeDatabaseEntitiesIntents).writeIntent(any(), any(), anyString(), any());
+        doThrow(DatabaseIntegrityViolationException.class).when(this.fakeDatabaseEntitiesIntents).writeIntent(any(), any(), anyString(), any(), any());
         final ApiResult result = this.intentLogic.writeIntent(DEVID_UUID, AIID, getIntent());
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
     }
@@ -182,7 +191,7 @@ public class TestIntentLogic {
 
     @Test
     public void testWriteIntent_InternalError() throws DatabaseException {
-        doThrow(new DatabaseException("test")).when(this.fakeDatabaseEntitiesIntents).writeIntent(any(), any(), anyString(), any());
+        doThrow(DatabaseException.class).when(this.fakeDatabaseEntitiesIntents).writeIntent(any(), any(), anyString(), any(), any());
         final ApiResult result = this.intentLogic.writeIntent(DEVID_UUID, AIID, getIntent());
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }

@@ -7,12 +7,14 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="common-lib" />
+        <module name="core-service" />
         <module name="HutomaAPI" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="api-project" target="1.5" />
       <module name="common-lib" target="1.8" />
+      <module name="core-service" target="1.8" />
       <module name="HutomaAPI" target="1.8" />
       <module name="service-ear" target="1.5" />
     </bytecodeTargetLevel>
