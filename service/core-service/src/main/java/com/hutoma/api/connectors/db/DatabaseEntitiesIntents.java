@@ -275,8 +275,9 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
             throws DatabaseException {
 
         // start the transaction
-        try (DatabaseTransaction transaction = databaseTransaction == null
-             ? this.transactionProvider.get() : databaseTransaction) {
+        DatabaseTransaction transaction = databaseTransaction == null
+                ? this.transactionProvider.get() : databaseTransaction;
+        try {
 
             // add or update the intent
             transaction.getDatabaseCall().initialise("addUpdateIntent", 6)
@@ -297,6 +298,8 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
             }
 
         } catch (SQLException e) {
+            transaction.rollback();
+            transaction.close();
             throw new DatabaseException(e);
         }
     }

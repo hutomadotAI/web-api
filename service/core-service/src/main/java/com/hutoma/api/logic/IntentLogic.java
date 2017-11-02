@@ -2,7 +2,6 @@ package com.hutoma.api.logic;
 
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.connectors.db.Database;
 import com.hutoma.api.connectors.db.DatabaseAI;
 import com.hutoma.api.connectors.db.DatabaseEntitiesIntents;
 import com.hutoma.api.connectors.db.DatabaseIntegrityViolationException;
@@ -25,7 +24,6 @@ import java.util.Set;
 import java.util.UUID;
 import javax.inject.Inject;
 import javax.inject.Provider;
-import javax.ws.rs.HEAD;
 
 /**
  * Created by David MG on 05/10/2016.
@@ -161,6 +159,7 @@ public class IntentLogic {
                         this.logger.logUserTraceEvent(LOGFROM, "WriteWebHook", devidString, logMap);
                     }
                 }
+                transaction.commit();
             }
             this.trainingLogic.stopTraining(devid, aiid);
             this.logger.logUserTraceEvent(LOGFROM, "WriteIntent", devidString, logMap);
