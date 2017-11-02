@@ -197,11 +197,12 @@ public class DatabaseAI extends Database  {
 
     public ApiAi getAI(final UUID devid, final UUID aiid, final JsonSerializer serializer,
                               final DatabaseTransaction transaction) throws DatabaseException {
-        try {
+        try (DatabaseCall call = transaction == null ? this.callProvider.get() : transaction.getDatabaseCall()) {
+
             // load the statuses first
-            BackendStatus backendStatus = DatabaseBackends.getBackendStatus(devid, aiid, transaction.getDatabaseCall());
+            BackendStatus backendStatus = DatabaseBackends.getBackendStatus(devid, aiid, call);
             // then load the AI
-            ResultSet rs = transaction.getDatabaseCall().initialise("getAi", 2)
+            ResultSet rs = call.initialise("getAi", 2)
                     .add(devid)
                     .add(aiid)
                     .executeQuery();
@@ -211,7 +212,7 @@ public class DatabaseAI extends Database  {
                 apiAi = getAiFromResultset(rs, backendStatus, serializer);
             }
             if (apiAi != null) {
-                rs = transaction.getDatabaseCall().initialise("getAiBotConfig", 3)
+                rs = call.initialise("getAiBotConfig", 3)
                         .add(devid)
                         .add(aiid)
                         .add(0)
