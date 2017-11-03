@@ -58,6 +58,7 @@ class apiBase
 
         switch ($responseJson['status']['code']) {
             case 200:
+            case 201:
             case 400:
             case 404:
             case 409:

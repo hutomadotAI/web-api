@@ -265,7 +265,8 @@ function commonAjaxApiRequest(request) {
                 var statusCode = parsedResponse['status']['code'];
                 var statusMessage = parsedResponse['status']['info'];
                 switch (statusCode) {
-                    case 200:
+                    case 200: // OK
+                    case 201: // Created
                         request.onOK(parsedResponse);
                         break;
                     case 404:

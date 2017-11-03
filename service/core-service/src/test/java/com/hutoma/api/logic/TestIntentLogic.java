@@ -157,6 +157,13 @@ public class TestIntentLogic {
     @Test
     public void testWriteIntent_Success() throws DatabaseException {
         final ApiResult result = this.intentLogic.writeIntent(DEVID_UUID, AIID, getIntent());
+        Assert.assertEquals(HttpURLConnection.HTTP_CREATED, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testWriteIntent_Update_Success() throws DatabaseException {
+        when(this.fakeDatabaseEntitiesIntents.getIntent(any(), anyString())).thenReturn(getIntent());
+        final ApiResult result = this.intentLogic.writeIntent(DEVID_UUID, AIID, getIntent());
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
     }
 
@@ -167,7 +174,7 @@ public class TestIntentLogic {
         intent.setWebHook(wh);
         when(this.fakeDatabase.createWebHook(any(), anyString(), anyString(), anyBoolean(), any())).thenReturn(true);
         final ApiResult result = this.intentLogic.writeIntent(DEVID_UUID, AIID, intent);
-        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+        Assert.assertEquals(HttpURLConnection.HTTP_CREATED, result.getStatus().getCode());
     }
 
     @Test

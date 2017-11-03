@@ -2,7 +2,6 @@ package com.hutoma.api.tests.service;
 
 import com.hutoma.api.common.TestDataHelper;
 import com.hutoma.api.connectors.AIServices;
-import com.hutoma.api.connectors.db.Database;
 import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.sub.IntentVariable;
@@ -49,7 +48,7 @@ public class TestServiceIntents extends ServiceTestBase {
                 .addPrompt(String.join("", Collections.nCopies(250, "A"))));
         final Response response = sendRequest(BASEPATH + TestDataHelper.AIID.toString(),
                 this.serializeObject(intent));
-        Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
+        Assert.assertEquals(HttpURLConnection.HTTP_CREATED, response.getStatus());
     }
 
     @Test

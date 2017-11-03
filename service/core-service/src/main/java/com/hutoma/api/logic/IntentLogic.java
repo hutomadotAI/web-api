@@ -110,6 +110,8 @@ public class IntentLogic {
                 return ApiError.getBadRequest(AILogic.BOT_RO_MESSAGE);
             }
 
+            boolean created = this.databaseEntitiesIntents.getIntent(aiid, intent.getIntentName()) == null;
+
             // Check if there are any variables with duplicate or empty labels
             Set<String> usedLabels = new HashSet<>();
             List<String> duplicateLabels = new ArrayList<>();
@@ -122,7 +124,7 @@ public class IntentLogic {
                             LogMap.map("Variable", firstEmptyLabelVar.get().getEntityName()).put("AIID", aiid)
                                     .put("IntentName", intent.getIntentName()));
                     return ApiError.getBadRequest(
-                            String.format("Unlabeled variable: %s", firstEmptyLabelVar.get().getEntityName()));
+                            String.format("Unlabeled variable: %s.", firstEmptyLabelVar.get().getEntityName()));
                 }
                 variables.forEach(x -> {
                     if (usedLabels.contains(x.getLabel())) {
@@ -166,15 +168,19 @@ public class IntentLogic {
             }
             this.trainingLogic.stopTraining(devid, aiid);
             this.logger.logUserTraceEvent(LOGFROM, "WriteIntent", devidString, logMap);
-            return new ApiResult().setSuccessStatus();
+            if (created) {
+                return new ApiResult().setCreatedStatus("Intent created.");
+            } else {
+                return new ApiResult().setSuccessStatus("Intent updated.");
+            }
         } catch (DatabaseEntitiesIntents.DatabaseEntityException dmee) {
             this.logger.logUserTraceEvent(LOGFROM, "WriteIntent - entity duplicate or non existent", devidString,
                     logMap.put("Message", dmee.getMessage()));
-            return ApiError.getBadRequest("Duplicate or missing entity_name");
+            return ApiError.getBadRequest("Duplicate or missing entity_name.");
         } catch (DatabaseIntegrityViolationException dive) {
             this.logger.logUserTraceEvent(LOGFROM, "WriteIntent - attempt to rename existing name",
                     devidString, logMap);
-            return ApiError.getBadRequest("Intent name already in use");
+            return ApiError.getBadRequest("Intent name already in use.");
         } catch (final Exception e) {
             this.logger.logUserExceptionEvent(LOGFROM, "WriteIntent", devidString, e);
             return ApiError.getInternalServerError();

@@ -77,14 +77,19 @@ public class EntityLogic {
                         devidString, logMap);
                 return ApiError.getBadRequest("Cannot create an entity with a system prefix.");
             }
+            boolean created = this.database.getEntity(devid, entityName) == null;
             stopTrainingIfEntityInUse(devid, entityName);
             this.database.writeEntity(devid, entityName, entity);
             this.logger.logUserTraceEvent(LOGFROM, "WriteEntity", devidString, logMap);
-            return new ApiResult().setSuccessStatus();
+            if (created) {
+                return new ApiResult().setCreatedStatus("Entity created.");
+            } else {
+                return new ApiResult().setSuccessStatus("Entity updated.");
+            }
         } catch (DatabaseIntegrityViolationException dive) {
             this.logger.logUserTraceEvent(LOGFROM, "WriteEntity - attempt to rename existing name",
                     devidString, logMap);
-            return ApiError.getBadRequest("entity name already in use");
+            return ApiError.getBadRequest("Entity name already in use.");
         } catch (final Exception e) {
             this.logger.logUserExceptionEvent(LOGFROM, "WriteEntity", devidString, e);
             return ApiError.getInternalServerError();
@@ -103,7 +108,7 @@ public class EntityLogic {
 
             if (!this.database.deleteEntity(devid, entityId.getAsInt())) {
                 this.logger.logUserTraceEvent(LOGFROM, "DeleteEntity - in use, not deleted", devidString, logMap);
-                return ApiError.getConflict("Entity is in use");
+                return ApiError.getConflict("Entity is in use.");
             }
             stopTrainingIfEntityInUse(devid, entityName);
             this.logger.logUserTraceEvent(LOGFROM, "DeleteEntity", devidString, logMap);

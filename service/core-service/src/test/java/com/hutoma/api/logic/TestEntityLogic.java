@@ -116,6 +116,13 @@ public class TestEntityLogic {
     @Test
     public void testWriteEntity_Success() throws DatabaseException {
         final ApiResult result = this.entityLogic.writeEntity(DEVID_UUID, ENTITY_NAME, new ApiEntity(ENTITY_NAME, DEVID_UUID));
+        Assert.assertEquals(HttpURLConnection.HTTP_CREATED, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testWriteEntity_Update_Success() throws DatabaseException {
+        when(this.fakeDatabase.getEntity(any(), anyString())).thenReturn(getEntity());
+        final ApiResult result = this.entityLogic.writeEntity(DEVID_UUID, ENTITY_NAME, new ApiEntity(ENTITY_NAME, DEVID_UUID));
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
     }
 
