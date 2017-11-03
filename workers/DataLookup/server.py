@@ -21,17 +21,19 @@ async def handle_json(request):
 
     intentName = body['intentName']
     variables = body['memoryVariables']
+    response_prefix = ""
     with QueryData() as querydata:
         intentMapping = querydata.getIntentMapping(intentName)
 
         try:
             knownValue = next((x for x in variables if x['entity'] == intentMapping['key_entity']), None)['value']
             knownColumn = intentMapping['key_column']
+            response_prefix = "({}): ".format(knownValue)
             targetValue = next((x for x in variables if x['entity'] == intentMapping['value_entity']), None)['value']
         except BaseException:
             return web.Response(text="A processing error occurred.")
 
-        response = {"text": querydata.getValueForRow(knownColumn, knownValue, targetValue, intentName)}
+        response = {"text": response_prefix + querydata.getValueForRow(knownColumn, knownValue, targetValue, intentName)}
         return web.json_response(response)
 
 app = web.Application()
