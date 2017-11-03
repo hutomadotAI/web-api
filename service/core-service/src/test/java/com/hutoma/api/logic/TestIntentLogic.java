@@ -3,7 +3,6 @@ package com.hutoma.api.logic;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.TestDataHelper;
-import com.hutoma.api.connectors.db.Database;
 import com.hutoma.api.connectors.db.DatabaseAI;
 import com.hutoma.api.connectors.db.DatabaseEntitiesIntents;
 import com.hutoma.api.connectors.db.DatabaseException;
@@ -74,6 +73,7 @@ public class TestIntentLogic {
 
     @Test
     public void testGetIntents_Success() throws DatabaseException {
+        when(this.fakeDatabase.checkAIBelongsToDevId(any(), any())).thenReturn(true);
         when(this.fakeDatabaseEntitiesIntents.getIntents(any(), any())).thenReturn(getIntentsList());
         final ApiResult result = this.intentLogic.getIntents(DEVID_UUID, AIID);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
@@ -81,6 +81,7 @@ public class TestIntentLogic {
 
     @Test
     public void testGetIntents_Success_Return() throws DatabaseException {
+        when(this.fakeDatabase.checkAIBelongsToDevId(any(), any())).thenReturn(true);
         when(this.fakeDatabaseEntitiesIntents.getIntents(any(), any())).thenReturn(getIntentsList());
         final ApiResult result = this.intentLogic.getIntents(DEVID_UUID, AIID);
         Assert.assertEquals(2, ((ApiIntentList) result).getIntentNames().size());
@@ -96,6 +97,7 @@ public class TestIntentLogic {
 
     @Test
     public void testGetIntents_Error() throws DatabaseException {
+        when(this.fakeDatabase.checkAIBelongsToDevId(any(), any())).thenReturn(true);
         when(this.fakeDatabaseEntitiesIntents.getIntents(any(), any())).thenThrow(DatabaseException.class);
         final ApiResult result = this.intentLogic.getIntents(DEVID_UUID, AIID);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
@@ -149,7 +151,7 @@ public class TestIntentLogic {
         when(this.fakeDatabaseEntitiesIntents.getIntent(any(), anyString())).thenThrow(DatabaseException.class);
         when(this.fakeDatabase.checkAIBelongsToDevId(any(), any())).thenReturn(false);
         final ApiResult result = this.intentLogic.getIntent(DEVID_UUID, AIID, INTENTNAME);
-        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
+        Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
     }
 
     @Test

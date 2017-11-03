@@ -57,11 +57,13 @@ public class IntentLogic {
         final String devidString = devid.toString();
         try {
             LogMap logMap = LogMap.map("AIID", aiid);
-            final List<String> intentList = this.databaseEntitiesIntents.getIntents(devid, aiid);
-            if (intentList.isEmpty()) {
-                this.logger.logUserTraceEvent(LOGFROM, "GetIntents", devidString, logMap.put("Num Intents", "0"));
-                return ApiError.getNotFound();
+            boolean aiidValid = this.databaseAi.checkAIBelongsToDevId(devid, aiid);
+            if (!aiidValid) {
+                this.logger.logUserTraceEvent(LOGFROM, "GetIntents - AI not found for devId", devidString,
+                        logMap);
+                return ApiError.getNotFound("AI not found for this Dev ID");
             }
+            final List<String> intentList = this.databaseEntitiesIntents.getIntents(devid, aiid);
             this.logger.logUserTraceEvent(LOGFROM, "GetIntents", devidString,
                     logMap.put("Num Intents", intentList.size()));
             return new ApiIntentList(aiid, intentList).setSuccessStatus();
@@ -77,13 +79,14 @@ public class IntentLogic {
             LogMap logMap = LogMap.map("AIID", aiid).put("IntentName", intentName);
             boolean aiidValid = this.databaseAi.checkAIBelongsToDevId(devid, aiid);
             if (!aiidValid) {
-                return ApiError.getBadRequest("AI not found for this Dev ID");
+                this.logger.logUserTraceEvent(LOGFROM, "GetIntent - AI not found for devId", devidString, logMap);
+                return ApiError.getNotFound("AI not found for this Dev ID");
             }
 
             ApiIntent intent = this.databaseEntitiesIntents.getIntent(aiid, intentName);
             if (null == intent) {
                 this.logger.logUserTraceEvent(LOGFROM, "GetIntent - not found", devidString, logMap);
-                return ApiError.getNotFound();
+                return ApiError.getNotFound("Intent not found");
             }
             WebHook webHook = this.databaseEntitiesIntents.getWebHook(aiid, intentName);
             intent.setWebHook(webHook);
