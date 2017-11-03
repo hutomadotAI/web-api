@@ -123,7 +123,7 @@ public class DatabaseMarketplace extends Database {
 
     public int publishBot(final AiBot bot, final DatabaseTransaction transaction) throws DatabaseException {
         try (DatabaseCall call = transaction == null ? this.callProvider.get() : transaction.getDatabaseCall()) {
-            call.initialise("publishBot", 17)
+            call.initialise("publishBot", 18)
                     .add(bot.getDevId())
                     .add(bot.getAiid())
                     .add(bot.getName())
