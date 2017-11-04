@@ -4,160 +4,50 @@ required for the next deployment.
 */
 
 #------------------------------------------------------------------------------------
-# Create Django database
-CREATE DATABASE  IF NOT EXISTS `django` CHARACTER SET utf8;
-USE `django`;
+# Convert to UTF8 mb4 (which is a 4-byte unicode proper UTF8)
+# https://mathiasbynens.be/notes/mysql-utf8mb4
+ALTER DATABASE `hutoma` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
-# Privileges for `django_caller`@`%`
-GRANT USAGE ON *.* TO 'django_caller'@'%' IDENTIFIED BY PASSWORD '*43AB6D5047308CDDD3C9C7BF244A184EB22559E2';
-GRANT CREATE, ALTER, EXECUTE, INSERT, SELECT, DELETE, UPDATE, REFERENCES, INDEX ON `django`.* TO 'django_caller'@'%';
+# Turn off foreign key checks
+SET FOREIGN_KEY_CHECKS = 0;
 
-
-
-
-USE `hutoma`;
-
-# Privileges for `django_caller`@`%`
-GRANT USAGE ON *.* TO 'django_caller'@'%' IDENTIFIED BY PASSWORD '*43AB6D5047308CDDD3C9C7BF244A184EB22559E2';
-GRANT EXECUTE ON `hutoma`.* TO 'django_caller'@'%';
-# Grant read-only DB access to django_caller
-GRANT SELECT ON `hutoma`.`users` TO 'django_caller'@'%';
-#-End-Django-----------------------------------------------------------------------------------
-
-#------------------------------------------------------------------------------------
-# Template publishing update
-ALTER TABLE botStore ADD COLUMN `publishing_type` tinyint(1) NOT NULL DEFAULT 1 AFTER `publishing_state`;
-CREATE INDEX `idx_botStore_publishing_state_publishing_type` on botStore (`publishing_state`, `publishing_type`);
-
-DROP PROCEDURE IF EXISTS `publishBot`;
-DELIMITER ;;
-CREATE DEFINER=`botStoreWriter`@`127.0.0.1` PROCEDURE `publishBot`(
-  IN `param_devId` VARCHAR(50),
-  IN `param_aiid` VARCHAR(50),
-  IN `param_name` VARCHAR(50),
-  IN `param_description` VARCHAR(1024),
-  IN `param_longDescription` TEXT,
-  IN `param_alertMessage` VARCHAR(150),
-  IN `param_badge` VARCHAR(20),
-  IN `param_price` DECIMAL,
-  IN `param_sample` TEXT,
-  IN `param_lastUpdate` DATETIME,
-  IN `param_category` VARCHAR(50),
-  IN `param_licenseType` VARCHAR(50),
-  IN `param_privacyPolicy` TEXT,
-  IN `param_classification` VARCHAR(50),
-  IN `param_version` VARCHAR(25),
-  IN `param_videoLink` VARCHAR(1800),
-  IN `param_publishingState` TINYINT(1),
-  IN `param_publishingType` TINYINT(1)
-)
-    NO SQL
-BEGIN
-
-    DECLARE EXIT HANDLER FOR SQLEXCEPTION
-    BEGIN
-      ROLLBACK;
-      SELECT -1;
-    END;
-
-    INSERT INTO botStore
-    (dev_id, aiid, name, description, long_description, alert_message, badge, price, sample, last_update, category,
-     privacy_policy, classification, version, video_link, license_type, publishing_state, publishing_type)
-    VALUES (param_devId, param_aiid, param_name, param_description, param_longDescription, param_alertMessage,
-                         param_badge, param_price, param_sample, param_lastUpdate, param_category, param_privacyPolicy, param_classification,
-            param_version, param_videoLink, param_licenseType, param_publishingState, param_publishingType);
-
-    SELECT LAST_INSERT_ID();
-  END ;;
-DELIMITER ;
-
-DROP PROCEDURE IF EXISTS `getPublishedBots`;
-DELIMITER ;;
-CREATE DEFINER=`botStoreReader`@`127.0.0.1` PROCEDURE `getPublishedBots`(
-  IN `param_publishing_type` TINYINT(1)
-)
-    NO SQL
-BEGIN
-    SELECT * FROM botStore WHERE publishing_state = 2 AND publishing_type = param_publishing_type;
-  END ;;
-DELIMITER ;
-#-End-publish-----------------------------------------------------------------------------------
-
-
-CREATE TABLE IF NOT EXISTS `hutoma`.`botTemplate` (
-  `botId` INT NOT NULL,
-  `template` LONGTEXT NULL,
-  UNIQUE INDEX `botId_UNIQUE` (`botId` ASC),
-  PRIMARY KEY (`botId`),
-  CONSTRAINT `fk_botTemplate_botId`
-    FOREIGN KEY (`botId`)
-    REFERENCES `hutoma`.`botStore` (`id`)
-    ON DELETE CASCADE
-    ON UPDATE NO ACTION);
-
-GRANT SELECT ON `hutoma`.`botTemplate` TO 'aiReader'@'127.0.0.1';
-GRANT SELECT, INSERT, UPDATE, DELETE ON `hutoma`.`botTemplate` TO 'aiWriter'@'127.0.0.1';
-
-DROP PROCEDURE IF EXISTS `hutoma`.`addBotTemplate`;
-DELIMITER ;;
-CREATE DEFINER=`aiWriter`@`127.0.0.1` PROCEDURE `addBotTemplate`(
-  IN `param_botId` INT(11),
-  IN `param_template` TEXT
-)
-BEGIN
-    INSERT INTO botTemplate (botId, template) VALUES (param_botId, param_template);
-  END ;;
-DELIMITER ;
-
-
-DROP PROCEDURE IF EXISTS `hutoma`.`getBotTemplate`;
-DELIMITER ;;
-CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `getBotTemplate`(
-  IN `param_botId` INT(11)
-)
-BEGIN
-    SELECT `template` FROM botTemplate WHERE `botId` = param_botId;
-  END ;;
-DELIMITER ;
-
-DROP PROCEDURE IF EXISTS `getAi`;
-DELIMITER ;;
-CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `getAi`(
-  IN `in_dev_id` VARCHAR(50),
-  IN `in_aiid` VARCHAR(50))
-    READS SQL DATA
-BEGIN
-
-    SELECT
-      `ai`.`id`,
-      `ai`.`aiid`,
-      `ai_name`,
-      `ai_description`,
-      `created_on`,
-      `ai`.`dev_id`,
-      `is_private`,
-      `client_token`,
-      `hmac_secret`,
-      `ui_ai_language`,
-      `ui_ai_timezone`,
-      `ui_ai_confidence`,
-      `ui_ai_personality`,
-      `ui_ai_voice`,
-      `passthrough_url`,
-      `default_chat_responses`,
-      `api_keys_desc`,
-      `botStore`.`publishing_state` as `publishing_state`,
-      (SELECT COUNT(`ai_training`.`aiid`)
-       FROM `ai_training`
-       WHERE `ai_training`.`aiid`=`in_aiid`)
-        AS `has_training_file`
-    FROM `ai` LEFT OUTER JOIN `botStore` on `botStore`.`aiid` = `ai`.`aiid`
-    WHERE `ai`.`dev_id`=`in_dev_id`
-          AND `ai`.`aiid`=`in_aiid`
-          AND `deleted`=0;
-
-  END;;
-DELIMITER ;
-
-
-CREATE INDEX `idx_ai_status_training_status` ON `ai_status` (`training_status`);
+# To generate this I ran a script to get a list of the tables required.
+#   USE INFORMATION_SCHEMA; 
+#   SELECT  
+#   CONCAT("ALTER TABLE `", TABLE_SCHEMA,"`.`", TABLE_NAME, "` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;")  
+#   AS MySQLCMD FROM TABLES  
+#   WHERE TABLE_SCHEMA = "hutoma"; 
+ALTER TABLE `hutoma`.`ai` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE `hutoma`.`ai_integration` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE `hutoma`.`ai_memory` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE `hutoma`.`ai_status` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE `hutoma`.`ai_training` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE `hutoma`.`api_rate_limit` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE `hutoma`.`botIcon` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE `hutoma`.`botPurchase` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE `hutoma`.`botStore` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE `hutoma`.`botTemplate` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE `hutoma`.`bot_ai` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE `hutoma`.`bot_ai_config` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE `hutoma`.`chatState` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE `hutoma`.`controller_state` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE `hutoma`.`debug` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE `hutoma`.`developerInfo` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE `hutoma`.`devplan` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE `hutoma`.`domains` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE `hutoma`.`entity` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE `hutoma`.`entity_value` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE `hutoma`.`integrations` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE `hutoma`.`intent` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE `hutoma`.`intent_response` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE `hutoma`.`intent_user_says` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE `hutoma`.`intent_variable` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE `hutoma`.`intent_variable_prompt` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE `hutoma`.`invite_code_uses` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE `hutoma`.`invite_codes` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE `hutoma`.`memoryIntent` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE `hutoma`.`resetTokens` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE `hutoma`.`userAIDomains` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE `hutoma`.`users` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE `hutoma`.`webhooks` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+SET FOREIGN_KEY_CHECKS = 1;
