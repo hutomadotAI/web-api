@@ -1,4 +1,4 @@
-CREATE DATABASE  IF NOT EXISTS `django` CHARACTER SET utf8;
+CREATE DATABASE  IF NOT EXISTS `django` CHARACTER SET utf8mb4;
 USE `django`;
 
 # Privileges for `django_caller`@`%`

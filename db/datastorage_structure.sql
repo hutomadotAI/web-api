@@ -1,4 +1,4 @@
-CREATE DATABASE  IF NOT EXISTS `data_storage` /*!40100 DEFAULT CHARACTER SET utf8 */;
+CREATE DATABASE  IF NOT EXISTS `data_storage` /*!40100 DEFAULT CHARACTER SET utf8mb4*/;
 USE `data_storage`;
 -- MySQL dump 10.13  Distrib 5.7.17, for Win64 (x86_64)
 --
@@ -9,7 +9,7 @@ USE `data_storage`;
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8 */;
+/*!40101 SET NAMES utf8mb4 */;
 /*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
 /*!40103 SET TIME_ZONE='+00:00' */;
 /*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
@@ -23,7 +23,7 @@ USE `data_storage`;
 
 DROP TABLE IF EXISTS `flexi_multiradio_bts_lte_alarms`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `flexi_multiradio_bts_lte_alarms` (
   `Changes between issues 03A and 03B` text,
   `Changes between releases FDD-LTE 15A and FDD-LTE 16` text,
@@ -91,7 +91,7 @@ CREATE TABLE `flexi_multiradio_bts_lte_alarms` (
   `Fault Name in issue 03A` text,
   `Fault Name in release FDD-LTE 15A` text,
   PRIMARY KEY (`Alarm Number`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -100,7 +100,7 @@ CREATE TABLE `flexi_multiradio_bts_lte_alarms` (
 
 DROP TABLE IF EXISTS `flexi_multiradio_bts_lte_parameters`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `flexi_multiradio_bts_lte_parameters` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `Changes between issues 05A and 05B` text,
@@ -161,7 +161,7 @@ CREATE TABLE `flexi_multiradio_bts_lte_parameters` (
   `References in issue 05A` text,
   `References in release FDD-LTE15A` text,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=2967 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=2967 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -170,7 +170,7 @@ CREATE TABLE `flexi_multiradio_bts_lte_parameters` (
 
 DROP TABLE IF EXISTS `intent_mapping`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `intent_mapping` (
   `intent_name` varchar(255) NOT NULL,
   `data_table` varchar(100) DEFAULT NULL,
@@ -178,7 +178,7 @@ CREATE TABLE `intent_mapping` (
   `key_entity` varchar(100) DEFAULT NULL,
   `value_entity` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`intent_name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -192,9 +192,9 @@ CREATE TABLE `intent_mapping` (
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8 */ ;
-/*!50003 SET character_set_results = utf8 */ ;
-/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_unicode_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
@@ -219,9 +219,9 @@ DELIMITER ;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8 */ ;
-/*!50003 SET character_set_results = utf8 */ ;
-/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_unicode_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;

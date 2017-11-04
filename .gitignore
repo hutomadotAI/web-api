@@ -66,3 +66,9 @@ modules.xml
 # Statics
 web/src/console/dist/assets/
 web/src/console/dist/manifest.php
+
+# VSCode + Java plugin
+.vscode
+.settings
+.project
+.classpath
