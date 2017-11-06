@@ -9,7 +9,7 @@ function pollStatus() {
 }
 
 function startPollForStatus() {
-    ID_pool = setInterval(pollStatus, 2000);
+    ID_pool = setTimeout(pollStatus, 2000);
 }
 
 function stopPollForStatus() {
@@ -392,6 +392,9 @@ function trainingStatusCall() {
             var JSONdata = JSON.stringify(xhr.responseText);
             setUICurrentStatus(UI_STATE.ERROR.value);
             msgAlertProgressBar(ALERT.DANGER.value, 'Cannot contact server.');
+        },
+        complete: function() {
+            startPollForStatus();
         }
     });
 }
