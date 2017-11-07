@@ -591,7 +591,8 @@ public class AIIntegrationLogic {
         logMap.add("facebook_page_name", pageNode.getName());
         logMap.add("facebook_user_name", integrationMetadata.getUserName());
 
-        IntegrationRecord updatedRecord = this.databaseIntegrations.updateIntegrationRecord(aiid, devid, IntegrationType.FACEBOOK,
+        IntegrationRecord updatedRecord = this.databaseIntegrations.updateIntegrationRecord(aiid, devid,
+                IntegrationType.FACEBOOK,
                 (record) -> {
                     // load a record if we have one
                     FacebookIntegrationMetadata metadata = null;

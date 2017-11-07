@@ -110,7 +110,7 @@ public class IntentLogic {
                 return ApiError.getBadRequest(AILogic.BOT_RO_MESSAGE);
             }
 
-            boolean created = this.databaseEntitiesIntents.getIntent(aiid, intent.getIntentName()) == null;
+            final boolean created = this.databaseEntitiesIntents.getIntent(aiid, intent.getIntentName()) == null;
 
             // Check if there are any variables with duplicate or empty labels
             Set<String> usedLabels = new HashSet<>();

@@ -41,7 +41,8 @@ public class Validate {
         return Arrays.stream(params).anyMatch(s -> s == null || s.isEmpty());
     }
 
-    public static Locale validateLocale(final String paramName, final String param) throws ParameterValidationException {
+    public static Locale validateLocale(final String paramName, final String param)
+            throws ParameterValidationException {
         if (param == null || param.isEmpty()) {
             throw new ParameterValidationException("parameter null or empty", paramName);
         }

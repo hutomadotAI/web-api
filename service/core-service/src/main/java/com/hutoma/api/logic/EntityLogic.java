@@ -77,7 +77,7 @@ public class EntityLogic {
                         devidString, logMap);
                 return ApiError.getBadRequest("Cannot create an entity with a system prefix.");
             }
-            boolean created = this.database.getEntity(devid, entityName) == null;
+            final boolean created = this.database.getEntity(devid, entityName) == null;
             stopTrainingIfEntityInUse(devid, entityName);
             this.database.writeEntity(devid, entityName, entity);
             this.logger.logUserTraceEvent(LOGFROM, "WriteEntity", devidString, logMap);

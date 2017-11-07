@@ -169,9 +169,13 @@ public class AiBot {
         this.publishingState = publishingState;
     }
 
-    public PublishingType getPublishingType() { return this.publishingType; }
+    public PublishingType getPublishingType() {
+        return this.publishingType;
+    }
 
-    public void setPublishingType(final PublishingType publishingType) { this.publishingType = publishingType; }
+    public void setPublishingType(final PublishingType publishingType) {
+        this.publishingType = publishingType;
+    }
 
     public String getLicenseType() {
         return this.licenseType;
@@ -213,7 +217,9 @@ public class AiBot {
 
         private final int value;
 
-        PublishingType(final int value) { this.value = value; }
+        PublishingType(final int value) {
+            this.value = value;
+        }
 
         public static PublishingType from(final int value) {
             Optional<PublishingType> state = Arrays.stream(PublishingType.values())
@@ -225,6 +231,8 @@ public class AiBot {
             return state.get();
         }
 
-        public int value() { return this.value; }
+        public int value() {
+            return this.value;
+        }
     }
 }

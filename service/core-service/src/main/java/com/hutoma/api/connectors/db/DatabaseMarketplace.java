@@ -153,7 +153,8 @@ public class DatabaseMarketplace extends Database {
         }
     }
 
-    public boolean addBotTemplate(final int botId, final BotStructure botStructure, final DatabaseTransaction transaction,
+    public boolean addBotTemplate(final int botId, final BotStructure botStructure,
+                                  final DatabaseTransaction transaction,
                                   final JsonSerializer jsonSerializer)
             throws DatabaseException {
         try (DatabaseCall call = transaction == null ? this.callProvider.get() : transaction.getDatabaseCall()) {

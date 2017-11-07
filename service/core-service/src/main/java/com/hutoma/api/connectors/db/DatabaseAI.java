@@ -548,6 +548,7 @@ public class DatabaseAI extends Database  {
     public boolean unlinkBotFromAi(final UUID devId, final UUID aiid, final int botId) throws DatabaseException {
         return this.unlinkBotFromAi(devId, aiid, botId, null);
     }
+
     public boolean unlinkBotFromAi(final UUID devId, final UUID aiid, final int botId,
                                    final DatabaseTransaction transaction)
             throws DatabaseException {
@@ -557,6 +558,7 @@ public class DatabaseAI extends Database  {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public ChatState getChatState(final UUID devId, final UUID aiid, final UUID chatId,
                                   final JsonSerializer jsonSerializer)
             throws DatabaseException {
@@ -575,8 +577,8 @@ public class DatabaseAI extends Database  {
                 String lockedAiid = rs.getString("locked_aiid");
                 double confidenceThreshold = rs.getDouble("confidence_threshold");
                 if (rs.wasNull()) {
-                    confidenceThreshold = getAI(devId, aiid, jsonSerializer, this.transactionProvider.get()).
-                            getConfidence();
+                    confidenceThreshold = getAI(devId, aiid, jsonSerializer, this.transactionProvider.get())
+                            .getConfidence();
                 }
                 return new ChatState(
                         new DateTime(rs.getTimestamp("timestamp")),

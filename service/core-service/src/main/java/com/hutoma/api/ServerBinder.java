@@ -70,7 +70,8 @@ public class ServerBinder extends AbstractBinder {
 
         // infrastructure
         bind(Config.class).to(Config.class).in(Singleton.class);
-        bind(Config.class).to(IDatabaseConfig.class).to(IThreadConfig.class).to(ILoggerConfig.class).in(Singleton.class);
+        bind(Config.class).to(IDatabaseConfig.class).to(IThreadConfig.class).to(ILoggerConfig.class)
+                .in(Singleton.class);
         bind(DatabaseConnectionPool.class).to(DatabaseConnectionPool.class).in(Singleton.class);
         bind(ThreadPool.class).to(ThreadPool.class).in(Singleton.class);
         bind(ThreadSubPool.class).to(ThreadSubPool.class);

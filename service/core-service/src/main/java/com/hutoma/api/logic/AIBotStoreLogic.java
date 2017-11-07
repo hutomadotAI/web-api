@@ -232,7 +232,8 @@ public class AIBotStoreLogic {
                     }
                     BotStructure botStructure = BotStructureSerializer.serialize(devId, aiid, this.database,
                             this.databaseEntitiesIntents, this.jsonSerializer);
-                    if (!this.databaseMarketplace.addBotTemplate(botId, botStructure, transaction, this.jsonSerializer)) {
+                    if (!this.databaseMarketplace.addBotTemplate(botId, botStructure, transaction,
+                            this.jsonSerializer)) {
                         transaction.rollback();
                         this.logger.logUserTraceEvent(LOGFROM, "PublishBot - could not write the template",
                                 devIdString, logMap);

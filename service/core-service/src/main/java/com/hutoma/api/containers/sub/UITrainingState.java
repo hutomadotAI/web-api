@@ -11,7 +11,8 @@ public class UITrainingState {
     @SerializedName("message")
     public final String errorMessage;
 
-    public UITrainingState(final TrainingStatus apiTrainingStatus, final double trainingProgress, final String errorMessage) {
+    public UITrainingState(final TrainingStatus apiTrainingStatus, final double trainingProgress,
+                           final String errorMessage) {
 
         switch (apiTrainingStatus) {
             case AI_READY_TO_TRAIN:
