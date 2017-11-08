@@ -12,19 +12,28 @@ public class ChatResult {
 
     @SerializedName("topicIn")
     private String topicIn = "";
+    @SerializedName("score")
     private double score;
     @SerializedName("query")
     private String query;
+    @SerializedName("answer")
     private String answer = "";
+    @SerializedName("history")
     private String history = "";
     @SerializedName("elapsedTime")
     private double elapsedTime;
+    @SerializedName("action")
     private String action;
+    @SerializedName("context")
     private String context;
     @SerializedName("topic_out")
     private String topicOut = "";
+    @SerializedName("chatId")
     private UUID chatId;
+    @SerializedName("intents")
     private List<MemoryIntent> intents;
+    @SerializedName("chatTarget")
+    private String chatTarget;
 
     // result of a webhook call if one was made
     private transient WebHookResponse webHookResponse;
@@ -57,6 +66,7 @@ public class ChatResult {
         this.topicOut = source.topicOut;
         this.chatId = source.chatId;
         this.aiid = source.aiid;
+        this.chatTarget = source.chatTarget;
     }
 
     public ChatResult(final UUID chatId, final double score, final String query, final String answer,
@@ -99,6 +109,10 @@ public class ChatResult {
 
     public void setScore(double score) {
         this.score = score;
+    }
+
+    public void setTopicIn(final String topicIn) {
+        this.topicIn = topicIn;
     }
 
     public String getTopicOut() {
@@ -171,5 +185,13 @@ public class ChatResult {
 
     public void setPromptForIntentVariable(final String promptForIntentVariable) {
         this.promptForIntentVariable = promptForIntentVariable;
+    }
+
+    public void setChatTarget(final String chatTarget) {
+        this.chatTarget = chatTarget;
+    }
+
+    public String getChatTarget() {
+        return this.chatTarget;
     }
 }

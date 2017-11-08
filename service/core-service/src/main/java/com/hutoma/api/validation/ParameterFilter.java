@@ -1,6 +1,7 @@
 package com.hutoma.api.validation;
 
 import com.hutoma.api.common.AnalyticsResponseFormat;
+import com.hutoma.api.containers.sub.ChatHandoverTarget;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Tools;
@@ -51,6 +52,7 @@ public class ParameterFilter extends Validate {
     protected static final String DEFAULT_CHAT_RESPONSES = "default_chat_responses";
     protected static final String PUBLISHING_TYPE = "publishing_type";
     protected static final String BOT_ID_LIST = "bot_list";
+    protected static final String CHAT_HANDOVER_TARGET = "target";
 
     private static final String DEVID_HEADER_KEY = "_developer_id";
 
@@ -164,6 +166,10 @@ public class ParameterFilter extends Validate {
     @SuppressWarnings("unchecked")
     public static List<Integer> getBotIdList(final ContainerRequestContext requestContext) {
         return (List<Integer>) requestContext.getProperty(APIParameter.BotIdList.toString());
+    }
+
+    public static ChatHandoverTarget getChatHandoverTarget(final ContainerRequestContext requestContext) {
+        return (ChatHandoverTarget) requestContext.getProperty(APIParameter.ChatHandoverTarget.toString());
     }
 
     /***

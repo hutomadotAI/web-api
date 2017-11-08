@@ -1,11 +1,12 @@
 package com.hutoma.api.validation;
 
 import com.hutoma.api.common.AnalyticsResponseFormat;
-import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.logging.LogMap;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.ApiError;
+import com.hutoma.api.containers.sub.ChatHandoverTarget;
+import com.hutoma.api.logging.ILogger;
+import com.hutoma.api.logging.LogMap;
 
 import java.io.IOException;
 import java.lang.reflect.AnnotatedElement;
@@ -121,6 +122,15 @@ public class QueryFilter extends ParameterFilter implements ContainerRequestFilt
             if (checkList.contains(APIParameter.BotIdList)) {
                 requestContext.setProperty(APIParameter.BotIdList.toString(),
                         this.validateIntegerList(APIParameter.BotIdList.toString(), queryParameters.get(BOT_ID_LIST)));
+            }
+
+            if (checkList.contains(APIParameter.ChatHandoverTarget)) {
+                try {
+                    requestContext.setProperty(APIParameter.ChatHandoverTarget.toString(),
+                            ChatHandoverTarget.fromString(getFirst(queryParameters.get(CHAT_HANDOVER_TARGET))));
+                } catch (IllegalArgumentException ex) {
+                    throw new ParameterValidationException("Unsupported handover target", CHAT_HANDOVER_TARGET);
+                }
             }
 
             this.logger.logDebug(LOGFROM, "parameter validation passed");

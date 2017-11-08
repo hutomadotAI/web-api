@@ -10,10 +10,10 @@ import java.util.UUID;
  */
 public class ApiChat extends ApiResult {
 
-    UUID chatId;
-    long timestamp;
-    ChatResult result;
-    Metadata metadata;
+    private UUID chatId;
+    private long timestamp;
+    private ChatResult result;
+    private Metadata metadata;
 
     public ApiChat(UUID chatId, long timestamp) {
         this.chatId = chatId;
@@ -42,5 +42,9 @@ public class ApiChat extends ApiResult {
 
     public UUID getChatId() {
         return chatId;
+    }
+
+    public long getTimestamp() {
+        return this.timestamp;
     }
 }

@@ -15,20 +15,23 @@ public class ChatState {
     private String history;
     private HashMap<String, String> entityValues;
     private double confidenceThreshold;
+    private ChatHandoverTarget chatTarget;
 
     public ChatState(final DateTime timestamp, final String topic, final String history, final UUID lockedAiid,
-                     final HashMap<String, String> entityValues, final double confidenceThreshold) {
+                     final HashMap<String, String> entityValues, final double confidenceThreshold,
+                     final ChatHandoverTarget chatTarget) {
         this.timestamp = timestamp;
         this.topic = topic;
         this.history = history;
         this.lockedAiid = lockedAiid;
         this.entityValues = entityValues;
         this.confidenceThreshold = confidenceThreshold;
+        this.chatTarget = chatTarget;
     }
 
     public static ChatState getEmpty() {
         return new ChatState(
-                null, null, null, null, new HashMap<>(), 0.0d
+                null, null, null, null, new HashMap<>(), 0.0d, ChatHandoverTarget.Ai
         );
     }
 
@@ -82,5 +85,13 @@ public class ChatState {
 
     public double getConfidenceThreshold() {
         return this.confidenceThreshold;
+    }
+
+    public ChatHandoverTarget getChatTarget() {
+        return this.chatTarget;
+    }
+
+    public void setChatTarget(final ChatHandoverTarget target) {
+        this.chatTarget = target;
     }
 }

@@ -2,6 +2,7 @@ package com.hutoma.api.tests.service;
 
 import com.google.common.collect.ImmutableMap;
 import com.hutoma.api.common.ChatLogger;
+import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.ApiChat;
 import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.containers.sub.ChatState;
@@ -25,6 +26,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.Response;
@@ -38,6 +40,7 @@ import static org.mockito.Mockito.when;
  */
 public class TestServiceChat extends ServiceTestBase {
     private static final String CHAT_PATH = "/ai/" + AIID + "/chat";
+    private static final String CHAT_HANDOVER = CHAT_PATH + "/target";
 
     @Mock
     protected IMemoryIntentHandler fakeMemoryIntentHandler;
@@ -49,7 +52,7 @@ public class TestServiceChat extends ServiceTestBase {
     protected ChatStateHandler fakeChatStateHandler;
 
     @Before
-    public void setup() {
+    public void setup() throws ChatStateHandler.ChatStateException {
         when(this.fakeTools.createNewRandomUUID()).thenReturn(UUID.randomUUID());
         when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(ChatState.getEmpty());
     }
@@ -144,6 +147,29 @@ public class TestServiceChat extends ServiceTestBase {
         Assert.assertTrue(resultIntent.getVariablesMap().containsKey(label2));
         Assert.assertEquals(mv1.getName(), resultIntent.getVariablesMap().get(label1).getName());
         Assert.assertEquals(mv2.getName(), resultIntent.getVariablesMap().get(label2).getName());
+    }
+
+    @Test
+    public void testChat_handover() throws DatabaseException {
+        when(this.fakeDatabaseAi.checkAIBelongsToDevId(any(), any())).thenReturn(true);
+        final Response response = target(CHAT_HANDOVER)
+                .queryParam("target", "hUmAn")
+                .queryParam("chatId", "")
+                .request()
+                .headers(defaultHeaders)
+                .post(Entity.text(""));
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
+    }
+
+    @Test
+    public void testChat_handover_invalidTarget() throws DatabaseException {
+        final Response response = target(CHAT_HANDOVER)
+                .queryParam("target", "thisIsNotAValidTarget")
+                .queryParam("chatId", "")
+                .request()
+                .headers(defaultHeaders)
+                .post(Entity.text(""));
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.getStatus());
     }
 
     private WebTarget buildChatDefaultParams(WebTarget webTarget) {

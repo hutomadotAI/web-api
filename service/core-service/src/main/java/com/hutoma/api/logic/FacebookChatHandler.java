@@ -1,9 +1,7 @@
 package com.hutoma.api.logic;
 
 import com.google.common.base.Strings;
-import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.logging.LogMap;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.FacebookConnector;
 import com.hutoma.api.connectors.FacebookException;
@@ -17,6 +15,9 @@ import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.containers.sub.IntegrationRecord;
 import com.hutoma.api.containers.sub.IntegrationType;
 import com.hutoma.api.containers.sub.MemoryVariable;
+import com.hutoma.api.logging.ILogger;
+import com.hutoma.api.logging.LogMap;
+import com.hutoma.api.memory.ChatStateHandler;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -133,7 +134,7 @@ public class FacebookChatHandler implements Callable {
             String messageOriginatorId = this.messaging.getSender();
 
             if (Strings.isNullOrEmpty(userQuery)) {
-                this.logger.logDebug(LOGFROM, String.format("facebook webhook with no usable payload"), logMap);
+                this.logger.logDebug(LOGFROM, "facebook webhook with no usable payload", logMap);
                 return null;
             }
 
@@ -162,7 +163,7 @@ public class FacebookChatHandler implements Callable {
 
             // keep track of whether this worked or not.
             boolean chatSuccess = false;
-            String status;
+            String status = "";
 
             // load the metadata from the record
             FacebookIntegrationMetadata metadata = (FacebookIntegrationMetadata) this.serializer.deserialize(
@@ -171,7 +172,7 @@ public class FacebookChatHandler implements Callable {
             // have we got a valid page token? bail if not
             if ((metadata == null) || Strings.isNullOrEmpty(metadata.getPageToken())) {
                 this.logger.logError(LOGFROM,
-                        String.format("bad facebook integration config. cannot get page token"),
+                        "bad facebook integration config. cannot get page token",
                         logMap);
                 status = "Bad Facebook integration config";
             } else {
@@ -195,31 +196,39 @@ public class FacebookChatHandler implements Callable {
                             messageOriginatorId,
                             userQuery, chatID, logMap);
 
-                    try {
-                        // note the start time
-                        final long startTime = this.tools.getTimestamp();
+                    if (!response.isEmpty()) {
+                        try {
+                            // note the start time
+                            final long startTime = this.tools.getTimestamp();
 
-                        // send the response back to Facebook
-                        sendChatResponseToFacebook(metadata, messageOriginatorId, response);
+                            // send the response back to Facebook
+                            sendChatResponseToFacebook(metadata, messageOriginatorId, response);
 
-                        facebookThinksWeAreTyping = false;
+                            facebookThinksWeAreTyping = false;
 
-                        // chat worked. save the status
-                        status = "Chat active.";
-                        chatSuccess = true;
+                            // chat worked. save the status
+                            status = "Chat active.";
+                            chatSuccess = true;
 
-                        // how long did we wait for sendapi to complete?
-                        double duration = (double) (this.tools.getTimestamp() - startTime) / 1000.0;
+                            // how long did we wait for sendapi to complete?
+                            double duration = (double) (this.tools.getTimestamp() - startTime) / 1000.0;
 
-                        // log the message that we just processed
-                        this.logger.logDebug(LOGFROM, String.format("responded to facebook message for %s",
-                                integrationRecord.getAiid()), logMap.put("duration", duration));
+                            // log the message that we just processed
+                            this.logger.logDebug(LOGFROM, String.format("responded to facebook message for %s",
+                                    integrationRecord.getAiid()), logMap.put("duration", duration));
 
-                    } catch (FacebookException fe) {
-                        // something went wrong. log it and save the status
-                        status = fe.getMessage();
-                        this.logger.logWarning(LOGFROM, status, logMap);
+                        } catch (FacebookException fe) {
+                            // something went wrong. log it and save the status
+                            status = fe.getMessage();
+                            this.logger.logWarning(LOGFROM, status, logMap);
+                        }
+
+                    } else { // response is empty
+
+                        this.logger.logDebug(LOGFROM, "chat has been handed over to an external entity",
+                                logMap);
                     }
+
                 } finally {
                     if (facebookThinksWeAreTyping) {
                         this.facebookConnector.sendFacebookSenderAction(messageOriginatorId,
@@ -304,6 +313,7 @@ public class FacebookChatHandler implements Callable {
 
             logMap.add("Facebook_RichIntentPrompt", createdContentFromIntentPrompt);
             logMap.add("Facebook_RichWebhook", webhookResponseSentRichContent);
+            logMap.add("Chat target", chatResult.getChatTarget());
 
             if (!createdContentFromIntentPrompt) {
                 if (webhookResponseSentRichContent) {
@@ -344,6 +354,9 @@ public class FacebookChatHandler implements Callable {
             // otherwise get a status message
             responseList.add(new FacebookResponseSegment.FacebookResponseTextSegment(
                     e.getApiError().getStatus().getInfo()));
+        } catch (ChatStateHandler.ChatStateException ex) {
+            this.logger.logUserExceptionEvent(LOGFROM, "GetChatResponse", integrationRecord.getDevid().toString(),
+                    ex);
         }
         return responseList;
     }

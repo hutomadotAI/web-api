@@ -5,11 +5,13 @@ import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.ApiChat;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.ApiResult;
+import com.hutoma.api.containers.sub.ChatHandoverTarget;
 import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.containers.sub.ChatState;
 import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.containers.sub.MemoryVariable;
 import com.hutoma.api.controllers.RequestBase;
+import com.hutoma.api.memory.ChatStateHandler;
 import com.hutoma.api.memory.MemoryIntentHandler;
 
 import org.joda.time.DateTime;
@@ -240,7 +242,7 @@ public class TestChatLogicIntents extends TestChatBase {
      */
     @Test
     public void testChat_multiLineIntent_fulfilledFromPersistence()
-            throws RequestBase.AiControllerException, DatabaseException {
+            throws RequestBase.AiControllerException, DatabaseException, ChatStateHandler.ChatStateException {
         MemoryIntent mi = getMultiEntityMemoryIntentForPrompt(3, "prompt");
 
         // Make sure all variables are clean
@@ -250,7 +252,7 @@ public class TestChatLogicIntents extends TestChatBase {
 
         HashMap<String, String> entityValues = new HashMap<>();
         entityValues.put("persistent_var", "persistentValue");
-        ChatState state = new ChatState(DateTime.now(), null, null, null, entityValues, 0.5d);
+        ChatState state = new ChatState(DateTime.now(), null, null, null, entityValues, 0.5d, ChatHandoverTarget.Ai);
         when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(state);
 
         // First question, triggers the intent but without the right entity value

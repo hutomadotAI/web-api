@@ -28,24 +28,58 @@ public class ChatStateHandler {
         this.jsonSerializer = jsonSerializer;
     }
 
-    public ChatState getState(final UUID devId, final UUID aiid, final UUID chatId) {
+    public ChatState getState(final UUID devId, final UUID aiid, final UUID chatId) throws ChatStateException {
+        ChatState state = null;
         try {
-            return this.databaseAi.getChatState(devId, aiid, chatId, jsonSerializer);
+            if (!this.databaseAi.checkAIBelongsToDevId(devId, aiid)) {
+                throw new ChatStateUserException("Unknown AI.");
+            }
+            state = this.databaseAi.getChatState(devId, aiid, chatId, jsonSerializer);
+        } catch (ChatStateUserException ex) {
+            this.logger.logUserExceptionEvent(LOGFROM, ex.getMessage(), devId.toString(), ex);
+            throw ex;
         } catch (Exception ex) {
             this.logger.logUserExceptionEvent(LOGFROM, ex.getMessage(), devId.toString(), ex);
         }
-        return ChatState.getEmpty();
+        return state == null ? ChatState.getEmpty() : state;
     }
 
-    public void saveState(final UUID devId, final UUID chatId, final ChatState chatState) {
+    public void saveState(final UUID devId, final UUID aiid, final UUID chatId, final ChatState chatState)
+            throws ChatStateException {
         try {
+            if (!this.databaseAi.checkAIBelongsToDevId(devId, aiid)) {
+                throw new ChatStateUserException("Unknown AI.");
+            }
             chatState.setTimestamp(DateTime.now());
             if (!this.databaseAi.saveChatState(devId, chatId, chatState, jsonSerializer)) {
                 this.logger.logUserErrorEvent(LOGFROM, "Could not save state for chat " + chatId,
                         devId.toString(), LogMap.map("ChatId", chatId));
             }
+        } catch (ChatStateUserException ex) {
+            this.logger.logUserExceptionEvent(LOGFROM, ex.getMessage(), devId.toString(), ex);
+            throw ex;
         } catch (Exception ex) {
             this.logger.logUserExceptionEvent(LOGFROM, ex.getMessage(), devId.toString(), ex);
+        }
+    }
+
+    public static class ChatStateException extends Exception {
+        public ChatStateException(final String message) {
+            super(message);
+        }
+
+        public ChatStateException(final Exception ex) {
+            super(ex);
+        }
+    }
+
+    public static class ChatStateUserException extends ChatStateException {
+        public ChatStateUserException(final String message) {
+            super(message);
+        }
+
+        public ChatStateUserException(final Exception ex) {
+            super(ex);
         }
     }
 }

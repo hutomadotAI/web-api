@@ -183,9 +183,13 @@ function requestAnswerAI(ai_name, question, previousChatId) {
                     } else {
                         var chatId = JSONdata['chatId'];
                         if (JSONdata['status']['code'] === 200) {
-                            var safeAnswer = htmlEncode(JSONdata['result']['answer']);
-                            createRightMsg(ai_name, safeAnswer, chatId, JSONdata['result']['score'], false);
-                            createChatEvent(chatId + "_" + user.email, user.email, chatId);
+                            if (JSONdata['result']['chatTarget'] === 'human') {
+                                createRightMsg(ai_name, "(conversation handed over to human)", chatId, JSONdata['result']['score'], false);
+                            } else {
+                                var safeAnswer = htmlEncode(JSONdata['result']['answer']);
+                                createRightMsg(ai_name, safeAnswer, chatId, JSONdata['result']['score'], false);
+                                createChatEvent(chatId + "_" + user.email, user.email, chatId);
+                            }
                         } else {
                             createRightMsg(ai_name, JSONdata['status']['info'], chatId, -1, true);
                         }

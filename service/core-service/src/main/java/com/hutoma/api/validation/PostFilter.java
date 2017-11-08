@@ -1,9 +1,7 @@
 package com.hutoma.api.validation;
 
 import com.google.gson.JsonParseException;
-import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.logging.LogMap;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.ApiEntity;
 import com.hutoma.api.containers.ApiError;
@@ -18,6 +16,8 @@ import com.hutoma.api.containers.sub.ServerAffinity;
 import com.hutoma.api.containers.sub.ServerAiEntry;
 import com.hutoma.api.containers.sub.ServerRegistration;
 import com.hutoma.api.containers.sub.WebHook;
+import com.hutoma.api.logging.ILogger;
+import com.hutoma.api.logging.LogMap;
 import com.hutoma.api.logic.ChatLogic;
 
 import org.apache.logging.log4j.util.Strings;

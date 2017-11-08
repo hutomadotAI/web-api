@@ -3,9 +3,7 @@ package com.hutoma.api.logic;
 import com.google.common.base.Strings;
 import com.hutoma.api.common.ChatLogger;
 import com.hutoma.api.common.Config;
-import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.logging.LogMap;
 import com.hutoma.api.common.Pair;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.AIChatServices;
@@ -13,9 +11,11 @@ import com.hutoma.api.connectors.AiStrings;
 import com.hutoma.api.connectors.ServerConnector;
 import com.hutoma.api.connectors.WebHooks;
 import com.hutoma.api.containers.ApiChat;
+import com.hutoma.api.containers.ApiChatApiHandover;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.ApiResult;
+import com.hutoma.api.containers.sub.ChatHandoverTarget;
 import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.containers.sub.ChatState;
 import com.hutoma.api.containers.sub.MemoryIntent;
@@ -23,6 +23,8 @@ import com.hutoma.api.containers.sub.MemoryVariable;
 import com.hutoma.api.containers.sub.WebHook;
 import com.hutoma.api.containers.sub.WebHookResponse;
 import com.hutoma.api.controllers.RequestBase;
+import com.hutoma.api.logging.ILogger;
+import com.hutoma.api.logging.LogMap;
 import com.hutoma.api.memory.ChatStateHandler;
 import com.hutoma.api.memory.IEntityRecognizer;
 import com.hutoma.api.memory.IMemoryIntentHandler;
@@ -92,12 +94,16 @@ public class ChatLogic {
             }
         } catch (ChatFailedException fail) {
             return fail.getApiError();
+        } catch (ChatStateHandler.ChatStateUserException ex) {
+            return ApiError.getBadRequest(ex.getMessage());
+        } catch (ChatStateHandler.ChatStateException ex) {
+            return ApiError.getBadRequest();
         }
     }
 
     public ApiChat chatPassthrough(final UUID aiid, final UUID devId, final String chatId, final String question,
                                    final Map<String, String> clientVariables, String passthrough)
-            throws ChatFailedException {
+            throws ChatFailedException, ChatStateHandler.ChatStateException {
         UUID chatUuid = UUID.fromString(chatId);
         final String devIdString = devId.toString();
 
@@ -154,7 +160,7 @@ public class ChatLogic {
 
     public ChatResult chatFacebook(final UUID aiid, final UUID devId, final String question, final String chatId,
                                    final String facebookOriginatingUser)
-            throws ChatFailedException {
+            throws ChatFailedException, ChatStateHandler.ChatStateException {
         this.telemetryMap = LogMap.map("ChatOrigin", "Facebook")
                 .put("QFromFacebookUser", facebookOriginatingUser);
         return chatCall(aiid, devId, question, chatId, null).getResult();
@@ -193,9 +199,36 @@ public class ChatLogic {
         return apiChat.setSuccessStatus();
     }
 
+    public ApiResult handOver(final UUID aiid, final UUID devId, final String chatId, final ChatHandoverTarget target) {
+        try {
+            LogMap logMap = LogMap.map("AIID", aiid);
+            UUID chatUuid = UUID.fromString(chatId);
+            this.chatState = this.chatStateHandler.getState(devId, aiid, chatUuid);
+            ChatHandoverTarget initialTarget = this.chatState.getChatTarget();
+            if (initialTarget == target) {
+                this.chatLogger.logUserWarnEvent(LOGFROM, "Handover already set to target", devId.toString(),
+                        logMap.put("Current target", target.toString()));
+                return ApiError.getBadRequest(String.format("Chat target already set to %s", target.getStringValue()));
+            }
+            this.chatState.setChatTarget(target);
+            this.chatStateHandler.saveState(devId, aiid,chatUuid, this.chatState);
+            this.chatLogger.logUserInfoEvent(LOGFROM, "Handover", devId.toString(),
+                    logMap.put("Previous target", initialTarget.toString())
+                        .put("Current target", target.toString()));
+            return new ApiChatApiHandover(chatUuid, target).setSuccessStatus(
+                    String.format("Handed over to %s.", target.toString()));
+        } catch (ChatStateHandler.ChatStateUserException ex) {
+            this.chatLogger.logUserExceptionEvent(LOGFROM, "handover", devId.toString(), ex);
+            return ApiError.getBadRequest(ex.getMessage());
+        } catch (Exception ex) {
+            this.chatLogger.logUserExceptionEvent(LOGFROM, "handover", devId.toString(), ex);
+            return ApiError.getInternalServerError();
+        }
+    }
+
     private ApiChat chatCall(final UUID aiid, final UUID devId, final String question, final String chatId,
                              final Map<String, String> clientVariables)
-            throws ChatFailedException {
+            throws ChatFailedException, ChatStateHandler.ChatStateException {
 
         final ChatRequestInfo chatInfo = new ChatRequestInfo(devId, aiid, UUID.fromString(chatId),
                 question, clientVariables);
@@ -204,12 +237,12 @@ public class ChatLogic {
         final long startTime = this.tools.getTimestamp();
         final UUID chatUuid = chatInfo.chatId;
 
-        this.chatState = this.chatStateHandler.getState(devId, aiid, chatUuid);
-
         // prepare the result container
         ApiChat apiChat = new ApiChat(chatUuid, 0);
         // Set the timestamp of the request
         apiChat.setTimestamp(startTime);
+
+        this.chatState = this.chatStateHandler.getState(devId, aiid, chatUuid);
 
         // Add telemetry for the request
         this.telemetryMap = this.telemetryMap.put("DevId", devId)
@@ -220,16 +253,44 @@ public class ChatLogic {
                 // TODO: potentially PII info, we may need to mask this later, but for
                 // development purposes log this
                 .put("ChatId", chatUuid)
-                .put("Q", question);
+                .put("Q", question)
+                .put("Chat target", this.chatState.getChatTarget().toString());
 
+
+        if (this.chatState.getChatTarget() != ChatHandoverTarget.Ai) {
+            ChatResult result = new ChatResult(chatUuid, 1.0, question, "",
+                    this.tools.getTimestamp() - startTime, null);
+            result.setChatTarget(this.chatState.getChatTarget().getStringValue());
+            result.setAnswer(null);
+            result.setHistory(null);
+            result.setTopicOut(null);
+            result.setContext(null);
+            result.setTopicIn(null);
+            result.setElapsedTime(this.tools.getTimestamp() - startTime);
+            apiChat.setResult(result);
+            this.telemetryMap.add("RequestDuration", result.getElapsedTime());
+        } else {
+            processChatRequest(devId, aiid, chatUuid, chatInfo, question, apiChat);
+        }
+
+        // log the results
+        this.chatLogger.logUserTraceEvent(LOGFROM, "ApiChat", devIdString, this.telemetryMap);
+        this.logger.logUserTraceEvent(LOGFROM, "Chat", devIdString, LogMap.map("AIID", aiid).put("SessionId", chatId));
+        return apiChat;
+    }
+
+    private void processChatRequest(final UUID devId, final UUID aiid, final UUID chatUuid,
+                                    final ChatRequestInfo chatInfo, final String question, final ApiChat apiChat)
+            throws ChatFailedException, ChatStateHandler.ChatStateException {
         UUID aiidForMemoryIntents = this.chatState.getLockedAiid() == null ? aiid : this.chatState.getLockedAiid();
         List<MemoryIntent> intentsForChat = this.intentHandler.getCurrentIntentsStateForChat(
                 aiidForMemoryIntents, chatUuid);
 
         // For now we should only have one active intent per chat.
         MemoryIntent currentIntent = intentsForChat.isEmpty() ? null : intentsForChat.get(0);
-        ChatResult result = new ChatResult(question);
 
+        ChatResult result = new ChatResult(question);
+        final String devIdString = devId.toString();
         double minP = 0.0;
         try {
 
@@ -395,12 +456,13 @@ public class ChatLogic {
         result.setScore(toOneDecimalPlace(result.getScore()));
 
         // set the chat response time to the whole duration since the start of the request until now
-        result.setElapsedTime((this.tools.getTimestamp() - startTime) / 1000.d);
+        result.setElapsedTime((this.tools.getTimestamp() - apiChat.getTimestamp()) / 1000.d);
         apiChat.setResult(result);
+        result.setChatTarget(this.chatState.getChatTarget().getStringValue());
 
         this.chatState.setTopic(apiChat.getResult().getTopicOut());
         this.chatState.setHistory(apiChat.getResult().getHistory());
-        this.chatStateHandler.saveState(devId, chatUuid, this.chatState);
+        this.chatStateHandler.saveState(devId, aiid, chatUuid, this.chatState);
 
         this.telemetryMap.add("MinP", minP);
         this.telemetryMap.add("RequestDuration", result.getElapsedTime());
@@ -408,11 +470,6 @@ public class ChatLogic {
         this.telemetryMap.add("Score", result.getScore());
         this.telemetryMap.add("LockedToAi",
                 this.chatState.getLockedAiid() == null ? "" : this.chatState.getLockedAiid().toString());
-
-        // log the results
-        this.chatLogger.logUserTraceEvent(LOGFROM, "ApiChat", devIdString, this.telemetryMap);
-        this.logger.logUserTraceEvent(LOGFROM, "Chat", devIdString, LogMap.map("AIID", aiid).put("SessionId", chatId));
-        return apiChat;
     }
 
     /**

@@ -1,6 +1,5 @@
 package com.hutoma.api.connectors.db;
 
-import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Pair;
 import com.hutoma.api.containers.AiBotConfig;
@@ -13,9 +12,11 @@ import com.hutoma.api.containers.sub.AiMinP;
 import com.hutoma.api.containers.sub.AiStatus;
 import com.hutoma.api.containers.sub.BackendServerType;
 import com.hutoma.api.containers.sub.BackendStatus;
+import com.hutoma.api.containers.sub.ChatHandoverTarget;
 import com.hutoma.api.containers.sub.ChatState;
 import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.containers.sub.WebHook;
+import com.hutoma.api.logging.ILogger;
 
 import org.joda.time.DateTime;
 
@@ -563,6 +564,10 @@ public class DatabaseAI extends Database  {
                                   final JsonSerializer jsonSerializer)
             throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
+            ApiAi ai = getAI(devId, aiid, jsonSerializer, this.transactionProvider.get());
+            if (ai == null) {
+                return null;
+            }
             call.initialise("getChatState", 2).add(devId).add(chatId);
             ResultSet rs = call.executeQuery();
             if (rs.next()) {
@@ -577,8 +582,7 @@ public class DatabaseAI extends Database  {
                 String lockedAiid = rs.getString("locked_aiid");
                 double confidenceThreshold = rs.getDouble("confidence_threshold");
                 if (rs.wasNull()) {
-                    confidenceThreshold = getAI(devId, aiid, jsonSerializer, this.transactionProvider.get())
-                            .getConfidence();
+                    confidenceThreshold = ai.getConfidence();
                 }
                 return new ChatState(
                         new DateTime(rs.getTimestamp("timestamp")),
@@ -586,14 +590,14 @@ public class DatabaseAI extends Database  {
                         rs.getString("history"),
                         lockedAiid != null ? UUID.fromString(lockedAiid) : null,
                         entities,
-                        confidenceThreshold
+                        confidenceThreshold,
+                        ChatHandoverTarget.fromInt(rs.getInt("chat_target"))
                 );
             }
             ChatState chatState = ChatState.getEmpty();
-            chatState.setConfidenceThreshold(getAI(devId, aiid, jsonSerializer, this.transactionProvider.get())
-                    .getConfidence());
+            chatState.setConfidenceThreshold(ai.getConfidence());
             return chatState;
-        } catch (SQLException ex) {
+        } catch (Exception ex) {
             throw new DatabaseException(ex);
         }
     }
@@ -603,7 +607,7 @@ public class DatabaseAI extends Database  {
             throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             String lockedAiid = (chatState.getLockedAiid() != null) ? chatState.getLockedAiid().toString() : null;
-            call.initialise("setChatState", 8)
+            call.initialise("setChatState", 9)
                     .add(devId)
                     .add(chatId)
                     .add(chatState.getTimestamp())
@@ -612,7 +616,8 @@ public class DatabaseAI extends Database  {
                     .add(lockedAiid)
                     .add(chatState.getEntityValues().isEmpty()
                             ? null : jsonSerializer.serialize(chatState.getEntityValues()))
-                    .add(chatState.getConfidenceThreshold());
+                    .add(chatState.getConfidenceThreshold())
+                    .add(chatState.getChatTarget().getIntValue());
             return call.executeUpdate() > 0;
         }
     }

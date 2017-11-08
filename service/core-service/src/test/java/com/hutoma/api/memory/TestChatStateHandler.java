@@ -1,10 +1,11 @@
 package com.hutoma.api.memory;
 
-import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.connectors.db.DatabaseAI;
 import com.hutoma.api.connectors.db.DatabaseException;
+import com.hutoma.api.containers.sub.ChatHandoverTarget;
 import com.hutoma.api.containers.sub.ChatState;
+import com.hutoma.api.logging.ILogger;
 
 import org.joda.time.DateTime;
 import org.junit.Assert;
@@ -44,37 +45,54 @@ public class TestChatStateHandler {
     }
 
     @Test
-    public void testChatStateHandler_getState() throws DatabaseException {
+    public void testChatStateHandler_getState() throws DatabaseException, ChatStateHandler.ChatStateException {
         final String topic = "theTopic";
         final DateTime timestamp = DateTime.now();
-        ChatState chatState = new ChatState(timestamp, topic, "theHistory", AIID, new HashMap<>(), 0.5d);
+        ChatState chatState = new ChatState(timestamp, topic, "theHistory", AIID, new HashMap<>(), 0.5d, ChatHandoverTarget.Ai);
+        when(this.fakeDatabaseAi.checkAIBelongsToDevId(any(), any())).thenReturn(true);
         when(this.fakeDatabaseAi.getChatState(any(), any(), any(), any())).thenReturn(chatState);
         ChatState result = this.chatStateHandler.getState(DEVID_UUID, AIID, UUID.randomUUID());
         assertChatStateEquals(chatState, result);
     }
 
     @Test
-    public void testChatStateHandler_getState_dbException() throws DatabaseException {
+    public void testChatStateHandler_getState_dbException() throws DatabaseException, ChatStateHandler.ChatStateException {
+        when(this.fakeDatabaseAi.checkAIBelongsToDevId(any(), any())).thenReturn(true);
         when(this.fakeDatabaseAi.getChatState(any(), any(), any(), any())).thenThrow(DatabaseException.class);
         ChatState result = this.chatStateHandler.getState(DEVID_UUID, AIID, UUID.randomUUID());
         assertChatStateEquals(ChatState.getEmpty(), result);
         verify(this.fakeLogger).logUserExceptionEvent(anyString(), any(), anyString(), any());
     }
 
-    @Test
-    public void testChatStateHandler_saveState() throws DatabaseException {
-        final UUID chatId = UUID.randomUUID();
-        ChatState chatState = new ChatState(DateTime.now(), "theTopic", "theHistory", AIID, new HashMap<>(), 0.5d);
-        this.chatStateHandler.saveState(DEVID_UUID, chatId, chatState);
-        verify(this.fakeDatabaseAi).saveChatState(DEVID_UUID, chatId, chatState, fakeJsonSerializer);
+    @Test(expected = ChatStateHandler.ChatStateUserException.class)
+    public void testChatStateHandler_getState_aiidNotOwned() throws DatabaseException, ChatStateHandler.ChatStateException {
+        when(this.fakeDatabaseAi.checkAIBelongsToDevId(any(), any())).thenReturn(false);
+        this.chatStateHandler.getState(DEVID_UUID, AIID, UUID.randomUUID());
     }
 
     @Test
-    public void testChatStateHandler_saveState_dbException() throws DatabaseException {
+    public void testChatStateHandler_saveState() throws DatabaseException, ChatStateHandler.ChatStateException {
         final UUID chatId = UUID.randomUUID();
-        ChatState chatState = new ChatState(DateTime.now(), "theTopic", "theHistory", AIID, new HashMap<>(), 0.5d);
+        ChatState chatState = new ChatState(DateTime.now(), "theTopic", "theHistory", AIID, new HashMap<>(), 0.5d, ChatHandoverTarget.Ai);
+        when(this.fakeDatabaseAi.checkAIBelongsToDevId(any(), any())).thenReturn(true);
+        this.chatStateHandler.saveState(DEVID_UUID, AIID, chatId, chatState);
+        verify(this.fakeDatabaseAi).saveChatState(DEVID_UUID, chatId, chatState, fakeJsonSerializer);
+    }
+
+    @Test(expected = ChatStateHandler.ChatStateUserException.class)
+    public void testChatStateHandler_saveState_aiidNotOwned() throws DatabaseException, ChatStateHandler.ChatStateException {
+        final UUID chatId = UUID.randomUUID();
+        ChatState chatState = new ChatState(DateTime.now(), "theTopic", "theHistory", AIID, new HashMap<>(), 0.5d, ChatHandoverTarget.Ai);
+        when(this.fakeDatabaseAi.checkAIBelongsToDevId(any(), any())).thenReturn(false);
+        this.chatStateHandler.saveState(DEVID_UUID, AIID, chatId, chatState);
+    }
+
+    @Test(expected = ChatStateHandler.ChatStateException.class)
+    public void testChatStateHandler_saveState_dbException() throws DatabaseException, ChatStateHandler.ChatStateException {
+        final UUID chatId = UUID.randomUUID();
+        ChatState chatState = new ChatState(DateTime.now(), "theTopic", "theHistory", AIID, new HashMap<>(), 0.5d, ChatHandoverTarget.Ai);
         when(this.fakeDatabaseAi.saveChatState(any(), any(), any(), any())).thenThrow(DatabaseException.class);
-        this.chatStateHandler.saveState(DEVID_UUID, chatId, chatState);
+        this.chatStateHandler.saveState(DEVID_UUID, AIID, chatId, chatState);
         verify(this.fakeLogger).logUserExceptionEvent(anyString(), any(), anyString(), any());
     }
 }

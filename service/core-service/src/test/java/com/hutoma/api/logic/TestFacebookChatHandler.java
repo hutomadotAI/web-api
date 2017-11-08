@@ -21,6 +21,7 @@ import com.hutoma.api.containers.sub.IntegrationRecord;
 import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.containers.sub.MemoryVariable;
 import com.hutoma.api.containers.sub.WebHookResponse;
+import com.hutoma.api.memory.ChatStateHandler;
 
 import org.joda.time.DateTime;
 import org.junit.Assert;
@@ -94,7 +95,7 @@ public class TestFacebookChatHandler {
             + "\"recipient\":{\"id\":\"632106133664550\"},\"timestamp\":1498224297854}]}]}";
 
     @Before
-    public void setup() throws DatabaseException, FacebookException, ChatLogic.ChatFailedException {
+    public void setup() throws DatabaseException, FacebookException, ChatLogic.ChatFailedException, ChatStateHandler.ChatStateException {
         this.fakeConfig = mock(Config.class);
         this.serializer = new JsonSerializer();
         this.fakeDatabaseIntegrations = mock(DatabaseIntegrations.class);

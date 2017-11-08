@@ -4,17 +4,21 @@ import com.google.common.collect.ImmutableMap;
 import com.hutoma.api.connectors.AIChatServices;
 import com.hutoma.api.connectors.ServerConnector;
 import com.hutoma.api.connectors.WebHooks;
+import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.ApiChat;
 import com.hutoma.api.containers.ApiResult;
+import com.hutoma.api.containers.sub.ChatHandoverTarget;
 import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.containers.sub.ChatState;
 import com.hutoma.api.containers.sub.WebHookResponse;
 import com.hutoma.api.controllers.RequestBase;
 import com.hutoma.api.controllers.ServerMetadata;
+import com.hutoma.api.memory.ChatStateHandler;
 
 import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 
 import java.net.HttpURLConnection;
 import java.util.HashMap;
@@ -22,10 +26,10 @@ import java.util.Map;
 import java.util.UUID;
 
 import static com.hutoma.api.common.TestDataHelper.AIID;
+import static com.hutoma.api.common.TestDataHelper.DEVID_UUID;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class TestChatLogic extends TestChatBase {
 
@@ -370,11 +374,12 @@ public class TestChatLogic extends TestChatBase {
     }
 
     @Test
-    public void testChat_botAffinity_noBots_stateHasUnknownLockedAiid() throws RequestBase.AiControllerException {
+    public void testChat_botAffinity_noBots_stateHasUnknownLockedAiid() throws RequestBase.AiControllerException,
+            ChatStateHandler.ChatStateException{
         final String response = "wnet";
         setupFakeChat(0.2d, response, 0.0d, "", 0.0d, "");
         when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(new ChatState(DateTime.now(),
-                null, null, UUID.randomUUID(), new HashMap<String, String>(), 0.1d));
+                null, null, UUID.randomUUID(), new HashMap<String, String>(), 0.1d, ChatHandoverTarget.Ai));
         ApiChat result = (ApiChat) getChat(0.1f);
         // Verify we still get the answer from WNET and it doesn't try to get it from the invalid bot
         Assert.assertEquals(response, result.getResult().getAnswer());
@@ -395,7 +400,8 @@ public class TestChatLogic extends TestChatBase {
     }
 
     @Test
-    public void testChat_botAffinity_bots_lockedToBot_stillLockedEvenWithOtherHigherConfidence() throws RequestBase.AiControllerException {
+    public void testChat_botAffinity_bots_lockedToBot_stillLockedEvenWithOtherHigherConfidence() throws RequestBase.AiControllerException,
+            ChatStateHandler.ChatStateException{
         ChatResult cr1 = new ChatResult("Hi");
         cr1.setScore(0.6);
         ChatResult cr2 = new ChatResult("Hi2");
@@ -403,7 +409,7 @@ public class TestChatLogic extends TestChatBase {
         UUID cr1Uuid = UUID.randomUUID();
         UUID cr2Uuid = UUID.randomUUID();
         Map<UUID, ChatResult> wnetResults = ImmutableMap.of(cr1Uuid, cr1, cr2Uuid, cr2);
-        ChatState initialChatState = new ChatState(DateTime.now(), null, null, cr1Uuid, new HashMap<>(), 0.5d);
+        ChatState initialChatState = new ChatState(DateTime.now(), null, null, cr1Uuid, new HashMap<>(), 0.5d, ChatHandoverTarget.Ai);
         when(this.fakeChatServices.getMinPMap()).thenReturn(ImmutableMap.of(cr1Uuid, 0.5, cr2Uuid, 0.5));
         when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(initialChatState);
         when(this.fakeChatServices.awaitWnet()).thenReturn(wnetResults);
@@ -411,7 +417,8 @@ public class TestChatLogic extends TestChatBase {
     }
 
     @Test
-    public void testChat_botAffinity_bots_lockedToBot_lowConfidenceSwitchToHigherConfidenceBot() throws RequestBase.AiControllerException {
+    public void testChat_botAffinity_bots_lockedToBot_lowConfidenceSwitchToHigherConfidenceBot() throws RequestBase.AiControllerException,
+            ChatStateHandler.ChatStateException{
         ChatResult cr1 = new ChatResult("Hi");
         cr1.setScore(0.2);
         ChatResult cr2 = new ChatResult("Hi2");
@@ -419,7 +426,7 @@ public class TestChatLogic extends TestChatBase {
         UUID cr1Uuid = UUID.randomUUID();
         UUID cr2Uuid = UUID.randomUUID();
         Map<UUID, ChatResult> wnetResults = ImmutableMap.of(cr1Uuid, cr1, cr2Uuid, cr2);
-        ChatState initialChatState = new ChatState(DateTime.now(), null, null, cr1Uuid, new HashMap<>(), 0.5d);
+        ChatState initialChatState = new ChatState(DateTime.now(), null, null, cr1Uuid, new HashMap<>(), 0.5d, ChatHandoverTarget.Ai);
         when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(initialChatState);
         when(this.fakeChatServices.getMinPMap()).thenReturn(ImmutableMap.of(cr1Uuid, 0.5, cr2Uuid, 0.5));
         when(this.fakeChatServices.awaitWnet()).thenReturn(wnetResults);
@@ -427,7 +434,8 @@ public class TestChatLogic extends TestChatBase {
     }
 
     @Test
-    public void testChat_botAffinity_bots_lockedToBot_allLowConfidence() throws RequestBase.AiControllerException {
+    public void testChat_botAffinity_bots_lockedToBot_allLowConfidence() throws RequestBase.AiControllerException,
+            ChatStateHandler.ChatStateException{
         ChatResult cr1 = new ChatResult("question");
         cr1.setScore(0.2);
         ChatResult cr2 = new ChatResult("question");
@@ -435,7 +443,7 @@ public class TestChatLogic extends TestChatBase {
         UUID cr1Uuid = UUID.randomUUID();
         UUID cr2Uuid = UUID.randomUUID();
         Map<UUID, ChatResult> wnetResults = ImmutableMap.of(cr1Uuid, cr1, cr2Uuid, cr2);
-        ChatState initialChatState = new ChatState(DateTime.now(), null, null, cr1Uuid, new HashMap<>(), 0.5d);
+        ChatState initialChatState = new ChatState(DateTime.now(), null, null, cr1Uuid, new HashMap<>(), 0.5d, ChatHandoverTarget.Ai);
         when(this.fakeChatServices.getMinPMap()).thenReturn(ImmutableMap.of(cr1Uuid, 0.5, cr2Uuid, 0.5));
         when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(initialChatState);
         when(this.fakeChatServices.awaitWnet()).thenReturn(wnetResults);
@@ -452,7 +460,8 @@ public class TestChatLogic extends TestChatBase {
     }
 
     @Test
-    public void testChat_botAffinity_bots_lockedToBot_wnet_aiml_score_order() throws RequestBase.AiControllerException {
+    public void testChat_botAffinity_bots_lockedToBot_wnet_aiml_score_order() throws RequestBase.AiControllerException,
+            ChatStateHandler.ChatStateException{
         // BOT1 has higher score in WNET
         ChatResult cr1 = new ChatResult("question");
         cr1.setScore(0.3);
@@ -461,7 +470,7 @@ public class TestChatLogic extends TestChatBase {
         UUID cr1Uuid = UUID.randomUUID();
         UUID cr2Uuid = UUID.randomUUID();
         Map<UUID, ChatResult> wnetResults = ImmutableMap.of(cr1Uuid, cr1, cr2Uuid, cr2);
-        ChatState initialChatState = new ChatState(DateTime.now(), null, null, cr1Uuid, new HashMap<>(), 0.5d);
+        ChatState initialChatState = new ChatState(DateTime.now(), null, null, cr1Uuid, new HashMap<>(), 0.5d, ChatHandoverTarget.Ai);
         when(this.fakeChatServices.getMinPMap()).thenReturn(ImmutableMap.of(cr1Uuid, 0.5, cr2Uuid, 0.5));
         when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(initialChatState);
         when(this.fakeChatServices.awaitWnet()).thenReturn(wnetResults);
@@ -492,5 +501,87 @@ public class TestChatLogic extends TestChatBase {
         ApiChat result = (ApiChat) getChat(0.0);
         Assert.assertEquals(0.0, result.getResult().getScore(), 0.0001);
         Assert.assertEquals(ChatLogic.COMPLETELY_LOST_RESULT, result.getResult().getAnswer());
+    }
+
+    @Test
+    public void testChat_handedOver_fromPreviousState() throws RequestBase.AiControllerException, ChatStateHandler.ChatStateException {
+        final ChatState state = ChatState.getEmpty();
+        state.setChatTarget(ChatHandoverTarget.Human);
+        when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(state);
+        ApiChat result = (ApiChat) getChat(0.0);
+        Assert.assertEquals(ChatHandoverTarget.Human.getStringValue(), result.getResult().getChatTarget());
+        Assert.assertEquals(1.0, result.getResult().getScore(), 0.00001);
+        Assert.assertNull(result.getResult().getAnswer());
+        // We never make any backend requests
+        verify(this.fakeChatServices, never()).awaitWnet();
+        verify(this.fakeChatServices, never()).awaitAiml();
+        verify(this.fakeChatServices, never()).awaitRnn();
+        // We don't process any intents
+        verify(this.fakeIntentHandler, never()).getIntent(any(), anyString());
+    }
+
+    @Test
+    public void testChat_handedOver_toHuman() throws ChatStateHandler.ChatStateException {
+        final ChatState state = ChatState.getEmpty();
+        state.setChatTarget(ChatHandoverTarget.Ai);
+        when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(state);
+        ArgumentCaptor<ChatState> argument = ArgumentCaptor.forClass(ChatState.class);
+        ApiResult result = this.chatLogic.handOver(AIID, DEVID_UUID, CHATID.toString(), ChatHandoverTarget.Human);
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+        verify(this.fakeChatStateHandler).saveState(any(), any(), any(), argument.capture());
+        Assert.assertEquals(ChatHandoverTarget.Human, argument.getValue().getChatTarget());
+    }
+
+    @Test
+    public void testChat_handedOver_toAi() throws ChatStateHandler.ChatStateException {
+        final ChatState state = ChatState.getEmpty();
+        state.setChatTarget(ChatHandoverTarget.Human);
+        when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(state);
+        ArgumentCaptor<ChatState> argument = ArgumentCaptor.forClass(ChatState.class);
+        ApiResult result = this.chatLogic.handOver(AIID, DEVID_UUID, CHATID.toString(), ChatHandoverTarget.Ai);
+        verify(this.fakeChatStateHandler).saveState(any(), any(), any(), argument.capture());
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+        Assert.assertEquals(ChatHandoverTarget.Ai, argument.getValue().getChatTarget());
+    }
+
+    @Test
+    public void testChat_handedOver_sameTarget() throws ChatStateHandler.ChatStateException, DatabaseException {
+        final ChatState state = ChatState.getEmpty();
+        state.setChatTarget(ChatHandoverTarget.Human);
+        when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(state);
+        ApiResult result = this.chatLogic.handOver(AIID, DEVID_UUID, CHATID.toString(), ChatHandoverTarget.Human);
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testChat_handedOver_getCurrentState_chatStateException_dueToUser()
+            throws ChatStateHandler.ChatStateException, DatabaseException {
+        when(this.fakeChatStateHandler.getState(any(), any(), any())).thenThrow(ChatStateHandler.ChatStateUserException.class);
+        ApiResult result = this.chatLogic.handOver(AIID, DEVID_UUID, CHATID.toString(), ChatHandoverTarget.Human);
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testChat_handedOver_getCurrentState_chatStateException_otherReason()
+            throws ChatStateHandler.ChatStateException, DatabaseException {
+        when(this.fakeChatStateHandler.getState(any(), any(), any())).thenThrow(Exception.class);
+        ApiResult result = this.chatLogic.handOver(AIID, DEVID_UUID, CHATID.toString(), ChatHandoverTarget.Human);
+        Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testChat_handedOver_saveNewState_chatStateException_dueToUser()
+            throws ChatStateHandler.ChatStateException, DatabaseException {
+        doThrow(ChatStateHandler.ChatStateUserException.class).when(this.fakeChatStateHandler).saveState(any(), any(), any(), any());
+        ApiResult result = this.chatLogic.handOver(AIID, DEVID_UUID, CHATID.toString(), ChatHandoverTarget.Human);
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testChat_handedOver_saveNewState_chatStateException_otherReason()
+            throws ChatStateHandler.ChatStateException, DatabaseException {
+        doThrow(Exception.class).when(this.fakeChatStateHandler).saveState(any(), any(), any(), any());
+        ApiResult result = this.chatLogic.handOver(AIID, DEVID_UUID, CHATID.toString(), ChatHandoverTarget.Human);
+        Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
 }

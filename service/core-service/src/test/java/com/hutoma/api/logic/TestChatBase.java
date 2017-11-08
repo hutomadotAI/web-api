@@ -61,7 +61,7 @@ public class TestChatBase {
     WebHooks fakeWebHooks;
     DatabaseAI fakeDatabaseAi;
     ChatStateHandler fakeChatStateHandler;
-    private ChatLogic chatLogic;
+    protected ChatLogic chatLogic;
     private ChatLogger fakeChatTelemetryLogger;
     private Config fakeConfig;
     private AiStrings fakeAiStrings;
@@ -83,11 +83,11 @@ public class TestChatBase {
                 mock(ILogger.class), this.fakeIntentHandler, this.fakeRecognizer, this.fakeChatTelemetryLogger, this.fakeWebHooks,
                 this.fakeChatStateHandler, this.fakeAiStrings);
 
-        when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(ChatState.getEmpty());
         try {
+            when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(ChatState.getEmpty());
             when(this.fakeAiStrings.getDefaultChatResponses(any(), any())).thenReturn(Collections.singletonList(ChatLogic.COMPLETELY_LOST_RESULT));
             when(this.fakeAiStrings.getRandomDefaultChatResponse(any(), any())).thenReturn(ChatLogic.COMPLETELY_LOST_RESULT);
-        } catch (AiStrings.AiStringsException ex) {
+        } catch (AiStrings.AiStringsException | ChatStateHandler.ChatStateException ex) {
             ex.printStackTrace();
         }
     }
@@ -101,7 +101,11 @@ public class TestChatBase {
         ApiChat result = (ApiChat) getChat(0.5f);
         Assert.assertEquals(returnedResult.getScore(), result.getResult().getScore(), 0.0001);
         ArgumentCaptor<ChatState> argumentCaptor = ArgumentCaptor.forClass(ChatState.class);
-        verify(this.fakeChatStateHandler).saveState(any(), any(), argumentCaptor.capture());
+        try {
+            verify(this.fakeChatStateHandler).saveState(any(), any(), any(), argumentCaptor.capture());
+        } catch (ChatStateHandler.ChatStateException ex) {
+            ex.printStackTrace();
+        }
         // And that the contains the lockedAiid value for the aiid with the highest score
         Assert.assertEquals(usedAiid, argumentCaptor.getValue().getLockedAiid());
 

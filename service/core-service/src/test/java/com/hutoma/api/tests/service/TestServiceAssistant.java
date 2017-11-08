@@ -45,7 +45,7 @@ public class TestServiceAssistant extends ServiceTestBase {
      * Carry out pre-test set-up.
      */
     @Before
-    public void setup() {
+    public void setup() throws ChatStateHandler.ChatStateException {
         when(this.fakeTools.createNewRandomUUID()).thenReturn(UUID.randomUUID());
         when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(ChatState.getEmpty());
     }
