@@ -1,6 +1,6 @@
 package com.hutoma.api.logic;
 
-import com.hutoma.api.common.ResultEvent;
+import com.hutoma.api.containers.sub.ResultEvent;
 import com.tngtech.java.junit.dataprovider.DataProvider;
 import com.tngtech.java.junit.dataprovider.DataProviderRunner;
 import com.tngtech.java.junit.dataprovider.UseDataProvider;
@@ -13,8 +13,8 @@ import org.junit.runner.RunWith;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.hutoma.api.common.ResultEvent.UPLOAD_MISSING_RESPONSE;
-import static com.hutoma.api.common.ResultEvent.UPLOAD_NO_CONTENT;
+import static com.hutoma.api.containers.sub.ResultEvent.UPLOAD_MISSING_RESPONSE;
+import static com.hutoma.api.containers.sub.ResultEvent.UPLOAD_NO_CONTENT;
 
 
 /**

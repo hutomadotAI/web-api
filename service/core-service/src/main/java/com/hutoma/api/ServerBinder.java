@@ -2,31 +2,35 @@ package com.hutoma.api;
 
 import com.hutoma.api.access.RateLimitCheck;
 import com.hutoma.api.common.AccessLogger;
-import com.hutoma.api.common.AiServiceStatusLogger;
-import com.hutoma.api.common.CentralLogger;
 import com.hutoma.api.common.ChatLogger;
 import com.hutoma.api.common.Config;
+import com.hutoma.api.common.ControllerConfig;
 import com.hutoma.api.common.HTMLExtractor;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Tools;
-import com.hutoma.api.connectors.AIChatServices;
-import com.hutoma.api.connectors.AIQueueServices;
-import com.hutoma.api.connectors.AIServices;
 import com.hutoma.api.connectors.AiStrings;
 import com.hutoma.api.connectors.AnalyticsESConnector;
 import com.hutoma.api.connectors.EntityRecognizerService;
 import com.hutoma.api.connectors.FacebookConnector;
 import com.hutoma.api.connectors.WebHooks;
+import com.hutoma.api.connectors.aiservices.AIQueueServices;
+import com.hutoma.api.connectors.aiservices.AIServices;
+import com.hutoma.api.connectors.aiservices.ControllerConnector;
+import com.hutoma.api.connectors.aiservices.QueueProcessor;
+import com.hutoma.api.connectors.aiservices.RnnServicesConnector;
+import com.hutoma.api.connectors.aiservices.WnetServicesConnector;
+import com.hutoma.api.connectors.chat.AIChatServices;
+import com.hutoma.api.connectors.chat.ChatAimlConnector;
+import com.hutoma.api.connectors.chat.ChatRnnConnector;
+import com.hutoma.api.connectors.chat.ChatWnetConnector;
 import com.hutoma.api.connectors.db.*;
 import com.hutoma.api.containers.facebook.FacebookMachineID;
 import com.hutoma.api.controllers.ControllerAiml;
 import com.hutoma.api.controllers.ControllerRnn;
 import com.hutoma.api.controllers.ControllerWnet;
-import com.hutoma.api.controllers.QueueProcessor;
-import com.hutoma.api.controllers.RequestAiml;
-import com.hutoma.api.controllers.RequestRnn;
-import com.hutoma.api.controllers.RequestWnet;
 import com.hutoma.api.controllers.ServerTracker;
+import com.hutoma.api.logging.AiServiceStatusLogger;
+import com.hutoma.api.logging.CentralLogger;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.ILoggerConfig;
 import com.hutoma.api.logic.*;
@@ -93,10 +97,8 @@ public class ServerBinder extends AbstractBinder {
         bind(DatabaseUser.class).to(DatabaseUser.class);
         bind(DatabaseMarketplace.class).to(DatabaseMarketplace.class);
         bind(DatabaseEntitiesIntents.class).to(DatabaseEntitiesIntents.class);
-        bind(DatabaseAiStatusUpdates.class).to(DatabaseAiStatusUpdates.class);
         bind(DatabaseIntegrations.class).to(DatabaseIntegrations.class);
         bind(DatabaseBackends.class).to(DatabaseBackends.class);
-
         bind(DatabaseTransaction.class).to(DatabaseTransaction.class);
         bind(DatabaseCall.class).to(DatabaseCall.class);
         bind(TransactionalDatabaseCall.class).to(TransactionalDatabaseCall.class);
@@ -114,7 +116,6 @@ public class ServerBinder extends AbstractBinder {
         bind(DeveloperInfoLogic.class).to(DeveloperInfoLogic.class);
         bind(AIIntegrationLogic.class).to(AIIntegrationLogic.class);
         bind(InviteLogic.class).to(InviteLogic.class);
-        bind(AIServicesLogic.class).to(AIServicesLogic.class);
         bind(FacebookIntegrationLogic.class).to(FacebookIntegrationLogic.class);
         bind(AnalyticsLogic.class).to(AnalyticsLogic.class);
         bind(AiStrings.class).to(AiStrings.class);
@@ -134,16 +135,14 @@ public class ServerBinder extends AbstractBinder {
 
         // backend facing related structures
         bind(AIServices.class).to(AIServices.class);
-        bind(AIQueueServices.class).to(AIQueueServices.class);
         bind(AIChatServices.class).to(AIChatServices.class);
-        bind(RequestWnet.class).to(RequestWnet.class);
-        bind(RequestRnn.class).to(RequestRnn.class);
-        bind(RequestAiml.class).to(RequestAiml.class);
-        bind(ControllerWnet.class).to(ControllerWnet.class).in(Singleton.class);
-        bind(ControllerRnn.class).to(ControllerRnn.class).in(Singleton.class);
-        bind(ControllerAiml.class).to(ControllerAiml.class).in(Singleton.class);
-        bind(QueueProcessor.class).to(QueueProcessor.class);
+        bind(ChatWnetConnector.class).to(ChatWnetConnector.class);
+        bind(ChatRnnConnector.class).to(ChatRnnConnector.class);
+        bind(ChatAimlConnector.class).to(ChatAimlConnector.class);
         bind(EntityRecognizerService.class).to(EntityRecognizerService.class);
+        bind(ControllerConnector.class).to(ControllerConnector.class);
+        bind(WnetServicesConnector.class).to(WnetServicesConnector.class);
+        bind(RnnServicesConnector.class).to(RnnServicesConnector.class);
 
         // UI
         bind(UILogic.class).to(UILogic.class);
@@ -151,5 +150,16 @@ public class ServerBinder extends AbstractBinder {
 
         // Jersey HTTP client
         bindFactory(JerseyClientFactory.class).to(JerseyClient.class);
+
+
+        // Controller
+        bind(ControllerConfig.class).to(ControllerConfig.class).in(Singleton.class);
+        bind(AIQueueServices.class).to(AIQueueServices.class);
+        bind(ControllerWnet.class).to(ControllerWnet.class).in(Singleton.class);
+        bind(ControllerRnn.class).to(ControllerRnn.class).in(Singleton.class);
+        bind(ControllerAiml.class).to(ControllerAiml.class).in(Singleton.class);
+        bind(QueueProcessor.class).to(QueueProcessor.class);
+        bind(AIServicesLogic.class).to(AIServicesLogic.class);
+        bind(DatabaseAiStatusUpdates.class).to(DatabaseAiStatusUpdates.class);
     }
 }

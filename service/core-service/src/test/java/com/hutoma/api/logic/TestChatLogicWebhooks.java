@@ -1,5 +1,6 @@
 package com.hutoma.api.logic;
 
+import com.hutoma.api.connectors.chat.ChatBackendConnector;
 import com.hutoma.api.connectors.WebHooks;
 import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.ApiChat;
@@ -10,7 +11,6 @@ import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.containers.sub.MemoryVariable;
 import com.hutoma.api.containers.sub.WebHook;
 import com.hutoma.api.containers.sub.WebHookResponse;
-import com.hutoma.api.controllers.RequestBase;
 import com.hutoma.api.memory.MemoryIntentHandler;
 
 import org.junit.Assert;
@@ -35,7 +35,7 @@ public class TestChatLogicWebhooks extends TestChatBase {
      */
     @Test
     public void testChat_webHookTriggered()
-            throws RequestBase.AiControllerException, DatabaseException, IOException, WebHooks.WebHookException {
+            throws ChatBackendConnector.AiControllerException, DatabaseException, IOException, WebHooks.WebHookException {
         final String intentName = "intent1";
         final String webHookResponse = "webhook executed";
 
@@ -68,7 +68,7 @@ public class TestChatLogicWebhooks extends TestChatBase {
      */
     @Test
     public void testChat_webHookNullResponseHandled()
-            throws RequestBase.AiControllerException, DatabaseException, IOException, WebHooks.WebHookException {
+            throws ChatBackendConnector.AiControllerException, DatabaseException, IOException, WebHooks.WebHookException {
         final String intentName = "intent1";
         final String webHookResponse = null;
         MemoryVariable mv = new MemoryVariable("var", Arrays.asList("a", "b"));
@@ -96,7 +96,7 @@ public class TestChatLogicWebhooks extends TestChatBase {
      */
     @Test
     public void testChat_inactiveWebHookIgnored()
-            throws RequestBase.AiControllerException, DatabaseException, IOException, WebHooks.WebHookException {
+            throws ChatBackendConnector.AiControllerException, DatabaseException, IOException, WebHooks.WebHookException {
         final String intentName = "intent1";
         final String webHookResponse = "webhook executed";
 
@@ -127,7 +127,7 @@ public class TestChatLogicWebhooks extends TestChatBase {
      */
     @Test
     public void testChat_badWebHookHandled()
-            throws RequestBase.AiControllerException, DatabaseException, IOException, WebHooks.WebHookException {
+            throws ChatBackendConnector.AiControllerException, DatabaseException, IOException, WebHooks.WebHookException {
 
         when(this.fakeWebHooks.executeIntentWebHook(any(), any(), any(), any()))
                 .thenThrow(new WebHooks.WebHookExternalException("It went wrong"));
@@ -137,14 +137,14 @@ public class TestChatLogicWebhooks extends TestChatBase {
 
     @Test
     public void testChat_webHookInternalFail()
-            throws RequestBase.AiControllerException, DatabaseException, IOException, WebHooks.WebHookException {
+            throws ChatBackendConnector.AiControllerException, DatabaseException, IOException, WebHooks.WebHookException {
 
         when(this.fakeWebHooks.executeIntentWebHook(any(), any(), any(), any()))
                 .thenThrow(new WebHooks.WebHookInternalException("It went wrong internally"));
         Assert.assertTrue(chatGetWebhook() instanceof ApiError);
     }
 
-    private ApiResult chatGetWebhook() throws RequestBase.AiControllerException {
+    private ApiResult chatGetWebhook() throws ChatBackendConnector.AiControllerException {
         final String intentName = "intent1";
         MemoryVariable mv = new MemoryVariable("var", Arrays.asList("a", "b"));
         mv.setCurrentValue("a value"); // to fulfill

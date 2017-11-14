@@ -1,5 +1,6 @@
 package com.hutoma.api.common;
 
+import com.hutoma.api.logging.CentralLogger;
 import com.hutoma.api.logging.LogMap;
 
 /**

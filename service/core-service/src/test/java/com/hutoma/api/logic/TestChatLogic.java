@@ -1,9 +1,11 @@
 package com.hutoma.api.logic;
 
 import com.google.common.collect.ImmutableMap;
-import com.hutoma.api.connectors.AIChatServices;
+import com.hutoma.api.connectors.NoServerAvailableException;
 import com.hutoma.api.connectors.ServerConnector;
 import com.hutoma.api.connectors.WebHooks;
+import com.hutoma.api.connectors.chat.AIChatServices;
+import com.hutoma.api.connectors.chat.ChatBackendConnector;
 import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.ApiChat;
 import com.hutoma.api.containers.ApiResult;
@@ -11,8 +13,6 @@ import com.hutoma.api.containers.sub.ChatHandoverTarget;
 import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.containers.sub.ChatState;
 import com.hutoma.api.containers.sub.WebHookResponse;
-import com.hutoma.api.controllers.RequestBase;
-import com.hutoma.api.controllers.ServerMetadata;
 import com.hutoma.api.memory.ChatStateHandler;
 
 import org.joda.time.DateTime;
@@ -37,7 +37,7 @@ public class TestChatLogic extends TestChatBase {
      * Valid semantic response.
      */
     @Test
-    public void testChat_Valid_Semantic() throws RequestBase.AiControllerException {
+    public void testChat_Valid_Semantic() throws ChatBackendConnector.AiControllerException {
         setupFakeChat(0.7d, SEMANTICRESULT, 0.5d, AIMLRESULT, 0.3d, NEURALRESULT);
         ApiResult result = getChat(0.2f);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
@@ -48,7 +48,7 @@ public class TestChatLogic extends TestChatBase {
      * Valid aiml net response.
      */
     @Test
-    public void testChat_Valid_Aiml() throws RequestBase.AiControllerException {
+    public void testChat_Valid_Aiml() throws ChatBackendConnector.AiControllerException {
         setupFakeChat(0.7d, SEMANTICRESULT, 0.5d, AIMLRESULT, 0.3d, NEURALRESULT);
         ApiResult result = getChat(0.9f);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
@@ -59,7 +59,7 @@ public class TestChatLogic extends TestChatBase {
      * Valid neural net response.
      */
     @Test
-    public void testChat_Valid_Rnn() throws RequestBase.AiControllerException {
+    public void testChat_Valid_Rnn() throws ChatBackendConnector.AiControllerException {
         setupFakeChat(0.7d, SEMANTICRESULT, 0.0d, AIMLRESULT, 0.3d, NEURALRESULT);
         ApiResult result = getChat(0.9f);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
@@ -67,17 +67,17 @@ public class TestChatLogic extends TestChatBase {
     }
 
     @Test
-    public void testChat_ErrorSemantic() throws RequestBase.AiControllerException {
+    public void testChat_ErrorSemantic() throws ChatBackendConnector.AiControllerException {
         setupFakeChat(0.7d, SEMANTICRESULT, 0.0d, AIMLRESULT, 0.3d, NEURALRESULT);
-        when(this.fakeChatServices.awaitWnet()).thenThrow(RequestBase.AiControllerException.class);
+        when(this.fakeChatServices.awaitWnet()).thenThrow(ChatBackendConnector.AiControllerException.class);
         ApiResult result = getChat(0.2f);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
 
     @Test
-    public void testChat_ErrorAiml() throws RequestBase.AiControllerException {
+    public void testChat_ErrorAiml() throws ChatBackendConnector.AiControllerException {
         setupFakeChat(0.7d, SEMANTICRESULT, 0.5d, AIMLRESULT, 0.3d, NEURALRESULT);
-        when(this.fakeChatServices.awaitAiml()).thenThrow(RequestBase.AiControllerException.class);
+        when(this.fakeChatServices.awaitAiml()).thenThrow(ChatBackendConnector.AiControllerException.class);
         ApiResult result = getChat(0.9f);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
@@ -86,7 +86,7 @@ public class TestChatLogic extends TestChatBase {
      * Check that whitespaces are removed from each end
      */
     @Test
-    public void testChat_Semantic_Trimmed() throws RequestBase.AiControllerException {
+    public void testChat_Semantic_Trimmed() throws ChatBackendConnector.AiControllerException {
         setupFakeChat(0.7d, " " + SEMANTICRESULT + "\n",
                 0.0d, AIMLRESULT, 0.3d, NEURALRESULT);
         ApiResult result = getChat(0.2f);
@@ -98,7 +98,7 @@ public class TestChatLogic extends TestChatBase {
      * Check that whitespaces are removed from each end
      */
     @Test
-    public void testChat_Aiml_Trimmed() throws RequestBase.AiControllerException {
+    public void testChat_Aiml_Trimmed() throws ChatBackendConnector.AiControllerException {
         setupFakeChat(0.7d, SEMANTICRESULT,
                 0.5d, " " + AIMLRESULT + "\n",
                 0.3d, NEURALRESULT);
@@ -111,7 +111,7 @@ public class TestChatLogic extends TestChatBase {
      * Check that whitespaces are removed from each end
      */
     @Test
-    public void testChat_Rnn_Trimmed() throws RequestBase.AiControllerException {
+    public void testChat_Rnn_Trimmed() throws ChatBackendConnector.AiControllerException {
         setupFakeChat(0.7d, SEMANTICRESULT,
                 0.0d, AIMLRESULT,
                 0.3d, " " + NEURALRESULT + "\n");
@@ -124,9 +124,9 @@ public class TestChatLogic extends TestChatBase {
      * Semantic server does not find AI.
      */
     @Test
-    public void testChat_Wnet_AiNotFound() throws RequestBase.AiControllerException {
+    public void testChat_Wnet_AiNotFound() throws ChatBackendConnector.AiControllerException {
         setupFakeChat(0.7d, SEMANTICRESULT, 0.0d, AIMLRESULT, 0.3d, NEURALRESULT);
-        when(this.fakeChatServices.awaitWnet()).thenThrow(RequestBase.AiNotFoundException.class);
+        when(this.fakeChatServices.awaitWnet()).thenThrow(ChatBackendConnector.AiNotFoundException.class);
         ApiResult result = getChat(0.9f);
         Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
     }
@@ -135,9 +135,9 @@ public class TestChatLogic extends TestChatBase {
      * Semantic server sends response below required confidence threshold, neuralnet is not found.
      */
     @Test
-    public void testChat_Rnn_AiNotFound() throws RequestBase.AiControllerException {
+    public void testChat_Rnn_AiNotFound() throws ChatBackendConnector.AiControllerException {
         setupFakeChat(0.0d, SEMANTICRESULT, 0.0d, AIMLRESULT, 0.3d, NEURALRESULT);
-        when(this.fakeChatServices.awaitRnn()).thenThrow(RequestBase.AiNotFoundException.class);
+        when(this.fakeChatServices.awaitRnn()).thenThrow(ChatBackendConnector.AiNotFoundException.class);
         ApiResult result = getChat(0.5f);
         Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
     }
@@ -146,9 +146,9 @@ public class TestChatLogic extends TestChatBase {
      * Semantic server throws generic exception.
      */
     @Test
-    public void testChat_Wnet_AiException() throws RequestBase.AiControllerException {
+    public void testChat_Wnet_AiException() throws ChatBackendConnector.AiControllerException {
         setupFakeChat(0.7d, SEMANTICRESULT, 0.0d, AIMLRESULT, 0.3d, NEURALRESULT);
-        when(this.fakeChatServices.awaitWnet()).thenThrow(RequestBase.AiControllerException.class);
+        when(this.fakeChatServices.awaitWnet()).thenThrow(ChatBackendConnector.AiControllerException.class);
         ApiResult result = getChat(0.5f);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
@@ -157,9 +157,9 @@ public class TestChatLogic extends TestChatBase {
      * Semantic server sends response below required confidence threshold, aiml throws generic exception.
      */
     @Test
-    public void testChat_Aiml_AiException() throws RequestBase.AiControllerException {
+    public void testChat_Aiml_AiException() throws ChatBackendConnector.AiControllerException {
         setupFakeChat(0.7d, SEMANTICRESULT, 0.5d, AIMLRESULT, 0.3d, NEURALRESULT);
-        when(this.fakeChatServices.awaitAiml()).thenThrow(RequestBase.AiControllerException.class);
+        when(this.fakeChatServices.awaitAiml()).thenThrow(ChatBackendConnector.AiControllerException.class);
         ApiResult result = getChat(0.9f);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
@@ -168,9 +168,9 @@ public class TestChatLogic extends TestChatBase {
      * Semantic server sends response below required confidence threshold, neuralnet throws generic exception.
      */
     @Test
-    public void testChat_Rnn_AiException() throws RequestBase.AiControllerException {
+    public void testChat_Rnn_AiException() throws ChatBackendConnector.AiControllerException {
         setupFakeChat(0.7d, SEMANTICRESULT, 0.0d, AIMLRESULT, 0.3d, NEURALRESULT);
-        when(this.fakeChatServices.awaitRnn()).thenThrow(RequestBase.AiControllerException.class);
+        when(this.fakeChatServices.awaitRnn()).thenThrow(ChatBackendConnector.AiControllerException.class);
         ApiResult result = getChat(0.9f);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
@@ -180,9 +180,9 @@ public class TestChatLogic extends TestChatBase {
      * but the semantic server is confident enough to reply.
      */
     @Test
-    public void testChat_RejectedNeuralDueToAIStatus_SemanticOverride() throws RequestBase.AiControllerException {
+    public void testChat_RejectedNeuralDueToAIStatus_SemanticOverride() throws ChatBackendConnector.AiControllerException {
         setupFakeChat(0.7d, SEMANTICRESULT, 0.0d, AIMLRESULT, 0.3d, NEURALRESULT);
-        when(this.fakeChatServices.awaitRnn()).thenThrow(RequestBase.AiControllerException.class);
+        when(this.fakeChatServices.awaitRnn()).thenThrow(ChatBackendConnector.AiControllerException.class);
         ApiResult result = getChat(0.2f);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
         Assert.assertEquals(SEMANTICRESULT, ((ApiChat) result).getResult().getAnswer());
@@ -193,7 +193,7 @@ public class TestChatLogic extends TestChatBase {
      * The semantic server has no confidence so we fallback to AIML
      */
     @Test
-    public void testChat_RejectedNeuralDueToAIStatus() throws RequestBase.AiControllerException {
+    public void testChat_RejectedNeuralDueToAIStatus() throws ChatBackendConnector.AiControllerException {
         setupFakeChat(0.7d, SEMANTICRESULT, 0.0d, AIMLRESULT, 0.3d, NEURALRESULT);
         ChatResult chatResult = new ChatResult("Hi");
         chatResult.setAnswer(null);
@@ -210,9 +210,9 @@ public class TestChatLogic extends TestChatBase {
      * The neural network can't be queried because the controller threw an exception.
      */
     @Test
-    public void testChat_RejectedNeuralDueToException() throws RequestBase.AiControllerException {
+    public void testChat_RejectedNeuralDueToException() throws ChatBackendConnector.AiControllerException {
         setupFakeChat(0.7d, SEMANTICRESULT, 0.0d, AIMLRESULT, 0.3d, NEURALRESULT);
-        when(this.fakeChatServices.awaitRnn()).thenThrow(RequestBase.AiControllerException.class);
+        when(this.fakeChatServices.awaitRnn()).thenThrow(ChatBackendConnector.AiControllerException.class);
         ApiResult result = getChat(0.9f);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
@@ -221,7 +221,7 @@ public class TestChatLogic extends TestChatBase {
      * History is passed back to the user when semantic server wins
      */
     @Test
-    public void testChat_History_Semantic() throws RequestBase.AiControllerException {
+    public void testChat_History_Semantic() throws ChatBackendConnector.AiControllerException {
         String historyValue = "History is made now";
         setupFakeChatWithHistory(0.7d, SEMANTICRESULT, historyValue, 0.5d, AIMLRESULT, 0.3d, NEURALRESULT);
         ApiResult result = getChat(0.2f);
@@ -233,7 +233,7 @@ public class TestChatLogic extends TestChatBase {
      * No history is passed back to the user when AIML server wins
      */
     @Test
-    public void testChat_History_Aiml_AlwaysEmpty() throws RequestBase.AiControllerException {
+    public void testChat_History_Aiml_AlwaysEmpty() throws ChatBackendConnector.AiControllerException {
         setupFakeChat(0.7d, SEMANTICRESULT, 0.5d, AIMLRESULT, 0.3d, NEURALRESULT);
         ApiResult result = getChat(0.9f);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
@@ -244,7 +244,7 @@ public class TestChatLogic extends TestChatBase {
      * No history is passed back to the user when RNN server wins
      */
     @Test
-    public void testChat_History_Rnn_AlwaysEmpty() throws RequestBase.AiControllerException {
+    public void testChat_History_Rnn_AlwaysEmpty() throws ChatBackendConnector.AiControllerException {
         setupFakeChat(0.7d, SEMANTICRESULT, 0.0d, AIMLRESULT, 0.3d, NEURALRESULT);
         ApiResult result = getChat(0.9f);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
@@ -256,7 +256,7 @@ public class TestChatLogic extends TestChatBase {
          * @throws RequestBase.AiControllerException.
          */
     @Test
-    public void testChat_botPassthrough() throws RequestBase.AiControllerException, WebHooks.WebHookException {
+    public void testChat_botPassthrough() throws ChatBackendConnector.AiControllerException, WebHooks.WebHookException {
         String passthroughResponse = "different message.";
         WebHookResponse response = new WebHookResponse(passthroughResponse);
 
@@ -275,7 +275,7 @@ public class TestChatLogic extends TestChatBase {
         * @throws RequestBase.AiControllerException.
         */
     @Test
-    public void testChat_botPassthroughIgnored() throws RequestBase.AiControllerException, WebHooks.WebHookException {
+    public void testChat_botPassthroughIgnored() throws ChatBackendConnector.AiControllerException, WebHooks.WebHookException {
         String passthroughResponse = "won't see this";
         WebHookResponse response = new WebHookResponse(passthroughResponse);
 
@@ -300,7 +300,7 @@ public class TestChatLogic extends TestChatBase {
     }
 
     @Test
-    public void testChat_noAiml_noRnn_wnetNotConfident() throws RequestBase.AiControllerException {
+    public void testChat_noAiml_noRnn_wnetNotConfident() throws ChatBackendConnector.AiControllerException {
         setupFakeChat(0.0d, "", 0.0d, "", 0.0d, "");
         when(this.fakeChatServices.awaitAiml()).thenReturn(null);
         when(this.fakeChatServices.awaitRnn()).thenReturn(null);
@@ -310,7 +310,7 @@ public class TestChatLogic extends TestChatBase {
     }
 
     @Test
-    public void testChat_noAiml_noRnn_wnetNull() throws RequestBase.AiControllerException {
+    public void testChat_noAiml_noRnn_wnetNull() throws ChatBackendConnector.AiControllerException {
         setupFakeChat(0.0d, "", 0.0d, "", 0.0d, "");
         when(this.fakeChatServices.awaitWnet()).thenReturn(null);
         when(this.fakeChatServices.awaitAiml()).thenReturn(null);
@@ -321,7 +321,7 @@ public class TestChatLogic extends TestChatBase {
     }
 
     @Test
-    public void testChat_noAiml_rnnEmpty_wnetNotConfident() throws RequestBase.AiControllerException {
+    public void testChat_noAiml_rnnEmpty_wnetNotConfident() throws ChatBackendConnector.AiControllerException {
         setupFakeChat(0.0d, "", 0.0d, "", 0.0d, "");
         when(this.fakeChatServices.awaitAiml()).thenReturn(null);
         ApiChat result = (ApiChat) getChat(0.9f);
@@ -330,7 +330,7 @@ public class TestChatLogic extends TestChatBase {
     }
 
     @Test
-    public void testChat_AimlNotConf_rnnNull_wnetNotConfident() throws RequestBase.AiControllerException {
+    public void testChat_AimlNotConf_rnnNull_wnetNotConfident() throws ChatBackendConnector.AiControllerException {
         setupFakeChat(0.0d, "wnet", 0.0d, "aiml", 0.0d, null);
         when(this.fakeChatServices.awaitRnn()).thenReturn(null);
         ApiChat result = (ApiChat) getChat(0.9f);
@@ -339,7 +339,7 @@ public class TestChatLogic extends TestChatBase {
     }
 
     @Test
-    public void testChat_notReadyToChat() throws RequestBase.AiControllerException, ServerConnector.AiServicesException, ServerMetadata.NoServerAvailable {
+    public void testChat_notReadyToChat() throws ChatBackendConnector.AiControllerException, ServerConnector.AiServicesException, NoServerAvailableException {
         setupFakeChat(0.0d, "", 0.0d, "", 0.0d, "");
         doThrow(AIChatServices.AiNotReadyToChat.class)
                 .when(this.fakeChatServices).startChatRequests(any(), any(), any(), anyString(), any());
@@ -348,7 +348,7 @@ public class TestChatLogic extends TestChatBase {
     }
 
     @Test
-    public void testChat_servicesException() throws RequestBase.AiControllerException, ServerConnector.AiServicesException, ServerMetadata.NoServerAvailable {
+    public void testChat_servicesException() throws ChatBackendConnector.AiControllerException, ServerConnector.AiServicesException, NoServerAvailableException {
         setupFakeChat(0.0d, "", 0.0d, "", 0.0d, "");
         doThrow(AIChatServices.AiServicesException.class)
                 .when(this.fakeChatServices).startChatRequests(any(), any(), any(), anyString(), any());
@@ -357,7 +357,7 @@ public class TestChatLogic extends TestChatBase {
     }
 
     @Test
-    public void testChat_genericException() throws RequestBase.AiControllerException, ServerConnector.AiServicesException, ServerMetadata.NoServerAvailable {
+    public void testChat_genericException() throws ChatBackendConnector.AiControllerException, ServerConnector.AiServicesException, NoServerAvailableException {
         setupFakeChat(0.0d, "", 0.0d, "", 0.0d, "");
         doThrow(Exception.class)
                 .when(this.fakeChatServices).startChatRequests(any(), any(), any(), anyString(), any());
@@ -366,7 +366,7 @@ public class TestChatLogic extends TestChatBase {
     }
 
     @Test
-    public void testChat_botAffinity_noBots_wnetWins() throws RequestBase.AiControllerException {
+    public void testChat_botAffinity_noBots_wnetWins() throws ChatBackendConnector.AiControllerException {
         final String response = "wnet";
         setupFakeChat(0.2d, response, 0.0d, "", 0.0d, "");
         ApiChat result = (ApiChat) getChat(0.1f);
@@ -374,7 +374,7 @@ public class TestChatLogic extends TestChatBase {
     }
 
     @Test
-    public void testChat_botAffinity_noBots_stateHasUnknownLockedAiid() throws RequestBase.AiControllerException,
+    public void testChat_botAffinity_noBots_stateHasUnknownLockedAiid() throws ChatBackendConnector.AiControllerException,
             ChatStateHandler.ChatStateException{
         final String response = "wnet";
         setupFakeChat(0.2d, response, 0.0d, "", 0.0d, "");
@@ -386,7 +386,7 @@ public class TestChatLogic extends TestChatBase {
     }
 
     @Test
-    public void testChat_botAffinity_bots_noPreviousLock_lockToHighestBot() throws RequestBase.AiControllerException {
+    public void testChat_botAffinity_bots_noPreviousLock_lockToHighestBot() throws ChatBackendConnector.AiControllerException {
         ChatResult cr1 = new ChatResult("Hi");
         cr1.setScore(0.6);
         ChatResult cr2 = new ChatResult("Hi2");
@@ -400,7 +400,7 @@ public class TestChatLogic extends TestChatBase {
     }
 
     @Test
-    public void testChat_botAffinity_bots_lockedToBot_stillLockedEvenWithOtherHigherConfidence() throws RequestBase.AiControllerException,
+    public void testChat_botAffinity_bots_lockedToBot_stillLockedEvenWithOtherHigherConfidence() throws ChatBackendConnector.AiControllerException,
             ChatStateHandler.ChatStateException{
         ChatResult cr1 = new ChatResult("Hi");
         cr1.setScore(0.6);
@@ -417,7 +417,7 @@ public class TestChatLogic extends TestChatBase {
     }
 
     @Test
-    public void testChat_botAffinity_bots_lockedToBot_lowConfidenceSwitchToHigherConfidenceBot() throws RequestBase.AiControllerException,
+    public void testChat_botAffinity_bots_lockedToBot_lowConfidenceSwitchToHigherConfidenceBot() throws ChatBackendConnector.AiControllerException,
             ChatStateHandler.ChatStateException{
         ChatResult cr1 = new ChatResult("Hi");
         cr1.setScore(0.2);
@@ -434,7 +434,7 @@ public class TestChatLogic extends TestChatBase {
     }
 
     @Test
-    public void testChat_botAffinity_bots_lockedToBot_allLowConfidence() throws RequestBase.AiControllerException,
+    public void testChat_botAffinity_bots_lockedToBot_allLowConfidence() throws ChatBackendConnector.AiControllerException,
             ChatStateHandler.ChatStateException{
         ChatResult cr1 = new ChatResult("question");
         cr1.setScore(0.2);
@@ -460,7 +460,7 @@ public class TestChatLogic extends TestChatBase {
     }
 
     @Test
-    public void testChat_botAffinity_bots_lockedToBot_wnet_aiml_score_order() throws RequestBase.AiControllerException,
+    public void testChat_botAffinity_bots_lockedToBot_wnet_aiml_score_order() throws ChatBackendConnector.AiControllerException,
             ChatStateHandler.ChatStateException{
         // BOT1 has higher score in WNET
         ChatResult cr1 = new ChatResult("question");
@@ -486,7 +486,7 @@ public class TestChatLogic extends TestChatBase {
     }
 
     @Test
-    public void testChat_linkedBots_allUnderMinP_noAnswer() throws RequestBase.AiControllerException {
+    public void testChat_linkedBots_allUnderMinP_noAnswer() throws ChatBackendConnector.AiControllerException {
         final double minP1 = 0.7;
         final double minP2 = 0.8;
         ChatResult cr1 = new ChatResult("Hi");
@@ -504,7 +504,7 @@ public class TestChatLogic extends TestChatBase {
     }
 
     @Test
-    public void testChat_handedOver_fromPreviousState() throws RequestBase.AiControllerException, ChatStateHandler.ChatStateException {
+    public void testChat_handedOver_fromPreviousState() throws ChatBackendConnector.AiControllerException, ChatStateHandler.ChatStateException {
         final ChatState state = ChatState.getEmpty();
         state.setChatTarget(ChatHandoverTarget.Human);
         when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(state);

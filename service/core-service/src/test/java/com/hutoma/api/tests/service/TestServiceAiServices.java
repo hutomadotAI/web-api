@@ -1,24 +1,25 @@
 package com.hutoma.api.tests.service;
 
+import com.hutoma.api.common.ControllerConfig;
 import com.hutoma.api.common.TestDataHelper;
-import com.hutoma.api.connectors.AIServices;
+import com.hutoma.api.connectors.BackendEngineStatus;
+import com.hutoma.api.connectors.BackendServerType;
 import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.sub.AiStatus;
-import com.hutoma.api.containers.sub.BackendEngineStatus;
-import com.hutoma.api.containers.sub.BackendServerType;
 import com.hutoma.api.containers.sub.ServerAffinity;
 import com.hutoma.api.containers.sub.ServerRegistration;
 import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.endpoints.AIServicesEndpoint;
-import com.hutoma.api.logic.AILogic;
 import com.hutoma.api.logic.AIServicesLogic;
 
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.Mock;
 
 import java.net.HttpURLConnection;
 import java.util.Collections;
+import javax.inject.Singleton;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
 
@@ -33,7 +34,10 @@ public class TestServiceAiServices extends ServiceTestBase {
 
     private static final String AI_SERVICES_SERVER_REG_PATH = "/aiservices/register";
     private static final String AI_SERVICES_SERVER_AFFINITY_PATH = "/aiservices/affinity";
-    private static final String AI_SERVICES_STATUS_PATH = "/aiservices/" + AIID + "/status";
+    private static final String AI_SERVICES_STATUS_PATH = "/aiservices/" + ServiceTestBase.AIID + "/status";
+
+    @Mock
+    private ControllerConfig fakeControllerConfig;
 
     @Test
     public void testUpdateStatus() throws DatabaseException {
@@ -77,7 +81,7 @@ public class TestServiceAiServices extends ServiceTestBase {
     @Test
     public void testServerRegister() {
         ServerRegistration wnet = new ServerRegistration(BackendServerType.WNET, "http://test:8000/server", 2, 2);
-        wnet.addAI(AIID, TrainingStatus.AI_TRAINING_COMPLETE, "hash");
+        wnet.addAI(ServiceTestBase.AIID, TrainingStatus.AI_TRAINING_COMPLETE, "hash");
         String json = this.serializeObject(wnet);
         final Response response = sendRegistrationRequest(json);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
@@ -95,8 +99,8 @@ public class TestServiceAiServices extends ServiceTestBase {
     @Test
     public void testServerRegister_badAIID() {
         ServerRegistration wnet = new ServerRegistration(BackendServerType.WNET, "http://test:8000/server", 2, 2);
-        wnet.addAI(AIID, TrainingStatus.AI_TRAINING_COMPLETE, "hash");
-        String json = this.serializeObject(wnet).replace(AIID.toString(), "be108d4e-9aed-4876-bxdc1-cfbf9ba1146a");
+        wnet.addAI(ServiceTestBase.AIID, TrainingStatus.AI_TRAINING_COMPLETE, "hash");
+        String json = this.serializeObject(wnet).replace(ServiceTestBase.AIID.toString(), "be108d4e-9aed-4876-bxdc1-cfbf9ba1146a");
         final Response response = sendRegistrationRequest(json);
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.getStatus());
     }
@@ -104,7 +108,7 @@ public class TestServiceAiServices extends ServiceTestBase {
     @Test
     public void testServerRegister_nullStatus() {
         ServerRegistration wnet = new ServerRegistration(BackendServerType.WNET, "http://test:8000/server", 2, 2);
-        wnet.addAI(AIID, null, "hash");
+        wnet.addAI(ServiceTestBase.AIID, null, "hash");
         String json = this.serializeObject(wnet);
         final Response response = sendRegistrationRequest(json);
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.getStatus());
@@ -113,7 +117,7 @@ public class TestServiceAiServices extends ServiceTestBase {
     @Test
     public void testServerRegister_badStatus() {
         ServerRegistration wnet = new ServerRegistration(BackendServerType.WNET, "http://test:8000/server", 2, 2);
-        wnet.addAI(AIID, TrainingStatus.AI_TRAINING_COMPLETE, "hash");
+        wnet.addAI(ServiceTestBase.AIID, TrainingStatus.AI_TRAINING_COMPLETE, "hash");
         String json = this.serializeObject(wnet).replace(TrainingStatus.AI_TRAINING_COMPLETE.value(), "wrong_string");
         final Response response = sendRegistrationRequest(json);
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.getStatus());
@@ -122,7 +126,7 @@ public class TestServiceAiServices extends ServiceTestBase {
     @Test
     public void testServerRegister_WrongServerType() {
         ServerRegistration wnet = new ServerRegistration(BackendServerType.WNET, "http://test:8000/server", 2, 2);
-        wnet.addAI(AIID, TrainingStatus.AI_TRAINING_COMPLETE, "hash");
+        wnet.addAI(ServiceTestBase.AIID, TrainingStatus.AI_TRAINING_COMPLETE, "hash");
         String json = this.serializeObject(wnet).replace("wnet", "other");
         final Response response = sendRegistrationRequest(json);
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.getStatus());
@@ -131,7 +135,7 @@ public class TestServiceAiServices extends ServiceTestBase {
     @Test
     public void testServerAffinity() {
         when(this.fakeControllerWnet.updateAffinity(any(), any())).thenReturn(true);
-        ServerAffinity affinity = new ServerAffinity(DEVID, Collections.singletonList(AIID));
+        ServerAffinity affinity = new ServerAffinity(ServiceTestBase.DEVID, Collections.singletonList(ServiceTestBase.AIID));
         String json = this.serializeObject(affinity);
         final Response response = sendAffinityRequest(json);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
@@ -142,7 +146,7 @@ public class TestServiceAiServices extends ServiceTestBase {
         when(this.fakeControllerWnet.updateAffinity(any(), any())).thenReturn(false);
         when(this.fakeControllerRnn.updateAffinity(any(), any())).thenReturn(false);
         when(this.fakeControllerAiml.updateAffinity(any(), any())).thenReturn(false);
-        ServerAffinity affinity = new ServerAffinity(DEVID, Collections.singletonList(AIID));
+        ServerAffinity affinity = new ServerAffinity(ServiceTestBase.DEVID, Collections.singletonList(ServiceTestBase.AIID));
         String json = this.serializeObject(affinity);
         final Response response = sendAffinityRequest(json);
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.getStatus());
@@ -153,14 +157,14 @@ public class TestServiceAiServices extends ServiceTestBase {
         when(this.fakeDatabaseStatusUpdates.updateAIStatus(any())).thenReturn(true);
         when(this.fakeDatabaseStatusUpdates.getAiQueueStatus(any(), any())).thenReturn(
                 new BackendEngineStatus(TrainingStatus.AI_TRAINING_QUEUED, 0.0, 0.0));
-        String statusJson = this.serializeObject(new AiStatus(DEVID.toString(), AIID,
+        String statusJson = this.serializeObject(new AiStatus(ServiceTestBase.DEVID.toString(), ServiceTestBase.AIID,
                 TrainingStatus.AI_READY_TO_TRAIN, BackendServerType.WNET,
                 0.0, 0.0, "hash",
                 TestDataHelper.SESSIONID));
         final Response response = sendStatusUpdateRequest(statusJson);
-        verify(this.fakeControllerWnet, times(1)).setHashCodeFor(AIID, "hash");
-        verify(this.fakeControllerRnn, never()).setHashCodeFor(AIID, "hash");
-        verify(this.fakeControllerAiml, never()).setHashCodeFor(AIID, "hash");
+        verify(this.fakeControllerWnet, times(1)).setHashCodeFor(ServiceTestBase.AIID, "hash");
+        verify(this.fakeControllerRnn, never()).setHashCodeFor(ServiceTestBase.AIID, "hash");
+        verify(this.fakeControllerAiml, never()).setHashCodeFor(ServiceTestBase.AIID, "hash");
     }
 
     @Test
@@ -168,14 +172,14 @@ public class TestServiceAiServices extends ServiceTestBase {
         when(this.fakeDatabaseStatusUpdates.updateAIStatus(any())).thenReturn(true);
         when(this.fakeDatabaseStatusUpdates.getAiQueueStatus(any(), any())).thenReturn(
                 new BackendEngineStatus(TrainingStatus.AI_TRAINING_QUEUED, 0.0, 0.0));
-        String statusJson = this.serializeObject(new AiStatus(DEVID.toString(), AIID,
+        String statusJson = this.serializeObject(new AiStatus(ServiceTestBase.DEVID.toString(), ServiceTestBase.AIID,
                 TrainingStatus.AI_READY_TO_TRAIN, BackendServerType.RNN,
                 0.0, 0.0, "hash",
                 TestDataHelper.SESSIONID));
         final Response response = sendStatusUpdateRequest(statusJson);
-        verify(this.fakeControllerWnet, never()).setHashCodeFor(AIID, "hash");
-        verify(this.fakeControllerRnn, times(1)).setHashCodeFor(AIID, "hash");
-        verify(this.fakeControllerAiml, never()).setHashCodeFor(AIID, "hash");
+        verify(this.fakeControllerWnet, never()).setHashCodeFor(ServiceTestBase.AIID, "hash");
+        verify(this.fakeControllerRnn, times(1)).setHashCodeFor(ServiceTestBase.AIID, "hash");
+        verify(this.fakeControllerAiml, never()).setHashCodeFor(ServiceTestBase.AIID, "hash");
     }
 
     @Test
@@ -183,7 +187,7 @@ public class TestServiceAiServices extends ServiceTestBase {
         when(this.fakeControllerWnet.isPrimaryMaster(any())).thenReturn(true);
         ServerRegistration wnet = new ServerRegistration(BackendServerType.WNET,
                 "http://test:8000/server", 2, 2);
-        wnet.addAI(AIID, TrainingStatus.AI_TRAINING_COMPLETE, "hash");
+        wnet.addAI(ServiceTestBase.AIID, TrainingStatus.AI_TRAINING_COMPLETE, "hash");
         String json = this.serializeObject(wnet);
         final Response response = sendRegistrationRequest(json);
         verify(this.fakeControllerWnet, times(1)).setAllHashCodes(any());
@@ -196,7 +200,7 @@ public class TestServiceAiServices extends ServiceTestBase {
         when(this.fakeControllerWnet.isPrimaryMaster(any())).thenReturn(false);
         ServerRegistration wnet = new ServerRegistration(BackendServerType.WNET,
                 "http://test:8000/server", 2, 2);
-        wnet.addAI(AIID, TrainingStatus.AI_TRAINING_COMPLETE, "hash");
+        wnet.addAI(ServiceTestBase.AIID, TrainingStatus.AI_TRAINING_COMPLETE, "hash");
         String json = this.serializeObject(wnet);
         final Response response = sendRegistrationRequest(json);
         verify(this.fakeControllerWnet, never()).setAllHashCodes(any());
@@ -242,18 +246,21 @@ public class TestServiceAiServices extends ServiceTestBase {
     }
 
     private String getCommonAiStatusJson() {
-        return this.serializeObject(new AiStatus(DEVID.toString(), AIID, TrainingStatus.AI_READY_TO_TRAIN, AI_ENGINE,
+        return this.serializeObject(new AiStatus(ServiceTestBase.DEVID.toString(), ServiceTestBase.AIID, TrainingStatus.AI_READY_TO_TRAIN, ServiceTestBase.AI_ENGINE,
                 0.0, 0.0, "hash",
                 TestDataHelper.SESSIONID));
     }
 
+    @Override
     protected Class<?> getClassUnderTest() {
         return AIServicesEndpoint.class;
     }
 
+    @Override
     protected AbstractBinder addAdditionalBindings(AbstractBinder binder) {
-        binder.bind(AILogic.class).to(AILogic.class);
-        binder.bind(AIServices.class).to(AIServices.class);
+        this.fakeControllerConfig = mock(ControllerConfig.class);
+        binder.bindFactory(new InstanceFactory<>(TestServiceAiServices.this.fakeControllerConfig)).to(ControllerConfig.class).in(Singleton.class);
+
         binder.bind(AIServicesLogic.class).to(AIServicesLogic.class);
         return binder;
     }

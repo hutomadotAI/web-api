@@ -144,7 +144,7 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
             this.logger.logDebug(LOGFROM, "post data validation passed");
 
         } catch (ParameterValidationException pve) {
-            requestContext.abortWith(ApiError.getBadRequest(pve).getResponse(this.serializer).build());
+            requestContext.abortWith(getValidationBadRequest(pve).getResponse(this.serializer).build());
             this.logger.logUserWarnEvent(LOGFROM, "ParameterValidation", getDeveloperId(requestContext),
                     LogMap.map("Type", "Post")
                             .put("Parameter", pve.getParameterName())

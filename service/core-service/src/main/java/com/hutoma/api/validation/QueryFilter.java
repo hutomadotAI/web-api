@@ -3,7 +3,6 @@ package com.hutoma.api.validation;
 import com.hutoma.api.common.AnalyticsResponseFormat;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Tools;
-import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.sub.ChatHandoverTarget;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
@@ -136,7 +135,7 @@ public class QueryFilter extends ParameterFilter implements ContainerRequestFilt
             this.logger.logDebug(LOGFROM, "parameter validation passed");
 
         } catch (ParameterValidationException pve) {
-            requestContext.abortWith(ApiError.getBadRequest(pve).getResponse(this.serializer).build());
+            requestContext.abortWith(Validate.getValidationBadRequest(pve).getResponse(this.serializer).build());
             this.logger.logUserWarnEvent(LOGFROM, "ParameterValidation", getDeveloperId(requestContext),
                     LogMap.map("Type", "Query")
                             .put("Parameter", pve.getParameterName())

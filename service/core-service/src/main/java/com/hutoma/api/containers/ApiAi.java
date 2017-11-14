@@ -1,10 +1,10 @@
 package com.hutoma.api.containers;
 
 import com.google.gson.annotations.SerializedName;
+import com.hutoma.api.connectors.BackendEngineStatus;
+import com.hutoma.api.connectors.BackendServerType;
+import com.hutoma.api.connectors.BackendStatus;
 import com.hutoma.api.containers.sub.AiBot;
-import com.hutoma.api.containers.sub.BackendEngineStatus;
-import com.hutoma.api.containers.sub.BackendServerType;
-import com.hutoma.api.containers.sub.BackendStatus;
 import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.containers.sub.UITrainingState;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;

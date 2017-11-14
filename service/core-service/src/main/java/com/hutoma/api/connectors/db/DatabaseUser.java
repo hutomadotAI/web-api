@@ -1,8 +1,7 @@
 package com.hutoma.api.connectors.db;
 
-import com.hutoma.api.logging.ILogger;
-import com.hutoma.api.containers.sub.DevPlan;
 import com.hutoma.api.containers.sub.UserInfo;
+import com.hutoma.api.logging.ILogger;
 
 import org.joda.time.DateTime;
 
@@ -191,28 +190,6 @@ public class DatabaseUser extends Database {
         }
 
         return false;
-    }
-
-    /**
-     * Gets the developer plan for the given developer Id.
-     * @param devId the developer id
-     * @return the plan, or null if there is no developer Id or not plan associated to it
-     * @throws DatabaseException database exception
-     */
-    public DevPlan getDevPlan(final UUID devId) throws DatabaseException {
-        try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("getDevPlan", 1).add(devId);
-            final ResultSet rs = call.executeQuery();
-            try {
-                if (rs.next()) {
-                    return new DevPlan(rs.getInt("maxai"), rs.getInt("monthlycalls"),
-                            rs.getLong("maxmem"), rs.getInt("maxtraining"));
-                }
-                return null;
-            } catch (final SQLException sqle) {
-                throw new DatabaseException(sqle);
-            }
-        }
     }
 
     /***

@@ -1,16 +1,16 @@
 package com.hutoma.api.common;
 
+import com.hutoma.api.connectors.BackendEngineStatus;
+import com.hutoma.api.connectors.BackendServerType;
+import com.hutoma.api.connectors.BackendStatus;
+import com.hutoma.api.connectors.IServerEndpoint;
 import com.hutoma.api.connectors.db.DatabaseAI;
 import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.AiBotConfigDefinition;
 import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.sub.AiBot;
 import com.hutoma.api.containers.sub.AiStatus;
-import com.hutoma.api.containers.sub.BackendEngineStatus;
-import com.hutoma.api.containers.sub.BackendServerType;
-import com.hutoma.api.containers.sub.BackendStatus;
 import com.hutoma.api.containers.sub.TrainingStatus;
-import com.hutoma.api.controllers.IServerEndpoint;
 import com.hutoma.api.logic.ChatLogic;
 
 import org.joda.time.DateTime;
@@ -23,6 +23,8 @@ import java.util.UUID;
 
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.when;
+
+;
 
 /**
  * Created by pedrotei on 09/01/17.

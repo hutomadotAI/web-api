@@ -1,15 +1,15 @@
 package com.hutoma.api.tests.service;
 
 import com.hutoma.api.common.TestDataHelper;
-import com.hutoma.api.connectors.AIServices;
+import com.hutoma.api.connectors.aiservices.AIServices;
+import com.hutoma.api.connectors.BackendEngineStatus;
+import com.hutoma.api.connectors.BackendServerType;
+import com.hutoma.api.connectors.BackendStatus;
 import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.ApiAiBotList;
 import com.hutoma.api.containers.ApiAiList;
 import com.hutoma.api.containers.sub.AiBot;
-import com.hutoma.api.containers.sub.BackendEngineStatus;
-import com.hutoma.api.containers.sub.BackendServerType;
-import com.hutoma.api.containers.sub.BackendStatus;
 import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.endpoints.AIEndpoint;
 import com.hutoma.api.logic.AIIntegrationLogic;
@@ -288,10 +288,12 @@ public class TestServiceAi extends ServiceTestBase {
         Assert.assertEquals(HttpURLConnection.HTTP_UNAUTHORIZED, response.getStatus());
     }
 
+    @Override
     protected Class<?> getClassUnderTest() {
         return AIEndpoint.class;
     }
 
+    @Override
     protected AbstractBinder addAdditionalBindings(AbstractBinder binder) {
         binder.bind(AIServices.class).to(AIServices.class);
         binder.bind(AILogic.class).to(AILogic.class);

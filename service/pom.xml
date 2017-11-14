@@ -32,6 +32,7 @@
     <modules>
         <module>common-lib</module>
         <module>core-service</module>
+        <module>controller-service</module>
     </modules>
 
 </project>

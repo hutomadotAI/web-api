@@ -1,8 +1,6 @@
 package com.hutoma.api.validation;
 
 import com.hutoma.api.common.AnalyticsResponseFormat;
-import com.hutoma.api.containers.sub.ChatHandoverTarget;
-import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.ApiEntity;
@@ -12,8 +10,10 @@ import com.hutoma.api.containers.facebook.FacebookConnect;
 import com.hutoma.api.containers.facebook.FacebookNotification;
 import com.hutoma.api.containers.sub.AiBot;
 import com.hutoma.api.containers.sub.AiStatus;
+import com.hutoma.api.containers.sub.ChatHandoverTarget;
 import com.hutoma.api.containers.sub.ServerAffinity;
 import com.hutoma.api.containers.sub.ServerRegistration;
+import com.hutoma.api.logging.ILogger;
 
 import java.util.List;
 import java.util.Locale;

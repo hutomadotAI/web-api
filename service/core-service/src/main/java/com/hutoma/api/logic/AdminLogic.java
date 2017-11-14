@@ -1,10 +1,8 @@
 package com.hutoma.api.logic;
 
 import com.hutoma.api.common.Config;
-import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.logging.LogMap;
-import com.hutoma.api.connectors.AIServices;
+import com.hutoma.api.connectors.aiservices.AIServices;
 import com.hutoma.api.connectors.db.DatabaseUser;
 import com.hutoma.api.containers.ApiAdmin;
 import com.hutoma.api.containers.ApiError;
@@ -12,6 +10,8 @@ import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.ApiString;
 import com.hutoma.api.containers.ApiUserInfo;
 import com.hutoma.api.containers.sub.UserInfo;
+import com.hutoma.api.logging.ILogger;
+import com.hutoma.api.logging.LogMap;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.compression.CompressionCodecs;

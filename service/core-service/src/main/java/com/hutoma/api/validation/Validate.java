@@ -1,6 +1,7 @@
 package com.hutoma.api.validation;
 
 import com.hutoma.api.common.Tools;
+import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.sub.AiBot;
 import com.hutoma.api.logic.TrainingLogic;
 
@@ -35,6 +36,16 @@ public class Validate {
 
     @Inject
     public Validate() {
+    }
+
+    public static ApiError getValidationBadRequest(final Validate.ParameterValidationException pve) {
+        String paramName = pve.getParameterName();
+        String message = pve.getMessage();
+        return ApiError.getBadRequest(String.format("%s%s%s",
+                (paramName == null) ? "" : paramName,
+                (paramName == null || message == null) ? "" : ": ",
+                (message == null) ? "" : message),
+                null);
     }
 
     public static boolean isAnyNullOrEmpty(final String... params) {

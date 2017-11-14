@@ -6,10 +6,11 @@ import com.hutoma.api.common.Config;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Pair;
 import com.hutoma.api.common.Tools;
-import com.hutoma.api.connectors.AIChatServices;
 import com.hutoma.api.connectors.AiStrings;
 import com.hutoma.api.connectors.ServerConnector;
 import com.hutoma.api.connectors.WebHooks;
+import com.hutoma.api.connectors.chat.AIChatServices;
+import com.hutoma.api.connectors.chat.ChatBackendConnector;
 import com.hutoma.api.containers.ApiChat;
 import com.hutoma.api.containers.ApiChatApiHandover;
 import com.hutoma.api.containers.ApiError;
@@ -22,7 +23,6 @@ import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.containers.sub.MemoryVariable;
 import com.hutoma.api.containers.sub.WebHook;
 import com.hutoma.api.containers.sub.WebHookResponse;
-import com.hutoma.api.controllers.RequestBase;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
 import com.hutoma.api.memory.ChatStateHandler;
@@ -414,7 +414,7 @@ public class ChatLogic {
             }
 
 
-        } catch (RequestBase.AiNotFoundException notFoundException) {
+        } catch (ChatBackendConnector.AiNotFoundException notFoundException) {
             this.logger.logUserTraceEvent(LOGFROM, "Chat - AI not found", devIdString,
                     LogMap.map("Message", notFoundException.getMessage()).put("AIID", aiid));
             this.chatLogger.logChatError(LOGFROM, devIdString, notFoundException, this.telemetryMap);
@@ -438,7 +438,7 @@ public class ChatLogic {
                             .put("Error", webHookErrorString));
             this.telemetryMap.add("webHookCallFailure", webHookErrorString);
 
-        } catch (IntentException | RequestBase.AiControllerException | ServerConnector.AiServicesException ex) {
+        } catch (IntentException | ChatBackendConnector.AiControllerException | ServerConnector.AiServicesException ex) {
             this.logger.logUserExceptionEvent(LOGFROM, "Chat - " + ex.getClass().getSimpleName(),
                     devIdString, ex, LogMap.map("AIID", aiid));
             this.chatLogger.logChatError(LOGFROM, devIdString, ex, this.telemetryMap);
@@ -804,7 +804,7 @@ public class ChatLogic {
     }
 
     private ChatResult interpretSemanticResult(final String question, final double confidenceThreshold)
-            throws RequestBase.AiControllerException {
+            throws ChatBackendConnector.AiControllerException {
 
         Map<UUID, ChatResult> allResults = this.chatServices.awaitWnet();
         if (allResults == null) {
@@ -835,7 +835,7 @@ public class ChatLogic {
     }
 
     private ChatResult interpretAimlResult(final String question, final double confidenceThreshold)
-            throws RequestBase.AiControllerException {
+            throws ChatBackendConnector.AiControllerException {
 
         Map<UUID, ChatResult> allResults = this.chatServices.awaitAiml();
         if (allResults == null) {
@@ -863,7 +863,7 @@ public class ChatLogic {
     }
 
     private ChatResult interpretRnnResult(final String question, final double confidenceThreshold)
-            throws RequestBase.AiControllerException {
+            throws ChatBackendConnector.AiControllerException {
 
         Map<UUID, ChatResult> allResults = this.chatServices.awaitRnn();
         if (allResults == null) {

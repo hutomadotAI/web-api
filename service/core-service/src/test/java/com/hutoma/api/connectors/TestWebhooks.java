@@ -1,6 +1,5 @@
 package com.hutoma.api.connectors;
 
-import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.db.DatabaseAI;
@@ -10,7 +9,7 @@ import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.containers.sub.WebHook;
 import com.hutoma.api.containers.sub.WebHookResponse;
-import com.hutoma.api.controllers.ServerMetadata;
+import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logic.ChatRequestInfo;
 
 import org.glassfish.jersey.client.JerseyClient;
@@ -48,7 +47,7 @@ public class TestWebhooks {
     private WebHooks webHooks;
 
     @Before
-    public void setup() throws ServerMetadata.NoServerAvailable {
+    public void setup() throws NoServerAvailableException {
         this.serializer = mock(JsonSerializer.class);
         this.fakeDatabase = mock(DatabaseAI.class);
         this.fakeDatabaseMarketplace = mock(DatabaseMarketplace.class);

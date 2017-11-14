@@ -1,20 +1,20 @@
 package com.hutoma.api.logic;
 
 import com.hutoma.api.common.Config;
-import com.hutoma.api.logging.ILogger;
-import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.logging.LogMap;
-import com.hutoma.api.connectors.AIServices;
 import com.hutoma.api.common.HTMLExtractor;
+import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.connectors.BackendServerType;
+import com.hutoma.api.connectors.BackendStatus;
+import com.hutoma.api.connectors.aiservices.AIServices;
 import com.hutoma.api.connectors.db.DatabaseAI;
 import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.ApiTrainingMaterials;
-import com.hutoma.api.containers.sub.BackendServerType;
-import com.hutoma.api.containers.sub.BackendStatus;
 import com.hutoma.api.containers.sub.TrainingStatus;
+import com.hutoma.api.logging.ILogger;
+import com.hutoma.api.logging.LogMap;
 import com.hutoma.api.memory.IMemoryIntentHandler;
 import com.hutoma.api.validation.Validate;
 
@@ -32,8 +32,8 @@ import java.util.Optional;
 import java.util.UUID;
 import javax.inject.Inject;
 
-import static com.hutoma.api.common.ResultEvent.UPLOAD_MISSING_RESPONSE;
-import static com.hutoma.api.common.ResultEvent.UPLOAD_NO_CONTENT;
+import static com.hutoma.api.containers.sub.ResultEvent.UPLOAD_MISSING_RESPONSE;
+import static com.hutoma.api.containers.sub.ResultEvent.UPLOAD_NO_CONTENT;
 
 /**
  * Logic to handle AI training.

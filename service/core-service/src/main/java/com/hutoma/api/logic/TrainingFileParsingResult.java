@@ -1,6 +1,6 @@
 package com.hutoma.api.logic;
 
-import com.hutoma.api.common.ResultEvent;
+import com.hutoma.api.containers.sub.ResultEvent;
 import com.hutoma.api.containers.sub.ResultEventList;
 
 import java.util.List;

@@ -2,6 +2,7 @@ package com.hutoma.api.connectors.db;
 
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Pair;
+import com.hutoma.api.connectors.BackendStatus;
 import com.hutoma.api.containers.AiBotConfig;
 import com.hutoma.api.containers.AiBotConfigDefinition;
 import com.hutoma.api.containers.ApiAi;
@@ -9,12 +10,8 @@ import com.hutoma.api.containers.ApiAiWithConfig;
 import com.hutoma.api.containers.ApiLinkedBotData;
 import com.hutoma.api.containers.sub.AiBot;
 import com.hutoma.api.containers.sub.AiMinP;
-import com.hutoma.api.containers.sub.AiStatus;
-import com.hutoma.api.containers.sub.BackendServerType;
-import com.hutoma.api.containers.sub.BackendStatus;
 import com.hutoma.api.containers.sub.ChatHandoverTarget;
 import com.hutoma.api.containers.sub.ChatState;
-import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.containers.sub.WebHook;
 import com.hutoma.api.logging.ILogger;
 
@@ -125,37 +122,6 @@ public class DatabaseAI extends Database  {
         } catch (SQLException sqle) {
             throw new DatabaseException(sqle);
         }
-    }
-
-    public boolean updateAIStatus(final AiStatus status)
-            throws DatabaseException {
-        return updateAIStatus(status.getAiEngine(), status.getAiid(), status.getTrainingStatus(),
-                status.getServerIdentifier(), status.getTrainingProgress(), status.getTrainingError());
-    }
-
-    public boolean updateAIStatus(BackendServerType serverType, UUID aiid, TrainingStatus trainingStatus,
-                                  String endpoint, double trainingProgress, double trainingError)
-            throws DatabaseException {
-
-        // open a transaction since this is a read/modify/write operation and we need consistency
-        try (DatabaseTransaction transaction = this.transactionProvider.get()) {
-
-            transaction.getDatabaseCall().initialise("updateAiStatus", 6)
-                    .add(serverType.value())
-                    .add(aiid)
-                    .add(trainingStatus)
-                    .add(endpoint)
-                    .add(trainingProgress)
-                    .add(trainingError)
-                    .executeUpdate();
-
-            // if all goes well, commit
-            transaction.commit();
-        }
-
-        // flag success
-        return true;
-
     }
 
     /***

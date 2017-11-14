@@ -2,13 +2,13 @@ package com.hutoma.api.tests.service;
 
 import com.google.common.collect.ImmutableMap;
 import com.hutoma.api.common.ChatLogger;
+import com.hutoma.api.connectors.chat.ChatBackendConnector;
 import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.ApiChat;
 import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.containers.sub.ChatState;
 import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.containers.sub.MemoryVariable;
-import com.hutoma.api.controllers.RequestBase;
 import com.hutoma.api.endpoints.ChatEndpoint;
 import com.hutoma.api.logic.ChatLogic;
 import com.hutoma.api.memory.ChatStateHandler;
@@ -58,7 +58,7 @@ public class TestServiceChat extends ServiceTestBase {
     }
 
     @Test
-    public void testChat() throws RequestBase.AiControllerException {
+    public void testChat() throws ChatBackendConnector.AiControllerException {
         final String answer = "the answer";
         final double score = 0.9;
         ChatResult semanticAnalysisResult = new ChatResult("Hi");

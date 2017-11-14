@@ -3,13 +3,13 @@ package com.hutoma.api.logic;
 import com.google.common.collect.ImmutableMap;
 import com.hutoma.api.common.ChatLogger;
 import com.hutoma.api.common.Config;
-import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Tools;
-import com.hutoma.api.connectors.AIChatServices;
 import com.hutoma.api.connectors.AiStrings;
 import com.hutoma.api.connectors.ServerConnector;
 import com.hutoma.api.connectors.WebHooks;
+import com.hutoma.api.connectors.chat.AIChatServices;
+import com.hutoma.api.connectors.chat.ChatBackendConnector;
 import com.hutoma.api.connectors.db.DatabaseAI;
 import com.hutoma.api.containers.ApiChat;
 import com.hutoma.api.containers.ApiResult;
@@ -19,7 +19,7 @@ import com.hutoma.api.containers.sub.ChatState;
 import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.containers.sub.MemoryVariable;
 import com.hutoma.api.containers.sub.WebHook;
-import com.hutoma.api.controllers.RequestBase;
+import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.memory.ChatStateHandler;
 import com.hutoma.api.memory.IEntityRecognizer;
 import com.hutoma.api.memory.IMemoryIntentHandler;
@@ -146,7 +146,7 @@ public class TestChatBase {
     void setupFakeChat(double wnetConfidence, String wnetResponse,
                        double aimlConfidence, String aimlResponse,
                        double rnnConfidence, String rnnResponse) throws
-            RequestBase.AiControllerException {
+            ChatBackendConnector.AiControllerException {
         setupFakeChatWithHistory(wnetConfidence, wnetResponse, "", aimlConfidence, aimlResponse,
                 rnnConfidence, rnnResponse);
     }
@@ -165,7 +165,7 @@ public class TestChatBase {
     void setupFakeChatWithHistory(double wnetConfidence, String wnetResponse, String wnetHistory,
                                   double aimlConfidence, String aimlResponse,
                                   double rnnConfidence, String rnnResponse) throws
-            RequestBase.AiControllerException {
+            ChatBackendConnector.AiControllerException {
 
         ChatResult wnetResult = new ChatResult("Hi");
         wnetResult.setScore(wnetConfidence);
@@ -195,7 +195,7 @@ public class TestChatBase {
     }
 
     MemoryIntent getMemoryIntentForPrompt(int maxPrompts, String currentValue)
-            throws RequestBase.AiControllerException {
+            throws ChatBackendConnector.AiControllerException {
         final String intentName = "intent1";
         final String promptTrigger = "variableValue";
         final String prompt = "prompt1";
@@ -219,7 +219,7 @@ public class TestChatBase {
 
     MemoryIntent getMultiEntityMemoryIntentForPrompt(
             int maxPrompts, String currentValue) throws
-            RequestBase.AiControllerException {
+            ChatBackendConnector.AiControllerException {
         final String intentName = "intent1";
         final String promptTrigger = "variableValue";
         final String prompt = "prompt1";

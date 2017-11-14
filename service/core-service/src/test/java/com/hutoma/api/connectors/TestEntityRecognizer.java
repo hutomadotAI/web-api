@@ -1,10 +1,11 @@
 package com.hutoma.api.connectors;
 
 import com.hutoma.api.common.Config;
-import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.connectors.aiservices.AIServices;
 import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.sub.RecognizedEntity;
+import com.hutoma.api.logging.ILogger;
 
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.client.JerseyClientBuilder;

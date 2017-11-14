@@ -1,24 +1,26 @@
 package com.hutoma.api.connectors;
 
-import com.hutoma.api.common.AiServiceStatusLogger;
 import com.hutoma.api.common.Config;
-import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.TestDataHelper;
-import com.hutoma.api.thread.ThreadPool;
 import com.hutoma.api.common.Tools;
-import com.hutoma.api.thread.TrackedThreadSubPool;
-import com.hutoma.api.connectors.db.DatabaseAiStatusUpdates;
+import com.hutoma.api.connectors.aiservices.AIQueueServices;
+import com.hutoma.api.connectors.aiservices.AIServices;
+import com.hutoma.api.connectors.aiservices.ControllerConnector;
+import com.hutoma.api.connectors.aiservices.RnnServicesConnector;
+import com.hutoma.api.connectors.aiservices.WnetServicesConnector;
+import com.hutoma.api.connectors.db.DatabaseAI;
 import com.hutoma.api.connectors.db.DatabaseEntitiesIntents;
 import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.connectors.db.DatabaseUser;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.DevPlan;
-import com.hutoma.api.controllers.ControllerRnn;
-import com.hutoma.api.controllers.ControllerWnet;
-import com.hutoma.api.controllers.ServerMetadata;
+import com.hutoma.api.logging.AiServiceStatusLogger;
+import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.memory.MemoryIntentHandler;
+import com.hutoma.api.thread.ThreadPool;
+import com.hutoma.api.thread.TrackedThreadSubPool;
 
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.client.JerseyClientBuilder;
@@ -72,17 +74,18 @@ public class TestAiServicesClient {
     private static HttpServer httpServer;
     private JsonSerializer fakeSerializer;
     private DatabaseUser fakeDatabaseUser;
-    private DatabaseAiStatusUpdates fakeDatabase;
+    private DatabaseAI fakeDatabaseAi;
     private DatabaseEntitiesIntents fakeDatabaseEntitiesIntents;
     private Config fakeConfig;
     private ILogger fakeLogger;
     private Tools fakeTools;
     private AIServices aiServices;
     private AiServiceStatusLogger fakeServicesStatusLogger;
-    private ControllerWnet fakeControllerWnet;
-    private ControllerRnn fakeControllerRnn;
     private ThreadPool threadPool;
     private AIQueueServices fakeQueueServices;
+    private ControllerConnector fakeControllerConnector;
+    private WnetServicesConnector fakeWnetServicesConnector;
+    private RnnServicesConnector fakeRnnServicesConnector;
 
     @BeforeClass
     public static void initializeClass() {
@@ -97,31 +100,29 @@ public class TestAiServicesClient {
     }
 
     @Before
-    public void setup() throws ServerMetadata.NoServerAvailable {
+    public void setup() throws NoServerAvailableException {
         this.fakeSerializer = mock(JsonSerializer.class);
         this.fakeConfig = mock(Config.class);
-        this.fakeDatabase = mock(DatabaseAiStatusUpdates.class);
+        this.fakeDatabaseAi = mock(DatabaseAI.class);
         this.fakeDatabaseEntitiesIntents = mock(DatabaseEntitiesIntents.class);
         this.fakeDatabaseUser = mock(DatabaseUser.class);
         this.fakeLogger = mock(ILogger.class);
         this.fakeTools = mock(Tools.class);
         this.fakeServicesStatusLogger = mock(AiServiceStatusLogger.class);
         this.fakeQueueServices = mock(AIQueueServices.class);
-
-        this.fakeControllerWnet = mock(ControllerWnet.class);
-        this.fakeControllerRnn = mock(ControllerRnn.class);
+        this.fakeControllerConnector = mock(ControllerConnector.class);
+        this.fakeWnetServicesConnector = mock(WnetServicesConnector.class);
+        this.fakeRnnServicesConnector = mock(RnnServicesConnector.class);
 
         when(this.fakeConfig.getThreadPoolMaxThreads()).thenReturn(32);
         when(this.fakeConfig.getThreadPoolIdleTimeMs()).thenReturn(10000L);
         this.threadPool = new ThreadPool(this.fakeConfig);
 
-        when(this.fakeControllerWnet.getBackendEndpoint(any(), any())).thenReturn(
-                TestDataHelper.getEndpointFor(LOCAL_WEB_ENDPOINT));
-        when(this.fakeControllerRnn.getBackendEndpoint(any(), any())).thenReturn(
-                TestDataHelper.getEndpointFor(LOCAL_WEB_ENDPOINT));
-        this.aiServices = new AIServices(this.fakeDatabaseUser, this.fakeDatabase, this.fakeDatabaseEntitiesIntents, this.fakeLogger, this.fakeSerializer,
-                this.fakeTools, this.fakeConfig, JerseyClientBuilder.createClient(), new TrackedThreadSubPool(this.threadPool),
-                this.fakeControllerWnet, this.fakeControllerRnn, this.fakeQueueServices);
+        when(this.fakeControllerConnector.getBackendEndpoint(any(), any(), any())).thenReturn(TestDataHelper.getEndpointFor(LOCAL_WEB_ENDPOINT));
+
+        this.aiServices = new AIServices(this.fakeDatabaseAi, this.fakeDatabaseEntitiesIntents, this.fakeLogger, this.fakeSerializer,
+                this.fakeTools, JerseyClientBuilder.createClient(), new TrackedThreadSubPool(this.threadPool),
+                this.fakeQueueServices, this.fakeControllerConnector, this.fakeWnetServicesConnector, this.fakeRnnServicesConnector);
     }
 
     @Test
@@ -141,16 +142,16 @@ public class TestAiServicesClient {
     }
 
     @Test
-    public void testDeleteDev() throws AIServices.AiServicesException {
+    public void testDeleteDev() throws AIServices.AiServicesException, NoServerAvailableException {
         this.aiServices.deleteDev(DEVID);
     }
 
     @Test
-    public void testUploadTraining() throws AIServices.AiServicesException {
+    public void testUploadTraining() throws AIServices.AiServicesException, NoServerAvailableException {
         // Need to have a real serializer here to transform the ai info
-        AIServices thisAiServices = new AIServices(this.fakeDatabaseUser, this.fakeDatabase, this.fakeDatabaseEntitiesIntents, this.fakeLogger, new JsonSerializer(),
-                this.fakeTools, this.fakeConfig, JerseyClientBuilder.createClient(), new TrackedThreadSubPool(this.threadPool),
-                this.fakeControllerWnet, this.fakeControllerRnn, this.fakeQueueServices);
+        AIServices thisAiServices = new AIServices(this.fakeDatabaseAi, this.fakeDatabaseEntitiesIntents, this.fakeLogger, new JsonSerializer(),
+                this.fakeTools, JerseyClientBuilder.createClient(), new TrackedThreadSubPool(this.threadPool),
+                this.fakeQueueServices, this.fakeControllerConnector, this.fakeWnetServicesConnector, this.fakeRnnServicesConnector);
         thisAiServices.uploadTraining(null, DEVID, AIID, TRAINING_MATERIALS);
     }
 

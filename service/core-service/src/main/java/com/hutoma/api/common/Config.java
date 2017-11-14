@@ -5,14 +5,8 @@ import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.ILoggerConfig;
 import com.hutoma.api.thread.IThreadConfig;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Properties;
-import java.util.UUID;
-import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -20,18 +14,24 @@ import javax.inject.Singleton;
  * Created by David MG on 02/08/2016.
  */
 @Singleton
-public class Config implements ILoggerConfig, IThreadConfig, IDatabaseConfig {
+public class Config extends CommonConfig implements ILoggerConfig, IThreadConfig, IDatabaseConfig {
 
     private static final String LOGFROM = "config";
-    private static final String API_ENV_PREFIX = "API_";
-    private final ILogger logger;
-    private final HashSet<String> propertyLoaded;
-    private Properties properties;
+
 
     @Inject
-    public Config(ILogger logger) {
-        this.logger = logger;
-        this.propertyLoaded = new HashSet<>();
+    public Config(final ILogger logger) {
+        super(logger);
+    }
+
+    @Override
+    protected String getLoggingLogfrom() {
+        return LOGFROM;
+    }
+
+    @Override
+    protected String getEnvPrefix() {
+        return "API_";
     }
 
     /***
@@ -131,16 +131,6 @@ public class Config implements ILoggerConfig, IThreadConfig, IDatabaseConfig {
         return stringList == null ? Collections.emptyList() : stringList;
     }
 
-    public List<UUID> getAimlBotAiids() {
-        List<String> stringList = getCSList("ai_aiml_bot_aiids");
-        if (stringList == null) {
-            stringList = Arrays.asList("e1bb8226-e8ce-467a-8305-bc2fcb89dd7f");
-        }
-        return stringList.stream()
-                .map(UUID::fromString)
-                .collect(Collectors.toList());
-    }
-
     public int getMaxLinkedBotsPerAi() {
         return Integer.parseInt(getConfigFromProperties("max_linked_bots_per_ai", "5"));
     }
@@ -199,85 +189,7 @@ public class Config implements ILoggerConfig, IThreadConfig, IDatabaseConfig {
         return 60 * 1000;
     }
 
-    /***
-     * Under normal conditions the controller will ping the server every n milliseconds
-     * @return n
-     */
-    public long getServerHeartbeatEveryMs() {
-        return 2 * 1000;
-    }
 
-    /***
-     * However long the last call took, always wait a minimum of n milliseconds
-     * before issuing the next ping
-     * i.e. if we issue a ping every 2 seconds and the ping takes 2 seconds to complete
-     * we would still wait n ms between calls
-     * @return n
-     */
-    public long getServerHeartbeatMinimumGapMs() {
-        return 500;
-    }
-
-    /***
-     * If we haven't received a valid ping for n milliseconds
-     * then we write off this server and it has to re-register with us
-     * @return n
-     */
-    public long getServerHeartbeatFailureCutOffMs() {
-        return 5 * 1000;
-    }
-
-    /***
-     * Every n milliseconds we check the queue status to see
-     * if there are tasks to run or reschedule
-     * @return
-     */
-    public long getProcessQueueIntervalDefault() {
-        return 2 * 1000;
-    }
-
-    /***
-     * The time to wait if a command needs to be scheduled
-     * immediately after this one (in ms)
-     * i.e. minimum interval between queue checks
-     * @return
-     */
-    public long getProcessQueueIntervalShort() {
-        return 1000;
-    }
-
-    /***
-     * The time to wait if nothing much is going on
-     * and we can wait a while before checking the queue again
-     * @return
-     */
-    public long getProcessQueueIntervalLong() {
-        return 10 * 1000;
-    }
-
-    /***
-     * How far in the future to schedule a command
-     * (in seconds)
-     */
-    public int getProcessQueueScheduleFutureCommand() {
-        return 30;
-    }
-
-    /***
-     * If this many seconds pass and no update is received for an active training slot
-     * then we consider it 'interrupted' and reallocate the training job to a server with space
-     */
-    public int getProcessQueueInterruptedSeconds() {
-        return 2 * 60;
-    }
-
-    /***
-     * Do not attempt slot recovery for the first n seconds after the API has started up
-     * This gives servers enough time to re-register and reclaim their training tasks
-     */
-    public int getProcessQueueDelayRecoveryForFirstSeconds() {
-        return 2 * 60;
-    }
 
     /***
      * The total number of milliseconds that we wait for backend
@@ -328,50 +240,6 @@ public class Config implements ILoggerConfig, IThreadConfig, IDatabaseConfig {
      */
     public String getFacebookVerifyToken() {
         return getConfigFromProperties("fb_verify_token", "oYfoYghfwj1p0i7f");
-    }
-
-    private List<String> getCSList(final String propertyName) {
-        String instances = getConfigFromProperties(propertyName, null);
-        if (instances == null) {
-            return null;
-        }
-        if (!instances.isEmpty()) {
-            return Arrays.asList(instances.split(","));
-        }
-        return new ArrayList<>();
-    }
-
-    private String getConfigFromEnvironment(String propertyName) {
-        return System.getenv(API_ENV_PREFIX + propertyName.toUpperCase());
-    }
-
-    private String getConfigFromProperties(String propertyName, String defaultValue) {
-        String configFromEnv = getConfigFromEnvironment(propertyName);
-        if (configFromEnv != null && !configFromEnv.isEmpty()) {
-            return configFromEnv;
-        }
-
-        if (this.properties == null) {
-            // if this is the first time we are accessing a property and we are using defaults then log a warning
-            if (this.propertyLoaded.add(propertyName)) {
-                if (defaultValue == null || defaultValue.isEmpty()) {
-                    this.logger.logWarning(LOGFROM, String.format("No value found for property \"%s\"!", propertyName));
-                } else {
-                    this.logger.logWarning(LOGFROM, String.format(
-                            "No value found for property \"%s\". Using default value \"%s\"",
-                            propertyName, defaultValue));
-                }
-                this.propertyLoaded.add(propertyName);
-
-            }
-            return defaultValue;
-        } else {
-            if (!this.properties.containsKey(propertyName)) {
-                this.logger.logWarning(LOGFROM, "no property set for " + propertyName + ". using hard-coded default "
-                        + defaultValue);
-            }
-            return this.properties.getProperty(propertyName, defaultValue);
-        }
     }
 
 }

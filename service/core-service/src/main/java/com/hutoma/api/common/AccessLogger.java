@@ -1,5 +1,7 @@
 package com.hutoma.api.common;
 
+import com.hutoma.api.logging.CentralLogger;
+
 /**
  * Telemetry Logging for Chat iterations.
  */

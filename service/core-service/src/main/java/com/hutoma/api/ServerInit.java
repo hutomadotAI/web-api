@@ -1,12 +1,12 @@
 package com.hutoma.api;
 
 import com.hutoma.api.common.Config;
-import com.hutoma.api.logging.ILogger;
-import com.hutoma.api.logging.LogMap;
 import com.hutoma.api.connectors.db.DatabaseConnectionPool;
 import com.hutoma.api.controllers.ControllerAiml;
 import com.hutoma.api.controllers.ControllerRnn;
 import com.hutoma.api.controllers.ControllerWnet;
+import com.hutoma.api.logging.ILogger;
+import com.hutoma.api.logging.LogMap;
 
 import org.fluentd.logger.FluentLogger;
 import org.glassfish.hk2.api.ServiceLocator;

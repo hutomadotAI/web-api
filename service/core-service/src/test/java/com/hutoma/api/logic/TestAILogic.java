@@ -7,7 +7,7 @@ import com.hutoma.api.common.Pair;
 import com.hutoma.api.common.TestBotHelper;
 import com.hutoma.api.common.TestDataHelper;
 import com.hutoma.api.common.Tools;
-import com.hutoma.api.connectors.AIServices;
+import com.hutoma.api.connectors.aiservices.AIServices;
 import com.hutoma.api.connectors.ServerConnector;
 import com.hutoma.api.connectors.db.DatabaseAI;
 import com.hutoma.api.connectors.db.DatabaseEntitiesIntents;
