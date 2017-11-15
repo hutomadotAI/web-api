@@ -141,8 +141,8 @@ public class ServerBinder extends AbstractBinder {
         bind(ChatAimlConnector.class).to(ChatAimlConnector.class);
         bind(EntityRecognizerService.class).to(EntityRecognizerService.class);
         bind(ControllerConnector.class).to(ControllerConnector.class);
-        bind(WnetServicesConnector.class).to(WnetServicesConnector.class);
-        bind(RnnServicesConnector.class).to(RnnServicesConnector.class);
+        bind(WnetServicesConnector.class).to(WnetServicesConnector.class).in(Singleton.class);
+        bind(RnnServicesConnector.class).to(RnnServicesConnector.class).in(Singleton.class);
 
         // UI
         bind(UILogic.class).to(UILogic.class);

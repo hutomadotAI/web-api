@@ -5,7 +5,9 @@ import com.hutoma.api.connectors.ServerTrackerInfo;
 
 import java.util.Map;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
+@Singleton
 public class WnetServicesConnector extends BackendServicesConnector {
 
     private final QueueProcessor queueProcessor;

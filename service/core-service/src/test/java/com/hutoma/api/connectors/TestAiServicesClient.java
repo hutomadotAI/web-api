@@ -62,7 +62,7 @@ public class TestAiServicesClient {
     private static final UUID DEVID = UUID.fromString("1a5c55e7-6492-4d08-8dfd-d167ac9f3330");
     private static final UUID AIID = UUID.fromString("41c6e949-4733-42d8-bfcf-95192131137e");
     private static final String COMMAND_PARAM = "command";
-    private static final String LOCAL_WEB_SERVER = "http://127.0.0.1:9090";
+    private static final String LOCAL_WEB_SERVER = "http://127.0.0.1:9190";
     private static final String LOCAL_ENDPOINT_PATH = "training";
     private static final String LOCAL_WEB_ENDPOINT = LOCAL_WEB_SERVER + "/" + LOCAL_ENDPOINT_PATH;
     private static final String TRAINING_MATERIALS_NO_INTENT = sysIndependent(

@@ -5,8 +5,10 @@ import com.hutoma.api.connectors.ServerTrackerInfo;
 
 import java.util.Map;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
-public class RnnServicesConnector extends BackendServicesConnector{
+@Singleton
+public class RnnServicesConnector extends BackendServicesConnector {
 
     private final QueueProcessor queueProcessor;
     private final ControllerConnector controllerConnector;
