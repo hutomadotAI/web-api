@@ -289,6 +289,28 @@ public class TestServerMetadata {
     }
 
     @Test
+    public void serverMetadata_OnlyServerIsPrimary() throws NoServerAvailableException {
+        ServerTracker server1 = makeServerTracker(1, 1);
+        Assert.assertTrue(this.test.isPrimaryMaster(server1.getSessionID()));
+    }
+
+    @Test
+    public void serverMetadata_FirstServerPrimary() throws NoServerAvailableException {
+        ServerTracker[] trackers = new ServerTracker[16];
+        for(int i=0; i<trackers.length; i++) {
+            trackers[i] = makeServerTracker(1, 1);
+            // all other servers are never the primary
+            if (i>0) {
+                Assert.assertFalse("" + i + "should not be master",
+                        this.test.isPrimaryMaster(trackers[i].getSessionID()));
+            }
+            // the first server is always the master
+            Assert.assertTrue("" + i + " should not have displaced master",
+                    this.test.isPrimaryMaster(trackers[0].getSessionID()));
+        }
+    }
+
+    @Test
     public void serverMetadata_TrainingRouteToMaster() throws NoServerAvailableException {
         ServerTracker server1 = makeServerTracker(0, 1);
         ServerTracker server2 = makeServerTracker(0, 1);
@@ -320,7 +342,7 @@ public class TestServerMetadata {
     private ServerTracker makeServerTracker(int trainingCapacity, int chatCapacity) {
         ServerTracker server = new FakeServerTracker(this.config, this.tools, this.logger);
         UUID uuid = server.trackServer(new ServerRegistration(
-                BackendServerType.WNET, "url1", trainingCapacity, chatCapacity));
+                BackendServerType.WNET, "url:" + server.getSessionID(), trainingCapacity, chatCapacity));
         this.test.addNewSession(uuid, server);
         return server;
     }

@@ -20,6 +20,7 @@ import com.hutoma.api.controllers.ControllerRnn;
 import com.hutoma.api.controllers.ControllerWnet;
 import com.hutoma.api.logging.AiServiceStatusLogger;
 import com.hutoma.api.logging.ILogger;
+import com.hutoma.api.logging.LogMap;
 
 import java.util.Arrays;
 import java.util.List;
@@ -128,10 +129,24 @@ public class AIServicesLogic {
             if (controller != null) {
                 // create a session and make it active
                 serverSessionID = controller.registerServer(registration);
+
+                // log registration data
+                LogMap logMap = LogMap.map("Op", "registerServer")
+                        .put("PrimaryMaster", controller.getPrimaryMasterIdentifier())
+                        .put("ServerType", registration.getServerType().value())
+                        .put("ServerIdentifier", controller.getSessionServerIdentifier(serverSessionID));
+
                 // if we are master then update all the hash codes from this reg-list
                 if (controller.isPrimaryMaster(serverSessionID)) {
                     controller.setAllHashCodes(registration.getAiList());
                     synchroniseStatuses(controller, registration);
+                    this.serviceStatusLogger.logInfo(LOGFROM,
+                            "registered primary master and synced db statuses and hash codes",
+                            logMap);
+                } else {
+                    this.serviceStatusLogger.logInfo(LOGFROM,
+                            "registered secondary server",
+                            logMap);
                 }
                 return new ApiServerAcknowledge(serverSessionID).setSuccessStatus("registered");
             } else {

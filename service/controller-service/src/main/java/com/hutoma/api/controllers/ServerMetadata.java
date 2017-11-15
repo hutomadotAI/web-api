@@ -9,6 +9,7 @@ import com.hutoma.api.logging.ILogger;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -27,14 +28,14 @@ import static java.util.stream.Collectors.toList;
 public class ServerMetadata {
 
     private static final String LOGFROM = "servermeta";
-    private final HashMap<UUID, ServerTracker> activeServerSessions;
+    private final LinkedHashMap<UUID, ServerTracker> activeServerSessions;
     private final HashMap<UUID, LinkedHashSet<ServerTracker>> serverAiAffinity;
     protected ILogger logger;
     private int roundRobinIndex;
 
     public ServerMetadata(final AiServiceStatusLogger logger) {
         this.logger = logger;
-        this.activeServerSessions = new HashMap<>();
+        this.activeServerSessions = new LinkedHashMap<>();
         this.serverAiAffinity = new HashMap<>();
         this.roundRobinIndex = 0;
     }
@@ -89,14 +90,31 @@ public class ServerMetadata {
      * @return t/f
      */
     public boolean isPrimaryMaster(UUID serverSessionID) {
+        Optional<ServerTracker> primary = getPrimaryMaster();
+        // is the current master what we just added?
+        return primary.isPresent()
+                && primary.get().getSessionID().equals(serverSessionID);
+    }
+
+    /***
+     * Get the server identifier for the current primary master
+     * for display and logging purposes
+     * @return
+     */
+    public String getPrimaryMasterIdentifier() {
+        Optional<ServerTracker> primary = getPrimaryMaster();
+        return primary.isPresent() ? primary.get().getServerIdentifier() : "";
+    }
+
+    /***
+     * Determine who is the primary master (if any)
+     * @return
+     */
+    private Optional<ServerTracker> getPrimaryMaster() {
         // lookup the current master server
-        Optional<ServerTracker> currentMaster = this.activeServerSessions.values().stream()
+        return this.activeServerSessions.values().stream()
                 .filter(ServerTracker::canTrain)
                 .findFirst();
-
-        // is the current master what we just added?
-        return currentMaster.isPresent()
-                && currentMaster.get().getSessionID().equals(serverSessionID);
     }
 
     /***
