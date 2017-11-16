@@ -213,7 +213,7 @@ public class TestChatBase {
         MemoryIntent mi = new MemoryIntent(intentName, AIID, CHATID, Collections.singletonList(mv));
 
         setupFakeChat(0.9d, MemoryIntentHandler.META_INTENT_TAG + intentName, 0.3d, "", 0.3d, "");
-        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any())).thenReturn(mi);
+        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), any())).thenReturn(mi);
         return mi;
     }
 
@@ -253,7 +253,7 @@ public class TestChatBase {
         MemoryIntent mi = new MemoryIntent(intentName, AIID, CHATID, variables);
 
         setupFakeChat(0.9d, MemoryIntentHandler.META_INTENT_TAG + intentName, 0.3d, "", 0.3d, "");
-        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any())).thenReturn(mi);
+        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), any())).thenReturn(mi);
         return mi;
     }
 

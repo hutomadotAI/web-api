@@ -1,16 +1,16 @@
 package com.hutoma.api.memory;
 
-import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Pair;
-import com.hutoma.api.connectors.db.DatabaseEntitiesIntents;
 import com.hutoma.api.connectors.db.Database;
+import com.hutoma.api.connectors.db.DatabaseEntitiesIntents;
 import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.ApiEntity;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.sub.IntentVariable;
 import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.containers.sub.MemoryVariable;
+import com.hutoma.api.logging.ILogger;
 import com.tngtech.java.junit.dataprovider.DataProvider;
 import com.tngtech.java.junit.dataprovider.DataProviderRunner;
 import com.tngtech.java.junit.dataprovider.UseDataProvider;
@@ -93,7 +93,7 @@ public class TestMemoryIntentHandler {
 
     @Test
     public void testRecognizeNoIntent() {
-        MemoryIntent mi = this.memoryIntentHandler.parseAiResponseForIntent(AIID, CHATID, "@this is not");
+        MemoryIntent mi = this.memoryIntentHandler.parseAiResponseForIntent(DEVID_UUID, AIID, CHATID, "@this is not");
         Assert.assertNull(mi);
     }
 
@@ -131,7 +131,7 @@ public class TestMemoryIntentHandler {
         when(this.fakeDatabaseEntities.getIntent(any(), anyString())).thenReturn(apiIntent);
         when(this.fakeDatabaseEntities.getMemoryIntent(anyString(), any(), any(), any())).thenReturn(null);
         when(this.fakeDatabaseEntities.getEntity(any(), anyString())).thenReturn(apiEntity);
-        MemoryIntent mi = this.memoryIntentHandler.parseAiResponseForIntent(AIID, CHATID, DEFAULT_INTENT);
+        MemoryIntent mi = this.memoryIntentHandler.parseAiResponseForIntent(DEVID_UUID, AIID, CHATID, DEFAULT_INTENT);
         Assert.assertNotNull(mi.getVariables());
         Assert.assertEquals(1, mi.getVariables().size());
         Assert.assertEquals(entityName, mi.getVariables().get(0).getName());
@@ -159,7 +159,7 @@ public class TestMemoryIntentHandler {
     public void testLoadIntentForAiDBException() throws DatabaseException {
         DatabaseException exception = new DatabaseException(new Throwable());
         when(this.fakeDatabaseEntities.getMemoryIntent(anyString(), any(), any(), any())).thenThrow(exception);
-        this.memoryIntentHandler.parseAiResponseForIntent(AIID, CHATID, DEFAULT_INTENT);
+        this.memoryIntentHandler.parseAiResponseForIntent(DEVID_UUID, AIID, CHATID, DEFAULT_INTENT);
         verify(this.fakeLogger).logException(anyString(), any());
     }
 
@@ -257,6 +257,6 @@ public class TestMemoryIntentHandler {
         MemoryIntent mi = new MemoryIntent(INTENT_NAME, AIID, CHATID,
                 Collections.singletonList(new MemoryVariable("name", Arrays.asList("a", "b", "c"))));
         when(this.fakeDatabaseEntities.getMemoryIntent(any(), any(), any(), any())).thenReturn(mi);
-        return this.memoryIntentHandler.parseAiResponseForIntent(AIID, CHATID, response);
+        return this.memoryIntentHandler.parseAiResponseForIntent(DEVID_UUID, AIID, CHATID, response);
     }
 }

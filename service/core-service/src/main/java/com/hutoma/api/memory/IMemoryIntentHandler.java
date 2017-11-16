@@ -16,7 +16,7 @@ public interface IMemoryIntentHandler {
      * @param response the AI response
      * @return the MemoryIntent, or null if no intent was found
      */
-    MemoryIntent parseAiResponseForIntent(UUID aiid, UUID chatId, String response);
+    MemoryIntent parseAiResponseForIntent(UUID devId, UUID aiid, UUID chatId, String response);
 
     /**
      * Gets the current intents state for this chat

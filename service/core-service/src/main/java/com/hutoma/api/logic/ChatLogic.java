@@ -325,7 +325,7 @@ public class ChatLogic {
                         // if we are taking WNET's reply then process intents
                         UUID aiidFromResult = result.getAiid();
                         MemoryIntent memoryIntent = this.intentHandler.parseAiResponseForIntent(
-                                aiidFromResult, chatUuid, result.getAnswer());
+                                devId, aiidFromResult, chatUuid, result.getAnswer());
                         if (memoryIntent != null // Intent was recognized
                                 && !memoryIntent.isFulfilled()) {
 
