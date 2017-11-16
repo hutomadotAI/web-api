@@ -402,7 +402,7 @@ public class AIIntegrationLogic {
                         record.getData(), FacebookIntegrationMetadata.class);
 
                 // delete customisations
-                removeCustomisationsFromFacebook(record, logMap);
+                removeCustomisationsFromFacebook(record, devid, logMap);
 
                 // try to unsubscribe
                 unsubscribeToFacebookPage(logMap, record, metadata);
@@ -417,9 +417,6 @@ public class AIIntegrationLogic {
         } catch (DatabaseException dbe) {
             this.logger.logUserExceptionEvent(LOGFROM, "error deleting facebook integration",
                     devid.toString(), dbe, logMap);
-        } catch (FacebookException fe) {
-            this.logger.logUserExceptionEvent(LOGFROM, "error deactivating facebook integration",
-                    devid.toString(), fe, logMap);
         }
     }
 
@@ -444,17 +441,27 @@ public class AIIntegrationLogic {
     /***
      * Switch off any Facebook customisations before we disconnect or delete
      * @param updatedRecord
-     * @throws FacebookException
+     * @param devid
      */
-    private void removeCustomisationsFromFacebook(final IntegrationRecord updatedRecord, final LogMap logMap)
-            throws FacebookException {
+    private void removeCustomisationsFromFacebook(final IntegrationRecord updatedRecord,
+                                                  final UUID devid, final LogMap logMap) {
         if ((updatedRecord != null) && (updatedRecord.isActive())) {
-            FacebookIntegrationMetadata metadata =
-                    (FacebookIntegrationMetadata) this.serializer.deserialize(
-                            updatedRecord.getData(), FacebookIntegrationMetadata.class);
-            customiseFacebookIntegration(updatedRecord.getIntegrationResource(), metadata.getPageToken(),
-                    null, null,
-                    logMap);
+            try {
+                FacebookIntegrationMetadata metadata =
+                        (FacebookIntegrationMetadata) this.serializer.deserialize(
+                                updatedRecord.getData(), FacebookIntegrationMetadata.class);
+                customiseFacebookIntegration(updatedRecord.getIntegrationResource(), metadata.getPageToken(),
+                        null, null,
+                        logMap);
+            } catch (FacebookException facebookException) {
+                // for unknown reasons we sometimes get an error from facebook
+                // OAuthException 100: (#100) You must set a Get Started button if you also wish to use persistent menu.
+                // when we are clearing the get started button
+                // even though we don't support a persistent menu
+                this.logger.logUserWarnEvent(LOGFROM,
+                        String.format("clear facebook customisations failed with %s", facebookException.getMessage()),
+                        devid.toString(), logMap);
+            }
         }
     }
 
@@ -487,32 +494,35 @@ public class AIIntegrationLogic {
                                  final FacebookIntegrationMetadata integrationMetadata)
             throws DatabaseException, FacebookException {
 
-        // switch off customisations
-        removeCustomisationsFromFacebook(integrationRecord, logMap);
+        try {
+            // switch off customisations
+            removeCustomisationsFromFacebook(integrationRecord, devid, logMap);
 
-        unsubscribeToFacebookPage(logMap, integrationRecord, integrationMetadata);
+            unsubscribeToFacebookPage(logMap, integrationRecord, integrationMetadata);
+            
+        } finally {
+            // clear the database record
+            this.databaseIntegrations.updateIntegrationRecord(aiid, devid, IntegrationType.FACEBOOK,
+                    (record) -> {
 
-        // clear the database record
-        this.databaseIntegrations.updateIntegrationRecord(aiid, devid, IntegrationType.FACEBOOK,
-                (record) -> {
+                        // load a record if we have one
+                        FacebookIntegrationMetadata metadata = null;
+                        if (record != null) {
+                            metadata = (FacebookIntegrationMetadata) this.serializer.deserialize(
+                                    record.getData(), FacebookIntegrationMetadata.class);
+                        }
+                        // create new metadata or load the old one
+                        metadata = (metadata == null) ? new FacebookIntegrationMetadata() : metadata;
 
-                    // load a record if we have one
-                    FacebookIntegrationMetadata metadata = null;
-                    if (record != null) {
-                        metadata = (FacebookIntegrationMetadata) this.serializer.deserialize(
-                                record.getData(), FacebookIntegrationMetadata.class);
-                    }
-                    // create new metadata or load the old one
-                    metadata = (metadata == null) ? new FacebookIntegrationMetadata() : metadata;
+                        // clear the accesstoken, username, token expiry, retaining other data
+                        metadata.connect("", "", null);
 
-                    // clear the accesstoken, username, token expiry, retaining other data
-                    metadata.connect("", "", null);
-
-                    // clear the integration resource, integrationUserid and status
-                    // and set active=false
-                    return new IntegrationRecord("", "",
-                            this.serializer.serialize(metadata), "", false);
-                });
+                        // clear the integration resource, integrationUserid and status
+                        // and set active=false
+                        return new IntegrationRecord("", "",
+                                this.serializer.serialize(metadata), "", false);
+                    });
+        }
 
         // log
         this.logger.logUserTraceEvent(LOGFROM, "facebook integration disconnected",
