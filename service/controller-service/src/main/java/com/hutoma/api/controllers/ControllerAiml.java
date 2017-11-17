@@ -17,10 +17,12 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /**
  * Created by David MG on 01/02/2017.
  */
+@Singleton
 public class ControllerAiml extends ControllerBase {
 
     @Inject
@@ -72,5 +74,9 @@ public class ControllerAiml extends ControllerBase {
             throws NoServerAvailableException {
         throw new NoServerAvailableException(
                 String.format("no AIML server registered to service AIML aiid %s", aiid.toString()));
+    }
+
+    @Override
+    public void kickQueue() {
     }
 }

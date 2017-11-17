@@ -111,6 +111,8 @@ public abstract class ControllerBase extends ServerMetadata {
      */
     public abstract boolean logErrorIfNoTrainingCapacity();
 
+    public abstract void kickQueue();
+
     protected ServerTracker createNewServerTracker() {
         return this.serviceLocator.getService(ServerTracker.class);
     }

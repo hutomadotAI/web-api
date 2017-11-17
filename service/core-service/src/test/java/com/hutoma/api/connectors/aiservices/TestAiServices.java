@@ -1,14 +1,14 @@
-package com.hutoma.api.connectors;
+package com.hutoma.api.connectors.aiservices;
 
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.TestDataHelper;
 import com.hutoma.api.common.Tools;
-import com.hutoma.api.connectors.aiservices.AIQueueServices;
-import com.hutoma.api.connectors.aiservices.AIServices;
-import com.hutoma.api.connectors.aiservices.ControllerConnector;
-import com.hutoma.api.connectors.aiservices.RnnServicesConnector;
-import com.hutoma.api.connectors.aiservices.WnetServicesConnector;
+import com.hutoma.api.connectors.BackendServerType;
+import com.hutoma.api.connectors.IServerEndpoint;
+import com.hutoma.api.connectors.NoServerAvailableException;
+import com.hutoma.api.connectors.RequestFor;
+import com.hutoma.api.connectors.ServerTrackerInfo;
 import com.hutoma.api.connectors.db.DatabaseAI;
 import com.hutoma.api.connectors.db.DatabaseEntitiesIntents;
 import com.hutoma.api.connectors.db.DatabaseException;
@@ -16,7 +16,6 @@ import com.hutoma.api.connectors.db.DatabaseUser;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.ApiResult;
-import com.hutoma.api.containers.sub.DevPlan;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logic.TestIntentLogic;
 import com.hutoma.api.memory.MemoryIntentHandler;
@@ -32,6 +31,8 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.Response;
@@ -50,8 +51,6 @@ public class TestAiServices {
     private static final UUID AIID = UUID.fromString("41c6e949-4733-42d8-bfcf-95192131137e");
     private static final String WNET_ENDPOINT = "http://wnet/endpoint1";
     private static final String RNN_ENDPOINT = "http://rnn/endpoint1";
-    private static final DevPlan DEVPLAN = new DevPlan(10, 1000, 5000, 120);
-    private static final String AI_ENGINE = "MOCKENGINE";
 
     private JsonSerializer fakeSerializer;
     private DatabaseAI fakeDatabaseAi;
@@ -65,7 +64,7 @@ public class TestAiServices {
     private WnetServicesConnector fakeWnetServicesConnector;
     private RnnServicesConnector fakeRnnServicesConnector;
 
-    private AIQueueServices fakeQueueServices;
+    private AiServicesQueue fakeQueueServices;
     private AIServices aiServices;
 
     public static String sysIndependent(String data) {
@@ -82,7 +81,7 @@ public class TestAiServices {
         this.fakeLogger = mock(ILogger.class);
         this.fakeTools = mock(Tools.class);
         this.fakeClient = mock(JerseyClient.class);
-        this.fakeQueueServices = mock(AIQueueServices.class);
+        this.fakeQueueServices = mock(AiServicesQueue.class);
         this.fakeControllerConnector = mock(ControllerConnector.class);
         this.fakeWnetServicesConnector = mock(WnetServicesConnector.class);
         this.fakeRnnServicesConnector = mock(RnnServicesConnector.class);
@@ -102,7 +101,7 @@ public class TestAiServices {
 
         this.aiServices = new AIServices(this.fakeDatabaseAi, this.fakeDatabaseEntitiesIntents, this.fakeLogger, this.fakeSerializer,
                 this.fakeTools, this.fakeClient, new TrackedThreadSubPool(threadPool), this.fakeQueueServices,
-                this.fakeControllerConnector, this.fakeWnetServicesConnector, this.fakeRnnServicesConnector);
+                this.fakeWnetServicesConnector, this.fakeRnnServicesConnector);
     }
 
     @Test
@@ -112,17 +111,22 @@ public class TestAiServices {
 
     @Test(expected = AIServices.AiServicesException.class)
     public void testDeleteDev_serverError() throws AIServices.AiServicesException, DatabaseException, NoServerAvailableException {
+        fakeBackendServicesRegistered();
         testCommand_serverError((a, b) -> this.aiServices.deleteDev(DEVID), HttpMethod.DELETE);
     }
 
     @Test(expected = AIServices.AiServicesException.class)
     public void testDeleteDev_response_noEntity() throws AIServices.AiServicesException, DatabaseException {
+        fakeBackendServicesRegistered();
         testCommand_response_noEntity((a, b) -> this.aiServices.deleteDev(DEVID), HttpMethod.DELETE);
     }
 
     @Test
-    public void testUploadTraining() throws AIServices.AiServicesException {
+    public void testUploadTraining() throws AIServices.AiServicesException, NoServerAvailableException {
         JerseyInvocation.Builder builder = getFakeBuilder();
+        IServerEndpoint endpoint = getFakeServerEndpoint();
+        when(this.fakeWnetServicesConnector.getBackendEndpoint(any(), any())).thenReturn(endpoint);
+        when(this.fakeRnnServicesConnector.getBackendEndpoint(any(), any())).thenReturn(endpoint);
         when(builder.post(any())).thenReturn(Response.ok(new ApiResult().setSuccessStatus()).build());
         this.aiServices.uploadTraining(null, DEVID, AIID, "training materials");
     }
@@ -227,6 +231,13 @@ public class TestAiServices {
         logicMethod.apply(DEVID, AIID);
     }
 
+    private void fakeBackendServicesRegistered() {
+        Map<String, ServerTrackerInfo> map = new HashMap<>();
+        map.put("key", new ServerTrackerInfo("url", "ident", 1, 1, true, true));
+        when(this.fakeWnetServicesConnector.getVerifiedEndpointMap()).thenReturn(map);
+        when(this.fakeRnnServicesConnector.getVerifiedEndpointMap()).thenReturn(map);
+    }
+
     private void testCommand_serverError(CheckedByConsumer<UUID, UUID> logicMethod, String verb)
             throws AIServices.AiServicesException, DatabaseException {
         JerseyInvocation.Builder builder = getFakeBuilder();
@@ -279,5 +290,19 @@ public class TestAiServices {
     @FunctionalInterface
     private interface CheckedByConsumer<T, U> {
         void apply(T t, U u) throws AIServices.AiServicesException;
+    }
+
+    static IServerEndpoint getFakeServerEndpoint() {
+        return new IServerEndpoint() {
+            @Override
+            public String getServerUrl() {
+                return "http://url.com";
+            }
+
+            @Override
+            public String getServerIdentifier() {
+                return "ident";
+            }
+        };
     }
 }

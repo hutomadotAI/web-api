@@ -40,13 +40,13 @@ public class ServerTracker implements Callable, IServerEndpoint {
     private final JsonSerializer jsonSerializer;
     private final ILogger logger;
     private final ThreadSubPool threadSubPool;
-    protected UUID serverSessionID;
-    protected AtomicBoolean endpointVerified;
-    protected ServerRegistration registration;
     private AtomicBoolean runFlag;
     private long lastValidHeartbeat = 0;
     private long lastHeartbeatAttempt = 0;
     private String serverIdentity = "(uninitialised)";
+    UUID serverSessionID;
+    AtomicBoolean endpointVerified;
+    private ServerRegistration registration;
 
     @Inject
     public ServerTracker(final ControllerConfig config, final Tools tools,
@@ -71,7 +71,7 @@ public class ServerTracker implements Callable, IServerEndpoint {
      * @return [0.0, 1.0] affinity divided by chat capacity,
      * or NaN if there is no chat capacity at all
      */
-    public double getChatLoadFactor() {
+    double getChatLoadFactor() {
         int chatCapacity = this.registration.getChatCapacity();
         if (chatCapacity < 1) {
             return Double.NaN;
@@ -176,7 +176,7 @@ public class ServerTracker implements Callable, IServerEndpoint {
      * @param registration registration data
      * @return a new session ID to represent this server
      */
-    public UUID trackServer(ServerRegistration registration) {
+    UUID trackServer(final ServerRegistration registration) {
         this.registration = registration;
         this.serverIdentity = String.format("%s@%s",
                 this.registration.getServerType().value(),
@@ -189,7 +189,7 @@ public class ServerTracker implements Callable, IServerEndpoint {
      * Flag the tracker to stop the heartbeat and terminate.
      * This causes the session to be dropped
      */
-    public void endServerSession() {
+    void endServerSession() {
         this.runFlag.set(false);
     }
 
@@ -197,6 +197,7 @@ public class ServerTracker implements Callable, IServerEndpoint {
      * The endpoint for this server
      * @return
      */
+    @Override
     public String getServerUrl() {
         return this.registration.getServerUrl();
     }
@@ -205,19 +206,20 @@ public class ServerTracker implements Callable, IServerEndpoint {
      * Uniquely identifies a server across sessions.
      * @return
      */
+    @Override
     public String getServerIdentifier() {
         return this.serverIdentity;
     }
 
-    public synchronized Set<UUID> getChatAffinity() {
+    synchronized Set<UUID> getChatAffinity() {
         return new HashSet<>(this.affinity);
     }
 
-    public synchronized void addChatAffinityEntry(UUID aiid) {
+    synchronized void addChatAffinityEntry(UUID aiid) {
         this.affinity.add(aiid);
     }
 
-    public synchronized void clearChatAffinity() {
+    synchronized void clearChatAffinity() {
         this.affinity.clear();
     }
 
@@ -251,7 +253,7 @@ public class ServerTracker implements Callable, IServerEndpoint {
         // entity to send with the post call
         private final Entity entity;
 
-        public HeartbeatThreadWrapper(final JerseyInvocation.Builder builder, final Entity entity) {
+        HeartbeatThreadWrapper(final JerseyInvocation.Builder builder, final Entity entity) {
             this.builder = builder;
             this.entity = entity;
         }

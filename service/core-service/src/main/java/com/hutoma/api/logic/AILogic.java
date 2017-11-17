@@ -20,6 +20,7 @@ import com.hutoma.api.containers.sub.Entity;
 import com.hutoma.api.containers.sub.WebHook;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
+import com.hutoma.api.validation.ParameterValidationException;
 import com.hutoma.api.validation.Validate;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -751,8 +752,8 @@ public class AILogic {
         // try to interpret the locale
         Locale locale;
         try {
-            locale = Validate.validateLocale("locale", importedBot.getLanguage());
-        } catch (Validate.ParameterValidationException e) {
+            locale = validate.validateLocale("locale", importedBot.getLanguage());
+        } catch (ParameterValidationException e) {
             // if the local is missing or badly formatted then use en-US
             locale = DEFAULT_LOCALE;
         }

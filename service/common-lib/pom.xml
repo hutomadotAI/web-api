@@ -161,6 +161,12 @@
         </dependency>
 
         <dependency>
+            <groupId>org.glassfish.jersey.media</groupId>
+            <artifactId>jersey-media-multipart</artifactId>
+            <version>${project.component.jersey.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>de.l3s.boilerpipe</groupId>
             <artifactId>boilerpipe</artifactId>
             <version>1.1.0</version>
@@ -197,11 +203,6 @@
             <version>3.7</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.glassfish.jersey.media</groupId>
-            <artifactId>jersey-media-multipart</artifactId>
-            <version>${project.component.jersey.version}</version>
-        </dependency>
 
         <!-- ********************************* Test-related ****************************************** -->
 

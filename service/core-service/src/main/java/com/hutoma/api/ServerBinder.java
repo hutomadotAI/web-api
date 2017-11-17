@@ -13,10 +13,9 @@ import com.hutoma.api.connectors.AnalyticsESConnector;
 import com.hutoma.api.connectors.EntityRecognizerService;
 import com.hutoma.api.connectors.FacebookConnector;
 import com.hutoma.api.connectors.WebHooks;
-import com.hutoma.api.connectors.aiservices.AIQueueServices;
 import com.hutoma.api.connectors.aiservices.AIServices;
-import com.hutoma.api.connectors.aiservices.ControllerConnector;
-import com.hutoma.api.connectors.aiservices.QueueProcessor;
+import com.hutoma.api.connectors.aiservices.AiServicesQueue;
+import com.hutoma.api.connectors.aiservices.AimlServicesConnector;
 import com.hutoma.api.connectors.aiservices.RnnServicesConnector;
 import com.hutoma.api.connectors.aiservices.WnetServicesConnector;
 import com.hutoma.api.connectors.chat.AIChatServices;
@@ -25,9 +24,11 @@ import com.hutoma.api.connectors.chat.ChatRnnConnector;
 import com.hutoma.api.connectors.chat.ChatWnetConnector;
 import com.hutoma.api.connectors.db.*;
 import com.hutoma.api.containers.facebook.FacebookMachineID;
+import com.hutoma.api.controllers.AIQueueServices;
 import com.hutoma.api.controllers.ControllerAiml;
 import com.hutoma.api.controllers.ControllerRnn;
 import com.hutoma.api.controllers.ControllerWnet;
+import com.hutoma.api.controllers.QueueProcessor;
 import com.hutoma.api.controllers.ServerTracker;
 import com.hutoma.api.logging.AiServiceStatusLogger;
 import com.hutoma.api.logging.CentralLogger;
@@ -86,8 +87,6 @@ public class ServerBinder extends AbstractBinder {
         bind(CentralLogger.class).to(ILogger.class).in(Singleton.class);
         // Chat requires specialized logging to support analytics
         bind(ChatLogger.class).to(ChatLogger.class).in(Singleton.class);
-        // AI Services Status specialized logger
-        bind(AiServiceStatusLogger.class).to(AiServiceStatusLogger.class).in(Singleton.class);
         // API Access specialized logger
         bind(AccessLogger.class).to(AccessLogger.class).in(Singleton.class);
 
@@ -140,9 +139,10 @@ public class ServerBinder extends AbstractBinder {
         bind(ChatRnnConnector.class).to(ChatRnnConnector.class);
         bind(ChatAimlConnector.class).to(ChatAimlConnector.class);
         bind(EntityRecognizerService.class).to(EntityRecognizerService.class);
-        bind(ControllerConnector.class).to(ControllerConnector.class);
         bind(WnetServicesConnector.class).to(WnetServicesConnector.class).in(Singleton.class);
         bind(RnnServicesConnector.class).to(RnnServicesConnector.class).in(Singleton.class);
+        bind(AimlServicesConnector.class).to(AimlServicesConnector.class);
+        bind(AiServicesQueue.class).to(AiServicesQueue.class);
 
         // UI
         bind(UILogic.class).to(UILogic.class);
@@ -161,5 +161,8 @@ public class ServerBinder extends AbstractBinder {
         bind(QueueProcessor.class).to(QueueProcessor.class);
         bind(AIServicesLogic.class).to(AIServicesLogic.class);
         bind(DatabaseAiStatusUpdates.class).to(DatabaseAiStatusUpdates.class);
+        bind(ControllerLogic.class).to(ControllerLogic.class);
+        // AI Services Status specialized logger
+        bind(AiServiceStatusLogger.class).to(AiServiceStatusLogger.class).in(Singleton.class);
     }
 }

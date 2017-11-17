@@ -32,7 +32,7 @@ public class TestParameterValidation {
             when(fakeValidation.validateUuid(anyString(), anyString())).thenReturn(UUID.fromString("41c6e949-4733-42d8-bfcf-95192131137e"));
             when(fakeValidation.validateAlphaNumPlusDashes(anyString(), anyString())).thenReturn("ainame");
             when(fakeValidation.validateOptionalDescription(anyString(), anyString())).thenReturn("aidesc");
-        } catch (Validate.ParameterValidationException e) {
+        } catch (ParameterValidationException e) {
             e.printStackTrace();
         }
         return fakeValidation;
@@ -66,279 +66,279 @@ public class TestParameterValidation {
     }
 
     @Test
-    public void testUUIDNormal() throws Validate.ParameterValidationException {
+    public void testUUIDNormal() throws ParameterValidationException {
         Assert.assertEquals(this.example, this.validation.validateUuid("uuid", "41c6e949-4733-42d8-bfcf-95192131137e"));
     }
 
     @Test
-    public void testUUIDUpper() throws Validate.ParameterValidationException {
+    public void testUUIDUpper() throws ParameterValidationException {
         Assert.assertEquals(this.example, this.validation.validateUuid("uuid", "41c6e949-4733-42d8-bfcf-95192131137e".toUpperCase()));
     }
 
     @Test
-    public void testUUIDPadded() throws Validate.ParameterValidationException {
+    public void testUUIDPadded() throws ParameterValidationException {
         Assert.assertEquals(this.example, this.validation.validateUuid("uuid", "            41c6e949-4733-42d8-bfcf-95192131137e "));
     }
 
-    @Test(expected = Validate.ParameterValidationException.class)
-    public void testUUIDBroken() throws Validate.ParameterValidationException {
+    @Test(expected = ParameterValidationException.class)
+    public void testUUIDBroken() throws ParameterValidationException {
         assertFailUuid(" 41c6e949-4733 -42d8-bfcf-95192131137e");
     }
 
-    @Test(expected = Validate.ParameterValidationException.class)
-    public void testUUIDShort() throws Validate.ParameterValidationException {
+    @Test(expected = ParameterValidationException.class)
+    public void testUUIDShort() throws ParameterValidationException {
         assertFailUuid("41c6e949-4733-42d8-bfcf-95192131137");
     }
 
     @Test
-    public void testDevidNormal() throws Validate.ParameterValidationException {
+    public void testDevidNormal() throws ParameterValidationException {
         String test = "DEMO24869e07-0d0f-4f37-b2fa-c8bf2b7130dd";
         Assert.assertEquals(test, this.validation.validateAlphaNumPlusDashes("devid", test));
     }
 
     @Test
-    public void testDevidTrim() throws Validate.ParameterValidationException {
+    public void testDevidTrim() throws ParameterValidationException {
         Assert.assertEquals("Test123", this.validation.validateAlphaNumPlusDashes("devid", " Test123 "));
     }
 
-    @Test(expected = Validate.ParameterValidationException.class)
-    public void testDevidSpace() throws Validate.ParameterValidationException {
+    @Test(expected = ParameterValidationException.class)
+    public void testDevidSpace() throws ParameterValidationException {
         assertFailDevid("test 123");
     }
 
-    @Test(expected = Validate.ParameterValidationException.class)
-    public void testDevidBrackets() throws Validate.ParameterValidationException {
+    @Test(expected = ParameterValidationException.class)
+    public void testDevidBrackets() throws ParameterValidationException {
         assertFailDevid("Test(not)");
     }
 
-    @Test(expected = Validate.ParameterValidationException.class)
-    public void testDevidEmpty() throws Validate.ParameterValidationException {
+    @Test(expected = ParameterValidationException.class)
+    public void testDevidEmpty() throws ParameterValidationException {
         assertFailDevid("");
     }
 
-    @Test(expected = Validate.ParameterValidationException.class)
-    public void testDevidNull() throws Validate.ParameterValidationException {
+    @Test(expected = ParameterValidationException.class)
+    public void testDevidNull() throws ParameterValidationException {
         assertFailDevid(null);
     }
 
     @Test
-    public void testAiDescNormal() throws Validate.ParameterValidationException {
+    public void testAiDescNormal() throws ParameterValidationException {
         String test = "123 tester !$%&().,";
         Assert.assertEquals(test, this.validation.validateOptionalDescription("desc", test));
     }
 
     @Test
-    public void testAiDescAllowEmpty() throws Validate.ParameterValidationException {
+    public void testAiDescAllowEmpty() throws ParameterValidationException {
         Assert.assertEquals("", this.validation.validateOptionalDescription("desc", ""));
         Assert.assertEquals("", this.validation.validateOptionalDescription("desc", "   \t"));
         Assert.assertEquals("", this.validation.validateOptionalDescription("desc", null));
     }
 
     @Test
-    public void testAiDescQuotes() throws Validate.ParameterValidationException {
+    public void testAiDescQuotes() throws ParameterValidationException {
         assertFailAiDesc("\'");
     }
 
     @Test
-    public void testAiDescDoubleQuotes() throws Validate.ParameterValidationException {
+    public void testAiDescDoubleQuotes() throws ParameterValidationException {
         assertFailAiDesc("\"");
     }
 
     @Test
-    public void testAiDescWavyBrackets() throws Validate.ParameterValidationException {
+    public void testAiDescWavyBrackets() throws ParameterValidationException {
         assertFailAiDesc("{");
     }
 
     @Test
-    public void testChatNormal() throws Validate.ParameterValidationException {
+    public void testChatNormal() throws ParameterValidationException {
         String test = "123 tester +- !$%().,_?";
         Assert.assertEquals(test, this.validation.validateRequiredSanitized("chat", test));
     }
 
     @Test
-    public void testChatSpaced() throws Validate.ParameterValidationException {
+    public void testChatSpaced() throws ParameterValidationException {
         Assert.assertEquals("123", this.validation.validateRequiredSanitized("chat", "    123    "));
     }
 
     @Test
-    public void testChatDisallowedCharacters() throws Validate.ParameterValidationException {
+    public void testChatDisallowedCharacters() throws ParameterValidationException {
         Assert.assertEquals("123", this.validation.validateRequiredSanitized("chat", "\t\n123\t"));
     }
 
-    @Test(expected = Validate.ParameterValidationException.class)
-    public void testChatEmpty() throws Validate.ParameterValidationException {
+    @Test(expected = ParameterValidationException.class)
+    public void testChatEmpty() throws ParameterValidationException {
         assertFailChat("");
         assertFailChat(null);
     }
 
-    @Test(expected = Validate.ParameterValidationException.class)
-    public void testChatNull() throws Validate.ParameterValidationException {
+    @Test(expected = ParameterValidationException.class)
+    public void testChatNull() throws ParameterValidationException {
         assertFailChat(null);
     }
 
     @Test
-    public void testHistoryEmpty() throws Validate.ParameterValidationException {
+    public void testHistoryEmpty() throws ParameterValidationException {
         Assert.assertEquals("", this.validation.validateOptionalSanitized(""));
         Assert.assertEquals("", this.validation.validateOptionalSanitized("   \t"));
         Assert.assertEquals("", this.validation.validateOptionalSanitized(null));
     }
 
     @Test
-    public void testTopicNormal() throws Validate.ParameterValidationException {
+    public void testTopicNormal() throws ParameterValidationException {
         String test = "123 tester +- !$%().,_?";
         Assert.assertEquals(test, this.validation.validateOptionalSanitizeRemoveAt("topic", test));
     }
 
     @Test
-    public void testTopicSpaced() throws Validate.ParameterValidationException {
+    public void testTopicSpaced() throws ParameterValidationException {
         Assert.assertEquals("123", this.validation.validateOptionalSanitizeRemoveAt("topic", "    123    "));
     }
 
-    @Test(expected = Validate.ParameterValidationException.class)
+    @Test(expected = ParameterValidationException.class)
     @UseDataProvider("dataProviderTopicDisallowedChars")
-    public void testTopicDisallowedCharacters(String chars) throws Validate.ParameterValidationException {
+    public void testTopicDisallowedCharacters(String chars) throws ParameterValidationException {
         assertFailTopic(chars);
     }
 
     @Test
-    public void testTopicEmpty() throws Validate.ParameterValidationException {
+    public void testTopicEmpty() throws ParameterValidationException {
         Assert.assertEquals("", this.validation.validateOptionalSanitizeRemoveAt("topic", ""));
         Assert.assertEquals("", this.validation.validateOptionalSanitizeRemoveAt("topic", "   \t"));
         Assert.assertEquals("", this.validation.validateOptionalSanitizeRemoveAt("topic", null));
     }
 
     @Test
-    public void testFloatNormal() throws Validate.ParameterValidationException {
+    public void testFloatNormal() throws ParameterValidationException {
         assertFloat(0.554f, "0.554");
     }
 
     @Test
-    public void testFloatLow() throws Validate.ParameterValidationException {
+    public void testFloatLow() throws ParameterValidationException {
         assertFloat(0.0f, "0");
     }
 
     @Test
-    public void testFloatHigh() throws Validate.ParameterValidationException {
+    public void testFloatHigh() throws ParameterValidationException {
         assertFloat(1.0f, "1");
     }
 
     @Test
-    public void testFloatEmpty() throws Validate.ParameterValidationException {
+    public void testFloatEmpty() throws ParameterValidationException {
         assertFloat(-1.0f, "");
         assertFloat(-1.0f, null);
     }
 
-    @Test(expected = Validate.ParameterValidationException.class)
-    public void testFloatSpacesFail() throws Validate.ParameterValidationException {
+    @Test(expected = ParameterValidationException.class)
+    public void testFloatSpacesFail() throws ParameterValidationException {
         assertFloatFail("   ");
     }
 
-    @Test(expected = Validate.ParameterValidationException.class)
-    public void testFloatEOLFail() throws Validate.ParameterValidationException {
+    @Test(expected = ParameterValidationException.class)
+    public void testFloatEOLFail() throws ParameterValidationException {
         assertFloatFail("\n");
     }
 
-    @Test(expected = Validate.ParameterValidationException.class)
-    public void testFloatFailText() throws Validate.ParameterValidationException {
+    @Test(expected = ParameterValidationException.class)
+    public void testFloatFailText() throws ParameterValidationException {
         assertFloatFail("t");
     }
 
-    @Test(expected = Validate.ParameterValidationException.class)
-    public void testFloatFailPunctuation() throws Validate.ParameterValidationException {
+    @Test(expected = ParameterValidationException.class)
+    public void testFloatFailPunctuation() throws ParameterValidationException {
         assertFloatFail("0:0");
     }
 
-    @Test(expected = Validate.ParameterValidationException.class)
-    public void testFloatFailOutOfRangeLow() throws Validate.ParameterValidationException {
+    @Test(expected = ParameterValidationException.class)
+    public void testFloatFailOutOfRangeLow() throws ParameterValidationException {
         assertFloatFail("-0.1");
     }
 
-    @Test(expected = Validate.ParameterValidationException.class)
-    public void testFloatFailOutOfRangeHigh() throws Validate.ParameterValidationException {
+    @Test(expected = ParameterValidationException.class)
+    public void testFloatFailOutOfRangeHigh() throws ParameterValidationException {
         assertFloatFail("31415926");
     }
 
     @Test
-    public void testFloatInternational() throws Validate.ParameterValidationException {
+    public void testFloatInternational() throws ParameterValidationException {
         assertFloat(0.22f, "0,22");
     }
 
     @Test
-    public void testLocaleLangCountry() throws Validate.ParameterValidationException {
-        Assert.assertEquals(new Locale("fr", "CA"), Validate.validateLocale("locale", "fr-CA"));
+    public void testLocaleLangCountry() throws ParameterValidationException {
+        Assert.assertEquals(new Locale("fr", "CA"), this.validation.validateLocale("locale", "fr-CA"));
     }
 
     @Test
-    public void testLocaleLang() throws Validate.ParameterValidationException {
-        Assert.assertEquals(new Locale("en"), Validate.validateLocale("locale", "en"));
+    public void testLocaleLang() throws ParameterValidationException {
+        Assert.assertEquals(new Locale("en"), this.validation.validateLocale("locale", "en"));
     }
 
-    @Test(expected = Validate.ParameterValidationException.class)
-    public void testLocaleInvalidFormat() throws Validate.ParameterValidationException {
-        Validate.validateLocale("locale", "notALocale");
+    @Test(expected = ParameterValidationException.class)
+    public void testLocaleInvalidFormat() throws ParameterValidationException {
+        this.validation.validateLocale("locale", "notALocale");
     }
 
-    @Test(expected = Validate.ParameterValidationException.class)
-    public void testLocaleInvalidLocale() throws Validate.ParameterValidationException {
-        Validate.validateLocale("locale", "xb-BX");
+    @Test(expected = ParameterValidationException.class)
+    public void testLocaleInvalidLocale() throws ParameterValidationException {
+        this.validation.validateLocale("locale", "xb-BX");
     }
 
-    @Test(expected = Validate.ParameterValidationException.class)
-    public void testLocaleEmpty() throws Validate.ParameterValidationException {
-        Validate.validateLocale("locale", "");
+    @Test(expected = ParameterValidationException.class)
+    public void testLocaleEmpty() throws ParameterValidationException {
+        this.validation.validateLocale("locale", "");
     }
 
-    @Test(expected = Validate.ParameterValidationException.class)
-    public void testLocaleNull() throws Validate.ParameterValidationException {
-        Validate.validateLocale("locale", null);
+    @Test(expected = ParameterValidationException.class)
+    public void testLocaleNull() throws ParameterValidationException {
+        this.validation.validateLocale("locale", null);
     }
 
     @Test
     @UseDataProvider("dataProviderTimezones")
-    public void validateTimezoneString(final String tz) throws Validate.ParameterValidationException {
+    public void validateTimezoneString(final String tz) throws ParameterValidationException {
         Assert.assertEquals(tz, this.validation.validateTimezoneString("tz", tz));
     }
 
-    @Test(expected = Validate.ParameterValidationException.class)
-    public void validateTimezoneInvalid() throws Validate.ParameterValidationException {
+    @Test(expected = ParameterValidationException.class)
+    public void validateTimezoneInvalid() throws ParameterValidationException {
         this.validation.validateTimezoneString("tz", "Nowhere/MiddleOf");
     }
 
-    @Test(expected = Validate.ParameterValidationException.class)
-    public void validateTimezoneNull() throws Validate.ParameterValidationException {
+    @Test(expected = ParameterValidationException.class)
+    public void validateTimezoneNull() throws ParameterValidationException {
         this.validation.validateTimezoneString("tz", null);
     }
 
-    @Test(expected = Validate.ParameterValidationException.class)
-    public void validateTimezoneEmpty() throws Validate.ParameterValidationException {
+    @Test(expected = ParameterValidationException.class)
+    public void validateTimezoneEmpty() throws ParameterValidationException {
         this.validation.validateTimezoneString("tz", "");
     }
 
-    private void assertFailUuid(String param) throws Validate.ParameterValidationException {
+    private void assertFailUuid(String param) throws ParameterValidationException {
         this.validation.validateUuid("uuid", param);
     }
 
-    private void assertFailDevid(String param) throws Validate.ParameterValidationException {
+    private void assertFailDevid(String param) throws ParameterValidationException {
         this.validation.validateAlphaNumPlusDashes("devid", param);
     }
 
-    private void assertFailAiDesc(String param) throws Validate.ParameterValidationException {
+    private void assertFailAiDesc(String param) throws ParameterValidationException {
         this.validation.validateOptionalDescription("desc", param);
     }
 
-    private void assertFailChat(String param) throws Validate.ParameterValidationException {
+    private void assertFailChat(String param) throws ParameterValidationException {
         this.validation.validateRequiredSanitized("chat", param);
     }
 
-    private void assertFailTopic(String param) throws Validate.ParameterValidationException {
+    private void assertFailTopic(String param) throws ParameterValidationException {
         this.validation.validateOptionalSanitizeRemoveAt("topic", param);
     }
 
-    private void assertFloatFail(String actual) throws Validate.ParameterValidationException {
+    private void assertFloatFail(String actual) throws ParameterValidationException {
         this.validation.validateOptionalFloat("float", 0.0f, 1.0f, -1.0f, actual);
     }
 
-    private void assertFloat(float expected, String actual) throws Validate.ParameterValidationException {
+    private void assertFloat(float expected, String actual) throws ParameterValidationException {
         Assert.assertEquals(expected, this.validation.validateOptionalFloat("float", 0.0f, 1.0f, -1.0f, actual), 0.01f);
     }
 }

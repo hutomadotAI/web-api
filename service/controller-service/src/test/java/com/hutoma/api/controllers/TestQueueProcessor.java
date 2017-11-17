@@ -1,12 +1,12 @@
-package com.hutoma.api.connectors;
+package com.hutoma.api.controllers;
 
 import com.hutoma.api.common.ControllerConfig;
 import com.hutoma.api.common.FakeTimerTools;
 import com.hutoma.api.common.Pair;
 import com.hutoma.api.common.Tools;
-import com.hutoma.api.connectors.aiservices.AIQueueServices;
-import com.hutoma.api.connectors.aiservices.BackendServicesConnector;
-import com.hutoma.api.connectors.aiservices.QueueProcessor;
+import com.hutoma.api.connectors.BackendEngineStatus;
+import com.hutoma.api.connectors.BackendServerType;
+import com.hutoma.api.connectors.QueueAction;
 import com.hutoma.api.connectors.db.DatabaseAiStatusUpdates;
 import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.sub.ServerEndpointTrainingSlots;
@@ -36,13 +36,13 @@ public class TestQueueProcessor {
     private static final String ENDPOINT4 = "e4";
 
     QueueProcessorTest qproc;
-    BackendServicesConnector fakeController;
+    ControllerBase fakeController;
     DatabaseAiStatusUpdates fakeDatabase;
     AIQueueServices fakeQueueServices;
     ControllerConfig fakeConfig;
     Tools fakeTools;
 
-    Pair<ArrayList<ServerEndpointTrainingSlots>, HashMap<String, ServerTrackerInfo>> fakeData;
+    Pair<ArrayList<ServerEndpointTrainingSlots>, HashMap<String, ServerTracker>> fakeData;
 
     @Test
     public void testQueue_RoundRobinAllocation() throws DatabaseException {
@@ -130,7 +130,7 @@ public class TestQueueProcessor {
         this.fakeConfig = mock(ControllerConfig.class);
         when(this.fakeConfig.getProcessQueueDelayRecoveryForFirstSeconds()).thenReturn(1);
 
-        this.fakeController = mock(BackendServicesConnector.class);
+        this.fakeController = mock(ControllerBase.class);
         this.fakeDatabase = mock(DatabaseAiStatusUpdates.class);
         this.fakeQueueServices = mock(AIQueueServices.class);
         this.fakeTools = new FakeTimerTools();
@@ -151,12 +151,12 @@ public class TestQueueProcessor {
         when(this.fakeDatabase.queueTakeNext(any())).thenReturn(fakeStatus);
     }
 
-    private Pair<ArrayList<ServerEndpointTrainingSlots>, HashMap<String, ServerTrackerInfo>> create(
-            Pair<ArrayList<ServerEndpointTrainingSlots>, HashMap<String, ServerTrackerInfo>> current,
+    private Pair<ArrayList<ServerEndpointTrainingSlots>, HashMap<String, ServerTracker>> create(
+            Pair<ArrayList<ServerEndpointTrainingSlots>, HashMap<String, ServerTracker>> current,
             String name, int usedSlots, int totalSlots, int interruptedSlots, boolean verified) {
         ArrayList<ServerEndpointTrainingSlots> slots = (current == null) ? new ArrayList<>() : current.getA();
-        HashMap<String, ServerTrackerInfo> servers = (current == null) ? new HashMap<>() : current.getB();
-        Pair<ServerEndpointTrainingSlots, ServerTrackerInfo> appended =
+        HashMap<String, ServerTracker> servers = (current == null) ? new HashMap<>() : current.getB();
+        Pair<ServerEndpointTrainingSlots, ServerTracker> appended =
                 createSlots(name, usedSlots, totalSlots, interruptedSlots, verified);
         slots.add(appended.getA());
         servers.put(appended.getB().getServerIdentifier(), appended.getB());
@@ -165,9 +165,9 @@ public class TestQueueProcessor {
                 current;
     }
 
-    private Pair<ServerEndpointTrainingSlots, ServerTrackerInfo> createSlots(String name, int usedSlots, int totalSlots, int interruptedSlots, boolean verified) {
+    private Pair<ServerEndpointTrainingSlots, ServerTracker> createSlots(String name, int usedSlots, int totalSlots, int interruptedSlots, boolean verified) {
         ServerEndpointTrainingSlots slots = new ServerEndpointTrainingSlots(name, usedSlots, interruptedSlots);
-        ServerTrackerInfo tracker = mock(ServerTrackerInfo.class);
+        ServerTracker tracker = mock(ServerTracker.class);
         when(tracker.canTrain()).thenReturn(true);
         when(tracker.isEndpointVerified()).thenReturn(verified);
         when(tracker.getServerIdentifier()).thenReturn(name);
@@ -186,18 +186,18 @@ public class TestQueueProcessor {
         }
 
         @Override
-        public void initialise(final BackendServicesConnector controller, final BackendServerType serverType) {
+        public void initialise(final ControllerBase controller, final BackendServerType serverType) {
             this.controller = controller;
             this.serverType = serverType;
         }
 
         @Override
-        protected void unqueueDelete(final BackendEngineStatus queued, final ServerTrackerInfo server) {
+        protected void unqueueDelete(final BackendEngineStatus queued, final ServerTracker server) {
             this.chosenServer = server.getServerIdentifier();
         }
 
         @Override
-        protected void unqueueTrain(final BackendEngineStatus queued, final ServerTrackerInfo server) {
+        protected void unqueueTrain(final BackendEngineStatus queued, final ServerTracker server) {
             this.chosenServer = server.getServerIdentifier();
         }
 

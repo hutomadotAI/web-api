@@ -141,6 +141,14 @@ public class CentralLogger implements ILogger {
      */
     @Override
     public void logException(String fromLabel, final Exception ex) {
+        logException(fromLabel, ex, null);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void logException(String fromLabel, final Exception ex, final LogMap properties) {
         StringBuilder sb = new StringBuilder();
         sb.append(ex.getMessage());
         if (ex.getSuppressed() != null) {
@@ -154,7 +162,7 @@ public class CentralLogger implements ILogger {
             sb.append("]");
         }
 
-        logUserExceptionEvent(fromLabel, sb.toString(), null, ex, null);
+        logUserExceptionEvent(fromLabel, sb.toString(), null, ex, properties);
     }
 
     /**

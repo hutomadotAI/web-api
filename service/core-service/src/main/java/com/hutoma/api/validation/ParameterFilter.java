@@ -9,10 +9,7 @@ import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.facebook.FacebookConnect;
 import com.hutoma.api.containers.facebook.FacebookNotification;
 import com.hutoma.api.containers.sub.AiBot;
-import com.hutoma.api.containers.sub.AiStatus;
 import com.hutoma.api.containers.sub.ChatHandoverTarget;
-import com.hutoma.api.containers.sub.ServerAffinity;
-import com.hutoma.api.containers.sub.ServerRegistration;
 import com.hutoma.api.logging.ILogger;
 
 import java.util.List;
@@ -24,35 +21,29 @@ import javax.ws.rs.container.ContainerRequestContext;
 public class ParameterFilter extends Validate {
 
     // parameter names
-    protected static final String AIID = "aiid";
-    protected static final String DEVID = "_developer_id";
-    protected static final String AICONFIDENCE = "confidence";
-    protected static final String TIMEZONE = "timezone";
-    protected static final String LOCALE = "locale";
-    protected static final String CHATID = "chatId";
-    protected static final String CHATQUESTION = "q";
-    protected static final String AIDESC = "description";
-    protected static final String AINAME = "name";
-    protected static final String MINP = "confidence_threshold";
-    protected static final String ENTITYNAME = "entity_name";
-    protected static final String INTENTNAME = "intent_name";
-    protected static final String ENTITYVALUE = "entity_value";
-    protected static final String INTENT_PROMPTLIST = "intent_prompts";
-    protected static final String INTENT_USERSAYS = "intent_usersays";
-    protected static final String INTENT_RESPONSES = "intent_responses";
-    protected static final String INTENT_VAR_VALUE = "intent_variable_value";
-    protected static final String INTENT_VAR_LABEL = "intent_variable_label";
-    protected static final String TRAINING_SOURCE_TYPE = "source_type";
-    protected static final String SERVER_TYPE = "server_type";
-    protected static final String AI_LIST = "ai_list";
-    protected static final String SERVER_SESSION_ID = "server_session_id";
-    protected static final String SERVER_URL = "server_url";
-    protected static final String FACEBOOK_CONNECT = "facebook_connect";
-    protected static final String ANALYTICS_RESPONSE_FORMAT = "format";
-    protected static final String DEFAULT_CHAT_RESPONSES = "default_chat_responses";
-    protected static final String PUBLISHING_TYPE = "publishing_type";
-    protected static final String BOT_ID_LIST = "bot_list";
-    protected static final String CHAT_HANDOVER_TARGET = "target";
+    static final String AICONFIDENCE = "confidence";
+    static final String TIMEZONE = "timezone";
+    static final String LOCALE = "locale";
+    static final String CHATID = "chatId";
+    static final String CHATQUESTION = "q";
+    static final String AIDESC = "description";
+    static final String AINAME = "name";
+    static final String MINP = "confidence_threshold";
+    static final String ENTITYNAME = "entity_name";
+    static final String INTENTNAME = "intent_name";
+    static final String ENTITYVALUE = "entity_value";
+    static final String INTENT_PROMPTLIST = "intent_prompts";
+    static final String INTENT_USERSAYS = "intent_usersays";
+    static final String INTENT_RESPONSES = "intent_responses";
+    static final String INTENT_VAR_VALUE = "intent_variable_value";
+    static final String INTENT_VAR_LABEL = "intent_variable_label";
+    static final String TRAINING_SOURCE_TYPE = "source_type";
+    static final String FACEBOOK_CONNECT = "facebook_connect";
+    static final String ANALYTICS_RESPONSE_FORMAT = "format";
+    static final String DEFAULT_CHAT_RESPONSES = "default_chat_responses";
+    static final String PUBLISHING_TYPE = "publishing_type";
+    static final String BOT_ID_LIST = "bot_list";
+    static final String CHAT_HANDOVER_TARGET = "target";
 
     private static final String DEVID_HEADER_KEY = "_developer_id";
 
@@ -94,10 +85,6 @@ public class ParameterFilter extends Validate {
         return (String) requestContext.getProperty(APIParameter.AIDescription.toString());
     }
 
-    public static float getMinP(final ContainerRequestContext requestContext) {
-        return (Float) requestContext.getProperty(APIParameter.Min_P.toString());
-    }
-
     public static String getEntityName(final ContainerRequestContext requestContext) {
         return (String) requestContext.getProperty(APIParameter.EntityName.toString());
     }
@@ -124,18 +111,6 @@ public class ParameterFilter extends Validate {
 
     public static Float getAiConfidence(final ContainerRequestContext requestContext) {
         return (Float) requestContext.getProperty(APIParameter.AiConfidence.toString());
-    }
-
-    public static AiStatus getAiStatus(final ContainerRequestContext requestContext) {
-        return (AiStatus) requestContext.getProperty(APIParameter.AiStatusJson.toString());
-    }
-
-    public static ServerRegistration getServerRegistration(final ContainerRequestContext requestContext) {
-        return (ServerRegistration) requestContext.getProperty(APIParameter.ServerRegistration.toString());
-    }
-
-    public static ServerAffinity getServerAffinity(final ContainerRequestContext requestContext) {
-        return (ServerAffinity) requestContext.getProperty(APIParameter.ServerAffinity.toString());
     }
 
     public static FacebookConnect getFacebookConnect(final ContainerRequestContext requestContext) {
@@ -172,31 +147,12 @@ public class ParameterFilter extends Validate {
         return (ChatHandoverTarget) requestContext.getProperty(APIParameter.ChatHandoverTarget.toString());
     }
 
-    /***
-     * Avoids null pointers when the list is null or empty
-     * @param list
-     * @return empty string or the first string in the list if available
-     */
-    protected String getFirst(final List<String> list) {
-        return ((null == list) || (list.isEmpty())) ? "" : list.get(0);
-    }
-
-    /***
-     * Gets the first parameter value, or a default value if there is none
-     * @param list
-     * @param defaultValue
-     * @return
-     */
-    protected String getFirstOrDefault(final List<String> list, final String defaultValue) {
-        return ((null == list) || (list.isEmpty())) ? defaultValue : list.get(0);
-    }
-
     /**
      * Gets the developer id (if any) from the headers in the request context.
      * @param requestContext the request context
      * @return the developer id for the request (if any)
      */
-    protected String getDeveloperId(final ContainerRequestContext requestContext) {
+    String getDeveloperId(final ContainerRequestContext requestContext) {
         if (!requestContext.getHeaders().containsKey(DEVID_HEADER_KEY)) {
             return "";
         }

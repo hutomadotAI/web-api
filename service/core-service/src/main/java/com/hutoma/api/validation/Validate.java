@@ -1,7 +1,6 @@
 package com.hutoma.api.validation;
 
 import com.hutoma.api.common.Tools;
-import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.sub.AiBot;
 import com.hutoma.api.logic.TrainingLogic;
 
@@ -11,7 +10,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
-import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
@@ -19,7 +17,7 @@ import javax.inject.Inject;
 /**
  * Created by David MG on 06/09/2016.
  */
-public class Validate {
+public class Validate extends ValidationBase {
 
 
     private static final Pattern alphaNumericDashes = Pattern.compile("^[a-zA-Z0-9_-]+$");
@@ -28,8 +26,7 @@ public class Validate {
             Pattern.compile("^[\\x20-\\x7E]+$");
     private static final Pattern printableAsciiNoAt =
             Pattern.compile("^[\\x20-\\x3f\\x41-\\x7E]+$");
-    private static final Pattern uuidPattern =
-            Pattern.compile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
+
     private static final Pattern floatPattern = Pattern.compile("^[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?$");
     private static final Pattern alphaNumDashesSomePunctuationAndSpace = Pattern.compile("^[a-zA-Z0-9_\\.\\,\\- ]+$");
     private static final Pattern aiName = Pattern.compile("^[a-zA-Z0-9\\-_\\s]+$");
@@ -38,21 +35,11 @@ public class Validate {
     public Validate() {
     }
 
-    public static ApiError getValidationBadRequest(final Validate.ParameterValidationException pve) {
-        String paramName = pve.getParameterName();
-        String message = pve.getMessage();
-        return ApiError.getBadRequest(String.format("%s%s%s",
-                (paramName == null) ? "" : paramName,
-                (paramName == null || message == null) ? "" : ": ",
-                (message == null) ? "" : message),
-                null);
-    }
-
     public static boolean isAnyNullOrEmpty(final String... params) {
         return Arrays.stream(params).anyMatch(s -> s == null || s.isEmpty());
     }
 
-    public static Locale validateLocale(final String paramName, final String param)
+    public Locale validateLocale(final String paramName, final String param)
             throws ParameterValidationException {
         if (param == null || param.isEmpty()) {
             throw new ParameterValidationException("parameter null or empty", paramName);
@@ -64,7 +51,7 @@ public class Validate {
         return Locale.forLanguageTag(param);
     }
 
-    static AiBot.PublishingType validatePublishingType(final String param)
+    AiBot.PublishingType validatePublishingType(final String param)
             throws ParameterValidationException {
         if (param == null || param.isEmpty()) {
             throw new ParameterValidationException("parameter null or empty", ParameterFilter.PUBLISHING_TYPE);
@@ -119,29 +106,13 @@ public class Validate {
     }
 
     /***
-     * Throw a validation exception if the string is too long
-     * @param maxLength
-     * @param paramName
-     * @param param
-     * @return
-     * @throws ParameterValidationException
-     */
-    public String validateFieldLength(final int maxLength, final String paramName, final String param)
-            throws ParameterValidationException {
-        if ((null != param) && param.length() > maxLength) {
-            throw new ParameterValidationException("parameter too long", paramName);
-        }
-        return param;
-    }
-
-    /***
      * For each string in the list, filter control characters and coalesce spaces
      * @param paramList list of strings
      * @return new list of strings
      */
-    public List<String> filterControlCoalesceSpacesInList(List<String> paramList) {
+    List<String> filterControlCoalesceSpacesInList(List<String> paramList) {
         return paramList.stream()
-                .map(x -> filterControlAndCoalesceSpaces(x))
+                .map(x -> this.filterControlAndCoalesceSpaces(x))
                 .collect(Collectors.toList());
     }
 
@@ -152,7 +123,7 @@ public class Validate {
      * @return deduped list
      * @throws ParameterValidationException
      */
-    public List<String> dedupeAndEnsureNonEmptyList(List<String> paramList, String paramName)
+    List<String> dedupeAndEnsureNonEmptyList(List<String> paramList, String paramName)
             throws ParameterValidationException {
         List<String> distinct = paramList.stream()
                 .distinct()
@@ -163,29 +134,6 @@ public class Validate {
                     String.format("at least one %s required", paramName), paramName);
         }
         return distinct;
-    }
-
-    /***
-     * Validates a parameter against a pattern
-     * @param pattern the static pattern to match to
-     * @param paramName the name of the param, to use in the exception message
-     * @param param the param value
-     * @return trimmed parameter
-     * @throws ParameterValidationException if the parameter is empty, null or invalid
-     */
-    private String validatePattern(final Pattern pattern, final String paramName, final String param)
-            throws ParameterValidationException {
-        if (null == param) {
-            throw new ParameterValidationException("parameter cannot be null", paramName);
-        }
-        final String result = param.trim();
-        if (result.isEmpty()) {
-            throw new ParameterValidationException("parameter cannot be empty", paramName);
-        }
-        if (!pattern.matcher(result).matches()) {
-            throw new ParameterValidationException("invalid characters found", paramName);
-        }
-        return result;
     }
 
     /***
@@ -231,19 +179,6 @@ public class Validate {
             }
         }
         return new ArrayList<>(results);
-    }
-
-    public static class ParameterValidationException extends Exception {
-        private final String paramName;
-
-        public ParameterValidationException(final String message, final String paramName) {
-            super(message);
-            this.paramName = paramName;
-        }
-
-        public String getParameterName() {
-            return this.paramName;
-        }
     }
 
     /***
@@ -368,14 +303,7 @@ public class Validate {
         return param;
     }
 
-    UUID validateUuid(final String paramName, final String param) throws ParameterValidationException {
-        final String result = validatePattern(uuidPattern, paramName, param);
-        try {
-            return UUID.fromString(result);
-        } catch (final IllegalArgumentException iae) {
-            throw new ParameterValidationException("invalid characters found", paramName);
-        }
-    }
+
 
     String validateAlphaNumPlusDashes(final String paramName, final String param) throws ParameterValidationException {
         return validatePattern(alphaNumericDashes, paramName, param);

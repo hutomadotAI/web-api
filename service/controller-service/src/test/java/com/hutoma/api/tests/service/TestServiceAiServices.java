@@ -241,7 +241,6 @@ public class TestServiceAiServices extends ServiceTestBase {
     private Response sendRequest(final String path, final String statusJson) {
         return target(path)
                 .request()
-                .headers(defaultHeaders)
                 .post(Entity.json(statusJson));
     }
 

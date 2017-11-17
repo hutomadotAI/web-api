@@ -54,54 +54,54 @@ public class QueryFilter extends ParameterFilter implements ContainerRequestFilt
 
             // developer ID is always validated
             requestContext.setProperty(APIParameter.DevID.toString(),
-                    this.validateAlphaNumPlusDashes(DEVID, requestContext.getHeaderString(DEVID)));
+                    validateAlphaNumPlusDashes(DEVID, requestContext.getHeaderString(DEVID)));
 
             // extract each parameter as necessary,
             // validate and put the result into a property in the requestcontext
             if (checkList.contains(APIParameter.AIID)) {
                 requestContext.setProperty(APIParameter.AIID.toString(),
-                        this.validateUuid(AIID, getFirst(pathParameters.get(AIID))));
+                        validateUuid(AIID, getFirst(pathParameters.get(AIID))));
             }
 
             if (checkList.contains(APIParameter.ChatID)) {
                 final String chatId = getFirstOrDefault(queryParameters.get(CHATID), "");
                 requestContext.setProperty(APIParameter.ChatID.toString(),
-                        this.validateAlphaNumPlusDashes(CHATID,
+                        validateAlphaNumPlusDashes(CHATID,
                                 chatId.isEmpty()
                                         ? this.tools.createNewRandomUUID().toString()
-                                        : this.validateAlphaNumPlusDashes(CHATID, chatId)));
+                                        : validateAlphaNumPlusDashes(CHATID, chatId)));
             }
             if (checkList.contains(APIParameter.EntityName)) {
                 requestContext.setProperty(APIParameter.EntityName.toString(),
-                        this.validateFieldLength(250, ENTITYNAME,
-                                this.validateAlphaNumPlusDashes(ENTITYNAME,
+                        validateFieldLength(250, ENTITYNAME,
+                                validateAlphaNumPlusDashes(ENTITYNAME,
                                         getFirst(queryParameters.get(ENTITYNAME)))));
             }
             if (checkList.contains(APIParameter.IntentName)) {
                 requestContext.setProperty(APIParameter.IntentName.toString(),
-                        this.validateFieldLength(250, INTENTNAME,
-                                this.validateAlphaNumPlusDashes(INTENTNAME,
+                        validateFieldLength(250, INTENTNAME,
+                                validateAlphaNumPlusDashes(INTENTNAME,
                                         getFirst(queryParameters.get(INTENTNAME)))));
             }
             if (checkList.contains(APIParameter.ChatQuestion)) {
                 requestContext.setProperty(APIParameter.ChatQuestion.toString(),
-                        this.validateFieldLength(1024, "question",
-                                this.validateRequiredSanitized("question",
+                        validateFieldLength(1024, "question",
+                                validateRequiredSanitized("question",
                                         getFirst(queryParameters.get(CHATQUESTION)))));
             }
             if (checkList.contains(APIParameter.AIName)) {
                 requestContext.setProperty(APIParameter.AIName.toString(),
-                        this.validateFieldLength(250, AINAME,
-                                this.validateAiName(AINAME, getFirst(queryParameters.get(AINAME)))));
+                        validateFieldLength(250, AINAME,
+                                validateAiName(AINAME, getFirst(queryParameters.get(AINAME)))));
             }
             if (checkList.contains(APIParameter.AIDescription)) {
                 requestContext.setProperty(APIParameter.AIDescription.toString(),
-                        this.validateFieldLength(250, AIDESC,
-                                this.validateOptionalDescription(AIDESC, getFirst(queryParameters.get(AIDESC)))));
+                        validateFieldLength(250, AIDESC,
+                                validateOptionalDescription(AIDESC, getFirst(queryParameters.get(AIDESC)))));
             }
             if (checkList.contains(APIParameter.Min_P)) {
                 requestContext.setProperty(APIParameter.Min_P.toString(),
-                        this.validateOptionalFloat(MINP, 0.0f, 1.0f, 0.0f, getFirst(queryParameters.get(MINP))));
+                        validateOptionalFloat(MINP, 0.0f, 1.0f, 0.0f, getFirst(queryParameters.get(MINP))));
             }
             if (checkList.contains(APIParameter.TrainingSourceType)) {
                 requestContext.setProperty(APIParameter.TrainingSourceType.toString(),
@@ -120,7 +120,7 @@ public class QueryFilter extends ParameterFilter implements ContainerRequestFilt
 
             if (checkList.contains(APIParameter.BotIdList)) {
                 requestContext.setProperty(APIParameter.BotIdList.toString(),
-                        this.validateIntegerList(APIParameter.BotIdList.toString(), queryParameters.get(BOT_ID_LIST)));
+                        validateIntegerList(APIParameter.BotIdList.toString(), queryParameters.get(BOT_ID_LIST)));
             }
 
             if (checkList.contains(APIParameter.ChatHandoverTarget)) {

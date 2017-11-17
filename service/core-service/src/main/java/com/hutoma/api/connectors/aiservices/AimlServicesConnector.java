@@ -9,20 +9,17 @@ import com.hutoma.api.logging.ILogger;
 import org.glassfish.jersey.client.JerseyClient;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
-@Singleton
-public class WnetServicesConnector extends ControllerConnector {
-
+public class AimlServicesConnector extends ControllerConnector {
 
     @Inject
-    public WnetServicesConnector(final Config config, final JsonSerializer serializer, final JerseyClient jerseyClient,
+    public AimlServicesConnector(final Config config, final JsonSerializer serializer, final JerseyClient jerseyClient,
                                 final ILogger logger, final Tools tools) {
         super(config, serializer, jerseyClient, logger, tools);
     }
 
     @Override
     public BackendServerType getServerType() {
-        return BackendServerType.WNET;
+        return BackendServerType.AIML;
     }
 }

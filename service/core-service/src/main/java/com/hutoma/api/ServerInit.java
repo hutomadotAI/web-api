@@ -26,6 +26,7 @@ public class ServerInit implements ApplicationEventListener {
     private static final String LOGFROM = "serverinit";
     @Inject
     private ServiceLocator serviceLocator;
+
     private ILogger logger;
 
     /**
@@ -106,4 +107,5 @@ public class ServerInit implements ApplicationEventListener {
         this.serviceLocator.getService(ControllerRnn.class);
         this.serviceLocator.getService(ControllerAiml.class);
     }
+
 }

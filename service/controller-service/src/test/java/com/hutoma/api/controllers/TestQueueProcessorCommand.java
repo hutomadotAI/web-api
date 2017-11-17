@@ -1,11 +1,12 @@
-package com.hutoma.api.connectors;
+package com.hutoma.api.controllers;
 
 import com.hutoma.api.common.ControllerConfig;
 import com.hutoma.api.common.TestDataHelper;
 import com.hutoma.api.common.Tools;
-import com.hutoma.api.connectors.aiservices.AIQueueServices;
-import com.hutoma.api.connectors.aiservices.BackendServicesConnector;
-import com.hutoma.api.connectors.aiservices.QueueProcessor;
+import com.hutoma.api.connectors.BackendEngineStatus;
+import com.hutoma.api.connectors.BackendServerType;
+import com.hutoma.api.connectors.QueueAction;
+import com.hutoma.api.connectors.ServerConnector;
 import com.hutoma.api.connectors.db.DatabaseAiStatusUpdates;
 import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.sub.TrainingStatus;
@@ -28,10 +29,10 @@ public class TestQueueProcessorCommand {
     private static final java.lang.String SERVERID = "serverid";
     private static final java.lang.String SERVERURL = "serverurl";
     QueueProcessorCommandTest qproc;
-    BackendServicesConnector fakeController;
+    ControllerBase fakeController;
     DatabaseAiStatusUpdates fakeDatabase;
     AIQueueServices fakeQueueServices;
-    ServerTrackerInfo fakeServerTracker;
+    ServerTracker fakeServerTracker;
     BackendEngineStatus status;
     ControllerConfig fakeConfig;
 
@@ -224,10 +225,10 @@ public class TestQueueProcessorCommand {
     @Before
     public void setUp() throws Exception {
         this.fakeConfig = mock(ControllerConfig.class);
-        this.fakeController = mock(BackendServicesConnector.class);
+        this.fakeController = mock(ControllerBase.class);
         this.fakeDatabase = mock(DatabaseAiStatusUpdates.class);
         this.fakeQueueServices = mock(AIQueueServices.class);
-        this.fakeServerTracker = mock(ServerTrackerInfo.class);
+        this.fakeServerTracker = mock(ServerTracker.class);
         Provider<AIQueueServices> fakeQueueServicesProvider = mock(Provider.class);
         when(fakeQueueServicesProvider.get()).thenReturn(this.fakeQueueServices);
         this.qproc = new QueueProcessorCommandTest(this.fakeConfig, this.fakeDatabase,
@@ -253,19 +254,19 @@ public class TestQueueProcessorCommand {
         }
 
         @Override
-        public void initialise(final BackendServicesConnector controller,
+        public void initialise(final ControllerBase controller,
                                final BackendServerType serverType) {
             this.controller = controller;
             this.serverType = serverType;
         }
 
         @Override
-        public void unqueueDelete(final BackendEngineStatus queued, final ServerTrackerInfo server) {
+        public void unqueueDelete(final BackendEngineStatus queued, final ServerTracker server) {
             super.unqueueDelete(queued, server);
         }
 
         @Override
-        public void unqueueTrain(final BackendEngineStatus queued, final ServerTrackerInfo server) {
+        public void unqueueTrain(final BackendEngineStatus queued, final ServerTracker server) {
             super.unqueueTrain(queued, server);
         }
     }

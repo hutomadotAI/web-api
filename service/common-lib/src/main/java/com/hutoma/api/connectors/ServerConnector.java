@@ -7,12 +7,16 @@ import com.hutoma.api.logging.LogMap;
 import com.hutoma.api.thread.TrackedThreadSubPool;
 
 import org.glassfish.jersey.client.JerseyClient;
+import org.glassfish.jersey.client.JerseyInvocation;
+import org.glassfish.jersey.client.JerseyWebTarget;
 import org.glassfish.jersey.media.multipart.internal.MultiPartWriter;
 
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -167,4 +171,26 @@ public class ServerConnector {
         this.logger.logDebug(LOGFROM, String.format("All %d calls executed successfully", callables.size()));
     }
 
+    /***
+     * Assemble endpoint url to start or stop training
+     * @param devId
+     * @param aiid
+     * @param endpoint
+     * @param params
+     * @return
+     * @throws AiServicesException
+     */
+    protected HashMap<String, Callable<InvocationResult>> getTrainingCallableForEndpoint(
+            final UUID devId, final UUID aiid, final String endpoint, Map<String, String> params)
+            throws AiServicesException {
+        HashMap<String, Callable<InvocationResult>> callables = new HashMap<>();
+        JerseyWebTarget target = this.jerseyClient.target(endpoint).path(devId.toString()).path(aiid.toString());
+        for (Map.Entry<String, String> param : params.entrySet()) {
+            target = target.queryParam(param.getKey(), param.getValue());
+        }
+
+        final JerseyInvocation.Builder builder = target.request();
+        callables.put(endpoint, () -> new InvocationResult(aiid, builder.post(null), endpoint, 0));
+        return callables;
+    }
 }

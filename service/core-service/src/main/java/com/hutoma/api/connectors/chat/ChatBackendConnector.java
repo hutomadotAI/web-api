@@ -70,7 +70,7 @@ public abstract class ChatBackendConnector {
 
     List<RequestInProgress> issueChatRequests(final Map<String, String> chatParams,
                                                      final List<AiDevId> ais, ChatState chatState)
-            throws NoServerAvailableException {
+            throws NoServerAvailableException, AiControllerException {
         List<RequestCallable> callables = new ArrayList<>();
 
         for (AiDevId ai : ais) {
@@ -80,12 +80,11 @@ public abstract class ChatBackendConnector {
                 chatParamsThisAi.put("history", chatState.getHistory());
                 chatParamsThisAi.put("topic", chatState.getTopic());
             }
-            BackendServerType serverType = this.getServerType();
-            IServerEndpoint endpoint = this.controllerConnector.getBackendEndpoint(ai.getAiid(), RequestFor.Chat,
-                    this.getServerType());
+            IServerEndpoint endpoint = this.controllerConnector.getBackendEndpoint(ai.getAiid(), RequestFor.Chat);
+            final String hash = this.controllerConnector.getHashCodeFor(ai.getAiid());
+            // Note that it's ok to get a null/empty hash, we just won't use that endpoint.
             callables.add(new RequestCallable(
-                    createCallable(endpoint.getServerUrl(), ai.getDevId(), ai.getAiid(), chatParamsThisAi,
-                            this.controllerConnector.getHashCodeFor(ai.getAiid(), this.getServerType())),
+                    createCallable(endpoint.getServerUrl(), ai.getDevId(), ai.getAiid(), chatParamsThisAi, hash),
                     endpoint.getServerIdentifier()));
         }
 

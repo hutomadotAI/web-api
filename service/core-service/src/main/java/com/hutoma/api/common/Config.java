@@ -60,6 +60,7 @@ public class Config extends CommonConfig implements ILoggerConfig, IThreadConfig
         return Integer.parseInt(getConfigFromProperties("max_upload_size_kb", "4096"));
     }
 
+    @Override
     public String getDatabaseConnectionString() {
         // if we are using admin or root, log an error and return an empty connection string
         try {
@@ -70,10 +71,12 @@ public class Config extends CommonConfig implements ILoggerConfig, IThreadConfig
         return "";
     }
 
+    @Override
     public int getDatabaseConnectionPoolMinimumSize() {
         return Integer.parseInt(getConfigFromProperties("dbconnectionpool_min_size", "8"));
     }
 
+    @Override
     public int getDatabaseConnectionPoolMaximumSize() {
         return Integer.parseInt(getConfigFromProperties("dbconnectionpool_max_size", "64"));
     }
@@ -177,6 +180,7 @@ public class Config extends CommonConfig implements ILoggerConfig, IThreadConfig
      * after which anyone requesting a thread will get an exception
      * @return
      */
+    @Override
     public int getThreadPoolMaxThreads() {
         return 1024;
     }
@@ -185,6 +189,7 @@ public class Config extends CommonConfig implements ILoggerConfig, IThreadConfig
      * The time after which an idle thread in the thread pool get be closed
      * @return
      */
+    @Override
     public long getThreadPoolIdleTimeMs() {
         return 60 * 1000;
     }
@@ -210,10 +215,12 @@ public class Config extends CommonConfig implements ILoggerConfig, IThreadConfig
         return getConfigFromProperties("bot_icon_path", "/boticon");
     }
 
+    @Override
     public String getFluentLoggingHost() {
         return getConfigFromProperties("logging_fluent_host", "log-fluent");
     }
 
+    @Override
     public int getFluentLoggingPort() {
         return Integer.parseInt(getConfigFromProperties("logging_fluent_port", "24224"));
     }
@@ -225,6 +232,8 @@ public class Config extends CommonConfig implements ILoggerConfig, IThreadConfig
     public String getEntityRecognizerUrl() {
         return getConfigFromProperties("entity_recognizer_url", "");
     }
+
+    public String getControllerEndpoint() { return getConfigFromProperties("controller_url", "http://localhost:8080/v1/controller/"); }
 
     public void validateConfigPresent() throws Exception {
         // Validate encoding key is present otherwise we can't sign

@@ -1,37 +1,27 @@
 package com.hutoma.api.connectors.aiservices;
 
+import com.hutoma.api.common.Config;
+import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.BackendServerType;
-import com.hutoma.api.connectors.ServerTrackerInfo;
+import com.hutoma.api.logging.ILogger;
 
-import java.util.Map;
+import org.glassfish.jersey.client.JerseyClient;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 @Singleton
-public class RnnServicesConnector extends BackendServicesConnector {
-
-    private final QueueProcessor queueProcessor;
-    private final ControllerConnector controllerConnector;
+public class RnnServicesConnector extends ControllerConnector {
 
     @Inject
-    public RnnServicesConnector(final QueueProcessor queueProcessor, final ControllerConnector controllerConnector) {
-        this.queueProcessor = queueProcessor;
-        this.queueProcessor.initialise(this, BackendServerType.RNN);
-        this.controllerConnector = controllerConnector;
+    public RnnServicesConnector(final Config config, final JsonSerializer serializer, final JerseyClient jerseyClient,
+                               final ILogger logger, final Tools tools) {
+        super(config, serializer, jerseyClient, logger, tools);
     }
 
     @Override
-    public void kickQueueProcessor() {
-        this.queueProcessor.kickQueueProcessor();
-    }
-
-    @Override
-    public boolean logErrorIfNoTrainingCapacity() {
-        return true;
-    }
-
-    @Override
-    public Map<String, ServerTrackerInfo> getVerifiedEndpointMap() {
-        return controllerConnector.getVerifiedEndpointMap(BackendServerType.RNN);
+    public BackendServerType getServerType() {
+        return BackendServerType.RNN;
     }
 }

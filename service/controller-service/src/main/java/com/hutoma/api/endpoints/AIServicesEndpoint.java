@@ -7,9 +7,9 @@ import com.hutoma.api.containers.sub.AiStatus;
 import com.hutoma.api.containers.sub.ServerAffinity;
 import com.hutoma.api.containers.sub.ServerRegistration;
 import com.hutoma.api.logic.AIServicesLogic;
-import com.hutoma.api.validation.APIParameter;
-import com.hutoma.api.validation.ParameterFilter;
-import com.hutoma.api.validation.ValidatePost;
+import com.hutoma.api.validation.ControllerParameter;
+import com.hutoma.api.validation.ControllerParameterFilter;
+import com.hutoma.api.validation.ValidateControllerPost;
 import com.webcohesion.enunciate.metadata.rs.ResourceMethodSignature;
 import com.webcohesion.enunciate.metadata.rs.ResponseCode;
 import com.webcohesion.enunciate.metadata.rs.StatusCodes;
@@ -48,7 +48,7 @@ public class AIServicesEndpoint {
      */
     @Path("{aiid}/status")
     @POST
-    @ValidatePost({APIParameter.AiStatusJson})
+    @ValidateControllerPost({ControllerParameter.AiStatusJson})
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @StatusCodes({
@@ -64,7 +64,7 @@ public class AIServicesEndpoint {
     Response updateStatus(
             @Context final ContainerRequestContext requestContext) {
         ApiResult result = this.aiServices.updateAIStatus(
-                ParameterFilter.getAiStatus(requestContext));
+                ControllerParameterFilter.getAiStatus(requestContext));
         return result.getResponse(this.serializer).build();
     }
 
@@ -75,7 +75,7 @@ public class AIServicesEndpoint {
      */
     @Path("register")
     @POST
-    @ValidatePost({APIParameter.ServerRegistration})
+    @ValidateControllerPost({ControllerParameter.ServerRegistration})
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @StatusCodes({
@@ -91,7 +91,7 @@ public class AIServicesEndpoint {
     Response registerBackend(
             @Context final ContainerRequestContext requestContext) {
         ApiResult result = this.aiServices.registerServer(
-                ParameterFilter.getServerRegistration(requestContext));
+                ControllerParameterFilter.getServerRegistration(requestContext));
         return result.getResponse(this.serializer).build();
     }
 
@@ -102,7 +102,7 @@ public class AIServicesEndpoint {
      */
     @Path("affinity")
     @POST
-    @ValidatePost({APIParameter.ServerAffinity})
+    @ValidateControllerPost({ControllerParameter.ServerAffinity})
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @StatusCodes({
@@ -118,7 +118,7 @@ public class AIServicesEndpoint {
     Response updateAffinity(
             @Context final ContainerRequestContext requestContext) {
         ApiResult result = this.aiServices.updateAffinity(
-                ParameterFilter.getServerAffinity(requestContext));
+                ControllerParameterFilter.getServerAffinity(requestContext));
         return result.getResponse(this.serializer).build();
     }
 }

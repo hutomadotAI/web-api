@@ -107,5 +107,8 @@ public class TestController {
         protected ServerTracker createNewServerTracker() {
             return mock(ServerTracker.class);
         }
+
+        @Override
+        public void kickQueue() {}
     }
 }

@@ -5,7 +5,6 @@ import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.connectors.BackendEngineStatus;
 import com.hutoma.api.connectors.BackendServerType;
 import com.hutoma.api.connectors.QueueAction;
-import com.hutoma.api.containers.sub.AiStatus;
 import com.hutoma.api.containers.sub.ServerAiEntry;
 import com.hutoma.api.containers.sub.ServerEndpointTrainingSlots;
 import com.hutoma.api.containers.sub.TrainingStatus;
@@ -34,33 +33,6 @@ public class DatabaseAiStatusUpdates extends Database {
                                    final Provider<DatabaseTransaction> transactionProvider) {
         super(logger, callProvider, transactionProvider);
         this.aiServicesLogger = logger;
-    }
-
-    /***
-     * Update the queue status for(servertype, aiid) without affecting AI status values
-     * @param serverType
-     * @param aiid
-     * @param setQueued
-     * @param queueOffsetSeconds
-     * @param action
-     * @throws DatabaseException
-     */
-    public void queueUpdate(BackendServerType serverType, UUID aiid, boolean setQueued,
-                            int queueOffsetSeconds, QueueAction action) throws DatabaseException {
-
-        try (DatabaseTransaction transaction = this.transactionProvider.get()) {
-
-            transaction.getDatabaseCall().initialise("queueUpdate", 5)
-                    .add(serverType.value())
-                    .add(aiid)
-                    .add(setQueued)
-                    .add(queueOffsetSeconds)
-                    .add(action.value())
-                    .executeUpdate();
-
-            // if all goes well, commit
-            transaction.commit();
-        }
     }
 
     /***
@@ -427,36 +399,5 @@ public class DatabaseAiStatusUpdates extends Database {
                     null, logmap);
         }
         return itemChanged;
-    }
-
-    public boolean updateAIStatus(final AiStatus status)
-            throws DatabaseException {
-        return updateAIStatus(status.getAiEngine(), status.getAiid(), status.getTrainingStatus(),
-                status.getServerIdentifier(), status.getTrainingProgress(), status.getTrainingError());
-    }
-
-    public boolean updateAIStatus(BackendServerType serverType, UUID aiid, TrainingStatus trainingStatus,
-                                  String endpoint, double trainingProgress, double trainingError)
-            throws DatabaseException {
-
-        // open a transaction since this is a read/modify/write operation and we need consistency
-        try (DatabaseTransaction transaction = this.transactionProvider.get()) {
-
-            transaction.getDatabaseCall().initialise("updateAiStatus", 6)
-                    .add(serverType.value())
-                    .add(aiid)
-                    .add(trainingStatus)
-                    .add(endpoint)
-                    .add(trainingProgress)
-                    .add(trainingError)
-                    .executeUpdate();
-
-            // if all goes well, commit
-            transaction.commit();
-        }
-
-        // flag success
-        return true;
-
     }
 }

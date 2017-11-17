@@ -122,7 +122,7 @@ public class AIServicesLogic {
         }
     }
 
-    public ApiResult registerServer(ServerRegistration registration) {
+    public ApiResult registerServer(final ServerRegistration registration) {
         UUID serverSessionID;
         try {
             ControllerBase controller = getControllerFor(registration.getServerType());
@@ -318,7 +318,7 @@ public class AIServicesLogic {
                                               final TrainingStatus[] trainingStatuses)
             throws StatusTransitionRejectedException {
         // stream the list and look for a match
-        if (!Arrays.stream(trainingStatuses).anyMatch(x -> x == previousStatus)) {
+        if (Arrays.stream(trainingStatuses).noneMatch(x -> x == previousStatus)) {
             // if not match
             // log the transition attempt
             this.logger.logWarning(LOGFROM,
@@ -354,18 +354,18 @@ public class AIServicesLogic {
     }
 
     public static class StatusTransitionRejectedException extends Exception {
-        public StatusTransitionRejectedException(final String message) {
+        StatusTransitionRejectedException(final String message) {
             super(message);
         }
     }
 
     public static class OriginatingServerRejectedException extends Exception {
-        public OriginatingServerRejectedException(final String message) {
+        OriginatingServerRejectedException(final String message) {
             super(message);
         }
     }
 
-    public static class StatusTransitionIgnoredException extends Exception {
+    private static class StatusTransitionIgnoredException extends Exception {
     }
 
 }

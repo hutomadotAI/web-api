@@ -20,7 +20,7 @@ public class ApiResult {
     }
 
     public Response.ResponseBuilder getResponse(JsonSerializer serializer) {
-        return Response.status(this.status.getCode()).entity(serializer.serialize(this));
+         return Response.status(this.status.getCode()).entity(serializer.serialize(this));
     }
 
     public ApiResult setCreatedStatus() {

@@ -43,6 +43,13 @@ public interface ILogger {
     void logException(String fromLabel, Exception ex);
 
     /**
+     * Logs an exception.
+     * @param fromLabel the origin of the log
+     * @param ex        the exception
+     */
+    void logException(String fromLabel, Exception ex, LogMap properties);
+
+    /**
      * Adds a WARNING log.
      * @param fromLabel  the origin of the log
      * @param logComment the comment

@@ -178,6 +178,12 @@
             <version>3.7</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.glassfish.jersey.containers</groupId>
+            <artifactId>jersey-container-servlet-core</artifactId>
+            <version>${project.component.jersey.version}</version>
+        </dependency>
+
         <!-- ********************************* Test-related ****************************************** -->
 
         <dependency>

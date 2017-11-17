@@ -9,12 +9,8 @@ import com.hutoma.api.containers.ApiFacebookCustomisation;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.facebook.FacebookConnect;
 import com.hutoma.api.containers.facebook.FacebookNotification;
-import com.hutoma.api.containers.sub.AiStatus;
 import com.hutoma.api.containers.sub.BotStructure;
 import com.hutoma.api.containers.sub.IntentVariable;
-import com.hutoma.api.containers.sub.ServerAffinity;
-import com.hutoma.api.containers.sub.ServerAiEntry;
-import com.hutoma.api.containers.sub.ServerRegistration;
 import com.hutoma.api.containers.sub.WebHook;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
@@ -79,10 +75,6 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
                 case EntityJson:
                     //fallthrough
                 case AiStatusJson:
-                    //fallthrough
-                case ServerRegistration:
-                    //fallthrough
-                case ServerAffinity:
                     //fallthrough
                 case BotStructure:
                     //fallthrough
@@ -175,27 +167,27 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
 
         if (checkList.contains(APIParameter.AIName)) {
             request.setProperty(APIParameter.AIName.toString(),
-                    this.validateFieldLength(50, AINAME,
-                            this.validateAiName(AINAME, getFirst(form.get(AINAME)))));
+                    validateFieldLength(50, AINAME,
+                            validateAiName(AINAME, getFirst(form.get(AINAME)))));
         }
 
         if (checkList.contains(APIParameter.AIID)) {
             request.setProperty(APIParameter.AIID.toString(),
-                    this.validateUuid(AIID, getFirst(form.get(AIID))));
+                    validateUuid(AIID, getFirst(form.get(AIID))));
         }
 
         if (checkList.contains(APIParameter.AIDescription)) {
             request.setProperty(APIParameter.AIDescription.toString(),
-                    this.validateFieldLength(250, AIDESC,
-                            this.filterControlAndCoalesceSpaces(getFirst(form.get(AIDESC)))));
+                    validateFieldLength(250, AIDESC,
+                            filterControlAndCoalesceSpaces(getFirst(form.get(AIDESC)))));
         }
         if (checkList.contains(APIParameter.AiConfidence)) {
             request.setProperty(APIParameter.AiConfidence.toString(),
-                    this.validateFloat(AICONFIDENCE, 0.0f, 1.0f, getFirst(form.get(AICONFIDENCE))));
+                    validateFloat(AICONFIDENCE, 0.0f, 1.0f, getFirst(form.get(AICONFIDENCE))));
         }
         if (checkList.contains(APIParameter.Timezone)) {
             request.setProperty(APIParameter.Timezone.toString(),
-                    this.validateTimezoneString(TIMEZONE, getFirst(form.get(TIMEZONE))));
+                    validateTimezoneString(TIMEZONE, getFirst(form.get(TIMEZONE))));
         }
         if (checkList.contains(APIParameter.Locale)) {
             request.setProperty(APIParameter.Locale.toString(),
@@ -246,37 +238,6 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
                 request.setProperty(APIParameter.BotStructure.toString(), botStructure);
             }
 
-            if (checkList.contains(APIParameter.AiStatusJson)) {
-                AiStatus aiStatus = (AiStatus) this.serializer.deserialize(request.getEntityStream(), AiStatus.class);
-                checkParameterNotNull(AIID, aiStatus.getAiid());
-                checkParameterNotNull(DEVID, aiStatus.getDevId());
-                checkParameterNotNull("training_status", aiStatus.getTrainingStatus());
-                checkParameterNotNull("ai_engine", aiStatus.getAiEngine());
-                request.setProperty(APIParameter.AiStatusJson.toString(), aiStatus);
-            }
-
-            if (checkList.contains(APIParameter.ServerRegistration)) {
-                ServerRegistration serverRegistration = (ServerRegistration)
-                        this.serializer.deserialize(request.getEntityStream(), ServerRegistration.class);
-                checkParameterNotNull(SERVER_TYPE, serverRegistration.getServerType());
-                this.validateFieldLength(255, SERVER_URL, serverRegistration.getServerUrl());
-                checkParameterNotNull(SERVER_URL, serverRegistration.getServerUrl());
-                checkParameterNotNull(AI_LIST, serverRegistration.getAiList());
-                for (ServerAiEntry entry : serverRegistration.getAiList()) {
-                    checkParameterNotNullInvalid("ai_id", entry.getAiid());
-                    checkParameterNotNullInvalid("training_status", entry.getTrainingStatus());
-                }
-                request.setProperty(APIParameter.ServerRegistration.toString(), serverRegistration);
-            }
-
-            if (checkList.contains(APIParameter.ServerAffinity)) {
-                ServerAffinity serverAffinity = (ServerAffinity)
-                        this.serializer.deserialize(request.getEntityStream(), ServerAffinity.class);
-                checkParameterNotNull(SERVER_SESSION_ID, serverAffinity.getServerSessionID());
-                checkParameterNotNull(AI_LIST, serverAffinity.getAiList());
-                request.setProperty(APIParameter.ServerAffinity.toString(), serverAffinity);
-            }
-
             if (checkList.contains(APIParameter.FacebookConnect)) {
                 FacebookConnect facebookConnect = (FacebookConnect)
                         this.serializer.deserialize(request.getEntityStream(), FacebookConnect.class);
@@ -293,7 +254,7 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
             if (checkList.contains(APIParameter.FacebookCustomisations)) {
                 ApiFacebookCustomisation facebookCustomisation = (ApiFacebookCustomisation)
                         this.serializer.deserialize(request.getEntityStream(), ApiFacebookCustomisation.class);
-                this.validateFieldLength(1000, "greeting", facebookCustomisation.getPageGreeting());
+                validateFieldLength(1000, "greeting", facebookCustomisation.getPageGreeting());
                 request.setProperty(APIParameter.FacebookCustomisations.toString(), facebookCustomisation);
             }
 
@@ -345,47 +306,47 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
      */
     void validateIntent(ApiIntent intent) throws ParameterValidationException {
         // validate name
-        this.validateFieldLength(250, INTENTNAME, intent.getIntentName());
-        this.validateAlphaNumPlusDashes(INTENTNAME, intent.getIntentName());
+        validateFieldLength(250, INTENTNAME, intent.getIntentName());
+        validateAlphaNumPlusDashes(INTENTNAME, intent.getIntentName());
 
         // for each response, filter, check against size limit, dedupe, remove empties, check one present
         intent.setResponses(
-                this.dedupeAndEnsureNonEmptyList(
-                        this.validateFieldLengthsInList(250, INTENT_RESPONSES,
-                                this.filterControlCoalesceSpacesInList(intent.getResponses())), INTENT_RESPONSES));
+                dedupeAndEnsureNonEmptyList(
+                        validateFieldLengthsInList(250, INTENT_RESPONSES,
+                                filterControlCoalesceSpacesInList(intent.getResponses())), INTENT_RESPONSES));
 
         // for each expression, filter, check against size limit, dedupe, remove empties, check one present
         intent.setUserSays(
-                this.dedupeAndEnsureNonEmptyList(
-                        this.validateFieldLengthsInList(250, INTENT_USERSAYS,
-                                this.filterControlCoalesceSpacesInList(intent.getUserSays())), INTENT_USERSAYS));
+                dedupeAndEnsureNonEmptyList(
+                        validateFieldLengthsInList(250, INTENT_USERSAYS,
+                                filterControlCoalesceSpacesInList(intent.getUserSays())), INTENT_USERSAYS));
 
         HashSet<String> labelsInUse = new HashSet<>();
         // for each variable
         if (null != intent.getVariables()) {
             for (IntentVariable variable : intent.getVariables()) {
                 // validate the name
-                this.validateFieldLength(250, ENTITYNAME, variable.getEntityName());
-                this.validateEntityName(ENTITYNAME, variable.getEntityName());
+                validateFieldLength(250, ENTITYNAME, variable.getEntityName());
+                validateEntityName(ENTITYNAME, variable.getEntityName());
 
                 // the list of prompts
-                List<String> prompts = this.validateFieldLengthsInList(250, INTENT_PROMPTLIST,
-                        this.filterControlCoalesceSpacesInList(variable.getPrompts()));
+                List<String> prompts = validateFieldLengthsInList(250, INTENT_PROMPTLIST,
+                        filterControlCoalesceSpacesInList(variable.getPrompts()));
                 if (variable.isRequired()) {
-                    prompts = this.dedupeAndEnsureNonEmptyList(prompts, INTENT_PROMPTLIST);
+                    prompts = dedupeAndEnsureNonEmptyList(prompts, INTENT_PROMPTLIST);
                 }
                 variable.setPrompts(prompts);
 
                 // the value
-                this.validateFieldLength(250, INTENT_VAR_VALUE, variable.getValue());
-                this.validateOptionalDescription(INTENT_VAR_VALUE, variable.getValue());
+                validateFieldLength(250, INTENT_VAR_VALUE, variable.getValue());
+                validateOptionalDescription(INTENT_VAR_VALUE, variable.getValue());
 
                 // the label
-                this.validateFieldLength(250, INTENT_VAR_LABEL, variable.getLabel());
+                validateFieldLength(250, INTENT_VAR_LABEL, variable.getLabel());
 
                 // get a trimmed label, to use for uniqueness check
                 // also validate characters in the process
-                String label = this.validateRequiredLabel(INTENT_VAR_LABEL, variable.getLabel());
+                String label = validateRequiredLabel(INTENT_VAR_LABEL, variable.getLabel());
                 if (!labelsInUse.add(label)) {
                     throw new ParameterValidationException("duplicate intent variable label", INTENT_VAR_LABEL);
                 }
@@ -395,11 +356,11 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
         WebHook webHook = intent.getWebHook();
         if (webHook != null) {
             this.checkParameterNotNull("enabled", webHook.isEnabled());
-            this.validateFieldLength(250, INTENTNAME, webHook.getIntentName());
-            this.validateAlphaNumPlusDashes(INTENTNAME, webHook.getIntentName());
+            validateFieldLength(250, INTENTNAME, webHook.getIntentName());
+            validateAlphaNumPlusDashes(INTENTNAME, webHook.getIntentName());
 
             if (webHook.isEnabled()) {
-                this.validateFieldLength(2048, "endpoint", webHook.getEndpoint());
+                validateFieldLength(2048, "endpoint", webHook.getEndpoint());
                 this.checkParameterNotNull("endpoint", webHook.getEndpoint());
                 this.checkParameterNotNull(AIID, webHook.getAiid());
             }
@@ -412,8 +373,8 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
      * @throws ParameterValidationException
      */
     void validateEntity(ApiEntity entity) throws ParameterValidationException {
-        this.validateEntityName(ENTITYNAME, entity.getEntityName());
-        this.validateOptionalObjectValues(ENTITYVALUE, entity.getEntityValueList());
+        validateEntityName(ENTITYNAME, entity.getEntityName());
+        validateOptionalObjectValues(ENTITYVALUE, entity.getEntityValueList());
     }
 
     /***
@@ -425,13 +386,13 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
         if (botStructure.getLanguage().equals("en_US")) {
             botStructure.setLanguage("en-US");
         }
-        this.validateLocale(LOCALE, botStructure.getLanguage());
-        this.validateAiName(AINAME, botStructure.getName());
-        this.validateFieldLength(50, AINAME, botStructure.getName());
-        this.validateFieldLength(250, AIDESC,
-                this.filterControlAndCoalesceSpaces(botStructure.getDescription()));
-        this.validateFieldLength(250, AIDESC, botStructure.getDescription());
-        this.validateTimezoneString(TIMEZONE, botStructure.getTimezone());
+        validateLocale(LOCALE, botStructure.getLanguage());
+        validateAiName(AINAME, botStructure.getName());
+        validateFieldLength(50, AINAME, botStructure.getName());
+        validateFieldLength(250, AIDESC,
+                filterControlAndCoalesceSpaces(botStructure.getDescription()));
+        validateFieldLength(250, AIDESC, botStructure.getDescription());
+        validateTimezoneString(TIMEZONE, botStructure.getTimezone());
         if (botStructure.getEntities() != null) {
             for (ApiEntity entity : botStructure.getEntities().values()) {
                 this.validateEntity(entity);

@@ -9,6 +9,7 @@ import com.hutoma.api.connectors.InvocationResult;
 import com.hutoma.api.connectors.NoServerAvailableException;
 import com.hutoma.api.connectors.RequestFor;
 import com.hutoma.api.connectors.ServerConnector;
+import com.hutoma.api.connectors.ServerTrackerInfo;
 import com.hutoma.api.connectors.db.DatabaseAI;
 import com.hutoma.api.connectors.db.DatabaseEntitiesIntents;
 import com.hutoma.api.connectors.db.DatabaseException;
@@ -25,9 +26,11 @@ import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.Scanner;
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -38,10 +41,9 @@ import javax.ws.rs.core.MediaType;
 public class AIServices extends ServerConnector {
 
     private static final String LOGFROM = "aiservices";
-    private final AIQueueServices queueServices;
+    private final AiServicesQueue queueServices;
     private final DatabaseEntitiesIntents databaseEntitiesIntents;
     private final DatabaseAI databaseAi;
-    private final ControllerConnector controllerConnector;
     private final WnetServicesConnector wnetServicesConnector;
     private final RnnServicesConnector rnnServicesConnector;
 
@@ -51,15 +53,13 @@ public class AIServices extends ServerConnector {
                       final JsonSerializer serializer,
                       final Tools tools, final JerseyClient jerseyClient,
                       final TrackedThreadSubPool threadSubPool,
-                      final AIQueueServices queueServices,
-                      final ControllerConnector controllerConnector,
+                      final AiServicesQueue queueServices,
                       final WnetServicesConnector wnetServicesConnector,
                       final RnnServicesConnector rnnServicesConnector) {
         super(logger, serializer, tools, jerseyClient, threadSubPool);
         this.queueServices = queueServices;
         this.databaseEntitiesIntents = databaseEntitiesIntents;
         this.databaseAi = databaseAi;
-        this.controllerConnector = controllerConnector;
         this.wnetServicesConnector = wnetServicesConnector;
         this.rnnServicesConnector = rnnServicesConnector;
     }
@@ -116,7 +116,7 @@ public class AIServices extends ServerConnector {
             this.wnetServicesConnector.kickQueueProcessor();
             this.queueServices.userActionDelete(backendStatus, BackendServerType.RNN, this.rnnServicesConnector,
                     devId, aiid);
-            this.wnetServicesConnector.kickQueueProcessor();
+            this.rnnServicesConnector.kickQueueProcessor();
         } catch (DatabaseException e) {
             AiServicesException.throwWithSuppressed("failed to delete ai", e);
         }
@@ -125,7 +125,7 @@ public class AIServices extends ServerConnector {
     public void deleteDev(final UUID devId) throws AiServicesException {
         this.logger.logDebug(LOGFROM, "Issuing \"delete DEV\" command to backends for dev " + devId);
         HashMap<String, Callable<InvocationResult>> callables = new HashMap<>();
-        for (String endpoint : this.getListOfPrimaryEndpoints(null)) {
+        for (String endpoint : this.getEndpointsForAllServerTypes()) {
             callables.put(endpoint, () -> new InvocationResult(
                     null,
                     this.jerseyClient
@@ -134,6 +134,18 @@ public class AIServices extends ServerConnector {
                             .delete(), endpoint, 0));
         }
         executeAndWait(callables);
+    }
+
+    private List<String> getEndpointsForAllServerTypes() {
+        List<String> list = new ArrayList<>();
+        Optional<ServerTrackerInfo> info = this.wnetServicesConnector.getVerifiedEndpointMap().values().stream()
+                .findFirst();
+        info.ifPresent(serverTrackerInfo -> list.add(serverTrackerInfo.getServerUrl()));
+        info = this.rnnServicesConnector.getVerifiedEndpointMap().values().stream()
+                .findFirst();
+        info.ifPresent(serverTrackerInfo -> list.add(serverTrackerInfo.getServerUrl()));
+
+        return list;
     }
 
     /***
@@ -169,8 +181,8 @@ public class AIServices extends ServerConnector {
             // Bug:2300
             String trainingToSend = trainingMaterials;
             try {
-                if (endpoint.equals(this.controllerConnector.getBackendEndpoint(aiid, RequestFor.Training,
-                        BackendServerType.RNN).getServerUrl())) {
+                if (endpoint.equals(this.rnnServicesConnector.getBackendEndpoint(
+                        aiid, RequestFor.Training).getServerUrl())) {
                     trainingToSend = removeIntentExpressions(trainingMaterials);
                 }
             } catch (NoServerAvailableException ex) {
@@ -284,17 +296,15 @@ public class AIServices extends ServerConnector {
      * @return
      * @throws AiServicesException
      */
-    private List<String> getListOfPrimaryEndpoints(UUID aiid) throws AiServicesException {
+    private List<String> getListOfPrimaryEndpoints(final UUID aiid) throws AiServicesException {
         try {
             return Arrays.asList(
-                    this.controllerConnector.getBackendEndpoint(aiid, RequestFor.Training,
-                            BackendServerType.WNET).getServerUrl(),
-                    this.controllerConnector.getBackendEndpoint(aiid, RequestFor.Training,
-                            BackendServerType.RNN).getServerUrl());
+                    this.wnetServicesConnector.getBackendEndpoint(aiid, RequestFor.Training).getServerUrl(),
+                    this.rnnServicesConnector.getBackendEndpoint(aiid, RequestFor.Training).getServerUrl());
         } catch (NoServerAvailableException noServer) {
             AiServicesException.throwWithSuppressed(noServer.getMessage(), noServer);
         }
-        return null; // this will never happen because the throwsWithSuppressed always throws
+        return new ArrayList<>(); // this will never happen because the throwsWithSuppressed always throws
     }
 
     public static class AiInfo {

@@ -1,4 +1,4 @@
-package com.hutoma.api.connectors.aiservices;
+package com.hutoma.api.controllers;
 
 import com.hutoma.api.common.ControllerConfig;
 import com.hutoma.api.common.Tools;
@@ -6,7 +6,6 @@ import com.hutoma.api.connectors.BackendEngineStatus;
 import com.hutoma.api.connectors.BackendServerType;
 import com.hutoma.api.connectors.QueueAction;
 import com.hutoma.api.connectors.ServerConnector;
-import com.hutoma.api.connectors.ServerTrackerInfo;
 import com.hutoma.api.connectors.db.DatabaseAiStatusUpdates;
 import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.sub.ServerEndpointTrainingSlots;
@@ -56,7 +55,7 @@ public class QueueProcessor extends TimerTask {
     // the timestamp after which we can perform slot recovery
     private final long noSlotRecoveryBeforeTimestamp;
     protected BackendServerType serverType;
-    protected BackendServicesConnector controller;
+    protected ControllerBase controller;
     // server rotation
     private AtomicInteger roundRobinIndex;
     private String logFrom;
@@ -82,7 +81,7 @@ public class QueueProcessor extends TimerTask {
                 + (config.getProcessQueueDelayRecoveryForFirstSeconds() * 1000);
     }
 
-    public void initialise(final BackendServicesConnector controller, final BackendServerType serverType) {
+    public void initialise(final ControllerBase controller, final BackendServerType serverType) {
         this.serverType = serverType;
         this.controller = controller;
         this.logFrom = String.format("qproc-%s", serverType.value());
@@ -202,7 +201,7 @@ public class QueueProcessor extends TimerTask {
      * @param server
      * @param exception
      */
-    private void handleDeleteTaskFailure(final BackendEngineStatus queued, final ServerTrackerInfo server,
+    private void handleDeleteTaskFailure(final BackendEngineStatus queued, final ServerTracker server,
                                          final ServerConnector.AiServicesException exception) {
 
         // requeue flag
@@ -248,7 +247,7 @@ public class QueueProcessor extends TimerTask {
      * @param server
      * @param exception
      */
-    private void handleTrainTaskFailure(final BackendEngineStatus queued, final ServerTrackerInfo server,
+    private void handleTrainTaskFailure(final BackendEngineStatus queued, final ServerTracker server,
                                         final ServerConnector.AiServicesException exception) {
 
         // queue flag
@@ -367,7 +366,7 @@ public class QueueProcessor extends TimerTask {
      * @param queued
      * @param server
      */
-    protected void unqueueDelete(final BackendEngineStatus queued, final ServerTrackerInfo server) {
+    protected void unqueueDelete(final BackendEngineStatus queued, final ServerTracker server) {
 
         this.logger.logDebugQueueAction(this.logFrom, "delete", this.serverType,
                 queued.getAiid(), queued.getDevId(), server.getServerIdentifier());
@@ -407,7 +406,7 @@ public class QueueProcessor extends TimerTask {
      * @param queued
      * @param server
      */
-    protected void unqueueTrain(final BackendEngineStatus queued, final ServerTrackerInfo server) {
+    protected void unqueueTrain(final BackendEngineStatus queued, final ServerTracker server) {
 
         this.logger.logDebugQueueAction(this.logFrom, "train", this.serverType,
                 queued.getAiid(), queued.getDevId(), server.getServerIdentifier());
@@ -465,7 +464,7 @@ public class QueueProcessor extends TimerTask {
                 .collect(Collectors.toMap(ServerEndpointTrainingSlots::getEndpointIdentifier, Function.identity()));
 
         // get a map of connected endpoints
-        Map<String, ServerTrackerInfo> serverMap = this.controller.getVerifiedEndpointMap();
+        Map<String, ServerTracker> serverMap = this.controller.getVerifiedEndpointMap();
 
         // for each connected server, set the capacity
         // and set the number of slots in use
@@ -511,7 +510,7 @@ public class QueueProcessor extends TimerTask {
                 listServersFreeSlots.get(this.roundRobinIndex.getAndIncrement() % listServersFreeSlots.size());
 
         // get a tracker for the server we have chosen
-        ServerTrackerInfo chosenServer = serverMap.get(chosenSlot.getEndpointIdentifier());
+        ServerTracker chosenServer = serverMap.get(chosenSlot.getEndpointIdentifier());
 
         // take the next task off the queue
         BackendEngineStatus queued = this.database.queueTakeNext(this.serverType);

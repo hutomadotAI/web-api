@@ -1,6 +1,7 @@
 package com.hutoma.api;
 
 import com.hutoma.api.common.JerseyGsonProvider;
+
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 
@@ -31,7 +32,6 @@ public class ServerApp extends ResourceConfig {
 
         // endpoints
         packages(false, "com.hutoma.api.endpoints");
-
     }
 
 }
