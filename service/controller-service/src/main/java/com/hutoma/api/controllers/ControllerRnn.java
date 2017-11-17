@@ -37,4 +37,8 @@ public class ControllerRnn extends ControllerBase {
         this.queueProcessor.kickQueueProcessor();
     }
 
+    @Override
+    public void terminateQueue() {
+        this.queueProcessor.stop();
+    }
 }

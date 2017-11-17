@@ -34,23 +34,7 @@ public class Config extends CommonConfig implements ILoggerConfig, IThreadConfig
         return "API_";
     }
 
-    /***
-     * Throw an exception if we are using a username that starts with 'admin' or 'root'
-     * @param value connection string
-     * @return same connection string
-     * @throws Exception if username is admin... or root...
-     */
-    private static String enforceNewDBCredentials(String value) throws Exception {
-        int startUserName = value.indexOf("user=");
-        if (startUserName >= 0) {
-            String prefixUsername = value.substring(startUserName + ("user=".length())).toLowerCase();
-            if ((prefixUsername.startsWith("admin")) || (prefixUsername.startsWith("root"))) {
-                throw new Exception(
-                        "db connection string uses root/admin access. please update your config properties file.");
-            }
-        }
-        return value;
-    }
+
 
     public String getEncodingKey() {
         return getConfigFromProperties("encoding_key", "");
@@ -64,7 +48,7 @@ public class Config extends CommonConfig implements ILoggerConfig, IThreadConfig
     public String getDatabaseConnectionString() {
         // if we are using admin or root, log an error and return an empty connection string
         try {
-            return enforceNewDBCredentials(getConfigFromProperties("connection_string", ""));
+            return IDatabaseConfig.enforceNewDBCredentials(getConfigFromProperties("connection_string", ""));
         } catch (Exception e) {
             this.logger.logError(LOGFROM, e.getMessage());
         }
@@ -233,7 +217,7 @@ public class Config extends CommonConfig implements ILoggerConfig, IThreadConfig
         return getConfigFromProperties("entity_recognizer_url", "");
     }
 
-    public String getControllerEndpoint() { return getConfigFromProperties("controller_url", "http://localhost:8080/v1/controller/"); }
+    public String getControllerEndpoint() { return getConfigFromProperties("controller_url", "http://localhost:8080/v1"); }
 
     public void validateConfigPresent() throws Exception {
         // Validate encoding key is present otherwise we can't sign

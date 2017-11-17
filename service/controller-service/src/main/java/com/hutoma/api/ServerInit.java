@@ -1,8 +1,11 @@
 package com.hutoma.api;
 
-import com.hutoma.api.common.Config;
+import com.hutoma.api.common.ControllerConfig;
 import com.hutoma.api.connectors.db.DatabaseConnectionPool;
-import com.hutoma.api.logging.ILogger;
+import com.hutoma.api.controllers.ControllerAiml;
+import com.hutoma.api.controllers.ControllerRnn;
+import com.hutoma.api.controllers.ControllerWnet;
+import com.hutoma.api.logging.AiServiceStatusLogger;
 import com.hutoma.api.logging.LogMap;
 
 import org.fluentd.logger.FluentLogger;
@@ -24,7 +27,10 @@ public class ServerInit implements ApplicationEventListener {
     @Inject
     private ServiceLocator serviceLocator;
 
-    private ILogger logger;
+    private AiServiceStatusLogger logger;
+    private ControllerWnet wnetController;
+    private ControllerRnn rnnController;
+    private ControllerAiml aimlController;
 
     /**
      * Application event handler.
@@ -37,6 +43,9 @@ public class ServerInit implements ApplicationEventListener {
                 initialise(applicationEvent);
                 break;
             case DESTROY_FINISHED:
+                this.wnetController.terminateQueue();
+                this.rnnController.terminateQueue();
+                this.aimlController.terminateQueue();
                 FluentLogger.flushAll();
                 FluentLogger.closeAll();
                 break;
@@ -86,10 +95,9 @@ public class ServerInit implements ApplicationEventListener {
     }
 
     private void initialise(final ApplicationEvent applicationEvent) {
-        this.logger = this.serviceLocator.getService(ILogger.class);
-        Config config = this.serviceLocator.getService(Config.class);
+        this.logger = this.serviceLocator.getService(AiServiceStatusLogger.class);
+        ControllerConfig config = this.serviceLocator.getService(ControllerConfig.class);
         try {
-            config.validateConfigPresent();
             this.logger.initialize(config);
             DatabaseConnectionPool connectionPool = this.serviceLocator.getService(DatabaseConnectionPool.class);
             connectionPool.borrowConnection().close();
@@ -97,6 +105,12 @@ public class ServerInit implements ApplicationEventListener {
         } catch (Exception e) {
             this.logger.logError(LOGFROM, "initialisation error: " + e.toString());
         }
+
+        // create the singleton instances so that the timers start
+        // and with them the server monitoring
+        this.wnetController = this.serviceLocator.getService(ControllerWnet.class);
+        this.rnnController = this.serviceLocator.getService(ControllerRnn.class);
+        this.aimlController = this.serviceLocator.getService(ControllerAiml.class);
     }
 
 }

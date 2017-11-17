@@ -89,6 +89,10 @@ public class QueueProcessor extends TimerTask {
         this.timer.schedule(this, 0, 500);
     }
 
+    public void stop() {
+        this.timer.cancel();
+    }
+
     @Override
     public void run() {
         // check the run flag

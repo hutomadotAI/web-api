@@ -1,13 +1,18 @@
 package com.hutoma.api.common;
 
-import com.hutoma.api.logging.ILogger;
+import com.hutoma.api.connectors.db.IDatabaseConfig;
+import com.hutoma.api.logging.AiServiceStatusLogger;
+import com.hutoma.api.logging.ILoggerConfig;
+import com.hutoma.api.thread.IThreadConfig;
 
 import javax.inject.Inject;
 
-public class ControllerConfig extends CommonConfig {
+public class ControllerConfig extends CommonConfig implements ILoggerConfig, IDatabaseConfig, IThreadConfig {
+
+    private static final String LOGFROM = "controllerconfig";
 
     @Inject
-    public ControllerConfig(final ILogger logger) {
+    public ControllerConfig(final AiServiceStatusLogger logger) {
         super(logger);
     }
 
@@ -99,5 +104,55 @@ public class ControllerConfig extends CommonConfig {
      */
     public long getServerHeartbeatFailureCutOffMs() {
         return 5 * 1000;
+    }
+
+    @Override
+    public String getFluentLoggingHost() {
+        return getConfigFromProperties("logging_fluent_host", "log-fluent");
+    }
+
+    @Override
+    public int getFluentLoggingPort() {
+        return Integer.parseInt(getConfigFromProperties("logging_fluent_port", "24224"));
+    }
+
+    @Override
+    public String getDatabaseConnectionString() {
+        // if we are using admin or root, log an error and return an empty connection string
+        try {
+            return IDatabaseConfig.enforceNewDBCredentials(getConfigFromProperties("connection_string", ""));
+        } catch (Exception e) {
+            this.logger.logError(LOGFROM, e.getMessage());
+        }
+        return "";
+    }
+
+    @Override
+    public int getDatabaseConnectionPoolMinimumSize() {
+        return Integer.parseInt(getConfigFromProperties("dbconnectionpool_min_size", "8"));
+    }
+
+    @Override
+    public int getDatabaseConnectionPoolMaximumSize() {
+        return Integer.parseInt(getConfigFromProperties("dbconnectionpool_max_size", "64"));
+    }
+
+    /***
+     * The maximum number of active threads in the threadpool
+     * after which anyone requesting a thread will get an exception
+     * @return
+     */
+    @Override
+    public int getThreadPoolMaxThreads() {
+        return 1024;
+    }
+
+    /***
+     * The time after which an idle thread in the thread pool get be closed
+     * @return
+     */
+    @Override
+    public long getThreadPoolIdleTimeMs() {
+        return 60 * 1000;
     }
 }

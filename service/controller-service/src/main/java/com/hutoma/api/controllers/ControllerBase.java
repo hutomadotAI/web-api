@@ -113,6 +113,8 @@ public abstract class ControllerBase extends ServerMetadata {
 
     public abstract void kickQueue();
 
+    public void terminateQueue() {}
+
     protected ServerTracker createNewServerTracker() {
         return this.serviceLocator.getService(ServerTracker.class);
     }

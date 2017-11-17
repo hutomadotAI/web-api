@@ -36,4 +36,9 @@ public class ControllerWnet extends ControllerBase {
     public void kickQueue() {
         this.queueProcessor.kickQueueProcessor();
     }
+
+    @Override
+    public void terminateQueue() {
+        this.queueProcessor.stop();
+    }
 }

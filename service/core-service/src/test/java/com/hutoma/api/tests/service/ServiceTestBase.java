@@ -7,7 +7,6 @@ import com.hutoma.api.common.AccessLogger;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.HTMLExtractor;
 import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.common.TestDataHelper;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.AiStrings;
 import com.hutoma.api.connectors.BackendServerType;
@@ -18,10 +17,6 @@ import com.hutoma.api.connectors.aiservices.AIServices;
 import com.hutoma.api.connectors.chat.AIChatServices;
 import com.hutoma.api.connectors.db.*;
 import com.hutoma.api.containers.sub.RateLimitStatus;
-import com.hutoma.api.controllers.ControllerAiml;
-import com.hutoma.api.controllers.ControllerRnn;
-import com.hutoma.api.controllers.ControllerWnet;
-import com.hutoma.api.logging.AiServiceStatusLogger;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logic.ChatLogic;
 import com.hutoma.api.logic.FacebookChatHandler;
@@ -87,8 +82,6 @@ public abstract class ServiceTestBase extends JerseyTest {
     @Mock
     protected DatabaseEntitiesIntents fakeDatabaseEntitiesIntents;
     @Mock
-    protected DatabaseAiStatusUpdates fakeDatabaseStatusUpdates;
-    @Mock
     protected DatabaseIntegrations fakeDatabaseIntegrations;
     @Mock
     protected DatabaseBackends fakeDatabaseBackends;
@@ -107,17 +100,9 @@ public abstract class ServiceTestBase extends JerseyTest {
     @Mock
     protected AIChatServices fakeAiChatServices;
     @Mock
-    protected AiServiceStatusLogger fakeServicesStatusLogger;
-    @Mock
     protected AIServices fakeAiServices;
     @Mock
     protected Tools fakeTools;
-    @Mock
-    protected ControllerAiml fakeControllerAiml;
-    @Mock
-    protected ControllerWnet fakeControllerWnet;
-    @Mock
-    protected ControllerRnn fakeControllerRnn;
     @Mock
     protected WebHooks fakeWebHooks;
     @Mock
@@ -190,7 +175,6 @@ public abstract class ServiceTestBase extends JerseyTest {
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeDatabaseAi)).to(DatabaseAI.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeDatabaseMarketplace)).to(DatabaseMarketplace.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeDatabaseEntitiesIntents)).to(DatabaseEntitiesIntents.class);
-                bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeDatabaseStatusUpdates)).to(DatabaseAiStatusUpdates.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeDatabaseIntegrations)).to(DatabaseIntegrations.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeDatabaseBackends)).to(DatabaseBackends.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeDatabaseTransaction)).to(DatabaseTransaction.class);
@@ -200,12 +184,8 @@ public abstract class ServiceTestBase extends JerseyTest {
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeAiChatServices)).to(AIChatServices.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeAiServices)).to(AIServices.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeTools)).to(Tools.class);
-                bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeControllerAiml)).to(ControllerAiml.class);
-                bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeControllerWnet)).to(ControllerWnet.class);
-                bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeControllerRnn)).to(ControllerRnn.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeWebHooks)).to(WebHooks.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeLogger)).to(ILogger.class).in(Singleton.class);
-                bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeServicesStatusLogger)).to(AiServiceStatusLogger.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeAccessLogger)).to(AccessLogger.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeEntityRecognizer)).to(EntityRecognizerService.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakefacebookConnector)).to(FacebookConnector.class);
@@ -259,7 +239,6 @@ public abstract class ServiceTestBase extends JerseyTest {
         this.fakeDatabaseAi = mock(DatabaseAI.class);
         this.fakeDatabaseMarketplace = mock(DatabaseMarketplace.class);
         this.fakeDatabaseEntitiesIntents = mock(DatabaseEntitiesIntents.class);
-        this.fakeDatabaseStatusUpdates = mock(DatabaseAiStatusUpdates.class);
         this.fakeDatabaseIntegrations = mock(DatabaseIntegrations.class);
         this.fakeDatabaseBackends = mock(DatabaseBackends.class);
         this.fakeConfig = mock(Config.class);
@@ -269,11 +248,7 @@ public abstract class ServiceTestBase extends JerseyTest {
         this.fakeLogger = mock(ILogger.class);
         this.fakeAiChatServices = mock(AIChatServices.class);
         this.fakeTools = mock(Tools.class);
-        this.fakeServicesStatusLogger = mock(AiServiceStatusLogger.class);
         this.fakeAiServices = mock(AIServices.class);
-        this.fakeControllerAiml = mock(ControllerAiml.class);
-        this.fakeControllerWnet = mock(ControllerWnet.class);
-        this.fakeControllerRnn = mock(ControllerRnn.class);
         this.fakeWebHooks = mock(WebHooks.class);
         this.fakeAccessLogger = mock(AccessLogger.class);
         this.fakeEntityRecognizer = mock(EntityRecognizerService.class);
@@ -288,13 +263,6 @@ public abstract class ServiceTestBase extends JerseyTest {
             // this will never happen, but on the zero in a million chance that it does ....
             e.printStackTrace();
         }
-
-        when(this.fakeControllerWnet.isActiveSession(eq(TestDataHelper.SESSIONID))).thenReturn(true);
-        when(this.fakeControllerWnet.getSessionServerIdentifier(eq(TestDataHelper.SESSIONID))).thenReturn("wnet@fake");
-        when(this.fakeControllerWnet.isPrimaryMaster(eq(TestDataHelper.SESSIONID))).thenReturn(true);
-        when(this.fakeControllerRnn.isActiveSession(eq(TestDataHelper.SESSIONID))).thenReturn(true);
-        when(this.fakeControllerRnn.getSessionServerIdentifier(eq(TestDataHelper.SESSIONID))).thenReturn("rnn@fake");
-        when(this.fakeControllerRnn.isPrimaryMaster(eq(TestDataHelper.SESSIONID))).thenReturn(true);
 
         when(this.fakeConfig.getThreadPoolMaxThreads()).thenReturn(16);
         when(this.fakeConfig.getMaxLinkedBotsPerAi()).thenReturn(5);

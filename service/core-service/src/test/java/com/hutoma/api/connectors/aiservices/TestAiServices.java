@@ -292,11 +292,11 @@ public class TestAiServices {
         void apply(T t, U u) throws AIServices.AiServicesException;
     }
 
-    static IServerEndpoint getFakeServerEndpoint() {
+    static IServerEndpoint getFakeServerEndpoint(final String url) {
         return new IServerEndpoint() {
             @Override
             public String getServerUrl() {
-                return "http://url.com";
+                return url;
             }
 
             @Override
@@ -304,5 +304,9 @@ public class TestAiServices {
                 return "ident";
             }
         };
+    }
+
+    static IServerEndpoint getFakeServerEndpoint() {
+        return getFakeServerEndpoint("http://url.com");
     }
 }

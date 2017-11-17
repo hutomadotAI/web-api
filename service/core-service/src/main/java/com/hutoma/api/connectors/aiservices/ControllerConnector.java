@@ -38,6 +38,7 @@ public abstract class ControllerConnector {
     private static final String PARAM_SERVER_TYPE = "serverType";
     private static final int CONNECTION_TIMEOUT = 1000; // 1s
     private static final int READ_TIMEOUT = 1000; // 1s
+    private static final String CONTROLLER_ENDPOINT = "controller";
 
     private final Config config;
     private final JsonSerializer serializer;
@@ -58,7 +59,7 @@ public abstract class ControllerConnector {
 
     public abstract BackendServerType getServerType();
 
-    public void kickQueueProcessor() {
+    void kickQueueProcessor() {
         this.kickQueue(this.getServerType());
     }
 
@@ -68,7 +69,7 @@ public abstract class ControllerConnector {
         return getBackendEndpoint(aiid, requestFor, this.getServerType());
     }
 
-    public Map<String, ServerTrackerInfo> getVerifiedEndpointMap() {
+    Map<String, ServerTrackerInfo> getVerifiedEndpointMap() {
         return getVerifiedEndpointMap(this.getServerType());
     }
 
@@ -80,7 +81,7 @@ public abstract class ControllerConnector {
      * @return the endpoint information
      * @throws NoServerAvailableException if there are no servers available to process this request
      */
-    protected IServerEndpoint getBackendEndpoint(final UUID aiid, final RequestFor requestFor,
+    IServerEndpoint getBackendEndpoint(final UUID aiid, final RequestFor requestFor,
                                               final BackendServerType serverType)
             throws NoServerAvailableException {
         if (aiid == null) {
@@ -169,7 +170,7 @@ public abstract class ControllerConnector {
      * @param serverType the backend server type
      * @return the map
      */
-    Map<String, ServerTrackerInfo> getVerifiedEndpointMap(final BackendServerType serverType) {
+    private Map<String, ServerTrackerInfo> getVerifiedEndpointMap(final BackendServerType serverType) {
         LogMap logMap = LogMap.map("ServerType", serverType.value());
         Response response = null;
         try {
@@ -197,7 +198,8 @@ public abstract class ControllerConnector {
 
     private Invocation.Builder getRequest(final String path, final Map<String, String> queryParams,
                                           final int connectionTimeout, final int readTimeout) {
-        JerseyWebTarget target = this.jerseyClient.target(this.config.getControllerEndpoint());
+        JerseyWebTarget target = this.jerseyClient.target(this.config.getControllerEndpoint())
+                .path(CONTROLLER_ENDPOINT);
         if (path != null && !path.isEmpty()) {
             target = target.path(path);
         }

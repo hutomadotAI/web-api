@@ -4,7 +4,6 @@ import com.hutoma.api.access.RateLimitCheck;
 import com.hutoma.api.common.AccessLogger;
 import com.hutoma.api.common.ChatLogger;
 import com.hutoma.api.common.Config;
-import com.hutoma.api.common.ControllerConfig;
 import com.hutoma.api.common.HTMLExtractor;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Tools;
@@ -24,13 +23,6 @@ import com.hutoma.api.connectors.chat.ChatRnnConnector;
 import com.hutoma.api.connectors.chat.ChatWnetConnector;
 import com.hutoma.api.connectors.db.*;
 import com.hutoma.api.containers.facebook.FacebookMachineID;
-import com.hutoma.api.controllers.AIQueueServices;
-import com.hutoma.api.controllers.ControllerAiml;
-import com.hutoma.api.controllers.ControllerRnn;
-import com.hutoma.api.controllers.ControllerWnet;
-import com.hutoma.api.controllers.QueueProcessor;
-import com.hutoma.api.controllers.ServerTracker;
-import com.hutoma.api.logging.AiServiceStatusLogger;
 import com.hutoma.api.logging.CentralLogger;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.ILoggerConfig;
@@ -81,7 +73,6 @@ public class ServerBinder extends AbstractBinder {
         bind(ThreadPool.class).to(ThreadPool.class).in(Singleton.class);
         bind(ThreadSubPool.class).to(ThreadSubPool.class);
         bind(TrackedThreadSubPool.class).to(TrackedThreadSubPool.class);
-        bind(ServerTracker.class).to(ServerTracker.class);
 
         // logging
         bind(CentralLogger.class).to(ILogger.class).in(Singleton.class);
@@ -97,7 +88,6 @@ public class ServerBinder extends AbstractBinder {
         bind(DatabaseMarketplace.class).to(DatabaseMarketplace.class);
         bind(DatabaseEntitiesIntents.class).to(DatabaseEntitiesIntents.class);
         bind(DatabaseIntegrations.class).to(DatabaseIntegrations.class);
-        bind(DatabaseBackends.class).to(DatabaseBackends.class);
         bind(DatabaseTransaction.class).to(DatabaseTransaction.class);
         bind(DatabaseCall.class).to(DatabaseCall.class);
         bind(TransactionalDatabaseCall.class).to(TransactionalDatabaseCall.class);
@@ -150,19 +140,5 @@ public class ServerBinder extends AbstractBinder {
 
         // Jersey HTTP client
         bindFactory(JerseyClientFactory.class).to(JerseyClient.class);
-
-
-        // Controller
-        bind(ControllerConfig.class).to(ControllerConfig.class).in(Singleton.class);
-        bind(AIQueueServices.class).to(AIQueueServices.class);
-        bind(ControllerWnet.class).to(ControllerWnet.class).in(Singleton.class);
-        bind(ControllerRnn.class).to(ControllerRnn.class).in(Singleton.class);
-        bind(ControllerAiml.class).to(ControllerAiml.class).in(Singleton.class);
-        bind(QueueProcessor.class).to(QueueProcessor.class);
-        bind(AIServicesLogic.class).to(AIServicesLogic.class);
-        bind(DatabaseAiStatusUpdates.class).to(DatabaseAiStatusUpdates.class);
-        bind(ControllerLogic.class).to(ControllerLogic.class);
-        // AI Services Status specialized logger
-        bind(AiServiceStatusLogger.class).to(AiServiceStatusLogger.class).in(Singleton.class);
     }
 }

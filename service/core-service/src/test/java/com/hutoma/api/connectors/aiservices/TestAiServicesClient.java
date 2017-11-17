@@ -140,8 +140,8 @@ public class TestAiServicesClient {
 
     @Test
     public void testUploadTraining() throws AIServices.AiServicesException, NoServerAvailableException {
-        when(this.fakeWnetServicesConnector.getBackendEndpoint(any(), any())).thenReturn(getFakeServerEndpoint());
-        when(this.fakeRnnServicesConnector.getBackendEndpoint(any(), any())).thenReturn(getFakeServerEndpoint());
+        when(this.fakeWnetServicesConnector.getBackendEndpoint(any(), any())).thenReturn(getFakeServerEndpoint(LOCAL_WEB_ENDPOINT));
+        when(this.fakeRnnServicesConnector.getBackendEndpoint(any(), any())).thenReturn(getFakeServerEndpoint(LOCAL_WEB_ENDPOINT));
         // Need to have a real serializer here to transform the ai info
         AIServices thisAiServices = new AIServices(this.fakeDatabaseAi, this.fakeDatabaseEntitiesIntents, this.fakeLogger, new JsonSerializer(),
                 this.fakeTools, JerseyClientBuilder.createClient(), new TrackedThreadSubPool(this.threadPool),
