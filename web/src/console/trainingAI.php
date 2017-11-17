@@ -105,6 +105,8 @@ include __DIR__ . "/include/page_menu.php";
 <script src="/console/dist/vendors/fastclick/fastclick.min.js"></script>
 <script src="/console/dist/vendors/app.min.js"></script>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/1.0.2/purify.min.js" integrity="sha256-uGzhuwD4ZNoc1uL7OtdXNGRKb+Zqg3hrgZQZTN88p/s=" crossorigin="anonymous"></script>
+
 <script src="<?php $assets->getAsset('shared/shared.js') ?>"></script>
 <script src="<?php $assets->getAsset('messaging/messaging.js') ?>"></script>
 <script src="/console/dist/vendors/iCheck/icheck.min.js"></script>

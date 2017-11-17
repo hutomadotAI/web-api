@@ -113,7 +113,10 @@ function createRightMsg(ai_name, msg, chatId, score, error) {
         wHTML += ('<div class="direct-chat-text chat-warning">');
     else
         wHTML += ('<div class="direct-chat-text chat-success">');
-    wHTML += stripHtml(msg).replace(/(?:\r\n|\r|\n)/g, '<br />');
+    wHTML += DOMPurify.sanitize(
+        stripHtml(msg).replace(/(?:\r\n|\r|\n)/g, '<br />'),
+        { ALLOWED_TAGS: ['br'] }
+    );
     wHTML += ('</div>');
     if (error === false)
         wHTML += ('<span class="direct-chat-timestamp pull-left text-sm text-white">score: ' + score + '</span>');
