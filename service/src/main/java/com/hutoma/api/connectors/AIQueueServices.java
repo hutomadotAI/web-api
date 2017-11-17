@@ -27,6 +27,9 @@ import java.util.UUID;
 import java.util.concurrent.Callable;
 import javax.inject.Inject;
 
+import static org.glassfish.jersey.client.ClientProperties.CONNECT_TIMEOUT;
+import static org.glassfish.jersey.client.ClientProperties.READ_TIMEOUT;
+
 public class AIQueueServices extends ServerConnector {
 
     private static final String LOGFROM = "aiqueueservices";
@@ -69,6 +72,8 @@ public class AIQueueServices extends ServerConnector {
                 aiid,
                 this.jerseyClient
                         .target(endpoint).path(devIdString).path(aiid.toString())
+                        .property(CONNECT_TIMEOUT, (int) this.config.getBackendConnectCallTimeoutMs())
+                        .property(READ_TIMEOUT, (int) this.config.getBackendTrainingCallTimeoutMs())
                         .request()
                         .delete(),
                 endpoint,
@@ -155,7 +160,12 @@ public class AIQueueServices extends ServerConnector {
             final UUID devId, final UUID aiid, final String endpoint, Map<String, String> params)
             throws AiServicesException {
         HashMap<String, Callable<InvocationResult>> callables = new HashMap<>();
-        JerseyWebTarget target = this.jerseyClient.target(endpoint).path(devId.toString()).path(aiid.toString());
+        JerseyWebTarget target = this.jerseyClient
+                .target(endpoint)
+                .path(devId.toString())
+                .path(aiid.toString())
+                .property(CONNECT_TIMEOUT, (int) this.config.getBackendConnectCallTimeoutMs())
+                .property(READ_TIMEOUT, (int) this.config.getBackendTrainingCallTimeoutMs());
         for (Map.Entry<String, String> param : params.entrySet()) {
             target = target.queryParam(param.getKey(), param.getValue());
         }

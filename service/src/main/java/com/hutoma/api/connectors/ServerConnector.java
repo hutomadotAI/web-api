@@ -30,12 +30,6 @@ public class ServerConnector {
 
     private static final String LOGFROM = "serverconnector";
 
-    // As a workaround to bug 1152, we need to allow more time for WNET to process
-    // training data.
-    // For a 700kB file this is around 20-25s. Reduce this timeout again once WNET
-    // processes training data in the training phase, not the upload phase.
-    private static final int TIMEOUT_SECONDS = 30;
-
     protected final JsonSerializer serializer;
     protected final Database database;
     protected final Config config;
@@ -92,7 +86,7 @@ public class ServerConnector {
         if (future == null) {
             throw new AiServicesException(String.format("Call %s not found", callName));
         }
-        return future.get(TIMEOUT_SECONDS, TimeUnit.SECONDS);
+        return future.get(config.getBackendTrainingCallTimeoutMs(), TimeUnit.MILLISECONDS);
     }
 
     protected HashMap<String, Future<InvocationResult>> execute(

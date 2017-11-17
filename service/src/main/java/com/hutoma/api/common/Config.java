@@ -285,6 +285,29 @@ public class Config {
         return Long.parseLong(getConfigFromProperties("backend_request_timeout_ms", "20000"));
     }
 
+    /***
+     * The total number of milliseconds that we wait for backend
+     * training commands to complete.
+     *
+     * As a workaround to bug 1152, we need to allow more time for WNET to process
+     * training data.
+     * For a 700kB file this is around 20-25s. Reduce this timeout again once WNET
+     * processes training data in the training phase, not the upload phase.
+     *
+     * @return
+     */
+    public long getBackendTrainingCallTimeoutMs() {
+        return 30000;
+    }
+
+    /***
+     * The total number of milliseconds that we wait for a backend connect
+     * @return
+     */
+    public long getBackendConnectCallTimeoutMs() {
+        return 10000;
+    }
+
     /**
      * The botstore icon storage path. This will typically be a NFS mount point.
      * @return the botstore icon storage path
