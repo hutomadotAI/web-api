@@ -499,62 +499,73 @@ public class ChatLogic {
         // Are we in the middle of an entity value request?
         Optional<MemoryVariable> requestedVariable = currentIntent.getVariables()
                 .stream().filter(MemoryVariable::isRequested).findFirst();
-        if (requestedVariable.isPresent()) {
-            MemoryVariable mv = requestedVariable.get();
 
-            this.telemetryMap.add("EntityRequested.Name", mv.getName());
-            this.telemetryMap.add("EntityRequested.Label", mv.getLabel());
-            chatResult.setScore(1.0d);
+        try {
 
-            // Attempt to retrieve entities from the question
-            List<Pair<String, String>> entities = this.entityRecognizer.retrieveEntities(chatInfo.question,
-                    currentIntent.getVariables());
-            // Did the recognizer find something for this entity?
-            Optional<Pair<String, String>> entityValue = entities.stream()
-                    .filter(x -> x.getA().equals(mv.getName())).findFirst();
-            if (entityValue.isPresent() || mv.getName().equals(SYSANY)) {
-                handledIntent = processVariables(chatInfo, aiidForMemoryIntents, currentIntent, chatResult,
-                        Collections.singletonList(mv), intentsToClear, intentLog);
+            if (requestedVariable.isPresent()) {
+                MemoryVariable mv = requestedVariable.get();
 
-            } else {
-                // If we have prompted enough, then give up
-                if (mv.getTimesPrompted() >= mv.getTimesToPrompt()) {
-                    mv.setRequested(false);
-                    handledIntent = false;
-                    // clear the intent whenever a mandatory variable is not set within the allowed number of prompts
-                    intentsToClear.add(currentIntent);
+                this.telemetryMap.add("EntityRequested.Name", mv.getName());
+                this.telemetryMap.add("EntityRequested.Label", mv.getLabel());
+                chatResult.setScore(1.0d);
+
+                // Attempt to retrieve entities from the question
+                List<Pair<String, String>> entities = this.entityRecognizer.retrieveEntities(chatInfo.question,
+                        currentIntent.getVariables());
+                // Did the recognizer find something for this entity?
+                Optional<Pair<String, String>> entityValue = entities.stream()
+                        .filter(x -> x.getA().equals(mv.getName())).findFirst();
+                if (entityValue.isPresent() || mv.getName().equals(SYSANY)) {
+                    handledIntent = processVariables(chatInfo, aiidForMemoryIntents, currentIntent, chatResult,
+                            Collections.singletonList(mv), intentsToClear, intentLog);
+
                 } else {
-                    promptForVariable(mv, chatResult, intentLog);
-                    handledIntent = true;
+                    // If we have prompted enough, then give up
+                    if (mv.getTimesPrompted() >= mv.getTimesToPrompt()) {
+                        mv.setRequested(false);
+                        handledIntent = false;
+                        // clear the intent whenever a mandatory variable is not set within the allowed number of prompts
+                        intentsToClear.add(currentIntent);
+                    } else {
+                        promptForVariable(mv, chatResult, intentLog);
+                        handledIntent = true;
+                    }
                 }
-            }
-
-        } else {
-
-
-            // Populate persistent entities.
-            for (MemoryVariable variable : currentIntent.getVariables()) {
-                String persistentValue = this.chatState.getEntityValue(variable.getName());
-                if (persistentValue != null) {
-                    variable.setCurrentValue(persistentValue);
-                }
-            }
-
-            // Do we have multiple entities with the same type?
-            MemoryVariable variableToPrompt = getVariableToPromptFromEntityList(currentIntent.getVariables());
-
-            // When we have multiple instances of a single entity type, we need to
-            // prompt for them until they're all fulfilled
-            if (variableToPrompt != null) {
-                // And prompt the user for the value for that variable
-                promptForVariable(variableToPrompt, chatResult, intentLog);
-                handledIntent = true;
 
             } else {
-                handledIntent = processVariables(chatInfo, aiidForMemoryIntents, currentIntent, chatResult,
-                        currentIntent.getVariables(), intentsToClear, intentLog);
 
+                // Populate persistent entities.
+                for (MemoryVariable variable : currentIntent.getVariables()) {
+                    String persistentValue = this.chatState.getEntityValue(variable.getName());
+                    if (persistentValue != null) {
+                        variable.setCurrentValue(persistentValue);
+                    }
+                }
+
+                // Do we have multiple entities with the same type?
+                MemoryVariable variableToPrompt = getVariableToPromptFromEntityList(currentIntent.getVariables());
+
+                // When we have multiple instances of a single entity type, we need to
+                // prompt for them until they're all fulfilled
+                if (variableToPrompt != null) {
+                    // And prompt the user for the value for that variable
+                    promptForVariable(variableToPrompt, chatResult, intentLog);
+                    handledIntent = true;
+
+                } else {
+                    handledIntent = processVariables(chatInfo, aiidForMemoryIntents, currentIntent, chatResult,
+                            currentIntent.getVariables(), intentsToClear, intentLog);
+
+                }
             }
+
+        } catch (WebHooks.WebHookException ex) {
+            // If we get a webhook exception it means the variables have been processed and we have fulfilled
+            // the intent, thus triggering the webhook. So for now clear the variables so that the intent can be
+            // fully processed again.
+            this.intentHandler.clearIntents(Collections.singletonList(currentIntent));
+            // rethrow for bubbling up
+            throw ex;
         }
 
         chatResult.setIntents(Collections.singletonList(currentIntent));
