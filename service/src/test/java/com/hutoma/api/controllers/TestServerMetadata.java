@@ -357,7 +357,7 @@ public class TestServerMetadata {
     public class FakeServerTracker extends ServerTracker {
 
         public FakeServerTracker(final Config config, final Tools tools, final ILogger logger) {
-            super(config, tools, mock(JerseyClient.class), null, logger);
+            super(config, tools, mock(JerseyClient.class), null, logger, null);
             testSetEndpointVerified(true);
         }
 
