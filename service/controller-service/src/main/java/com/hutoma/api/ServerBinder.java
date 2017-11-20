@@ -4,6 +4,7 @@ import com.hutoma.api.common.ControllerConfig;
 import com.hutoma.api.common.HTMLExtractor;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Tools;
+import com.hutoma.api.connectors.IConnectConfig;
 import com.hutoma.api.connectors.db.Database;
 import com.hutoma.api.connectors.db.DatabaseAiStatusUpdates;
 import com.hutoma.api.connectors.db.DatabaseBackends;
@@ -57,7 +58,7 @@ public class ServerBinder extends AbstractBinder {
 
         // infrastructure
         bind(ControllerConfig.class).to(ControllerConfig.class).to(IDatabaseConfig.class).to(IThreadConfig.class)
-                .to(ILoggerConfig.class).in(Singleton.class);
+                .to(ILoggerConfig.class).to(IConnectConfig.class).in(Singleton.class);
         bind(DatabaseConnectionPool.class).to(DatabaseConnectionPool.class).in(Singleton.class);
         bind(ThreadPool.class).to(ThreadPool.class).in(Singleton.class);
         bind(ThreadSubPool.class).to(ThreadSubPool.class);

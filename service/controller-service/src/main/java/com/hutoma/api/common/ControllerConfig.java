@@ -1,5 +1,6 @@
 package com.hutoma.api.common;
 
+import com.hutoma.api.connectors.IConnectConfig;
 import com.hutoma.api.connectors.db.IDatabaseConfig;
 import com.hutoma.api.logging.AiServiceStatusLogger;
 import com.hutoma.api.logging.ILoggerConfig;
@@ -7,13 +8,32 @@ import com.hutoma.api.thread.IThreadConfig;
 
 import javax.inject.Inject;
 
-public class ControllerConfig extends CommonConfig implements ILoggerConfig, IDatabaseConfig, IThreadConfig {
+public class ControllerConfig extends CommonConfig implements ILoggerConfig, IDatabaseConfig, IThreadConfig, IConnectConfig {
 
     private static final String LOGFROM = "controllerconfig";
 
     @Inject
     public ControllerConfig(final AiServiceStatusLogger logger) {
         super(logger);
+    }
+
+    /***
+     * The total number of milliseconds that we wait for backend
+     * non-chat commands to complete.
+     * @return
+     */
+    @Override
+    public long getBackendTrainingCallTimeoutMs() {
+        return 20000;
+    }
+
+    /***
+     * The total number of milliseconds that we wait for a backend connect
+     * @return
+     */
+    @Override
+    public long getBackendConnectCallTimeoutMs() {
+        return 10000;
     }
 
     @Override

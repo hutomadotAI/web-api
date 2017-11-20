@@ -5,6 +5,7 @@ import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.BackendServerType;
 import com.hutoma.api.connectors.BackendStatus;
+import com.hutoma.api.connectors.IConnectConfig;
 import com.hutoma.api.connectors.NoServerAvailableException;
 import com.hutoma.api.connectors.ServerConnector;
 import com.hutoma.api.connectors.db.DatabaseAI;
@@ -51,13 +52,14 @@ public class AIChatServices extends ServerConnector {
 
     @Inject
     public AIChatServices(final DatabaseAI databaseAi, final ILogger logger,
+                          final IConnectConfig connectConfig,
                           final JsonSerializer serializer,
                           final Tools tools, final Config config, final JerseyClient jerseyClient,
                           final TrackedThreadSubPool threadSubPool,
                           final ChatWnetConnector backendWnetConnector,
                           final ChatRnnConnector backendRnnConnector,
                           final ChatAimlConnector backendAimlConnector) {
-        super(logger, serializer, tools, jerseyClient, threadSubPool);
+        super(logger, connectConfig, serializer, tools, jerseyClient, threadSubPool);
         this.backendWnetConnector = backendWnetConnector;
         this.backendRnnConnector = backendRnnConnector;
         this.backendAimlConnector = backendAimlConnector;

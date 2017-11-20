@@ -88,6 +88,7 @@ public class TestAiServices {
 
         when(this.fakeConfig.getThreadPoolMaxThreads()).thenReturn(32);
         when(this.fakeConfig.getThreadPoolIdleTimeMs()).thenReturn(10000L);
+        when(this.fakeConfig.getBackendTrainingCallTimeoutMs()).thenReturn(30000L);
         ThreadPool threadPool = new ThreadPool(this.fakeConfig);
 
         when(this.fakeControllerConnector.getBackendEndpoint(AIID, RequestFor.Training, BackendServerType.WNET))
@@ -99,7 +100,8 @@ public class TestAiServices {
         when(this.fakeControllerConnector.getBackendEndpoint(null, RequestFor.Training, BackendServerType.RNN))
                 .thenReturn(TestDataHelper.getEndpointFor(RNN_ENDPOINT));
 
-        this.aiServices = new AIServices(this.fakeDatabaseAi, this.fakeDatabaseEntitiesIntents, this.fakeLogger, this.fakeSerializer,
+        this.aiServices = new AIServices(this.fakeDatabaseAi, this.fakeDatabaseEntitiesIntents, this.fakeLogger,
+                this.fakeConfig, this.fakeSerializer,
                 this.fakeTools, this.fakeClient, new TrackedThreadSubPool(threadPool), this.fakeQueueServices,
                 this.fakeWnetServicesConnector, this.fakeRnnServicesConnector);
     }

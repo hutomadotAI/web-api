@@ -260,7 +260,7 @@ public abstract class ChatBackendConnector {
         return () -> {
             long startTime = ChatBackendConnector.this.tools.getTimestamp();
             Response response = builder
-                    .property(CONNECT_TIMEOUT, (int) this.config.getBackendCombinedRequestTimeoutMs())
+                    .property(CONNECT_TIMEOUT, (int) this.config.getBackendConnectCallTimeoutMs())
                     .property(READ_TIMEOUT, (int) this.config.getBackendCombinedRequestTimeoutMs())
                     .get();
             return new InvocationResult(aiid, response, endpoint,

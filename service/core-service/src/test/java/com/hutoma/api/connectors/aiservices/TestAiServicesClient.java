@@ -108,11 +108,13 @@ public class TestAiServicesClient {
 
         when(this.fakeConfig.getThreadPoolMaxThreads()).thenReturn(32);
         when(this.fakeConfig.getThreadPoolIdleTimeMs()).thenReturn(10000L);
+        when(this.fakeConfig.getBackendTrainingCallTimeoutMs()).thenReturn(20000L);
         this.threadPool = new ThreadPool(this.fakeConfig);
 
         when(this.fakeRnnServicesConnector.getBackendEndpoint(any(), any())).thenReturn(TestDataHelper.getEndpointFor(LOCAL_WEB_ENDPOINT));
 
-        this.aiServices = new AIServices(this.fakeDatabaseAi, this.fakeDatabaseEntitiesIntents, this.fakeLogger, this.fakeSerializer,
+        this.aiServices = new AIServices(this.fakeDatabaseAi, this.fakeDatabaseEntitiesIntents, this.fakeLogger,
+                this.fakeConfig, this.fakeSerializer,
                 this.fakeTools, JerseyClientBuilder.createClient(), new TrackedThreadSubPool(this.threadPool),
                 this.fakeQueueServices, this.fakeWnetServicesConnector, this.fakeRnnServicesConnector);
     }
@@ -143,7 +145,8 @@ public class TestAiServicesClient {
         when(this.fakeWnetServicesConnector.getBackendEndpoint(any(), any())).thenReturn(getFakeServerEndpoint(LOCAL_WEB_ENDPOINT));
         when(this.fakeRnnServicesConnector.getBackendEndpoint(any(), any())).thenReturn(getFakeServerEndpoint(LOCAL_WEB_ENDPOINT));
         // Need to have a real serializer here to transform the ai info
-        AIServices thisAiServices = new AIServices(this.fakeDatabaseAi, this.fakeDatabaseEntitiesIntents, this.fakeLogger, new JsonSerializer(),
+        AIServices thisAiServices = new AIServices(this.fakeDatabaseAi, this.fakeDatabaseEntitiesIntents,
+                this.fakeLogger, this.fakeConfig, new JsonSerializer(),
                 this.fakeTools, JerseyClientBuilder.createClient(), new TrackedThreadSubPool(this.threadPool),
                 this.fakeQueueServices, this.fakeWnetServicesConnector, this.fakeRnnServicesConnector);
         thisAiServices.uploadTraining(null, DEVID, AIID, TRAINING_MATERIALS);

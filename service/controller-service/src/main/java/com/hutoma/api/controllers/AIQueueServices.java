@@ -3,6 +3,7 @@ package com.hutoma.api.controllers;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.BackendServerType;
+import com.hutoma.api.connectors.IConnectConfig;
 import com.hutoma.api.connectors.InvocationResult;
 import com.hutoma.api.connectors.ServerConnector;
 import com.hutoma.api.connectors.db.DatabaseAiStatusUpdates;
@@ -19,6 +20,9 @@ import java.util.UUID;
 import java.util.concurrent.Callable;
 import javax.inject.Inject;
 
+import static org.glassfish.jersey.client.ClientProperties.CONNECT_TIMEOUT;
+import static org.glassfish.jersey.client.ClientProperties.READ_TIMEOUT;
+
 public class AIQueueServices extends ServerConnector {
 
     private static final String LOGFROM = "aiqueueservices";
@@ -29,9 +33,10 @@ public class AIQueueServices extends ServerConnector {
 
     @Inject
     public AIQueueServices(final DatabaseAiStatusUpdates databaseAiStatusUpdates, final ILogger logger,
+                           final IConnectConfig connectConfig,
                            final JsonSerializer serializer, final Tools tools,
                            final JerseyClient jerseyClient, final TrackedThreadSubPool threadSubPool) {
-        super(logger, serializer, tools, jerseyClient, threadSubPool);
+        super(logger, connectConfig, serializer, tools, jerseyClient, threadSubPool);
         this.databaseAiStatusUpdates = databaseAiStatusUpdates;
     }
 
@@ -60,7 +65,11 @@ public class AIQueueServices extends ServerConnector {
         callables.put(endpoint, () -> new InvocationResult(
                 aiid,
                 this.jerseyClient
-                        .target(endpoint).path(devIdString).path(aiid.toString())
+                        .target(endpoint)
+                        .path(devIdString)
+                        .path(aiid.toString())
+                        .property(CONNECT_TIMEOUT, (int) this.connectConfig.getBackendConnectCallTimeoutMs())
+                        .property(READ_TIMEOUT, (int) this.connectConfig.getBackendTrainingCallTimeoutMs())
                         .request()
                         .delete(),
                 endpoint,

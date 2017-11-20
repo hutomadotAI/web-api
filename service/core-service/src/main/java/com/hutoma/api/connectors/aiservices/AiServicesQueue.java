@@ -5,6 +5,7 @@ import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.BackendEngineStatus;
 import com.hutoma.api.connectors.BackendServerType;
 import com.hutoma.api.connectors.BackendStatus;
+import com.hutoma.api.connectors.IConnectConfig;
 import com.hutoma.api.connectors.InvocationResult;
 import com.hutoma.api.connectors.QueueAction;
 import com.hutoma.api.connectors.ServerConnector;
@@ -32,10 +33,12 @@ public class AiServicesQueue extends ServerConnector {
     private final Database database;
 
     @Inject
-    public AiServicesQueue(final Database database, final ILogger logger, final JerseyClient jerseyClient,
+    public AiServicesQueue(final Database database, final ILogger logger,
+                           final IConnectConfig connectConfig,
+                           final JerseyClient jerseyClient,
                            final JsonSerializer serializer, final Tools tools,
                            final TrackedThreadSubPool threadSubPool) {
-        super(logger, serializer, tools, jerseyClient, threadSubPool);
+        super(logger, connectConfig, serializer, tools, jerseyClient, threadSubPool);
         this.database = database;
     }
 

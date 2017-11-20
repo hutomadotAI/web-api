@@ -8,6 +8,7 @@ import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.BackendEngineStatus;
 import com.hutoma.api.connectors.BackendServerType;
 import com.hutoma.api.connectors.BackendStatus;
+import com.hutoma.api.connectors.IConnectConfig;
 import com.hutoma.api.connectors.NoServerAvailableException;
 import com.hutoma.api.connectors.ServerConnector;
 import com.hutoma.api.connectors.db.DatabaseAI;
@@ -63,7 +64,7 @@ public class TestAiChatServices {
         this.fakeRequestRnn = mock(ChatRnnConnector.class);
         this.threadSubPool = mock(TrackedThreadSubPool.class);
         this.chatServices = new AIChatServices(
-                this.fakeDatabaseAi, mock(ILogger.class), mock(JsonSerializer.class),
+                this.fakeDatabaseAi, mock(ILogger.class), fakeConfig, mock(JsonSerializer.class),
                 mock(Tools.class), this.fakeConfig, mock(JerseyClient.class),
                 this.threadSubPool,
                 this.fakeRequestWnet, this.fakeRequestRnn, this.fakeRequestAiml);

@@ -25,6 +25,9 @@ import java.util.concurrent.TimeoutException;
 import javax.inject.Inject;
 import javax.ws.rs.core.Response;
 
+import static org.glassfish.jersey.client.ClientProperties.CONNECT_TIMEOUT;
+import static org.glassfish.jersey.client.ClientProperties.READ_TIMEOUT;
+
 /**
  * Server connector.
  */
@@ -32,20 +35,15 @@ public class ServerConnector {
 
     private static final String LOGFROM = "serverconnector";
 
-    // As a workaround to bug 1152, we need to allow more time for WNET to process
-    // training data.
-    // For a 700kB file this is around 20-25s. Reduce this timeout again once WNET
-    // processes training data in the training phase, not the upload phase.
-    private static final int TIMEOUT_SECONDS = 30;
-
     protected final JsonSerializer serializer;
     protected final JerseyClient jerseyClient;
     protected final ILogger logger;
     protected final Tools tools;
     protected final TrackedThreadSubPool threadSubPool;
+    protected final IConnectConfig connectConfig;
 
     @Inject
-    public ServerConnector(final ILogger logger,
+    public ServerConnector(final ILogger logger, IConnectConfig connectConfig,
                            final JsonSerializer serializer,
                            final Tools tools, final JerseyClient jerseyClient,
                            final TrackedThreadSubPool threadSubPool) {
@@ -55,6 +53,7 @@ public class ServerConnector {
         this.jerseyClient = jerseyClient;
         this.threadSubPool = threadSubPool;
         this.jerseyClient.register(MultiPartWriter.class);
+        this.connectConfig = connectConfig;
     }
 
     public void abandonCalls() {
@@ -91,7 +90,7 @@ public class ServerConnector {
         if (future == null) {
             throw new AiServicesException(String.format("Call %s not found", callName));
         }
-        return future.get(TIMEOUT_SECONDS, TimeUnit.SECONDS);
+        return future.get(connectConfig.getBackendTrainingCallTimeoutMs(), TimeUnit.MILLISECONDS);
     }
 
     private HashMap<String, Future<InvocationResult>> execute(
@@ -184,7 +183,11 @@ public class ServerConnector {
             final UUID devId, final UUID aiid, final String endpoint, Map<String, String> params)
             throws AiServicesException {
         HashMap<String, Callable<InvocationResult>> callables = new HashMap<>();
-        JerseyWebTarget target = this.jerseyClient.target(endpoint).path(devId.toString()).path(aiid.toString());
+        JerseyWebTarget target = this.jerseyClient.target(endpoint)
+                .path(devId.toString())
+                .path(aiid.toString())
+                .property(CONNECT_TIMEOUT, (int) this.connectConfig.getBackendConnectCallTimeoutMs())
+                .property(READ_TIMEOUT, (int) this.connectConfig.getBackendTrainingCallTimeoutMs());
         for (Map.Entry<String, String> param : params.entrySet()) {
             target = target.queryParam(param.getKey(), param.getValue());
         }

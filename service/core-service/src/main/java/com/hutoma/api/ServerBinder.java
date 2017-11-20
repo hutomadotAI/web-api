@@ -11,6 +11,7 @@ import com.hutoma.api.connectors.AiStrings;
 import com.hutoma.api.connectors.AnalyticsESConnector;
 import com.hutoma.api.connectors.EntityRecognizerService;
 import com.hutoma.api.connectors.FacebookConnector;
+import com.hutoma.api.connectors.IConnectConfig;
 import com.hutoma.api.connectors.WebHooks;
 import com.hutoma.api.connectors.aiservices.AIServices;
 import com.hutoma.api.connectors.aiservices.AiServicesQueue;
@@ -68,7 +69,7 @@ public class ServerBinder extends AbstractBinder {
         // infrastructure
         bind(Config.class).to(Config.class).in(Singleton.class);
         bind(Config.class).to(IDatabaseConfig.class).to(IThreadConfig.class).to(ILoggerConfig.class)
-                .in(Singleton.class);
+                .to(IConnectConfig.class).in(Singleton.class);
         bind(DatabaseConnectionPool.class).to(DatabaseConnectionPool.class).in(Singleton.class);
         bind(ThreadPool.class).to(ThreadPool.class).in(Singleton.class);
         bind(ThreadSubPool.class).to(ThreadSubPool.class);

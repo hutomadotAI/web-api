@@ -1,5 +1,6 @@
 package com.hutoma.api.common;
 
+import com.hutoma.api.connectors.IConnectConfig;
 import com.hutoma.api.connectors.db.IDatabaseConfig;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.ILoggerConfig;
@@ -14,7 +15,7 @@ import javax.inject.Singleton;
  * Created by David MG on 02/08/2016.
  */
 @Singleton
-public class Config extends CommonConfig implements ILoggerConfig, IThreadConfig, IDatabaseConfig {
+public class Config extends CommonConfig implements ILoggerConfig, IThreadConfig, IDatabaseConfig, IConnectConfig {
 
     private static final String LOGFROM = "config";
 
@@ -178,8 +179,6 @@ public class Config extends CommonConfig implements ILoggerConfig, IThreadConfig
         return 60 * 1000;
     }
 
-
-
     /***
      * The total number of milliseconds that we wait for backend
      * requests to complete.
@@ -189,6 +188,25 @@ public class Config extends CommonConfig implements ILoggerConfig, IThreadConfig
      */
     public long getBackendCombinedRequestTimeoutMs() {
         return Long.parseLong(getConfigFromProperties("backend_request_timeout_ms", "20000"));
+    }
+
+    /***
+     * The total number of milliseconds that we wait for backend
+     * non-chat commands to complete.
+     * @return
+     */
+    @Override
+    public long getBackendTrainingCallTimeoutMs() {
+        return 20000;
+    }
+
+    /***
+     * The total number of milliseconds that we wait for a backend connect
+     * @return
+     */
+    @Override
+    public long getBackendConnectCallTimeoutMs() {
+        return 10000;
     }
 
     /**

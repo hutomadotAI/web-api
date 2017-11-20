@@ -5,6 +5,7 @@ import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.BackendServerType;
 import com.hutoma.api.connectors.BackendStatus;
+import com.hutoma.api.connectors.IConnectConfig;
 import com.hutoma.api.connectors.InvocationResult;
 import com.hutoma.api.connectors.NoServerAvailableException;
 import com.hutoma.api.connectors.RequestFor;
@@ -38,6 +39,9 @@ import javax.inject.Inject;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 
+import static org.glassfish.jersey.client.ClientProperties.CONNECT_TIMEOUT;
+import static org.glassfish.jersey.client.ClientProperties.READ_TIMEOUT;
+
 public class AIServices extends ServerConnector {
 
     private static final String LOGFROM = "aiservices";
@@ -50,13 +54,14 @@ public class AIServices extends ServerConnector {
     @Inject
     public AIServices(final DatabaseAI databaseAi,
                       final DatabaseEntitiesIntents databaseEntitiesIntents, final ILogger logger,
+                      final IConnectConfig connectConfig,
                       final JsonSerializer serializer,
                       final Tools tools, final JerseyClient jerseyClient,
                       final TrackedThreadSubPool threadSubPool,
                       final AiServicesQueue queueServices,
                       final WnetServicesConnector wnetServicesConnector,
                       final RnnServicesConnector rnnServicesConnector) {
-        super(logger, serializer, tools, jerseyClient, threadSubPool);
+        super(logger, connectConfig, serializer, tools, jerseyClient, threadSubPool);
         this.queueServices = queueServices;
         this.databaseEntitiesIntents = databaseEntitiesIntents;
         this.databaseAi = databaseAi;
@@ -129,7 +134,10 @@ public class AIServices extends ServerConnector {
             callables.put(endpoint, () -> new InvocationResult(
                     null,
                     this.jerseyClient
-                            .target(endpoint).path(devId.toString())
+                            .target(endpoint)
+                            .path(devId.toString())
+                            .property(CONNECT_TIMEOUT, (int) this.connectConfig.getBackendConnectCallTimeoutMs())
+                            .property(READ_TIMEOUT, (int) this.connectConfig.getBackendTrainingCallTimeoutMs())
                             .request()
                             .delete(), endpoint, 0));
         }
