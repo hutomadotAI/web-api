@@ -12,11 +12,14 @@ import com.hutoma.api.connectors.db.DatabaseAI;
 import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.AiDevId;
 import com.hutoma.api.containers.ApiAi;
+import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.sub.AiMinP;
 import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.containers.sub.ChatState;
 import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.logging.ILogger;
+import com.hutoma.api.logging.LogMap;
+import com.hutoma.api.logic.ChatLogic;
 import com.hutoma.api.thread.TrackedThreadSubPool;
 
 import org.glassfish.jersey.client.JerseyClient;
@@ -249,10 +252,15 @@ public class AIChatServices extends ServerConnector {
         return this.minPMap;
     }
 
-    public String getAIPassthroughUrl(UUID devid, UUID aiid) {
+    public String getAIPassthroughUrl(UUID devid, UUID aiid) throws ChatLogic.ChatFailedException {
         String result = null;
         try {
             ApiAi ai = this.databaseAi.getAI(devid, aiid, this.serializer);
+            if (ai == null) {
+                this.logger.logUserWarnEvent(LOGFROM, "Request for unknown AIID for user", devid.toString(),
+                        LogMap.map("AIID", aiid));
+                throw new ChatLogic.ChatFailedException(ApiError.getNotFound("AIID not found"));
+            }
             result = ai.getPassthroughUrl();
         } catch (DatabaseException e) {
             this.logger.logException("Database exception attempting to retrieve PassthroughUrl", e);

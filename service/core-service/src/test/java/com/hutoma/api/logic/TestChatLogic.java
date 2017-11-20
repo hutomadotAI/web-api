@@ -8,6 +8,7 @@ import com.hutoma.api.connectors.chat.AIChatServices;
 import com.hutoma.api.connectors.chat.ChatBackendConnector;
 import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.ApiChat;
+import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.ChatHandoverTarget;
 import com.hutoma.api.containers.sub.ChatResult;
@@ -256,7 +257,8 @@ public class TestChatLogic extends TestChatBase {
          * @throws RequestBase.AiControllerException.
          */
     @Test
-    public void testChat_botPassthrough() throws ChatBackendConnector.AiControllerException, WebHooks.WebHookException {
+    public void testChat_botPassthrough() throws ChatBackendConnector.AiControllerException, WebHooks.WebHookException,
+            ChatLogic.ChatFailedException {
         String passthroughResponse = "different message.";
         WebHookResponse response = new WebHookResponse(passthroughResponse);
 
@@ -275,7 +277,8 @@ public class TestChatLogic extends TestChatBase {
         * @throws RequestBase.AiControllerException.
         */
     @Test
-    public void testChat_botPassthroughIgnored() throws ChatBackendConnector.AiControllerException, WebHooks.WebHookException {
+    public void testChat_botPassthroughIgnored() throws ChatBackendConnector.AiControllerException, WebHooks.WebHookException,
+            ChatLogic.ChatFailedException {
         String passthroughResponse = "won't see this";
         WebHookResponse response = new WebHookResponse(passthroughResponse);
 
@@ -286,6 +289,13 @@ public class TestChatLogic extends TestChatBase {
 
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
         Assert.assertEquals(SEMANTICRESULT, ((ApiChat) result).getResult().getAnswer());
+    }
+
+    @Test
+    public void testChat_botPassthrough_invalidAiidForUser() throws DatabaseException, ChatLogic.ChatFailedException {
+        when(this.fakeChatServices.getAIPassthroughUrl(any(), any())).thenThrow(new ChatLogic.ChatFailedException(ApiError.getNotFound()));
+        ApiResult result = getChat(0.2f);
+        Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
     }
 
     /***

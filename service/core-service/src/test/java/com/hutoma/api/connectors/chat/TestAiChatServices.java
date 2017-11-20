@@ -18,6 +18,7 @@ import com.hutoma.api.containers.sub.AiMinP;
 import com.hutoma.api.containers.sub.ChatState;
 import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.logging.ILogger;
+import com.hutoma.api.logic.ChatLogic;
 import com.hutoma.api.thread.TrackedThreadSubPool;
 
 import org.glassfish.jersey.client.JerseyClient;
@@ -185,6 +186,12 @@ public class TestAiChatServices {
         Assert.assertEquals(bot1.getMinP(), this.chatServices.getMinPMap().get(bot1.getAiid()), 0.00001);
         Assert.assertEquals(bot2.getMinP(), this.chatServices.getMinPMap().get(bot2.getAiid()), 0.00001);
         Assert.assertEquals(minP, this.chatServices.getMinPMap().get(AIID), 0.00001);
+    }
+
+    @Test(expected = ChatLogic.ChatFailedException.class)
+    public void classtestChatservices_passthroughUrl_invalidAiidForDev() throws DatabaseException, ChatLogic.ChatFailedException {
+        when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(null);
+        this.chatServices.getAIPassthroughUrl(DEVID_UUID, AIID);
     }
 
     private void issueStartChatRequests() throws ServerConnector.AiServicesException, ChatBackendConnector.AiControllerException, NoServerAvailableException {
