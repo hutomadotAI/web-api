@@ -250,11 +250,18 @@ public abstract class ChatBackendConnector {
                 .path(devId.toString())
                 .path(aiid.toString())
                 .path("chat");
-        for (Map.Entry<String, String> param : params.entrySet()) {
-            target = target.queryParam(param.getKey(), param.getValue());
-        }
+
+        Map<String, Object> queryParams = new HashMap<>(params);
         // add the hashcode to the query string
-        target = target.queryParam(AI_HASH_PARAM, aiHash);
+        queryParams.put(AI_HASH_PARAM, aiHash);
+
+        // create template
+        for (String param : queryParams.keySet()) {
+            target = target.queryParam(param, String.format("{%s}", param));
+        }
+
+        // encode parameters into template
+        target = target.resolveTemplates(queryParams);
 
         final JerseyInvocation.Builder builder = target.request();
         return () -> {

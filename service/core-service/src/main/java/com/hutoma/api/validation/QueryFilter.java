@@ -85,9 +85,8 @@ public class QueryFilter extends ParameterFilter implements ContainerRequestFilt
             }
             if (checkList.contains(APIParameter.ChatQuestion)) {
                 requestContext.setProperty(APIParameter.ChatQuestion.toString(),
-                        validateFieldLength(1024, "question",
-                                validateRequiredSanitized("question",
-                                        getFirst(queryParameters.get(CHATQUESTION)))));
+                                        validateChatQuestion(
+                                                getFirst(queryParameters.get(CHATQUESTION))));
             }
             if (checkList.contains(APIParameter.AIName)) {
                 requestContext.setProperty(APIParameter.AIName.toString(),
@@ -141,6 +140,17 @@ public class QueryFilter extends ParameterFilter implements ContainerRequestFilt
                             .put("Parameter", pve.getParameterName())
                             .put("Message", pve.getMessage()));
         }
+    }
+
+    /***
+     * Check length and clean up content of chat question
+     * @param chatQuestion
+     * @return cleaned up chat question
+     * @throws ParameterValidationException if question is out of spec
+     */
+    public String validateChatQuestion(String chatQuestion) throws ParameterValidationException {
+        return validateFieldLength(1024, "question",
+                validateRequiredSanitized("question", chatQuestion));
     }
 
     /***

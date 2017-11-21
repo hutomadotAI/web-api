@@ -22,6 +22,8 @@ import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.containers.sub.MemoryVariable;
 import com.hutoma.api.containers.sub.WebHookResponse;
 import com.hutoma.api.memory.ChatStateHandler;
+import com.hutoma.api.validation.ParameterValidationException;
+import com.hutoma.api.validation.QueryFilter;
 
 import org.joda.time.DateTime;
 import org.junit.Assert;
@@ -79,11 +81,10 @@ public class TestFacebookChatHandler {
     private DatabaseIntegrations fakeDatabaseIntegrations;
     private ILogger fakeLogger;
     private FacebookConnector fakeConnector;
-    private FacebookToken fakeToken;
-    private FacebookNode fakeNode;
     private IntegrationRecord fakeIntegrationRecord;
     private Provider<ChatLogic> fakeChatLogicProvider;
     private ChatLogic fakeChatLogic;
+    private Provider<QueryFilter> fakeQueryFilterProvider;
     private ChatResult chatResult;
     private String fbPostback = "{\"object\":\"page\",\"entry\":[{\"id\":\"1731355550428969\","
             + "\"time\":1498224298036,\"messaging\":[{\"sender\":{\"id\":\"" + SENDER + "\"},"
@@ -95,7 +96,7 @@ public class TestFacebookChatHandler {
             + "\"recipient\":{\"id\":\"632106133664550\"},\"timestamp\":1498224297854}]}]}";
 
     @Before
-    public void setup() throws DatabaseException, FacebookException, ChatLogic.ChatFailedException, ChatStateHandler.ChatStateException {
+    public void setup() throws DatabaseException, FacebookException, ChatLogic.ChatFailedException, ChatStateHandler.ChatStateException, ParameterValidationException {
         this.fakeConfig = mock(Config.class);
         this.serializer = new JsonSerializer();
         this.fakeDatabaseIntegrations = mock(DatabaseIntegrations.class);
@@ -121,8 +122,14 @@ public class TestFacebookChatHandler {
         when(this.fakeChatLogicProvider.get()).thenReturn(this.fakeChatLogic);
         when(this.fakeChatLogic.chatFacebook(Matchers.eq(TestDataHelper.AIID), any(), any(), any(), any()))
                 .thenAnswer(invocation -> this.chatResult);
+
+        this.fakeQueryFilterProvider = mock(Provider.class);
+        when(this.fakeQueryFilterProvider.get()).thenReturn(
+                new QueryFilter(this.fakeLogger, mock(Tools.class), this.serializer));
+
         this.chatHandler = new FacebookChatHandler(this.fakeDatabaseIntegrations, this.fakeLogger,
-                this.serializer, this.fakeConnector, this.fakeChatLogicProvider, mock(Tools.class));
+                this.serializer, this.fakeConnector, this.fakeChatLogicProvider, this.fakeQueryFilterProvider,
+                mock(Tools.class));
 
         this.chatHandler.initialise(
                 new FacebookNotification.Messaging(SENDER, PAGEID, MESSAGE));
@@ -157,14 +164,14 @@ public class TestFacebookChatHandler {
 
     @Test
     public void testChat_OK_NotTruncated() throws Exception {
-        String answer = String.join("", Collections.nCopies(640, "A"));
+        String answer = TestDataHelper.stringOfLength(640);
         List<FacebookResponseSegment> chatOutput = makeChatCall(answer, null);
         Assert.assertEquals(answer, getOutput(chatOutput.get(0)).getText());
     }
 
     @Test
     public void testChat_OK_Truncated() throws Exception {
-        String answer = String.join("", Collections.nCopies(1000, "A"));
+        String answer = TestDataHelper.stringOfLength(1000);
         List<FacebookResponseSegment> chatOutput = makeChatCall(answer, null);
         Assert.assertEquals(640, getOutput(chatOutput.get(0)).getText().length());
     }
@@ -177,6 +184,40 @@ public class TestFacebookChatHandler {
         verify(this.fakeConnector, times(1)).sendFacebookMessage(
                 Matchers.eq(SENDER), Matchers.eq(PAGETOKEN),
                 any());
+    }
+
+    @Test
+    public void testChat_ValidationError() throws Exception {
+
+        QueryFilter fakeQueryFilter = mock(QueryFilter.class);
+        when(fakeQueryFilter.validateChatQuestion(anyString()))
+                .thenThrow(new ParameterValidationException("test", "test"));
+        when(this.fakeQueryFilterProvider.get()).thenReturn(fakeQueryFilter);
+        verifyRequestIgnored();
+        // verify database status updated
+        verify(this.fakeDatabaseIntegrations, times(1))
+                .updateIntegrationStatus(any(), any(), any(), anyBoolean());
+    }
+
+    @Test
+    public void testChat_Validation_QEmpty() throws Exception {
+        this.chatHandler.initialise(
+                new FacebookNotification.Messaging(SENDER, PAGEID, ""));
+        verifyRequestIgnored();
+    }
+
+    @Test
+    public void testChat_Validation_QEmptyContent() throws Exception {
+        this.chatHandler.initialise(
+                new FacebookNotification.Messaging(SENDER, PAGEID, "     "));
+        verifyRequestIgnored();
+    }
+
+    @Test
+    public void testChat_Validation_TooLong() throws Exception {
+        this.chatHandler.initialise(
+                new FacebookNotification.Messaging(SENDER, PAGEID, TestDataHelper.stringOfLength(1024 + 1)));
+        verifyRequestIgnored();
     }
 
     @Test
@@ -480,4 +521,13 @@ public class TestFacebookChatHandler {
         this.chatHandler.call();
         return chatOutput;
     }
+
+    private void verifyRequestIgnored() throws Exception {
+        this.chatHandler.call();
+        verify(this.fakeChatLogic, never()).chatFacebook(
+                Matchers.eq(TestDataHelper.AIID), any(), any(), anyString(), any());
+        verify(this.fakeConnector, never()).sendFacebookMessage(
+                any(), any(), any());
+    }
+    
 }

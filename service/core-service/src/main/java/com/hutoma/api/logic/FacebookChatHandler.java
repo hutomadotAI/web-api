@@ -18,6 +18,8 @@ import com.hutoma.api.containers.sub.MemoryVariable;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
 import com.hutoma.api.memory.ChatStateHandler;
+import com.hutoma.api.validation.ParameterValidationException;
+import com.hutoma.api.validation.QueryFilter;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -36,6 +38,7 @@ public class FacebookChatHandler implements Callable {
     private final DatabaseIntegrations databaseIntegrations;
     private final ILogger logger;
     private Provider<ChatLogic> chatLogicProvider;
+    private final Provider<QueryFilter> queryFilter;
     private FacebookConnector facebookConnector;
     private JsonSerializer serializer;
     private Tools tools;
@@ -46,10 +49,12 @@ public class FacebookChatHandler implements Callable {
                                final JsonSerializer serializer,
                                final FacebookConnector facebookConnector,
                                final Provider<ChatLogic> chatLogicProvider,
+                               final Provider<QueryFilter> queryFilter,
                                final Tools tools) {
         this.databaseIntegrations = databaseIntegrations;
         this.logger = logger;
         this.chatLogicProvider = chatLogicProvider;
+        this.queryFilter = queryFilter;
         this.facebookConnector = facebookConnector;
         this.serializer = serializer;
         this.tools = tools;
@@ -184,12 +189,15 @@ public class FacebookChatHandler implements Callable {
                 facebookThinksWeAreTyping = true;
 
                 try {
+
+                    // validate and clean up the text question
+                    userQuery = queryFilter.get().validateChatQuestion(userQuery);
+
                     // hash the sender ID and the aiid together to get a chatID
                     // that is unique to each user-page pair
                     UUID chatID = generateChatId(integrationRecord.getAiid(), messageOriginatorId);
 
                     // TODO: rate limiting
-                    // TODO: load chat state and check sequence number
 
                     // call the chat logic to get a response
                     List<FacebookResponseSegment> response = getChatResponse(integrationRecord,
@@ -228,7 +236,10 @@ public class FacebookChatHandler implements Callable {
                         this.logger.logDebug(LOGFROM, "chat has been handed over to an external entity",
                                 logMap);
                     }
-
+                } catch (ParameterValidationException pve) {
+                    status = pve.getMessage();
+                    this.logger.logDebug(LOGFROM, "Facebook chat ignored due to failed validation",
+                            logMap.put("Validation", status));
                 } finally {
                     if (facebookThinksWeAreTyping) {
                         this.facebookConnector.sendFacebookSenderAction(messageOriginatorId,
@@ -240,10 +251,8 @@ public class FacebookChatHandler implements Callable {
             // save the status in the integration record to feed it back to the user
             this.databaseIntegrations.updateIntegrationStatus(integrationRecord.getAiid(),
                     IntegrationType.FACEBOOK, status, chatSuccess);
-        } catch (DatabaseException dbe) {
-            this.logger.logException(LOGFROM, dbe);
-        } catch (Exception e) {
-            this.logger.logException(LOGFROM, e);
+        } catch (DatabaseException e) {
+            this.logger.logException(LOGFROM, e, logMap);
         }
 
         return null;
