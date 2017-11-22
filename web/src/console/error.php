@@ -1,41 +1,26 @@
 <?php
-require "../pages/config.php";
-require_once "../console/api/botstoreApi.php";
+namespace hutoma;
 
-\hutoma\telemetry::getInstance()->log(\hutoma\TelemetryEvent::ERROR, "errorpage", $_GET['err'],
-    array(
-        "referrer" => $_SERVER['HTTP_REFERER'],
-        "errorObject" => isset($_GET['errObj']) ? $_GET['errObj'] : ""
-    ));
+require_once __DIR__ . "/common/globals.php";
+require_once __DIR__ . "/common/sessionObject.php";
+require_once __DIR__ . "/common/utils.php";
+require_once __DIR__ . "/common/logging.php";
+require_once __DIR__ . "/api/apiBase.php";
+require_once __DIR__ . "/api/botstoreApi.php";
 
-if(!\hutoma\console::checkSessionIsActive()){
-    exit;
-}
 
+logging::error(sprintf("%s - referrer: %s  msg: %s", $_GET['err'], $_SERVER['HTTP_REFERER'], $_GET['msg']));
+
+
+sessionObject::redirectToLoginIfUnauthenticated();
+$header_page_title = "Error";
+include __DIR__ . "/include/page_head_default.php";
+include __DIR__ . "/include/page_body_default.php";
+include __DIR__ . "/include/page_menu.php";
 ?>
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>hu:toma |ERROR PAGE</title>
-    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-
-    <link rel="stylesheet" href="./bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet" href="./dist/css/font-awesome.min.css">
-    <link rel="stylesheet" href="scripts/external/datatables/dataTables.bootstrap.css">
-    <link rel="stylesheet" href="./dist/css/hutoma.css">
-    <link rel="stylesheet" href="./dist/css/skins/skin-blue.css">
-
-</head>
-
-<body class="hold-transition skin-blue fixed sidebar-mini">
-<?php include_once "../console/common/google_analytics.php"; ?>
 
 <div class="wrapper">
-    <header class="main-header">
-        <?php include './dynamic/header.html.php'; ?>
-    </header>
+    <?php include __DIR__ . "/include/page_header_default.php"; ?>
 
     <aside class="main-sidebar ">
         <section class="sidebar">
@@ -50,19 +35,17 @@ if(!\hutoma\console::checkSessionIsActive()){
     <!-- ================ PAGE CONTENT ================= -->
     <div class="content-wrapper">
         <section class="content">
-            <?php include './dynamic/error.content.html.php'; ?>
+            <?php include __DIR__ . '/dynamic/error.content.html.php'; ?>
         </section>
     </div>
 
-    <footer class="main-footer">
-        <?php include './dynamic/footer.inc.html.php'; ?>
-    </footer>
+    <?php include __DIR__ . '/include/page_footer_default.php'; ?>
 </div>
 
-<script src="scripts/external/jQuery/jQuery-2.1.4.min.js"></script>
-<script src="./bootstrap/js/bootstrap.min.js"></script>
-<script src="scripts/external/slimScroll/jquery.slimscroll.min.js"></script>
-<script src="scripts/external/fastclick/fastclick.min.js"></script>
-<script src="./dist/js/app.min.js"></script>
+<script src="/console/dist/vendors/jQuery/jQuery-2.1.4.min.js"></script>
+<script src="/console/dist/vendors/bootstrap/js/bootstrap.min.js"></script>
+<script src="/console/dist/vendors/slimScroll/jquery.slimscroll.min.js"></script>
+<script src="/console/dist/vendors/fastclick/fastclick.min.js"></script>
+<script src="/console/dist/vendors/app.min.js"></script>
 </body>
 </html>

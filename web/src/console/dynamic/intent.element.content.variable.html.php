@@ -42,21 +42,26 @@
                         Entity
                     </div>
                 </div>
-                <div class="col-xs-3">
+                <div class="col-xs-2">
                     <div class="text-center">
                         <i class="fa fa-sliders text-md text-red"></i>
-                        N°prompts
+                        Times to prompt
                     </div>
                 </div>
-                <div class="col-xs-4">
+                <div class="col-xs-2">
                     <div class="text-center">
                         <i class="fa  fa-comments text-md text-blue"></i>
-                        Prompt
+                        Prompts
                     </div>
                 </div>
                 <div class="col-xs-2">
                     <div class="text-center">
                         Required
+                    </div>
+                </div>
+                <div class="col-xs-2">
+                    <div class="text-center">
+                        Label
                     </div>
                 </div>
             </div>
@@ -71,7 +76,7 @@
 
     <div class="box-footer">
         <span>
-            If you’re stuck check out our <a data-toggle="collapse" href="#collapseVideoTutorialIntent">intents variables tutorial</a> or email <a href='mailto:support@hutoma.com?subject=Invite%20to%20slack%20channel' tabindex="-1">support@hutoma.com</a> for an invite to our slack channel.
+            If you’re stuck check out our <a data-toggle="collapse" href="#collapseVideoTutorialIntent">intents variables tutorial</a> or email <a href='mailto:support@hutoma.ai?subject=Invite%20to%20slack%20channel' tabindex="-1">support@hutoma.ai</a> for an invite to our slack channel.
         </span>
         <p></p>
     </div>

@@ -1,8 +1,8 @@
 <!-- Modal PROMPT -->
 <div class="modal fade" id="boxPrompts" role="dialog">
-    <div class="modal-dialog flat">
+    <div class="modal-dialog flat width600">
         <!-- Modal Prompt content-->
-        <div class="modal-content bordered" style="background-color: #202020">
+        <div class="modal-content bordered" style="background-color: #202020;">
 
             <div class="modal-header">
                 <button type="button" class="close text-gray" id="btnModelClose" data-dismiss="modal">&times;</button>
@@ -32,7 +32,8 @@
                 </tr>
                 <tr style="padding-top: 5px;">
                     <td class="text-center" style="width:33.3333336%; padding-left:10px;" >
-                        <input type="text-center" class="form-control flat no-shadow no-border text-center" name="curr_intent" value="" style="text-align:center;  background-color: #515151;" disabled/>
+                        <input type="hidden" id="var_row" name="var_row" value=""/>
+                        <input type="text" class="form-control flat no-shadow no-border text-center" name="curr_intent" value="" style="text-align:center;  background-color: #515151;" disabled/>
                     </td>
                     <td class="text-center" style="width:33.3333336%;">
                         <input type="text" class="form-control flat no-shadow" name="curr_entity" id="curr_entity" value="" style="text-align:center; background-color: #515151;" disabled/>

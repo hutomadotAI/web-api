@@ -12,7 +12,7 @@
     <div class='box-body'>
         You're amongst the very first people to have access to our platform! Thanks for your support! We're in beta, so your feedback and patience would be incredibly helpful.<br>
         <br>
-        <button class="btn btn-success btn-lg center-block flat" id="btnCreateAI"> <b>Create New Bot</b> <span class="fa fa-arrow-circle-right"></span></button>
+        <button class="btn btn-success btn-lg center-block flat" id="btnCreateAI" onclick="window.location.href = './newAI.php'"> <b>Create New Bot</b> <span class="fa fa-arrow-circle-right"></span></button>
         <p></p>
 
         <div id="collapseStart" class="panel-collapse collapse">
@@ -30,7 +30,7 @@
 
     <div class="box-footer">
         <span>
-            If you’re stuck check out our <a data-toggle="collapse" href="#collapseCreateBotVideoTutorial">video tutorial</a> or email <a href='mailto:support@hutoma.com?subject=Invite%20to%20slack%20channel' tabindex="-1">support@hutoma.com</a> for an invite to our slack channel.
+            If you’re stuck check out our <a data-toggle="collapse" href="#collapseCreateBotVideoTutorial">video tutorial</a> or email <a href='mailto:support@hutoma.ai?subject=Invite%20to%20slack%20channel' tabindex="-1">support@hutoma.ai</a> for an invite to our slack channel.
         </span>
         <p></p>
 
@@ -39,7 +39,7 @@
                 <div class="overlay center-block">
                     <div class="embed-responsive embed-responsive-16by9" id="videoCreateBot">
                         <iframe
-                            src="//www.youtube.com/embed/__pO6wVvBEY?controls=1&hd=1&enablejsapi=1"
+                            src="//www.youtube.com/embed/uFj73npjhbk?controls=1&hd=1&enablejsapi=1"
                             frameborder="0" allowfullscreen>
                         </iframe>
                     </div>

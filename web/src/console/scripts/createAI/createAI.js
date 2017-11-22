@@ -67,9 +67,12 @@ function activeButtonCreate() {
 }
 
 function setConfidenceValueBeforePosting(){
+    // copy from the slider to the hidden input variable
     var element = document.getElementById('ai_confidence');
-    var confidence_text = element.value;
-    element.value = getValueFromConfidence(confidence_text);
+    var confidence_value = getValueFromConfidence(element.value);
+    var param_element = document.getElementById('ai_confidence_param');
+    param_element.value = confidence_value;
+
 }
 
 function checkDescriptionLength() {
@@ -102,7 +105,7 @@ $(document).ready(function(){
             document.getElementById('btnNext').setAttribute('disabled','disabled');
     }
     else {
-        setSliderValue('ai_confidence', 0.2); // default value "sometimes"
+        setSliderValue('ai_confidence', 0.4); // default value "sometimes"
     }
     if(err) {
         document.getElementById('containerMsgAlertNewAI').style.display = 'block';

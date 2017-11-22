@@ -1,10 +1,3 @@
-document.getElementById("btnCreateAI").addEventListener("click", wizardCreate);
-
-function wizardCreate() {
-    $(this).prop("disabled", true);
-    RecursiveUnbind($('#wrapper'));
-    window.location.href = './newAI.php';
-}
 
 function sendAIID(elem, action) {
     var value = elem.value;
@@ -25,45 +18,49 @@ function recursiveDisable($jElement) {
 
 function drawTableRows() {
 
-    // dependence by aiList from php server
-    for (var i = 0, len = aiList.length; i < len; i++) {
-        var wHTML = '';
-        var newNode = document.createElement('tr');
-        wHTML += '<td class="text-gray"style="padding-top: 15px;">' + aiList[i]['name'] + '</td>';
-        wHTML += '<td style="padding-top: 15px;">' + htmlEncode(aiList[i]['description']) + '</td>';
-        wHTML += '<td class="text-center" style="padding-top: 15px;">' + decodeAIState(aiList[i]['ai_status']) + '</td>';
+    var view = {
+        ais: aiList.map(function(ai, index) {
+            var canBePublished = ai.publishing_state === 'NOT_PUBLISHED' && ai.ai_status === 'ai_training_complete';
+            if (canBePublished) {
+                ai.canBePublished = true;
+            } else {
+                if (ai.publishing_state === 'NOT_PUBLISHED') {
+                    ai.cannotBePublished = true;
+                }
+            }
+            if (ai.publishing_state === 'SUBMITTED') {
+                ai.submittedForPublishing = true;
+            }
+            if (ai.publishing_state === 'PUBLISHED') {
+                ai.published = true;
+            }
+            ai.trainingStatusString = decodeAIState(ai.ai_status);
+            ai.oddEven = index % 2 === 0 ? 'odd' : 'even';
+            if (ai.linked_bots.length > 0) {
+                ai.numLinkedSkills = ai.linked_bots.length;
+            }
 
-        var publishDisabled = aiList[i]['ai_status'] === 'ai_training_complete' ? 'onClick="sendAIID(this,\'./publishAI.php\')"' : ' data-toggle="tooltip" title="The bot needs to be fully trained before being published" ';
-        wHTML += '<td style="padding-top: 8px;padding-right: 0px;">';
-        if (aiList[i]['publishing_state'] == "NOT_PUBLISHED") {
-            wHTML += '<button type="button" id="btnPublishAI"  value="' + aiList[i]['aiid'] + '"';
-            wHTML += publishDisabled + 'class="btn btn-info flat pull-right" style="margin-right: 0px; width: 125px;">' + '<b> <span class="fa fa-globe"></span>';
-            wHTML += ' Publish Bot</b></button></td>';
-        }
-        else if (aiList[i]['publishing_state'] == "SUBMITTED") {
-            wHTML += '<button type="button" id="btnPublishAI"  value="' + aiList[i]['aiid'] + '"' + 'onClick="" class="btn btn-warning flat pull-right" style="margin-right: 0px; width: 125px;">' + '<b>';
-            wHTML += ' Request Sent</b></button></td>';
-        }
-        else if (aiList[i]['publishing_state'] == "PUBLISHED") {
-            wHTML += '<button type="button" id="btnPublishAI"  value="' + aiList[i]['aiid'] + '"' + 'onClick="" class="btn btn-warning flat pull-right" style="margin-right: 0px; width: 125px;">' + '<b>';
-            wHTML += ' Published</b></button></td>';
-        }
-        else {
-            // Don't show any button.
-        }
+            if (canBePublished) {
+                if (ai.numLinkedSkills > 0) {
+                    ai.publishButtonTooltip = 'We do not currently support publishing with linked skills. Please remove them if you’d like your bot to be published.';
+                }
+            } else if (ai.ai_status !== 'ai_training_complete') {
+                ai.publishButtonTooltip = 'The bot needs to be fully trained before being published';
+            }
 
-        wHTML += '<td style="padding-top: 8px;padding-right: 0px;">';
-        wHTML += '<button type="button" id="btnSelectAI"  value="' + aiList[i]['aiid'] + '"';
-        wHTML += 'onClick="sendAIID(this,\'./dynamic/sessionAI.php\')" class="btn btn-primary flat pull-right" style="margin-right: 0px; width: 115px;">';
-        wHTML += '<b> <span class="fa fa-search">';
-        wHTML += '</span> View Bot </b></button></td>';
+            return ai;
+        }).sort(function(a, b){
+            if (a.created_on < b.created_on)
+                return 1;
+            else if (a.created_on > b.created_on)
+                return -1;
+            return 0;
+        })
+    };
 
-        newNode.innerHTML = wHTML;
-        document.getElementById('tableAiList').appendChild(newNode);
-        var list = document.getElementById('tableAiList');
-        list.insertBefore(newNode, list.childNodes[0]);
-    }
-
+    $.get('templates/own_bots_list.mustache', function(template) {
+        $('#tableAiList').html(Mustache.render(template, view));
+    });
 }
 
 function decodeAIState(state) {
@@ -85,10 +82,10 @@ function decodeAIState(state) {
             return ('<span class="text-olive">Completed</span>');
             break;
         case API_AI_STATE.ERROR.value :
-            return ('<span class="text-red" flat>Error</span>');
+            return ('<span class="text-red flat">Error</span>');
             break;
         default:
-            return ('<span class="text-red" flat></span>');
+            return ('<span class="text-red flat"></span>');
     }
 }
 
@@ -96,21 +93,5 @@ function decodeAIState(state) {
 $("#collapseFirstVideoTutorial").on('hidden.bs.collapse', function () {
     var iframe = document.getElementsByTagName("iframe")[0].contentWindow;
     iframe.postMessage('{"event":"command","func":"' + 'pauseVideo' + '","args":""}', '*');
-});
-
-$(document).ready(function () {
-    drawTableRows();
-
-    $(function () {
-        $('#tableAi').DataTable({
-            "paging": true,
-            "lengthChange": false,
-            "searching": false,
-            "ordering": false,
-            "info": true,
-            "autoWidth": false,
-            "pageLength": 5
-        });
-    });
 });
 

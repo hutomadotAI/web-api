@@ -1,20 +1,11 @@
 var variables = [];
 var ID_pool;
 
-function getMultipleElementValues(elementName) {
-    var values = [];
-    var elements = document.getElementsByName(elementName);
-    for (var i = 0; i < elements.length; i++) {
-        values.push(addEscapeCharacter(elements[i].value));
-    }
-    return values;
-}
-
 function getWebHookValues() {
     var webhook = {};
     webhook['intent_name'] = document.getElementById('intent-name').value;
     webhook['endpoint'] = document.getElementById('webhook').value;
-    webhook['enabled'] = !(webhook['endpoint'].trim()=="");
+    webhook['enabled'] = !(webhook['endpoint'].trim()==="");
     return webhook;
 }
 
@@ -24,14 +15,6 @@ function enableSaving(state){
 
 function isDataChanged(){
     return data_changed;
-}
-
-function addEscapeCharacter(value) {
-    return value.replace(/,/g, "||#44;");
-}
-
-function removeEscapeCharacter(value) {
-    return value.replace(/\|\|#44;/g, ",");
 }
 
 function saveIntent() {
@@ -44,12 +27,16 @@ function saveIntent() {
     var variables = [];
 
     var hasErrors = false;
-    if (expressions.length == 0) {
+    if (expressions.length === 0) {
         msgAlertUserExpression(ALERT.DANGER.value, 'At least one user expression is required.');
         hasErrors = true;
     }
-    if (responses.length == 0) {
+    if (responses.length === 0) {
         msgAlertIntentResponse(ALERT.DANGER.value, 'At least one response is required.');
+        hasErrors = true;
+    }
+    if (webhook['enabled'] && isInputInvalid(webhook['endpoint'], 'webhook')){
+        msgAlertWebHook(ALERT.DANGER.value, 'Please enter a valid URL.');
         hasErrors = true;
     }
     if (hasErrors) {
@@ -59,6 +46,7 @@ function saveIntent() {
 
     var node = document.getElementById('parameter-list');
     var len = node.childNodes.length;
+    var labelsMap = new Object();
 
     for (var i = 0; i < len; i++) {
         var v = {};
@@ -66,7 +54,7 @@ function saveIntent() {
         //*** check validation entity name
         var node_entity = node.children[i].children[0].children[0].children[0];
         var elem = $(node_entity).find("ul").find("li.selected");
-        if (elem.text() == '') {
+        if (elem.text() === '') {
             node.children[i].children[0].children[0].children[0].style.border = "thin dotted red";
             msgAlertIntentVariable(ALERT.DANGER.value, 'Cannot save. Missing entity.');
             msgAlertIntentElement(ALERT.DANGER.value, 'Intent not saved: Please review the errors below.');
@@ -78,7 +66,7 @@ function saveIntent() {
         //*** check validation n prompt
         var node_nprompt = node.children[i].children[1].children[0].children[0];
 
-        if (node_nprompt.value != '' && node_nprompt.value !== 'undefined') {
+        if (node_nprompt.value !== '' && typeof node_nprompt.value !== 'undefined') {
             if (isInputInvalid(node_nprompt.value, 'intent_n_prompt')) {
                 node.children[i].children[1].children[0].children[0].style.border = "thin dotted red";
                 msgAlertIntentVariable(ALERT.DANGER.value, 'The number of prompts must be between 1 and 99.');
@@ -88,7 +76,7 @@ function saveIntent() {
             node_nprompt.setAttribute('placeholder', node_nprompt.value);
         }
 
-        if (node_nprompt.getAttribute('placeholder') == 'n° prompt') {
+        if (node_nprompt.getAttribute('placeholder') === 'n° prompt') {
             node.children[i].children[1].children[0].children[0].style.border = "thin dotted red";
             msgAlertIntentVariable(ALERT.DANGER.value, 'Cannot save. Missing n° prompt value.');
             msgAlertIntentElement(ALERT.DANGER.value, 'Intent not saved: Please review the errors below.');
@@ -100,26 +88,50 @@ function saveIntent() {
         //*** check validation list prompts
         var node_prompt = node.children[i].children[2].children[0].children[0];
         var list_prompt = node_prompt.getAttribute('data-prompts');
-        var prompts_split = list_prompt.split(',');
+        var prompts = decodeCSStringAsArray(list_prompt);
 
-        if (list_prompt == '' || prompts_split.length == 0) {
+        if (list_prompt === '' || prompts.length === 0) {
             node.children[i].children[2].children[0].children[0].style.border = "thin dotted red";
             msgAlertIntentVariable(ALERT.DANGER.value, 'Please add at least one prompt before saving.');
             msgAlertIntentElement(ALERT.DANGER.value, 'Intent not saved: Please review the errors below.');
             return false;
         }
 
-
-        var promptsArray = [];
-        for (var j = 0; j < prompts_split.length; j++)
-            promptsArray.push(removeEscapeCharacter(prompts_split[j]));
-        v['prompts'] = promptsArray;
+        v['prompts'] = prompts;
 
         //*** check required checkbox
         var node_required = node.children[i].children[3].children[0].children[0].children[0];
         v['required'] = node_required.checked;
 
+        var labelElement = node.children[i].children[4].children[0].children[0].children[0];
+        v['label'] = labelElement.value;
+
         variables.push(v);
+
+        var labelArray = [];
+        if(labelsMap.hasOwnProperty(v['entity_name'])) {
+            labelArray = labelsMap[v['entity_name']];
+        }
+        labelArray.push({label: v['label'].trim(), node: labelElement});
+        labelsMap[v['entity_name']] = labelArray;
+    }
+
+
+    var usedLabels = new Object();
+    for (var entityName in labelsMap) {
+        if (labelsMap.hasOwnProperty(entityName)) {
+            var labelArr = labelsMap[entityName];
+            for (var x in labelArr) {
+                var label = labelArr[x].label;
+                if (label === "" || usedLabels.hasOwnProperty(label)) {
+                    labelArr[x].node.style.border = "thin dotted red";
+                    msgAlertIntentVariable(ALERT.DANGER.value, 'You need to provide a unique label for each entity.');
+                    msgAlertIntentElement(ALERT.DANGER.value, 'Intent not saved: Please review the errors below.');
+                    return false;
+                }
+                usedLabels[label] = true;
+            }
+        }
     }
 
     if (!isDataChanged()) {
@@ -127,13 +139,17 @@ function saveIntent() {
         return false;
     }
 
-    var prevCursor = document.body.style.cursor;
-    document.body.style.cursor = 'wait';
     $("#btnSaveIntent").prop("disabled", true);
     resetMsgAlertIntentVariable();
     msgAlertIntentElement(ALERT.WARNING.value, 'saving...');
-    $.ajax({
-        url: './dynamic/updateIntent.php',
+
+    saveIntentToApi(intentName, expressions, responses, variables, webhook);
+}
+
+function saveIntentToApi(intentName, expressions, responses, variables, webhook) {
+    var prevCursor = document.body.style.cursor;
+    var request = {
+        url: './proxy/intentProxy.php',
         data: {
             intent_name: intentName,
             intent_expressions: expressions,
@@ -141,63 +157,42 @@ function saveIntent() {
             variables: variables,
             webhook: webhook
         },
-        type: 'POST',
-        success: function (response) {
-            var JSONdata = JSON.parse(response);
-            switch (JSONdata['status']['code']) {
-                case 200:
-                    msgAlertIntentElement(ALERT.PRIMARY.value, 'Intent saved');
-                    enableSaving(false);
-                    if (trainingFile)
-                        createWarningIntentAlert(INTENT_ACTION.SAVE_INTENT.value);
-                    break;
-                case 400:
-                    msgAlertIntentElement(ALERT.DANGER.value, JSONdata['status']['info']);
-                    break;
-                case 500:
-                    msgAlertIntentElement(ALERT.DANGER.value, JSONdata['status']['info']);
-                    break;
-                default:
-                    msgAlertIntentElement(ALERT.DANGER.value, JSONdata['status']['info']);
-            }
+        verb: 'PUT',
+        onGenericError: function (statusMessage) {
+            msgAlertIntentElement(ALERT.DANGER.value, statusMessage === null
+                ? "There was a problem saving the intent." : statusMessage);
         },
-        complete: function () {
-            $("#btnSaveIntent").prop("disabled", false);
+        onOK: function(response) {
+            msgAlertIntentElement(ALERT.PRIMARY.value, 'Intent saved');
+            enableSaving(false);
+            createWarningIntentAlert(INTENT_ACTION.SAVE_INTENT.value);
+        },
+        onShowError: function (message) {
+            msgAlertIntentElement(message);
+        },
+        onComplete: function () {
             document.body.style.cursor = prevCursor;
-        },
-        error: function (xhr, ajaxOptions, thrownError) {
-            //alert(xhr.status + ' ' + thrownError);
-            msgAlertIntentElement(ALERT.DANGER.value, 'Unexpected error occurred. Intent not saved!');
         }
-    });
+
+    };
+    document.body.style.cursor = 'wait';
+    commonAjaxApiRequest(request);
 }
 
 $('#boxPrompts').on('show.bs.modal', function (e) {
-    var parent = $(e.relatedTarget).parent().parent().parent();
-
-    //send to modal current entity name selected from first node in the current variables row selected
-    var node_entity = parent.children().children().children();
-    var elem = $(node_entity).find("ul").find("li.selected");
-    var curr_entity = elem.text();
-    $(e.currentTarget).find('input[name="curr_entity"]').val(curr_entity);
-
-    //send to modal current intent store in data-intent html
-    var curr_intent = document.getElementById('intent-name').value;
-    $(e.currentTarget).find('input[name="curr_intent"]').val(curr_intent);
-
-    //send to modal current n prompt value or placeholder if is not changed from second node in the current variables row selected
-    var node_n_prompts = parent.children().eq(1).children().children();
-    var curr_n_prompts;
-    if (node_n_prompts.val() == '' || node_n_prompts.val() == 'n° prompt')
-        curr_n_prompts = node_n_prompts.attr('placeholder');
-    else
-        curr_n_prompts = node_n_prompts.val();
-    $(e.currentTarget).find('input[name="curr_n_prompts"]').val(curr_n_prompts);
-
-    // remove character @
-    curr_entity = curr_entity.replace(/[@]/g, "");
-
+    var rowElement = $(e.relatedTarget).parent().parent().parent();
     cleanupromptDialogbox();
-    loadPromptsForEntity(curr_entity)
+    loadPromptsForEntity(rowElement, e.currentTarget);
 });
 
+window.addEventListener('beforeunload', function (e) {
+    if (data_changed) {
+        var message = 'Are you sure you want to leave this page?';
+        // For IE and Firefox prior to version 4
+        if (e || window.event) {
+            e.returnValue = message;
+        }
+        // For Safari
+        return message;
+    }
+});

@@ -1,7 +1,7 @@
 document.getElementById("btnCreateIntent").addEventListener("click", postingIntentName);
 
 function checkIntentCode(element, key) {
-    if (key == 13) {
+    if (key === 13) {
         if (activeButtonCreateIntent())
             postingIntentName();
     }
@@ -44,9 +44,7 @@ function postingIntentName() {
     RecursiveUnbind($('#wrapper'));
 }
 
-function showIntents(str) {
-    var wHTML = "";
-
+function showIntents(filter) {
     if (intents.length < 1) {
         msgAlertIntent(ALERT.BASIC.value, 'No intents yet. Create the first one.');
         return;
@@ -54,41 +52,40 @@ function showIntents(str) {
     else
         msgAlertIntent(ALERT.BASIC.value, 'Create an Intent to trigger your own business logic.');
 
+    var view = {
+        intents: intents.filter(function (item) {
+            return !(filter.trim() !== "" && item.toLowerCase().indexOf(filter.toLowerCase()) === -1);
+        }).map(function (intent, index) {
+            return {name: intent, index: index};
+        })
+    };
 
-    for (var x in intents) {
-        if ((str != " ") && ( (str.length == 0) || (intents[x].toLowerCase()).indexOf(str.toLowerCase()) != -1 )) {
-
-            wHTML += ('<div class="col-xs-12">');
-            wHTML += ('<div class="box-body flat no-padding" onmouseover="OnMouseIn (this)" onmouseout="OnMouseOut (this)">');
-            wHTML += ('<div class="row item-row">');
-
-            wHTML += ('<div class="col-xs-10 no-padding" id="obj-intent">');
-            wHTML += ('<input type="text" class="form-control flat no-shadow" id="intent-label' + x + '"  name="intent-label" onClick="editIntent(this,this.value)" onMouseOver="this.style.cursor=\'pointer\'" style="padding-left:10px; background-color: #404446; " value="' + intents[x] + '" readonly>');
-            wHTML += ('</div>');
-
-            wHTML += ('<div class="col-xs-2" id="btnEnt"  style="display:none;margin-top:8px;padding-righ:8px;"" >');
-            wHTML += ('<div class="btn-group pull-right text-gray">');
-
-            wHTML += ('<a data-toggle="modal" data-target="#deleteIntent" id="' + x + '" style="cursor: pointer;">');
-            wHTML += ('<i class="fa fa-trash-o text-gray" data-toggle="tooltip" title="Delete"></i>');
-            wHTML += ('</a>');
-            wHTML += ('</div>');
-
-            wHTML += ('</div>');
-            wHTML += ('</div>');
-
-            wHTML += ('</div>');
-            wHTML += ('</div>');
-            wHTML += ('</div>');
-        }
-    }
-
-    newNode.innerHTML = wHTML;
-    document.getElementById('intentsearch').appendChild(newNode);
+    $.get('templates/intents_list.mustache', function(template) {
+        $('#intentsearch').html(Mustache.render(template, view));
+    });
 }
 
 function deleteIntent(elem) {
-    this.location.href = 'intent.php?deleteintent=' + intents[elem];
+    var request = {
+        url: './proxy/intentProxy.php?intent=' + intents[elem],
+        verb: 'DELETE',
+        onGenericError: function(statusMessage) {
+            msgAlertIntentOp(ALERT.DANGER.value, statusMessage === null
+                ? "There was a problem deleting the intent." : statusMessage);
+        },
+        onOK: function(response) {
+            msgAlertIntentOp(ALERT.SUCCESS.value, 'The intent was deleted.');
+            // Should just delete the list entry, but for now refresh the page as previously
+            location.href = 'intent.php';
+        },
+        onNotFound: function() {
+            msgAlertIntentOp(ALERT.DANGER.value, 'Intent could not be found. Please refresh the page.');
+        },
+        onShowError: function(message) {
+            msgAlertIntentOp(ALERT.DANGER.value, message);
+        }
+    };
+    commonAjaxApiRequest(request);
 }
 
 function OnMouseIn(elem) {
@@ -137,7 +134,7 @@ $("#collapseVideoTutorialIntent").on('hidden.bs.collapse', function () {
 });
 
 $( document ).ready(function() {
-    if ( (trainingFile && intent_deleted) || ai_state == API_AI_STATE.STOPPED.value)
+    if ( (trainingFile && intent_deleted) || ai_state === API_AI_STATE.STOPPED.value)
         createWarningIntentAlert(INTENT_ACTION.DELETE_INTENT.value);
     
 });

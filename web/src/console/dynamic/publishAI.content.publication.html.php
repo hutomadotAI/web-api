@@ -1,11 +1,25 @@
 <?php
-    require_once "./common/developer.php";
-    require_once "./common/bot.php";
-    require_once "./api/botApi.php";
 
-    $botApi = new \hutoma\api\botApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
-    $botDetails = $botApi->getAiBotDetails($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']);
-    unset($botApi);
+namespace hutoma;
+
+require_once __DIR__ . "/../common/globals.php";
+require_once __DIR__ . "/../common/sessionObject.php";
+require_once __DIR__ . "/../common/utils.php";
+require_once __DIR__ . "/../common/developer.php";
+require_once __DIR__ . "/../common/bot.php";
+require_once __DIR__ . "/../api/botApi.php";
+require_once __DIR__ . "/../common/Assets.php";
+require_once __DIR__ . "/../dist/manifest.php";
+
+$assets = new Assets($manifest);
+
+sessionObject::redirectToLoginIfUnauthenticated();
+
+$requestedAi = $_REQUEST['ai'];
+$botApi = new api\botApi(sessionObject::isLoggedIn(), sessionObject::getDevToken());
+$botDetails = $botApi->getAiBotDetails($requestedAi);
+unset($botApi);
+
 ?>
 <div class="row">
     <div class="col-md-12" id="publishInfoBox">
@@ -15,6 +29,26 @@
                 <dt>Information</dt>
                 <dl class="dl-horizontal no-margin" style="text-align:justify">
                     This platform is currently under preview. As such the options and features are actively being developed and will likely change. Submitted bots will be reviewed before publishing.
+                </dl>
+            </span>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="alert alert-warning unselectable" style="padding-bottom: 25px;">
+            <span class="text-white">
+                <dt>Please note:</dt>
+                <dl class="dl-horizontal no-margin" style="text-align:justify">
+                    After sending your bot for publishing, it will become Read-Only, meaning <strong>you will not be able to make any changes to it</strong>!
+                    You can, however, export the bot and re-import it as a new one.
+                </dl>
+            </span>
+            <span class="text-white" id="linkedBotWarning">
+                <br/>
+                <dt>Also:</dt>
+                <dl class="dl-horizontal no-margin" style="text-align:justify">
+                    We do not currently support publishing with linked skills. Please remove them if you’d like your bot to be published.
                 </dl>
             </span>
         </div>
@@ -49,7 +83,7 @@
         <div class="row no-margin">
             <div class="col-xs-4 drop-zone">
                 <div class="row no-margin">
-                    <?php include './dynamic/input.image.html.php'; ?>
+                    <?php include __DIR__ . '/../dynamic/input.image.html.php'; ?>
                 </div>
             </div>
 
@@ -72,13 +106,13 @@
         <div class="row no-margin"  style="border-top: 1px solid #434343;">
             <div class="col-xs-4 drop-zone2">
                 <div class="row no-margin">
-                    <?php include './dynamic/input.licenseType.html.php'; ?>
+                    <?php include __DIR__ . '/../dynamic/input.licenseType.html.php'; ?>
                 </div>
                 <div class="row no-margin">
-                    <?php include './dynamic/input.category.html.php'; ?>
+                    <?php include __DIR__ . '/../dynamic/input.category.html.php'; ?>
                 </div>
                 <div class="row no-margin">
-                    <?php include './dynamic/input.classification.html.php'; ?>
+                    <?php include __DIR__ . '/../dynamic/input.classification.html.php'; ?>
                 </div>
             </div>
 
@@ -178,10 +212,10 @@
         <div class="row no-margin">
             <div class="col-xs-4 drop-zone2">
                 <div class="row no-margin">
-                    <?php include './dynamic/input.price.html.php'; ?>
+                    <?php include __DIR__ . '/../dynamic/input.price.html.php'; ?>
                 </div>
                 <div class="row no-margin">
-                    <?php include './dynamic/input.version.html.php'; ?>
+                    <?php include __DIR__ . '/../dynamic/input.version.html.php'; ?>
                 </div>
             </div>
 
@@ -361,7 +395,7 @@
 
 <script>
     var developer = <?php
-        $dev = new \hutoma\developer();
+        $dev = new developer();
         $dev->setName($developer['info']['name']);
         $dev->setCompany($developer['info']['company']);
         $dev->setEmail($developer['info']['email']);
@@ -379,7 +413,7 @@
         ?>;
 
     var bot = <?php
-        $bot = new \hutoma\bot();
+        $bot = new bot();
         //TODO need check controll on value returned by API
         /* if (isset($botDetails)!=200) {} */
 
@@ -399,11 +433,15 @@
             $bot->setSample($botDetails['bot']['sample']);
             $bot->setVersion($botDetails['bot']['version']);
             $bot->setVideoLink($botDetails['bot']['videoLink']);
+            $bot->setLinkedBots($botDetails['bot']['linked_bots']);
         }
         else{
-            $bot->setAiid($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']);
-            $bot->setName($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name']);
-            $bot->setDescription($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['description']);
+            $aiApi = new api\aiApi(sessionObject::isLoggedIn(), sessionObject::getDevToken());
+            $ai = $aiApi->getSingleAI($requestedAi);
+            $bot->setAiid($ai['aiid']);
+            $bot->setName($ai['name']);
+            $bot->setDescription(isset($ai['description']) ? $ai['description'] : "");
+            $bot->setLinkedBots($ai['linked_bots']);
         }
 
         $tmp_bot = $bot->toJSON();
@@ -413,5 +451,5 @@
         unset($tmp_bot);
         ?>;
 </script>
-<script src="./scripts/drag-and-drop/drag-and-drop.js"></script>
-<script src="./scripts/publish/publish.js"></script>
+<script src="<?php $assets->getAsset('drag-and-drop/drag-and-drop.js') ?>"></script>
+<script src="<?php $assets->getAsset('publish/publish.js') ?>"></script>

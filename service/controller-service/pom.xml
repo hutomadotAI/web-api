@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <parent>
+        <groupId>com.hutoma.api</groupId>
+        <artifactId>api-project</artifactId>
+        <version>1.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>controller-service</artifactId>
+    <packaging>war</packaging>
+    <version>1.0-SNAPSHOT</version>
+    <name>controller-service</name>
+
+    <build>
+        <finalName>Controller</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${project.component.maven-compiler.version}</version>
+                <inherited>true</inherited>
+                <configuration>
+                    <source>${project.component.java.version}</source>
+                    <target>${project.component.java.version}</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${project.component.surefire.version}</version>
+                <configuration>
+                    <parallel>both</parallel>
+                    <threadCount>10</threadCount>
+                    <excludes>
+                        <exclude>**/TestThreadPool.java</exclude>
+                    </excludes>
+                </configuration>
+                <goals>
+                    <goal>test</goal>
+                </goals>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>findbugs-maven-plugin</artifactId>
+                <version>${project.component.findbugs.version}</version>
+                <configuration>
+                    <!--
+                        Enables analysis which takes more memory but finds more bugs.
+                        If you run out of memory, changes the value of the effort element
+                        to 'Low'.
+                    -->
+                    <effort>Max</effort>
+                    <!-- Reports all bugs (other values are medium and max) -->
+                    <threshold>Medium</threshold>
+                    <!-- Produces XML report -->
+                    <xmlOutput>true</xmlOutput>
+                    <!-- Configures the directory in which the XML report is created -->
+                    <findbugsXmlOutputDirectory>${project.build.directory}/findbugs</findbugsXmlOutputDirectory>
+                    <excludeFilterFile>${project.basedir}/src/main/resources/findbugs/findbugs-exclude.xml
+                    </excludeFilterFile>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>analyze-compile</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${project.component.jacoco.version}</version>
+                <configuration>
+                    <excludes>
+                        <!-- Excludes all the logging -->
+                        <exclude>**/*Logger*.*</exclude>
+                        <!-- Excludes configuration -->
+                        <exclude>**/Config.*</exclude>
+                        <!-- Excludes Database related classes -->
+                        <exclude>**/Database*.*</exclude>
+                        <exclude>**/TransactionalDatabaseCall.*</exclude>
+                    </excludes>
+                </configuration>
+                <executions>
+                    <!--
+                        Prepares the property pointing to the JaCoCo runtime agent which
+                        is passed as VM argument when Maven the Surefire plugin is executed.
+                    -->
+                    <execution>
+                        <id>pre-unit-test</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                        <configuration>
+                            <!-- Sets the path to the file which contains the execution data. -->
+                            <destFile>${project.build.directory}/jacoco.exec</destFile>
+                            <!-- Sets the name of the property containing the settings for JaCoCo runtime agent. -->
+                            <propertyName>argLine</propertyName>
+                        </configuration>
+                    </execution>
+                    <!--
+                        Ensures that the code coverage report for unit tests is created after
+                        unit tests have been run.
+                    -->
+                    <execution>
+                        <id>post-unit-test</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                        <configuration>
+                            <!-- Sets the path to the file which contains the execution data. -->
+                            <dataFile>${project.build.directory}/jacoco.exec</dataFile>
+                            <!-- Sets the output directory for the code coverage report. -->
+                            <outputDirectory>${project.build.directory}/jacoco</outputDirectory>
+                        </configuration>
+                    </execution>
+                    <!--
+                    Breaks the build if the code coverage threshold is crossed
+                    -->
+                    <execution>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <rule implementation="org.jacoco.maven.RuleConfiguration">
+                                    <element>BUNDLE</element>
+                                    <limits>
+                                        <!-- Don't enforce coverage minimum for now, but keep this for later
+                                        <limit implementation="org.jacoco.report.check.Limit">
+                                            <counter>INSTRUCTION</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.73</minimum>
+                                        </limit>
+                                        -->
+                                    </limits>
+                                </rule>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+
+    <dependencies>
+
+        <dependency>
+            <groupId>com.hutoma.api</groupId>
+            <artifactId>common-lib</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>${project.component.google.gson.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
+            <version>${project.component.joda-time.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi</artifactId>
+            <version>3.7</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.glassfish.jersey.containers</groupId>
+            <artifactId>jersey-container-servlet-core</artifactId>
+            <version>${project.component.jersey.version}</version>
+        </dependency>
+
+        <!-- ********************************* Test-related ****************************************** -->
+
+        <dependency>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-site-plugin</artifactId>
+            <version>3.5.1</version>
+            <type>maven-plugin</type>
+        </dependency>
+
+        <!-- ********************************* Logging-related ****************************************** -->
+
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+            <version>${project.component.log4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <version>${project.component.log4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-web</artifactId>
+            <version>${project.component.log4j.version}</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.fluentd/fluent-logger -->
+        <dependency>
+            <groupId>org.fluentd</groupId>
+            <artifactId>fluent-logger</artifactId>
+            <version>0.3.2</version>
+        </dependency>
+
+
+        <!-- ********************************* Test-related ****************************************** -->
+
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>findbugs</artifactId>
+            <version>${project.component.findbugs.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>findbugs-maven-plugin</artifactId>
+            <version>${project.component.findbugs.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${project.component.junit.version}</version>
+            <type>jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>${project.component.mockito.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.test-framework.providers</groupId>
+            <artifactId>jersey-test-framework-provider-grizzly2</artifactId>
+            <version>2.24</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- ********************************* Documentation ****************************************** -->
+        <dependency>
+            <groupId>com.webcohesion.enunciate</groupId>
+            <artifactId>enunciate-maven-plugin</artifactId>
+            <version>2.9.1</version>
+        </dependency>
+
+    </dependencies>
+
+</project>

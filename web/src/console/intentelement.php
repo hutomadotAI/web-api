@@ -1,53 +1,60 @@
 <?php
-require "../pages/config.php";
 
-require_once "../console/api/apiBase.php";
-require_once "../console/api/intentsApi.php";
-require_once "../console/api/entityApi.php";
-require_once "../console/api/aiApi.php";
-require_once "../console/api/botstoreApi.php";
+namespace hutoma;
 
-if(!\hutoma\console::checkSessionIsActive()){
-    exit;
-}
+require_once __DIR__ . "/common/errorRedirect.php";
+require_once __DIR__ . "/common/globals.php";
+require_once __DIR__ . "/common/sessionObject.php";
+require_once __DIR__ . "/common/menuObj.php";
+require_once __DIR__ . "/common/utils.php";
+require_once __DIR__ . "/api/apiBase.php";
+require_once __DIR__ . "/api/aiApi.php";
+require_once __DIR__ . "/api/intentsApi.php";
+require_once __DIR__ . "/api/entityApi.php";
+require_once __DIR__ . "/api/botstoreApi.php";
+require_once __DIR__ . "/common/Assets.php";
+require_once __DIR__ . "/dist/manifest.php";
+
+$assets = new Assets($manifest);
+
+sessionObject::redirectToLoginIfUnauthenticated();
 
 if (!isPostInputAvailable()) {
-    \hutoma\console::redirect('./error.php?err=118');
+    errorRedirect::defaultErrorRedirect();
     exit;
 }
 
-if (isset($_POST['intent_name']))
-    $intentName = $_POST['intent_name'];
-else
-    $intentName = $_POST['intent'];
-
-$entityApi = new \hutoma\api\entityApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
+$intentName = isset($_POST['intent_name']) ? $_POST['intent_name'] : $_POST['intent'];
+$entityApi = new api\entityApi(sessionObject::isLoggedIn(), sessionObject::getDevToken());
 $entityList = $entityApi->getEntities();
 unset($entityApi);
 
-$intentsApi = new \hutoma\api\intentsApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
-$intent = $intentsApi->getIntent($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'], $intentName);
+$intentsApi = new api\intentsApi(sessionObject::isLoggedIn(), sessionObject::getDevToken());
+$intent = $intentsApi->getIntent(sessionObject::getCurrentAI()['aiid'], $intentName);
 unset($intentsApi);
 
-$aiApi = new \hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
-$bot= $aiApi->getSingleAI($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']);
+$aiApi = new api\aiApi(sessionObject::isLoggedIn(), sessionObject::getDevToken());
+$bot= $aiApi->getSingleAI(sessionObject::getCurrentAI()['aiid']);
 unset($aiApi);
 
 if ($entityList['status']['code'] !== 200 && $entityList['status']['code'] !== 404) {
+    $entityList_result = $entityList;
     unset($entityList);
-    \hutoma\console::redirect('./error.php?err=210');
+    errorRedirect::handleErrorRedirect($entityList_result);
     exit;
 }
 
 if ($intent['status']['code'] !== 200 && $intent['status']['code'] !== 404) {
+    $intent_result = $intent;
     unset($intent);
-    \hutoma\console::redirect('./error.php?err=211');
+    errorRedirect::handleErrorRedirect($intent_result);
     exit;
 }
 
-if ($bot['status']['code'] !== 200) {
+if ($bot['status']['code'] !== 200 && $bot['status']['code'] !== 404) {
+    $bot_result = $bot;
     unset($bot);
-    \hutoma\console::redirect('./error.php?err=204');
+    errorRedirect::handleErrorRedirect($bot_result);
     exit;
 }
 
@@ -72,37 +79,15 @@ function echoJsonEntityListResponse($entityList)
         echo '""'; // return empty string
 }
 
+$header_page_title = "Edit Intent";
+include __DIR__ . "/include/page_head_default.php";
+include __DIR__ . "/include/page_body_default.php";
+include __DIR__ . "/include/page_menu.php";
 ?>
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>hu:toma | Edit Intent </title>
-    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-
-    <link rel="stylesheet" href="./bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet" href="./dist/css/font-awesome.min.css">
-    <link rel="stylesheet" href="./dist/css/hutoma.css">
-    <link rel="stylesheet" href="./dist/css/skins/skin-blue.css">
-    <script src="scripts/external/autopilot/autopilot.js"></script>
-</head>
-
-<body class="hold-transition skin-blue fixed sidebar-mini">
 <div class="wrapper">
-    <header class="main-header">
-        <?php include './dynamic/header.html.php'; ?>
-    </header>
+    <?php include __DIR__ . "/include/page_header_default.php"; ?>
 
-    <!-- ================ MENU CONSOLE ================= -->
-    <aside class="main-sidebar ">
-        <section class="sidebar">
-            <p id="sidebarmenu"></p>
-        </section>
-    </aside>
-
-    <!-- ================ PAGE CONTENT ================= -->
-    <div class="content-wrapper" style="margin-right:350px;">
+    <div class="content-wrapper">
         <section class="content">
             <div class="row">
                 <div class="col-md-12" id="intentElementBox">
@@ -110,59 +95,72 @@ function echoJsonEntityListResponse($entityList)
             </div>
             <div class="row">
                 <div class="col-md-12">
-                    <?php include './dynamic/intent.element.content.head.html.php'; ?>
-                    <?php include './dynamic/intent.element.content.expression.html.php'; ?>
-                    <?php include './dynamic/intent.element.content.variable.html.php'; ?>
-                    <?php include './dynamic/intent.element.content.response.html.php'; ?>
-                    <?php include './dynamic/intent.element.content.webhook.html.php'; ?>
-                    <?php include './dynamic/intent.element.content.prompt.html.php'; ?>
+                    <input type="hidden" id="intent-name" name="intent-name" value="<?= $_POST['intent'] ?>">
+                    <input type="hidden" id="bot-status" name="bot-status" value="0" style="display:none;"/>
+                    <div class="box box-solid box-clean flat no-shadow unselectable" style="padding-bottom:0px;">
+
+                        <div class="box-header no-border" style="padding: 10px 10px 0px 10px;">
+                            <div class="form-group no-margin">
+                                <div class="input-group">
+                                    <div class="input-prefix-text">
+                                        <i class="fa fa-commenting-o text-green"></i>
+                                        <span><b> Intent </b></span><span class="text-md text-darkgray" style="padding-right:3px;">:</span>
+                                    </div>
+                                    <input type="text" class="flat no-shadow input-text-limited pull-left" value="<?= $_POST['intent'] ?>" readonly>
+                                    <button class="input-postfix-button btn btn-success flat pull-right" id="btnSaveEntity" style="width: 130px; "
+                                            alt="save intent" onclick="saveIntent();RecursiveUnbind($('#wrapper'))">Save Intent
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="box-body no-margin" id="boxExpression" style="padding-top:5px;padding-bottom:5px;">
+                            <div class="alert alert-dismissable flat alert-base" id="containerMsgAlertIntentElement"
+                                 style="margin-bottom:10px;">
+                                <!--<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>-->
+                                <i class="icon fa fa-check" id="iconAlertIntentElement"></i>
+                                <span id="msgAlertIntentElement">Use intents to map what a user says and what action should be taken by your business logic.</span>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <?php include __DIR__ . '/dynamic/intent.element.content.expression.html.php'; ?>
+                    <?php include __DIR__ . '/dynamic/intent.element.content.variable.html.php'; ?>
+                    <?php include __DIR__ . '/dynamic/intent.element.content.response.html.php'; ?>
+                    <?php include __DIR__ . '/dynamic/intent.element.content.webhook.html.php'; ?>
+                    <?php include __DIR__ . '/dynamic/intent.element.content.prompt.html.php'; ?>
                 </div>
             </div>
         </section>
     </div>
 
-    <!-- ================ CHAT CONTENT ================= -->
-    <aside class="control-sidebar control-sidebar-dark control-sidebar-open">
-        <?php include './dynamic/chat.html.php'; ?>
-        <?php include './dynamic/training.content.json.html.php'; ?>
-    </aside>
-
-    <footer class="main-footer" style="margin-right:350px;">
-        <?php include './dynamic/footer.inc.html.php'; ?>
-    </footer>
+    <?php include __DIR__ . '/include/page_footer_default.php'; ?>
 </div>
 
-<script src="scripts/external/jQuery/jQuery-2.1.4.min.js"></script>
-<script src="./bootstrap/js/bootstrap.min.js"></script>
-<script src="scripts/external/slimScroll/jquery.slimscroll.min.js"></script>
-<script src="scripts/external/fastclick/fastclick.min.js"></script>
-<script src="./dist/js/app.min.js"></script>
+<script src="/console/dist/vendors/jQuery/jQuery-2.1.4.min.js"></script>
+<script src="/console/dist/vendors/bootstrap/js/bootstrap.min.js"></script>
+<script src="/console/dist/vendors/slimScroll/jquery.slimscroll.min.js"></script>
+<script src="/console/dist/vendors/fastclick/fastclick.min.js"></script>
+<script src="/console/dist/vendors/app.min.js"></script>
 
-<script src="scripts/external/jQuery/jquery.omniselect.js"></script>
-<script src="scripts/external/saveFile/FileSaver.js"></script>
-<script src="./scripts/validation/validation.js"></script>
-<script src="./scripts/button-select/buttonSelect.js"></script>
-<script src="./scripts/intent/intent.polling.js"></script>
-<script src="./scripts/intent/intent.element.response.js"></script>
-<script src="./scripts/intent/intent.element.webhook.js"></script>
-<script src="./scripts/intent/intent.element.expression.js"></script>
-<script src="./scripts/intent/intent.element.js"></script>
-<script src="./scripts/intent/intent.element.prompt.js"></script>
-<script src="./scripts/intent/intent.element.variable.js"></script>
+<script src="/console/dist/vendors/jQuery/jquery.omniselect.js"></script>
+<script src="/console/dist/vendors/saveFile/FileSaver.js"></script>
+<script src="<?php $assets->getAsset('validation/validation.js') ?>"></script>
+<script src="<?php $assets->getAsset('button-select/buttonSelect.js') ?>"></script>
+<script src="<?php $assets->getAsset('intent/intent.polling.js') ?>"></script>
+<script src="<?php $assets->getAsset('intent/intent.element.other.js') ?>"></script>
+<script src="<?php $assets->getAsset('intent/intent.element.js') ?>"></script>
+<script src="/console/dist/vendors/mustache.min.js"></script>
+<script src="<?php $assets->getAsset('messaging/messaging.js') ?>"></script>
+<script src="<?php $assets->getAsset('shared/shared.js') ?>"></script>
+<script src="/console/dist/vendors/saveFile/FileSaver.js"></script>
 
-<script src="./scripts/chat/chat.js"></script>
-<script src="./scripts/chat/voice.js"></script>
+<?php
+$menuObj = new menuObj(sessionObject::getCurrentAI()['name'], "intents", 1, false, false);
+include __DIR__ . "/include/page_menu_builder.php" ?>
 
-<script src="./scripts/messaging/messaging.js"></script>
-<script src="./scripts/shared/shared.js"></script>
-<script src="./scripts/sidebarMenu/sidebar.menu.js"></script>
-<script src="scripts/external/saveFile/FileSaver.js"></script>
-
-<form action="" method="post" enctype="multipart/form-data">
-    <script type="text/javascript">
-        MENU.init(["<?php echo $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name']; ?>", "intents", 1, false, false]);
-    </script>
-</form>
 <script>
     var entityListFromServer = <?php echo echoJsonEntityListResponse($entityList); unset($entityList);?>;
     var intent = <?php echoJsonIntentResponse($intent); unset($intent);?>;

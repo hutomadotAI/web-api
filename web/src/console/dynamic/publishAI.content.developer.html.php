@@ -1,3 +1,14 @@
+<?php
+namespace hutoma;
+
+require_once __DIR__ . "/../common/Assets.php";
+require_once __DIR__ . "/../dist/manifest.php";
+
+
+$assets = new Assets($manifest);
+?>
+
+<input type="hidden" name="ai" value="<?php echo $aiToPublish['aiid'] ?>" id="aiToPublish">
 <div class="box box-solid box-clean flat no-shadow" id="newAicontent">
     <div class="box-header with-border">
         <div class="box-title"><b>Developer Info</b></div>
@@ -81,7 +92,7 @@
                 </div>
             </div>
             <div class="col-xs-5">
-                <?php include './dynamic/input.country.html.php'; ?>
+                <?php include __DIR__ . '/../dynamic/input.country.html.php'; ?>
             </div>
             <div class="col-xs-3">
                 <div class="form-group">
@@ -138,4 +149,4 @@
     </div>
 </div>
 
-<script src="./scripts/publish/developer.js"></script>
+<script src="<?php $assets->getAsset('publish/developer.js') ?>"></script>

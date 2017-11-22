@@ -106,6 +106,7 @@ class botApi extends apiBase
                 'sample' => $bot['sample'],
                 'version' => $bot['version'],
                 'videoLink' =>  $bot['videoLink'],
+                'publishing_type' => 1, // Skill=1, Template=2. Should go on an enum but this code is throwaway anyway
             );
 
             $this->curl->setOpt(CURLOPT_POSTFIELDS, http_build_query($args));
@@ -139,7 +140,7 @@ class botApi extends apiBase
             $this->curl->setVerbPost();
             $this->curl->setOpt(CURLOPT_POSTFIELDS, $args);
             $curl_response = $this->curl->exec();
-            $this->handleApiCallError($curl_response, 386);
+            $this->handleApiCallError($curl_response);
             $json_response = json_decode($curl_response, true);
             return $json_response;
         }

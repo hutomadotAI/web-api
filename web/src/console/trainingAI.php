@@ -1,171 +1,125 @@
 <?php
-require "../pages/config.php";
-require_once "../console/api/apiBase.php";
-require_once "../console/api/aiApi.php";
-require_once "../console/api/botstoreApi.php";
 
-if(!\hutoma\console::checkSessionIsActive()){
+namespace hutoma;
+
+require_once __DIR__ . "/common/errorRedirect.php";
+require_once __DIR__ . "/common/globals.php";
+require_once __DIR__ . "/common/sessionObject.php";
+require_once __DIR__ . "/common/menuObj.php";
+require_once __DIR__ . "/common/utils.php";
+require_once __DIR__ . "/api/apiBase.php";
+require_once __DIR__ . "/api/aiApi.php";
+require_once __DIR__ . "/api/botstoreApi.php";
+require_once __DIR__ . "/common/Assets.php";
+require_once __DIR__ . "/dist/manifest.php";
+
+$assets = new Assets($manifest);
+
+sessionObject::redirectToLoginIfUnauthenticated();
+
+$aiid = isset($_REQUEST['ai']) ? $_REQUEST['ai'] : sessionObject::getCurrentAI()['aiid'];
+
+if (!isset($aiid)) {
+    errorRedirect::defaultErrorRedirect();
     exit;
 }
 
-if (!isset($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'])) {
-    \hutoma\console::redirect('./error.php?err=200');
+$aiApi = new api\aiApi(sessionObject::isLoggedIn(), sessionObject::getDevToken());
+$ai = $aiApi->getSingleAI($aiid);
+unset($aiApi);
+if ($ai['status']['code'] === 200) {
+    sessionObject::populateCurrentAI($ai);
+    $deepLearningError = json_encode($ai['deep_learning_error']);
+    $aiStatus = json_encode($ai['ai_status']);
+    $phase1progress = json_encode($ai['phase_1_progress']);
+    $phase2progress = json_encode($ai['phase_2_progress']);
+    $trainingFileUploaded = json_encode($ai['training_file_uploaded']);
+} else {
+    $ai_result = $ai;
+    unset($ai);
+    errorRedirect::handleErrorRedirect($ai_result);
     exit;
 }
+unset($singleAI);
 
-CallGetSingleAI($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']);
-
-function CallGetSingleAI($aiid)
-{
-    $aiApi = new \hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
-    $singleAI = $aiApi->getSingleAI($aiid);
-    
-    unset($aiApi);
-    if ($singleAI['status']['code'] === 200) {
-        setSessionVariables($singleAI);
-    } else {
-        unset($singleAI);
-        \hutoma\console::redirect('../error.php?err=200');
-        exit;
-    }
-    unset($singleAI);
-}
-
-function setSessionVariables($singleAI)
-{
-    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'] = $singleAI['aiid'];
-    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['client_token'] = $singleAI['client_token'];
-    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name'] = $singleAI['name'];
-    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['description'] = $singleAI['description'];
-    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['created_on'] = $singleAI['created_on'];
-    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['private'] = $singleAI['is_private'];
-    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['status'] = $singleAI['ai_status'];
-    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['personality'] = $singleAI['personality'];
-    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['confidence'] = $singleAI['confidence'];
-    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['voice'] = $singleAI['voice'];
-    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['language'] = localeToLanguage($singleAI['language']);
-    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['timezone'] = $singleAI['timezone'];
-    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['trainingfile'] = $singleAI['training_file_uploaded'];
-    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['phase_1_progress'] = $singleAI['phase_1_progress'];
-    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['phase_2_progress'] = $singleAI['phase_2_progress'];
-    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['deep_learning_error'] = $singleAI['deep_learning_error'];
-}
-
-function localeToLanguage($locale)
-{
-    $languages = array(
-        'de-DE' => 'Deutsch',
-        'es-ES' => 'Español',
-        'fr-FR' => 'Français',
-        'it-IT' => 'Italiano',
-        'nl-NL' => 'Nederlands',
-        'pt-PT' => 'Português',
-        'en-US' => 'English'
-    );
-
-    if (array_key_exists($locale, $languages)) {
-        return $languages[$locale];
-    } else {
-        return $languages['en-US'];
-    }
-}
-
+$header_page_title = "Bot Training";
+include __DIR__ . "/include/page_head_default.php";
+$body_additional_style = "margin-right:350px;";
+include __DIR__ . "/include/page_body_default.php";
+include __DIR__ . "/include/page_menu.php";
 ?>
 
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>hu:toma | Training AI</title>
-    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-
-    <link rel="stylesheet" href="./bootstrap/css/bootstrap.css">
-    <link rel="stylesheet" href="scripts/external/select2/select2.css">
-    <link rel="stylesheet" href="./dist/css/font-awesome.min.css">
-    <link rel="stylesheet" href="./dist/css/hutoma.css">
-    <link rel="stylesheet" href="./dist/css/skins/skin-blue.css">
-    <link rel="stylesheet" href="scripts/external/iCheck/all.css">
-    <script src="scripts/external/autopilot/autopilot.js"></script>
-</head>
-
-<body class="hold-transition skin-blue fixed sidebar-mini" style="background-color: #2E3032;" id="trainingBody">
-<?php include_once "../console/common/google_analytics.php"; ?>
-
 <script>
-    var deep_error = <?php echo json_encode($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['deep_learning_error']);?>;
+    var deep_error = <?php echo $deepLearningError ?>;
     var aiStatus = {
-        "ai_status": <?php echo json_encode($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['status']);?>,
-        "phase_1_progress": <?php echo json_encode($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['phase_1_progress']);?>,
-        "phase_2_progress": <?php echo json_encode($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['phase_2_progress']);?>,
-        "deep_learning_error": deep_error,
-        "training_file_uploaded": <?php echo json_encode($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['trainingfile']);?>
+        "ai_status": <?php echo $aiStatus ?>,
+        "phase_1_progress": <?php echo $phase1progress ?>,
+        "phase_2_progress": <?php echo $phase2progress ?>,
+        "deep_learning_error": <?php echo $deepLearningError ?>,
+        "training_file_uploaded": <?php echo $trainingFileUploaded ?>
     };
 
 </script>
 
 <div class="wrapper">
-    <header class="main-header" id="headerID">
-        <?php include './dynamic/header.html.php'; ?>
-    </header>
-
-    <!-- ================ MENU CONSOLE ================= -->
-    <aside class="main-sidebar ">
-        <section class="sidebar">
-            <p id="sidebarmenu"></p>
-        </section>
-    </aside>
-
-    <!-- ================ PAGE CONTENT ================= -->
-    <div class="content-wrapper" style="margin-right:350px;">
+    <?php include __DIR__ . "/include/page_header_default.php"; ?>
+    <div class="content-wrapper">
         <section class="content">
             <div class="row">
                 <div class="col-md-12" id="trainingBox">
-                    <?php include './dynamic/training.content.info.html.php'; ?>
+                    <div class="alert alert-dismissable flat alert-info unselectable" id="containerMsgAlertTrainingInfo" style="padding-bottom: 25px;">
+                        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                        <span id="msgAlertTrainingInfo" class="text-muted" >
+                            <dt>How do you train a bot?</dt>
+                            <dl class="dl-horizontal no-margin" style="text-align:justify">
+                                You can use our platform to upload text format training data that you may have. For example,
+                                existing customer service chat history or other conversational content stored in your CRM, emails or
+                                chat platforms. Once you upload the file, our system will process it and you can further train it by
+                                creating more questions and answers.
+                            </dl>
+                        </span>
+                    </div>
                 </div>
             </div>
 
             <div class="row">
                 <div class="col-md-12">
-                    <?php include './dynamic/training.content.upload.file.html.php'; ?>
-                    <?php include './dynamic/training.content.monitor.html.php'; ?>
+                    <?php include __DIR__ . '/dynamic/training.content.upload.file.html.php'; ?>
+                    <?php include __DIR__ . '/dynamic/training.content.monitor.html.php'; ?>
                 </div>
             </div>
         </section>
     </div>
     <!-- ================ CHAT CONTENT ================= -->
     <aside class="control-sidebar control-sidebar-dark control-sidebar-open">
-        <?php include './dynamic/chat.html.php'; ?>
-        <?php include './dynamic/training.content.json.html.php'; ?>
+        <?php include __DIR__ . '/dynamic/chat.html.php'; ?>
+        <?php include __DIR__ . '/dynamic/training.content.json.html.php'; ?>
     </aside>
-    <footer class="main-footer" style="margin-right:350px;">
-        <?php include './dynamic/footer.inc.html.php'; ?>
-    </footer>
+    <?php include __DIR__ . '/include/page_footer_default.php'; ?>
 </div>
 
-<script src="scripts/external/jQuery/jQuery-2.1.4.min.js"></script>
-<script src="./bootstrap/js/bootstrap.min.js"></script>
-<script src="./bootstrap/js/bootstrap-filestyle.js"></script>
-<script src="scripts/external/slimScroll/jquery.slimscroll.min.js"></script>
-<script src="scripts/external/fastclick/fastclick.min.js"></script>
-<script src="./dist/js/app.min.js"></script>
+<script src="/console/dist/vendors/jQuery/jQuery-2.1.4.min.js"></script>
+<script src="/console/dist/vendors/bootstrap/js/bootstrap.min.js"></script>
+<script src="/console/dist/vendors/bootstrap/js/bootstrap-filestyle.js"></script>
+<script src="/console/dist/vendors/slimScroll/jquery.slimscroll.min.js"></script>
+<script src="/console/dist/vendors/fastclick/fastclick.min.js"></script>
+<script src="/console/dist/vendors/app.min.js"></script>
 
-<script src="./scripts/shared/shared.js"></script>
-<script src="./scripts/messaging/messaging.js"></script>
-<script src="scripts/external/iCheck/icheck.min.js"></script>
-<script src="./scripts/training/training.area.upload.textfile.js"></script>
-<script src="./scripts/training/training.area.js"></script>
-<script src="./scripts/chat/chat.js"></script>
-<script src="./scripts/chat/voice.js"></script>
-<script src="./scripts/clipboard/copyToClipboard.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/1.0.2/purify.min.js" integrity="sha256-uGzhuwD4ZNoc1uL7OtdXNGRKb+Zqg3hrgZQZTN88p/s=" crossorigin="anonymous"></script>
 
-<script src="./scripts/sidebarMenu/sidebar.menu.js"></script>
+<script src="<?php $assets->getAsset('shared/shared.js') ?>"></script>
+<script src="<?php $assets->getAsset('messaging/messaging.js') ?>"></script>
+<script src="/console/dist/vendors/iCheck/icheck.min.js"></script>
+<script src="<?php $assets->getAsset('training/training.area.upload.textfile.js') ?>"></script>
+<script src="<?php $assets->getAsset('training/training.area.js') ?>"></script>
+<script src="<?php $assets->getAsset('chat/chat.js') ?>"></script>
+<script src="<?php $assets->getAsset('chat/voice.js') ?>"></script>
+<script src="<?php $assets->getAsset('clipboard/copyToClipboard.js') ?>"></script>
 
-<form action="" method="post" enctype="multipart/form-data">
-    <script type="text/javascript">
-        MENU.init(["<?php echo $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name']; ?>", "training", 1, true, false]);
-    </script>
-</form>
+<?php
+$menuObj = new menuObj(sessionObject::getCurrentAI()['name'], "training", 1, true, false);
+include __DIR__ . "/include/page_menu_builder.php" ?>
+
 
 </body>
 </html>

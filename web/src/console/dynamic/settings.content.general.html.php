@@ -1,42 +1,97 @@
+<?php
+
+namespace hutoma;
+
+$currentAiInfo = json_encode($aiInfo);
+
+?>
+
+
 <script>
-    var previousGeneralInfo = <?php echo json_encode($_SESSION[$_SESSION['navigation_id']]['user_details']['ai']); ?>;
+    var previousGeneralInfo = <?php echo $currentAiInfo ?>;
+    function regenerateHmacSecret() {
+        var errorMessage = 'There was a problem updating the webhook secret. Please try again later and if the issue ' +
+            'persists, please contact support.';
+        $.ajax({
+            url: './proxy/webhook.regenerate.secret.php',
+            type: 'POST',
+            success: function (response) {
+                var parsedResponse = JSON.parse(response);
+                if (parsedResponse === null) {
+                    msgAlertUpdateAI(ALERT.DANGER.value,errorMessage);
+                }
+                else {
+                    var statusCode = parsedResponse['status']['code'];
+                    var message = parsedResponse['status']['info'];
+                    switch (statusCode) {
+                        case 200:
+                            var input = document.getElementById('webhook_secret');
+                            input.value = message;
+                            msgAlertUpdateAI(ALERT.SUCCESS.value, 'The webhook secret has been updated');
+                            break;
+                        default:
+                            msgAlertUpdateAI(ALERT.DANGER.value,errorMessage);
+                            break;
+                    }
+                }
+            },
+            complete: function () {
+            },
+            error: function () {
+                msgAlertUpdateAI(ALERT.DANGER.value,errorMessage);
+            }
+        });
+    }
 </script>
 
-<div class="box-header with-border unselectable">
-    <i class="fa fa-sliders text-success"></i>
-    <div class="box-title"><b>General Info</b></div>
-</div>
 
 <form role="form">
-    <div class="box-body unselectable">
+
+    <div class="modal-content bordered" style="padding:10px;background-color: #202020">
         <div class="row">
             <div class="col-md-6">
-                <?php include './dynamic/input.name.html.php'; ?>
+                <?php include __DIR__ . '/../dynamic/input.name.html.php'; ?>
             </div>
             <div class="col-md-6">
-                <?php include './dynamic/input.language.html.php'; ?>
+                <?php include __DIR__ . '/../dynamic/input.language.html.php'; ?>
             </div>
         </div>
 
         <div class="row">
             <div class="col-md-6">
-                <?php include './dynamic/input.description.html.php'; ?>
+                <?php include __DIR__ . '/../dynamic/input.description.html.php'; ?>
             </div>
             <div class="col-md-6">
-                <?php include './dynamic/input.timezone.html.php'; ?>
+                <?php include __DIR__ . '/../dynamic/input.timezone.html.php'; ?>
             </div>
         </div>
 
         <div class="row">
             <div class="col-md-6">
-                <?php include './dynamic/input.confidence.html.php'; ?>
+                <?php include __DIR__ . '/../dynamic/input.confidence.html.php'; ?>
             </div>
 
             <div class="col-md-6">
-                <?php include './dynamic/input.learn.html.php'; ?>
-                <?php include './dynamic/input.voice.html.php'; ?>
+                <?php include __DIR__ . '/../dynamic/input.learn.html.php'; ?>
+                <?php include __DIR__ . '/../dynamic/input.voice.html.php'; ?>
             </div>
 
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="form-group">
+                    <label for="ai_name">Default response for when the bot doesn't understand the user</label>
+                    <div class="input-group">
+                        <div class="input-group-addon">
+                            <i class="glyphicon glyphicon-question-sign"></i>
+                        </div>
+                        <input type="text" class="form-control flat no-shadow"
+                               id="ai_default_response" name="ai_default_response"
+                                value="<?php echo $aiInfo['default_chat_responses'][0]; ?>">
+                    </div>
+                </div>
+            </div>
         </div>
 
         <h3><p class="text-muted">API keys</p></h3>
@@ -45,7 +100,7 @@
                 <div class="input-group" style="padding-bottom:10px;">
                     <span class="input-group-addon text-gray" style="width:90px;">Bot ID</i></span>
                     <input type="text" class="form-control flat no-shadow" id="aikey"
-                           value="<?php echo $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid']; ?>"
+                           value="<?php echo $aiInfo['aiid']; ?>"
                            readonly>
                     <span class="input-group-addon text-gray" data-clipboard-action="copy" data-toggle="tooltip"
                           data-clipboard-target="#aikey" id="aikeytooltip" title="copy to clipboard"
@@ -57,7 +112,7 @@
                 <div class="input-group" style="padding-bottom:10px;">
                     <span class="input-group-addon text-gray" style="width:90px;">Dev key</i></span>
                     <input type="text" class="form-control flat no-shadow" id="devkey"
-                           value="<?php echo $_SESSION[$_SESSION['navigation_id']]['user_details']['dev_token']; ?>"
+                           value="<?php echo sessionObject::getDevToken(); ?>"
                            readonly>
                     <span class="input-group-addon text-gray" data-clipboard-action="copy" data-toggle="tooltip"
                           data-clipboard-target="#devkey" id="devkeytooltip" title="copy to clipboard"
@@ -67,15 +122,30 @@
         </div>
 
         <div class="row">
-            <div class="col-md-12">
+            <div class="col-md-6" style="padding-bottom:10px;">
                 <div class="input-group">
                     <span class="input-group-addon text-gray" style="width:90px;">Client key</i></span>
                     <input type="text" class="form-control flat no-shadow" id="clikey"
-                           value="<?php echo $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['client_token']; ?>"
+                           value="<?php echo $aiInfo['client_token']; ?>"
                            readonly>
                     <span class="input-group-addon text-gray" data-clipboard-action="copy" data-toggle="tooltip"
                           data-clipboard-target="#clikey" id="clikeytooltip" title="copy to clipboard"
                           onclick="copyToClipboard('clikey')"><i class="fa fa-clipboard"></i></span>
+                </div>
+            </div>
+
+            <div class="col-md-6" style="padding-bottom:10px;">
+                <div class="input-group">
+                    <span class="input-group-addon text-gray" style="width:90px;">Webhook signing secret</i></span>
+                    <input type="text" class="form-control flat no-shadow" id="webhook_secret"
+                           value="<?php echo (isset($aiInfo['hmac_secret']) ? $aiInfo['hmac_secret'] : ""); ?>"
+                           readonly>
+                    <span class="input-group-addon text-gray"  data-toggle="modal" data-target="#regenHmacSecret"
+                          id="webhook_secret_regen_tooltip" title="re-generate secret"
+                          onclick=""><i class="fa fa-refresh"></i></span>
+                    <span class="input-group-addon text-gray" data-clipboard-action="copy" data-toggle="tooltip"
+                          data-clipboard-target="#webhook_secret" id="webhook_secret_copy_tooltip" title="copy to clipboard"
+                          onclick="copyToClipboard('webhook_secret')"><i class="fa fa-clipboard"></i></span>
                 </div>
             </div>
         </div>
@@ -92,17 +162,19 @@
 
 <div class="box-footer unselectable">
     <button name="btnCancel" id="btnReset" value="_cancel" class="btn btn-primary flat">revert to saved values</button>
+    <form action="./proxy/downloadBotExport.php" method="post" style="display:inline; margin:0; padding:0">
+        <button type="submit" name="btnExport" id="btnExport" value="_export" class="btn btn-primary flat">export Bot</button>
+    </form>
     <button name="btnSave" id="btnSave" value="_save" class="btn btn-success flat">save</button>
     <button name="btnDelete" id="btnDelete" data-toggle="modal" data-target="#deleteAI"
-            value="<?php echo $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name']; ?>"
+            value="<?php echo $aiInfo['name']; ?>"
             class="btn btn-danger flat pull-right" alt="delete">delete Bot
     </button>
 </div>
 
-
 <!-- Modal DELETE AI-->
 <div class="modal fade" id="deleteAI" role="dialog">
-    <div class="modal-dialog flat"  style="border: 1px solid red;">
+    <div class="modal-dialog flat width600"  style="border: 1px solid red;">
         <!-- Modal content-->
         <div class="modal-content bordered" style="background-color: #202020">
             <div class="modal-header">
@@ -116,10 +188,43 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <form method="POST" id="deleteForm" action="./dynamic/deleteai.php">
+                <form method="POST" id="deleteForm" action="./proxy/aiProxy.php">
+                    <input type="hidden" name="action" value="delete">
                     <button type="button" class="btn btn-primary flat" id="btnModelCancel" data-dismiss="modal">Cancel
                     </button>
                     <button type="submit" class="btn btn-danger flat" id="modalDelete" data-dismiss="modal">Delete
+                    </button>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Modal Regenerate HMAC secret-->
+<div class="modal fade" id="regenHmacSecret" role="dialog">
+    <div class="modal-dialog flat width600"  style="border: 1px solid red;">
+        <!-- Modal content-->
+        <div class="modal-content bordered" style="background-color: #202020">
+            <div class="modal-header">
+                <button type="button" class="close" id="btnModelClose" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title"><i class="fa fa fa-warning text-danger" style="padding-right:2em"></i> Regenerate the webhook
+                    signing secret
+                </h4>
+            </div>
+            <div class="modal-body">
+                <div class="box-body" id="delete-ai-label">
+                    Warning - if this is updated, all code relying on the existing key for signature
+                    validation must be updated.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <form method="POST" id="regenForm">
+                    <button type="button" class="btn btn-primary flat" id="btnModelCancel" data-dismiss="modal">Cancel
+                    </button>
+                    <button type="submit" class="btn btn-danger flat" id="modalDelete" data-dismiss="modal"
+                            onclick="regenerateHmacSecret()">
+                        Regenerate
                     </button>
                 </form>
             </div>

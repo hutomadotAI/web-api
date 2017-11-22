@@ -30,7 +30,11 @@ GRANT SELECT ON `hutoma`.`botPurchase` TO 'aiReader'@'127.0.0.1';
 
 GRANT SELECT ON `hutoma`.`botStore` TO 'aiReader'@'127.0.0.1';
 
+GRANT SELECT ON `hutoma`.`botTemplate` TO 'aiReader'@'127.0.0.1';
+
 GRANT SELECT ON `hutoma`.`bot_ai` TO 'aiReader'@'127.0.0.1';
+
+GRANT SELECT ON `hutoma`.`bot_ai_config` TO 'aiReader'@'127.0.0.1';
 
 GRANT SELECT ON `hutoma`.`webhooks` TO `aiReader`@'127.0.0.1';
 
@@ -39,6 +43,8 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON `hutoma`.`ai_status` TO 'aiReader'@'127.
 GRANT SELECT ON `hutoma`.`developerInfo` TO `aiReader`@'127.0.0.1';
 
 GRANT SELECT, INSERT, UPDATE ON `hutoma`.`controller_state` TO 'aiReader'@'127.0.0.1';
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON `hutoma`.`ai_integration` TO 'aiReader'@'127.0.0.1';
 
 
 # Privileges for `aiWriter`@`127.0.0.1`
@@ -53,9 +59,13 @@ GRANT SELECT, INSERT, UPDATE ON `hutoma`.`ai_training` TO 'aiWriter'@'127.0.0.1'
 
 GRANT SELECT, INSERT, UPDATE, DELETE ON `hutoma`.`bot_ai` TO 'aiWriter'@'127.0.0.1';
 
+GRANT SELECT, INSERT, UPDATE, DELETE ON `hutoma`.`bot_ai_config` TO 'aiWriter'@'127.0.0.1';
+
 GRANT INSERT ON `hutoma`.`botPurchase` TO 'aiWriter'@'127.0.0.1';
 
 GRANT SELECT, UPDATE, DELETE ON `hutoma`.`botStore` TO 'aiWriter'@'127.0.0.1';
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON `hutoma`.`botTemplate` TO 'aiWriter'@'127.0.0.1';
 
 GRANT SELECT, INSERT, UPDATE, DELETE ON `hutoma`.`webhooks` TO `aiWriter`@'127.0.0.1';
 
@@ -106,6 +116,12 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON `hutoma`.`resetTokens` TO 'hutoma_caller
 
 GRANT SELECT, INSERT, UPDATE ON `hutoma`.`users` TO 'hutoma_caller'@'%';
 
+# Privileges for `django_caller`@`%`
+GRANT USAGE ON *.* TO 'django_caller'@'%' IDENTIFIED BY PASSWORD '*43AB6D5047308CDDD3C9C7BF244A184EB22559E2';
+GRANT EXECUTE ON `hutoma`.* TO 'django_caller'@'%';
+
+# Grant read-only DB access to django_caller
+GRANT SELECT ON `hutoma`.`users` TO 'django_caller'@'%';
 
 # Privileges for `integrReader`@`127.0.0.1`
 GRANT USAGE ON *.* TO 'integrReader'@'127.0.0.1' IDENTIFIED BY PASSWORD '*D4F8BDC0CD9A30E12DDD19CB859B6830A81F0BF2';
@@ -226,7 +242,7 @@ GRANT INSERT, DELETE ON `hutoma`.`botIcon` TO 'botStoreWriter'@'127.0.0.1';
 
 # Privileges for `analytics`@`%`
 
-CREATE USER 'analytics'@'%' IDENTIFIED BY '*2F308CADE7BCAFDE8273D8DA24246FFC892588AF';
+CREATE USER 'analytics'@'%' IDENTIFIED BY PASSWORD '*2470C0C06DEE42FD1618BB99005ADCA2EC9D1E19';
 
 GRANT SELECT,CREATE TEMPORARY TABLES  ON hutoma.* to 'analytics'@'%';
 
@@ -237,3 +253,6 @@ GRANT USAGE ON `data_storage`.* TO 'dataLookup'@'%' IDENTIFIED BY PASSWORD '*C31
 
 GRANT EXECUTE, SELECT ON `data_storage`.* TO 'dataLookup'@'%';
 
+GRANT USAGE ON `data_storage`.* TO 'dataLookup'@'127.0.0.1' IDENTIFIED BY PASSWORD '*C313F8BCB6FC67A062F11A728A4DBA9675B5BF90';
+
+GRANT EXECUTE, SELECT ON `data_storage`.* TO 'dataLookup'@'127.0.0.1';

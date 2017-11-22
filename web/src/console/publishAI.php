@@ -1,113 +1,87 @@
 <?php
-require "../pages/config.php";
-require_once "api/apiBase.php";
-require_once "api/aiApi.php";
-require_once "api/botstoreApi.php";
 
-if(!\hutoma\console::checkSessionIsActive()){
-    exit;
-}
+namespace hutoma;
 
-if (isset($_POST['ai'])) {
-    getBasicAiInfo($_POST['ai']);
+require_once __DIR__ . "/common/errorRedirect.php";
+require_once __DIR__ . "/common/globals.php";
+require_once __DIR__ . "/common/sessionObject.php";
+require_once __DIR__ . "/common/menuObj.php";
+require_once __DIR__ . "/common/utils.php";
+require_once __DIR__ . "/api/apiBase.php";
+require_once __DIR__ . "/api/aiApi.php";
+require_once __DIR__ . "/api/botstoreApi.php";
+require_once __DIR__ . "/api/developerApi.php";
+require_once __DIR__ . "/common/Assets.php";
+require_once __DIR__ . "/dist/manifest.php";
+
+$assets = new Assets($manifest);
+
+sessionObject::redirectToLoginIfUnauthenticated();
+
+$aiToPublish = null;
+
+if (isset($_REQUEST['ai'])) {
+    $aiToPublish = getBasicAiInfo($_REQUEST['ai']);
 }
 
 function getBasicAiInfo($aiid){
-    $aiApi = new \hutoma\api\aiApi(\hutoma\console::isLoggedIn(), \hutoma\console::getDevToken());
+    $aiApi = new api\aiApi(sessionObject::isLoggedIn(), sessionObject::getDevToken());
     $singleAI = $aiApi->getSingleAI($aiid);
     unset($aiApi);
 
-    if ($singleAI['status']['code'] === 200) {
-        setSessionVariables($singleAI);
-    } else {
+    if ($singleAI['status']['code'] !== 200 && $singleAI['status']['code'] !== 404) {
+        $singleAI_result = $singleAI;
         unset($singleAI);
-        \hutoma\console::redirect('../error.php?err=200');
+        errorRedirect::handleErrorRedirect($singleAI_result);
         exit;
     }
-    unset($singleAI);
+    return $singleAI;
 }
 
-function setSessionVariables($singleAI)
-{
-    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['aiid'] = $singleAI['aiid'];
-    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['name'] = $singleAI['name'];
-    $_SESSION[$_SESSION['navigation_id']]['user_details']['ai']['description'] = $singleAI['description'];
-}
-
+$header_page_title = "Publish Bot";
+include __DIR__ . "/include/page_head_default.php";
+include __DIR__ . "/include/page_body_default.php";
+include __DIR__ . "/include/page_menu.php";
 ?>
 
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Hu:toma | Publish AI</title>
-    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-
-    <link rel="stylesheet" href="./bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet" href="scripts/external/select2/select2.css">
-    <link rel="stylesheet" href="./dist/css/font-awesome.min.css">
-    <link rel="stylesheet" href="./dist/css/hutoma.css">
-    <link rel="stylesheet" href="./dist/css/skins/skin-blue.css">
-</head>
-
-<body class="hold-transition skin-blue fixed sidebar-mini">
-<?php include_once "../console/common/google_analytics.php"; ?>
-
 <div class="wrapper">
-    <header class="main-header" style="border:1px solid black;">
-        <?php include './dynamic/header.html.php'; ?>
-    </header>
-
-    <!-- ================ MENU CONSOLE ================= -->
-    <aside class="main-sidebar ">
-        <section class="sidebar">
-            <p id="sidebarmenu"></p>
-        </section>
-    </aside>
-
-    <!-- ================ PAGE CONTENT ================= -->
+    <?php include __DIR__ . "/include/page_header_default.php"; ?>
     <div class="content-wrapper">
         <section class="content">
             <div class="row">
                 <div class="col-md-12">
-                    <?php include './dynamic/publishAI.content.html.php'; ?>
+                    <?php include __DIR__ . '/dynamic/publishAI.content.html.php'; ?>
                 </div>
             </div>
         </section>
     </div>
-
-    <footer class="main-footer">
-        <?php include './dynamic/footer.inc.html.php'; ?>
-    </footer>
-    
+    <?php include __DIR__ . '/include/page_footer_default.php'; ?>
 </div>
 
-<script src="scripts/external/jQuery/jQuery-2.1.4.min.js"></script>
-<script src="./bootstrap/js/bootstrap.min.js"></script>
-<script src="./bootstrap/js/bootstrap-filestyle.js"></script>
-<script src="scripts/external/slimScroll/jquery.slimscroll.min.js"></script>
-<script src="scripts/external/fastclick/fastclick.min.js"></script>
-<script src="./dist/js/app.min.js"></script>
+<script src="/console/dist/vendors/jQuery/jQuery-2.1.4.min.js"></script>
+<script src="/console/dist/vendors/bootstrap/js/bootstrap.min.js"></script>
+<script src="/console/dist/vendors/bootstrap/js/bootstrap-filestyle.js"></script>
+<script src="/console/dist/vendors/slimScroll/jquery.slimscroll.min.js"></script>
+<script src="/console/dist/vendors/fastclick/fastclick.min.js"></script>
+<script src="/console/dist/vendors/app.min.js"></script>
 
-<script src="./scripts/validation/validation.js"></script>
-<script src="scripts/external/select2/select2.full.js"></script>
-<script src="scripts/external/bootstrap-slider/bootstrap-slider.js"></script>
+<script src="<?php $assets->getAsset('validation/validation.js') ?>"></script>
+<script src="/console/dist/vendors/select2/select2.full.js"></script>
+<script src="/console/dist/vendors/bootstrap-slider/bootstrap-slider.js"></script>
 
-<script src="./scripts/messaging/messaging.js"></script>
-<script src="./scripts/shared/shared.js"></script>
-<script src="./scripts/sidebarMenu/sidebar.menu.js"></script>
+<script src="<?php $assets->getAsset('messaging/messaging.js') ?>"></script>
+<script src="<?php $assets->getAsset('shared/shared.js') ?>"></script>
 <script>
     $(function () {
         $('.select2').select2();
     });
 
 </script>
-<form action="" method="post" enctype="multipart/form-data">
-    <script type="text/javascript">
-        MENU.init([ "","home",0,false,true]);
-    </script>
-</form>
+
+<?php
+$menuObj = new menuObj("", "home", 0, false, true);
+include __DIR__ . "/include/page_menu_builder.php" ?>
+
 
 </body>
 </html>

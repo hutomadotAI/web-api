@@ -1,3 +1,23 @@
+/**
+ * Create and send a Buy Skill Event to the GTM
+ * @return {undefined}
+ */
+function createBuyBotEvent(eventname, name, aiid) {
+    if ('dataLayer' in window) {
+        dataLayer.push({
+            event: 'abstractEvent',
+            eventCategory: 'botstore',
+            eventAction: 'purchase',
+            eventLabel: eventname,
+            eventMetadata: {
+                timestamp: Date.now(),
+                aiid: aiid,
+                name: name
+            }
+        });
+    }
+}
+
 function purchaseBotFromBotcardDetail() {
     var GENERIC_ERROR_STRING = "There was a problem acquiring the bot";
     var prevCursor = document.body.style.cursor;
@@ -5,16 +25,20 @@ function purchaseBotFromBotcardDetail() {
     document.getElementById('btnBuyBot').disabled = true;
     var botId = document.getElementById('bot_id').value;
     $.ajax({
-        url: './dynamic/purchaseBot.php',
-        data: {botId: botId},
+        url: './proxy/purchaseBot.php',
+        data: { botId: botId },
         type: 'POST',
-        success: function (response) {
+        success: function(response) {
             var parsedResponse = JSON.parse(response);
             var statusCode = parsedResponse['status']['code'];
             var message = parsedResponse['status']['info'];
             switch (statusCode) {
                 case 200:
+                    item = JSON.parse(botstoreItem)
+
+                    createBuyBotEvent(item.metadata.aiid + "_" + user.email, user.email, item.metadata.aiid);
                     btnFromBuyToPurchased();
+                    $('#store_purchase_confirmation_popup').modal('show');
                     break;
                 default:
                     document.getElementById('msgAlertBotcardBox').style.display = 'block';
@@ -22,11 +46,11 @@ function purchaseBotFromBotcardDetail() {
                     break;
             }
         },
-        complete: function () {
+        complete: function() {
             document.body.style.cursor = prevCursor;
             document.getElementById('btnBuyBot').disabled = false;
         },
-        error: function () {
+        error: function() {
             document.getElementById('msgAlertBotcardBox').style.display = 'block';
             msgAlertBorcard(ALERT.DANGER.value, GENERIC_ERROR_STRING);
         }

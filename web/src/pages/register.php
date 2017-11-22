@@ -1,9 +1,26 @@
 <?php
 
-include_once __DIR__ . "../console/api/signupCodeApi.php";
-include_once __DIR__ . "../console/common/config.php";
+namespace hutoma;
 
-include "config.php";
+use hutoma\api\userMgmt;
+
+require_once __DIR__ . "/../console/common/globals.php";
+require_once __DIR__ . "/../console/common/utils.php";
+require_once __DIR__ . "/../console/common/config.php";
+require_once __DIR__ . "/../console/common/sessionObject.php";
+require_once __DIR__ . "/../console/api/userMgmt.php";
+include_once __DIR__ . "/../console/api/signupCodeApi.php";
+require_once __DIR__ . "/../console/common/Assets.php";
+require_once __DIR__ . "/../console/dist/manifest.php";
+
+$assets = new Assets($manifest);
+
+function getErrorMessage($message, $alertType = 'alert-warning') {
+    $msg ='<div class="alert ' . $alertType . ' text-white flat">';
+    $msg .='<i class="icon fa fa-exclamation"></i> ' . $message;
+    $msg .='</div>';
+    return $msg;
+}
 
 if(isset($_POST['submit'])) {
 
@@ -12,9 +29,7 @@ if(isset($_POST['submit'])) {
         $response=json_decode(file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret=6LfUJhMUAAAAAF_JWYab5E1oBqZ-XWtHer5n67xO&response=".$captcha."&remoteip=".$_SERVER['REMOTE_ADDR']), true);
         if($response['success'] == false)
         {
-            $msg ='<div class="alert alert-warning text-white flat">';
-            $msg .='<i class="icon fa fa-exclamation"></i> You did not pass the captcha test';
-            $msg .='</div>';
+            $msg = getErrorMessage('You did not pass the captcha test');
         }
         else {
             $email = $_POST['email'];
@@ -22,66 +37,55 @@ if(isset($_POST['submit'])) {
             $retyped_password = $_POST['retyped_password'];
             $name = $_POST['username'];
             $terms = isset($_POST['terms']);
-            $invite_code =$_POST['invite_code'];
 
-            $missingfields  ='<div class="alert alert-warning text-white flat">';
-            $missingfields .='<i class="icon fa fa-exclamation"></i> Some fields were left blank.';
-            $missingfields .='</div>';
+            $passwordCompliance =
+                preg_match('/\d+/', $password) == 1       // at least one digit
+                && strlen($password) >= 6                         // minimum length of 6 chars
+                && preg_match('/[a-z]/', $password) == 1  // at least a lowercase letter
+                && preg_match('/[A-Z]/', $password) == 1; // at least an uppercase letter
 
-            $passwordmismatch  ='<div class="alert alert-warning text-white flat">';
-            $passwordmismatch .='<i class="icon fa fa-exclamation"></i> The passwords you entered do not match.';
-            $passwordmismatch .='</div>';
-
-            $termsmsg  ='<div class="alert alert-warning text-white flat">';
-            $termsmsg .='<i class="icon fa fa-exclamation"></i> Please indicate that you have read the Hu:toma Subscription Agreement thoroughly and agree to the terms stated.';
-            $termsmsg .='</div>';
-
-            $userexists  ='<div class="alert alert-warning text-white flat">';
-            $userexists .='<i class="icon fa fa-exclamation"></i> This user already exists.';
-            $userexists .='</div>';
-
-            $invalidcode  ='<div class="alert alert-warning text-white flat">';
-            $invalidcode .='<i class="icon fa fa-exclamation"></i> Please enter a valid invitation code.</a>';
-            $invalidcode .='</div>';
-
-            $unknownErrorMessage  ='<div class="alert alert-danger text-white flat">';
-            $unknownErrorMessage .='<i class="icon fa fa-exclamation"></i> Unspecified error code.';
-            $unknownErrorMessage .='</div>';
-
-
-            $msg= $missingfields;
-
-            $api = new \hutoma\api\signupCodeApi(\hutoma\console::isLoggedIn(), \hutoma\config::getAdminToken());
-
-            if( $email == "" || $password == '' || $retyped_password == '' || $name == '' ) $msg= $missingfields;
-            elseif($password != $retyped_password) $msg= $passwordmismatch;
-            elseif($terms != 'True') $msg= $termsmsg;
-            elseif($api->inviteCodeValid($invite_code) !== 200) $msg=$invalidcode;
-            else{
-                $createAccount = \hutoma\console::register($email, $password, $email, $name, date("Y-m-d H:i:s"));
+            $api = new api\signupCodeApi(sessionObject::isLoggedIn(), sessionObject::getDevToken());
+            if( $email == "" || $password == '' || $retyped_password == '' || $name == '' ) {
+                $msg= getErrorMessage('Some fields were left blank.');
+            }
+            elseif (!$passwordCompliance) {
+                $msg = getErrorMessage('The password needs to be at least 6 characters long, contain at least a digit and both uppercase and lowercase letters');
+            }
+            elseif($password != $retyped_password) {
+                $msg= getErrorMessage('The passwords you entered do not match.');
+            }
+            elseif($terms != 'True') {
+                $msg= getErrorMessage('Please indicate that you have read the Hu:toma Subscription Agreement thoroughly and agree to the terms stated.');
+            } else {
+                $createAccount = userMgmt::register($email, $password, $email, $name, date("Y-m-d H:i:s"));
 
                 if($createAccount === "exists") {
-                    $msg= $userexists;
+                    $msg = getErrorMessage('This user already exists.');
                 } elseif ($createAccount === "unknown") {
-                    $msg = $unknownErrorMessage;
+                    $msg = getErrorMessage('Unspecified error code.', 'alert-danger');
                 } else {
                     // Register succeeded
                     if ($createAccount === 200) {
-                        // Redeem invite code.
-
-                        $api->redeemInviteCode($invite_code, $email);
-
                         setcookie('logSyscuruser', $email);
-                        $login = \hutoma\console::login($email, $password, false);
+
+                        // Try to login if successful redirect to homepage using naive register trigger
+                        $login = userMgmt::login(
+                            $email, 
+                            $password, 
+                            false, 
+                            true, 
+                            config::getHomePageUrl() . '?register=1'
+                        );
+
                         if ($login === false) {
-                            $msg = array("Error", "There was an error creating the user - please try again later");
+                            $msg = getErrorMessage('There was an error creating the user - please try again later.');
                         } elseif (is_array($login) && $login['status'] == "blocked") {
-                            $msg = array("Error", "Too many login attempts. You can try again after " . $login['minutes'] . " minutes (" . $login['seconds'] . " seconds)");
+                            $msg = getErrorMessage('Too many login attempts. You can try again after ' . $login['minutes'] . ' minutes (' . $login['seconds'] . ' seconds)');
                             exit();
                         }
                     } else {
                         // Registration threw an error
-                        $msg = array("Error", "Error code:" . $createAccount);
+                        $msg = getErrorMessage("Error code:" . $createAccount);
                     }
                 }
             }
@@ -92,9 +96,7 @@ if(isset($_POST['submit'])) {
     }
     else
     {
-        $msg  ='<div class="alert alert-warning text-white flat">';
-        $msg.='<i class="icon fa fa-exclamation"></i> Please check the captcha checkbox';
-        $msg .='</div>';
+        $msg  = getErrorMessage('Please check the captcha checkbox');
     }
 
 
@@ -115,7 +117,7 @@ if(isset($_POST['submit'])) {
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <title>Hu:toma | New Account </title>
+    <title>Hu:toma | Register</title>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="keywords" content="Deep learning, AI, Hutoma, Artificial Intelligence, Machine Learning, Siri, Cortana, Deep Learning API, AI Marketplace, Chatbots">
@@ -123,18 +125,19 @@ if(isset($_POST['submit'])) {
     <meta name="author" content="hutoma limited">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <link rel="stylesheet" href="../console/dist/css/hutoma.css">
-    <link rel="stylesheet" href="../console/bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet" href="../console/dist/css/font-awesome.min.css">
-    <link rel="stylesheet" href="../console/scripts/cookiePolicyBar/cookiePolicyBar.css">
+    <link rel="stylesheet" href="/console/dist/css/hutoma.css">
+    <link rel="stylesheet" href="/console/dist/vendors/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/console/dist/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/console/dist/vendors/cookiePolicyBar/cookiePolicyBar.css">
 
-    <link rel="stylesheet" href="https://www.hutoma.com/css/main.css">
+    <link rel="stylesheet" href="https://www.hutoma.ai/css/main.css">
+    <link rel="icon" href="/console/dist/img/favicon.ico" type="image/x-icon">
 
-    <script type="text/javascript" src="../console/scripts/external/jQuery/jquery-3.1.0.min.js"></script>
-    <script type="text/javascript" src="../console/scripts/cookiePolicyBar/cookiePolicyBar.js"></script>
-    <script type="text/javascript" src="../console/scripts/external/iCheck/icheck.min.js"></script>
+    <script type="text/javascript" src="/console/dist/vendors/jQuery/jquery-3.1.0.min.js"></script>
+    <script type="text/javascript" src="/console/dist/vendors/cookiePolicyBar/cookiePolicyBar.js"></script>
+    <script type="text/javascript" src="/console/dist/vendors/iCheck/icheck.min.js"></script>
     
-    <script src='../console/scripts/security/password.js'></script>
+    <script src='<?php $assets->getAsset('security/password.js') ?>'></script>
     <script src='https://www.google.com/recaptcha/api.js'></script>
     
     <script type="text/javascript">
@@ -176,10 +179,10 @@ if(isset($_POST['submit'])) {
         }
 
     </style>
+    <?php include_once "../console/common/google_tag_manager.php" ?>
 </head>
 <body id="body" class="web-body hold-transition register-page">
-<?php include_once "../console/common/google_analytics.php"; ?>
-<?php include_once "./header.php"; ?>
+<?php include __DIR__ . "/../console/include/loggedout_header.php"; ?>
 
 <section>
     <div class="register-box">
@@ -212,16 +215,11 @@ if(isset($_POST['submit'])) {
                        onkeyup="confirmPassword('passwordField','passConfirmationField');">
                 <span class="glyphicon glyphicon-log-in form-control-feedback"></span>
             </div>
-            <div class="form-group has-feedback">
-                <input name="invite_code"  type="invite_code" class="form-control flat" placeholder="Invitation Code" value="<?php if (isset($_POST['invite_code'])) echo $_POST['invite_code']?>">
-                <span class="glyphicon glyphicon-barcode form-control-feedback"></span>
-            </div>
             <div class="row">
                 <div class="col-xs-8">
                     <div class="checkbox icheck">
                         <label>
-                            <input name="terms" type="checkbox" <?php if (isset($_POST['terms']) ) echo 'checked'?> > I agree to the terms stated in the Subscription <a href="https://www.hutoma.com/Hutoma_WebPlatformSaaSAgreement.pdf" target="_blank">Agreement.</a>.
-                        </label>
+                            <input name="terms" type="checkbox" <?php if (isset($_POST['terms']) ) echo 'checked'?> > I agree to the terms stated in the Subscription <a href="https://www.hutoma.ai/Hutoma_WebPlatformSaaSAgreement.pdf" target="_blank">Agreement.</a>.
                         </label>
                     </div>
                 </div><!-- /.col -->
@@ -236,12 +234,29 @@ if(isset($_POST['submit'])) {
             </div>
         </form>
         <a href="login.php" class="text-center new-link">I already have an account</a><br/>
-        <a href="https://www.hutoma.com" class="text-center new-link">I need an invitation code</a>
     </div><!-- /.form-box -->
     </div><!-- /.register-box -->
 </section>
 
-<?php include_once "./footer.php"; ?>
+<?php include __DIR__ . "/../console/include/loggedout_footer.php"; ?>
+<!-- Google Code for sign-up Conversion Page -->
+<script type="text/javascript">
+    /* <![CDATA[ */
+    var google_conversion_id = 843069449;
+    var google_conversion_language = "en";
+    var google_conversion_format = "3";
+    var google_conversion_color = "ffffff";
+    var google_conversion_label = "LtRjCIPTx3MQifCAkgM";
+    var google_remarketing_only = false;
+    /* ]]> */
+</script>
+<script type="text/javascript" src="//www.googleadservices.com/pagead/conversion.js">
+</script>
+<noscript>
+    <div style="display:inline;">
+        <img height="1" width="1" style="border-style:none;" alt="" src="//www.googleadservices.com/pagead/conversion/843069449/?label=LtRjCIPTx3MQifCAkgM&amp;guid=ON&amp;script=0"/>
+    </div>
+</noscript>
 
 </body>
 </html>

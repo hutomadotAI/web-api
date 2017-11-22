@@ -19,5 +19,4 @@
   var element = document.getElementById('developer_country');
   element.value = valueToSelect;
   element.selected = true;
-  document.getElementById('select2-' + id + '-container').innerHTML = valueToSelect;
 </script>

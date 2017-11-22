@@ -1,32 +1,38 @@
 version: '2'
-services:
-   dev-console:
-      container_name: dev-console
-      build:
-        context: .
-        dockerfile: Dockerfile
-      ports: 
-      - "8080:80"
-      environment:
-      - HUTOMA_API_DB_CONNECTION_STRING=mysql:dbname=hutoma;host=api-db;port=3306;charset=utf8
-      - HUTOMA_API_DB_USERNAME=hutoma_caller
-      - HUTOMA_API_DB_PASSWORD=>YR"khuN*.gF)V4#
-      - HUTOMA_API_URL=http://api:8080/v1
-      - LOG_SERVICE_ANALYTICS_URL=http://log-svc:8080/log
 
-   dev-console-snowflake:
-      container_name: dev-console-snowflake
-      build:
-        context: .
-        dockerfile: Dockerfile.snowflake
-      ports: 
-      - "8083:80"
-      environment:
-      - HUTOMA_API_DB_CONNECTION_STRING=mysql:dbname=hutoma;host=api-db;port=3306;charset=utf8
-      - HUTOMA_API_DB_USERNAME=hutoma_caller
-      - HUTOMA_API_DB_PASSWORD=>YR"khuN*.gF)V4#
-      - HUTOMA_API_URL=http://api:8080/v1
-      - LOG_SERVICE_ANALYTICS_URL=http://log-svc:8080/log      
+services:
+
+  dev-console:
+    container_name: dev-console
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports: 
+      - "8080:80"
+    environment:
+      LOG_SERVICE_ANALYTICS_URL: 'http://log-svc:8080/log'
+
+  # Local development container
+  local-console:
+    container_name: local-console
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        DEBUG: 1
+    ports:
+      - "8080:80"
+    environment:
+      # We should move environments variables to secret.env file as soon as it's get optional:
+      # https://github.com/docker/compose/pull/3955
+      API_ADMIN_DEVTOKEN: 'eyJhbGciOiJIUzI1NiIsImNhbGciOiJERUYifQ.eNqqVgry93FVsgJT8Y4uvp5-SjpKxaVJQKHElNzMPKVaAAAAAP__.e-INR1D-L_sokTh9sZ9cBnImWI0n6yXXpDCmat1ca_c'
+      LOG_SERVICE_ANALYTICS_URL: 'http://log-svc:8080/log'
+      HUTOMA_API_URL: http://10.132.0.4:8081/v1
+      PHP_XDEBUG_ENABLED: 1
+      XDEBUG_CONFIG: remote_host=192.168.1.255
+    volumes:
+      - ./src:/var/www/html
+
 networks:
   default:
     external:

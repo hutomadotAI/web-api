@@ -1,0 +1,4 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Context docBase="ROOT" path="/" reloadable="true" crossContext="true">
+    <Valve className="org.apache.catalina.valves.rewrite.RewriteValve"/>
+</Context>

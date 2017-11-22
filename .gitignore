@@ -4,6 +4,7 @@
 **/.idea/dictionaries
 **/.idea/vcs.xml
 **/.idea/jsLibraryMappings.xml
+**/.idea/artifacts
 
 # Sensitive or high-churn files:
 **/.idea/dataSources.ids
@@ -59,3 +60,9 @@ modules.xml
 
 #Python
 *.pyc
+
+**/node_modules
+
+# Statics
+web/src/console/dist/assets/
+web/src/console/dist/manifest.php

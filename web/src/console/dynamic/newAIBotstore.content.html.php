@@ -54,7 +54,7 @@
 <p></p>
 <h2></h2>
 <p id="botsSearch"></p>
-<form method="POST" name="newAIbotstoreform" action="./dynamic/saveAI.php">
+<form method="POST" name="newAIbotstoreform" action="./proxy/aiProxy.php">
     <input type="hidden" name="userActivedBots" id="userActivedBots" val="" style="display:none;">
 </form>
 

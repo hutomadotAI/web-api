@@ -26,7 +26,7 @@ class intentsApi extends apiBase
             $this->curl->setUrl($this->buildRequestUrl(self::$intentPath . '/' . $aiid, array('intent_name' => $intentName)));
             $this->curl->setVerbDelete();
             $curl_response = $this->curl->exec();
-            $this->handleApiCallError($curl_response, 317);
+            $this->handleApiCallError($curl_response);
             $json_response = json_decode($curl_response, true);
             return $json_response;
         }
@@ -39,7 +39,7 @@ class intentsApi extends apiBase
             $this->curl->setUrl($this->buildRequestUrl(self::$intentsPath . '/' . $aiid, array('aiid' => $aiid)));
             $this->curl->setVerbGet();
             $curl_response = $this->curl->exec();
-            $this->handleApiCallError($curl_response, 310);
+            $this->handleApiCallError($curl_response);
             $json_response = json_decode($curl_response, true);
             return $json_response;
         }
@@ -52,7 +52,7 @@ class intentsApi extends apiBase
             $this->curl->setUrl($this->buildRequestUrl(self::$intentPath . '/' . $aiid, array('aiid' => $aiid, 'intent_name' => $name)));
             $this->curl->setVerbGet();
             $curl_response = $this->curl->exec();
-            $this->handleApiCallError($curl_response, 311);
+            $this->handleApiCallError($curl_response);
             $json_response = json_decode($curl_response, true);
             return $json_response;
         }
@@ -76,7 +76,7 @@ class intentsApi extends apiBase
                 )
             ));
             $curl_response = $this->curl->exec();
-            $this->handleApiCallError($curl_response, 311);
+            $this->handleApiCallError($curl_response);
             $json_response = json_decode($curl_response, true);
             return $json_response;
         }

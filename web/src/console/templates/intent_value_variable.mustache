@@ -1,0 +1,73 @@
+<div class="col-xs-3">
+    <div class="text-center">
+        <a class="btn btn-select btn-primary btn-select-light" onClick="pushEntitiesList(this)">
+            <input type="hidden" class="btn-select-input" value=""/>
+            {{#variable.value}}
+                <span class="btn-select-value">{{variable.value}}</span>
+            {{/variable.value}}
+            {{^variable.value}}
+                <span class="btn-select-value">add entity</span>
+            {{/variable.value}}
+            <span class="btn-select-arrow text-sm glyphicon glyphicon-chevron-down"></span>
+            <ul class="flex">
+                <li class="selected">{{variable.value}}</li>
+            </ul>
+        </a>
+    </div>
+</div>
+
+<div class="col-xs-2">
+    <div class="text-center">
+        <input type="text" class="form-control flat no-shadow text-center" name="action-nprompt"
+               style="background-color: transparent; margin:0;" placeholder="{{variable.numberPrompts}}"
+               onclick="resetBorderHighlightError(this)" onkeydown="enableSaving(true)">
+    </div>
+</div>
+
+<div class="col-xs-2">
+    <div class="text-center">
+
+        {{#variable.promptsList}}
+            <input type="text" class="form-control flat no-shadow text-center" name="action-prompts"
+                   style="background-color: transparent; margin:0;" placeholder=" ... " data-toggle="modal"
+                   data-target="#boxPrompts" data-prompts="{{variable.promptsList}}"
+                   onMouseOver="this.style.cursor='pointer'" onclick="resetBorderHighlightError(this);" readonly>
+        {{/variable.promptsList}}
+        {{^variable.promptsList}}
+            <input type="text" class="form-control flat no-shadow text-center" name="action-prompts"
+                   style="background-color: transparent; margin:0;" placeholder="click to enter" data-toggle="modal"
+                   data-target="#boxPrompts" data-prompts="" onMouseOver="this.style.cursor='pointer'"
+                   onclick="resetBorderHighlightError(this);" readonly>
+        {{/variable.promptsList}}
+
+    </div>
+</div>
+
+<div class="col-xs-2" style="padding-top:7px;">
+    <div class="text-left">
+        <div class="col-xs-7 text-gray no-padding">
+            <input class="pull-right" type="checkbox" name="action-required"
+                   onclick="enableSaving(true)"{{#variable.required}} checked{{/variable.required}}>
+        </div>
+    </div>
+</div>
+
+<div class="col-xs-2">
+    <div class="text-left">
+        <div class="text-gray no-padding">
+            <input type="text" class="form-control flat no-shadow text-center" name="action-nprompt"
+                   style="background-color: transparent; margin:0;" {{{variable.labelToDisplay}}}
+                   onclick="resetBorderHighlightError(this)" onkeydown="enableSaving(true)">
+        </div>
+    </div>
+</div>
+
+
+<div class="col-xs-1 text-gray no-padding">
+    <a class="pull-right" data-toggle="modal" data-target="#deleteIntentVariable"
+       style="display:none; padding-top:2px;" onClick="deleteIntentVariable(this)">
+        <i class="fa fa-trash-o" data-toggle="tooltip" title="Delete"
+           style="padding-top:10px;padding-right:10px;"></i>
+    </a>
+</div>
+

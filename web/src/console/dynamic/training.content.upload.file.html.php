@@ -38,7 +38,7 @@
                     <div class="overlay center-block">
                         <div class="embed-responsive embed-responsive-16by9" id="videoTrainingFile">
                             <iframe
-                                src="//www.youtube.com/embed/__pO6wVvBEY?controls=1&hd=1&enablejsapi=1"
+                                src="https://www.youtube.com/embed/uFj73npjhbk?controls=1&hd=1&enablejsapi=1"
                                 frameborder="0" allowfullscreen>
                             </iframe>
                         </div>
@@ -50,7 +50,7 @@
 
 <!-- MODAL Example training file -->
 <div class="modal fade" id="sampleTrainingFile" role="dialog">
-    <div class="modal-dialog flat">
+    <div class="modal-dialog flat width600">
 
         <!-- Modal content-->
         <div class="modal-content bordered" style="background-color: #212121">

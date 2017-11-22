@@ -24,7 +24,7 @@ class aiApi extends apiBase
             $this->curl->setUrl($this->buildRequestUrl(self::$path));
             $this->curl->setVerbGet();
             $curl_response = $this->curl->exec();
-            $this->handleApiCallError($curl_response, 302);
+            $this->handleApiCallError($curl_response);
             $json_response = json_decode($curl_response, true);
             return $json_response;
         }
@@ -37,7 +37,19 @@ class aiApi extends apiBase
             $this->curl->setUrl($this->buildRequestUrl(self::$path . '/' . $aiid));
             $this->curl->setVerbGet();
             $curl_response = $this->curl->exec();
-            $this->handleApiCallError($curl_response, 303);
+            $this->handleApiCallError($curl_response);
+            $json_response = json_decode($curl_response, true);
+            return $json_response;
+        }
+        return $this->getDefaultResponse();
+    }
+
+    public function regenerateHmacSecretForAI($aiid)
+    {
+        if ($this->isLoggedIn()) {
+            $this->curl->setUrl($this->buildRequestUrl(self::$path . '/' . $aiid . '/' . 'regenerate_webhook_secret'));
+            $this->curl->setVerbPost();
+            $curl_response = $this->curl->exec();
             $json_response = json_decode($curl_response, true);
             return $json_response;
         }
@@ -50,14 +62,14 @@ class aiApi extends apiBase
             $this->curl->setUrl($this->buildRequestUrl(self::$path . '/' . $aiid));
             $this->curl->setVerbDelete();
             $curl_response = $this->curl->exec();
-            //$this->handleApiCallError($curl_response, 305);
+            //$this->handleApiCallError($curl_response);
             $json_response = json_decode($curl_response, true);
             return $json_response;
         }
         return null;
     }
 
-    public function updateAI($aiid, $description, $language, $timezone, $personality, $voice, $confidence)
+    public function updateAI($aiid, $description, $language, $timezone, $personality, $voice, $confidence, $defaultChatResponses)
     {
         if ($this->isLoggedIn()) {
             $this->curl->setUrl($this->buildRequestUrl(self::$path . '/' . $aiid));
@@ -88,13 +100,15 @@ class aiApi extends apiBase
                 'confidence' => $confidence,
                 'voice' => $voice,
                 'locale' => $locale,
-                'timezone' => $timezone
+                'timezone' => $timezone,
+                // TODO: change to a true json array when we support multiple lines on the UI
+                'default_chat_responses' => '["' . $defaultChatResponses . '"]'
             );
 
             $this->curl->setVerbPost();
             $this->curl->setOpt(CURLOPT_POSTFIELDS, http_build_query($args));
             $curl_response = $this->curl->exec();
-            $this->handleApiCallError($curl_response, 305);
+            $this->handleApiCallError($curl_response);
             $json_response = json_decode($curl_response, true);
             return $json_response;
         }
@@ -140,24 +154,52 @@ class aiApi extends apiBase
             $this->curl->setVerbPost();
             $this->curl->setOpt(CURLOPT_POSTFIELDS, http_build_query($args));
             $curl_response = $this->curl->exec();
-            $this->handleApiCallError($curl_response, 301);
+            $this->handleApiCallError($curl_response);
             $json_response = json_decode($curl_response, true);
             return $json_response;
         }
         return $this->getDefaultResponse();
     }
 
-    public function chatAI($aiid, $chatId, $q, $history, $fs, $min_p, $topic)
+    public function exportAI($aiid)
+    {
+        if ($this->isLoggedIn()) {
+            $this->curl->setUrl($this->buildRequestUrl(self::$path . '/' . $aiid . '/export'));
+            $this->curl->setVerbGet();
+            $curl_response = $this->curl->exec();
+            $this->handleApiCallError($curl_response, 500);
+            $json_response = json_decode($curl_response, true);
+            return $json_response;
+        }
+        return $this->getDefaultResponse();
+    }
+
+    public function importAI($file)
+    {
+        if ($this->isLoggedIn()) {
+            $this->curl->setUrl($this->buildRequestUrl(self::$path . '/import'));
+
+            $filename = $file['tmp_name'];
+            $file_contents = file_get_contents($filename);
+
+            $this->curl->addHeader("Content-Type", "application/json");
+            $this->curl->setOpt(CURLOPT_POSTFIELDS, $file_contents);
+            $this->curl->setVerbPost();
+            $curl_response = $this->curl->exec();
+
+            $json_response = json_decode($curl_response, true);
+            return $json_response;
+        }
+        return $this->getDefaultResponse();
+    }
+
+    public function chatAI($aiid, $chatId, $q)
     {
         if ($this->isLoggedIn()) {
             $this->curl->setUrl($this->buildRequestUrl(self::$path . '/' . $aiid . '/chat',
                 array(
                     'q' => $q,
-                    'chatId' => $chatId,
-                    'chat_history' => $history,
-                    'confidence_threshold' => $min_p,
-                    'current_topic' => $topic
-                )
+                    'chatId' => $chatId)
             ));
             $this->curl->setVerbGet();
             $curl_response = $this->curl->exec();
@@ -173,7 +215,7 @@ class aiApi extends apiBase
             $this->curl->setUrl($this->buildRequestUrl(self::$path . '/domain'));
             $this->curl->setVerbGet();
             $curl_response = $this->curl->exec();
-            $this->handleApiCallError($curl_response, 360);
+            $this->handleApiCallError($curl_response);
             $json_response = json_decode($curl_response, true);
             return $json_response;
         }
@@ -211,7 +253,7 @@ class aiApi extends apiBase
             $this->curl->setUrl($this->buildRequestUrl(self::$path . '/' . $aiid . '/training/stop'));
             $this->curl->setVerbPut();
             $curl_response = $this->curl->exec();
-            $this->handleApiCallError($curl_response, 309);
+            $this->handleApiCallError($curl_response);
             $json_response = json_decode($curl_response, true);
             return $json_response;
         }

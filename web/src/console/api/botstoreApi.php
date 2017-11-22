@@ -4,8 +4,8 @@ namespace hutoma\api;
 
 use hutoma\botstoreListParam;
 
-define('CAROUSEL_CATEGORIES',  json_encode(array("Entertainment", "Education","Events", "Finance", "Fitness", "Games", "Health & Beauty", "Internet of Things", "News", "Personal", "Other", "Shopping", "Social", "Travel", "Virtual Assistants")));
-define('CAROUSEL_CATEGORIES_ICONS',  json_encode(array("fa-film", "fa-graduation-cap","fa-calendar-check-o", "fa-eur", "fa-bicycle", "fa-gamepad", "fa-heartbeat", "fa-laptop", "fa-newspaper-o", "fa-male", "fa-search", "fa-cart-plus", "fa-thumbs-o-up", "fa-plane", "fa-headphones")));
+define('CAROUSEL_CATEGORIES',  json_encode(array("Entertainment", "Education","Events", "Finance", "Fitness", "Health & Beauty",  "News", "Personal", "Other", "Social", "Travel", "Virtual Assistants")));
+define('CAROUSEL_CATEGORIES_ICONS',  json_encode(array("fa-film", "fa-graduation-cap","fa-calendar-check-o", "fa-eur", "fa-bicycle", "fa-heartbeat", "fa-newspaper-o", "fa-male", "fa-search", "fa-thumbs-o-up", "fa-plane", "fa-headphones")));
 
 include_once __DIR__ . "/../common/botstoreListParam.php";
 

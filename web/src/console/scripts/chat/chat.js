@@ -9,8 +9,7 @@ if (isChrome) {
         deactiveSpeechButton();
     else
         activeSpeechButton();
-}
-else {
+} else {
     lockSpeechOption();
     document.getElementById('speech-icon').className = 'fa fa-microphone text-gray';
     document.getElementById('speech-text').className = 'text-gray';
@@ -26,16 +25,16 @@ function start() {
 }
 
 function keyboardChat(e) {
-    if (e.keyCode == 13 && document.getElementById("message").value)
+    if (e.keyCode === 13 && document.getElementById("message").value)
         createNodeChat(human, AI);
 }
 
 function createNodeChat(human_name, ai_name) {
-    if (chatSemaphore == 0) {
-        chatSemaphore = (chatSemaphore + 1) % (2);
-        var msg = $('#message').val();
-        var chatId = $('#chatId').val();
-        if (msg.length != 0) {
+    var msg = $('#message').val().trim();
+    var chatId = $('#chatId').val();
+    if (msg.length !== 0) {
+        if (chatSemaphore === 0) {
+            chatSemaphore = (chatSemaphore + 1) % (2);
             disableChat();
             deactiveSpeechButton();
             lockSpeechOption();
@@ -45,6 +44,10 @@ function createNodeChat(human_name, ai_name) {
     }
 }
 
+function getPrintableLocalDateTime() {
+    return new Date().toString().split(' ').slice(0, 5).join(' ');
+}
+
 function createLeftMsg(human_name, msg) {
     var height = parseInt($('#chat').scrollTop());
     var interval = window.setInterval(animate, 10);
@@ -52,16 +55,16 @@ function createLeftMsg(human_name, msg) {
     var newLeftMsg = document.createElement('div');
     newLeftMsg.className = 'direct-chat-msg';
     newLeftMsg.id = 'left_message';
-    var date = new Date().toUTCString().split(' ').slice(0, 5).join(' ');
     var wHTML = '';
     wHTML += ('<div class="direct-chat-info clearfix">');
     wHTML += ('<span class="direct-chat-name pull-left" style="color:gray;">');
     wHTML += (human_name);
     wHTML += ('</span>');
-    wHTML += ('<span class="direct-chat-timestamp pull-right">' + date + '</span>');
+    wHTML += ('<span class="direct-chat-timestamp pull-right">' + getPrintableLocalDateTime() + '</span>');
     wHTML += ('</div>');
     wHTML += ('<img class="direct-chat-img" src="./dist/img/human.jpg" alt="User image">');
     wHTML += ('<div class="direct-chat-text">');
+    // Print out the string cleared of any html and adding a break on each line break
     wHTML += cleanChat(msg);
     wHTML += ('</div>');
     newLeftMsg.innerHTML = wHTML;
@@ -87,7 +90,7 @@ function cutText(phrase) {
 
 function createRightMsg(ai_name, msg, chatId, score, error) {
     // Update chatId if needed
-    if ($("#chatId").val() == '') {
+    if ($("#chatId").val() === '') {
         $("#chatId").val(chatId);
     }
 
@@ -98,23 +101,25 @@ function createRightMsg(ai_name, msg, chatId, score, error) {
     newRightMsg.className = 'direct-chat-msg right';
     newRightMsg.id = 'right_message';
 
-    var date = new Date().toUTCString().split(' ').slice(0, 5).join(' ');
     var wHTML = "";
     wHTML += ('<div class="direct-chat-info clearfix">');
     wHTML += ('<span class="direct-chat-name pull-right" style="color:gray;">');
     wHTML += (ai_name);
     wHTML += ('</span>');
-    wHTML += ('<span class="direct-chat-timestamp pull-left">' + date + '</span>');
+    wHTML += ('<span class="direct-chat-timestamp pull-left">' + getPrintableLocalDateTime() + '</span>');
     wHTML += ('</div>');
     wHTML += ('<img class="direct-chat-img" src="./dist/img/bot.jpg" alt="AI image">');
     if (error)
         wHTML += ('<div class="direct-chat-text chat-warning">');
     else
         wHTML += ('<div class="direct-chat-text chat-success">');
-    wHTML += msg;
+    wHTML += DOMPurify.sanitize(
+        stripHtml(msg).replace(/(?:\r\n|\r|\n)/g, '<br />'),
+        { ALLOWED_TAGS: ['br'] }
+    );
     wHTML += ('</div>');
-    if (error == false)
-        wHTML += ('<span class="direct-chat-timestamp pull-left text-sm text-white">confidence score: ' + score + '</span>');
+    if (error === false)
+        wHTML += ('<span class="direct-chat-timestamp pull-left text-sm text-white">score: ' + score + '</span>');
     newRightMsg.innerHTML = wHTML;
     document.getElementById('chat').appendChild(newRightMsg);
 
@@ -134,34 +139,68 @@ function createRightMsg(ai_name, msg, chatId, score, error) {
         unlockSpeechOption();
 }
 
-function requestAnswerAI(ai_name, question, chatId) {
-    if (question != '') {
+
+function stripHtml(text) {
+    return $('<div>' + text + '</div>').text();
+}
+
+/**
+ * Create and send a chat Event to the GTM
+ * @return {undefined}
+ */
+function createChatEvent(eventname, name, chatid) {
+    if ('dataLayer' in window) {
+        dataLayer.push({
+            event: 'abstractEvent',
+            eventCategory: 'chat',
+            eventAction: 'post',
+            eventLabel: eventname,
+            eventMetadata: {
+                timestamp: Date.now(),
+                chatId: chatid,
+                name: name
+            }
+        });
+    }
+}
+
+function requestAnswerAI(ai_name, question, previousChatId) {
+    if (question !== '') {
         jQuery.ajax({
             url: 'chat.php',
             contentType: "application/json; charset=utf-8",
             type: 'GET',
             dataType: 'json',
-            data: {chatId: chatId, q: question},
-            success: function (response) {
+            data: { chatId: previousChatId, q: question },
+            success: function(response) {
 
-                // Write response in JSON message box
-                var JSONnode = document.getElementById('msgJSON');
-                JSONnode.innerHTML = htmlEncode(JSON.stringify(response, undefined, 2));
-                var JSONdata = response;
-                if (JSONdata['chatId'] === '') {
-                    createRightMsg(ai_name, 'no chat id returned', '', -1, true);
+                if (response === null) {
+                    createRightMsg(ai_name, "Oops, there was an error...", previousChatId, -1, true);
                 } else {
-                    var chatId = JSONdata['chatId'];
-                    if (JSONdata['status']['code'] === 200) {
-                        var safeAnswer = htmlEncode(JSONdata['result']['answer']);
-                        createRightMsg(ai_name, safeAnswer, chatId, JSONdata['result']['score'], false);
+                    // Write response in JSON message box
+                    var JSONnode = document.getElementById('msgJSON');
+                    JSONnode.innerHTML = htmlEncode(JSON.stringify(response, undefined, 2));
+                    var JSONdata = response;
+                    if (JSONdata['chatId'] === '') {
+                        createRightMsg(ai_name, 'no chat id returned', '', -1, true);
+                    } else {
+                        var chatId = JSONdata['chatId'];
+                        if (JSONdata['status']['code'] === 200) {
+                            if (JSONdata['result']['chatTarget'] === 'human') {
+                                createRightMsg(ai_name, "(conversation handed over to human)", chatId, JSONdata['result']['score'], false);
+                            } else {
+                                var safeAnswer = htmlEncode(JSONdata['result']['answer']);
+                                createRightMsg(ai_name, safeAnswer, chatId, JSONdata['result']['score'], false);
+                                createChatEvent(chatId + "_" + user.email, user.email, chatId);
+                            }
+                        } else {
+                            createRightMsg(ai_name, JSONdata['status']['info'], chatId, -1, true);
+                        }
                     }
-                    else
-                        createRightMsg(ai_name, JSONdata['status']['info'], chatId, -1, true);
                 }
             },
-            error: function (xhr, ajaxOptions, thrownError) {
-                if (xhr.status == 200) {
+            error: function(xhr, ajaxOptions, thrownError) {
+                if (xhr.status === 200) {
                     // We're most likely being redirected to the login page due to session having expired
                     window.location.href = "/";
                 } else {
@@ -223,8 +262,7 @@ function speechOption() {
     speechResponse = !speechResponse;
     if (speechResponse) {
         activeSpeechButton();
-    }
-    else {
+    } else {
         // deactive speech buttons
         deactiveSpeechButton();
         stopSynthesis();
@@ -232,22 +270,21 @@ function speechOption() {
     updateVoiceSessionVariable(speechResponse);
 }
 
-function updateVoiceSessionVariable(voiceOption){
+function updateVoiceSessionVariable(voiceOption) {
     jQuery.ajax({
-        url: "./dynamic/sessionChat.php",
+        url: "./proxy/sessionChat.php",
         type: "POST",
-        data: {speech: voiceOption},
+        data: { speech: voiceOption },
         cache: false,
-        success: function(response) {
-        },
-        error: function () {
+        success: function(response) {},
+        error: function() {
             console.log('Cannot update speech session variable.');
         }
     });
 }
 
 function setOptionJsonWindow() {
-    document.getElementById('json-text').innerHTML = ( !showJsonWindow ) ? '  Hide JSON Message' : '  Show JSON Message';
+    document.getElementById('json-text').innerHTML = (!showJsonWindow) ? '  Hide JSON Message' : '  Show JSON Message';
     // toggle json window
     $('#jsonBox').toggle();
     showJsonWindow = !showJsonWindow;
@@ -257,7 +294,7 @@ function copyJsonToClipboard(elementId) {
     var node = document.getElementById('msgJSON');
     var content = (node.innerHTML);
 
-    if (content.length != 0 && content.trim()) {
+    if (content.length !== 0 && content.trim()) {
         var aux = document.createElement('input');
 
         document.getElementById('message').value = '';
@@ -270,35 +307,31 @@ function copyJsonToClipboard(elementId) {
         try {
             copysuccess = document.execCommand('cut');
         } catch (e) {
-            $('#btnJSON').attr('data-original-title', 'not supported').tooltip('show');
-            $('#btnJSON').attr('data-original-title', 'copy to clipboard');
+            $('#btnJSON').attr('data-original-title', 'Not supported.').tooltip('show');
+            $('#btnJSON').attr('data-original-title', 'Copy to clipboard');
         }
         if (!copysuccess) {
-            $('#btnJSON').attr('data-original-title', 'not supported').tooltip('show');
-            $('#btnJSON').attr('data-original-title', 'copy to clipboard');
-        }
-        else {
-            $('#btnJSON').attr('data-original-title', 'Copied!!!').tooltip('show');
-            $('#btnJSON').attr('data-original-title', 'copy to clipboard');
+            $('#btnJSON').attr('data-original-title', 'Not supported.').tooltip('show');
+            $('#btnJSON').attr('data-original-title', 'Copy to clipboard');
+        } else {
+            $('#btnJSON').attr('data-original-title', 'Copied.').tooltip('show');
+            $('#btnJSON').attr('data-original-title', 'Copy to clipboard');
         }
         document.body.removeChild(aux);
-    }
-    else {
-        $('#btnJSON').attr('data-original-title', 'nothing to copy').tooltip('show');
-        $('#btnJSON').attr('data-original-title', 'copy to clipboard');
+    } else {
+        $('#btnJSON').attr('data-original-title', 'Nothing to copy.').tooltip('show');
+        $('#btnJSON').attr('data-original-title', 'Copy to clipboard.');
     }
 }
 
 function cleanChat(msg) {
     msg = msg.replace('\&', '&#38');
     msg = msg.replace('\/', '&#47');
-    return msg.replace('\<', '&#60').replace('\>', '&#62;');
+    return msg.replace('\<', '&#60').replace('\>', '&#62;').trim();
 }
 
-String.prototype.toHtmlEntities = function () {
-    return this.replace(/./gm, function (s) {
+String.prototype.toHtmlEntities = function() {
+    return this.replace(/./gm, function(s) {
         return '&#' + s.charCodeAt(0) + ';';
     });
 };
-
-

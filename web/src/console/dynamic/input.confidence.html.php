@@ -8,7 +8,13 @@
     <div class="box-body flat">
         <div class="row margin">
             <div class="col-sm-12">
-                <input type="hidden" name="ai_confidence" id="ai_confidence">
+                <?php
+                //  id = ai_confidence becomes the ionslider
+                //  id = ai_confidence_param is set with the double value that the slider is set to
+                //       immediately before the post fires.
+                ?>
+                <input type="hidden" name="ai_confidence_control" id="ai_confidence">
+                <input type="hidden" name="ai_confidence" id="ai_confidence_param">
             </div>
         </div>
     </div>
