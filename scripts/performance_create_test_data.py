@@ -119,8 +119,8 @@ def main():
     chat_test_defs = config.chat_test_ais
 
     # if files are missing then recreate from scratch
-    if not have_we_got_the_files(load_test_defs):
-        create_new_ai_files(load_test_defs)
+    #if not have_we_got_the_files(load_test_defs):
+    #    create_new_ai_files(load_test_defs)
     if not have_we_got_the_files(chat_test_defs):
         create_new_ai_files(chat_test_defs)
 
@@ -129,7 +129,7 @@ def main():
     delete_test_ais(chat_test_defs)
 
     # upload new training data
-    create_and_train_new_ais(load_test_defs)
+    #create_and_train_new_ais(load_test_defs)
     create_and_train_new_ais(chat_test_defs)
 
 
