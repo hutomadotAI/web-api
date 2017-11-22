@@ -1,5 +1,6 @@
 package com.hutoma.api.connectors.db;
 
+import com.google.common.base.Strings;
 import com.google.gson.internal.LinkedTreeMap;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.containers.ApiEntity;
@@ -556,7 +557,10 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
 
         // 1 is a create and 2 is an update (0 means that we failed)
         if (updateVarRs.getInt("update") < 1) {
-            throw new DatabaseEntityException(intentVariable.getEntityName());
+            throw new DatabaseEntityException(String.format("failed to update intent variable \"%s\" "
+                    + " with entity name \"%s\"",
+                    (intentVariable.getLabel() == null)? "(null label)" : intentVariable.getLabel(),
+                    (intentVariable.getEntityName() == null)? "(null entity)" : intentVariable.getEntityName()));
         }
 
         // we need to take note of the ID to update prompts against

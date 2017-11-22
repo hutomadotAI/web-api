@@ -648,7 +648,16 @@ public class AILogic {
         try {
             createdBot = createImportedBot(devId, importedBot);
         } catch (BotImportException e) {
-            this.logger.logUserExceptionEvent(LOGFROM, "ImportBotV1", devId.toString(), e);
+
+            LogMap logMap = LogMap.map("Op", "import");
+            if (e.getCause() != null) {
+                logMap.add("Cause", e.getCause().toString());
+            }
+            this.logger.logUserExceptionEvent(LOGFROM, "ImportBotV1",
+                    devId.toString(), e, logMap);
+            // DEBUG ONLY
+            this.logger.logInfo(LOGFROM, (e.getCause()==null)? "import error" : e.getCause().toString());
+            // END DEBUG ONLY
             return ApiError.getBadRequest(e.getMessage());
         }
 
@@ -778,7 +787,7 @@ public class AILogic {
             try {
                 bot = (ApiAi) result;
             } catch (ClassCastException e) {
-                throw new BotImportException(result.getStatus().getInfo());
+                throw new BotImportException(result.getStatus().getInfo(), e);
             }
 
             UUID aiid = UUID.fromString(bot.getAiid());
@@ -786,7 +795,7 @@ public class AILogic {
             try {
                 bot = (ApiAi) this.getSingleAI(devId, aiid, transaction);
             } catch (Exception e) {
-                throw new BotImportException("Failed to retrieve newly imported bot.");
+                throw new BotImportException("Failed to retrieve newly imported bot.", e);
             }
 
             List<Entity> userEntities = null;
@@ -794,7 +803,7 @@ public class AILogic {
                 // Add the entities that the user doesn't currently have.
                 userEntities = this.databaseEntitiesIntents.getEntities(devId);
             } catch (DatabaseException ex) {
-                throw new BotImportException("Can't retrieve users existing entities.");
+                throw new BotImportException("Can't retrieve users existing entities.", ex);
             }
 
             try {
@@ -811,7 +820,7 @@ public class AILogic {
                     }
                 }
             } catch (DatabaseException ex) {
-                throw new BotImportException("Failed to create new entities from imported bot.");
+                throw new BotImportException("Failed to create new entities from imported bot.", ex);
             }
 
             // Import intents.
@@ -829,27 +838,32 @@ public class AILogic {
                     }
                 }
             } catch (DatabaseException ex) {
-                throw new BotImportException("Failed to write intents for imported bot.");
+                throw new BotImportException("Failed to write intents for imported bot.", ex);
             }
 
             // Add the training file to the database.
             try {
                 this.databaseAi.updateAiTrainingFile(aiid, importedBot.getTrainingFile(), transaction);
             } catch (Exception e) {
-                throw new BotImportException("Failed to add training file for imported bot.");
+                throw new BotImportException("Failed to add training file for imported bot.", e);
             }
 
             transaction.commit();
         } catch (DatabaseException ex) {
-            throw new BotImportException("Failed to commit transaction.");
+            throw new BotImportException("Failed to commit transaction.", ex);
         }
 
         return bot;
     }
 
     static class BotImportException extends Exception {
+
         BotImportException(final String message) {
             super(message);
+        }
+
+        public BotImportException(final String message, final Throwable cause) {
+            super(message, cause);
         }
     }
 }
