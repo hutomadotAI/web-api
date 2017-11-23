@@ -6,6 +6,7 @@ import com.hutoma.api.containers.ApiIntent;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Created by bretc on 10/08/2017.
@@ -38,11 +39,13 @@ public class BotStructure {
     private HashMap<String, ApiEntity> entities;
     @SerializedName("version")
     private int version;
+    @SerializedName("linkedBots")
+    private List<UUID> linkedBots;
 
     public BotStructure(final String name, final String description, final List<ApiIntent> intents,
                         final String trainingFile, final HashMap<String, ApiEntity> entities, final int version,
                         final boolean isPrivate, final int personality, final double confidence, final int voice,
-                        final String language, final String timezone) {
+                        final String language, final String timezone, final List<UUID> linkedBots) {
         this.name = name;
         this.description = description;
         this.intents = intents;
@@ -55,6 +58,7 @@ public class BotStructure {
         this.voice = voice;
         this.language = language;
         this.timezone = timezone;
+        this.linkedBots = linkedBots;
     }
 
     /**
@@ -74,6 +78,7 @@ public class BotStructure {
         this.voice = other.voice;
         this.language = other.language;
         this.timezone = other.timezone;
+        this.linkedBots = other.linkedBots;
     }
 
     public String getName() {
@@ -124,6 +129,8 @@ public class BotStructure {
         return this.timezone;
     }
 
+    public List<UUID> getLinkedBots() { return this.linkedBots; }
+
     public void setName(final String name) {
         this.name = name;
     }
@@ -171,4 +178,6 @@ public class BotStructure {
     public void setTimezone(final String timezone) {
         this.timezone = timezone;
     }
+
+    public void setLinkedBots(final List<UUID> linkedBots) { this.linkedBots = linkedBots; }
 }

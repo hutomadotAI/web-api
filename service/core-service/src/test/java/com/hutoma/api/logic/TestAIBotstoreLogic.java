@@ -31,6 +31,7 @@ import org.junit.Test;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
@@ -457,7 +458,7 @@ public class TestAIBotstoreLogic {
 
     public static BotStructure getBotStructure() {
         return new BotStructure("bot", "desc", Collections.emptyList(), "aaa\nbbb", new HashMap<String, ApiEntity>(),
-                1, false, 1, 1.0, 1, Locale.UK.toLanguageTag(), "UTC");
+                1, false, 1, 1.0, 1, Locale.UK.toLanguageTag(), "UTC", new ArrayList<>());
     }
 
     public static String getBotStructureTemplate() {

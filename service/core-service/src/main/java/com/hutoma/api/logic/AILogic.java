@@ -8,6 +8,7 @@ import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.ServerConnector;
 import com.hutoma.api.connectors.WebHooks;
 import com.hutoma.api.connectors.aiservices.AIServices;
+import com.hutoma.api.connectors.db.Database;
 import com.hutoma.api.connectors.db.DatabaseAI;
 import com.hutoma.api.connectors.db.DatabaseEntitiesIntents;
 import com.hutoma.api.connectors.db.DatabaseException;
@@ -30,6 +31,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -812,6 +814,28 @@ public class AILogic {
                 }
             } catch (DatabaseException ex) {
                 throw new BotImportException("Failed to create new entities from imported bot.");
+            }
+
+            Set<UUID> ownedBotIds = new HashSet<>();
+
+            try {
+                for (AiBot ownedBot : this.databaseMarketplace.getPurchasedBots(devId)) {
+                    ownedBotIds.add(ownedBot.getAiid());
+                }
+            } catch (DatabaseException ex) {
+                throw new BotImportException("Couldn't retrieve users purchased bots.");
+            }
+
+            for (UUID linkedBot : importedBot.getLinkedBots()) {
+                if (!ownedBotIds.contains(linkedBot)) {
+                    throw new BotImportException("Failed to find linked bot amongst purchased bots.");
+                }
+                try {
+                    int publishedBot = this.databaseMarketplace.getPublishedBotIdForAI(linkedBot);
+                    this.linkBotToAI(devId, aiid, publishedBot);
+                }catch (DatabaseException ex) {
+                    throw new BotImportException("Failed to link purchased bots to imported bot.");
+                }
             }
 
             // Import intents.

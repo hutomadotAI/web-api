@@ -643,6 +643,11 @@ public class TestAILogic {
         when(this.fakeDatabaseEntitiesIntents.getEntity(any(), any())).thenReturn(intentEntity);
         when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
         when(this.fakeDatabaseAi.getAiTrainingFile(any())).thenReturn("hello\nhi");
+        List<AiBot> botList = this.generateBots(1);
+        List<UUID> linkedBotIds = new ArrayList<>();
+        linkedBotIds.add(botList.get(0).getAiid());
+
+        when(this.fakeDatabaseAi.getBotsLinkedToAi(any(), any())).thenReturn(botList);
 
         ApiBotStructure result = (ApiBotStructure) this.aiLogic.exportBotData(VALIDDEVID, AIID);
         BotStructure bot = result.getBotStructure();
@@ -651,6 +656,7 @@ public class TestAILogic {
         Assert.assertEquals(TestDataHelper.getSampleAI().getDescription(), bot.getDescription());
         Assert.assertEquals(intent.getIntentName(), bot.getIntents().get(0).getIntentName());
         Assert.assertEquals(intent.getWebHook(), bot.getIntents().get(0).getWebHook());
+        Assert.assertEquals(bot.getLinkedBots(), linkedBotIds);
     }
 
     @Test

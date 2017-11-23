@@ -191,6 +191,19 @@ public class DatabaseMarketplace extends Database {
         }
     }
 
+    public int getPublishedBotIdForAI(final UUID aiid) throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("getPublishedBotIdForAi", 1).add(aiid);
+            final ResultSet rs = call.executeQuery();
+            try {
+
+                return rs.next() ? rs.getInt("id") : -1;
+            } catch (final SQLException sqle) {
+                throw new DatabaseException(sqle);
+            }
+        }
+    }
+
     public List<AiBot> getPublishedBots(final AiBot.PublishingType publishingType) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("getPublishedBots", 1)
