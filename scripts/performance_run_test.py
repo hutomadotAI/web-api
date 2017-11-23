@@ -1,7 +1,5 @@
-import argparse
-import os
+
 import random
-import urllib
 from threading import Thread
 
 import time
@@ -78,21 +76,27 @@ def main():
 
     while True:
         started_at = time.time()
+
+        # ten seconds per round
         next_one_after = started_at + 10
 
         threads = []
-        for name, (aiid, words) in botlist.items():
-            threaded_requester = hu_api.api.ApiRequester(config.url_root, config.auth, [])
-            thread = Thread(target=chat_ai, args=(aiid, name, words, threaded_requester))
-            threads.append(thread)
-            thread.start()
+        for name in sorted(botlist.keys()):
+            (aiid, words) = botlist[name]
+
+            # only the first 10 bots so as not to thrash bot-data
+            if len(threads) < 10:
+                threaded_requester = hu_api.api.ApiRequester(config.url_root, config.auth, [])
+                thread = Thread(target=chat_ai, args=(aiid, name, words, threaded_requester))
+                threads.append(thread)
+                thread.start()
 
         for thread_join in threads:
             thread_join.join()
 
         time_now = time.time()
         time_to_wait = next_one_after - time_now
-        break
+
         if time_to_wait > 0:
             print('Waiting {} seconds for the next round ...'.format(time_to_wait))
             time.sleep(time_to_wait)
