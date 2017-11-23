@@ -187,15 +187,15 @@ def stop_training(api: ApiRequester, aiid):
     return api.put("ai/" + aiid + "/training/stop")
 
 
-def chat(api: ApiRequester, aiid, say_what, history="", chat_id="", min_p=0.4):
-    query = {'q': say_what, 'confidence_threshold': min_p, 'chat_history': history}
+def chat(api: ApiRequester, aiid, say_what, chat_id=""):
+    query = {'q': say_what}
     if chat_id != "":
         query['chatId'] = chat_id
     return api.get("ai/" + aiid + "/chat", query=query)
 
 
-def load_test_chat(api: ApiRequester, aiid, say_what, history="", chat_id="", min_p=0.4):
-    query = {'q': say_what, 'confidence_threshold': min_p, 'chat_history': history}
+def load_test_chat(api: ApiRequester, aiid, say_what, chat_id=""):
+    query = {'q': say_what}
     if chat_id != "":
         query['chatId'] = chat_id
     return api.get("ai/load/" + aiid + "/chat", query=query)

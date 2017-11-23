@@ -25,11 +25,11 @@ class Config:
         self.chat_auth = 'eyJhbGciOiJIUzI1NiIsImNhbGciOiJERUYifQ.eNqqVgry93FVsgJT8SGuwSFKOkrFpUlAkSQTM6NEY5NE3ZTUZBNdk0TTJN0k4yQj3cTUREvDZMNU85QUA6VaAAAAAP__.eUytifp7MPitydSm1sGQ8FVlp97CtgMvAlrt0AEyoRE'
 
         self.load_test_ais = \
-            AiDefinition("set_chat_", "Load-Test", "lt-", \
+            AiDefinition("set_load_", "Load-Test", "lt-", \
             [ (x, x, "set_load_" + str(x)) for x in range(100, 3000, 500)])
 
         self.chat_test_ais = \
-            AiDefinition("set_load_", "Multichat-Test", "mt-", \
+            AiDefinition("set_chat_", "Multichat-Test", "mt-", \
             [ (20, x, "set_chat_" + str(x)) for x in range(1, 16)])
 
         # this is the list of (simultaneous requests, total requests) for each load test run
