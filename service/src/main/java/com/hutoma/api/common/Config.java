@@ -199,7 +199,7 @@ public class Config {
      * @return n
      */
     public long getServerHeartbeatEveryMs() {
-        return 2 * 1000;
+        return 3 * 1000;
     }
 
     /***
@@ -219,7 +219,7 @@ public class Config {
      * @return n
      */
     public long getServerHeartbeatFailureCutOffMs() {
-        return 5 * 1000;
+        return 6 * 1000;
     }
 
     /***

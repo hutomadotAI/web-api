@@ -290,8 +290,8 @@ public class ServerTracker implements Callable, IServerEndpoint {
                     .path("heartbeat");
 
             HeartbeatThreadWrapper heartbeatWrapper = new HeartbeatThreadWrapper(target
-                    .property(CONNECT_TIMEOUT, (int) this.config.getServerHeartbeatEveryMs())
-                    .property(READ_TIMEOUT, (int) this.config.getServerHeartbeatEveryMs())
+                    .property(CONNECT_TIMEOUT, (int) this.config.getServerHeartbeatFailureCutOffMs())
+                    .property(READ_TIMEOUT, (int) this.config.getServerHeartbeatFailureCutOffMs())
                     .request(),
                     Entity.json(this.jsonSerializer.serialize(new ApiServerAcknowledge(this.serverSessionID))));
 
@@ -300,7 +300,8 @@ public class ServerTracker implements Callable, IServerEndpoint {
 
             // get the status code result of the heartbeat call
             // but only wait a specified amount of time before failing with a TimeoutException
-            int responseStatus = futureResponse.get(this.config.getServerHeartbeatEveryMs(), TimeUnit.MILLISECONDS);
+            int responseStatus = futureResponse.get(this.config.getServerHeartbeatFailureCutOffMs(),
+                    TimeUnit.MILLISECONDS);
 
             // re-check session to see if it was closed while this heartbeat was in progress
             // if so, just bail out here
