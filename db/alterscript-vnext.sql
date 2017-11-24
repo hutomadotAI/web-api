@@ -28,3 +28,11 @@ BEGIN
       locked_aiid = param_locked_aiid, entity_values = param_entity_values, confidence_threshold = param_confidence_threshold, chat_target = param_chat_target;
   END ;;
 DELIMITER ;
+DELIMITER ;;
+CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `getPublishedBotIdForAi`(IN `param_aiid` VARCHAR(50))
+    NO SQL
+BEGIN
+    SELECT bs.id FROM botStore bs
+    WHERE bs.aiid = param_aiid;
+  END ;;
+DELIMITER ;

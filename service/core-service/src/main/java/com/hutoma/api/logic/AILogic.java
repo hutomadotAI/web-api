@@ -834,7 +834,7 @@ public class AILogic {
                     int publishedBot = this.databaseMarketplace.getPublishedBotIdForAI(linkedBot);
                     this.linkBotToAI(devId, aiid, publishedBot);
                 }catch (DatabaseException ex) {
-                    throw new BotImportException("Failed to link purchased bots to imported bot.");
+                    throw new BotImportException(String.format("Failed to link purchased bot %s to imported bot.", linkedBot.toString()));
                 }
             }
 
