@@ -828,7 +828,7 @@ public class AILogic {
 
             for (UUID linkedBot : importedBot.getLinkedBots()) {
                 if (!ownedBotIds.contains(linkedBot)) {
-                    throw new BotImportException("Failed to find linked bot amongst purchased bots.");
+                    throw new BotImportException(String.format("Failed to find linked bot %s amongst purchased bots.", linkedBot.toString()));
                 }
                 try {
                     int publishedBot = this.databaseMarketplace.getPublishedBotIdForAI(linkedBot);
