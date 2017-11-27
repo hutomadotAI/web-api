@@ -832,11 +832,13 @@ public class AILogic {
                 throw new BotImportException("Failed to write intents for imported bot.");
             }
 
-            // Add the training file to the database.
-            try {
-                this.databaseAi.updateAiTrainingFile(aiid, importedBot.getTrainingFile(), transaction);
-            } catch (Exception e) {
-                throw new BotImportException("Failed to add training file for imported bot.");
+            if (importedBot.getTrainingFile() != null) {
+                // Add the training file to the database
+                try {
+                    this.databaseAi.updateAiTrainingFile(aiid, importedBot.getTrainingFile(), transaction);
+                } catch (Exception e) {
+                    throw new BotImportException("Failed to add training file for imported bot.");
+                }
             }
 
             transaction.commit();
