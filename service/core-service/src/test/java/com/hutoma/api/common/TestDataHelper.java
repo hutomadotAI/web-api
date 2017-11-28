@@ -113,7 +113,12 @@ public class TestDataHelper {
     public static void mockDatabaseCreateAI(final DatabaseAI fakeDatabase, final UUID createdAiid) throws DatabaseException {
         when(fakeDatabase.createAI(any(), anyString(), anyString(), any(), anyBoolean(),
                 anyString(), anyObject(), anyObject(), anyDouble(), anyInt(),
-                anyInt(), anyObject(), any())).thenReturn(createdAiid);
+                anyInt())).thenReturn(createdAiid);
+    }
+    public static void mockDatabaseCreateAIInTrans(final DatabaseAI fakeDatabase, final UUID createdAiid) throws DatabaseException {
+        when(fakeDatabase.createAI(any(), anyString(), anyString(), any(), anyBoolean(),
+                anyString(), anyObject(), anyObject(), anyDouble(), anyInt(),
+                anyInt(), any())).thenReturn(createdAiid);
     }
 
     public static AiBot getAiBot(int id, String name) {

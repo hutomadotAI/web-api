@@ -120,20 +120,32 @@ public class AILogic {
                     .signWith(SignatureAlgorithm.HS256, encodingKey)
                     .compact();
 
-            UUID namedAiid = this.databaseAi.createAI(
-                    aiUUID,
-                    name,
-                    description,
-                    devId,
-                    isPrivate,
-                    token,
-                    language,
-                    timezone,
-                    confidence,
-                    personality,
-                    voice,
-                    this.jsonSerializer,
-                    transaction);
+            UUID namedAiid = transaction == null
+                    ? this.databaseAi.createAI(
+                        aiUUID,
+                        name,
+                        description,
+                        devId,
+                        isPrivate,
+                        token,
+                        language,
+                        timezone,
+                        confidence,
+                        personality,
+                        voice)
+                    : this.databaseAi.createAI(
+                        aiUUID,
+                        name,
+                        description,
+                        devId,
+                        isPrivate,
+                        token,
+                        language,
+                        timezone,
+                        confidence,
+                        personality,
+                        voice,
+                        transaction);
 
             // if the stored procedure returns a different aiid then it didn't
             // create the one we requested because of a name clash
@@ -729,7 +741,9 @@ public class AILogic {
         final String devIdString = devid.toString();
         try {
             LogMap logMap = LogMap.map("AIID", aiid);
-            ApiAi ai = this.databaseAi.getAI(devid, aiid, this.jsonSerializer, transaction);
+            ApiAi ai = transaction == null
+                    ? this.databaseAi.getAI(devid, aiid, this.jsonSerializer)
+                    : this.databaseAi.getAI(devid, aiid, this.jsonSerializer, transaction);
             if (ai == null) {
                 this.logger.logUserTraceEvent(LOGFROM,
                         String.format("%s - not found", logTag), devIdString, logMap);
@@ -778,7 +792,7 @@ public class AILogic {
             try {
                 bot = (ApiAi) result;
             } catch (ClassCastException e) {
-                throw new BotImportException(result.getStatus().getInfo());
+                throw new BotImportException(result.getStatus().getInfo(), e);
             }
 
             UUID aiid = UUID.fromString(bot.getAiid());
@@ -786,7 +800,7 @@ public class AILogic {
             try {
                 bot = (ApiAi) this.getSingleAI(devId, aiid, transaction);
             } catch (Exception e) {
-                throw new BotImportException("Failed to retrieve newly imported bot.");
+                throw new BotImportException("Failed to retrieve newly imported bot.", e);
             }
 
             List<Entity> userEntities = null;
@@ -794,7 +808,7 @@ public class AILogic {
                 // Add the entities that the user doesn't currently have.
                 userEntities = this.databaseEntitiesIntents.getEntities(devId);
             } catch (DatabaseException ex) {
-                throw new BotImportException("Can't retrieve users existing entities.");
+                throw new BotImportException("Can't retrieve users existing entities.", ex);
             }
 
             try {
@@ -811,7 +825,7 @@ public class AILogic {
                     }
                 }
             } catch (DatabaseException ex) {
-                throw new BotImportException("Failed to create new entities from imported bot.");
+                throw new BotImportException("Failed to create new entities from imported bot.", ex);
             }
 
             // Import intents.
@@ -829,21 +843,21 @@ public class AILogic {
                     }
                 }
             } catch (DatabaseException ex) {
-                throw new BotImportException("Failed to write intents for imported bot.");
+                throw new BotImportException("Failed to write intents for imported bot.", ex);
             }
 
             if (importedBot.getTrainingFile() != null) {
                 // Add the training file to the database
                 try {
                     this.databaseAi.updateAiTrainingFile(aiid, importedBot.getTrainingFile(), transaction);
-                } catch (Exception e) {
-                    throw new BotImportException("Failed to add training file for imported bot.");
+                } catch (Exception ex) {
+                    throw new BotImportException("Failed to add training file for imported bot.", ex);
                 }
             }
 
             transaction.commit();
         } catch (DatabaseException ex) {
-            throw new BotImportException("Failed to commit transaction.");
+            throw new BotImportException("Failed to commit transaction.", ex);
         }
 
         return bot;
@@ -852,6 +866,9 @@ public class AILogic {
     static class BotImportException extends Exception {
         BotImportException(final String message) {
             super(message);
+        }
+        BotImportException(final String message, final Exception ex) {
+            super(message, ex);
         }
     }
 }

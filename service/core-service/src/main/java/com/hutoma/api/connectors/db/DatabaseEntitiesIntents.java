@@ -111,13 +111,35 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
      * Gets a fully populated intent object
      * including intent, usersays, variables and prompts
      * @param aiid the aiid that owns the intent
-     * @param intentName
+     * @param intentName the intent name
      * @return an intent
      * @throws DatabaseException if things go wrong
      */
     public ApiIntent getIntent(final UUID aiid, final String intentName) throws DatabaseException {
-
         try (DatabaseTransaction transaction = this.transactionProvider.get()) {
+            ApiIntent intent = getIntent(aiid, intentName, transaction);
+            transaction.commit();
+            return intent;
+        }
+    }
+
+    /***
+     * Gets a fully populated intent object
+     * including intent, usersays, variables and prompts
+     * @param aiid the aiid that owns the intent
+     * @param intentName the intent name
+     * @param transaction the transaction it should be enrolled in
+     * @return an intent
+     * @throws DatabaseException if things go wrong
+     */
+    public ApiIntent getIntent(final UUID aiid, final String intentName, final DatabaseTransaction transaction)
+            throws DatabaseException {
+
+        if (transaction == null) {
+            throw new IllegalArgumentException("transaction");
+        }
+
+        try {
             ResultSet rs = transaction.getDatabaseCall().initialise("getIntent", 2).add(aiid).add(intentName)
                     .executeQuery();
             if (!rs.next()) {
@@ -170,26 +192,42 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
 
             intent.setWebHook(this.getWebHook(aiid, intentName));
 
-            // nothing was written but this prevents an auto-rollback
-            transaction.commit();
-
             return intent;
         } catch (SQLException sqle) {
             throw new DatabaseException(sqle);
         }
     }
 
+    /**
+     * Writes (or updates) and entity
+     * @param devid the developer id
+     * @param entityOldName the entity's old name
+     * @param entity the entity's new name
+     * @throws DatabaseException if something goes wrong
+     */
     public void writeEntity(final UUID devid, final String entityOldName, final ApiEntity entity)
             throws DatabaseException {
-        this.writeEntity(devid, entityOldName, entity, null);
+        try (DatabaseTransaction transaction = this.transactionProvider.get()) {
+            this.writeEntity(devid, entityOldName, entity, transaction);
+            transaction.commit();
+        }
     }
 
+    /**
+     * Writes (or updates) and entity
+     * @param devid the developer id
+     * @param entityOldName the entity's old name
+     * @param entity the entity's new name
+     * @param transaction the transaction it should be enrolled in
+     * @throws DatabaseException if something goes wrong
+     */
     public void writeEntity(final UUID devid, final String entityOldName, final ApiEntity entity,
-                            final DatabaseTransaction databaseTransaction)
+                            final DatabaseTransaction transaction)
             throws DatabaseException {
-        try (DatabaseTransaction transaction = databaseTransaction == null
-                ? this.transactionProvider.get() : databaseTransaction) {
-
+        if (transaction == null) {
+            throw new IllegalArgumentException("transaction");
+        }
+        try {
             // add or update the entity
             transaction.getDatabaseCall().initialise("addUpdateEntity", 3)
                     .add(devid).add(entityOldName).add(entity.getEntityName()).executeUpdate();
@@ -221,11 +259,6 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
                         .add(devid).add(entity.getEntityName()).add(obsoleteEntityValue).executeUpdate();
             }
 
-            // commit everything - only if we didn't get passed a transaction
-            if (databaseTransaction == null) {
-                transaction.commit();
-            }
-
         } catch (SQLException e) {
             throw new DatabaseException(e);
         }
@@ -255,9 +288,22 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
         }
     }
 
+    /***
+     * Add a new complete intent to the database,
+     * or update an intent previously called 'intentName' to the new intent.
+     * If intentName is different to the one specified in the intent then this will rename the intent.
+     * @param devid owner id
+     * @param aiid owner aiid
+     * @param intentName the old name if we are renaming the intent
+     * @param intent the new data
+     * @throws DatabaseException if something goes wrong
+     */
     public void writeIntent(final UUID devid, final UUID aiid, final String intentName, final ApiIntent intent)
             throws DatabaseException {
-        this.writeIntent(devid, aiid, intentName, intent, null);
+        try (DatabaseTransaction transaction = this.transactionProvider.get()) {
+            this.writeIntent(devid, aiid, intentName, intent, transaction);
+            transaction.commit();
+        }
     }
 
     /***
@@ -268,22 +314,27 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
      * @param aiid owner aiid
      * @param intentName the old name if we are renaming the intent
      * @param intent the new data
-     * @throws DatabaseException
+     * @param transaction the transaction to be enrolled in
+     * @throws DatabaseException if something goes wrong
      */
     public void writeIntent(final UUID devid, final UUID aiid, final String intentName, final ApiIntent intent,
-                            final DatabaseTransaction databaseTransaction)
+                            final DatabaseTransaction transaction)
             throws DatabaseException {
 
-        // start the transaction
-        DatabaseTransaction transaction = databaseTransaction == null
-                ? this.transactionProvider.get() : databaseTransaction;
+        if (transaction == null) {
+            throw new IllegalArgumentException("transaction");
+        }
         try {
 
             // add or update the intent
-            transaction.getDatabaseCall().initialise("addUpdateIntent", 6)
+            int rowcount = transaction.getDatabaseCall().initialise("addUpdateIntent", 6)
                     .add(devid).add(aiid).add(intentName).add(intent.getIntentName())
                     .add(intent.getTopicIn()).add(intent.getTopicOut())
                     .executeUpdate();
+
+            if (rowcount != 1) {
+                throw new DatabaseException("Failed to add/update intent");
+            }
 
             // synchronise user says (change as needed)
             updateIntentUserSays(devid, aiid, intent, transaction);
@@ -292,14 +343,7 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
             // synchronise variables and their prompts
             updateIntentVariables(devid, aiid, intent, transaction);
 
-            // commit everything - only if we weren't passed a transaction
-            if (databaseTransaction == null) {
-                transaction.commit();
-            }
-
         } catch (SQLException e) {
-            transaction.rollback();
-            transaction.close();
             throw new DatabaseException(e);
         }
     }
@@ -556,7 +600,10 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
 
         // 1 is a create and 2 is an update (0 means that we failed)
         if (updateVarRs.getInt("update") < 1) {
-            throw new DatabaseEntityException(intentVariable.getEntityName());
+            throw new DatabaseEntityException(String.format("failed to update intent variable \"%s\" "
+                            + " with entity name \"%s\"",
+                    (intentVariable.getLabel() == null) ? "(null label)" : intentVariable.getLabel(),
+                    (intentVariable.getEntityName() == null) ? "(null entity)" : intentVariable.getEntityName()));
         }
 
         // we need to take note of the ID to update prompts against

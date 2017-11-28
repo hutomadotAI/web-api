@@ -1,10 +1,10 @@
 package com.hutoma.api.tests.service;
 
 import com.hutoma.api.common.TestDataHelper;
-import com.hutoma.api.connectors.aiservices.AIServices;
 import com.hutoma.api.connectors.BackendEngineStatus;
 import com.hutoma.api.connectors.BackendServerType;
 import com.hutoma.api.connectors.BackendStatus;
+import com.hutoma.api.connectors.aiservices.AIServices;
 import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.ApiAiBotList;
@@ -69,23 +69,11 @@ public class TestServiceAi extends ServiceTestBase {
     @Test
     public void testGetAI() throws DatabaseException {
         ApiAi ai = TestDataHelper.getAI();
-        when(this.fakeDatabaseAi.getAI(any(), any(), any(), any())).thenReturn(ai);
+        when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(ai);
         final Response response = target(AI_PATH).request().headers(defaultHeaders).get();
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
         ApiAi responseAi = deserializeResponse(response, ApiAi.class);
         Assert.assertEquals(ai.getAiid(), responseAi.getAiid());
-    }
-
-    public ApiAi checkMaskedTrainingStatus(
-            TrainingStatus trainingStatus, double trainingProgress) throws DatabaseException {
-        BackendStatus status = new BackendStatus();
-        status.setEngineStatus(BackendServerType.WNET, new BackendEngineStatus(
-                trainingStatus, 0.0, trainingProgress));
-        status.setEngineStatus(BackendServerType.RNN, new BackendEngineStatus(
-                trainingStatus, 0.0, trainingProgress));
-        when(this.fakeDatabaseAi.getAI(any(), any(), any(), any())).thenReturn(TestDataHelper.getAi(status));
-        final Response response = target(AI_PATH).request().headers(defaultHeaders).get();
-        return deserializeResponse(response, ApiAi.class);
     }
 
     @Test
@@ -240,7 +228,7 @@ public class TestServiceAi extends ServiceTestBase {
         when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
         when(this.fakeDatabaseAi.getAI(any(), any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
         when(this.fakeTools.createNewRandomUUID()).thenReturn(aiid);
-        TestDataHelper.mockDatabaseCreateAI(this.fakeDatabaseAi, aiid);
+        TestDataHelper.mockDatabaseCreateAIInTrans(this.fakeDatabaseAi, aiid);
           final Response response = target(BOT_CLONE_PATH)
                 .request()
                 .headers(defaultHeaders)
@@ -299,5 +287,17 @@ public class TestServiceAi extends ServiceTestBase {
         binder.bind(AILogic.class).to(AILogic.class);
         binder.bind(AIIntegrationLogic.class).to(AIIntegrationLogic.class);
         return binder;
+    }
+
+    private ApiAi checkMaskedTrainingStatus(
+            TrainingStatus trainingStatus, double trainingProgress) throws DatabaseException {
+        BackendStatus status = new BackendStatus();
+        status.setEngineStatus(BackendServerType.WNET, new BackendEngineStatus(
+                trainingStatus, 0.0, trainingProgress));
+        status.setEngineStatus(BackendServerType.RNN, new BackendEngineStatus(
+                trainingStatus, 0.0, trainingProgress));
+        when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(TestDataHelper.getAi(status));
+        final Response response = target(AI_PATH).request().headers(defaultHeaders).get();
+        return deserializeResponse(response, ApiAi.class);
     }
 }

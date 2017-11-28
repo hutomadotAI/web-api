@@ -50,19 +50,18 @@ public class DatabaseAI extends Database  {
      * @param confidence UI parameter
      * @param personality UI parameter
      * @param voice UI parameter
-     * @return
-     * @throws DatabaseException
+     * @param databaseCall the database call
+     * @return the newly created AIID
+     * @throws DatabaseException if something goes wrong
      */
-    public UUID createAI(final UUID aiid, final String name, final String description, final UUID devid,
+    private UUID createAI(final UUID aiid, final String name, final String description, final UUID devid,
                          final boolean isPrivate,
                          final String clientToken,
                          final Locale language, final String timezoneString,
                          final double confidence, final int personality, final int voice,
-                         final JsonSerializer jsonSerializer,
-                         final DatabaseTransaction transaction)
-            throws DatabaseException {
-        try (DatabaseCall call = transaction == null ? this.callProvider.get() : transaction.getDatabaseCall()) {
-            call.initialise("addAi", 11)
+                         final DatabaseCall databaseCall) throws DatabaseException {
+        try {
+            databaseCall.initialise("addAi", 11)
                     .add(aiid)
                     .add(name)
                     .add(description)
@@ -74,7 +73,7 @@ public class DatabaseAI extends Database  {
                     .add(confidence)
                     .add(personality)
                     .add(voice);
-            ResultSet result = call.executeQuery();
+            ResultSet result = databaseCall.executeQuery();
             if (result.next()) {
                 String namedAiid = result.getString("aiid");
                 return UUID.fromString((namedAiid == null) ? "" : namedAiid);
@@ -84,6 +83,69 @@ public class DatabaseAI extends Database  {
         } catch (IllegalArgumentException | SQLException ex) {
             // null or empty UUID means that there was a db fail of some sort
             throw new DatabaseException(ex);
+        }
+    }
+
+    /***
+     * Create a new AI but only if the devid doesn't already have an AI with that ai_name
+     * @param aiid the id for the new AI
+     * @param name ai_name
+     * @param description ai_description
+     * @param devid the owner dev
+     * @param isPrivate private ai
+     * @param clientToken a guest token that the dev can give out to users
+     * @param language UI parameter
+     * @param timezoneString UI parameter
+     * @param confidence UI parameter
+     * @param personality UI parameter
+     * @param voice UI parameter
+     * @param transaction the transaction to be enrolled in
+     * @return the newly created AIID
+     * @throws DatabaseException if something goes wrong
+     */
+    public UUID createAI(final UUID aiid, final String name, final String description, final UUID devid,
+                         final boolean isPrivate,
+                         final String clientToken,
+                         final Locale language, final String timezoneString,
+                         final double confidence, final int personality, final int voice,
+                         final DatabaseTransaction transaction)
+            throws DatabaseException {
+
+        if (transaction == null) {
+            throw new IllegalArgumentException("transaction");
+        }
+        try (DatabaseCall call = transaction.getDatabaseCall()) {
+            return createAI(aiid, name, description, devid, isPrivate, clientToken, language,
+                    timezoneString, confidence, personality, voice, call);
+        }
+    }
+
+    /***
+     * Create a new AI but only if the devid doesn't already have an AI with that ai_name
+     * @param aiid the id for the new AI
+     * @param name ai_name
+     * @param description ai_description
+     * @param devid the owner dev
+     * @param isPrivate private ai
+     * @param clientToken a guest token that the dev can give out to users
+     * @param language UI parameter
+     * @param timezoneString UI parameter
+     * @param confidence UI parameter
+     * @param personality UI parameter
+     * @param voice UI parameter
+     * @return the newly created AIID
+     * @throws DatabaseException if something goes wrong
+     */
+    public UUID createAI(final UUID aiid, final String name, final String description, final UUID devid,
+                         final boolean isPrivate,
+                         final String clientToken,
+                         final Locale language, final String timezoneString,
+                         final double confidence, final int personality, final int voice)
+            throws DatabaseException {
+
+        try (DatabaseCall call = this.callProvider.get()) {
+            return createAI(aiid, name, description, devid, isPrivate, clientToken, language,
+                    timezoneString, confidence, personality, voice, call);
         }
     }
 
@@ -164,12 +226,15 @@ public class DatabaseAI extends Database  {
 
     public ApiAi getAI(final UUID devid, final UUID aiid, final JsonSerializer serializer,
                               final DatabaseTransaction transaction) throws DatabaseException {
-        try (DatabaseTransaction dbTrans = transaction == null ? this.transactionProvider.get() : transaction) {
+        if (transaction == null) {
+            throw new IllegalArgumentException("transaction");
+        }
 
+        try {
             // load the statuses first
-            BackendStatus backendStatus = DatabaseBackends.getBackendStatus(devid, aiid, dbTrans.getDatabaseCall());
+            BackendStatus backendStatus = DatabaseBackends.getBackendStatus(devid, aiid, transaction.getDatabaseCall());
             // then load the AI
-            ResultSet rs = dbTrans.getDatabaseCall().initialise("getAi", 2)
+            ResultSet rs = transaction.getDatabaseCall().initialise("getAi", 2)
                     .add(devid)
                     .add(aiid)
                     .executeQuery();
@@ -179,7 +244,7 @@ public class DatabaseAI extends Database  {
                 apiAi = getAiFromResultset(rs, backendStatus, serializer);
             }
             if (apiAi != null) {
-                rs = dbTrans.getDatabaseCall().initialise("getAiBotConfig", 3)
+                rs = transaction.getDatabaseCall().initialise("getAiBotConfig", 3)
                         .add(devid)
                         .add(aiid)
                         .add(0)
