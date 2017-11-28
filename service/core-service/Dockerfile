@@ -1,4 +1,4 @@
-FROM tomcat:8-jre8
+FROM tomcat:8.5.23-jre8
 LABEL maintainer "pedrotei@hutoma.com"
 
 # Copy the certificates to the store
