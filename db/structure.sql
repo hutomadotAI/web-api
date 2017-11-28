@@ -591,7 +591,7 @@ CREATE TABLE `memoryIntent` (
   `aiid` varchar(50) NOT NULL,
   `chatId` varchar(50) NOT NULL,
   `name` varchar(50) NOT NULL,
-  `variables` text NOT NULL,
+  `variables` mediumtext NOT NULL,
   `lastAccess` datetime NOT NULL,
   `isFulfilled` tinyint(1) NOT NULL,
   PRIMARY KEY (`aiid`,`chatId`),
@@ -3822,7 +3822,7 @@ DELIMITER ;
 /*!50003 SET sql_mode              = '' */ ;
 DELIMITER ;;
 CREATE DEFINER=`userTableWriter`@`127.0.0.1` PROCEDURE `updateMemoryIntent`(IN `param_name` VARCHAR(50), IN `param_aiid` VARCHAR(50), IN `param_chatId` VARCHAR(50),
-                                                                            IN `param_variables` TEXT, IN `param_isFulFilled` TINYINT(1))
+                                                                            IN `param_variables` MEDIUMTEXT, IN `param_isFulFilled` TINYINT(1))
 BEGIN
     INSERT INTO memoryIntent (aiid, chatId, name, variables, lastAccess, isFulfilled)
     VALUES(param_aiid, param_chatId, param_name, param_variables, NOW(), param_isFulFilled)
