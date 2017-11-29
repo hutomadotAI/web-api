@@ -15,10 +15,10 @@ RUN chown -R tomcat:tomcat /usr/local/tomcat/
 USER tomcat
 
 # Copy the server config
-COPY config/server.xml /usr/local/tomcat/conf
+COPY --chown=tomcat:tomcat config/server.xml /usr/local/tomcat/conf
 
 # Copy the WAR file to be expanded as the new ROOT folder (as we have set unpackWARs="true")
-COPY ./target/Controller.war /usr/local/tomcat/webapps/ROOT.war
+COPY --chown=tomcat:tomcat ./target/Controller.war /usr/local/tomcat/webapps/ROOT.war
 
 # Expose the following environment variables
 ENV API_CONNECTION_STRING jdbc:mysql://server:3306/hutoma?user=user&password=password&zeroDateTimeBehavior=convertToNull
