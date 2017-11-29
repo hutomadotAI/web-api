@@ -154,7 +154,7 @@ public abstract class ChatBackendConnector {
         this.threadSubPool.cancelAll();
     }
 
-    private InvocationResult waitForResult(final RequestInProgress requestInProgress, final int timeoutMs)
+    protected InvocationResult waitForResult(final RequestInProgress requestInProgress, final int timeoutMs)
             throws AiControllerException {
         InvocationResult invocationResult;
         Future<InvocationResult> future = requestInProgress.getFuture();
@@ -165,9 +165,20 @@ public abstract class ChatBackendConnector {
             } else {
                 invocationResult = future.get(timeoutMs, TimeUnit.MILLISECONDS);
             }
-        } catch (ExecutionException | TimeoutException ex) {
+        } catch (TimeoutException | ExecutionException ex) {
+            Throwable cause = ex;
+            // execution exception may wrap a more interesting exception
+            if ((ex instanceof ExecutionException) && (ex.getCause() != null)) {
+                cause = ex.getCause();
+            }
+            // was this a timeout? throw a more specific exception
+            if (cause instanceof TimeoutException) {
+                throw new AiControllerTimeoutException(String.format("Timeout executing request to %s: %s",
+                        requestInProgress.getEndpointIdentifier(), cause.getClass().getSimpleName()));
+            }
+            // otherwise throw the generic form of the error
             throw new AiControllerException(String.format("Error executing request to %s: %s",
-                    requestInProgress.getEndpointIdentifier(), ex.getClass().getSimpleName()));
+                    requestInProgress.getEndpointIdentifier(), cause.getClass().getSimpleName()));
         } catch (InterruptedException ex) {
             throw new AiControllerException(String.format("Interrupted request to %s",
                     requestInProgress.getEndpointIdentifier()));
@@ -175,8 +186,15 @@ public abstract class ChatBackendConnector {
         return invocationResult;
     }
 
+
     public static class AiControllerException extends Exception {
         AiControllerException(String message) {
+            super(message);
+        }
+    }
+
+    public static class AiControllerTimeoutException extends AiControllerException {
+        AiControllerTimeoutException(String message) {
             super(message);
         }
     }

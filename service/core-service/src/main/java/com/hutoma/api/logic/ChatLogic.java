@@ -375,8 +375,17 @@ public class ChatLogic {
                         this.chatState.setLockedAiid(null);
 
                         // get a response from the RNN
-                        ChatResult rnnResult = this.interpretRnnResult(question,
-                                this.chatState.getConfidenceThreshold());
+                        ChatResult rnnResult = null;
+
+                        // if the RNN times out, treat it as if it returned an empty response
+                        // i.e. carry on and take the best answer that we have
+                        try {
+                            rnnResult = this.interpretRnnResult(question,
+                                    this.chatState.getConfidenceThreshold());
+                        } catch (ChatBackendConnector.AiControllerTimeoutException ex) {
+                            // log the timeout if it happens
+                            this.telemetryMap.add("RnnTimeout", ex.getMessage());
+                        }
 
                         // Currently RNN "cannot be trusted" as it doesn't provide an accurate confidence level
                         this.telemetryMap.add("AnsweredWithConfidence", false);

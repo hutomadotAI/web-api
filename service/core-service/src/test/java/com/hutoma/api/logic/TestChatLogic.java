@@ -177,6 +177,18 @@ public class TestChatLogic extends TestChatBase {
     }
 
     /***
+     * Semantic server sends response below required confidence threshold, rnn times out.
+     * So we ignore rnn and use AIML result
+     */
+    @Test
+    public void testChat_Rnn_Timeout() throws ChatBackendConnector.AiControllerException {
+        setupFakeChat(0.7d, SEMANTICRESULT, 0.1d, AIMLRESULT, 0.3d, NEURALRESULT);
+        when(this.fakeChatServices.awaitRnn()).thenThrow(ChatBackendConnector.AiControllerTimeoutException.class);
+        ApiResult result = getChat(0.9f);
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+        Assert.assertEquals(AIMLRESULT, ((ApiChat) result).getResult().getAnswer());
+    }
+    /***
      * The neural network can't be queried because the training status is bad (no training)
      * but the semantic server is confident enough to reply.
      */
