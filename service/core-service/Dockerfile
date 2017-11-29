@@ -1,6 +1,19 @@
 FROM tomcat:8.5.23-jre8
 LABEL maintainer "pedrotei@hutoma.com"
 
+# Delete any existing root folder
+RUN rm -rf /usr/local/tomcat/webapps/ROOT
+
+# Add a tomcat user
+ARG USERID=1000
+ARG GROUPID=1000
+RUN addgroup --system --gid $GROUPID tomcat
+RUN adduser --system --uid $USERID --gid $GROUPID tomcat
+
+RUN chown -R tomcat:tomcat /usr/local/tomcat/
+
+USER tomcat
+
 # Copy the certificates to the store
 RUN mkdir -p /usr/local/tomcat/ssl
 COPY config/internal.hutoma.crt /usr/local/tomcat/ssl
@@ -9,8 +22,7 @@ COPY config/internal.hutoma.key /usr/local/tomcat/ssl
 # Copy the server config
 COPY config/server.xml /usr/local/tomcat/conf
 
-# Delete any existing root folder
-RUN rm -rf /usr/local/tomcat/webapps/ROOT
+
 # Copy the WAR file to be expanded as the new ROOT folder (as we have set unpackWARs="true")
 COPY ./target/HutomaAPI.war /usr/local/tomcat/webapps/ROOT.war
 
