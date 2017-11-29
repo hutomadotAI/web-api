@@ -1,5 +1,6 @@
 package com.hutoma.api.connectors.chat;
 
+import com.google.common.base.Strings;
 import com.google.gson.JsonParseException;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.JsonSerializer;
@@ -31,6 +32,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.ws.rs.core.Response;
 
@@ -251,17 +253,22 @@ public abstract class ChatBackendConnector {
                 .path(aiid.toString())
                 .path("chat");
 
-        Map<String, Object> queryParams = new HashMap<>(params);
+        // make a copy of the params list but ensure that we have empty strings in the place of nulls
+        Map<String, Object> queryParamsWithoutNulls = params.entrySet()
+                .stream()
+                .collect(Collectors.toMap(p -> p.getKey(),
+                        p -> Strings.nullToEmpty(p.getValue())));
+
         // add the hashcode to the query string
-        queryParams.put(AI_HASH_PARAM, aiHash);
+        queryParamsWithoutNulls.put(AI_HASH_PARAM, Strings.nullToEmpty(aiHash));
 
         // create template
-        for (String param : queryParams.keySet()) {
+        for (String param : queryParamsWithoutNulls.keySet()) {
             target = target.queryParam(param, String.format("{%s}", param));
         }
 
         // encode parameters into template
-        target = target.resolveTemplates(queryParams);
+        target = target.resolveTemplates(queryParamsWithoutNulls);
 
         final JerseyInvocation.Builder builder = target.request();
         return () -> {

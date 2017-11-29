@@ -13,7 +13,11 @@ import com.hutoma.api.containers.sub.AiStatus;
 import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.logic.ChatLogic;
 
+import org.glassfish.jersey.client.JerseyClient;
+import org.glassfish.jersey.client.JerseyInvocation;
+import org.glassfish.jersey.client.JerseyWebTarget;
 import org.joda.time.DateTime;
+import org.mockito.Mockito;
 
 import java.math.BigDecimal;
 import java.util.Collections;
@@ -126,5 +130,16 @@ public class TestDataHelper {
                 "badge", new BigDecimal(0), "sample", "category", "licenseType",
                 DateTime.now(), "privacyPolicy", "classification", "version",
                 "videoLink", AiBot.PublishingState.NOT_PUBLISHED, AiBot.PublishingType.SKILL, "botIcon");
+    }
+
+    public static JerseyInvocation.Builder mockJerseyClient(JerseyClient fakeJerseyClient) {
+        JerseyWebTarget jerseyWebTarget = Mockito.mock(JerseyWebTarget.class);
+        JerseyInvocation.Builder builder = Mockito.mock(JerseyInvocation.Builder.class);
+        when(fakeJerseyClient.target(any(String.class))).thenReturn(jerseyWebTarget);
+        when(jerseyWebTarget.path(anyString())).thenReturn(jerseyWebTarget);
+        when(jerseyWebTarget.queryParam(anyString(), anyString())).thenReturn(jerseyWebTarget);
+        when(jerseyWebTarget.request()).thenReturn(builder);
+        when(jerseyWebTarget.resolveTemplates(any())).thenReturn(jerseyWebTarget);
+        return builder;
     }
 }

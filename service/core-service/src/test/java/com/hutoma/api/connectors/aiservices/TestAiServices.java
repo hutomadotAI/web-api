@@ -24,11 +24,9 @@ import com.hutoma.api.thread.TrackedThreadSubPool;
 
 import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.client.JerseyInvocation;
-import org.glassfish.jersey.client.JerseyWebTarget;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -38,7 +36,6 @@ import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.Response;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -125,7 +122,7 @@ public class TestAiServices {
 
     @Test
     public void testUploadTraining() throws AIServices.AiServicesException, NoServerAvailableException {
-        JerseyInvocation.Builder builder = getFakeBuilder();
+        JerseyInvocation.Builder builder = TestDataHelper.mockJerseyClient(this.fakeClient);
         IServerEndpoint endpoint = getFakeServerEndpoint();
         when(this.fakeWnetServicesConnector.getBackendEndpoint(any(), any())).thenReturn(endpoint);
         when(this.fakeRnnServicesConnector.getBackendEndpoint(any(), any())).thenReturn(endpoint);
@@ -216,7 +213,7 @@ public class TestAiServices {
 
     private void testCommand(CheckedByConsumer<UUID, UUID> logicMethod, String verb)
             throws AIServices.AiServicesException, DatabaseException {
-        JerseyInvocation.Builder builder = getFakeBuilder();
+        JerseyInvocation.Builder builder = TestDataHelper.mockJerseyClient(this.fakeClient);
         switch (verb) {
             case HttpMethod.POST:
                 when(builder.post(any())).thenReturn(Response.ok(new ApiResult().setSuccessStatus()).build());
@@ -242,7 +239,7 @@ public class TestAiServices {
 
     private void testCommand_serverError(CheckedByConsumer<UUID, UUID> logicMethod, String verb)
             throws AIServices.AiServicesException, DatabaseException {
-        JerseyInvocation.Builder builder = getFakeBuilder();
+        JerseyInvocation.Builder builder = TestDataHelper.mockJerseyClient(this.fakeClient);
         switch (verb) {
             case HttpMethod.POST:
                 when(builder.post(any())).thenReturn(Response.serverError().entity(ApiError.getInternalServerError()).build());
@@ -261,7 +258,7 @@ public class TestAiServices {
 
     private void testCommand_response_noEntity(CheckedByConsumer<UUID, UUID> logicMethod, String verb)
             throws AIServices.AiServicesException, DatabaseException {
-        JerseyInvocation.Builder builder = getFakeBuilder();
+        JerseyInvocation.Builder builder = TestDataHelper.mockJerseyClient(this.fakeClient);
         switch (verb) {
             case HttpMethod.POST:
                 when(builder.post(any())).thenReturn(Response.serverError().entity(null).build());
@@ -277,16 +274,6 @@ public class TestAiServices {
         }
         logicMethod.apply(DEVID, AIID);
 
-    }
-
-    private JerseyInvocation.Builder getFakeBuilder() {
-        JerseyWebTarget jerseyWebTarget = Mockito.mock(JerseyWebTarget.class);
-        JerseyInvocation.Builder builder = Mockito.mock(JerseyInvocation.Builder.class);
-        when(this.fakeClient.target(any(String.class))).thenReturn(jerseyWebTarget);
-        when(jerseyWebTarget.path(anyString())).thenReturn(jerseyWebTarget);
-        when(jerseyWebTarget.queryParam(anyString(), anyString())).thenReturn(jerseyWebTarget);
-        when(jerseyWebTarget.request()).thenReturn(builder);
-        return builder;
     }
 
     @FunctionalInterface
