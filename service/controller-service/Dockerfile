@@ -3,22 +3,11 @@ LABEL maintainer "pedrotei@hutoma.com"
 
 # Delete any existing root folder
 RUN rm -rf /usr/local/tomcat/webapps/ROOT
-
-# Add a tomcat user
-ARG USERID=1000
-ARG GROUPID=1000
-RUN addgroup --system --gid $GROUPID tomcat
-RUN adduser --system --uid $USERID --gid $GROUPID tomcat
-
-RUN chown -R tomcat:tomcat /usr/local/tomcat/
-
-USER tomcat
-
 # Copy the server config
-COPY --chown=tomcat:tomcat config/server.xml /usr/local/tomcat/conf
+COPY config/server.xml /usr/local/tomcat/conf
 
 # Copy the WAR file to be expanded as the new ROOT folder (as we have set unpackWARs="true")
-COPY --chown=tomcat:tomcat ./target/Controller.war /usr/local/tomcat/webapps/ROOT.war
+COPY ./target/Controller.war /usr/local/tomcat/webapps/ROOT.war
 
 # Expose the following environment variables
 ENV API_CONNECTION_STRING jdbc:mysql://server:3306/hutoma?user=user&password=password&zeroDateTimeBehavior=convertToNull
