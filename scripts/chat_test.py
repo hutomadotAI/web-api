@@ -1,5 +1,6 @@
 
 import random
+from math import copysign
 from queue import Queue
 from threading import Thread
 
@@ -59,6 +60,12 @@ class Worker(Thread):
 
 def main():
 
+    # for average_access_time in range(0, 21):
+    #     diff = 10.0 - average_access_time
+    #     access_diff = copysign(((abs(diff) / 10.0) ** 1.2) * 1.2, average_access_time)
+    #     print("{} {}".format(round(average_access_time, 3), access_diff))
+    # exit(0)
+
     requester = hu_api.api.ApiRequester(config.url_root, config.auth, [])
 
     check_api_available(requester)
@@ -115,13 +122,22 @@ def main():
         valid_in_window = time.time() - 10.0
         result_window = [x for x in result_window if x[1] > valid_in_window]
 
-        average_access_time = sum([duration for (_, _, duration) in result_window]) / len(result_window) \
-            if len(result_window) else 0.0
+        window_times = [duration for (success, _, duration) in result_window if success] + \
+            [20.0 for (success, _, duration) in result_window if not success]
+
+        average_access_time = sum(window_times) / len(window_times) \
+            if len(result_window) else 10.0
         window_error_count = len([x for x in result_window if not x[0]])
         window_total_count = len(result_window)
+
+        diff = 10.0 - average_access_time
+        access_diff = copysign(((abs(diff) / 10.0) ** 1.2) * 1.2, average_access_time)
+
         if changes:
-            print("Simultaneous {} latency {} results {} errors {}".format(\
-                load, average_access_time, window_total_count, window_error_count))
+            print("Simultaneous {}({}) latency {} results {} errors {} diff {}".format(
+                len(threads), round(load, 3), round(average_access_time, 3),
+                window_total_count, window_error_count, round(access_diff, 3)))
+            load += access_diff
             changes = False
 
 
