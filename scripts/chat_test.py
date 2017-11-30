@@ -49,8 +49,9 @@ class Worker(Thread):
             except Exception as e:
                 result = str(e)
             finally:
-                duration = time.time() - start_time
-                self.results.put((success, duration, result))
+                end_time = time.time()
+                duration = end_time - start_time
+                self.results.put((success, end_time, duration, result))
 
     def stop(self):
         self.execute = False
@@ -83,6 +84,8 @@ def main():
     load = 1.0
     result_queue = Queue()
 
+    result_window = []
+
     while True:
         need_active = int(round(load))
         while need_active > len(threads):
@@ -96,11 +99,18 @@ def main():
             threads.pop().stop()
 
         while not result_queue.empty():
-            (success, duration, result) = result_queue.get(False)
+            (success, end_time, duration, result) = result_queue.get(False)
+            result_window.append((success, end_time, duration))
             success_message = "OK" if success else "ERROR"
-            print("{} {} {}".format(success_message, duration, result))
+            print("{} {} {}".format(success_message, str(round(duration, 2)), result))
 
-        time.sleep(0.5)
+        time.sleep(1.0)
+        valid_in_window = time.time() - 10.0
+        result_window = [x for x in result_window if x[1] > valid_in_window]
+
+        average_access_time = sum([duration for (_, _, duration) in result_window]) / len(result_window) \
+            if len(result_window) else 0.0
+        print("Simult {} latency {}".format(load, average_access_time))
 
 
 if __name__ == "__main__":
