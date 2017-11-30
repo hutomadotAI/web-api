@@ -76,15 +76,21 @@ def main():
     server = config.server
 
     if server == 'rnn':
-        botlist = {name: (aiid, non_words) for (name, (aiid, words)) in botlist}
+        botlist = {name: (aiid, non_words) for (name, (aiid, words)) in botlist.items()}
     if server == 'aiml':
-        botlist = {'aiml': (aiml_bot_id, non_words) for (name, (aiid, words)) in botlist}
+        botlist = {'aiml': (aiml_bot_id, non_words) for (name, (aiid, words)) in botlist.items()}
+
+
+    # target only a single bot
+    first_bot = sorted(botlist.keys())[0]
+    botlist = {name: v for (name, v) in botlist.items() if name == first_bot}
 
     threads = []
     load = 1.0
     result_queue = Queue()
 
     result_window = []
+    changes = False
 
     while True:
         need_active = int(round(load))
@@ -102,7 +108,8 @@ def main():
             (success, end_time, duration, result) = result_queue.get(False)
             result_window.append((success, end_time, duration))
             success_message = "OK" if success else "ERROR"
-            print("{} {} {}".format(success_message, str(round(duration, 2)), result))
+            print("    {} {} {}".format(success_message, str(round(duration, 2)), result))
+            changes = True
 
         time.sleep(1.0)
         valid_in_window = time.time() - 10.0
@@ -110,7 +117,12 @@ def main():
 
         average_access_time = sum([duration for (_, _, duration) in result_window]) / len(result_window) \
             if len(result_window) else 0.0
-        print("Simult {} latency {}".format(load, average_access_time))
+        window_error_count = len([x for x in result_window if not x[0]])
+        window_total_count = len(result_window)
+        if changes:
+            print("Simultaneous {} latency {} results {} errors {}".format(\
+                load, average_access_time, window_total_count, window_error_count))
+            changes = False
 
 
 if __name__ == "__main__":
