@@ -12,14 +12,18 @@ import hu_api
 from performance.common import check_api_available, de_rate_limit, read_training_file, lines_to_words, find_ais, chat_ai
 from performance.performance_config import Config, make_config
 
+TARGET_LATENCY_SECONDS = 10.0
+TIME_WINDOW_SECONDS = 10.0
 
 class Worker(Thread):
     """ Thread executing tasks from a given tasks queue """
-    def __init__(self, args, results):
+    def __init__(self, args, results, index):
         Thread.__init__(self)
         self.args = args
         self.execute = True
         self.results = results
+        self.start_time = 0.0
+        self.index = index
 
     def run(self):
         while self.execute:
@@ -28,7 +32,7 @@ class Worker(Thread):
             name = random.sample(botlist.keys(), 1)[0]
             (aiid, words) = botlist[name]
 
-            start_time = time.time()
+            self.start_time = time.time()
             success = False
             result = ''
 
@@ -41,22 +45,27 @@ class Worker(Thread):
                 if chat and chat.response and chat.response['status'] and chat.response['status']['code']:
                     code = chat.response['status']['code']
                     if code != 200:
-                        result = "{} ERR {}".format(name, code)
+                        result = "{} {} ERR {}".format(self.index, name, code)
                     else:
-                        result = "{} OK Q\"{}\" A\"{}\"".format(name, question, chat.response['result']['answer'])
+                        result = "{} {} OK Q\"{}\" A\"{}\""\
+                            .format(self.index, name, question, chat.response['result']['answer'])
                         success = True
                 else:
-                    result = "{} ERROR {}".format(name, chat.status_code)
+                    result = "{} {} ERROR {}"\
+                        .format(self.index, name, chat.status_code)
             except Exception as e:
                 result = str(e)
             finally:
                 end_time = time.time()
-                duration = end_time - start_time
+                duration = end_time - self.start_time
+                self.start_time = 0.0
                 self.results.put((success, end_time, duration, result))
 
     def stop(self):
         self.execute = False
 
+    def get_running_duration(self):
+        return (time.time() - self.start_time) if self.start_time > 1.0 else 0.0
 
 def main():
 
@@ -100,11 +109,11 @@ def main():
     changes = False
 
     while True:
-        need_active = int(round(load))
+        need_active = max(1, int(round(load)))
         while need_active > len(threads):
 
             threaded_requester = hu_api.api.ApiRequester(config.url_root, config.auth, [])
-            thread = Worker(args=(botlist, threaded_requester), results=result_queue)
+            thread = Worker(args=(botlist, threaded_requester), results=result_queue, index=len(threads))
             threads.append(thread)
             thread.start()
 
@@ -119,25 +128,35 @@ def main():
             changes = True
 
         time.sleep(1.0)
-        valid_in_window = time.time() - 10.0
+        valid_in_window = time.time() - TIME_WINDOW_SECONDS
         result_window = [x for x in result_window if x[1] > valid_in_window]
 
         window_times = [duration for (success, _, duration) in result_window if success] + \
-            [20.0 for (success, _, duration) in result_window if not success]
+            [(TARGET_LATENCY_SECONDS * 2.0) for (success, _, duration) in result_window if not success]
 
-        average_access_time = sum(window_times) / len(window_times) \
-            if len(result_window) else 10.0
+        average_access_time_complete = sum(window_times) / len(window_times) \
+            if len(result_window) else TARGET_LATENCY_SECONDS
+
+        in_progress_times = [thread.get_running_duration() for thread in threads]
+        running_times = [x for x in in_progress_times if x > 1.0 and x > average_access_time_complete]
+
+        average_access_time = (sum(window_times) + sum(running_times)) / \
+                              (len(window_times) + len(running_times))\
+            if len(result_window) else TARGET_LATENCY_SECONDS
+
         window_error_count = len([x for x in result_window if not x[0]])
         window_total_count = len(result_window)
 
-        diff = 10.0 - average_access_time
-        access_diff = copysign(((abs(diff) / 10.0) ** 1.2) * 1.2, average_access_time)
+        diff = TARGET_LATENCY_SECONDS - average_access_time
+        access_diff = copysign(((abs(diff) / 10.0) ** 1.2) * 1.2, diff)
 
         if changes:
-            print("Simultaneous {}({}) latency {} results {} errors {} diff {}".format(
-                len(threads), round(load, 3), round(average_access_time, 3),
+            print("Simultaneous {}({}) lat_metric {} complete_lat {} results {} errors {} diff {}".format(
+                len(threads), round(load, 3),
+                round(average_access_time, 3),
+                round(average_access_time_complete, 3),
                 window_total_count, window_error_count, round(access_diff, 3)))
-            load += access_diff
+            load = max(1.0, load + access_diff)
             changes = False
 
 
