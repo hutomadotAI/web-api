@@ -109,6 +109,8 @@ def main():
     changes = False
 
     while True:
+        time.sleep(1.0)
+
         need_active = max(1, int(round(load)))
         while need_active > len(threads):
 
@@ -127,7 +129,6 @@ def main():
             print("    {} {} {}".format(success_message, str(round(duration, 2)), result))
             changes = True
 
-        time.sleep(1.0)
         valid_in_window = time.time() - TIME_WINDOW_SECONDS
         result_window = [x for x in result_window if x[1] > valid_in_window]
 
@@ -148,15 +149,15 @@ def main():
         window_total_count = len(result_window)
 
         diff = TARGET_LATENCY_SECONDS - average_access_time
-        access_diff = copysign(((abs(diff) / 10.0) ** 1.2) * 1.2, diff)
+        load_correction = copysign(((abs(diff) / 10.0) ** 1.2) * 0.5, diff)
 
         if changes:
             print("Simultaneous {}({}) lat_metric {} complete_lat {} results {} errors {} diff {}".format(
                 len(threads), round(load, 3),
                 round(average_access_time, 3),
                 round(average_access_time_complete, 3),
-                window_total_count, window_error_count, round(access_diff, 3)))
-            load = max(1.0, load + access_diff)
+                window_total_count, window_error_count, round(load_correction, 3)))
+            load = max(1.0, load + load_correction)
             changes = False
 
 
