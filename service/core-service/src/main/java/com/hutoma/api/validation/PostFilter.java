@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import javax.annotation.Priority;
 import javax.inject.Inject;
 import javax.ws.rs.Priorities;
@@ -207,7 +208,7 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
         }
     }
 
-    private void processJson(ContainerRequest request, HashSet<APIParameter> checkList)
+    private void processJson(final ContainerRequest request, final HashSet<APIParameter> checkList)
             throws ParameterValidationException {
         // if the body is of the right type
         if (!MediaTypes.typeEqual(MediaType.APPLICATION_JSON_TYPE, request.getMediaType())) {
@@ -234,7 +235,7 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
             if (checkList.contains(APIParameter.BotStructure)) {
                 BotStructure botStructure = (BotStructure)
                         this.serializer.deserialize(request.getEntityStream(), BotStructure.class);
-                this.validateBotStructure(botStructure);
+                this.validateBotStructure(botStructure, getDevid(request));
                 request.setProperty(APIParameter.BotStructure.toString(), botStructure);
             }
 
@@ -382,25 +383,44 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
      * @param botStructure The BotStructure.
      * @throws ParameterValidationException
      */
-    void validateBotStructure(BotStructure botStructure) throws ParameterValidationException {
-        if (botStructure.getLanguage().equals("en_US")) {
-            botStructure.setLanguage("en-US");
-        }
-        validateLocale(LOCALE, botStructure.getLanguage());
-        validateAiName(AINAME, botStructure.getName());
-        validateFieldLength(50, AINAME, botStructure.getName());
-        validateFieldLength(250, AIDESC,
-                filterControlAndCoalesceSpaces(botStructure.getDescription()));
-        validateFieldLength(250, AIDESC, botStructure.getDescription());
-        validateTimezoneString(TIMEZONE, botStructure.getTimezone());
-        if (botStructure.getEntities() != null) {
-            for (ApiEntity entity : botStructure.getEntities().values()) {
-                this.validateEntity(entity);
+    void validateBotStructure(final BotStructure botStructure, final UUID devId) throws ParameterValidationException {
+
+        try {
+            checkParameterNotNull("language", botStructure.getLanguage());
+            checkParameterNotNull(TIMEZONE, botStructure.getTimezone());
+            if (botStructure.getVersion() < 1) {
+                throw new ParameterValidationException("Invalid version", "version");
             }
-        }
-        if (botStructure.getIntents() != null) {
-            for (ApiIntent intent : botStructure.getIntents()) {
-                this.validateIntent(intent);
+
+            if (botStructure.getLanguage().equals("en_US")) {
+                botStructure.setLanguage("en-US");
+            }
+            validateLocale(LOCALE, botStructure.getLanguage());
+            validateAiName(AINAME, botStructure.getName());
+            validateFieldLength(50, AINAME, botStructure.getName());
+            validateFieldLength(250, AIDESC,
+                    filterControlAndCoalesceSpaces(botStructure.getDescription()));
+            validateFieldLength(250, AIDESC, botStructure.getDescription());
+            validateTimezoneString(TIMEZONE, botStructure.getTimezone());
+            if (botStructure.getEntities() != null) {
+                for (ApiEntity entity : botStructure.getEntities().values()) {
+                    this.validateEntity(entity);
+                }
+            }
+            if (botStructure.getIntents() != null) {
+                for (ApiIntent intent : botStructure.getIntents()) {
+                    this.validateIntent(intent);
+                }
+            }
+        } catch (Exception ex) {
+            if (ex instanceof ParameterValidationException) {
+                // rethrow
+                throw ex;
+            } else {
+                this.logger.logUserExceptionEvent(LOGFROM, "Error validating bot import structure",
+                        devId.toString(), ex);
+                // We should have caught all possible parameter failures, but just in case...
+                throw new ParameterValidationException("Failed to process the bot structure.", "");
             }
         }
     }

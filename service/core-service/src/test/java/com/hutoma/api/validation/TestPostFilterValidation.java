@@ -43,7 +43,7 @@ public class TestPostFilterValidation {
     @Test
     public void validateV1BotStructure() throws ParameterValidationException {
         BotStructure botStructure = generateValidV1BotStructure();
-        this.postFilter.validateBotStructure(botStructure);
+        this.postFilter.validateBotStructure(botStructure, TestDataHelper.DEVID_UUID);
         // If the test doesn't throw an exception, it's valid.
     }
 
@@ -51,14 +51,14 @@ public class TestPostFilterValidation {
     public void validateV1BotStructureInvalidAiName() throws ParameterValidationException {
         BotStructure botStructure = generateValidV1BotStructure();
         botStructure.setName("<?php new name alert(); ?>#_+~\\");
-        this.postFilter.validateBotStructure(botStructure);
+        this.postFilter.validateBotStructure(botStructure, TestDataHelper.DEVID_UUID);
     }
 
     @Test
     public void validateV1BotStructureEmptyTrainingFile() throws ParameterValidationException {
         BotStructure botStructure = generateValidV1BotStructure();
         botStructure.setTrainingFile("");
-        this.postFilter.validateBotStructure(botStructure);
+        this.postFilter.validateBotStructure(botStructure, TestDataHelper.DEVID_UUID);
         // If the test doesn't throw an exception, it's valid.
     }
 
@@ -66,22 +66,36 @@ public class TestPostFilterValidation {
     public void validatV1BotStructureAllowsEN_US() throws ParameterValidationException {
         BotStructure botStructure = generateValidV1BotStructure();
         botStructure.setLanguage("en_US");
-        this.postFilter.validateBotStructure(botStructure);
+        this.postFilter.validateBotStructure(botStructure, TestDataHelper.DEVID_UUID);
         // If the test doesn't throw an exception it's valid.
+    }
+
+    @Test(expected = ParameterValidationException.class)
+    public void validateV1BotStructureNullTimeZone() throws ParameterValidationException {
+        BotStructure botStructure = generateValidV1BotStructure();
+        botStructure.setTimezone(null);
+        this.postFilter.validateBotStructure(botStructure, TestDataHelper.DEVID_UUID);
     }
 
     @Test(expected = ParameterValidationException.class)
     public void validateV1BotStructureInvalidTimeZone() throws ParameterValidationException {
         BotStructure botStructure = generateValidV1BotStructure();
         botStructure.setTimezone("tz");
-        this.postFilter.validateBotStructure(botStructure);
+        this.postFilter.validateBotStructure(botStructure, TestDataHelper.DEVID_UUID);
     }
 
     @Test(expected = ParameterValidationException.class)
     public void validatV1BotStructureInvalidLanguage() throws ParameterValidationException {
         BotStructure botStructure = generateValidV1BotStructure();
         botStructure.setLanguage("en-EN");
-        this.postFilter.validateBotStructure(botStructure);
+        this.postFilter.validateBotStructure(botStructure, TestDataHelper.DEVID_UUID);
+    }
+
+    @Test(expected = ParameterValidationException.class)
+    public void validateV1BotStructureNullLanguage() throws ParameterValidationException {
+        BotStructure botStructure = generateValidV1BotStructure();
+        botStructure.setLanguage(null);
+        this.postFilter.validateBotStructure(botStructure, TestDataHelper.DEVID_UUID);
     }
 
     @Test(expected = ParameterValidationException.class)
@@ -92,7 +106,7 @@ public class TestPostFilterValidation {
         entityValues.add("_+[[*invalid");
         entities.put("invalid", new ApiEntity("_=]InvalidName", UUID.randomUUID(), entityValues, false));
         botStructure.setEntities(entities);
-        this.postFilter.validateBotStructure(botStructure);
+        this.postFilter.validateBotStructure(botStructure, TestDataHelper.DEVID_UUID);
     }
 
     @Test(expected = ParameterValidationException.class)
@@ -106,21 +120,21 @@ public class TestPostFilterValidation {
                 "valid value", false, ";'["));
         intents.add(intent);
         botStructure.setIntents(intents);
-        this.postFilter.validateBotStructure(botStructure);
+        this.postFilter.validateBotStructure(botStructure, TestDataHelper.DEVID_UUID);
     }
 
     @Test(expected = ParameterValidationException.class)
     public void validateV1BotStructureNameLength() throws ParameterValidationException {
         BotStructure botStructure = generateValidV1BotStructure();
         botStructure.setName(TestDataHelper.stringOfLength(640));
-        this.postFilter.validateBotStructure(botStructure);
+        this.postFilter.validateBotStructure(botStructure, TestDataHelper.DEVID_UUID);
     }
 
     @Test(expected = ParameterValidationException.class)
     public void validateV1BotStructureDescriptionLength() throws ParameterValidationException {
         BotStructure botStructure = generateValidV1BotStructure();
         botStructure.setDescription(TestDataHelper.stringOfLength(640));
-        this.postFilter.validateBotStructure(botStructure);
+        this.postFilter.validateBotStructure(botStructure, TestDataHelper.DEVID_UUID);
     }
 
     @Test
@@ -138,7 +152,7 @@ public class TestPostFilterValidation {
     @Test(expected = ParameterValidationException.class)
     public void validateIntent_NoUserExpressions() throws ParameterValidationException {
         ApiIntent intent = createIntent(null);
-        intent.setUserSays(Collections.EMPTY_LIST);
+        intent.setUserSays(Collections.emptyList());
         this.postFilter.validateIntent(intent);
     }
 
@@ -167,7 +181,7 @@ public class TestPostFilterValidation {
     @Test(expected = ParameterValidationException.class)
     public void validateIntent_NoResponses() throws ParameterValidationException {
         ApiIntent intent = createIntent(null);
-        intent.setResponses(Collections.EMPTY_LIST);
+        intent.setResponses(Collections.emptyList());
         this.postFilter.validateIntent(intent);
     }
 
@@ -218,7 +232,7 @@ public class TestPostFilterValidation {
     public void validateIntent_Variable_RequiredNoPrompts() throws ParameterValidationException {
         ApiIntent intent = createIntent(null);
         IntentVariable intentVariable = createRequiredIntentVariable("name", "label", 1);
-        intentVariable.setPrompts(Collections.EMPTY_LIST);
+        intentVariable.setPrompts(Collections.emptyList());
         intent.addVariable(intentVariable);
         this.postFilter.validateIntent(intent);
     }
@@ -227,7 +241,7 @@ public class TestPostFilterValidation {
     public void validateIntent_Variable_NotRequiredNoPrompts() throws ParameterValidationException {
         ApiIntent intent = createIntent(null);
         IntentVariable intentVariable = createOptionalIntentVariable("name", "label", 1);
-        intentVariable.setPrompts(Collections.EMPTY_LIST);
+        intentVariable.setPrompts(Collections.emptyList());
         intent.addVariable(intentVariable);
         this.postFilter.validateIntent(intent);
     }
