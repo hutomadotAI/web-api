@@ -58,8 +58,8 @@ class Worker(Thread):
             finally:
                 end_time = time.time()
                 duration = end_time - self.start_time
+                self.results.put((success, self.start_time, end_time, duration, result))
                 self.start_time = 0.0
-                self.results.put((success, end_time, duration, result))
 
     def stop(self):
         self.execute = False
@@ -105,11 +105,14 @@ def main():
     load = 1.0
     result_queue = Queue()
 
+    all_results = []
     result_window = []
     changes = False
 
-    while True:
-        time.sleep(1.0)
+    run_starts_at = time.time()
+    run_ends_at = run_starts_at + 120.0
+
+    while time.time() < run_ends_at:
 
         need_active = max(1, int(round(load)))
         while need_active > len(threads):
@@ -123,7 +126,8 @@ def main():
             threads.pop().stop()
 
         while not result_queue.empty():
-            (success, end_time, duration, result) = result_queue.get(False)
+            (success, start_time, end_time, duration, result) = result_queue.get(False)
+            all_results.append((success, start_time, end_time, duration, result))
             result_window.append((success, end_time, duration))
             success_message = "OK" if success else "ERROR"
             print("    {} {} {}".format(success_message, str(round(duration, 2)), result))
@@ -159,6 +163,31 @@ def main():
                 window_total_count, window_error_count, round(load_correction, 3)))
             load = max(1.0, load + load_correction)
             changes = False
+
+        time.sleep(1.0)
+
+    while len(threads):
+        threads.pop().stop()
+
+    switchover_times = []
+    for (success, start_time, end_time, duration, result) in \
+            sorted(all_results, key=lambda x: x[1]):
+        switchover_times.append(start_time)
+        switchover_times.append(end_time)
+        #print("{},{},{}".format(round(start_time - run_starts_at, 5),
+        #                        round(end_time - run_starts_at, 5), success))
+
+    last_output = ''
+    switchover_times.sort()
+    for time_point in switchover_times:
+        ok_count = len([success for (success, start_time, end_time, duration, result) in all_results if
+                    success and start_time <= time_point and end_time >= time_point])
+        err_count = len([success for (success, start_time, end_time, duration, result) in all_results if
+                         (not success) and start_time <= time_point and end_time >= time_point])
+        output = "{},{}".format(ok_count, err_count)
+        if not output == last_output:
+            print("{},{}".format(time_point - run_starts_at, output))
+            last_output = output
 
 
 if __name__ == "__main__":
