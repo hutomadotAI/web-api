@@ -81,7 +81,7 @@ def main():
 
     chat_test_defs = config.chat_test_ais
 
-    botlist = find_ais(requester, chat_test_defs)
+    botlist = find_ais(requester, chat_test_defs, set(config.common_words))
 
     if not botlist:
         print("No data")
