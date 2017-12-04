@@ -110,7 +110,7 @@ def main():
     changes = False
 
     run_starts_at = time.time()
-    run_ends_at = run_starts_at + 120.0
+    run_ends_at = run_starts_at + 300.0
 
     while time.time() < run_ends_at:
 
@@ -137,34 +137,44 @@ def main():
         valid_in_window = time.time() - TIME_WINDOW_SECONDS
         result_window = [x for x in result_window if x[1] > valid_in_window]
 
-        # if it succeeded then count duration, otherwise count it as 30
-        window_times = [duration for (success, _, duration) in result_window if success] + \
-            [(TARGET_LATENCY_SECONDS * 3.0) for (success, _, duration) in result_window if not success]
+        #calculate weighted average
+        total_weight = 0.0
+        latency_sum = 0.0
 
-        # an average time
-        average_access_time_complete = sum(window_times) / len(window_times) \
-            if len(result_window) else TARGET_LATENCY_SECONDS
+        for (success, end_time, duration) in result_window:
+            weight = (end_time - valid_in_window) / TIME_WINDOW_SECONDS
+            total_weight += weight;
+            latency_sum += (weight * duration) if success else weight * (TARGET_LATENCY_SECONDS * 3.0)
+            print("        FIN {} time {} factor {}".format("okk" if success else "ERR", duration, weight))
 
+        # weighted average for everything that terminated
+        average_access_time_complete = latency_sum / total_weight \
+            if total_weight > 0.1 else TARGET_LATENCY_SECONDS
+
+        # get a list of everything in progress that is taking longer than average
         in_progress_times = [thread.get_running_duration() for thread in threads]
         running_times = [x for x in in_progress_times if x > 1.0 and x > average_access_time_complete]
 
         # debug
-        for (success, _, duration) in result_window:
-            print("        FIN {} {}".format("okk" if success else "ERR", duration))
         for duration in in_progress_times:
-            print("        RUN {} {}".format("___", duration))
+            print("        RUN {} time {}".format("___", duration))
         print("\n")
 
-        average_access_time = (sum(window_times) + sum(running_times)) / \
-                              (len(window_times) + len(running_times))\
-            if len(result_window) else TARGET_LATENCY_SECONDS
+        # factor running timings into the average
+        total_weight += len(running_times)
+        latency_sum += sum(running_times)
 
+        # recalculate an average out of complete and running
+        average_access_time = latency_sum / total_weight \
+            if total_weight > 0.1 else TARGET_LATENCY_SECONDS
+
+        # count successes an failures
         window_error_count = len([x for x in result_window if not x[0]])
         window_total_count = len(result_window)
 
+        # calculate the new P term
         diff = TARGET_LATENCY_SECONDS - average_access_time
-        load_correction = copysign(((abs(diff) / 10.0) ** 1.2) * 0.5, diff)
-
+        load_correction = copysign(((abs(diff) / 10.0) ** 1.2) * 0.2, diff)
 
         print("Simultaneous {}({}) lat_metric {} complete_lat {} results {} errors {} diff {}".format(
             len(threads), round(load, 3),
@@ -172,7 +182,6 @@ def main():
             round(average_access_time_complete, 3),
             window_total_count, window_error_count, round(load_correction, 3)))
         load = max(1.0, load + load_correction)
-        changes = False
 
         time.sleep(1.0)
 
