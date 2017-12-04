@@ -41,11 +41,11 @@ class Worker(Thread):
                     random.sample(words, 1)[0],
                     random.sample(words, 1)[0])
 
-                chat = de_rate_limit(hu_api.api.chat, requester, aiid, question)
+                chat = de_rate_limit(hu_api.api.load_test_chat, requester, aiid, question)
                 if chat and chat.response and chat.response['status'] and chat.response['status']['code']:
                     code = chat.response['status']['code']
                     if code != 200:
-                        result = "{} {} ERR {}".format(self.index, name, code)
+                        result = "{} {} ERR Q\"{}\" {}".format(self.index, name, question, code)
                     else:
                         result = "{} {} OK Q\"{}\" A\"{}\""\
                             .format(self.index, name, question, chat.response['result']['answer'])
@@ -117,7 +117,7 @@ def main():
         need_active = max(1, int(round(load)))
         while need_active > len(threads):
 
-            threaded_requester = hu_api.api.ApiRequester(config.url_root, config.auth, [])
+            threaded_requester = hu_api.api.ApiRequester(config.url_root, config.chat_auth, [])
             thread = Worker(args=(botlist, threaded_requester), results=result_queue, index=len(threads))
             threads.append(thread)
             thread.start()
@@ -133,17 +133,27 @@ def main():
             print("    {} {} {}".format(success_message, str(round(duration, 2)), result))
             changes = True
 
+        #take an average latency for anything that completed in the last n seconds
         valid_in_window = time.time() - TIME_WINDOW_SECONDS
         result_window = [x for x in result_window if x[1] > valid_in_window]
 
+        # if it succeeded then count duration, otherwise count it as 30
         window_times = [duration for (success, _, duration) in result_window if success] + \
-            [(TARGET_LATENCY_SECONDS * 2.0) for (success, _, duration) in result_window if not success]
+            [(TARGET_LATENCY_SECONDS * 3.0) for (success, _, duration) in result_window if not success]
 
+        # an average time
         average_access_time_complete = sum(window_times) / len(window_times) \
             if len(result_window) else TARGET_LATENCY_SECONDS
 
         in_progress_times = [thread.get_running_duration() for thread in threads]
         running_times = [x for x in in_progress_times if x > 1.0 and x > average_access_time_complete]
+
+        # debug
+        for (success, _, duration) in result_window:
+            print("        FIN {} {}".format("okk" if success else "ERR", duration))
+        for duration in in_progress_times:
+            print("        RUN {} {}".format("___", duration))
+        print("\n")
 
         average_access_time = (sum(window_times) + sum(running_times)) / \
                               (len(window_times) + len(running_times))\
@@ -155,14 +165,14 @@ def main():
         diff = TARGET_LATENCY_SECONDS - average_access_time
         load_correction = copysign(((abs(diff) / 10.0) ** 1.2) * 0.5, diff)
 
-        if changes:
-            print("Simultaneous {}({}) lat_metric {} complete_lat {} results {} errors {} diff {}".format(
-                len(threads), round(load, 3),
-                round(average_access_time, 3),
-                round(average_access_time_complete, 3),
-                window_total_count, window_error_count, round(load_correction, 3)))
-            load = max(1.0, load + load_correction)
-            changes = False
+
+        print("Simultaneous {}({}) lat_metric {} complete_lat {} results {} errors {} diff {}".format(
+            len(threads), round(load, 3),
+            round(average_access_time, 3),
+            round(average_access_time_complete, 3),
+            window_total_count, window_error_count, round(load_correction, 3)))
+        load = max(1.0, load + load_correction)
+        changes = False
 
         time.sleep(1.0)
 
@@ -177,6 +187,7 @@ def main():
         #print("{},{},{}".format(round(start_time - run_starts_at, 5),
         #                        round(end_time - run_starts_at, 5), success))
 
+    print("\n\ntime,successful,failed")
     last_output = ''
     switchover_times.sort()
     for time_point in switchover_times:
