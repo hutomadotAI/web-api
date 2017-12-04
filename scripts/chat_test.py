@@ -142,8 +142,8 @@ def main():
         latency_sum = 0.0
 
         for (success, end_time, duration) in result_window:
-            weight = (end_time - valid_in_window) / TIME_WINDOW_SECONDS
-            total_weight += weight;
+            weight = ((end_time - valid_in_window) / TIME_WINDOW_SECONDS) ** 3
+            total_weight += weight
             latency_sum += (weight * duration) if success else weight * (TARGET_LATENCY_SECONDS * 3.0)
             print("        FIN {} time {} factor {}".format("okk" if success else "ERR", duration, weight))
 
