@@ -271,7 +271,9 @@ public class DatabaseAI extends Database  {
     public ApiAi getAI(final UUID devid, final UUID aiid, final JsonSerializer serializer)
             throws DatabaseException {
         try (DatabaseTransaction transaction = this.transactionProvider.get()) {
-            return getAI(devid, aiid, serializer, transaction);
+            ApiAi ai = getAI(devid, aiid, serializer, transaction);
+            transaction.commit();
+            return ai;
         }
     }
 
@@ -282,7 +284,9 @@ public class DatabaseAI extends Database  {
                     .add(devId.toString())
                     .add(aiid)
                     .executeQuery();
-            return rs.next();
+            boolean ret = rs.next();
+            transaction.commit();
+            return ret;
         } catch (final SQLException sqle) {
             throw new DatabaseException(sqle);
         }
@@ -533,6 +537,7 @@ public class DatabaseAI extends Database  {
                     }
                     botData = new ApiLinkedBotData(aiBot, config);
                 }
+                transaction.commit();
                 return botData;
             } catch (final SQLException sqle) {
                 throw new DatabaseException(sqle);
@@ -562,10 +567,6 @@ public class DatabaseAI extends Database  {
                 throw new DatabaseException(sqle);
             }
         }
-    }
-
-    public boolean linkBotToAi(final UUID devId, final UUID aiid, final int botId) throws DatabaseException {
-        return this.linkBotToAi(devId, aiid, botId, null);
     }
 
     public boolean linkBotToAi(final UUID devId, final UUID aiid, final int botId,

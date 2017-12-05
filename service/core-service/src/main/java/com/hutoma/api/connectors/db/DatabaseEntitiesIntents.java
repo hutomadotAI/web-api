@@ -688,7 +688,7 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
      */
     public static class DatabaseEntityException extends DatabaseException {
 
-        public DatabaseEntityException(String entity) {
+        DatabaseEntityException(String entity) {
             super(entity);
         }
     }
