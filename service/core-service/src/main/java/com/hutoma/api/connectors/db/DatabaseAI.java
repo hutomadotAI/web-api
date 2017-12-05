@@ -595,40 +595,42 @@ public class DatabaseAI extends Database  {
     public ChatState getChatState(final UUID devId, final UUID aiid, final UUID chatId,
                                   final JsonSerializer jsonSerializer)
             throws DatabaseException {
-        try (DatabaseCall call = this.callProvider.get()) {
-            ApiAi ai = getAI(devId, aiid, jsonSerializer, this.transactionProvider.get());
+        try (DatabaseTransaction transaction = this.transactionProvider.get()) {
+            ApiAi ai = getAI(devId, aiid, jsonSerializer, transaction);
             if (ai == null) {
                 return null;
             }
-            call.initialise("getChatState", 2).add(devId).add(chatId);
-            ResultSet rs = call.executeQuery();
-            if (rs.next()) {
-                String entitiesJson = rs.getString("entity_values");
-                HashMap<String, String> entities;
-                if (entitiesJson == null) {
-                    entities = new HashMap<>();
-                } else {
-                    entities = (HashMap<String, String>) jsonSerializer.deserialize(entitiesJson, HashMap.class);
-                }
+            try (DatabaseCall call = transaction.getDatabaseCall()) {
+                call.initialise("getChatState", 2).add(devId).add(chatId);
+                ResultSet rs = call.executeQuery();
+                if (rs.next()) {
+                    String entitiesJson = rs.getString("entity_values");
+                    HashMap<String, String> entities;
+                    if (entitiesJson == null) {
+                        entities = new HashMap<>();
+                    } else {
+                        entities = (HashMap<String, String>) jsonSerializer.deserialize(entitiesJson, HashMap.class);
+                    }
 
-                String lockedAiid = rs.getString("locked_aiid");
-                double confidenceThreshold = rs.getDouble("confidence_threshold");
-                if (rs.wasNull()) {
-                    confidenceThreshold = ai.getConfidence();
+                    String lockedAiid = rs.getString("locked_aiid");
+                    double confidenceThreshold = rs.getDouble("confidence_threshold");
+                    if (rs.wasNull()) {
+                        confidenceThreshold = ai.getConfidence();
+                    }
+                    return new ChatState(
+                            new DateTime(rs.getTimestamp("timestamp")),
+                            rs.getString("topic"),
+                            rs.getString("history"),
+                            lockedAiid != null ? UUID.fromString(lockedAiid) : null,
+                            entities,
+                            confidenceThreshold,
+                            ChatHandoverTarget.fromInt(rs.getInt("chat_target"))
+                    );
                 }
-                return new ChatState(
-                        new DateTime(rs.getTimestamp("timestamp")),
-                        rs.getString("topic"),
-                        rs.getString("history"),
-                        lockedAiid != null ? UUID.fromString(lockedAiid) : null,
-                        entities,
-                        confidenceThreshold,
-                        ChatHandoverTarget.fromInt(rs.getInt("chat_target"))
-                );
+                ChatState chatState = ChatState.getEmpty();
+                chatState.setConfidenceThreshold(ai.getConfidence());
+                return chatState;
             }
-            ChatState chatState = ChatState.getEmpty();
-            chatState.setConfidenceThreshold(ai.getConfidence());
-            return chatState;
         } catch (Exception ex) {
             throw new DatabaseException(ex);
         }
