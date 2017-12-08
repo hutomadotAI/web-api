@@ -42,7 +42,7 @@ public class TestController {
         this.fakeThreadConfig = mock(IThreadConfig.class);
         when(this.fakeThreadConfig.getThreadPoolMaxThreads()).thenReturn(16);
         when(this.fakeThreadConfig.getThreadPoolIdleTimeMs()).thenReturn(1L);
-        this.threadPool = new ThreadPool(this.fakeThreadConfig);
+        this.threadPool = new ThreadPool(this.fakeThreadConfig, this.logger);
         this.subPool = new TrackedThreadSubPool(this.threadPool);
         this.controllerUnderTest = new ControllerUnderTest(this.config, this.subPool, this.logger);
     }

@@ -109,7 +109,7 @@ public class TestAiServicesClient {
         when(this.fakeConfig.getThreadPoolMaxThreads()).thenReturn(32);
         when(this.fakeConfig.getThreadPoolIdleTimeMs()).thenReturn(10000L);
         when(this.fakeConfig.getBackendTrainingCallTimeoutMs()).thenReturn(20000L);
-        this.threadPool = new ThreadPool(this.fakeConfig);
+        this.threadPool = new ThreadPool(this.fakeConfig, this.fakeLogger);
 
         when(this.fakeRnnServicesConnector.getBackendEndpoint(any(), any())).thenReturn(TestDataHelper.getEndpointFor(LOCAL_WEB_ENDPOINT));
 

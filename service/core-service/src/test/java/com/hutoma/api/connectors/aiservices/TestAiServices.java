@@ -86,7 +86,7 @@ public class TestAiServices {
         when(this.fakeConfig.getThreadPoolMaxThreads()).thenReturn(32);
         when(this.fakeConfig.getThreadPoolIdleTimeMs()).thenReturn(10000L);
         when(this.fakeConfig.getBackendTrainingCallTimeoutMs()).thenReturn(30000L);
-        ThreadPool threadPool = new ThreadPool(this.fakeConfig);
+        ThreadPool threadPool = new ThreadPool(this.fakeConfig, this.fakeLogger);
 
         when(this.fakeControllerConnector.getBackendEndpoint(AIID, RequestFor.Training, BackendServerType.WNET))
                 .thenReturn(TestDataHelper.getEndpointFor(WNET_ENDPOINT));

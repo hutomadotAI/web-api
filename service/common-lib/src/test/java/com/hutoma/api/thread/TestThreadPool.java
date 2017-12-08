@@ -1,5 +1,7 @@
 package com.hutoma.api.thread;
 
+import com.hutoma.api.logging.ILogger;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -13,6 +15,10 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
+
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Created by David MG on 31/01/2017.
@@ -137,7 +143,7 @@ public class TestThreadPool {
 
     public class TestableThreadPool extends ThreadPool {
         public TestableThreadPool(final IThreadConfig config) {
-            super(config);
+            super(config, mock(ILogger.class));
         }
 
         public int getPoolSize() {
@@ -150,9 +156,9 @@ public class TestThreadPool {
     }
 
     TestableThreadPool getPool(int max, long lifespan) {
-        IThreadConfig mockConfig = Mockito.mock(IThreadConfig.class);
-        Mockito.when(mockConfig.getThreadPoolMaxThreads()).thenReturn(max);
-        Mockito.when(mockConfig.getThreadPoolIdleTimeMs()).thenReturn(lifespan);
+        IThreadConfig mockConfig = mock(IThreadConfig.class);
+        when(mockConfig.getThreadPoolMaxThreads()).thenReturn(max);
+        when(mockConfig.getThreadPoolIdleTimeMs()).thenReturn(lifespan);
         return new TestableThreadPool(mockConfig);
     }
 
