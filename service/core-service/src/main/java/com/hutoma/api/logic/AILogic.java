@@ -122,30 +122,30 @@ public class AILogic {
 
             UUID namedAiid = transaction == null
                     ? this.databaseAi.createAI(
-                        aiUUID,
-                        name,
-                        description,
-                        devId,
-                        isPrivate,
-                        token,
-                        language,
-                        timezone,
-                        confidence,
-                        personality,
-                        voice)
+                    aiUUID,
+                    name,
+                    description,
+                    devId,
+                    isPrivate,
+                    token,
+                    language,
+                    timezone,
+                    confidence,
+                    personality,
+                    voice)
                     : this.databaseAi.createAI(
-                        aiUUID,
-                        name,
-                        description,
-                        devId,
-                        isPrivate,
-                        token,
-                        language,
-                        timezone,
-                        confidence,
-                        personality,
-                        voice,
-                        transaction);
+                    aiUUID,
+                    name,
+                    description,
+                    devId,
+                    isPrivate,
+                    token,
+                    language,
+                    timezone,
+                    confidence,
+                    personality,
+                    voice,
+                    transaction);
 
             // if the stored procedure returns a different aiid then it didn't
             // create the one we requested because of a name clash
@@ -445,7 +445,7 @@ public class AILogic {
     }
 
     private ApiResult linkBotToAI(final UUID devId, final UUID aiid, final int botId,
-                                 final DatabaseTransaction transaction, final boolean skipValidation) {
+                                  final DatabaseTransaction transaction, final boolean skipValidation) {
         final String devIdString = devId.toString();
         try {
             LogMap logMap = LogMap.map("AIID", aiid).put("BotId", botId);
@@ -582,7 +582,7 @@ public class AILogic {
     }
 
     private ApiResult unlinkBotFromAI(final UUID devId, final UUID aiid, final int botId,
-                                     final DatabaseTransaction transaction) {
+                                      final DatabaseTransaction transaction) {
         final String devIdString = devId.toString();
         try {
             LogMap logMap = LogMap.map("AIID", aiid).put("BotId", botId);
@@ -682,7 +682,35 @@ public class AILogic {
         }
 
         // load the new bot as a get
-        return getAI(devId, uuidAiid, "Import-Get", true);
+        ApiResult result = getAI(devId, uuidAiid, "ImportBot-GetAI", true, null);
+
+        if (result.getStatus().getCode() == HttpURLConnection.HTTP_CREATED) {
+            // Log the import
+            ApiAi ai = (ApiAi) result;
+            this.logger.logUserInfoEvent(LOGFROM, "ImportBot", devId.toString(),
+                    LogMap.map("NewAIID", ai.getAiid())
+                            .put("Name", ai.getName() == null ? "" : ai.getName())
+                            .put("NumLinkedBots", ai.getLinkedBots() == null ? 0 : ai.getLinkedBots().size())
+                            .put("LinkedBots", ai.getLinkedBots() == null ? "" : ai.getLinkedBots().stream()
+                                    .map(Object::toString).collect(Collectors.joining(",")))
+                            .put("BackendStatus", ai.getBackendStatus())
+                            .put("DefaultChatResponses", ai.getDefaultChatResponses().stream()
+                                    .collect(Collectors.joining(",")))
+                            .put("TrainingFileSize", importedBot.getTrainingFile() == null
+                                    ? 0 : importedBot.getTrainingFile().length())
+                            .put("NumIntents", importedBot.getIntents() == null ? 0 : importedBot.getIntents().size())
+                            .put("NumEntities", importedBot.getEntities() == null
+                                    ? 0 : importedBot.getEntities().size())
+                            .put("Confidence", ai.getConfidence())
+                            .put("PassthroughUrl", ai.getPassthroughUrl() == null ? "" : ai.getPassthroughUrl())
+                            .put("Description", ai.getDescription() == null ? "" : ai.getDescription())
+                            .put("Language", importedBot.getLanguage() == null ? "" : importedBot.getLanguage())
+                            .put("Timezone", importedBot.getTimezone() == null ? "" : importedBot.getTimezone())
+                            .put("Personality", importedBot.getPersonality())
+                            .put("Voice", importedBot.getVoice())
+                            .put("Version", importedBot.getVersion()));
+        }
+        return result;
     }
 
     public ApiResult cloneBot(final UUID devId, final UUID aiidToClone,
@@ -730,10 +758,6 @@ public class AILogic {
             salt.append(saltChars.charAt(index));
         }
         return salt.toString();
-    }
-
-    private ApiResult getAI(final UUID devid, final UUID aiid, String logTag, boolean isCreate) {
-        return this.getAI(devid, aiid, logTag, isCreate, null);
     }
 
     private ApiResult getAI(final UUID devid, final UUID aiid, String logTag, boolean isCreate,
@@ -867,6 +891,7 @@ public class AILogic {
         BotImportException(final String message) {
             super(message);
         }
+
         BotImportException(final String message, final Exception ex) {
             super(message, ex);
         }
