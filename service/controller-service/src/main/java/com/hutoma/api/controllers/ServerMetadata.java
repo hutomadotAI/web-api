@@ -110,7 +110,7 @@ public class ServerMetadata {
      * Determine who is the primary master (if any)
      * @return
      */
-    private Optional<ServerTracker> getPrimaryMaster() {
+    private synchronized Optional<ServerTracker> getPrimaryMaster() {
         // lookup the current master server
         return this.activeServerSessions.values().stream()
                 .filter(ServerTracker::canTrain)
