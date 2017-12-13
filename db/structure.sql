@@ -2927,7 +2927,7 @@ DELIMITER ;;
 CREATE DEFINER=`userTableReader`@`127.0.0.1` PROCEDURE `getAllUsers`()
 BEGIN
     SELECT *
-    FROM `users`
+    FROM `users`;
   END;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
