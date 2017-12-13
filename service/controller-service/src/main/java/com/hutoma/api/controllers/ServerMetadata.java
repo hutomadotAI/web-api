@@ -46,7 +46,8 @@ public class ServerMetadata {
      * @return t/f
      */
     public synchronized boolean isActiveSession(UUID sessionID) {
-        return this.activeServerSessions.containsKey(sessionID);
+        ServerTracker tracker = this.activeServerSessions.get(sessionID);
+        return (tracker != null) && tracker.isSessionNotEnding();
     }
 
     /***
@@ -113,6 +114,7 @@ public class ServerMetadata {
     private synchronized Optional<ServerTracker> getPrimaryMaster() {
         // lookup the current master server
         return this.activeServerSessions.values().stream()
+                .filter(ServerTracker::isSessionNotEnding)
                 .filter(ServerTracker::canTrain)
                 .findFirst();
     }
@@ -124,6 +126,7 @@ public class ServerMetadata {
     public synchronized Map<String, ServerTracker> getVerifiedEndpointMap() {
         return this.activeServerSessions.values().stream()
                 .filter(ServerTracker::isEndpointVerified)
+                .filter(ServerTracker::isSessionNotEnding)
                 .collect(Collectors.toMap(ServerTracker::getServerIdentifier, Function.identity()));
     }
 
@@ -190,6 +193,7 @@ public class ServerMetadata {
      */
     private synchronized ServerTracker getServerForUpload(final UUID aiid) throws NoServerAvailableException {
         return this.activeServerSessions.values().stream()
+                .filter(ServerTracker::isSessionNotEnding)
                 .filter(ServerTracker::canTrain)
                 .findFirst()
                 .orElseThrow(() -> new NoServerAvailableException());
@@ -211,7 +215,8 @@ public class ServerMetadata {
         // map into a list of pairs of (ChatCapacity, Server)
         List<Pair<Double, ServerTracker>> candidates
                 = this.activeServerSessions.values().stream()
-                .filter(server -> server.isEndpointVerified())
+                .filter(ServerTracker::isSessionNotEnding)
+                .filter(ServerTracker::isEndpointVerified)
                 .map(server -> new Pair<>(server.getChatLoadFactor(), server))
                 .filter(pair -> !Double.isNaN(pair.getA()))
                 .collect(toList());

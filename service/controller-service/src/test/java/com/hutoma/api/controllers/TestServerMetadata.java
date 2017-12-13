@@ -278,6 +278,13 @@ public class TestServerMetadata {
         Assert.assertEquals(server1, this.test.getServerFor(UUID.randomUUID(), RequestFor.Training));
     }
 
+    @Test(expected = NoServerAvailableException.class)
+    public void serverMetadata_OnlyEndingServerAvailable() throws NoServerAvailableException {
+        ServerTracker server1 = makeServerTracker(1, 1);
+        server1.endServerSession();
+        this.test.getServerFor(UUID.randomUUID(), RequestFor.Training);
+    }
+
     @Test
     public void serverMetadata_TwoTestServersAvailable() throws NoServerAvailableException {
         ServerTracker server1 = makeServerTracker(1, 1);
@@ -289,9 +296,25 @@ public class TestServerMetadata {
     }
 
     @Test
+    public void serverMetadata_HandoverWhenSessionEnding() throws NoServerAvailableException {
+        ServerTracker server1 = makeServerTracker(1, 1);
+        ServerTracker server2 = makeServerTracker(1, 1);
+        Assert.assertEquals(server1, this.test.getServerFor(UUID.randomUUID(), RequestFor.Training));
+        server1.endServerSession();
+        Assert.assertEquals(server2, this.test.getServerFor(UUID.randomUUID(), RequestFor.Training));
+    }
+
+    @Test
     public void serverMetadata_OnlyServerIsPrimary() throws NoServerAvailableException {
         ServerTracker server1 = makeServerTracker(1, 1);
         Assert.assertTrue(this.test.isPrimaryMaster(server1.getSessionID()));
+    }
+
+    @Test
+    public void serverMetadata_OnlyEndingSessionNotPrimary() throws NoServerAvailableException {
+        ServerTracker server1 = makeServerTracker(1, 1);
+        server1.endServerSession();
+        Assert.assertFalse(this.test.isPrimaryMaster(server1.getSessionID()));
     }
 
     @Test
@@ -342,7 +365,7 @@ public class TestServerMetadata {
     private ServerTracker makeServerTracker(int trainingCapacity, int chatCapacity) {
         ServerTracker server = new FakeServerTracker(this.config, this.tools, this.logger);
         UUID uuid = server.trackServer(new ServerRegistration(
-                BackendServerType.WNET, "url:" + server.getSessionID(), trainingCapacity, chatCapacity));
+                BackendServerType.WNET, "url:" + tools.generateRandomHexString(4), trainingCapacity, chatCapacity));
         this.test.addNewSession(uuid, server);
         return server;
     }
@@ -383,6 +406,7 @@ public class TestServerMetadata {
         public FakeServerTracker(final ControllerConfig config, final Tools tools, final ILogger logger) {
             super(config, tools, mock(JerseyClient.class), null, logger, null);
             testSetEndpointVerified(true);
+            this.runFlag.set(true);
         }
 
         public void testSetEndpointVerified(boolean flag) {

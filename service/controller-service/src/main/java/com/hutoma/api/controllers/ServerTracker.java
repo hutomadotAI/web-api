@@ -40,7 +40,7 @@ public class ServerTracker implements Callable, IServerEndpoint {
     private final JsonSerializer jsonSerializer;
     private final ILogger logger;
     private final ThreadSubPool threadSubPool;
-    private AtomicBoolean runFlag;
+    protected AtomicBoolean runFlag;
     private long lastValidHeartbeat = 0;
     private long lastHeartbeatAttempt = 0;
     private String serverIdentity = "(uninitialised)";
@@ -191,6 +191,16 @@ public class ServerTracker implements Callable, IServerEndpoint {
      */
     void endServerSession() {
         this.runFlag.set(false);
+    }
+
+    /***
+     * If this session has already been flagged to end (endServerSession above) because it has dropped offline
+     * or a new one has connected using the same callback URL
+     * then we need to filter it out from lists and not consider it a usable server
+     * @return false if the session is about to end
+     */
+    boolean isSessionNotEnding() {
+        return this.runFlag.get();
     }
 
     /***
