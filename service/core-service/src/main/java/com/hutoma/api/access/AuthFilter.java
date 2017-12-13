@@ -1,10 +1,10 @@
 package com.hutoma.api.access;
 
 import com.hutoma.api.common.AccessLogger;
+import com.hutoma.api.common.AuthHelper;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.logging.LogMap;
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
 
 import java.io.IOException;
 import java.lang.reflect.AnnotatedElement;
@@ -61,19 +61,6 @@ public class AuthFilter implements ContainerRequestFilter {
     }
 
     /**
-     * Gets the claims from the JWT token.
-     * @param token  the token as a string
-     * @param config the configuration
-     * @return the claims
-     */
-    private static Claims getClaimsFromToken(final String token, final Config config) {
-        // get the encoding key to decode the token
-        String encodingKey = config.getEncodingKey();
-        // decode the token
-        return Jwts.parser().setSigningKey(encodingKey).parseClaimsJws(token).getBody();
-    }
-
-    /**
      * Retrieves the developer ID from the header.
      * @param requestContext the request context
      * @param config         the configuration
@@ -82,8 +69,7 @@ public class AuthFilter implements ContainerRequestFilter {
     public static UUID getDevIdFromHeader(final ContainerRequestContext requestContext, final Config config) {
         String token = getTokenFromAuthBearer(requestContext);
         if (token != null) {
-            final String devId = getClaimsFromToken(token, config).getSubject();
-            return UUID.fromString(devId);
+            return UUID.fromString(AuthHelper.getSubjectFromToken(token, config.getEncodingKey()));
         }
         return null;
     }
@@ -110,7 +96,7 @@ public class AuthFilter implements ContainerRequestFilter {
             MultivaluedMap<String, String> pathParameters = requestContext.getUriInfo().getPathParameters();
 
             // decode the token
-            Claims claims = getClaimsFromToken(token, this.config);
+            Claims claims = AuthHelper.getClaimsFromToken(token, this.config.getEncodingKey());
 
             // get the owner devid
             String devID = claims.getSubject();
@@ -147,7 +133,7 @@ public class AuthFilter implements ContainerRequestFilter {
                 }
             }
 
-            String devRole = claims.get("ROLE").toString();
+            String devRole = AuthHelper.getRoleStringFromClaims(claims);
 
             Class<?> resourceClass = this.resourceInfo.getResourceClass();
             List<Role> classRoles = extractRoles(resourceClass);

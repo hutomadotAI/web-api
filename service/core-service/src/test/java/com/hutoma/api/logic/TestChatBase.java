@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.hutoma.api.common.ChatLogger;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.common.TestDataHelper;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.AiStrings;
 import com.hutoma.api.connectors.ServerConnector;
@@ -53,7 +54,7 @@ public class TestChatBase {
     static final String MEMORY_VARIABLE_PROMPT = "prompt1";
     static final WebHook VALID_WEBHOOK = new WebHook(AIID, "intent", "endpoint", true);
     private static final UUID AIML_BOT_AIID = UUID.fromString("bd2700ff-279b-4bac-ad2f-85a5275ac073");
-    private static final String VALIDKEY = "RW1wdHlUZXN0S2V5";
+
     private static final String QUESTION = "question";
     AIChatServices fakeChatServices;
     IEntityRecognizer fakeRecognizer;
@@ -69,7 +70,7 @@ public class TestChatBase {
     @Before
     public void setup() {
         Config fakeConfig = mock(Config.class);
-        when(fakeConfig.getEncodingKey()).thenReturn(VALIDKEY);
+        when(fakeConfig.getEncodingKey()).thenReturn(TestDataHelper.VALID_ENCODING_KEY);
         this.fakeChatServices = mock(AIChatServices.class);
         this.fakeRecognizer = mock(IEntityRecognizer.class);
         this.fakeIntentHandler = mock(IMemoryIntentHandler.class);

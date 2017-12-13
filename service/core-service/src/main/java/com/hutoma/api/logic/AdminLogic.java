@@ -1,24 +1,28 @@
 package com.hutoma.api.logic;
 
+import com.hutoma.api.access.InvalidRoleException;
+import com.hutoma.api.access.Role;
+import com.hutoma.api.common.AuthHelper;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.connectors.aiservices.AIServices;
+import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.connectors.db.DatabaseUser;
 import com.hutoma.api.containers.ApiAdmin;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.ApiString;
+import com.hutoma.api.containers.ApiTokenRegenResult;
 import com.hutoma.api.containers.ApiUserInfo;
 import com.hutoma.api.containers.sub.UserInfo;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.impl.compression.CompressionCodecs;
+import io.jsonwebtoken.Claims;
 
 import org.apache.logging.log4j.util.Strings;
 
 import java.net.HttpURLConnection;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import javax.inject.Inject;
@@ -36,6 +40,8 @@ public class AdminLogic {
     private final ILogger logger;
     private final AIServices aiServices;
     private final AIBotStoreLogic botStoreLogic;
+
+    private static final List<Role> SUPPORTED_ROLES = Arrays.asList(Role.ROLE_FREE);
 
     @Inject
     public AdminLogic(final Config config, final JsonSerializer jsonSerializer, final DatabaseUser database,
@@ -58,18 +64,24 @@ public class AdminLogic {
             final String lastName,
             final int planId
     ) {
-
         try {
+            // Limit the creation of the user to ROLE_FREE only, at least for now
+            if (SUPPORTED_ROLES.stream().noneMatch(x -> x.name().equals(securityRole))) {
+                this.logger.logUserErrorEvent(LOGFROM, "CreateDev - unsupported role", ADMIN_DEVID_LOG,
+                        LogMap.map("Role", securityRole));
+                return ApiError.getBadRequest(String.format("Role %s is not supported", securityRole));
+            }
+            // Now check the planId (artificially) matches the role
+            Role role = Role.fromString(securityRole);
+            if (planId != role.getPlan()) {
+                this.logger.logUserErrorEvent(LOGFROM, "CreateDev - unsupported plan", ADMIN_DEVID_LOG,
+                        LogMap.map("Plan", planId));
+                return ApiError.getBadRequest(String.format("Plan %d is not supported", planId));
+            }
 
             UUID devId = UUID.randomUUID();
-            String encodingKey = this.config.getEncodingKey();
 
-            String devToken = Jwts.builder()
-                    .claim("ROLE", securityRole)
-                    .setSubject(devId.toString())
-                    .compressWith(CompressionCodecs.DEFLATE)
-                    .signWith(SignatureAlgorithm.HS256, encodingKey)
-                    .compact();
+            String devToken = AuthHelper.generateDevToken(devId, securityRole, this.config.getEncodingKey());
 
             if (!this.database.createDev(username, email, password, passwordSalt, firstName, lastName,
                     devToken, planId, devId.toString())) {
@@ -269,6 +281,92 @@ public class AdminLogic {
         } catch (Exception ex) {
             this.logger.logUserExceptionEvent(LOGFROM, "InsertPasswordResetToken", ADMIN_DEVID_LOG, ex, logMap);
             return ApiError.getInternalServerError();
+        }
+    }
+
+    public ApiResult regenerateTokens(final String devId, final boolean dryrun) {
+        try {
+            final String encodingKey = this.config.getEncodingKey();
+            if (devId != null) {
+                try {
+                    UUID uuidDevId = UUID.fromString(devId);
+                    UserInfo user = this.database.getUserFromDevId(uuidDevId);
+                    boolean updated = regenerateDevTokenIfNeeded(user, encodingKey, dryrun);
+                    ApiResult result = updated
+                        ? new ApiResult().setCreatedStatus()
+                        : new ApiResult().setSuccessStatus();
+                    this.logger.logUserInfoEvent(LOGFROM, "RegenerateTokens-single", ADMIN_DEVID_LOG,
+                            LogMap.map("DevId", devId)
+                                    .put("Updated", updated)
+                                    .put("Dry run", dryrun));
+                    return result;
+                } catch (IllegalArgumentException ex) {
+                    return ApiError.getBadRequest(String.format("DevId %s is not valid", devId));
+                } catch (Exception ex) {
+                    this.logger.logUserExceptionEvent(LOGFROM, "RegenerateTokens-single", ADMIN_DEVID_LOG, ex);
+                    return ApiError.getInternalServerError();
+                }
+            } else {
+                List<UserInfo> users = this.database.getAllUsers();
+                ApiTokenRegenResult result = new ApiTokenRegenResult();
+                for (UserInfo user: users) {
+                    try {
+                        boolean updated = regenerateDevTokenIfNeeded(user, encodingKey, dryrun);
+                        if (updated) {
+                            result.addUpdated(UUID.fromString(user.getDevId()));
+                        } else {
+                            result.addSkipped(UUID.fromString(user.getDevId()));
+                        }
+                    } catch (Exception ex) {
+                        result.addError(UUID.fromString(user.getDevId()), ex.getMessage());
+                    }
+                }
+                this.logger.logUserInfoEvent(LOGFROM, "RegenerateTokens-multiple", ADMIN_DEVID_LOG,
+                        LogMap.map("NumUpdated", result.getUpdated().size())
+                            .put("NumSkipped", result.getSkipped().size())
+                            .put("NumErrors", result.getErrors().size())
+                            .put("Dry run", dryrun));
+                return result.setSuccessStatus();
+            }
+        } catch (Exception ex) {
+            this.logger.logUserExceptionEvent(LOGFROM, "RegenerateTokens-multiple", ADMIN_DEVID_LOG, ex);
+            return ApiError.getInternalServerError();
+        }
+    }
+
+    private boolean regenerateDevTokenIfNeeded(final UserInfo user, final String encodingKey, final boolean dryrun)
+            throws InvalidRoleException, DatabaseException {
+        // Skip any users that don't have a dev token as these are special user types (cannot perform actions)
+        if (user.getDevToken() == null || user.getDevToken().isEmpty()) {
+            return false;
+        }
+
+        boolean needsRegen = false;
+        // Determine if we can open the token stored for the user
+        final String token = user.getDevToken();
+        try {
+            final Claims claims = AuthHelper.getClaimsFromToken(token, encodingKey);
+            final String expectedDevId = claims.getSubject();
+            if (!user.getDevId().equals(expectedDevId)) {
+                needsRegen = true;
+            }
+            AuthHelper.getRoleFromClaims(claims);
+        } catch (Exception ex) {
+            needsRegen = true;
+        }
+
+        if (needsRegen) {
+            UUID uuid = UUID.fromString(user.getDevId());
+            Role role = Role.fromPlan(user.getPlanId());
+            final String newToken = AuthHelper.generateDevToken(uuid, role.name(), encodingKey);
+            if (!dryrun) {
+                if (!this.database.updateUserDevToken(uuid, newToken)) {
+                    throw new DatabaseException("user not added");
+                }
+            }
+            return true;
+        } else {
+            return false;
         }
     }
 }

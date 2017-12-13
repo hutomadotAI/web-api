@@ -58,7 +58,6 @@ import static org.mockito.Mockito.eq;
  */
 public class TestAILogic {
 
-    private static final String VALIDKEY = "RW1wdHlUZXN0S2V5";
     private static final UUID VALIDDEVID = UUID.fromString("0a5c30c3-cd10-45da-9be9-e57942660215");
     private Provider<AIIntegrationLogic> fakeAiIntegrationLogicProvider;
     private Provider<DatabaseTransaction> fakeDatabaseTransactionProvider;
@@ -78,7 +77,7 @@ public class TestAILogic {
     public void setup() {
         this.fakeSerializer = mock(JsonSerializer.class);
         this.fakeConfig = mock(Config.class);
-        when(this.fakeConfig.getEncodingKey()).thenReturn(VALIDKEY);
+        when(this.fakeConfig.getEncodingKey()).thenReturn(TestDataHelper.VALID_ENCODING_KEY);
         this.fakeDatabaseAi = mock(DatabaseAI.class);
         this.fakeDatabaseEntitiesIntents = mock(DatabaseEntitiesIntents.class);
         this.fakeDatabaseMarketplace = mock(DatabaseMarketplace.class);

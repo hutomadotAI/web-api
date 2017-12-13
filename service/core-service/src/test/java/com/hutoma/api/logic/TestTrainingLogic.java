@@ -56,7 +56,6 @@ import static org.mockito.Mockito.*;
 @RunWith(DataProviderRunner.class)
 public class TestTrainingLogic {
 
-    private static final String VALIDKEY = "RW1wdHlUZXN0S2V5";
     private static final String UURL = "url://";
     private static final String SOMETEXT = "some text\nsome response";
     private static final String TEXTMULTILINE = "line\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\n";
@@ -146,7 +145,7 @@ public class TestTrainingLogic {
     public void setup() throws DatabaseException {
 
         this.fakeConfig = mock(Config.class);
-        when(this.fakeConfig.getEncodingKey()).thenReturn(VALIDKEY);
+        when(this.fakeConfig.getEncodingKey()).thenReturn(TestDataHelper.VALID_ENCODING_KEY);
         this.fakeDatabaseAi = mock(DatabaseAI.class);
         this.fakeDatabaseEntitiesIntents = mock(DatabaseEntitiesIntents.class);
         when(this.fakeDatabaseAi.updateAiTrainingFile(any(), anyString())).thenReturn(true);

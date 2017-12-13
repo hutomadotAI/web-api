@@ -31,11 +31,13 @@ public class UserInfo {
     @SerializedName("id")
     private final int id;
     @SerializedName("dev_token")
-    private final String devToken;
+    private String devToken;
+    @SerializedName("plan_id")
+    private final int planId;
 
     public UserInfo(final String name, final String username, final String email, final DateTime created,
                     final boolean valid, final boolean internal, final String password, final String passwordSalt,
-                    final String devId, final String attempts, final int id, final String devToken) {
+                    final String devId, final String attempts, final int id, final String devToken, final int planId) {
         this.name = name;
         this.username = username;
         this.email = email;
@@ -47,6 +49,23 @@ public class UserInfo {
         this.devId = devId;
         this.attempts = attempts;
         this.id = id;
+        this.devToken = devToken;
+        this.planId = planId;
+    }
+
+    public String getDevId() {
+        return this.devId;
+    }
+
+    public String getDevToken() {
+        return this.devToken;
+    }
+
+    public int getPlanId() {
+        return this.planId;
+    }
+
+    public void setDevToken(final String devToken) {
         this.devToken = devToken;
     }
 }

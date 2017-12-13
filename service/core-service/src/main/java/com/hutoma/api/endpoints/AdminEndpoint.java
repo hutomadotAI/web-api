@@ -7,7 +7,6 @@ import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.logic.AdminLogic;
 
 import java.util.UUID;
-
 import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -158,6 +157,28 @@ public class AdminEndpoint {
             @FormParam("user_id") int userId,
             @FormParam("token") String token) {
         ApiResult result = this.adminLogic.insertPasswordResetToken(userId, token);
+        return result.getResponse(this.serializer).build();
+    }
+
+    @POST
+    @Path("regenerate_tokens")
+    @Secured({Role.ROLE_ADMIN})
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response regenerateAllTokens(
+            @DefaultValue("false") @QueryParam("dryrun") boolean dryrun
+    ) {
+        ApiResult result = this.adminLogic.regenerateTokens(null, dryrun);
+        return result.getResponse(this.serializer).build();
+    }
+
+    @POST
+    @Path("{devid}/regenerate_token")
+    @Secured({Role.ROLE_ADMIN})
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response regenerateUserToken(
+            @PathParam("devid") String devId,
+            @DefaultValue("false") @QueryParam("dryrun") boolean dryrun) {
+        ApiResult result = this.adminLogic.regenerateTokens(devId, dryrun);
         return result.getResponse(this.serializer).build();
     }
 }

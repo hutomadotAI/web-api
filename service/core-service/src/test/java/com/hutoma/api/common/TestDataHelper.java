@@ -42,6 +42,7 @@ public class TestDataHelper {
     public static final UUID ALT_SESSIONID = UUID.fromString("f29a1eed-6094-464a-b335-c0885a501750");
     public static final List<String> DEFAULT_CHAT_RESPONSES = Collections.singletonList(ChatLogic.COMPLETELY_LOST_RESULT);
     public static final AiBotConfigDefinition DEFAULT_API_KEY_DESC = new AiBotConfigDefinition(null);
+    public static final String VALID_ENCODING_KEY = "RW1wdHlUZXN0S2V5";
 
     public static String stringOfLength(int length) {
         return String.join("", Collections.nCopies(length, "a"));
