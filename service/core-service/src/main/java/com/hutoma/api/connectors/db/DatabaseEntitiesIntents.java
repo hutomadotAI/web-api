@@ -67,26 +67,26 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
     }
 
     public ApiEntity getEntity(final UUID devid, final String entityName) throws DatabaseException {
-        try (DatabaseCall call = this.callProvider.get()) {
-            ResultSet rs;
+        try (DatabaseTransaction transaction = this.transactionProvider.get()) {
             try {
-                call.initialise("getEntityDetails", 2).add(devid).add(entityName);
-                rs = call.executeQuery();
-                if (!rs.next()) {
-                    return null;
-                } else {
+                ApiEntity result = null;
+                ResultSet rs = transaction.getDatabaseCall().initialise("getEntityDetails", 2)
+                        .add(devid).add(entityName).executeQuery();
+                if (rs.next()) {
                     boolean isSystem = rs.getBoolean("isSystem");
                     final ArrayList<String> entityValues = new ArrayList<>();
                     // only custom entities have values as system entities are handled externally
                     if (!isSystem) {
-                        call.initialise("getEntityValues", 2).add(devid).add(entityName);
-                        rs = call.executeQuery();
-                        while (rs.next()) {
-                            entityValues.add(rs.getString("value"));
+                        ResultSet valuesRs = transaction.getDatabaseCall().initialise("getEntityValues", 2)
+                                .add(devid).add(entityName).executeQuery();
+                        while (valuesRs.next()) {
+                            entityValues.add(valuesRs.getString("value"));
                         }
                     }
-                    return new ApiEntity(entityName, devid, entityValues, isSystem);
+                    result = new ApiEntity(entityName, devid, entityValues, isSystem);
                 }
+                transaction.commit();
+                return result;
             } catch (final SQLException sqle) {
                 throw new DatabaseException(sqle);
             }
