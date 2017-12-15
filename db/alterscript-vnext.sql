@@ -161,3 +161,17 @@ DELIMITER ;
 
 
 CREATE INDEX `idx_ai_status_training_status` ON `ai_status` (`training_status`);
+ALTER TABLE `hutoma`.`memoryIntent` 
+CHANGE COLUMN `variables` `variables` MEDIUMTEXT NOT NULL ;
+
+DROP PROCEDURE `updateMemoryIntent`;
+DELIMITER ;;
+CREATE DEFINER=`userTableWriter`@`127.0.0.1` PROCEDURE `updateMemoryIntent`(IN `param_name` VARCHAR(50), IN `param_aiid` VARCHAR(50), IN `param_chatId` VARCHAR(50),
+                                                                            IN `param_variables` MEDIUMTEXT, IN `param_isFulFilled` TINYINT(1))
+BEGIN
+    INSERT INTO memoryIntent (aiid, chatId, name, variables, lastAccess, isFulfilled)
+    VALUES(param_aiid, param_chatId, param_name, param_variables, NOW(), param_isFulFilled)
+
+    ON DUPLICATE KEY UPDATE variables = param_variables, lastAccess = NOW(), isFulfilled = param_isFulFilled;
+  END ;;
+DELIMITER ;
