@@ -7,6 +7,8 @@ public interface IDatabaseConfig {
 
     int getDatabaseConnectionPoolMaximumSize();
 
+    boolean getDatabaseConnectionPoolLeakTracer();
+
     /***
      * Throw an exception if we are using a username that starts with 'admin' or 'root'
      * @param value connection string

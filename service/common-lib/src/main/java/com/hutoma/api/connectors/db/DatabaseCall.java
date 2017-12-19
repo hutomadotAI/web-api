@@ -244,11 +244,7 @@ public class DatabaseCall implements AutoCloseable {
 
     protected void closeConnection() {
         if (null != this.connection) {
-            try {
-                this.connection.close();
-            } catch (SQLException e) {
-                this.logger.logWarning(LOGFROM, "Could not close the connection");
-            }
+            this.pool.returnConnection(this.connection);
             this.connection = null;
         }
     }

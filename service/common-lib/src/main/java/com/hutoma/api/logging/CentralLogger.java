@@ -317,12 +317,17 @@ public class CentralLogger implements ILogger {
         return new LogMap(map).put("user", user == null ? "" : user);
     }
 
-    public static String getStackTraceAsString(StackTraceElement[] stackTrace) {
+    public static String getStackTraceAsString(final StackTraceElement[] stackTrace, final int maxDepth) {
         StringBuilder sb = new StringBuilder();
-        for (StackTraceElement e : stackTrace) {
-            sb.append(e.toString()).append("\n");
+        final int depth = maxDepth < 0 ? stackTrace.length : Math.min(maxDepth, stackTrace.length);
+        for (int i = 0; i < depth; i++) {
+            sb.append(stackTrace[i].toString()).append("\n");
         }
         return sb.toString();
+    }
+
+    public static String getStackTraceAsString(final StackTraceElement[] stackTrace) {
+        return getStackTraceAsString(stackTrace, -1);
     }
 
     protected enum EventType {

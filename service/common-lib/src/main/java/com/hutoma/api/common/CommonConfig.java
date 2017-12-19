@@ -35,6 +35,10 @@ public abstract class CommonConfig {
                 .collect(Collectors.toList());
     }
 
+    public boolean getDatabaseConnectionPoolLeakTracer() {
+        return Boolean.parseBoolean(getConfigFromProperties("dbconnectionpool_trace_leaks", "false"));
+    }
+
     protected List<String> getCSList(final String propertyName) {
         String instances = getConfigFromProperties(propertyName, null);
         if (instances == null) {
