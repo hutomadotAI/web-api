@@ -85,7 +85,10 @@ public class WebHooks {
             throw new WebHookInternalException("Webhook aborted due to failure to load config", e);
         }
 
-        WebHookPayload payload = new WebHookPayload(intent, chatResult, chatInfo, config);
+        WebHookPayload payload = new WebHookPayload(
+                MemoryIntent.getUserViewable(intent),
+                ChatResult.getUserViewable(chatResult),
+                chatInfo, config);
 
         WebHookResponse webHookResponse = this.executeWebhook(webHookEndpoint, payload, devIdString, chatInfo.aiid);
 
@@ -109,7 +112,10 @@ public class WebHooks {
             throw new WebHookExternalException("Invalid URL for passthrough webhook");
         }
 
-        WebHookPayload payload = new WebHookPayload(chatResult, chatInfo, null);
+        WebHookPayload payload = new WebHookPayload(
+                ChatResult.getUserViewable(chatResult),
+                chatInfo, null);
+
         WebHookResponse webHookResponse = this.executeWebhook(passthroughUrl, payload, devIdString, chatInfo.aiid);
         this.logger.logInfo(LOGFROM,
                 String.format("Successfully executed chat webhook for aiid %s",

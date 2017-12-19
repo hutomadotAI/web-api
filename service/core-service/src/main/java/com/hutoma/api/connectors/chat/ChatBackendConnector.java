@@ -130,8 +130,7 @@ public abstract class ChatBackendConnector {
                         try {
                             String content = result.getResponse().readEntity(String.class);
                             this.logger.logDebug("requestbase", "chat response from " + result.getEndpoint());
-                            ChatResult chatResult = new ChatResult((ChatResult)
-                                    this.serializer.deserialize(content, ChatResult.class));
+                            ChatResult chatResult = (ChatResult) this.serializer.deserialize(content, ChatResult.class);
                             UUID aiid = result.getAiid();
                             chatResult.setAiid(aiid);
                             chatResult.setElapsedTime(result.getDurationMs() / 1000.0);

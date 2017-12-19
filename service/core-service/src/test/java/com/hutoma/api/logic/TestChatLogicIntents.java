@@ -61,22 +61,40 @@ public class TestChatLogicIntents extends TestChatBase {
      */
     @Test
     public void testChat_IntentFulfilled() throws ChatBackendConnector.AiControllerException {
-        final String intentName = "intent1";
-        MemoryVariable mv = new MemoryVariable("var", Arrays.asList("a", "b"));
-        mv.setCurrentValue("a value"); // to fulfill
-        MemoryIntent mi = new MemoryIntent(intentName, AIID, CHATID, Collections.singletonList(mv));
-        setupFakeChat(0.7d, MemoryIntentHandler.META_INTENT_TAG + intentName, 0.0d, AIMLRESULT, 0.3d, NEURALRESULT);
-        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), anyString())).thenReturn(mi);
-        ApiIntent intent = new ApiIntent(intentName, "", "");
-        intent.setResponses(Collections.singletonList("response"));
-        when(this.fakeIntentHandler.getIntent(any(), any())).thenReturn(intent);
-        when(this.fakeIntentHandler.getCurrentIntentsStateForChat(any(), any())).thenReturn(Collections.singletonList(mi));
+        MemoryIntent mi = intentFulfilledSetup();
         Assert.assertFalse(mi.isFulfilled());
         ApiChat result = (ApiChat) getChat(0.5f);
         Assert.assertTrue(mi.isFulfilled());
         Assert.assertEquals(1, result.getResult().getIntents().size());
         Assert.assertTrue(result.getResult().getIntents().get(0).isFulfilled());
         verify(this.fakeIntentHandler).clearIntents(any());
+    }
+
+    /***
+     * Memory intent is fulfilled but some fields are not reported to the user
+     */
+    @Test
+    public void testChat_IntentFulfilled_NoEntityKeysAndPrompts() throws ChatBackendConnector.AiControllerException {
+        intentFulfilledSetup();
+        ApiChat result = (ApiChat) getChat(0.5f);
+        MemoryVariable mv = result.getResult().getIntents().get(0).getVariables().get(0);
+        Assert.assertNull(mv.getEntityKeys());
+        Assert.assertNull(mv.getPrompts());
+    }
+
+    private MemoryIntent intentFulfilledSetup() throws ChatBackendConnector.AiControllerException {
+        final String intentName = "intent1";
+        MemoryVariable mv = new MemoryVariable("var", Arrays.asList("a", "b"));
+        mv.setCurrentValue("a value"); // to fulfill
+        MemoryIntent mi = new MemoryIntent(intentName, AIID, CHATID, Collections.singletonList(mv));
+        setupFakeChat(0.7d, MemoryIntentHandler.META_INTENT_TAG + intentName,
+                0.0d, AIMLRESULT, 0.3d, NEURALRESULT);
+        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), anyString())).thenReturn(mi);
+        ApiIntent intent = new ApiIntent(intentName, "", "");
+        intent.setResponses(Collections.singletonList("response"));
+        when(this.fakeIntentHandler.getIntent(any(), any())).thenReturn(intent);
+        when(this.fakeIntentHandler.getCurrentIntentsStateForChat(any(), any())).thenReturn(Collections.singletonList(mi));
+        return mi;
     }
 
     /***
@@ -304,7 +322,8 @@ public class TestChatLogicIntents extends TestChatBase {
         Assert.assertFalse(r.getIntents().get(0).isFulfilled());
 
         when(this.fakeIntentHandler.getCurrentIntentsStateForChat(any(), any()))
-                .thenReturn(Collections.singletonList(r.getIntents().get(0)));
+                .thenReturn(Collections.singletonList(mi));
+
         // Second question, the answer to the prompt with the right entity value
         final String varValue = "_value_";
         List<Pair<String, String>> entities = new ArrayList<Pair<String, String>>() {{

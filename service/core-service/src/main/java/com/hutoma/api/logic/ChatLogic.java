@@ -123,7 +123,6 @@ public class ChatLogic {
                 .put("Q", question)
                 .put("ChatType", "Passthrough");
 
-
         try {
             WebHookResponse response = this.webHooks.executePassthroughWebhook(passthrough, chatResult, chatInfo);
 
@@ -466,11 +465,10 @@ public class ChatLogic {
 
         // set the chat response time to the whole duration since the start of the request until now
         result.setElapsedTime((this.tools.getTimestamp() - apiChat.getTimestamp()) / 1000.d);
-        apiChat.setResult(result);
         result.setChatTarget(this.chatState.getChatTarget().getStringValue());
 
-        this.chatState.setTopic(apiChat.getResult().getTopicOut());
-        this.chatState.setHistory(apiChat.getResult().getHistory());
+        this.chatState.setTopic(result.getTopicOut());
+        this.chatState.setHistory(result.getHistory());
         this.chatStateHandler.saveState(devId, aiid, chatUuid, this.chatState);
 
         this.telemetryMap.add("MinP", minP);
@@ -479,6 +477,9 @@ public class ChatLogic {
         this.telemetryMap.add("Score", result.getScore());
         this.telemetryMap.add("LockedToAi",
                 this.chatState.getLockedAiid() == null ? "" : this.chatState.getLockedAiid().toString());
+
+        // clean up the chat result to remove excessive detail
+        apiChat.setResult(ChatResult.getUserViewable(result));
     }
 
     /**
@@ -717,8 +718,7 @@ public class ChatLogic {
         WebHook webHook = this.webHooks.getWebHookForIntent(currentIntent, chatInfo.devId);
         if (webHook != null && webHook.isEnabled()) {
             log.put("Webhook run", true);
-            WebHookResponse response = this.webHooks.executeIntentWebHook(webHook, currentIntent, chatResult,
-                    chatInfo);
+            WebHookResponse response = this.webHooks.executeIntentWebHook(webHook, currentIntent, chatResult, chatInfo);
 
             // first store the whole deserialized webhook in a transient field
             chatResult.setWebHookResponse(response);

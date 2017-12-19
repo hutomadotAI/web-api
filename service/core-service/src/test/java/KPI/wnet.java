@@ -77,7 +77,8 @@ public class wnet extends recallBaseClass {
                         System.err.println("Method failed: " + get.getStatusLine());
                     }
                     String response = get.getResponseBodyAsString();
-                    result = new ChatResult((ChatResult) serializer.deserialize(response, ChatResult.class));
+                    result = ChatResult.getUserViewable(
+                            (ChatResult) serializer.deserialize(response, ChatResult.class));
                     String a = result.getAnswer();
                     recall.add(new crecall(q, a, gt));
                     printProgress(startTime, rows, rowindex);

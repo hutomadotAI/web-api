@@ -14,12 +14,6 @@ public class MemoryVariable {
     private String currentValue;
     @SerializedName("mandatory")
     private boolean isMandatory;
-    // TODO: entity_keys should not be sent back to the user
-    @SerializedName("entity_keys")
-    private List<String> entityKeys;
-    // TODO: prompts should not be sent back to the user
-    @SerializedName("prompts")
-    private List<String> prompts;
     @SerializedName("times_prompted")
     private int timesPrompted;
     @SerializedName("max_prompts")
@@ -31,6 +25,13 @@ public class MemoryVariable {
     private String label;
     @SerializedName("requested")
     private boolean requested;
+
+    // do not send these back to the user
+    @SerializedName("entity_keys")
+    private List<String> entityKeys;
+    // do not send these back to the user
+    @SerializedName("prompts")
+    private List<String> prompts;
 
     /**
      * Ctor.
@@ -50,7 +51,6 @@ public class MemoryVariable {
         this.label = label;
     }
 
-
     public MemoryVariable(final String name, final String currentValue, final boolean isMandatory,
                           final List<String> entityKeys, final List<String> prompts, final int timesToPrompt,
                           final int timesPrompted, final boolean isSystem, final boolean persistent,
@@ -64,6 +64,18 @@ public class MemoryVariable {
         this.persistent = persistent;
         this.isSystem = isSystem;
         this.label = label;
+    }
+
+    private MemoryVariable(final MemoryVariable source) {
+        this.name = source.name;
+        this.currentValue = source.currentValue;
+        this.isMandatory = source.isMandatory;
+        this.timesPrompted = source.timesPrompted;
+        this.timesToPrompt = source.timesToPrompt;
+        this.persistent = source.persistent;
+        this.isSystem = source.isSystem;
+        this.label = source.label;
+        this.requested = source.requested;
     }
 
     public boolean isRequested() {
@@ -213,4 +225,12 @@ public class MemoryVariable {
     public void setLabel(final String label) {
         this.label = label;
     }
+
+    /***
+     * Clone a version of the memory intent that we can send back to the user
+     */
+    public static MemoryVariable getUserViewable(final MemoryVariable source) {
+        return new MemoryVariable(source);
+    }
+
 }

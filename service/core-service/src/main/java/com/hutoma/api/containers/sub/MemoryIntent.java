@@ -38,7 +38,19 @@ public class MemoryIntent {
         this.variables = variables;
         this.isFulfilled = isFulfilled;
         this.variablesMap = getMapFromVariablesList(this.variables);
+    }
 
+    private MemoryIntent(MemoryIntent source) {
+        this.name = source.name;
+        this.aiid = source.aiid;
+        this.chatId = source.chatId;
+        this.isFulfilled = source.isFulfilled;
+        if (source.variables != null) {
+            this.variables = source.variables.stream()
+                    .map(MemoryVariable::getUserViewable)
+                    .collect(Collectors.toList());
+        }
+        this.variablesMap = getMapFromVariablesList(this.variables);
     }
 
     /**
@@ -127,4 +139,12 @@ public class MemoryIntent {
     public String getName() {
         return this.name;
     }
+
+    /***
+     * Clone a version of the memory intent that we can send back to the user
+     */
+    public static MemoryIntent getUserViewable(final MemoryIntent source) {
+        return new MemoryIntent(source);
+    }
+
 }

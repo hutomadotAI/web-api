@@ -4,6 +4,7 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * Created by David MG on 16/08/2016.
@@ -54,7 +55,7 @@ public class ChatResult {
      * that we want to pass to the API caller
      * @param source
      */
-    public ChatResult(final ChatResult source) {
+    private ChatResult(final ChatResult source) {
         this.topicIn = source.topicIn;
         this.score = source.score;
         this.query = source.query;
@@ -193,5 +194,18 @@ public class ChatResult {
 
     public String getChatTarget() {
         return this.chatTarget;
+    }
+
+    /***
+     * Clone a version of the chat result that we can send back to the user
+     */
+    public static ChatResult getUserViewable(ChatResult source) {
+        ChatResult chatResult = new ChatResult(source);
+        if (source.getIntents() != null) {
+            chatResult.intents = source.getIntents().stream()
+                    .map(MemoryIntent::getUserViewable)
+                    .collect(Collectors.toList());
+        }
+        return chatResult;
     }
 }
