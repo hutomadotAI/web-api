@@ -28,7 +28,6 @@ import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
@@ -80,8 +79,10 @@ public class AIServices extends ServerConnector {
         try {
             this.queueServices.userActionStartTraining(status, BackendServerType.WNET, devId, aiid);
             this.wnetServicesConnector.kickQueueProcessor();
-            this.queueServices.userActionStartTraining(status, BackendServerType.RNN, devId, aiid);
-            this.rnnServicesConnector.kickQueueProcessor();
+            if (this.connectConfig.isRnnEnabled()) {
+                this.queueServices.userActionStartTraining(status, BackendServerType.RNN, devId, aiid);
+                this.rnnServicesConnector.kickQueueProcessor();
+            }
         } catch (DatabaseException e) {
             AiServicesException.throwWithSuppressed("failed to start training", e);
         }
@@ -99,8 +100,10 @@ public class AIServices extends ServerConnector {
         try {
             this.queueServices.userActionStopTraining(backendStatus, BackendServerType.WNET, this.wnetServicesConnector,
                     devId, aiid);
-            this.queueServices.userActionStopTraining(backendStatus, BackendServerType.RNN, this.rnnServicesConnector,
-                    devId, aiid);
+            if (this.connectConfig.isRnnEnabled()) {
+                this.queueServices.userActionStopTraining(backendStatus, BackendServerType.RNN,
+                        this.rnnServicesConnector, devId, aiid);
+            }
         } catch (DatabaseException e) {
             AiServicesException.throwWithSuppressed("failed to stop training", e);
         }
@@ -119,9 +122,11 @@ public class AIServices extends ServerConnector {
             this.queueServices.userActionDelete(backendStatus, BackendServerType.WNET, this.wnetServicesConnector,
                     devId, aiid);
             this.wnetServicesConnector.kickQueueProcessor();
-            this.queueServices.userActionDelete(backendStatus, BackendServerType.RNN, this.rnnServicesConnector,
-                    devId, aiid);
-            this.rnnServicesConnector.kickQueueProcessor();
+            if (this.connectConfig.isRnnEnabled()) {
+                this.queueServices.userActionDelete(backendStatus, BackendServerType.RNN, this.rnnServicesConnector,
+                        devId, aiid);
+                this.rnnServicesConnector.kickQueueProcessor();
+            }
         } catch (DatabaseException e) {
             AiServicesException.throwWithSuppressed("failed to delete ai", e);
         }
@@ -149,10 +154,11 @@ public class AIServices extends ServerConnector {
         Optional<ServerTrackerInfo> info = this.wnetServicesConnector.getVerifiedEndpointMap().values().stream()
                 .findFirst();
         info.ifPresent(serverTrackerInfo -> list.add(serverTrackerInfo.getServerUrl()));
-        info = this.rnnServicesConnector.getVerifiedEndpointMap().values().stream()
-                .findFirst();
-        info.ifPresent(serverTrackerInfo -> list.add(serverTrackerInfo.getServerUrl()));
-
+        if (this.connectConfig.isRnnEnabled()) {
+            info = this.rnnServicesConnector.getVerifiedEndpointMap().values().stream()
+                    .findFirst();
+            info.ifPresent(serverTrackerInfo -> list.add(serverTrackerInfo.getServerUrl()));
+        }
         return list;
     }
 
@@ -173,8 +179,10 @@ public class AIServices extends ServerConnector {
         try {
             this.queueServices.userActionUpload(backendStatus, BackendServerType.WNET, this.wnetServicesConnector,
                     devId, aiid);
-            this.queueServices.userActionUpload(backendStatus, BackendServerType.RNN, this.rnnServicesConnector,
-                    devId, aiid);
+            if (this.connectConfig.isRnnEnabled()) {
+                this.queueServices.userActionUpload(backendStatus, BackendServerType.RNN, this.rnnServicesConnector,
+                        devId, aiid);
+            }
         } catch (DatabaseException e) {
             AiServicesException.throwWithSuppressed("failed to upload training materials", e);
         }
@@ -189,7 +197,7 @@ public class AIServices extends ServerConnector {
             // Bug:2300
             String trainingToSend = trainingMaterials;
             try {
-                if (endpoint.equals(this.rnnServicesConnector.getBackendEndpoint(
+                if (this.connectConfig.isRnnEnabled() && endpoint.equals(this.rnnServicesConnector.getBackendEndpoint(
                         aiid, RequestFor.Training).getServerUrl())) {
                     trainingToSend = removeIntentExpressions(trainingMaterials);
                 }
@@ -306,9 +314,12 @@ public class AIServices extends ServerConnector {
      */
     private List<String> getListOfPrimaryEndpoints(final UUID aiid) throws AiServicesException {
         try {
-            return Arrays.asList(
-                    this.wnetServicesConnector.getBackendEndpoint(aiid, RequestFor.Training).getServerUrl(),
-                    this.rnnServicesConnector.getBackendEndpoint(aiid, RequestFor.Training).getServerUrl());
+            List<String> endpoints = new ArrayList<>();
+            endpoints.add(this.wnetServicesConnector.getBackendEndpoint(aiid, RequestFor.Training).getServerUrl());
+            if (this.connectConfig.isRnnEnabled()) {
+                endpoints.add(this.rnnServicesConnector.getBackendEndpoint(aiid, RequestFor.Training).getServerUrl());
+            }
+            return endpoints;
         } catch (NoServerAvailableException noServer) {
             AiServicesException.throwWithSuppressed(noServer.getMessage(), noServer);
         }
@@ -321,7 +332,7 @@ public class AIServices extends ServerConnector {
         @SerializedName("dev_id")
         private final String devId;
 
-        public AiInfo(final UUID devId, final UUID aiid) {
+        AiInfo(final UUID devId, final UUID aiid) {
             this.aiid = aiid.toString();
             this.devId = devId.toString();
         }

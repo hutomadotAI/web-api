@@ -62,26 +62,27 @@ public class TestChatBase {
     WebHooks fakeWebHooks;
     DatabaseAI fakeDatabaseAi;
     ChatStateHandler fakeChatStateHandler;
-    protected ChatLogic chatLogic;
-    private ChatLogger fakeChatTelemetryLogger;
-    private Config fakeConfig;
+    ChatLogic chatLogic;
+    protected Config fakeConfig;
     private AiStrings fakeAiStrings;
 
     @Before
     public void setup() {
-        Config fakeConfig = mock(Config.class);
-        when(fakeConfig.getEncodingKey()).thenReturn(TestDataHelper.VALID_ENCODING_KEY);
+        this.fakeConfig = mock(Config.class);
         this.fakeChatServices = mock(AIChatServices.class);
         this.fakeRecognizer = mock(IEntityRecognizer.class);
         this.fakeIntentHandler = mock(IMemoryIntentHandler.class);
-        this.fakeChatTelemetryLogger = mock(ChatLogger.class);
         this.fakeDatabaseAi = mock(DatabaseAI.class);
         this.fakeChatStateHandler = mock(ChatStateHandler.class);
         this.fakeConfig = mock(Config.class);
         this.fakeWebHooks = mock(WebHooks.class);
         this.fakeAiStrings = mock(AiStrings.class);
+
+        when(fakeConfig.getEncodingKey()).thenReturn(TestDataHelper.VALID_ENCODING_KEY);
+        when(this.fakeConfig.isRnnEnabled()).thenReturn(true);
+
         this.chatLogic = new ChatLogic(fakeConfig, mock(JsonSerializer.class), this.fakeChatServices, mock(Tools.class),
-                mock(ILogger.class), this.fakeIntentHandler, this.fakeRecognizer, this.fakeChatTelemetryLogger, this.fakeWebHooks,
+                mock(ILogger.class), this.fakeIntentHandler, this.fakeRecognizer, mock(ChatLogger.class), this.fakeWebHooks,
                 this.fakeChatStateHandler, this.fakeAiStrings);
 
         try {

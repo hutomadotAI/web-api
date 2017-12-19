@@ -218,7 +218,7 @@ public class AIChatServices extends ServerConnector {
      * @param aiid id
      * @return a set of servers that can interact with the AI (empty set if none)
      */
-    public Set<BackendServerType> canChatWithAi(final UUID devId, final UUID aiid) {
+    Set<BackendServerType> canChatWithAi(final UUID devId, final UUID aiid) {
         // by default chat with nothing
         HashSet<BackendServerType> chatSet = new HashSet<>();
         BackendStatus result = null;
@@ -232,17 +232,19 @@ public class AIChatServices extends ServerConnector {
         if (result != null) {
             // get the status of each backend server for this ai
             TrainingStatus wnetStatus = result.getEngineStatus(BackendServerType.WNET).getTrainingStatus();
-            TrainingStatus rnnStatus = result.getEngineStatus(BackendServerType.RNN).getTrainingStatus();
-
             // wnet can only chat if training is complete
             if (wnetStatus == TrainingStatus.AI_TRAINING_COMPLETE) {
                 chatSet.add(BackendServerType.WNET);
             }
-            // rnn can chat if training is complete, stopped or in progress
-            if (rnnStatus == TrainingStatus.AI_TRAINING_COMPLETE
-                    || rnnStatus == TrainingStatus.AI_TRAINING_STOPPED
-                    || rnnStatus == TrainingStatus.AI_TRAINING) {
-                chatSet.add(BackendServerType.RNN);
+
+            if (this.config.isRnnEnabled()) {
+                TrainingStatus rnnStatus = result.getEngineStatus(BackendServerType.RNN).getTrainingStatus();
+                // rnn can chat if training is complete, stopped or in progress
+                if (rnnStatus == TrainingStatus.AI_TRAINING_COMPLETE
+                        || rnnStatus == TrainingStatus.AI_TRAINING_STOPPED
+                        || rnnStatus == TrainingStatus.AI_TRAINING) {
+                    chatSet.add(BackendServerType.RNN);
+                }
             }
         }
         return chatSet;

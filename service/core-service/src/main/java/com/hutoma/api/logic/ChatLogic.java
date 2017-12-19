@@ -885,6 +885,10 @@ public class ChatLogic {
     private ChatResult interpretRnnResult(final String question, final double confidenceThreshold)
             throws ChatBackendConnector.AiControllerException {
 
+        if (!this.config.isRnnEnabled()) {
+            return null;
+        }
+
         Map<UUID, ChatResult> allResults = this.chatServices.awaitRnn();
         if (allResults == null) {
             return null;

@@ -55,6 +55,7 @@ public class TestServiceChat extends ServiceTestBase {
     public void setup() throws ChatStateHandler.ChatStateException {
         when(this.fakeTools.createNewRandomUUID()).thenReturn(UUID.randomUUID());
         when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(ChatState.getEmpty());
+        when(this.fakeConfig.isRnnEnabled()).thenReturn(true);
     }
 
     @Test
@@ -178,10 +179,12 @@ public class TestServiceChat extends ServiceTestBase {
                 .queryParam("chatId", "");
     }
 
+    @Override
     protected Class<?> getClassUnderTest() {
         return ChatEndpoint.class;
     }
 
+    @Override
     protected AbstractBinder addAdditionalBindings(AbstractBinder binder) {
         this.fakeMemoryIntentHandler = mock(IMemoryIntentHandler.class);
         this.fakeEntityRecognizer = mock(IEntityRecognizer.class);

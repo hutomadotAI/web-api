@@ -8,7 +8,6 @@ import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.BackendEngineStatus;
 import com.hutoma.api.connectors.BackendServerType;
 import com.hutoma.api.connectors.BackendStatus;
-import com.hutoma.api.connectors.IConnectConfig;
 import com.hutoma.api.connectors.NoServerAvailableException;
 import com.hutoma.api.connectors.ServerConnector;
 import com.hutoma.api.connectors.db.DatabaseAI;
@@ -64,6 +63,7 @@ public class TestAiChatServices {
         this.fakeRequestAiml = mock(ChatAimlConnector.class);
         this.fakeRequestRnn = mock(ChatRnnConnector.class);
         this.threadSubPool = mock(TrackedThreadSubPool.class);
+        when(this.fakeConfig.isRnnEnabled()).thenReturn(true);
         this.chatServices = new AIChatServices(
                 this.fakeDatabaseAi, mock(ILogger.class), fakeConfig, mock(JsonSerializer.class),
                 mock(Tools.class), this.fakeConfig, mock(JerseyClient.class),
@@ -192,6 +192,19 @@ public class TestAiChatServices {
     public void classtestChatservices_passthroughUrl_invalidAiidForDev() throws DatabaseException, ChatLogic.ChatFailedException {
         when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(null);
         this.chatServices.getAIPassthroughUrl(DEVID_UUID, AIID);
+    }
+
+    @Test
+    public void testChatServices_Rnn_disabled() throws ServerConnector.AiServicesException, ChatBackendConnector.AiControllerException,
+            NoServerAvailableException, DatabaseException {
+        BackendStatus beStatus = new BackendStatus();
+        beStatus.setEngineStatus(BackendServerType.WNET, new BackendEngineStatus(TrainingStatus.AI_TRAINING_COMPLETE, 0.0, 1.0));
+        beStatus.setEngineStatus(BackendServerType.RNN, new BackendEngineStatus(TrainingStatus.AI_TRAINING_COMPLETE, 0.0, 1.0));
+        when(this.fakeDatabaseAi.getAIStatusReadOnly(any(), any())).thenReturn(beStatus);
+        // Make sure we never even issue requests to RNN if we have it disabled
+        when(this.fakeConfig.isRnnEnabled()).thenReturn(false);
+        this.chatServices.startChatRequests(DEVID_UUID, AIID, CHATID, "question", ChatState.getEmpty());
+        verify(this.fakeRequestRnn, never()).issueChatRequests(anyMap(), anyList(), any());
     }
 
     private void issueStartChatRequests() throws ServerConnector.AiServicesException, ChatBackendConnector.AiControllerException, NoServerAvailableException {

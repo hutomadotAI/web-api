@@ -54,7 +54,7 @@ public abstract class CommonConfig {
         return System.getenv(getEnvPrefix() + propertyName.toUpperCase());
     }
 
-    protected String getConfigFromProperties(String propertyName, String defaultValue) {
+    String getConfigFromProperties(String propertyName, String defaultValue) {
         String configFromEnv = getConfigFromEnvironment(propertyName);
         if (configFromEnv != null && !configFromEnv.isEmpty()) {
             return configFromEnv;
@@ -73,5 +73,10 @@ public abstract class CommonConfig {
 
         }
         return defaultValue;
+    }
+
+    public boolean isRnnEnabled() {
+        String val = getConfigFromProperties("rnn_enabled", "true");
+        return Boolean.parseBoolean(val);
     }
 }

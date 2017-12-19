@@ -15,4 +15,9 @@ public interface IConnectConfig {
      */
     long getBackendConnectCallTimeoutMs();
 
+    /**
+     * Whether the RNN backend is enabled or not
+     * @return
+     */
+    boolean isRnnEnabled();
 }

@@ -44,7 +44,9 @@ public class ServerInit implements ApplicationEventListener {
                 break;
             case DESTROY_FINISHED:
                 this.wnetController.terminateQueue();
-                this.rnnController.terminateQueue();
+                if (rnnController != null) {
+                    this.rnnController.terminateQueue();
+                }
                 this.aimlController.terminateQueue();
                 FluentLogger.flushAll();
                 FluentLogger.closeAll();
@@ -109,7 +111,9 @@ public class ServerInit implements ApplicationEventListener {
         // create the singleton instances so that the timers start
         // and with them the server monitoring
         this.wnetController = this.serviceLocator.getService(ControllerWnet.class);
-        this.rnnController = this.serviceLocator.getService(ControllerRnn.class);
+        if (config.isRnnEnabled()) {
+            this.rnnController = this.serviceLocator.getService(ControllerRnn.class);
+        }
         this.aimlController = this.serviceLocator.getService(ControllerAiml.class);
     }
 

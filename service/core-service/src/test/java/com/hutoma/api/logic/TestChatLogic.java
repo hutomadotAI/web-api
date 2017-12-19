@@ -264,6 +264,20 @@ public class TestChatLogic extends TestChatBase {
         Assert.assertEquals("", ((ApiChat) result).getResult().getHistory());
     }
 
+    @Test
+    public void testChat_Rnn_disabled() throws ChatBackendConnector.AiControllerException {
+        when(this.fakeConfig.isRnnEnabled()).thenReturn(false);
+        // Setup the chat so only RNN would send out a >0 response
+        setupFakeChat(0.0d, SEMANTICRESULT,
+                0.0d, AIMLRESULT,
+                1.0d, NEURALRESULT);
+        ApiResult result = getChat(0.9f);
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+        Assert.assertEquals(ChatLogic.COMPLETELY_LOST_RESULT, ((ApiChat) result).getResult().getAnswer());
+        // We completely skip RNN responses
+        verify(this.fakeChatServices, never()).awaitRnn();
+    }
+
     /*
          * Tests for correct passthrough on bots that provide a valid url.
          * @throws RequestBase.AiControllerException.

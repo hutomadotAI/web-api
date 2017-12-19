@@ -23,6 +23,10 @@ public class BackendStatus {
         return (status == null) ? new BackendEngineStatus() : status;
     }
 
+    public boolean hasEngineStatus(final BackendServerType engine) {
+        return this.engines.containsKey(engine);
+    }
+
     public void setEngineStatus(final AiStatus aiStatus) {
         this.engines.put(aiStatus.getAiEngine(), new BackendEngineStatus(aiStatus));
     }
