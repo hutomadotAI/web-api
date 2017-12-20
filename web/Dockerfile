@@ -13,22 +13,12 @@ RUN apt-get update && apt-get -y upgrade && DEBIAN_FRONTEND=noninteractive apt-g
 # Install PHP's curl
 RUN /usr/local/bin/docker-php-ext-install curl json
     
-# Enable apache SSL module
-RUN a2enmod ssl
-
-# Create the folder to hold the certificates
-RUN mkdir -p /etc/apache2/ssl
-
 # Copy the PHP configuration
 COPY config/php.ini /usr/local/etc/php/php.ini
 
-# Copy the certificates to the store
-COPY config/internal.hutoma.crt /etc/apache2/ssl
-COPY config/internal.hutoma.key /etc/apache2/ssl
 
 # Copy the site and server configuration
 COPY config/000-default.conf /etc/apache2/sites-enabled
-COPY config/default-ssl.conf /etc/apache2/sites-enabled
 COPY config/apache2.conf /etc/apache2/
 
 # Install xDebug if in debug mode
@@ -41,7 +31,7 @@ RUN if [ $DEBUG -eq 1 ]; then pecl install xdebug \
 COPY src /var/www/html
 
 # Expose default ports for HTTP and HTTPS
-EXPOSE 80 443
+EXPOSE 80
 
 # Expose environment variables for the console
 ENV HUTOMA_API_URL http://server/v1
