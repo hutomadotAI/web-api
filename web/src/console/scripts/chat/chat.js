@@ -113,10 +113,10 @@ function createRightMsg(ai_name, msg, chatId, score, error) {
         wHTML += ('<div class="direct-chat-text chat-warning">');
     else
         wHTML += ('<div class="direct-chat-text chat-success">');
-    wHTML += DOMPurify.sanitize(
-        stripHtml(msg).replace(/(?:\r\n|\r|\n)/g, '<br />'),
-        { ALLOWED_TAGS: ['br'] }
-    );
+    wHTML += msg.replace(
+        /[\x26\x0A\<>'"]/g, 
+        function charToEntity(char) { return '&#' + char.charCodeAt(0) + ';' }
+    )
     wHTML += ('</div>');
     if (error === false)
         wHTML += ('<span class="direct-chat-timestamp pull-left text-sm text-white">score: ' + score + '</span>');
@@ -179,7 +179,7 @@ function requestAnswerAI(ai_name, question, previousChatId) {
                 } else {
                     // Write response in JSON message box
                     var JSONnode = document.getElementById('msgJSON');
-                    JSONnode.innerHTML = htmlEncode(JSON.stringify(response, undefined, 2));
+                    JSONnode.innerText = JSON.stringify(response, undefined, 2);
                     var JSONdata = response;
                     if (JSONdata['chatId'] === '') {
                         createRightMsg(ai_name, 'no chat id returned', '', -1, true);
@@ -189,8 +189,7 @@ function requestAnswerAI(ai_name, question, previousChatId) {
                             if (JSONdata['result']['chatTarget'] === 'human') {
                                 createRightMsg(ai_name, "(conversation handed over to human)", chatId, JSONdata['result']['score'], false);
                             } else {
-                                var safeAnswer = htmlEncode(JSONdata['result']['answer']);
-                                createRightMsg(ai_name, safeAnswer, chatId, JSONdata['result']['score'], false);
+                                createRightMsg(ai_name, JSONdata.result.answer, chatId, JSONdata['result']['score'], false);
                                 createChatEvent(chatId + "_" + user.email, user.email, chatId);
                             }
                         } else {
@@ -329,9 +328,3 @@ function cleanChat(msg) {
     msg = msg.replace('\/', '&#47');
     return msg.replace('\<', '&#60').replace('\>', '&#62;').trim();
 }
-
-String.prototype.toHtmlEntities = function() {
-    return this.replace(/./gm, function(s) {
-        return '&#' + s.charCodeAt(0) + ';';
-    });
-};
