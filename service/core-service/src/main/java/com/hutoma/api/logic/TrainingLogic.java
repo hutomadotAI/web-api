@@ -184,7 +184,7 @@ public class TrainingLogic {
     }
 
     /**
-     * Submit a training request to SQS only if the training file is avaialable or a previous
+     * Submit a training request to SQS only if the training file is available or a previous
      * valid training session was stopped.
      * In all other cases we return an error
      * @param devid
@@ -195,25 +195,40 @@ public class TrainingLogic {
 
         ApiAi ai;
         LogMap logMap = LogMap.map("AIID", aiid);
+        TrainingStatus trainingStatus;
+        boolean intent_only = false;
         final String devidString = devid.toString();
         try {
             ai = this.databaseAi.getAI(devid, aiid, this.jsonSerializer);
+            if (ai == null) {
+                this.logger.logUserTraceEvent(LOGFROM, "StartTraining - AI not found", devidString, logMap);
+                return ApiError.getNotFound();
+            }
+            if (ai.isReadOnly()) {
+                this.logger.logUserTraceEvent(LOGFROM, "StartTraining - Bot is RO", devidString, logMap);
+                return ApiError.getBadRequest(AILogic.BOT_RO_MESSAGE);
+            }
+
+            trainingStatus = ai.getSummaryAiStatus();
+
+            // if this is an intent only bot then upload the intents before starting training
+            if (ai.getSummaryAiStatus() == TrainingStatus.AI_UNDEFINED
+                     && !ai.trainingFileUploaded()) {
+                intent_only = true;
+                ApiResult uploadResult = reuploadTraining(devid, aiid, ai, logMap, "StartTraining");
+                if (uploadResult instanceof ApiError) {
+                    return uploadResult;
+                }
+            }
+
         } catch (DatabaseException ex) {
             this.logger.logUserExceptionEvent(LOGFROM, "StartTraining", devidString, ex);
             return ApiError.getInternalServerError();
         }
-        if (ai == null) {
-            this.logger.logUserTraceEvent(LOGFROM, "StartTraining - AI not found", devidString, logMap);
-            return ApiError.getNotFound();
-        }
-        if (ai.isReadOnly()) {
-            this.logger.logUserTraceEvent(LOGFROM, "StartTraining - Bot is RO", devidString, logMap);
-            return ApiError.getBadRequest(AILogic.BOT_RO_MESSAGE);
-        }
 
-        TrainingStatus trainingStatus = ai.getSummaryAiStatus();
         logMap.add("Start from state", trainingStatus.name());
-        if (trainingStatus == TrainingStatus.AI_READY_TO_TRAIN
+        if (intent_only
+                || trainingStatus == TrainingStatus.AI_READY_TO_TRAIN
                 || trainingStatus == TrainingStatus.AI_TRAINING_STOPPED) {
             try {
                 this.aiServices.startTraining(ai.getBackendStatus(), devid, aiid);
@@ -290,62 +305,67 @@ public class TrainingLogic {
      * @return
      */
     public ApiResult updateTraining(final UUID devid, final UUID aiid) {
-        final String devidString = devid.toString();
         try {
             LogMap logMap = LogMap.map("AIID", aiid);
             ApiAi ai = this.databaseAi.getAI(devid, aiid, this.jsonSerializer);
             if (ai == null) {
-                this.logger.logUserTraceEvent(LOGFROM, "UpdateTraining - AI not found", devidString, logMap);
+                this.logger.logUserTraceEvent(LOGFROM, "UpdateTraining - AI not found", devid.toString(), logMap);
                 return ApiError.getNotFound();
             }
             if (ai.isReadOnly()) {
-                this.logger.logUserTraceEvent(LOGFROM, "UpdateTraining - Bot is RO", devidString, logMap);
+                this.logger.logUserTraceEvent(LOGFROM, "UpdateTraining - Bot is RO", devid.toString(), logMap);
                 return ApiError.getBadRequest(AILogic.BOT_RO_MESSAGE);
             }
 
-            switch (ai.getSummaryAiStatus()) {
-                case AI_TRAINING:           // fallthrough
-                case AI_READY_TO_TRAIN:     // fallthrough
-                case AI_TRAINING_STOPPED:   // fallthrough
-                case AI_TRAINING_COMPLETE:  // fallthrough
-                case AI_TRAINING_QUEUED:    // fallthrough
-                case AI_ERROR:              // fallthrough
-                case AI_UNDEFINED:
-                    try {
-                        String trainingMaterials = this.aiServices.getTrainingMaterialsCommon(devid, aiid,
-                                this.jsonSerializer);
-                        if (trainingMaterials == null || trainingMaterials.isEmpty()) {
-                            this.logger.logUserTraceEvent(LOGFROM, "UpdateTraining - no training data",
-                                    devidString, logMap);
-                            return ApiError.getNotFound("There is no training data.");
-                        }
-                        // We only support AI_UNDEFINED when it's an intent-only AI (no training file), or when
-                        // there's a backend error, to allow re-training
-                        if ((ai.getSummaryAiStatus() == TrainingStatus.AI_UNDEFINED
-                                || ai.getSummaryAiStatus() == TrainingStatus.AI_ERROR) && ai.trainingFileUploaded()) {
-                            this.logger.logUserTraceEvent(LOGFROM, "UpdateTraining - no training data",
-                                    devidString, logMap);
-                            return ApiError.getBadRequest("Invalid training status - make sure you have uploaded a "
-                                    + "training file and/or added intents.");
-                        }
-                        this.aiServices.uploadTraining(ai.getBackendStatus(), devid, aiid, trainingMaterials);
-                        // Delete all memory variables for this AI
-                        this.memoryIntentHandler.deleteAllIntentsForAi(aiid);
-                        this.logger.logUserTraceEvent(LOGFROM, "UpdateTraining", devidString, logMap);
-                        return new ApiResult().setSuccessStatus("Training updated.");
-                    } catch (AIServices.AiServicesException ex) {
-                        this.logger.logUserExceptionEvent(LOGFROM, ex.getMessage(), devidString, ex);
-                        return ApiError.getInternalServerError("Could not update training.");
-                    }
-
-                default:
-                    this.logger.logUserTraceEvent(LOGFROM, "UpdateTraining - could not update training",
-                            devidString, logMap);
-                    return ApiError.getBadRequest("Invalid training status");
-            }
+            return reuploadTraining(devid, aiid, ai, logMap, "UpdateTraining");
         } catch (Exception e) {
-            this.logger.logUserExceptionEvent(LOGFROM, "UpdateTraining", devidString, e);
+            this.logger.logUserExceptionEvent(LOGFROM, "UpdateTraining", devid.toString(), e);
             return ApiError.getInternalServerError();
+        }
+    }
+
+    private ApiResult reuploadTraining(final UUID devid, final UUID aiid, final ApiAi ai,
+                                       final LogMap logMap, final String origin) throws DatabaseException {
+        final String devidString = devid.toString();
+        switch (ai.getSummaryAiStatus()) {
+            case AI_TRAINING:           // fallthrough
+            case AI_READY_TO_TRAIN:     // fallthrough
+            case AI_TRAINING_STOPPED:   // fallthrough
+            case AI_TRAINING_COMPLETE:  // fallthrough
+            case AI_TRAINING_QUEUED:    // fallthrough
+            case AI_ERROR:              // fallthrough
+            case AI_UNDEFINED:
+                try {
+                    String trainingMaterials = this.aiServices.getTrainingMaterialsCommon(devid, aiid,
+                            this.jsonSerializer);
+                    if (trainingMaterials == null || trainingMaterials.isEmpty()) {
+                        this.logger.logUserTraceEvent(LOGFROM, String.format("%s - no training data", origin),
+                                devidString, logMap);
+                        return ApiError.getNotFound("There is no training data.");
+                    }
+                    // We only support AI_UNDEFINED when it's an intent-only AI (no training file), or when
+                    // there's a backend error, to allow re-training
+                    if ((ai.getSummaryAiStatus() == TrainingStatus.AI_UNDEFINED
+                            || ai.getSummaryAiStatus() == TrainingStatus.AI_ERROR) && ai.trainingFileUploaded()) {
+                        this.logger.logUserTraceEvent(LOGFROM, String.format("%s - no training data", origin),
+                                devidString, logMap);
+                        return ApiError.getBadRequest("Invalid training status - make sure you have uploaded a "
+                                + "training file and/or added intents.");
+                    }
+                    this.aiServices.uploadTraining(ai.getBackendStatus(), devid, aiid, trainingMaterials);
+                    // Delete all memory variables for this AI
+                    this.memoryIntentHandler.deleteAllIntentsForAi(aiid);
+                    this.logger.logUserTraceEvent(LOGFROM, String.format("%s - training reuploaded", origin), devidString, logMap);
+                    return new ApiResult().setSuccessStatus("Training updated.");
+                } catch (AIServices.AiServicesException ex) {
+                    this.logger.logUserExceptionEvent(LOGFROM, ex.getMessage(), devidString, ex);
+                    return ApiError.getInternalServerError("Could not update training.");
+                }
+
+            default:
+                this.logger.logUserTraceEvent(LOGFROM, String.format("%s - could not update training", origin),
+                        devidString, logMap);
+                return ApiError.getBadRequest("Invalid training status");
         }
     }
 
