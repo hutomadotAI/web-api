@@ -11,6 +11,7 @@ import com.hutoma.api.containers.sub.IntentVariable;
 import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.containers.sub.MemoryVariable;
 import com.hutoma.api.logging.ILogger;
+import com.hutoma.api.logic.ChatLogic;
 import com.tngtech.java.junit.dataprovider.DataProvider;
 import com.tngtech.java.junit.dataprovider.DataProviderRunner;
 import com.tngtech.java.junit.dataprovider.UseDataProvider;
@@ -84,7 +85,7 @@ public class TestMemoryIntentHandler {
 
     @Test
     @UseDataProvider("recognizeIntentDataProvider")
-    public void testRecognizeIntent(String response) throws DatabaseException {
+    public void testRecognizeIntent(String response) throws DatabaseException, ChatLogic.IntentException {
         MemoryIntent mi = setDummyMemoryIntent(response);
         Assert.assertNotNull(mi);
         Assert.assertEquals(INTENT_NAME, mi.getName());
@@ -92,9 +93,14 @@ public class TestMemoryIntentHandler {
     }
 
     @Test
-    public void testRecognizeNoIntent() {
+    public void testRecognizeNoIntent() throws ChatLogic.IntentException {
         MemoryIntent mi = this.memoryIntentHandler.parseAiResponseForIntent(DEVID_UUID, AIID, CHATID, "@this is not");
         Assert.assertNull(mi);
+    }
+
+    @Test(expected = ChatLogic.IntentException.class)
+    public void testRecognize_UnknownIntent() throws ChatLogic.IntentException {
+        this.memoryIntentHandler.parseAiResponseForIntent(DEVID_UUID, AIID, CHATID, "@meta.intent.unknown");
     }
 
     @Test
@@ -110,7 +116,7 @@ public class TestMemoryIntentHandler {
     }
 
     @Test
-    public void testIntentUpdate() throws DatabaseException {
+    public void testIntentUpdate() throws DatabaseException, ChatLogic.IntentException {
         MemoryIntent mi = this.setDummyMemoryIntent("");
         this.memoryIntentHandler.updateStatus(mi);
         try {
@@ -122,7 +128,7 @@ public class TestMemoryIntentHandler {
     }
 
     @Test
-    public void testMemoryIntentULoadNotExistYet() throws DatabaseException {
+    public void testMemoryIntentULoadNotExistYet() throws ChatLogic.IntentException, DatabaseException {
         final String entityName = "entity1";
         ApiIntent apiIntent = new ApiIntent(INTENT_NAME, "in", "out");
         IntentVariable iv = new IntentVariable(entityName, DEVID_UUID, true, 1, null, false, "");
@@ -139,7 +145,7 @@ public class TestMemoryIntentHandler {
     }
 
     @Test()
-    public void testIntentUpdateDBException() throws DatabaseException {
+    public void testIntentUpdateDBException() throws DatabaseException, ChatLogic.IntentException {
         MemoryIntent mi = this.setDummyMemoryIntent("");
         DatabaseException exception = new DatabaseException(new Throwable());
         when(this.fakeDatabaseEntities.updateMemoryIntent(any(), any())).thenThrow(exception);
@@ -155,12 +161,11 @@ public class TestMemoryIntentHandler {
         verify(this.fakeLogger).logException(anyString(), any());
     }
 
-    @Test
-    public void testLoadIntentForAiDBException() throws DatabaseException {
-        DatabaseException exception = new DatabaseException(new Throwable());
+    @Test(expected = ChatLogic.IntentException.class)
+    public void testLoadIntentForAiDBException() throws ChatLogic.IntentException, DatabaseException {
+        DatabaseException exception = new DatabaseException("test");
         when(this.fakeDatabaseEntities.getMemoryIntent(anyString(), any(), any(), any())).thenThrow(exception);
         this.memoryIntentHandler.parseAiResponseForIntent(DEVID_UUID, AIID, CHATID, DEFAULT_INTENT);
-        verify(this.fakeLogger).logException(anyString(), any());
     }
 
     @Test(expected = IllegalStateException.class)
@@ -239,21 +244,22 @@ public class TestMemoryIntentHandler {
     }
 
     @Test
-    public void testIntent_clearIntents() throws DatabaseException {
+    public void testIntent_clearIntents() throws DatabaseException, ChatLogic.IntentException {
         List<MemoryIntent> intents = Collections.singletonList(setDummyMemoryIntent("response"));
         this.memoryIntentHandler.clearIntents(intents);
         verify(this.fakeDatabaseEntities).deleteMemoryIntent(intents.get(0));
     }
 
     @Test
-    public void testIntent_clearIntents_dbException() throws DatabaseException {
+    public void testIntent_clearIntents_dbException() throws DatabaseException, ChatLogic.IntentException {
         List<MemoryIntent> intents = Collections.singletonList(setDummyMemoryIntent("response"));
         when(this.fakeDatabaseEntities.deleteMemoryIntent(any())).thenThrow(DatabaseException.class);
         this.memoryIntentHandler.clearIntents(intents);
         verify(this.fakeLogger).logException(anyString(), any());
     }
 
-    private MemoryIntent setDummyMemoryIntent(final String response) throws DatabaseException {
+    private MemoryIntent setDummyMemoryIntent(final String response)
+            throws DatabaseException, ChatLogic.IntentException {
         MemoryIntent mi = new MemoryIntent(INTENT_NAME, AIID, CHATID,
                 Collections.singletonList(new MemoryVariable("name", Arrays.asList("a", "b", "c"))));
         when(this.fakeDatabaseEntities.getMemoryIntent(any(), any(), any(), any())).thenReturn(mi);

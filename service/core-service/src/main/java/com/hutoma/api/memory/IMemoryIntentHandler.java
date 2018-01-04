@@ -1,7 +1,9 @@
 package com.hutoma.api.memory;
 
+import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.sub.MemoryIntent;
+import com.hutoma.api.logic.ChatLogic;
 
 import java.util.List;
 import java.util.UUID;
@@ -10,13 +12,15 @@ import java.util.UUID;
  * Created by pedrotei on 07/10/16.
  */
 public interface IMemoryIntentHandler {
+
     /**
      * Parses the AI response in search for an intent.
      * @param chatId   the Chat ID
      * @param response the AI response
      * @return the MemoryIntent, or null if no intent was found
      */
-    MemoryIntent parseAiResponseForIntent(UUID devId, UUID aiid, UUID chatId, String response);
+    MemoryIntent parseAiResponseForIntent(UUID devId, UUID aiid, UUID chatId, String response)
+            throws ChatLogic.IntentException;
 
     /**
      * Gets the current intents state for this chat

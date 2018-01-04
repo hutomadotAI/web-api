@@ -12,6 +12,7 @@ import com.hutoma.api.connectors.WebHooks;
 import com.hutoma.api.connectors.chat.AIChatServices;
 import com.hutoma.api.connectors.chat.ChatBackendConnector;
 import com.hutoma.api.connectors.db.DatabaseAI;
+import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.ApiChat;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.AiMinP;
@@ -197,7 +198,7 @@ public class TestChatBase {
     }
 
     MemoryIntent getMemoryIntentForPrompt(int maxPrompts, String currentValue)
-            throws ChatBackendConnector.AiControllerException {
+            throws ChatBackendConnector.AiControllerException, ChatLogic.IntentException {
         final String intentName = "intent1";
         final String promptTrigger = "variableValue";
         final String prompt = "prompt1";
@@ -221,7 +222,7 @@ public class TestChatBase {
 
     MemoryIntent getMultiEntityMemoryIntentForPrompt(
             int maxPrompts, String currentValue) throws
-            ChatBackendConnector.AiControllerException {
+            ChatBackendConnector.AiControllerException, ChatLogic.IntentException {
         final String intentName = "intent1";
         final String promptTrigger = "variableValue";
         final String prompt = "prompt1";

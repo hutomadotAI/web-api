@@ -40,7 +40,7 @@ public class TestChatLogicIntents extends TestChatBase {
      * Tests an intent is recognized by the API when the backend sends it.
      */
     @Test
-    public void testChat_IntentRecognized() throws ChatBackendConnector.AiControllerException {
+    public void testChat_IntentRecognized() throws ChatBackendConnector.AiControllerException, ChatLogic.IntentException {
         final String intentName = "intent1";
         MemoryVariable mv = new MemoryVariable("var", Arrays.asList("a", "b"));
         MemoryIntent mi = new MemoryIntent(intentName, AIID, CHATID, Collections.singletonList(mv));
@@ -60,7 +60,8 @@ public class TestChatLogicIntents extends TestChatBase {
      * Memory intent is fulfilled.
      */
     @Test
-    public void testChat_IntentFulfilled() throws ChatBackendConnector.AiControllerException {
+    public void testChat_IntentFulfilled() throws
+            ChatBackendConnector.AiControllerException, ChatLogic.IntentException {
         MemoryIntent mi = intentFulfilledSetup();
         Assert.assertFalse(mi.isFulfilled());
         ApiChat result = (ApiChat) getChat(0.5f);
@@ -74,7 +75,8 @@ public class TestChatLogicIntents extends TestChatBase {
      * Memory intent is fulfilled but some fields are not reported to the user
      */
     @Test
-    public void testChat_IntentFulfilled_NoEntityKeysAndPrompts() throws ChatBackendConnector.AiControllerException {
+    public void testChat_IntentFulfilled_NoEntityKeysAndPrompts() throws
+            ChatBackendConnector.AiControllerException, ChatLogic.IntentException {
         intentFulfilledSetup();
         ApiChat result = (ApiChat) getChat(0.5f);
         MemoryVariable mv = result.getResult().getIntents().get(0).getVariables().get(0);
@@ -82,7 +84,7 @@ public class TestChatLogicIntents extends TestChatBase {
         Assert.assertNull(mv.getPrompts());
     }
 
-    private MemoryIntent intentFulfilledSetup() throws ChatBackendConnector.AiControllerException {
+    private MemoryIntent intentFulfilledSetup() throws ChatBackendConnector.AiControllerException, ChatLogic.IntentException {
         final String intentName = "intent1";
         MemoryVariable mv = new MemoryVariable("var", Arrays.asList("a", "b"));
         mv.setCurrentValue("a value"); // to fulfill
@@ -101,7 +103,7 @@ public class TestChatLogicIntents extends TestChatBase {
      * Memory intent updates prompt when intent is recognized but doesn't match any entity value.
      */
     @Test
-    public void testChat_IntentPrompt() throws ChatBackendConnector.AiControllerException {
+    public void testChat_IntentPrompt() throws ChatBackendConnector.AiControllerException, ChatLogic.IntentException {
         MemoryIntent mi = getMemoryIntentForPrompt(3, null);
         ApiResult result = getChat(0.5f, "nothing to see here.");
         ChatResult r = ((ApiChat) result).getResult();
@@ -119,7 +121,7 @@ public class TestChatLogicIntents extends TestChatBase {
      */
     @Test
     public void testChat_IntentPrompt_unfullfileldVar_exceededPrompts() throws
-            ChatBackendConnector.AiControllerException {
+            ChatBackendConnector.AiControllerException, ChatLogic.IntentException {
         MemoryIntent mi = getMemoryIntentForPrompt(1, null);
         ApiResult result = getChat(0.5f, "nothing to see here.");
         ChatResult r = ((ApiChat) result).getResult();
@@ -140,7 +142,7 @@ public class TestChatLogicIntents extends TestChatBase {
      */
     @Test
     public void testChat_IntentPrompt_unfullfilledVar_fulfillFromUserQuestion()
-            throws ChatBackendConnector.AiControllerException {
+            throws ChatBackendConnector.AiControllerException, ChatLogic.IntentException {
         MemoryIntent mi = getMemoryIntentForPrompt(3, null);
         List<Pair<String, String>> entities = new ArrayList<Pair<String, String>>() {{
             this.add(new Pair<>(mi.getVariables().get(0).getName(), "value"));
@@ -158,7 +160,7 @@ public class TestChatLogicIntents extends TestChatBase {
      */
     @Test
     public void testChat_IntentPrompt_unfulfilledVar_variableWithNoPrompt()
-            throws ChatBackendConnector.AiControllerException {
+            throws ChatBackendConnector.AiControllerException, ChatLogic.IntentException {
         MemoryIntent mi = getMemoryIntentForPrompt(3, null);
         mi.getVariables().get(0).setPrompts(new ArrayList<>());
         when(this.fakeRecognizer.retrieveEntities(any(), any())).thenReturn(new ArrayList<>());
@@ -175,7 +177,7 @@ public class TestChatLogicIntents extends TestChatBase {
      */
     @Test
     public void testChat_IntentPrompt_unfulfilled_SysAny()
-            throws ChatBackendConnector.AiControllerException {
+            throws ChatBackendConnector.AiControllerException, ChatLogic.IntentException {
 
         final String intentName = "intent1";
         MemoryVariable mv = new MemoryVariable("sys.any", null, true,
@@ -199,7 +201,8 @@ public class TestChatLogicIntents extends TestChatBase {
      * Can use multiple sys.any variables
      */
     @Test
-    public void testChat_IntentPrompt_multiple_SysAny() throws ChatBackendConnector.AiControllerException {
+    public void testChat_IntentPrompt_multiple_SysAny() throws ChatBackendConnector.AiControllerException,
+            ChatLogic.IntentException {
 
         final String intentName = "intent1";
         final String labelSysAny1 = "sysany1";
@@ -246,7 +249,8 @@ public class TestChatLogicIntents extends TestChatBase {
      * Memory intent does not prompt after numPromps>=MaxPrompts when intent is recognized but doesn't match any entity value.
      */
     @Test
-    public void testChat_IntentPrompt_NoPromptWhenZero() throws ChatBackendConnector.AiControllerException {
+    public void testChat_IntentPrompt_NoPromptWhenZero()
+            throws ChatBackendConnector.AiControllerException, ChatLogic.IntentException {
         MemoryIntent mi = getMemoryIntentForPrompt(1, "currentValue");
         ApiResult result = getChat(0.5f, "nothing to see here.");
         ChatResult r = ((ApiChat) result).getResult();
@@ -261,7 +265,8 @@ public class TestChatLogicIntents extends TestChatBase {
      */
     @Test
     public void testChat_multiLineIntent_fulfilledFromPersistence()
-            throws ChatBackendConnector.AiControllerException, DatabaseException, ChatStateHandler.ChatStateException {
+            throws ChatBackendConnector.AiControllerException,
+            ChatStateHandler.ChatStateException, ChatLogic.IntentException {
         MemoryIntent mi = getMultiEntityMemoryIntentForPrompt(3, "prompt");
 
         // Make sure all variables are clean
@@ -304,7 +309,7 @@ public class TestChatLogicIntents extends TestChatBase {
      */
     @Test
     public void testChat_multiLineIntent_notFulfilledWithNonPersistedValue()
-            throws ChatBackendConnector.AiControllerException, DatabaseException {
+            throws ChatBackendConnector.AiControllerException, ChatLogic.IntentException {
         MemoryIntent mi = getMultiEntityMemoryIntentForPrompt(3, "prompt");
 
         // Make sure all variables are clean
@@ -343,7 +348,7 @@ public class TestChatLogicIntents extends TestChatBase {
      */
     @Test
     public void testChat_multiLineIntent_fulfilled()
-            throws ChatBackendConnector.AiControllerException, DatabaseException {
+            throws ChatBackendConnector.AiControllerException, ChatLogic.IntentException {
         MemoryIntent mi = getMemoryIntentForPrompt(3, "prompt");
 
         // Make sure all variables are clean
@@ -390,7 +395,7 @@ public class TestChatLogicIntents extends TestChatBase {
      */
     @Test
     public void testChat_multiLineIntent_promptsExhausted()
-            throws ChatBackendConnector.AiControllerException, DatabaseException {
+            throws ChatBackendConnector.AiControllerException, DatabaseException, ChatLogic.IntentException {
         final int maxPrompts = 3;
         MemoryIntent mi = getMemoryIntentForPrompt(maxPrompts, "prompt");
         // Make sure all variables are clean
@@ -427,7 +432,7 @@ public class TestChatLogicIntents extends TestChatBase {
      */
     @Test
     public void testChat_multiVariable_promptsExhausted_intentReset()
-            throws ChatBackendConnector.AiControllerException, DatabaseException {
+            throws ChatBackendConnector.AiControllerException, ChatLogic.IntentException {
         final int maxPrompts = 1;
         MemoryVariable mv1 = new MemoryVariable(
                 "var1",
@@ -478,7 +483,7 @@ public class TestChatLogicIntents extends TestChatBase {
      */
     @Test
     public void testChat_intent_sameEntity_multipleVars_promptsForDisambiguationFirst()
-            throws ChatBackendConnector.AiControllerException, DatabaseException, IOException {
+            throws ChatBackendConnector.AiControllerException, IOException, ChatLogic.IntentException {
         final String intentName = "intent1";
         final String sameEntityName = "sameEntityName";
         MemoryVariable mv1 = new MemoryVariable("entity1", null, true, Collections.singletonList("1"),

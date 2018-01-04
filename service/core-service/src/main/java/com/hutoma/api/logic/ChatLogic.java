@@ -952,9 +952,13 @@ public class ChatLogic {
         return result;
     }
 
-    static class IntentException extends Exception {
+    public static class IntentException extends Exception {
         public IntentException(final String message) {
             super(message);
+        }
+
+        public IntentException(final Throwable cause) {
+            super(cause);
         }
     }
 

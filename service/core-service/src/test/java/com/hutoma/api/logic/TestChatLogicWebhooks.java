@@ -35,7 +35,8 @@ public class TestChatLogicWebhooks extends TestChatBase {
      */
     @Test
     public void testChat_webHookTriggered()
-            throws ChatBackendConnector.AiControllerException, DatabaseException, IOException, WebHooks.WebHookException {
+            throws ChatBackendConnector.AiControllerException, IOException,
+                WebHooks.WebHookException, DatabaseException, ChatLogic.IntentException {
         final String intentName = "intent1";
         final String webHookResponse = "webhook executed";
 
@@ -68,7 +69,8 @@ public class TestChatLogicWebhooks extends TestChatBase {
      */
     @Test
     public void testChat_webHookNullResponseHandled()
-            throws ChatBackendConnector.AiControllerException, DatabaseException, IOException, WebHooks.WebHookException {
+            throws ChatBackendConnector.AiControllerException, DatabaseException,
+                IOException, WebHooks.WebHookException, ChatLogic.IntentException {
         final String intentName = "intent1";
         final String webHookResponse = null;
         MemoryVariable mv = new MemoryVariable("var", Arrays.asList("a", "b"));
@@ -96,7 +98,8 @@ public class TestChatLogicWebhooks extends TestChatBase {
      */
     @Test
     public void testChat_inactiveWebHookIgnored()
-            throws ChatBackendConnector.AiControllerException, DatabaseException, IOException, WebHooks.WebHookException {
+            throws ChatBackendConnector.AiControllerException, DatabaseException,
+                IOException, WebHooks.WebHookException, ChatLogic.IntentException {
         final String intentName = "intent1";
         final String webHookResponse = "webhook executed";
 
@@ -127,7 +130,8 @@ public class TestChatLogicWebhooks extends TestChatBase {
      */
     @Test
     public void testChat_badWebHookHandled()
-            throws ChatBackendConnector.AiControllerException, DatabaseException, IOException, WebHooks.WebHookException {
+            throws ChatBackendConnector.AiControllerException, DatabaseException, IOException,
+            WebHooks.WebHookException, ChatLogic.IntentException {
 
         when(this.fakeWebHooks.executeIntentWebHook(any(), any(), any(), any()))
                 .thenThrow(new WebHooks.WebHookExternalException("It went wrong"));
@@ -137,14 +141,16 @@ public class TestChatLogicWebhooks extends TestChatBase {
 
     @Test
     public void testChat_webHookInternalFail()
-            throws ChatBackendConnector.AiControllerException, DatabaseException, IOException, WebHooks.WebHookException {
+            throws ChatBackendConnector.AiControllerException, DatabaseException,
+                IOException, WebHooks.WebHookException, ChatLogic.IntentException {
 
         when(this.fakeWebHooks.executeIntentWebHook(any(), any(), any(), any()))
                 .thenThrow(new WebHooks.WebHookInternalException("It went wrong internally"));
         Assert.assertTrue(chatGetWebhook() instanceof ApiError);
     }
 
-    private ApiResult chatGetWebhook() throws ChatBackendConnector.AiControllerException {
+    private ApiResult chatGetWebhook() throws ChatBackendConnector.AiControllerException,
+            DatabaseException, ChatLogic.IntentException {
         final String intentName = "intent1";
         MemoryVariable mv = new MemoryVariable("var", Arrays.asList("a", "b"));
         mv.setCurrentValue("a value"); // to fulfill

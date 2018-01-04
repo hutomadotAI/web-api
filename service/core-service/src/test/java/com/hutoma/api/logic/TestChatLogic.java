@@ -402,6 +402,15 @@ public class TestChatLogic extends TestChatBase {
     }
 
     @Test
+    public void testChat_IntentError() throws ChatBackendConnector.AiControllerException, ChatLogic.IntentException {
+        setupFakeChat(0.7d, SEMANTICRESULT, 0.5d, AIMLRESULT, 0.3d, NEURALRESULT);
+        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), anyString()))
+                .thenThrow(new ChatLogic.IntentException("test"));
+        ApiResult result = getChat(0.2f);
+        Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
+    }
+
+    @Test
     public void testChat_botAffinity_noBots_wnetWins() throws ChatBackendConnector.AiControllerException {
         final String response = "wnet";
         setupFakeChat(0.2d, response, 0.0d, "", 0.0d, "");
