@@ -371,6 +371,8 @@ public class FacebookConnector {
                     break;
             }
 
+            response.bufferEntity();
+
             // what did we get back?
             Response.StatusType statusInfo = response.getStatusInfo();
             switch (statusInfo.getStatusCode()) {
@@ -391,10 +393,6 @@ public class FacebookConnector {
             throw fe;
         } catch (Exception e) {
             throw new FacebookException(e.toString());
-        } finally {
-            if (response != null) {
-                response.close();
-            }
         }
     }
 
