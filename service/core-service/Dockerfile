@@ -7,6 +7,14 @@ RUN rm -rf /usr/local/tomcat/webapps/ROOT
 # Copy the server config
 COPY config/server.xml /usr/local/tomcat/conf
 
+# Add a tomcat user
+ARG USERID=1000
+ARG GROUPID=1000
+RUN addgroup --system --gid $GROUPID tomcat
+RUN adduser --system --uid $USERID --gid $GROUPID tomcat
+RUN chown -R tomcat:tomcat /usr/local/tomcat/
+USER tomcat
+
 # Copy the WAR file to be expanded as the new ROOT folder (as we have set unpackWARs="true")
 COPY ./target/HutomaAPI.war /usr/local/tomcat/webapps/ROOT.war
 
