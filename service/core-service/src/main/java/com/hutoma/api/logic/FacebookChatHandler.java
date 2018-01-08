@@ -251,7 +251,9 @@ public class FacebookChatHandler implements Callable {
             // save the status in the integration record to feed it back to the user
             this.databaseIntegrations.updateIntegrationStatus(integrationRecord.getAiid(),
                     IntegrationType.FACEBOOK, status, chatSuccess);
-        } catch (DatabaseException | FacebookException e) {
+        } catch (RuntimeException re) {
+            this.logger.logException(LOGFROM, re, logMap);
+        } catch (Exception e) {
             this.logger.logException(LOGFROM, e, logMap);
         }
 
