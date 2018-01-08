@@ -39,7 +39,6 @@ def load_test(config, requester, requesterLoad):
             worker.join()
         return multiAverage
 
-
     def make_request(config, aiid, questionWords, answerWords, average, semaphore):
         howManyWordsInAQuestion = random.randrange(1, 4)
         question = ' '.join(random.sample(questionWords, howManyWordsInAQuestion))
@@ -64,7 +63,6 @@ def load_test(config, requester, requesterLoad):
                 flag = 'ok'
 
             print("{0:.2f} {1:.2f}".format(average.average(), duration), flag, '[', question, ']', answer)
-
 
     def multi_run(config, aiid, questionwords, answerwords, simultaneous, total, size, results):
         average = multipleRun(config, aiid, questionwords, answerwords, simultaneous, total).average()

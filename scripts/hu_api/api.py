@@ -5,6 +5,9 @@ import uuid
 from json import JSONDecodeError
 
 import requests
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
+
+requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 
 # Response wrapper
@@ -46,20 +49,22 @@ class ApiRequester:
             headers = {}
         headers.update(self.auth_headers)
         response = ApiResponse(
-            requests.get(self.__get_url(path), params=query, headers=headers, proxies=self.proxies))
+            requests.get(self.__get_url(path), params=query, headers=headers,
+                         proxies=self.proxies, verify=False, timeout=30.0))
         return response
 
     def put(self, path, body=None, query=None, body_is_json=True, headers=None):
         headers = self.__prepare_headers(headers, body, body_is_json)
         response = ApiResponse(
-            requests.put(self.__get_url(path), params=query, headers=headers, data=body, proxies=self.proxies))
+            requests.put(self.__get_url(path), params=query, headers=headers, data=body,
+                         proxies=self.proxies, verify=False, timeout=30.0))
         return response
 
     def post(self, path, body=None, query=None, body_is_json=True, headers=None, files=None):
         headers = self.__prepare_headers(headers, body, body_is_json)
         response = ApiResponse(
-            requests.post(self.__get_url(path), params=query, headers=headers, data=body, proxies=self.proxies,
-                          files=files))
+            requests.post(self.__get_url(path), params=query, headers=headers, data=body,
+                          proxies=self.proxies, files=files, verify=False, timeout=30.0))
         return response
 
     def delete(self, path, headers=None):
@@ -67,7 +72,8 @@ class ApiRequester:
             headers = {}
         headers.update(self.auth_headers)
         response = ApiResponse(
-            requests.delete(self.__get_url(path), headers=headers, proxies=self.proxies))
+            requests.delete(self.__get_url(path), headers=headers,
+                            proxies=self.proxies, verify=False, timeout=30.0))
         return response
 
     def __prepare_headers(self, headers, body, body_is_json):
@@ -150,7 +156,6 @@ def delete_all_ais(api: ApiRequester):
 
 def edit_entity(api: ApiRequester, entity):
     query = {"entity_name": entity["entity_name"]}
-
     return api.post("entity", query=query, body=json.dumps(entity))
 
 
@@ -168,9 +173,9 @@ def create_intent(name, variables, user_says, responses, topic_in="", topic_out=
             "user_says": user_says, "responses": responses}
 
 
-def create_intent_variable(entityName, required, n_prompts, value, prompts):
+def create_intent_variable(entityName, required, n_prompts, label, prompts):
     return {"entity_name": entityName, "required": required, "n_prompts": n_prompts,
-            "value": value, "prompts": prompts}
+            "label": label, "prompts": prompts}
 
 
 def upload_training(api: ApiRequester, aiid, file):
@@ -183,19 +188,31 @@ def start_training(api: ApiRequester, aiid):
     return api.put("ai/" + aiid + "/training/start")
 
 
+def update_training(api: ApiRequester, aiid):
+    return api.put("ai/{}/training/update".format(aiid))
+
+
 def stop_training(api: ApiRequester, aiid):
     return api.put("ai/" + aiid + "/training/stop")
 
 
-def chat(api: ApiRequester, aiid, say_what, history="", chat_id="", min_p=0.4):
-    query = {'q': say_what, 'confidence_threshold': min_p, 'chat_history': history}
+def chat(api: ApiRequester, aiid, say_what, chat_id=""):
+    query = {'q': say_what}
     if chat_id != "":
         query['chatId'] = chat_id
     return api.get("ai/" + aiid + "/chat", query=query)
 
 
-def load_test_chat(api: ApiRequester, aiid, say_what, history="", chat_id="", min_p=0.4):
-    query = {'q': say_what, 'confidence_threshold': min_p, 'chat_history': history}
+def load_test_chat(api: ApiRequester, aiid, say_what, chat_id=""):
+    query = {'q': say_what}
     if chat_id != "":
         query['chatId'] = chat_id
     return api.get("ai/load/" + aiid + "/chat", query=query)
+
+
+def get_linked_bots(api: ApiRequester, aiid):
+    return api.get("ai/{}/bots".format(aiid))
+
+
+def link_bot_to_ai(api: ApiRequester, aiid, bot_to_link):
+    return api.post("ai/{}/bot/{}".format(aiid, bot_to_link))
