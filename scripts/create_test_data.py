@@ -115,11 +115,12 @@ def main():
         if not train.success:
             print("Error updating training: {0}".format(train.text))
 
-    def create_sentence(source_word_set, common_words):
+    def create_sentence(source_word_list, common_words):
         big_word_count = random.randint(1, 3)
         small_word_count = 2 * big_word_count + random.randint(-1, 3)
-        using_big_words = random.sample(source_word_set, big_word_count)
-        source_word_set -= set(using_big_words)
+        using_big_words = random.sample(source_word_list, big_word_count)
+        for word in using_big_words:
+            source_word_list.remove(word)
         question = using_big_words + random.sample(common_words, small_word_count)
         random.shuffle(question)
         return ' '.join(question)
@@ -134,13 +135,14 @@ def main():
             filtered.discard(word)
 
         print('Unique words ', len(filtered))
-        return filtered
+        as_list = sorted(list(filtered))
+        return as_list
 
-    def create_test_bot_lines(wordset, line_count):
+    def create_test_bot_lines(word_list, line_count):
         training_data = []
         for a in range(line_count // 2):
-            question = create_sentence(wordset, config.common_words)
-            answer = create_sentence(wordset, config.common_words)
+            question = create_sentence(word_list, config.common_words)
+            answer = create_sentence(word_list, config.common_words)
             training_data.append((question, answer))
         return training_data
 
@@ -149,10 +151,10 @@ def main():
         for size, tag, filename in ai_defs.defs:
             create_new_ai_pairs(filtered, size, filename, ai_defs.response_prefix + str(tag))
 
-    def create_new_ai_pairs(word_set, line_count, filename, response_prefix):
-        training_data = create_test_bot_lines(word_set, line_count);
+    def create_new_ai_pairs(word_list, line_count, filename, response_prefix):
+        training_data = create_test_bot_lines(word_list, line_count);
         print("Generated {0} pairs, {1} words left over: into {2}"
-              .format(len(training_data), len(word_set), filename))
+              .format(len(training_data), len(word_list), filename))
 
         text = []
         for q, a in training_data:
@@ -176,6 +178,9 @@ def main():
                 missing_files = True
                 print("Missing {0}; recreating all data files".format(filename))
         return not missing_files
+
+    # make this process predictable
+    random.seed(31415926)
 
     requester = hu_api.api.ApiRequester(config.url_root, config.auth, [])
 
