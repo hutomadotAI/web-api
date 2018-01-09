@@ -37,6 +37,7 @@ import com.hutoma.api.thread.IThreadConfig;
 import com.hutoma.api.thread.ThreadPool;
 import com.hutoma.api.thread.ThreadSubPool;
 import com.hutoma.api.thread.TrackedThreadSubPool;
+import com.hutoma.api.validation.QueryFilter;
 import com.hutoma.api.validation.Validate;
 
 import org.glassfish.hk2.api.Factory;
@@ -74,6 +75,7 @@ public class ServerBinder extends AbstractBinder {
         bind(ThreadPool.class).to(ThreadPool.class).in(Singleton.class);
         bind(ThreadSubPool.class).to(ThreadSubPool.class);
         bind(TrackedThreadSubPool.class).to(TrackedThreadSubPool.class);
+        bind(QueryFilter.class).to(QueryFilter.class);
 
         // logging
         bind(CentralLogger.class).to(ILogger.class).in(Singleton.class);
