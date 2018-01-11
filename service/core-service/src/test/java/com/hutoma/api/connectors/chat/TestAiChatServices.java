@@ -207,6 +207,44 @@ public class TestAiChatServices {
         verify(this.fakeRequestRnn, never()).issueChatRequests(anyMap(), anyList(), any());
     }
 
+    @Test
+    public void testChatServices_RnnDisabled_LinkedBots() throws ServerConnector.AiServicesException,
+            ChatBackendConnector.AiControllerException,
+            NoServerAvailableException, DatabaseException {
+
+        AiMinP bot1 = new AiMinP(DEVID_UUID, UUID.randomUUID(), 0.5);
+        AiMinP bot2 = new AiMinP(DEVID_UUID, UUID.randomUUID(), 0.7);
+        List<AiMinP> linkedBots = Arrays.asList(bot1, bot2);
+
+        checkDisabledRnn(linkedBots);
+    }
+
+    @Test
+    public void testChatServices_RnnDisabled_LinkedBots_AIML() throws ServerConnector.AiServicesException,
+            ChatBackendConnector.AiControllerException,
+            NoServerAvailableException, DatabaseException {
+
+        when(this.fakeConfig.getAimlBotAiids()).thenReturn(Collections.singletonList(SAMPLEBOT.getAiid()));
+
+        AiMinP bot1 = new AiMinP(DEVID_UUID, UUID.randomUUID(), 0.5);
+        AiMinP bot2 = new AiMinP(DEVID_UUID, SAMPLEBOT.getAiid(), 0.7);
+        List<AiMinP> linkedBots = Arrays.asList(bot1, bot2);
+
+        checkDisabledRnn(linkedBots);
+    }
+
+    private void checkDisabledRnn(final List<AiMinP> linkedBots) throws DatabaseException, ServerConnector.AiServicesException, ChatBackendConnector.AiControllerException, NoServerAvailableException {
+        BackendStatus beStatus = new BackendStatus();
+        beStatus.setEngineStatus(BackendServerType.WNET, new BackendEngineStatus(TrainingStatus.AI_TRAINING_COMPLETE, 0.0, 1.0));
+        beStatus.setEngineStatus(BackendServerType.RNN, new BackendEngineStatus(TrainingStatus.AI_TRAINING_COMPLETE, 0.0, 1.0));
+        when(this.fakeDatabaseAi.getAisLinkedToAi(any(), any())).thenReturn(linkedBots);
+        when(this.fakeDatabaseAi.getAIStatusReadOnly(any(), any())).thenReturn(beStatus);
+        // Make sure we never even issue requests to RNN if we have it disabled
+        when(this.fakeConfig.isRnnEnabled()).thenReturn(false);
+        this.chatServices.startChatRequests(DEVID_UUID, AIID, CHATID, "question", ChatState.getEmpty());
+        verify(this.fakeRequestRnn, never()).issueChatRequests(anyMap(), anyList(), any());
+    }
+
     private void issueStartChatRequests() throws ServerConnector.AiServicesException, ChatBackendConnector.AiControllerException, NoServerAvailableException {
         ChatState chatState = ChatState.getEmpty();
         chatState.setHistory("history");
