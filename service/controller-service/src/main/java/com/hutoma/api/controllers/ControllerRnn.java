@@ -24,21 +24,27 @@ public class ControllerRnn extends ControllerBase {
                          final QueueProcessor queueProcessor) {
         super(config, threadSubPool, serviceLocator, logger);
         this.queueProcessor = queueProcessor;
-        this.queueProcessor.initialise(this, BackendServerType.RNN);
+        if (config.isRnnEnabled()) {
+            this.queueProcessor.initialise(this, BackendServerType.RNN);
+        }
     }
 
     @Override
     public boolean logErrorIfNoTrainingCapacity() {
-        return true;
+        return config.isRnnEnabled();
     }
 
     @Override
     public void kickQueue() {
-        this.queueProcessor.kickQueueProcessor();
+        if (config.isRnnEnabled()) {
+            this.queueProcessor.kickQueueProcessor();
+        }
     }
 
     @Override
     public void terminateQueue() {
-        this.queueProcessor.stop();
+        if (config.isRnnEnabled()) {
+            this.queueProcessor.stop();
+        }
     }
 }
