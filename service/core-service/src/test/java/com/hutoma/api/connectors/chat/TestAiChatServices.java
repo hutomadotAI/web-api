@@ -96,7 +96,8 @@ public class TestAiChatServices {
     public void startChatRequests_aiIsNotTrained_onlyAimSingleBot() throws ServerConnector.AiServicesException,
             ChatBackendConnector.AiControllerException, DatabaseException, NoServerAvailableException {
         when(this.fakeConfig.getAimlBotAiids()).thenReturn(Collections.singletonList(SAMPLEBOT.getAiid()));
-        when(this.fakeDatabaseAi.getBotsLinkedToAi(any(), any())).thenReturn(Collections.singletonList(SAMPLEBOT));
+        when(this.fakeDatabaseAi.getAisLinkedToAi(any(), any()))
+                .thenReturn(Collections.singletonList(new AiMinP(DEVID_UUID, SAMPLEBOT.getAiid(), 0.5)));
         when(this.fakeDatabaseAi.getAIStatusReadOnly(any(), any())).thenReturn(TestDataHelper.getBackendStatus(
                 TrainingStatus.AI_UNDEFINED, TrainingStatus.AI_UNDEFINED));
         this.issueStartChatRequests();
@@ -109,7 +110,8 @@ public class TestAiChatServices {
     public void startChatRequests_aiIsTrained_onlyAimSingleBot() throws ServerConnector.AiServicesException,
             ChatBackendConnector.AiControllerException, DatabaseException, NoServerAvailableException {
         when(this.fakeConfig.getAimlBotAiids()).thenReturn(Collections.singletonList(AIML_BOT_AIID));
-        when(this.fakeDatabaseAi.getBotsLinkedToAi(any(), any())).thenReturn(Collections.singletonList(TestBotHelper.getBot(DEVID_UUID, AIML_BOT_AIID, BOTID)));
+        when(this.fakeDatabaseAi.getAisLinkedToAi(any(), any())).thenReturn(
+                Collections.singletonList(new AiMinP(DEVID_UUID, AIML_BOT_AIID, 0.5)));
         when(this.fakeDatabaseAi.getAIStatusReadOnly(any(), any())).thenReturn(TestDataHelper.getBackendStatus(
                 TrainingStatus.AI_TRAINING_COMPLETE, TrainingStatus.AI_TRAINING_COMPLETE));
         this.issueStartChatRequests();

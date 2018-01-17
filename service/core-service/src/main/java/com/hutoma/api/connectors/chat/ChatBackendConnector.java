@@ -6,14 +6,15 @@ import com.hutoma.api.common.Config;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.BackendServerType;
-import com.hutoma.api.connectors.IServerEndpoint;
 import com.hutoma.api.connectors.InvocationResult;
 import com.hutoma.api.connectors.NoServerAvailableException;
 import com.hutoma.api.connectors.RequestFor;
 import com.hutoma.api.connectors.aiservices.ControllerConnector;
 import com.hutoma.api.containers.AiDevId;
+import com.hutoma.api.containers.ApiServerEndpointMulti;
 import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.containers.sub.ChatState;
+import com.hutoma.api.containers.sub.ServerEndpointRequestMulti;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.thread.TrackedThreadSubPool;
 
@@ -23,6 +24,7 @@ import org.glassfish.jersey.client.JerseyWebTarget;
 
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -75,19 +77,34 @@ public abstract class ChatBackendConnector {
             throws NoServerAvailableException, AiControllerException {
         List<RequestCallable> callables = new ArrayList<>();
 
+        ServerEndpointRequestMulti serverEndpointRequestMulti = new ServerEndpointRequestMulti();
+        ais.forEach(aiDevId -> {
+            serverEndpointRequestMulti.add(new ServerEndpointRequestMulti.ServerEndpointRequest(
+                    aiDevId.getAiid(), Collections.EMPTY_LIST));
+        });
+        Map<UUID, ApiServerEndpointMulti.ServerEndpointResponse> endpointMap = ais.isEmpty()?
+                new HashMap<>():
+                this.controllerConnector.getBackendChatEndpointMulti(serverEndpointRequestMulti);
+
         for (AiDevId ai : ais) {
+            UUID aiid = ai.getAiid();
+            ApiServerEndpointMulti.ServerEndpointResponse endpoint = endpointMap.get(aiid);
+            if ((endpoint == null) || (Strings.isNullOrEmpty(endpoint.getServerUrl()))) {
+                throw new NoServerAvailableException(String.format("No server available for %s for %s on %s",
+                        aiid.toString(), RequestFor.Chat.toString(), this.getServerType().value()));
+            }
+
             Map<String, String> chatParamsThisAi = chatParams;
             if (ai.getAiid().equals(chatState.getLockedAiid())) {
                 chatParamsThisAi = new HashMap<>(chatParams);
                 chatParamsThisAi.put("history", chatState.getHistory());
                 chatParamsThisAi.put("topic", chatState.getTopic());
             }
-            IServerEndpoint endpoint = this.controllerConnector.getBackendEndpoint(ai.getAiid(), RequestFor.Chat);
-            final String hash = this.controllerConnector.getHashCodeFor(ai.getAiid());
+
             // Note that it's ok to get a null/empty hash, we just won't use that endpoint.
             callables.add(new RequestCallable(
-                    createCallable(endpoint.getServerUrl(), ai.getDevId(), ai.getAiid(), chatParamsThisAi, hash),
-                    endpoint.getServerIdentifier()));
+                    createCallable(endpoint.getServerUrl(), ai.getDevId(), ai.getAiid(), chatParamsThisAi,
+                            endpoint.getHash()), endpoint.getServerIdentifier()));
         }
 
         return this.execute(callables);
@@ -187,8 +204,12 @@ public abstract class ChatBackendConnector {
 
 
     public static class AiControllerException extends Exception {
-        AiControllerException(String message) {
+
+        public AiControllerException(String message) {
             super(message);
+        }
+        public AiControllerException(final Throwable cause) {
+            super(cause);
         }
     }
 

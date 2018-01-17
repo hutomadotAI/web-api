@@ -111,7 +111,7 @@ public class TestAiServicesClient {
         when(this.fakeConfig.getBackendTrainingCallTimeoutMs()).thenReturn(20000L);
         this.threadPool = new ThreadPool(this.fakeConfig, this.fakeLogger);
 
-        when(this.fakeRnnServicesConnector.getBackendEndpoint(any(), any())).thenReturn(TestDataHelper.getEndpointFor(LOCAL_WEB_ENDPOINT));
+        when(this.fakeRnnServicesConnector.getBackendTrainingEndpoint(any(), any())).thenReturn(TestDataHelper.getEndpointFor(LOCAL_WEB_ENDPOINT));
 
         this.aiServices = new AIServices(this.fakeDatabaseAi, this.fakeDatabaseEntitiesIntents, this.fakeLogger,
                 this.fakeConfig, this.fakeSerializer,
@@ -142,8 +142,8 @@ public class TestAiServicesClient {
 
     @Test
     public void testUploadTraining() throws AIServices.AiServicesException, NoServerAvailableException {
-        when(this.fakeWnetServicesConnector.getBackendEndpoint(any(), any())).thenReturn(getFakeServerEndpoint(LOCAL_WEB_ENDPOINT));
-        when(this.fakeRnnServicesConnector.getBackendEndpoint(any(), any())).thenReturn(getFakeServerEndpoint(LOCAL_WEB_ENDPOINT));
+        when(this.fakeWnetServicesConnector.getBackendTrainingEndpoint(any())).thenReturn(getFakeServerEndpoint(LOCAL_WEB_ENDPOINT));
+        when(this.fakeRnnServicesConnector.getBackendTrainingEndpoint(any())).thenReturn(getFakeServerEndpoint(LOCAL_WEB_ENDPOINT));
         // Need to have a real serializer here to transform the ai info
         AIServices thisAiServices = new AIServices(this.fakeDatabaseAi, this.fakeDatabaseEntitiesIntents,
                 this.fakeLogger, this.fakeConfig, new JsonSerializer(),

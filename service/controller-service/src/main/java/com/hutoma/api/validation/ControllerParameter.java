@@ -10,4 +10,5 @@ public enum ControllerParameter {
     AiStatusJson,
     ServerRegistration,
     ServerAffinity,
+    ServerEndpointMulti,
 }

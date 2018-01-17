@@ -7,6 +7,7 @@ import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.sub.AiStatus;
 import com.hutoma.api.containers.sub.ServerAffinity;
 import com.hutoma.api.containers.sub.ServerAiEntry;
+import com.hutoma.api.containers.sub.ServerEndpointRequestMulti;
 import com.hutoma.api.containers.sub.ServerRegistration;
 import com.hutoma.api.logging.AiServiceStatusLogger;
 import com.hutoma.api.logging.LogMap;
@@ -128,6 +129,13 @@ public class ControllerPostFilter extends ControllerParameterFilter implements C
                 checkParameterNotNull(SERVER_SESSION_ID, serverAffinity.getServerSessionID());
                 checkParameterNotNull(AI_LIST, serverAffinity.getAiList());
                 request.setProperty(ControllerParameter.ServerAffinity.toString(), serverAffinity);
+            }
+
+            if (checkList.contains(ControllerParameter.ServerEndpointMulti)) {
+                ServerEndpointRequestMulti serverEndpointRequestMulti = (ServerEndpointRequestMulti)
+                        this.serializer.deserialize(request.getEntityStream(), ServerEndpointRequestMulti.class);
+                checkParameterNotNull(ENDPOINT_REQUEST_LIST, serverEndpointRequestMulti.getEndpointRequests());
+                request.setProperty(ControllerParameter.ServerEndpointMulti.toString(), serverEndpointRequestMulti);
             }
 
         } catch (JsonParseException jpe) {

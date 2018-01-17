@@ -197,8 +197,8 @@ public class AIServices extends ServerConnector {
             // Bug:2300
             String trainingToSend = trainingMaterials;
             try {
-                if (this.connectConfig.isRnnEnabled() && endpoint.equals(this.rnnServicesConnector.getBackendEndpoint(
-                        aiid, RequestFor.Training).getServerUrl())) {
+                if (this.connectConfig.isRnnEnabled() && endpoint.equals(this.rnnServicesConnector.getBackendTrainingEndpoint(
+                        aiid).getServerUrl())) {
                     trainingToSend = removeIntentExpressions(trainingMaterials);
                 }
             } catch (NoServerAvailableException ex) {
@@ -315,9 +315,9 @@ public class AIServices extends ServerConnector {
     private List<String> getListOfPrimaryEndpoints(final UUID aiid) throws AiServicesException {
         try {
             List<String> endpoints = new ArrayList<>();
-            endpoints.add(this.wnetServicesConnector.getBackendEndpoint(aiid, RequestFor.Training).getServerUrl());
+            endpoints.add(this.wnetServicesConnector.getBackendTrainingEndpoint(aiid).getServerUrl());
             if (this.connectConfig.isRnnEnabled()) {
-                endpoints.add(this.rnnServicesConnector.getBackendEndpoint(aiid, RequestFor.Training).getServerUrl());
+                endpoints.add(this.rnnServicesConnector.getBackendTrainingEndpoint(aiid).getServerUrl());
             }
             return endpoints;
         } catch (NoServerAvailableException noServer) {

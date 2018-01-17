@@ -88,13 +88,13 @@ public class TestAiServices {
         when(this.fakeConfig.getBackendTrainingCallTimeoutMs()).thenReturn(30000L);
         ThreadPool threadPool = new ThreadPool(this.fakeConfig, this.fakeLogger);
 
-        when(this.fakeControllerConnector.getBackendEndpoint(AIID, RequestFor.Training, BackendServerType.WNET))
+        when(this.fakeControllerConnector.getBackendTrainingEndpoint(AIID, BackendServerType.WNET))
                 .thenReturn(TestDataHelper.getEndpointFor(WNET_ENDPOINT));
-        when(this.fakeControllerConnector.getBackendEndpoint(AIID, RequestFor.Training, BackendServerType.RNN))
+        when(this.fakeControllerConnector.getBackendTrainingEndpoint(AIID, BackendServerType.RNN))
                 .thenReturn(TestDataHelper.getEndpointFor(RNN_ENDPOINT));
-        when(this.fakeControllerConnector.getBackendEndpoint(null, RequestFor.Training, BackendServerType.WNET))
+        when(this.fakeControllerConnector.getBackendTrainingEndpoint(null, BackendServerType.WNET))
                 .thenReturn(TestDataHelper.getEndpointFor(WNET_ENDPOINT));
-        when(this.fakeControllerConnector.getBackendEndpoint(null, RequestFor.Training, BackendServerType.RNN))
+        when(this.fakeControllerConnector.getBackendTrainingEndpoint(null, BackendServerType.RNN))
                 .thenReturn(TestDataHelper.getEndpointFor(RNN_ENDPOINT));
 
         this.aiServices = new AIServices(this.fakeDatabaseAi, this.fakeDatabaseEntitiesIntents, this.fakeLogger,
@@ -124,8 +124,8 @@ public class TestAiServices {
     public void testUploadTraining() throws AIServices.AiServicesException, NoServerAvailableException {
         JerseyInvocation.Builder builder = TestDataHelper.mockJerseyClient(this.fakeClient);
         IServerEndpoint endpoint = getFakeServerEndpoint();
-        when(this.fakeWnetServicesConnector.getBackendEndpoint(any(), any())).thenReturn(endpoint);
-        when(this.fakeRnnServicesConnector.getBackendEndpoint(any(), any())).thenReturn(endpoint);
+        when(this.fakeWnetServicesConnector.getBackendTrainingEndpoint(any())).thenReturn(endpoint);
+        when(this.fakeRnnServicesConnector.getBackendTrainingEndpoint(any())).thenReturn(endpoint);
         when(builder.post(any())).thenReturn(Response.ok(new ApiResult().setSuccessStatus()).build());
         this.aiServices.uploadTraining(null, DEVID, AIID, "training materials");
     }

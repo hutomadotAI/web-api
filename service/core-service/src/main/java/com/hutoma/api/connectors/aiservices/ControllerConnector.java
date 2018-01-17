@@ -9,9 +9,11 @@ import com.hutoma.api.connectors.IServerEndpoint;
 import com.hutoma.api.connectors.NoServerAvailableException;
 import com.hutoma.api.connectors.RequestFor;
 import com.hutoma.api.connectors.ServerTrackerInfo;
+import com.hutoma.api.connectors.chat.ChatBackendConnector;
 import com.hutoma.api.containers.ApiServerEndpoint;
-import com.hutoma.api.containers.ApiServerHashcode;
+import com.hutoma.api.containers.ApiServerEndpointMulti;
 import com.hutoma.api.containers.ApiServerTrackerInfoMap;
+import com.hutoma.api.containers.sub.ServerEndpointRequestMulti;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
 
@@ -63,10 +65,9 @@ public abstract class ControllerConnector {
         this.kickQueue(this.getServerType());
     }
 
-
-    public IServerEndpoint getBackendEndpoint(final UUID aiid, final RequestFor requestFor)
+    public IServerEndpoint getBackendTrainingEndpoint(final UUID aiid)
             throws NoServerAvailableException {
-        return getBackendEndpoint(aiid, requestFor, this.getServerType());
+        return getBackendTrainingEndpoint(aiid, this.getServerType());
     }
 
     Map<String, ServerTrackerInfo> getVerifiedEndpointMap() {
@@ -74,27 +75,25 @@ public abstract class ControllerConnector {
     }
 
     /**
-     * Gets from the controller a backend endpoint for a given AI, depending on the backend and request type.
+     * Gets from the controller a training backend endpoint for a given AI.
      * @param aiid the AIID
-     * @param requestFor request type (training, chat)
-     * @param serverType backend server type
      * @return the endpoint information
      * @throws NoServerAvailableException if there are no servers available to process this request
      */
-    IServerEndpoint getBackendEndpoint(final UUID aiid, final RequestFor requestFor,
-                                              final BackendServerType serverType)
+    IServerEndpoint getBackendTrainingEndpoint(final UUID aiid,
+                                               final BackendServerType serverType)
             throws NoServerAvailableException {
         if (aiid == null) {
             throw new IllegalArgumentException("aiid");
         }
         LogMap logMap = LogMap.map("AIID", aiid.toString())
-                .put("RequestFor", requestFor.toString())
+                .put("RequestFor", RequestFor.Training.toString())
                 .put("ServerType", serverType.value());
         Response response = null;
         try {
             final long startTimestamp = this.tools.getTimestamp();
-            response = getRequest(String.format("/%s", aiid.toString()),
-                    ImmutableMap.of(PARAM_SERVER_TYPE, serverType.value(), "for", requestFor.toString()))
+            response = getRequest(String.format("/%s/training", aiid.toString()),
+                    ImmutableMap.of(PARAM_SERVER_TYPE, serverType.value()))
                     .get();
             if (response.getStatus() == HttpURLConnection.HTTP_OK) {
                 response.bufferEntity();
@@ -107,7 +106,7 @@ public abstract class ControllerConnector {
             }
 
             throw new NoServerAvailableException(String.format("No server available for %s for %s on %s",
-                    aiid.toString(), requestFor.toString(), serverType.value()));
+                    aiid.toString(), RequestFor.Training.toString(), serverType.value()));
 
         } catch (NoServerAvailableException ex) {
             // rethrow
@@ -122,47 +121,48 @@ public abstract class ControllerConnector {
         return null;
     }
 
-    public String getHashCodeFor(final UUID aiid) {
-        return getHashCodeFor(aiid, this.getServerType());
-    }
-
-
-    /**
-     * Gets the hash code for the AI on the given backend server type.
-     * @param aiid the AIIS
-     * @param serverType the backend server type
-     * @return the hashcode, or null if not found/error
+    /***
+     * For each bot in a list, get a chat endpoint and a valid hashcode for the instance
+     * @param multiRequest
+     * @return
+     * @throws NoServerAvailableException
+     * @throws ChatBackendConnector.AiControllerException
      */
-    private String getHashCodeFor(final UUID aiid, final BackendServerType serverType) {
-        if (aiid == null) {
-            throw new IllegalArgumentException("aiid");
+    public Map<UUID, ApiServerEndpointMulti.ServerEndpointResponse> getBackendChatEndpointMulti
+            (final ServerEndpointRequestMulti multiRequest) throws NoServerAvailableException,
+            ChatBackendConnector.AiControllerException {
+        if (multiRequest == null) {
+            throw new IllegalArgumentException("multiRequest");
         }
-        LogMap logMap = LogMap.map("AIID", aiid.toString())
-                .put("ServerType", serverType.value());
+        LogMap logMap = LogMap.map("RequestFor", RequestFor.Chat.toString())
+                .put("ServerType", this.getServerType().value());
         Response response = null;
         try {
             final long startTimestamp = this.tools.getTimestamp();
-            response = getRequest(String.format("/%s/hash", aiid.toString()),
-                    ImmutableMap.of(PARAM_SERVER_TYPE, serverType.value()))
-                    .get();
+            response = getRequest("/chatEndpoints",
+                    ImmutableMap.of(PARAM_SERVER_TYPE, this.getServerType().value()))
+                    .post(Entity.json(this.serializer.serialize(multiRequest)));
+
             if (response.getStatus() == HttpURLConnection.HTTP_OK) {
                 response.bufferEntity();
-                ApiServerHashcode result = (ApiServerHashcode) this.serializer.deserialize(
-                        (InputStream) response.getEntity(), ApiServerHashcode.class);
+                ApiServerEndpointMulti result = (ApiServerEndpointMulti) this.serializer.deserialize(
+                        (InputStream) response.getEntity(), ApiServerEndpointMulti.class);
 
-                this.logger.logPerf(LOGFROM, "GetHashcodeFor", logMap
+                this.logger.logPerf(LOGFROM, "GetServerEndpointMulti", logMap
                         .put("Duration", this.tools.getTimestamp() - startTimestamp));
-                return result.getHash();
+                return result.getEndpointMap();
             }
+            throw new ChatBackendConnector.AiControllerException(
+                    String.format("getBackendChatEndpointMulti returned Error %d", response.getStatus()));
+        } catch (ChatBackendConnector.AiControllerException ce) {
+            throw ce;
         } catch (Exception ex) {
-            this.logger.logException(LOGFROM, ex, logMap);
+            throw new ChatBackendConnector.AiControllerException(ex);
         } finally {
             if (response != null) {
                 response.close();
             }
         }
-
-        return null;
     }
 
     /**
@@ -239,4 +239,5 @@ public abstract class ControllerConnector {
             }
         }
     }
+
 }

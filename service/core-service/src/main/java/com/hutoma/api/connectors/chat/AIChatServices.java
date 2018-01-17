@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 
@@ -100,28 +101,29 @@ public class AIChatServices extends ServerConnector {
         boolean usedAimlBot = false;
         HashSet<UUID> aimlBotIdsSet = new HashSet<>(this.config.getAimlBotAiids());
 
-        List<AiDevId> listAis = new ArrayList<>();
+        List<AiDevId> aimlAis = new ArrayList<>();
 
-        if (!aimlBotIdsSet.isEmpty()) {
-            Map<UUID, AiDevId> map = ais.stream().collect(Collectors.toMap(AiDevId::getAiid, x -> x));
-            for (Map.Entry<UUID, AiDevId> entry : map.entrySet()) {
-                if (aimlBotIdsSet.contains(entry.getKey())) {
-                    listAis.add(new AiDevId(entry.getValue().getDevId(), entry.getValue().getAiid()));
-                }
+        // map all the linked AIs by aiid
+        Map<UUID, AiDevId> map = ais.stream()
+                .collect(Collectors.toMap(AiDevId::getAiid, Function.identity()));
+
+        // extract the AIs that are AIML based
+        for (Map.Entry<UUID, AiDevId> entry : map.entrySet()) {
+            if (aimlBotIdsSet.contains(entry.getKey())) {
+                aimlAis.add(new AiDevId(entry.getValue().getDevId(), entry.getValue().getAiid()));
             }
-            this.aimlFutures = this.backendAimlConnector.issueChatRequests(parameters, listAis, chatState);
-            usedAimlBot = true;
-            // remove the aiml bots ais from the list of ais
-            List<AiDevId> newList = new ArrayList<>();
-            for (Map.Entry<UUID, AiDevId> entry : map.entrySet()) {
-                if (!aimlBotIdsSet.contains(entry.getKey())) {
-                    newList.add(entry.getValue());
-                }
-            }
-            listAis = newList;
-        } else {
-            listAis = ais.stream().map(x -> new AiDevId(x.getDevId(), x.getAiid())).collect(Collectors.toList());
         }
+
+        // if there are any AIML bots then start the calls
+        if (!aimlAis.isEmpty()) {
+            this.aimlFutures = this.backendAimlConnector.issueChatRequests(parameters, aimlAis, chatState);
+            usedAimlBot = true;
+        }
+
+        // remove any bots that are AIML from the list of linked list still to be processed
+        List<AiDevId> listAis = ais.stream()
+                .filter(ai -> !aimlBotIdsSet.contains(ai.getAiid()))
+                .map(x -> new AiDevId(x.getDevId(), x.getAiid())).collect(Collectors.toList());
 
         // find out which servers can chat with this AI
         Set<BackendServerType> canChatWith = canChatWithAi(devId, aiid);

@@ -6,6 +6,7 @@ import com.hutoma.api.connectors.BackendServerType;
 import com.hutoma.api.connectors.RequestFor;
 import com.hutoma.api.containers.sub.AiStatus;
 import com.hutoma.api.containers.sub.ServerAffinity;
+import com.hutoma.api.containers.sub.ServerEndpointRequestMulti;
 import com.hutoma.api.containers.sub.ServerRegistration;
 import com.hutoma.api.logging.AiServiceStatusLogger;
 
@@ -20,6 +21,7 @@ public class ControllerParameterFilter extends ValidationBase {
     static final String SERVER_TYPE = "server_type";
     static final String AI_LIST = "ai_list";
     static final String SERVER_SESSION_ID = "server_session_id";
+    static final String ENDPOINT_REQUEST_LIST = "endpoint_request_list";
 
     protected final AiServiceStatusLogger logger;
     protected final Tools tools;
@@ -56,4 +58,9 @@ public class ControllerParameterFilter extends ValidationBase {
     public static BackendServerType getBackendServerType(final ContainerRequestContext requestContext) {
         return (BackendServerType) requestContext.getProperty(ControllerParameter.ServerType.toString());
     }
+
+    public static ServerEndpointRequestMulti getServerEndpointRequestMulti(final ContainerRequestContext requestContext) {
+        return (ServerEndpointRequestMulti) requestContext.getProperty(ControllerParameter.ServerEndpointMulti.toString());
+    }
+
 }
