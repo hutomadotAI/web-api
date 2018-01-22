@@ -486,7 +486,6 @@ public class AILogic {
                 this.logger.logUserTraceEvent(LOGFROM, "LinkBotToAI - bot already linked to AI", devIdString, logMap);
                 return ApiError.getBadRequest(String.format("Bot %d already linked to AI.", botId));
             }
-            this.aiServices.stopTrainingIfNeeded(devId, aiid);
             if (this.databaseAi.linkBotToAi(devId, aiid, botId, transaction)) {
                 this.logger.logUserTraceEvent(LOGFROM, "LinkBotToAI", devIdString, logMap);
                 return new ApiResult().setSuccessStatus();
@@ -597,7 +596,6 @@ public class AILogic {
             }
 
             if (this.databaseAi.unlinkBotFromAi(devId, aiid, botId, transaction)) {
-                this.aiServices.stopTrainingIfNeeded(devId, aiid);
                 this.logger.logUserTraceEvent(LOGFROM, "UnlinkBotFromAI", devIdString, logMap);
                 return new ApiResult().setSuccessStatus();
             } else {

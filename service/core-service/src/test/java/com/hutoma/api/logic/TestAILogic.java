@@ -412,7 +412,7 @@ public class TestAILogic {
     }
 
     @Test
-    public void testLinkBotToAi_trainingInProgress() throws DatabaseException, ServerConnector.AiServicesException {
+    public void testLinkBotToAi_trainingInProgress() throws DatabaseException{
         when(this.fakeDatabaseMarketplace.getBotDetails(anyInt())).thenReturn(SAMPLEBOT);
         when(this.fakeDatabaseMarketplace.getPurchasedBots(any())).thenReturn(Collections.singletonList(SAMPLEBOT));
         when(this.fakeDatabaseAi.getBotsLinkedToAi(any(), any())).thenReturn(Collections.emptyList());
@@ -420,7 +420,7 @@ public class TestAILogic {
         when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(TestDataHelper.getAi(TestDataHelper.getTrainingInProgress()));
         ApiResult result = this.aiLogic.linkBotToAI(DEVID_UUID, AIID, BOTID);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
-        verify(this.fakeAiServices).stopTrainingIfNeeded(DEVID_UUID, AIID);
+        verify(this.fakeAiServices, never()).stopTrainingIfNeeded(DEVID_UUID, AIID);
     }
 
     @Test
@@ -559,13 +559,12 @@ public class TestAILogic {
     }
 
     @Test
-    public void testUnlinkBotFromAi_aiTrainingInProgress()
-            throws DatabaseException, ServerConnector.AiServicesException {
+    public void testUnlinkBotFromAi_aiTrainingInProgress()  throws DatabaseException {
         when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(TestDataHelper.getAi(TestDataHelper.getTrainingInProgress()));
         when(this.fakeDatabaseAi.unlinkBotFromAi(any(), any(), anyInt(), any())).thenReturn(true);
         ApiResult result = this.aiLogic.unlinkBotFromAI(DEVID_UUID, AIID, BOTID);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
-        verify(this.fakeAiServices).stopTrainingIfNeeded(DEVID_UUID, AIID);
+        verify(this.fakeAiServices, never()).stopTrainingIfNeeded(DEVID_UUID, AIID);
     }
 
     @Test
