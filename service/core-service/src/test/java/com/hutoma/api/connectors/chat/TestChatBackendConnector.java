@@ -1,5 +1,6 @@
 package com.hutoma.api.connectors.chat;
 
+import com.google.inject.Provider;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.FakeTimerTools;
 import com.hutoma.api.common.JsonSerializer;
@@ -68,7 +69,8 @@ public class TestChatBackendConnector {
                                           final TrackedThreadSubPool threadSubPool, final ILogger logger,
                                           final JsonSerializer serializer,
                                           final WnetServicesConnector controllerConnector) {
-            super(jerseyClient, tools, config, threadSubPool, logger, serializer, controllerConnector);
+            super(jerseyClient, tools, config, threadSubPool, logger, serializer, controllerConnector,
+                    mock(Provider.class));
         }
 
         @Override

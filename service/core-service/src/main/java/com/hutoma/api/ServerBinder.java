@@ -20,6 +20,7 @@ import com.hutoma.api.connectors.aiservices.RnnServicesConnector;
 import com.hutoma.api.connectors.aiservices.WnetServicesConnector;
 import com.hutoma.api.connectors.chat.AIChatServices;
 import com.hutoma.api.connectors.chat.ChatAimlConnector;
+import com.hutoma.api.connectors.chat.ChatBackendRequester;
 import com.hutoma.api.connectors.chat.ChatRnnConnector;
 import com.hutoma.api.connectors.chat.ChatWnetConnector;
 import com.hutoma.api.connectors.db.*;
@@ -136,6 +137,7 @@ public class ServerBinder extends AbstractBinder {
         bind(RnnServicesConnector.class).to(RnnServicesConnector.class).in(Singleton.class);
         bind(AimlServicesConnector.class).to(AimlServicesConnector.class);
         bind(AiServicesQueue.class).to(AiServicesQueue.class);
+        bind(ChatBackendRequester.class).to(ChatBackendRequester.class);
 
         // UI
         bind(UILogic.class).to(UILogic.class);

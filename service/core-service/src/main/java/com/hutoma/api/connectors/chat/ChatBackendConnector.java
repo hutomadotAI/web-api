@@ -36,6 +36,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.ws.rs.core.Response;
 
 import static org.glassfish.jersey.client.ClientProperties.CONNECT_TIMEOUT;
@@ -55,12 +56,16 @@ public abstract class ChatBackendConnector {
     protected final JsonSerializer serializer;
     private final TrackedThreadSubPool threadSubPool;
     private final ControllerConnector controllerConnector;
+    private final Provider<ChatBackendRequester> requesterProvider;
+
+    private long deadlineTimestamp;
 
     @Inject
     public ChatBackendConnector(final JerseyClient jerseyClient, final Tools tools, final Config config,
                                 final TrackedThreadSubPool threadSubPool,
                                 final ILogger logger, final JsonSerializer serializer,
-                                final ControllerConnector controllerConnector) {
+                                final ControllerConnector controllerConnector,
+                                final Provider<ChatBackendRequester> requesterProvider) {
         this.jerseyClient = jerseyClient;
         this.tools = tools;
         this.config = config;
@@ -68,6 +73,7 @@ public abstract class ChatBackendConnector {
         this.logger = logger;
         this.serializer = serializer;
         this.controllerConnector = controllerConnector;
+        this.requesterProvider = requesterProvider;
     }
 
     protected abstract BackendServerType getServerType();
@@ -76,6 +82,9 @@ public abstract class ChatBackendConnector {
                                                      final List<AiDevId> ais, ChatState chatState)
             throws NoServerAvailableException, AiControllerException {
         List<RequestCallable> callables = new ArrayList<>();
+
+        // calculate the time at which we give up on all calls to backend servers
+        deadlineTimestamp = tools.getTimestamp() + config.getBackendCombinedRequestTimeoutMs();
 
         ServerEndpointRequestMulti serverEndpointRequestMulti = new ServerEndpointRequestMulti();
         ais.forEach(aiDevId -> {
@@ -86,6 +95,7 @@ public abstract class ChatBackendConnector {
                 new HashMap<>():
                 this.controllerConnector.getBackendChatEndpointMulti(serverEndpointRequestMulti);
 
+        // check that there is an endpoint for each ai we need to call
         for (AiDevId ai : ais) {
             UUID aiid = ai.getAiid();
             ApiServerEndpointMulti.ServerEndpointResponse endpoint = endpointMap.get(aiid);
@@ -93,20 +103,18 @@ public abstract class ChatBackendConnector {
                 throw new NoServerAvailableException(String.format("No server available for %s for %s on %s",
                         aiid.toString(), RequestFor.Chat.toString(), this.getServerType().value()));
             }
-
-            Map<String, String> chatParamsThisAi = chatParams;
-            if (ai.getAiid().equals(chatState.getLockedAiid())) {
-                chatParamsThisAi = new HashMap<>(chatParams);
-                chatParamsThisAi.put("history", chatState.getHistory());
-                chatParamsThisAi.put("topic", chatState.getTopic());
-            }
-
-            // Note that it's ok to get a null/empty hash, we just won't use that endpoint.
-            callables.add(new RequestCallable(
-                    createCallable(endpoint.getServerUrl(), ai.getDevId(), ai.getAiid(), chatParamsThisAi,
-                            endpoint.getHash()), endpoint.getServerIdentifier()));
         }
 
+        // generate the callables
+        for (AiDevId ai : ais) {
+            UUID aiid = ai.getAiid();
+            ApiServerEndpointMulti.ServerEndpointResponse endpoint = endpointMap.get(aiid);
+            ChatBackendRequester chatBackendRequester = requesterProvider.get()
+                    .initialise(ai, endpoint, chatParams, chatState, deadlineTimestamp);
+            callables.add(new RequestCallable(chatBackendRequester, endpoint.getServerIdentifier()));
+        }
+
+        // start the calls
         return this.execute(callables);
     }
 
@@ -282,7 +290,6 @@ public abstract class ChatBackendConnector {
                                                         final Map<String, String> params, final String aiHash) {
 
         // create call to back-end chat endpoints
-        // e.g.
         //     http://wnet:8083/ai/c930c441-bd90-4029-b2df-8dbb08b37b32/9f376458-20ca-4d13-a04c-4d835232b90b/chat
         //     ?q=my+name+is+jim&chatId=8fb944b8-d2d0-4a42-870b-4347c9689fae
         JerseyWebTarget target = this.jerseyClient

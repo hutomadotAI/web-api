@@ -14,7 +14,6 @@ import javax.inject.Singleton;
 @Singleton
 public class WnetServicesConnector extends ControllerConnector {
 
-
     @Inject
     public WnetServicesConnector(final Config config, final JsonSerializer serializer, final JerseyClient jerseyClient,
                                 final ILogger logger, final Tools tools) {
