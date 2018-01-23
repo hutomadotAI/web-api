@@ -106,6 +106,10 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON `hutoma`.`entity` TO 'entityUser'@'127.0
 
 GRANT SELECT ON `hutoma`.`intent_variable` TO 'entityUser'@'127.0.0.1';
 
+GRANT SELECT ON `hutoma`.`intent` TO 'entityUser'@'127.0.0.1';
+
+GRANT SELECT ON `hutoma`.`ai` TO 'entityUser'@'127.0.0.1';
+
 # Privileges for `hutoma_caller`@`%`
 
 GRANT USAGE ON *.* TO 'hutoma_caller'@'%' IDENTIFIED BY PASSWORD '*EAF232196B73ACE914A99F0607D770FB81BDE348';

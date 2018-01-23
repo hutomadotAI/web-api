@@ -6,74 +6,18 @@ required for the next deployment.
 
 USE `hutoma`;
 
-ALTER TABLE `chatState` ADD COLUMN `chat_target` TINYINT(1) DEFAULT 0 AFTER `confidence_threshold`;
+GRANT SELECT ON `hutoma`.`intent` TO 'entityUser'@'127.0.0.1';
+GRANT SELECT ON `hutoma`.`ai` TO 'entityUser'@'127.0.0.1';
 
-DROP PROCEDURE `setChatState`;
+DROP PROCEDURE `deleteEntity`;
 DELIMITER ;;
-CREATE DEFINER=`aiWriter`@`127.0.0.1` PROCEDURE `setChatState`(
-  IN `param_devId` VARCHAR(50),
-  IN `param_chatId` VARCHAR(50),
-  IN `param_timestamp` TIMESTAMP,
-  IN `param_topic` VARCHAR(250),
-  IN `param_history` VARCHAR(1024),
-  IN `param_locked_aiid` VARCHAR(50),
-  IN `param_entity_values` TEXT,
-  IN `param_confidence_threshold` DOUBLE,
-  IN `param_chat_target` TINYINT(1))
+CREATE DEFINER=`entityUser`@`127.0.0.1` PROCEDURE `deleteEntity`(
+  IN in_dev_id VARCHAR(50),
+  IN in_entity_id int(11))
 BEGIN
-    INSERT INTO chatState (dev_id, chat_id, timestamp, topic, history, locked_aiid, entity_values, confidence_threshold, chat_target)
-    VALUES(param_devId, param_chatId, param_timestamp, param_topic, param_history, param_locked_aiid, param_entity_values, param_confidence_threshold, param_chat_target)
-    ON DUPLICATE KEY UPDATE timestamp = param_timestamp, topic = param_topic, history = param_history,
-      locked_aiid = param_locked_aiid, entity_values = param_entity_values, confidence_threshold = param_confidence_threshold, chat_target = param_chat_target;
-  END ;;
-DELIMITER ;
-
-ALTER TABLE `hutoma`.`memoryIntent` 
-CHANGE COLUMN `variables` `variables` MEDIUMTEXT NOT NULL ;
-
-DROP PROCEDURE `updateMemoryIntent`;
-DELIMITER ;;
-CREATE DEFINER=`userTableWriter`@`127.0.0.1` PROCEDURE `updateMemoryIntent`(IN `param_name` VARCHAR(50), IN `param_aiid` VARCHAR(50), IN `param_chatId` VARCHAR(50),
-                                                                            IN `param_variables` MEDIUMTEXT, IN `param_isFulFilled` TINYINT(1))
-BEGIN
-    INSERT INTO memoryIntent (aiid, chatId, name, variables, lastAccess, isFulfilled)
-    VALUES(param_aiid, param_chatId, param_name, param_variables, NOW(), param_isFulFilled)
-
-    ON DUPLICATE KEY UPDATE variables = param_variables, lastAccess = NOW(), isFulfilled = param_isFulFilled;
-  END ;;
-DELIMITER ;
-
-DROP PROCEDURE `getUserDetails`;
-DELIMITER ;;
-CREATE DEFINER=`userTableReader`@`127.0.0.1` PROCEDURE `getUserDetails`(IN `param_username` VARCHAR(50))
-BEGIN
-    SELECT *
-    FROM `users`
-    WHERE `username`=param_username;
-  END;;
-DELIMITER ;
-
-DELIMITER ;;
-CREATE DEFINER=`userTableReader`@`127.0.0.1` PROCEDURE `getAllUsers`()
-BEGIN
-    SELECT *
-    FROM `users`;
-  END;;
-DELIMITER ;
-
-DELIMITER ;;
-CREATE DEFINER=`userTableReader`@`127.0.0.1` PROCEDURE `getUserFromDevId`(IN `param_devId` VARCHAR(50))
-BEGIN
-    SELECT *
-    FROM `users`
-    WHERE `dev_id`=param_devId;
-  END;;
-DELIMITER ;
-
-
-DELIMITER ;;
-CREATE DEFINER=`userTableWriter`@`127.0.0.1` PROCEDURE `updateDevToken`(IN `param_devId` VARCHAR(50), IN `param_devToken` VARCHAR(250))
-BEGIN
-    UPDATE `users` SET `dev_token` = param_devToken WHERE `dev_id` = param_devId;
-  END;;
+    DELETE FROM `entity` WHERE `in_dev_id`=`dev_id` AND `in_entity_id`=`id`
+      AND NOT EXISTS (
+     SELECT NULL FROM `intent_variable` iv INNER JOIN `intent` ON `intent`.`id`=iv.`intent_id` INNER JOIN `ai` ON `ai`.`aiid`=`intent`.`aiid` 
+     WHERE iv.`entity_id`=`in_entity_id` AND `ai`.`deleted`=0);
+END;;
 DELIMITER ;
