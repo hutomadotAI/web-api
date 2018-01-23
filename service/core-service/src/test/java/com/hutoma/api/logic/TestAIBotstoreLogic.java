@@ -3,24 +3,23 @@ package com.hutoma.api.logic;
 import com.google.gson.JsonParseException;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.DeveloperInfoHelper;
-import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.TestBotHelper;
 import com.hutoma.api.common.TestDataHelper;
-import com.hutoma.api.connectors.db.DatabaseEntitiesIntents;
 import com.hutoma.api.connectors.db.DatabaseAI;
+import com.hutoma.api.connectors.db.DatabaseEntitiesIntents;
 import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.connectors.db.DatabaseMarketplace;
 import com.hutoma.api.connectors.db.DatabaseTransaction;
 import com.hutoma.api.containers.ApiAiBot;
 import com.hutoma.api.containers.ApiAiBotList;
 import com.hutoma.api.containers.ApiBotStructure;
-import com.hutoma.api.containers.ApiEntity;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.ApiString;
 import com.hutoma.api.containers.sub.AiBot;
 import com.hutoma.api.containers.sub.BotStructure;
 import com.hutoma.api.containers.sub.TrainingStatus;
+import com.hutoma.api.logging.ILogger;
 
 import org.apache.commons.lang.SystemUtils;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
@@ -455,9 +454,9 @@ public class TestAIBotstoreLogic {
         when(this.fakeDatabaseMarketplace.getBotDetails(anyInt())).thenReturn(bot);
     }
 
-    public static BotStructure getBotStructure() {
-        return new BotStructure("bot", "desc", Collections.emptyList(), "aaa\nbbb", new HashMap<String, ApiEntity>(),
-                1, false, 1, 1.0, 1, Locale.UK.toLanguageTag(), "UTC");
+    private static BotStructure getBotStructure() {
+        return new BotStructure("bot", "desc", Collections.emptyList(), "aaa\nbbb", new HashMap<>(),
+                1, false, 1, 1.0, 1, Locale.UK.toLanguageTag(), "UTC", Collections.singletonList("Dunno"), "");
     }
 
     public static String getBotStructureTemplate() {

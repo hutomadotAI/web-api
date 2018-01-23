@@ -30,6 +30,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -719,7 +720,9 @@ public class AILogic {
                               final double newConfidence,
                               final int newVoice,
                               final Locale newLanguage,
-                              final String newTimezone) {
+                              final String newTimezone,
+                              final List<String> defaultResponses,
+                              final String passthroughUrl) {
         ApiResult result = this.exportBotData(devId, aiidToClone);
         if (result.getStatus().getCode() != HttpURLConnection.HTTP_OK) {
             return result;
@@ -741,6 +744,8 @@ public class AILogic {
         botStructure.setVoice(newVoice);
         botStructure.setLanguage(newLanguage.toLanguageTag());
         botStructure.setTimezone(newTimezone);
+        botStructure.setDefaultResponses(defaultResponses);
+        botStructure.setPassthroughUrl(passthroughUrl);
 
         return this.importBot(devId, botStructure);
     }
@@ -810,7 +815,6 @@ public class AILogic {
                     importedBot.getTimezone(),
                     transaction);
 
-
             try {
                 bot = (ApiAi) result;
             } catch (ClassCastException e) {
@@ -823,6 +827,19 @@ public class AILogic {
                 bot = (ApiAi) this.getSingleAI(devId, aiid, transaction);
             } catch (Exception e) {
                 throw new BotImportException("Failed to retrieve newly imported bot.", e);
+            }
+
+            if (!this.databaseAi.updatePassthroughUrl(devId, aiid, importedBot.getPassthroughUrl(), transaction)) {
+                throw new BotImportException("Failed to setup the new bot");
+            }
+
+            List<String> defaultResponses =
+                    (importedBot.getDefaultResponses() == null || importedBot.getDefaultResponses().isEmpty())
+                            ? Collections.singletonList(ChatLogic.COMPLETELY_LOST_RESULT)
+                            : importedBot.getDefaultResponses();
+            if (!this.databaseAi.updateDefaultChatResponses(devId, aiid, defaultResponses,
+                    this.jsonSerializer, transaction)) {
+                throw new BotImportException("Failed to setup the new bot");
             }
 
             List<Entity> userEntities = null;

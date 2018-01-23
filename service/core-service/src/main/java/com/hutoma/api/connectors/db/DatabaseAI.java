@@ -470,6 +470,31 @@ public class DatabaseAI extends Database  {
         }
     }
 
+    public boolean updatePassthroughUrl(final UUID devId, final UUID aiid, final String passthroughUrl,
+                                        final DatabaseTransaction transaction)
+            throws DatabaseException {
+        try (DatabaseCall call = transaction == null ? this.callProvider.get() : transaction.getDatabaseCall()) {
+            call.initialise("updatePassthroughUrl", 3)
+                    .add(devId).add(aiid).add(passthroughUrl);
+            return call.executeUpdate() > 0;
+        }
+    }
+
+    public boolean updateDefaultChatResponses(final UUID devId, final UUID aiid,
+                                              final List<String> defaultChatResponses,
+                                              final JsonSerializer serializer,
+                                              final DatabaseTransaction transaction)
+        throws DatabaseException {
+
+        try (DatabaseCall call = transaction == null ? this.callProvider.get() : transaction.getDatabaseCall()) {
+            call.initialise("updateDefaultChatResponses", 3)
+                    .add(devId)
+                    .add(aiid)
+                    .add(serializer.serialize(defaultChatResponses));
+            return call.executeUpdate() > 0;
+        }
+    }
+
     public List<AiBot> getBotsLinkedToAi(final UUID devId, final UUID aiid) throws DatabaseException {
         return getBotsLinkedToAi(devId, aiid, null);
     }

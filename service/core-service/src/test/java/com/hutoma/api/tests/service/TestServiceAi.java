@@ -228,6 +228,8 @@ public class TestServiceAi extends ServiceTestBase {
         when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
         when(this.fakeDatabaseAi.getAI(any(), any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
         when(this.fakeTools.createNewRandomUUID()).thenReturn(aiid);
+        when(this.fakeDatabaseAi.updatePassthroughUrl(any(), any(), anyString(), any())).thenReturn(true);
+        when(this.fakeDatabaseAi.updateDefaultChatResponses(any(), any(), any(), any(), any())).thenReturn(true);
         TestDataHelper.mockDatabaseCreateAIInTrans(this.fakeDatabaseAi, aiid);
           final Response response = target(BOT_CLONE_PATH)
                 .request()

@@ -1,8 +1,8 @@
 package com.hutoma.api.logic;
 
 import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.connectors.db.DatabaseEntitiesIntents;
 import com.hutoma.api.connectors.db.DatabaseAI;
+import com.hutoma.api.connectors.db.DatabaseEntitiesIntents;
 import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.ApiEntity;
@@ -47,6 +47,7 @@ public class BotStructureSerializer {
         }
         return new BotStructure(bot.getName(), bot.getDescription(), intents, trainingFile,
                 entityMap, BOT_SCHEMA_VERSION, bot.getIsPrivate(), bot.getPersonality(),
-                bot.getConfidence(), bot.getVoice(), bot.getLanguage().toLanguageTag(), bot.getTimezone());
+                bot.getConfidence(), bot.getVoice(), bot.getLanguage().toLanguageTag(), bot.getTimezone(),
+                bot.getDefaultChatResponses(), bot.getPassthroughUrl());
     }
 }

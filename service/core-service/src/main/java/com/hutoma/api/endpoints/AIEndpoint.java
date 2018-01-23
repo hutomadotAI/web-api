@@ -1,5 +1,6 @@
 package com.hutoma.api.endpoints;
 
+import com.google.common.base.Strings;
 import com.hutoma.api.access.RateKey;
 import com.hutoma.api.access.RateLimit;
 import com.hutoma.api.access.Role;
@@ -27,6 +28,7 @@ import com.webcohesion.enunciate.metadata.rs.StatusCodes;
 import com.webcohesion.enunciate.metadata.rs.TypeHint;
 
 import java.net.HttpURLConnection;
+import java.util.Collections;
 import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.container.ContainerRequestContext;
@@ -254,7 +256,9 @@ public class AIEndpoint {
             @Context ContainerRequestContext requestContext,
             @DefaultValue("false") @FormParam("is_private") boolean isPrivate,
             @DefaultValue("0") @FormParam("personality") int personality,
-            @DefaultValue("0") @FormParam("voice") int voice) {
+            @DefaultValue("0") @FormParam("voice") int voice,
+            @DefaultValue("") @FormParam("default_responses") String defaultResponses,
+            @DefaultValue("") @FormParam("passthrough_url") String passthroughUrl) {
         ApiResult result = this.aiLogic.cloneBot(
                 ParameterFilter.getDevid(requestContext),
                 ParameterFilter.getAiid(requestContext),
@@ -265,7 +269,11 @@ public class AIEndpoint {
                 ParameterFilter.getAiConfidence(requestContext),
                 voice,
                 ParameterFilter.getLocale(requestContext),
-                ParameterFilter.getTimezone(requestContext));
+                ParameterFilter.getTimezone(requestContext),
+                Strings.isNullOrEmpty(defaultResponses)
+                    ? Collections.emptyList()
+                    : this.serializer.deserializeList(defaultResponses),
+                passthroughUrl);
         return result.getResponse(this.serializer).build();
     }
 

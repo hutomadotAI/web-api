@@ -130,9 +130,9 @@ public class AIChatServices extends ServerConnector {
 
         // make copies of the AI lists
         List<AiDevId> wnetAIs = new ArrayList<>(listAis);
-        List<AiDevId> rnnAIs = config.isRnnEnabled()?
-                new ArrayList<>(listAis) :
-                new ArrayList<>();
+        List<AiDevId> rnnAIs = config.isRnnEnabled()
+                ? new ArrayList<>(listAis)
+                : new ArrayList<>();
 
         // add the AI to the list if the server can chat
         if (canChatWith.contains(BackendServerType.WNET)) {
@@ -285,7 +285,7 @@ public class AIChatServices extends ServerConnector {
     }
 
     public static class AiNotReadyToChat extends AiServicesException {
-        public AiNotReadyToChat(final String message) {
+        AiNotReadyToChat(final String message) {
             super(message);
         }
     }

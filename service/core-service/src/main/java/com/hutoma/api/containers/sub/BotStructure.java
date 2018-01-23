@@ -4,6 +4,7 @@ import com.google.gson.annotations.SerializedName;
 import com.hutoma.api.containers.ApiEntity;
 import com.hutoma.api.containers.ApiIntent;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -38,11 +39,16 @@ public class BotStructure {
     private HashMap<String, ApiEntity> entities;
     @SerializedName("version")
     private int version;
+    @SerializedName("default_responses")
+    private List<String> defaultResponses;
+    @SerializedName("passthrough_url")
+    private String passthroughUrl;
 
     public BotStructure(final String name, final String description, final List<ApiIntent> intents,
                         final String trainingFile, final HashMap<String, ApiEntity> entities, final int version,
                         final boolean isPrivate, final int personality, final double confidence, final int voice,
-                        final String language, final String timezone) {
+                        final String language, final String timezone, final List<String> defaultResponses,
+                        final String passthroughUrl) {
         this.name = name;
         this.description = description;
         this.intents = intents;
@@ -55,6 +61,8 @@ public class BotStructure {
         this.voice = voice;
         this.language = language;
         this.timezone = timezone;
+        this.defaultResponses = defaultResponses;
+        this.passthroughUrl = passthroughUrl;
     }
 
     /**
@@ -74,6 +82,8 @@ public class BotStructure {
         this.voice = other.voice;
         this.language = other.language;
         this.timezone = other.timezone;
+        this.defaultResponses = new ArrayList<>(other.defaultResponses);
+        this.passthroughUrl = other.passthroughUrl;
     }
 
     public String getName() {
@@ -124,6 +134,14 @@ public class BotStructure {
         return this.timezone;
     }
 
+    public List<String> getDefaultResponses() {
+        return this.defaultResponses;
+    }
+
+    public String getPassthroughUrl() {
+        return this.passthroughUrl;
+    }
+
     public void setName(final String name) {
         this.name = name;
     }
@@ -170,5 +188,13 @@ public class BotStructure {
 
     public void setTimezone(final String timezone) {
         this.timezone = timezone;
+    }
+
+    public void setDefaultResponses(final List<String> defaultResponses) {
+        this.defaultResponses = defaultResponses;
+    }
+
+    public void setPassthroughUrl(final String passthroughUrl) {
+        this.passthroughUrl = passthroughUrl;
     }
 }

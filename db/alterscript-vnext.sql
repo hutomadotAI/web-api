@@ -21,3 +21,31 @@ BEGIN
      WHERE iv.`entity_id`=`in_entity_id` AND `ai`.`deleted`=0);
 END;;
 DELIMITER ;
+
+DELIMITER ;;
+CREATE DEFINER=`aiWriter`@`127.0.0.1` PROCEDURE `updateDefaultChatResponses`(
+  IN in_dev_id VARCHAR(50),
+  IN in_aiid VARCHAR(50),
+  IN in_default_responses TEXT)
+BEGIN
+
+  UPDATE `ai`
+  SET `ai`.`default_chat_responses` = in_default_responses
+  WHERE `ai`.`dev_id` = in_dev_id AND `ai`.`aiid` = in_aiid;
+
+END;;
+DELIMITER ;
+
+DELIMITER ;;
+CREATE DEFINER=`aiWriter`@`127.0.0.1` PROCEDURE `updatePassthroughUrl`(
+  IN in_dev_id VARCHAR(50),
+  IN in_aiid VARCHAR(50),
+  IN in_passthrough_url VARCHAR(2048))
+BEGIN
+
+  UPDATE `ai`
+  SET `ai`.`passthrough_url` = in_passthrough_url
+  WHERE `ai`.`dev_id` = in_dev_id AND `ai`.`aiid` = in_aiid;
+
+END;;
+DELIMITER ;

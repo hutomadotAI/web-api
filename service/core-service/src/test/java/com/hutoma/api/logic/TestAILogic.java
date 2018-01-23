@@ -851,11 +851,13 @@ public class TestAILogic {
         final int newVoice = 9;
         final Locale newLanguage = Locale.ITALY;
         final String newTimezone = "Europe/Dublin";
+        final List<String> newDefaultResponses = Collections.singletonList("New default response");
+        final String newPassthroughUrl = "passthrough url";
 
         ApiAi importedAi = new ApiAi(generatedAiid.toString(), "token", newName, newDescription, DateTime.now(),
                 newIsPrivate, baseAi.getBackendStatus(), baseAi.trainingFileUploaded(), newPersonality,
                 newConfidence, newVoice, newLanguage, newTimezone, null,
-                baseAi.getPassthroughUrl(), baseAi.getDefaultChatResponses(), null);
+                newPassthroughUrl, newDefaultResponses, null);
 
         // For when we read the original AI for export
         when(this.fakeDatabaseAi.getAI(DEVID_UUID, UUID.fromString(baseAi.getAiid()), this.fakeSerializer)).thenReturn(baseAi);
@@ -865,11 +867,14 @@ public class TestAILogic {
         when(this.fakeDatabaseAi.getAI(DEVID_UUID, generatedAiid, fakeSerializer)).thenReturn(importedAi);
         when(this.fakeDatabaseAi.getAiTrainingFile(any())).thenReturn(trainingFile);
         when(this.fakeTools.createNewRandomUUID()).thenReturn(generatedAiid);
+        when(this.fakeDatabaseAi.updatePassthroughUrl(any(), any(), anyString(), any())).thenReturn(true);
+        when(this.fakeDatabaseAi.updateDefaultChatResponses(any(), any(), any(), any(), any())).thenReturn(true);
         TestDataHelper.mockDatabaseCreateAIInTrans(this.fakeDatabaseAi, generatedAiid);
 
         AILogic spyLogic = spy(this.aiLogic);
         ApiAi cloned = (ApiAi) spyLogic.cloneBot(originalBot.getDevId(), originalBot.getAiid(),
-                newName, newDescription, newIsPrivate, newPersonality, newConfidence, newVoice, newLanguage, newTimezone);
+                newName, newDescription, newIsPrivate, newPersonality, newConfidence, newVoice, newLanguage,
+                newTimezone, newDefaultResponses, newPassthroughUrl);
 
         ArgumentCaptor<BotStructure> argument = ArgumentCaptor.forClass(BotStructure.class);
         verify(spyLogic).importBot(any(), argument.capture());
@@ -882,14 +887,15 @@ public class TestAILogic {
         Assert.assertEquals(newVoice, argument.getValue().getVoice());
         Assert.assertEquals(newPersonality, argument.getValue().getPersonality());
 
-        Assert.assertEquals(baseAi.getPassthroughUrl(), cloned.getPassthroughUrl());
-        Assert.assertEquals(baseAi.getDefaultChatResponses(), cloned.getDefaultChatResponses());
+        Assert.assertEquals(newPassthroughUrl, cloned.getPassthroughUrl());
+        Assert.assertEquals(newDefaultResponses, cloned.getDefaultChatResponses());
     }
 
     @Test
     public void testCloneBot_errorExportingOrImporting() throws DatabaseException {
         when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(null);
-        ApiResult result = this.aiLogic.cloneBot(DEVID_UUID, AIID, null, null, true, 1, 0.1, 0, Locale.ITALY, null);
+        ApiResult result = this.aiLogic.cloneBot(DEVID_UUID, AIID, null, null, true, 1, 0.1, 0,
+                Locale.ITALY, null, null, null);
         Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
     }
 
