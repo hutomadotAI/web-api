@@ -81,41 +81,19 @@ public class TestChatBackendConnector {
     }
 
     @Test
-    public void testParameterTemplates() {
-        HashMap<String, String> paramMap = new HashMap<>();
-        paramMap.put("key", "value");
-        this.connector.createCallable("endpoint", TestDataHelper.DEVID_UUID, TestDataHelper.AIID,
-                paramMap, "hash");
-        verify(this.fakeTarget, times(1)).resolveTemplates(any());
-    }
-
-    @Test
-    public void testParameterTemplates_Nulls() {
-        HashMap<String, String> paramMap = new HashMap<>();
-        paramMap.put("key", "value");
-        paramMap.put("key2", null);
-        this.connector.createCallable("endpoint", TestDataHelper.DEVID_UUID, TestDataHelper.AIID,
-                paramMap, "hash");
-        verify(this.fakeTarget, times(1)).resolveTemplates(any());
-    }
-
-    @Test
-    public void testParameterTemplates_NullHash() {
-        HashMap<String, String> paramMap = new HashMap<>();
-        paramMap.put("key", "value");
-        this.connector.createCallable("endpoint", TestDataHelper.DEVID_UUID, TestDataHelper.AIID,
-                paramMap, null);
-        verify(this.fakeTarget, times(1)).resolveTemplates(any());
-    }
-
-    @Test
-    public void testWaitForResult_Done() throws ChatBackendConnector.AiControllerException {
+    public void testWaitForResult_Done() throws ChatBackendConnector.AiControllerException,
+            ExecutionException, InterruptedException {
+        when(fakeFuture.get()).thenReturn(new InvocationResult(
+                null, "", 0, 0, 0, TestDataHelper.AIID));
         when(fakeFuture.isDone()).thenReturn(true);
         this.connector.waitForResult(this.fakeRequestInProgress, 10);
     }
 
     @Test
-    public void testWaitForResult_NotDone() throws ChatBackendConnector.AiControllerException {
+    public void testWaitForResult_NotDone() throws ChatBackendConnector.AiControllerException,
+            InterruptedException, ExecutionException, TimeoutException {
+        when(fakeFuture.get(anyLong(), any())).thenReturn(new InvocationResult(
+                null, "", 0, 0, 0, TestDataHelper.AIID));
         when(fakeFuture.isDone()).thenReturn(false);
         this.connector.waitForResult(this.fakeRequestInProgress, 10);
     }

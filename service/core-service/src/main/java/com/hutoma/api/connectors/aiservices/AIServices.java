@@ -137,25 +137,25 @@ public class AIServices extends ServerConnector {
         HashMap<String, Callable<InvocationResult>> callables = new HashMap<>();
         for (String endpoint : this.getEndpointsForAllServerTypes()) {
             callables.put(endpoint, () -> new InvocationResult(
-                    null,
                     this.jerseyClient
                             .target(endpoint)
                             .path(devId.toString())
                             .property(CONNECT_TIMEOUT, (int) this.connectConfig.getBackendConnectCallTimeoutMs())
                             .property(READ_TIMEOUT, (int) this.connectConfig.getBackendTrainingCallTimeoutMs())
                             .request()
-                            .delete(), endpoint, 0));
+                            .delete(),
+                    endpoint, 0, 0, 1, null));
         }
         executeAndWait(callables);
     }
 
     private List<String> getEndpointsForAllServerTypes() {
         List<String> list = new ArrayList<>();
-        Optional<ServerTrackerInfo> info = this.wnetServicesConnector.getVerifiedEndpointMap().values().stream()
+        Optional<ServerTrackerInfo> info = this.wnetServicesConnector.getVerifiedEndpointMap(serializer).values().stream()
                 .findFirst();
         info.ifPresent(serverTrackerInfo -> list.add(serverTrackerInfo.getServerUrl()));
         if (this.connectConfig.isRnnEnabled()) {
-            info = this.rnnServicesConnector.getVerifiedEndpointMap().values().stream()
+            info = this.rnnServicesConnector.getVerifiedEndpointMap(serializer).values().stream()
                     .findFirst();
             info.ifPresent(serverTrackerInfo -> list.add(serverTrackerInfo.getServerUrl()));
         }
@@ -197,8 +197,8 @@ public class AIServices extends ServerConnector {
             // Bug:2300
             String trainingToSend = trainingMaterials;
             try {
-                if (this.connectConfig.isRnnEnabled() && endpoint.equals(this.rnnServicesConnector.getBackendTrainingEndpoint(
-                        aiid).getServerUrl())) {
+                if (this.connectConfig.isRnnEnabled() && endpoint.equals(
+                        this.rnnServicesConnector.getBackendTrainingEndpoint(aiid, serializer).getServerUrl())) {
                     trainingToSend = removeIntentExpressions(trainingMaterials);
                 }
             } catch (NoServerAvailableException ex) {
@@ -217,13 +217,11 @@ public class AIServices extends ServerConnector {
                     .field("info", this.serializer.serialize(info), MediaType.APPLICATION_JSON_TYPE)
                     .bodyPart(bodyPart);
             callables.put(endpoint, () -> new InvocationResult(
-                    aiid,
                     this.jerseyClient
                             .target(endpoint)
                             .request()
                             .post(Entity.entity(multipart, multipart.getMediaType())),
-                    endpoint,
-                    0));
+                    endpoint, 0, 0, 1, aiid));
         }
         executeAndWait(callables);
     }
@@ -315,9 +313,9 @@ public class AIServices extends ServerConnector {
     private List<String> getListOfPrimaryEndpoints(final UUID aiid) throws AiServicesException {
         try {
             List<String> endpoints = new ArrayList<>();
-            endpoints.add(this.wnetServicesConnector.getBackendTrainingEndpoint(aiid).getServerUrl());
+            endpoints.add(this.wnetServicesConnector.getBackendTrainingEndpoint(aiid, serializer).getServerUrl());
             if (this.connectConfig.isRnnEnabled()) {
-                endpoints.add(this.rnnServicesConnector.getBackendTrainingEndpoint(aiid).getServerUrl());
+                endpoints.add(this.rnnServicesConnector.getBackendTrainingEndpoint(aiid, serializer).getServerUrl());
             }
             return endpoints;
         } catch (NoServerAvailableException noServer) {

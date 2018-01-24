@@ -2,19 +2,11 @@ package com.hutoma.api.controllers;
 
 import com.hutoma.api.common.Pair;
 import com.hutoma.api.connectors.NoServerAvailableException;
-import com.hutoma.api.connectors.RequestFor;
 import com.hutoma.api.logging.AiServiceStatusLogger;
 import com.hutoma.api.logging.ILogger;
+import com.hutoma.api.logging.LogMap;
 
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -186,12 +178,28 @@ public class ServerMetadata {
     }
 
     /***
+     * Clear one affinity from this server
+     * @param targetServer
+     */
+    private synchronized void clearSingleAffinityForServer(final ServerTracker targetServer, final UUID aiid) {
+
+        // take the aiid off the server's affinity list
+        targetServer.removeChatAffinity(aiid);
+
+        // in the affinity table, clear all the entries for this particular aiid
+        LinkedHashSet<ServerTracker> affinityList = this.serverAiAffinity.get(aiid);
+        if (affinityList != null) {
+            affinityList.clear();
+        }
+    }
+
+    /***
      * Gets the first connected
      * @param aiid
      * @return
      * @throws NoServerAvailableException
      */
-    private synchronized ServerTracker getServerForUpload(final UUID aiid) throws NoServerAvailableException {
+    protected synchronized ServerTracker getServerForUpload(final UUID aiid) throws NoServerAvailableException {
         return this.activeServerSessions.values().stream()
                 .filter(ServerTracker::isSessionNotEnding)
                 .filter(ServerTracker::canTrain)
@@ -203,20 +211,25 @@ public class ServerMetadata {
      * If nobody is servicing this AIID then we have to pick the best server to assign it to
      * and then add this server-aiid pair to the affinity table
      * @param aiid
+     * @param alreadyTried
      * @return
      * @throws NoServerAvailableException
      */
-    protected synchronized ServerTracker chooseServerToAssignAffinity(final UUID aiid) throws NoServerAvailableException {
+    protected synchronized ServerTracker chooseServerToAssignAffinity(final UUID aiid,
+                                                                      final Set<String> alreadyTried)
+            throws NoServerAvailableException {
 
         String routePickReason;
 
         // remove the ones that have no chat capacity at all
         // and remove the ones where ping hasn't succeeded yet
+        // and remove the ones that have already been tried and were too busy
         // map into a list of pairs of (ChatCapacity, Server)
         List<Pair<Double, ServerTracker>> candidates
                 = this.activeServerSessions.values().stream()
                 .filter(ServerTracker::isSessionNotEnding)
                 .filter(ServerTracker::isEndpointVerified)
+                .filter(tracker -> !alreadyTried.contains(tracker.getServerIdentifier()))
                 .map(server -> new Pair<>(server.getChatLoadFactor(), server))
                 .filter(pair -> !Double.isNaN(pair.getA()))
                 .collect(toList());
@@ -262,7 +275,8 @@ public class ServerMetadata {
         }
 
         this.logger.logInfo(LOGFROM,
-                String.format("Routing to %s because %s", pick.describeServer(), routePickReason));
+                String.format("Routing to %s because %s", pick.describeServer(), routePickReason),
+                LogMap.map("PreviousTries", alreadyTried.size()));
         addAffinity(pick, aiid);
         return pick;
     }
@@ -302,30 +316,22 @@ public class ServerMetadata {
      * @return
      * @throws NoServerAvailableException
      */
-    protected synchronized ServerTracker getServerForChat(UUID aiid) throws NoServerAvailableException {
+    protected synchronized ServerTracker getServerForChat(UUID aiid, Set<String> alreadyTried)
+            throws NoServerAvailableException {
+        // was there a previous affinity entry?
         ServerTracker server = existingAffinity(aiid);
+
+        // has the previous affinity told us it was too busy?
+        if ((server != null) && alreadyTried.contains(server.getServerIdentifier())) {
+            // if so, remove the affinity and reassign
+            clearSingleAffinityForServer(server, aiid);
+            server = null;
+        }
+        // assign a new affinity
         if (server == null) {
-            server = chooseServerToAssignAffinity(aiid);
+            server = chooseServerToAssignAffinity(aiid, alreadyTried);
         }
         return server;
-    }
-
-    /***
-     * Gets a server to service a request
-     *
-     * @param aiid
-     * @return
-     * @throws NoServerAvailableException
-     */
-    protected synchronized ServerTracker getServerFor(UUID aiid, RequestFor requestFor) throws NoServerAvailableException {
-        switch (requestFor) {
-            case Chat:
-                return getServerForChat(aiid);
-            case Training:
-                return getServerForUpload(aiid);
-            default:
-        }
-        return null;
     }
 
 }

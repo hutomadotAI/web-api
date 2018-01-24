@@ -16,11 +16,10 @@ import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.containers.sub.ChatState;
 import com.hutoma.api.containers.sub.ServerEndpointRequestMulti;
 import com.hutoma.api.logging.ILogger;
+import com.hutoma.api.logging.LogMap;
 import com.hutoma.api.thread.TrackedThreadSubPool;
 
 import org.glassfish.jersey.client.JerseyClient;
-import org.glassfish.jersey.client.JerseyInvocation;
-import org.glassfish.jersey.client.JerseyWebTarget;
 
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
@@ -34,13 +33,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.ws.rs.core.Response;
-
-import static org.glassfish.jersey.client.ClientProperties.CONNECT_TIMEOUT;
-import static org.glassfish.jersey.client.ClientProperties.READ_TIMEOUT;
 
 /**
  * Base class for backend controllers.
@@ -93,7 +88,7 @@ public abstract class ChatBackendConnector {
         });
         Map<UUID, ApiServerEndpointMulti.ServerEndpointResponse> endpointMap = ais.isEmpty()?
                 new HashMap<>():
-                this.controllerConnector.getBackendChatEndpointMulti(serverEndpointRequestMulti);
+                this.controllerConnector.getBackendChatEndpointMulti(serverEndpointRequestMulti, serializer);
 
         // check that there is an endpoint for each ai we need to call
         for (AiDevId ai : ais) {
@@ -110,7 +105,7 @@ public abstract class ChatBackendConnector {
             UUID aiid = ai.getAiid();
             ApiServerEndpointMulti.ServerEndpointResponse endpoint = endpointMap.get(aiid);
             ChatBackendRequester chatBackendRequester = requesterProvider.get()
-                    .initialise(ai, endpoint, chatParams, chatState, deadlineTimestamp);
+                    .initialise(this.controllerConnector, ai, endpoint, chatParams, chatState, deadlineTimestamp);
             callables.add(new RequestCallable(chatBackendRequester, endpoint.getServerIdentifier()));
         }
 
@@ -132,13 +127,19 @@ public abstract class ChatBackendConnector {
             for (RequestInProgress future : futures) {
                 final InvocationResult result = waitForResult(future, timeoutMs);
 
+                LogMap logMap = LogMap.map("Op", "ChatWait");
+
                 if (result != null) {
+                    logMap.add("Attempts", result.getattemptNumber());
+                    logMap.add("TotalRequestTime", result.getDurationMs());
                     Response.StatusType statusInfo = result.getResponse().getStatusInfo();
                     switch (statusInfo.getStatusCode()) {
                         case HttpURLConnection.HTTP_OK:
                             break;
                         case HttpURLConnection.HTTP_NOT_FOUND:
-                            this.logger.logError(this.getLogFrom(), "AI not found: " + result.getAiid());
+                            this.logger.logError(this.getLogFrom(),
+                                    "AI not found: " + result.getAiid(),
+                                    logMap);
                             throw new AiNotFoundException("AI was not found");
                         default:
                             // generate error text from the HTTP result only
@@ -146,7 +147,7 @@ public abstract class ChatBackendConnector {
                             String errorText = String.format("http error: %d %s)",
                                     statusInfo.getStatusCode(),
                                     statusInfo.getReasonPhrase());
-                            this.logger.logError(this.getLogFrom(), errorText);
+                            this.logger.logError(this.getLogFrom(), errorText, logMap);
                             throw new AiControllerException(errorText);
                     }
 
@@ -189,6 +190,10 @@ public abstract class ChatBackendConnector {
             } else {
                 invocationResult = future.get(timeoutMs, TimeUnit.MILLISECONDS);
             }
+            if (invocationResult == null) {
+                throw new AiControllerTimeoutException(String.format("No response from %s",
+                        requestInProgress.getEndpointIdentifier()));
+            }
         } catch (TimeoutException | ExecutionException ex) {
             Throwable cause = ex;
             // execution exception may wrap a more interesting exception
@@ -199,6 +204,11 @@ public abstract class ChatBackendConnector {
             if (cause instanceof TimeoutException) {
                 throw new AiControllerTimeoutException(String.format("Timeout executing request to %s: %s",
                         requestInProgress.getEndpointIdentifier(), cause.getClass().getSimpleName()));
+            }
+            if (cause instanceof NoServerAvailableException.ServiceTooBusyException) {
+                throw new AiControllerException(
+                        String.format("Chat-core too busy to accept the chat (tried %d servers)",
+                                ((NoServerAvailableException.ServiceTooBusyException)cause).getAlreadyTried().size()));
             }
             // otherwise throw the generic form of the error
             throw new AiControllerException(String.format("Error executing request to %s: %s",
@@ -284,47 +294,6 @@ public abstract class ChatBackendConnector {
         String getEndpointIdentifier() {
             return this.endpointIdentifier;
         }
-    }
-
-    Callable<InvocationResult> createCallable(final String endpoint, final UUID devId, final UUID aiid,
-                                                        final Map<String, String> params, final String aiHash) {
-
-        // create call to back-end chat endpoints
-        //     http://wnet:8083/ai/c930c441-bd90-4029-b2df-8dbb08b37b32/9f376458-20ca-4d13-a04c-4d835232b90b/chat
-        //     ?q=my+name+is+jim&chatId=8fb944b8-d2d0-4a42-870b-4347c9689fae
-        JerseyWebTarget target = this.jerseyClient
-                .target(endpoint)
-                .path(devId.toString())
-                .path(aiid.toString())
-                .path("chat");
-
-        // make a copy of the params list but ensure that we have empty strings in the place of nulls
-        Map<String, Object> queryParamsWithoutNulls = params.entrySet()
-                .stream()
-                .collect(Collectors.toMap(p -> p.getKey(),
-                        p -> Strings.nullToEmpty(p.getValue())));
-
-        // add the hashcode to the query string
-        queryParamsWithoutNulls.put(AI_HASH_PARAM, Strings.nullToEmpty(aiHash));
-
-        // create template
-        for (String param : queryParamsWithoutNulls.keySet()) {
-            target = target.queryParam(param, String.format("{%s}", param));
-        }
-
-        // encode parameters into template
-        target = target.resolveTemplates(queryParamsWithoutNulls);
-
-        final JerseyInvocation.Builder builder = target.request();
-        return () -> {
-            long startTime = ChatBackendConnector.this.tools.getTimestamp();
-            Response response = builder
-                    .property(CONNECT_TIMEOUT, (int) this.config.getBackendConnectCallTimeoutMs())
-                    .property(READ_TIMEOUT, (int) this.config.getBackendCombinedRequestTimeoutMs())
-                    .get();
-            return new InvocationResult(aiid, response, endpoint,
-                    ChatBackendConnector.this.tools.getTimestamp() - startTime);
-        };
     }
 
     private List<RequestInProgress> execute(

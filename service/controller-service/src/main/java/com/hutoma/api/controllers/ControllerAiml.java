@@ -14,6 +14,7 @@ import com.hutoma.api.thread.ThreadSubPool;
 import org.glassfish.hk2.api.ServiceLocator;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
@@ -66,11 +67,12 @@ public class ControllerAiml extends ControllerBase {
      * So a chat request will throw a "noserver" exception unless a server has
      * explicitly registered to service this AIID
      * @param aiid
+     * @param alreadyTried
      * @return never returns
      * @throws NoServerAvailableException
      */
     @Override
-    protected synchronized ServerTracker chooseServerToAssignAffinity(final UUID aiid)
+    protected synchronized ServerTracker chooseServerToAssignAffinity(final UUID aiid, final Set<String> alreadyTried)
             throws NoServerAvailableException {
         throw new NoServerAvailableException(
                 String.format("no AIML server registered to service AIML aiid %s", aiid.toString()));

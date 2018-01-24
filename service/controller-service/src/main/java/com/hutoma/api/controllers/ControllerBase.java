@@ -15,6 +15,7 @@ import com.hutoma.api.thread.ThreadSubPool;
 
 import org.glassfish.hk2.api.ServiceLocator;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -70,8 +71,16 @@ public abstract class ControllerBase extends ServerMetadata {
         return serverSessionID;
     }
 
-    public IServerEndpoint getBackendEndpoint(UUID aiid, RequestFor requestFor) throws NoServerAvailableException {
-        ServerTracker tracker = this.getServerFor(aiid, requestFor);
+    public IServerEndpoint getUploadBackendEndpoint(UUID aiid)
+            throws NoServerAvailableException {
+        ServerTracker tracker = this.getServerForUpload(aiid);
+        return tracker;
+    }
+
+    public IServerEndpoint getChatBackendEndpoint(UUID aiid, final List<String> alreadyTried)
+            throws NoServerAvailableException {
+        ServerTracker tracker = this.getServerForChat(aiid,
+                (alreadyTried == null) ? Collections.EMPTY_SET : new HashSet<>(alreadyTried));
         return tracker;
     }
 

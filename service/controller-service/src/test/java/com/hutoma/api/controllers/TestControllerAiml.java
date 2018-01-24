@@ -16,6 +16,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Collections;
 import java.util.UUID;
 
 import static org.mockito.Mockito.mock;
@@ -48,7 +49,7 @@ public class TestControllerAiml {
     @Test
     public void testControllerAiml_noServer() {
         try {
-            this.test.getServerFor(UUID.randomUUID(), RequestFor.Chat);
+            this.test.getServerForChat(UUID.randomUUID(), Collections.EMPTY_SET);
         } catch (NoServerAvailableException noServerAvailable) {
             return;
         }
@@ -59,7 +60,7 @@ public class TestControllerAiml {
     public void testControllerAiml_oneServer() throws NoServerAvailableException {
         UUID ai1 = UUID.randomUUID();
         UUID sid = registerServer(ai1);
-        Assert.assertEquals(sid, this.test.getServerFor(ai1, RequestFor.Chat).getSessionID());
+        Assert.assertEquals(sid, this.test.getServerForChat(ai1, Collections.EMPTY_SET).getSessionID());
     }
 
     @Test
@@ -68,7 +69,7 @@ public class TestControllerAiml {
         UUID ai2 = UUID.randomUUID();
         registerServer(ai1);
         try {
-            this.test.getServerFor(ai2, RequestFor.Chat);
+            this.test.getServerForChat(ai2, Collections.EMPTY_SET);
         } catch (NoServerAvailableException noServerAvailable) {
             return;
         }
@@ -81,8 +82,8 @@ public class TestControllerAiml {
         UUID ai2 = UUID.randomUUID();
         UUID sid1 = registerServer(ai1);
         UUID sid2 = registerServer(ai2);
-        Assert.assertEquals(sid1, this.test.getServerFor(ai1, RequestFor.Chat).getSessionID());
-        Assert.assertEquals(sid2, this.test.getServerFor(ai2, RequestFor.Chat).getSessionID());
+        Assert.assertEquals(sid1, this.test.getServerForChat(ai1, Collections.EMPTY_SET).getSessionID());
+        Assert.assertEquals(sid2, this.test.getServerForChat(ai2, Collections.EMPTY_SET).getSessionID());
     }
 
     private UUID registerServer(UUID aiid) {

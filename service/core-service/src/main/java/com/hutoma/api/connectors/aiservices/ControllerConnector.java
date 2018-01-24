@@ -43,16 +43,14 @@ public abstract class ControllerConnector {
     private static final String CONTROLLER_ENDPOINT = "controller";
 
     private final Config config;
-    private final JsonSerializer serializer;
     private final JerseyClient jerseyClient;
     private final ILogger logger;
     private final Tools tools;
 
     @Inject
-    public ControllerConnector(final Config config, final JsonSerializer serializer, final JerseyClient jerseyClient,
+    public ControllerConnector(final Config config, final JerseyClient jerseyClient,
                                final ILogger logger, final Tools tools) {
         this.config = config;
-        this.serializer = serializer;
         this.jerseyClient = jerseyClient;
         this.logger = logger;
         this.tools = tools;
@@ -65,13 +63,13 @@ public abstract class ControllerConnector {
         this.kickQueue(this.getServerType());
     }
 
-    public IServerEndpoint getBackendTrainingEndpoint(final UUID aiid)
+    public IServerEndpoint getBackendTrainingEndpoint(final UUID aiid, final JsonSerializer serializer)
             throws NoServerAvailableException {
-        return getBackendTrainingEndpoint(aiid, this.getServerType());
+        return getBackendTrainingEndpoint(aiid, this.getServerType(), serializer);
     }
 
-    Map<String, ServerTrackerInfo> getVerifiedEndpointMap() {
-        return getVerifiedEndpointMap(this.getServerType());
+    Map<String, ServerTrackerInfo> getVerifiedEndpointMap(final JsonSerializer serializer) {
+        return getVerifiedEndpointMap(this.getServerType(), serializer);
     }
 
     /**
@@ -81,7 +79,8 @@ public abstract class ControllerConnector {
      * @throws NoServerAvailableException if there are no servers available to process this request
      */
     IServerEndpoint getBackendTrainingEndpoint(final UUID aiid,
-                                               final BackendServerType serverType)
+                                               final BackendServerType serverType,
+                                               final JsonSerializer serializer)
             throws NoServerAvailableException {
         if (aiid == null) {
             throw new IllegalArgumentException("aiid");
@@ -97,7 +96,7 @@ public abstract class ControllerConnector {
                     .get();
             if (response.getStatus() == HttpURLConnection.HTTP_OK) {
                 response.bufferEntity();
-                ApiServerEndpoint result = (ApiServerEndpoint) this.serializer.deserialize(
+                ApiServerEndpoint result = (ApiServerEndpoint) serializer.deserialize(
                         (InputStream) response.getEntity(), ApiServerEndpoint.class);
 
                 this.logger.logPerf(LOGFROM, "GetBackendEndpoint", logMap
@@ -129,7 +128,8 @@ public abstract class ControllerConnector {
      * @throws ChatBackendConnector.AiControllerException
      */
     public Map<UUID, ApiServerEndpointMulti.ServerEndpointResponse> getBackendChatEndpointMulti
-            (final ServerEndpointRequestMulti multiRequest) throws NoServerAvailableException,
+            (final ServerEndpointRequestMulti multiRequest, final JsonSerializer serializer)
+            throws NoServerAvailableException,
             ChatBackendConnector.AiControllerException {
         if (multiRequest == null) {
             throw new IllegalArgumentException("multiRequest");
@@ -141,11 +141,11 @@ public abstract class ControllerConnector {
             final long startTimestamp = this.tools.getTimestamp();
             response = getRequest("/chatEndpoints",
                     ImmutableMap.of(PARAM_SERVER_TYPE, this.getServerType().value()))
-                    .post(Entity.json(this.serializer.serialize(multiRequest)));
+                    .post(Entity.json(serializer.serialize(multiRequest)));
 
             if (response.getStatus() == HttpURLConnection.HTTP_OK) {
                 response.bufferEntity();
-                ApiServerEndpointMulti result = (ApiServerEndpointMulti) this.serializer.deserialize(
+                ApiServerEndpointMulti result = (ApiServerEndpointMulti) serializer.deserialize(
                         (InputStream) response.getEntity(), ApiServerEndpointMulti.class);
 
                 this.logger.logPerf(LOGFROM, "GetServerEndpointMulti", logMap
@@ -170,7 +170,8 @@ public abstract class ControllerConnector {
      * @param serverType the backend server type
      * @return the map
      */
-    private Map<String, ServerTrackerInfo> getVerifiedEndpointMap(final BackendServerType serverType) {
+    private Map<String, ServerTrackerInfo> getVerifiedEndpointMap(final BackendServerType serverType,
+                                                                  final JsonSerializer serializer) {
         LogMap logMap = LogMap.map("ServerType", serverType.value());
         Response response = null;
         try {
@@ -179,7 +180,7 @@ public abstract class ControllerConnector {
                     .get();
             if (response.getStatus() == HttpURLConnection.HTTP_OK) {
                 response.bufferEntity();
-                ApiServerTrackerInfoMap result = (ApiServerTrackerInfoMap) this.serializer.deserialize(
+                ApiServerTrackerInfoMap result = (ApiServerTrackerInfoMap) serializer.deserialize(
                         (InputStream) response.getEntity(), ApiServerTrackerInfoMap.class);
                 this.logger.logPerf(LOGFROM, "GetVerifiedEndpointMap",
                         logMap.put("Duration", this.tools.getTimestamp() - startTimestamp));

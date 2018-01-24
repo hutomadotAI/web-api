@@ -13,9 +13,9 @@ import javax.inject.Inject;
 public class AimlServicesConnector extends ControllerConnector {
 
     @Inject
-    public AimlServicesConnector(final Config config, final JsonSerializer serializer, final JerseyClient jerseyClient,
+    public AimlServicesConnector(final Config config, final JerseyClient jerseyClient,
                                 final ILogger logger, final Tools tools) {
-        super(config, serializer, jerseyClient, logger, tools);
+        super(config, jerseyClient, logger, tools);
     }
 
     @Override

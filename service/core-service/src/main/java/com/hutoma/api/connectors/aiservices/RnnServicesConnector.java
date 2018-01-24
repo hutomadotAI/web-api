@@ -15,9 +15,9 @@ import javax.inject.Singleton;
 public class RnnServicesConnector extends ControllerConnector {
 
     @Inject
-    public RnnServicesConnector(final Config config, final JsonSerializer serializer, final JerseyClient jerseyClient,
+    public RnnServicesConnector(final Config config, final JerseyClient jerseyClient,
                                final ILogger logger, final Tools tools) {
-        super(config, serializer, jerseyClient, logger, tools);
+        super(config, jerseyClient, logger, tools);
     }
 
     @Override

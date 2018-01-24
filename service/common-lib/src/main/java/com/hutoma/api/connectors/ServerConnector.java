@@ -193,7 +193,8 @@ public class ServerConnector {
         }
 
         final JerseyInvocation.Builder builder = target.request();
-        callables.put(endpoint, () -> new InvocationResult(aiid, builder.post(null), endpoint, 0));
+        callables.put(endpoint, () -> new InvocationResult(builder.post(null), endpoint,
+                0, 0, 1, aiid));
         return callables;
     }
 }

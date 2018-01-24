@@ -63,7 +63,6 @@ public class AIQueueServices extends ServerConnector {
                 devIdString, logMap);
 
         callables.put(endpoint, () -> new InvocationResult(
-                aiid,
                 this.jerseyClient
                         .target(endpoint)
                         .path(devIdString)
@@ -72,8 +71,7 @@ public class AIQueueServices extends ServerConnector {
                         .property(READ_TIMEOUT, (int) this.connectConfig.getBackendTrainingCallTimeoutMs())
                         .request()
                         .delete(),
-                endpoint,
-                0));
+                endpoint, 0, 0, 1, aiid));
         executeAndWait(callables);
     }
 

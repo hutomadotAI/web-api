@@ -9,7 +9,6 @@ import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.ApiServerEndpoint;
 import com.hutoma.api.containers.ApiServerEndpointMulti;
-import com.hutoma.api.containers.ApiServerHashcode;
 import com.hutoma.api.containers.ApiServerTrackerInfoMap;
 import com.hutoma.api.containers.sub.ServerEndpointRequestMulti;
 import com.hutoma.api.controllers.ControllerAiml;
@@ -54,7 +53,7 @@ public class ControllerLogic {
                                                 final BackendServerType serverType) {
         try {
             IServerEndpoint endpoint = this.controllerMap.get(serverType)
-                    .getBackendEndpoint(aiid, RequestFor.Training);
+                    .getUploadBackendEndpoint(aiid);
             return new ApiServerEndpoint(endpoint).setSuccessStatus();
         } catch (NoServerAvailableException ex) {
             return ApiError.getNotFound();
@@ -87,7 +86,7 @@ public class ControllerLogic {
             try {
                 // get the server to send the chat request to
                 IServerEndpoint server = controller
-                        .getBackendEndpoint(request.getAiid(), RequestFor.Chat);
+                        .getChatBackendEndpoint(request.getAiid(), request.getAlreadyTried());
                 // get the hash code
                 String hash = controller.getHashCodeFor(request.getAiid());
 

@@ -9,6 +9,7 @@ import com.hutoma.api.connectors.RequestFor;
 import com.hutoma.api.containers.sub.ServerRegistration;
 import com.hutoma.api.logging.AiServiceStatusLogger;
 import com.hutoma.api.logging.ILogger;
+import edu.umd.cs.findbugs.annotations.ExpectWarning;
 
 import org.glassfish.hk2.api.ServiceLocator;
 import org.glassfish.jersey.client.JerseyClient;
@@ -47,7 +48,7 @@ public class TestServerMetadata {
     @Test
     public void serverMetadata_noServer() {
         try {
-            this.test.getServerFor(UUID.randomUUID(), RequestFor.Chat);
+            this.test.getServerForChat(UUID.randomUUID(), Collections.EMPTY_SET);
         } catch (NoServerAvailableException noServerAvailable) {
             return;
         }
@@ -57,14 +58,14 @@ public class TestServerMetadata {
     @Test
     public void serverMetadata_oneServer() throws NoServerAvailableException {
         ServerTracker server = makeServerTracker(1);
-        Assert.assertEquals(server, this.test.getServerFor(UUID.randomUUID(), RequestFor.Chat));
+        Assert.assertEquals(server, this.test.getServerForChat(UUID.randomUUID(), Collections.EMPTY_SET));
     }
 
     @Test
     public void serverMetadata_twoServers() throws NoServerAvailableException {
         ServerTracker server1 = makeServerTracker(1);
         ServerTracker server2 = makeServerTracker(1);
-        Assert.assertEquals(server1, this.test.getServerFor(UUID.randomUUID(), RequestFor.Chat));
+        Assert.assertEquals(server1, this.test.getServerForChat(UUID.randomUUID(), Collections.EMPTY_SET));
     }
 
     @Test
@@ -73,10 +74,10 @@ public class TestServerMetadata {
         ServerTracker server2 = makeServerTracker(1);
         UUID chat1 = UUID.randomUUID();
         UUID chat2 = UUID.randomUUID();
-        Assert.assertEquals(server1, this.test.getServerFor(chat1, RequestFor.Chat));
-        Assert.assertEquals(server2, this.test.getServerFor(chat2, RequestFor.Chat));
-        Assert.assertEquals(server2, this.test.getServerFor(chat2, RequestFor.Chat));
-        Assert.assertEquals(server1, this.test.getServerFor(chat1, RequestFor.Chat));
+        Assert.assertEquals(server1, this.test.getServerForChat(chat1, Collections.EMPTY_SET));
+        Assert.assertEquals(server2, this.test.getServerForChat(chat2, Collections.EMPTY_SET));
+        Assert.assertEquals(server2, this.test.getServerForChat(chat2, Collections.EMPTY_SET));
+        Assert.assertEquals(server1, this.test.getServerForChat(chat1, Collections.EMPTY_SET));
     }
 
     @Test
@@ -118,7 +119,7 @@ public class TestServerMetadata {
         ServerTracker server2 = makeServerTracker(10);
 
         UUID chat1 = UUID.randomUUID();
-        Assert.assertEquals(server2, this.test.getServerFor(chat1, RequestFor.Chat));
+        Assert.assertEquals(server2, this.test.getServerForChat(chat1, Collections.EMPTY_SET));
     }
 
     @Test
@@ -132,7 +133,7 @@ public class TestServerMetadata {
 
         aiids.stream().forEach(aiid -> {
             try {
-                Assert.assertEquals(server2, this.test.getServerFor(aiid, RequestFor.Chat));
+                Assert.assertEquals(server2, this.test.getServerForChat(aiid, Collections.EMPTY_SET));
             } catch (NoServerAvailableException noServerAvailable) {
                 Assert.fail("no server available for updated affinity");
             }
@@ -154,8 +155,8 @@ public class TestServerMetadata {
         this.test.updateAffinity(server1SessionID, Collections.singletonList(chat2));
         this.test.updateAffinity(server2SessionID, Collections.singletonList(chat1));
 
-        Assert.assertEquals(server1, this.test.getServerFor(chat2, RequestFor.Chat));
-        Assert.assertEquals(server2, this.test.getServerFor(chat1, RequestFor.Chat));
+        Assert.assertEquals(server1, this.test.getServerForChat(chat2, Collections.EMPTY_SET));
+        Assert.assertEquals(server2, this.test.getServerForChat(chat1, Collections.EMPTY_SET));
     }
 
     @Test
@@ -172,14 +173,14 @@ public class TestServerMetadata {
         this.test.updateAffinity(server1SessionID, Collections.singletonList(chat2));
         this.test.updateAffinity(server2SessionID, Collections.singletonList(chat1));
 
-        Assert.assertEquals(server1, this.test.getServerFor(chat2, RequestFor.Chat));
-        Assert.assertEquals(server2, this.test.getServerFor(chat1, RequestFor.Chat));
+        Assert.assertEquals(server1, this.test.getServerForChat(chat2, Collections.EMPTY_SET));
+        Assert.assertEquals(server2, this.test.getServerForChat(chat1, Collections.EMPTY_SET));
 
         this.test.updateAffinity(server1SessionID, Collections.singletonList(chat1));
         this.test.updateAffinity(server2SessionID, Collections.singletonList(chat2));
 
-        Assert.assertEquals(server1, this.test.getServerFor(chat1, RequestFor.Chat));
-        Assert.assertEquals(server2, this.test.getServerFor(chat2, RequestFor.Chat));
+        Assert.assertEquals(server1, this.test.getServerForChat(chat1, Collections.EMPTY_SET));
+        Assert.assertEquals(server2, this.test.getServerForChat(chat2, Collections.EMPTY_SET));
     }
 
     @Test
@@ -190,14 +191,14 @@ public class TestServerMetadata {
         UUID chat1 = UUID.randomUUID();
         UUID chat2 = UUID.randomUUID();
 
-        Assert.assertEquals(server1, this.test.getServerFor(chat1, RequestFor.Chat));
-        Assert.assertEquals(server2, this.test.getServerFor(chat2, RequestFor.Chat));
+        Assert.assertEquals(server1, this.test.getServerForChat(chat1, Collections.EMPTY_SET));
+        Assert.assertEquals(server2, this.test.getServerForChat(chat2, Collections.EMPTY_SET));
 
         UUID server2SessionID = ((FakeServerTracker) server2).getSessionID();
         this.test.deleteSession(server2SessionID);
 
-        Assert.assertEquals(server1, this.test.getServerFor(chat1, RequestFor.Chat));
-        Assert.assertEquals(server1, this.test.getServerFor(chat2, RequestFor.Chat));
+        Assert.assertEquals(server1, this.test.getServerForChat(chat1, Collections.EMPTY_SET));
+        Assert.assertEquals(server1, this.test.getServerForChat(chat2, Collections.EMPTY_SET));
     }
 
     @Test
@@ -212,8 +213,8 @@ public class TestServerMetadata {
         this.test.deleteSession(server1SessionID);
         this.test.updateAffinity(server1SessionID, Arrays.asList(chat1, chat2));
 
-        Assert.assertEquals(server2, this.test.getServerFor(chat1, RequestFor.Chat));
-        Assert.assertEquals(server2, this.test.getServerFor(chat2, RequestFor.Chat));
+        Assert.assertEquals(server2, this.test.getServerForChat(chat1, Collections.EMPTY_SET));
+        Assert.assertEquals(server2, this.test.getServerForChat(chat2, Collections.EMPTY_SET));
     }
 
     @Test
@@ -225,8 +226,8 @@ public class TestServerMetadata {
         UUID chat1 = UUID.randomUUID();
         UUID chat2 = UUID.randomUUID();
 
-        Assert.assertEquals(server2, this.test.getServerFor(chat1, RequestFor.Chat));
-        Assert.assertEquals(server2, this.test.getServerFor(chat2, RequestFor.Chat));
+        Assert.assertEquals(server2, this.test.getServerForChat(chat1, Collections.EMPTY_SET));
+        Assert.assertEquals(server2, this.test.getServerForChat(chat2, Collections.EMPTY_SET));
     }
 
     @Test
@@ -238,11 +239,11 @@ public class TestServerMetadata {
         UUID chat1 = UUID.randomUUID();
         UUID chat2 = UUID.randomUUID();
 
-        UUID server1SessionID = ((FakeServerTracker) server1).getSessionID();
+        UUID server1SessionID = server1.getSessionID();
         this.test.updateAffinity(server1SessionID, Arrays.asList(chat1, chat2));
 
-        Assert.assertEquals(server2, this.test.getServerFor(chat1, RequestFor.Chat));
-        Assert.assertEquals(server2, this.test.getServerFor(chat2, RequestFor.Chat));
+        Assert.assertEquals(server2, this.test.getServerForChat(chat1, Collections.EMPTY_SET));
+        Assert.assertEquals(server2, this.test.getServerForChat(chat2, Collections.EMPTY_SET));
     }
 
     @Test
@@ -259,14 +260,59 @@ public class TestServerMetadata {
 
         ((FakeServerTracker) server1).testSetEndpointVerified(true);
 
-        Assert.assertEquals(server1, this.test.getServerFor(chat1, RequestFor.Chat));
-        Assert.assertEquals(server1, this.test.getServerFor(chat2, RequestFor.Chat));
+        Assert.assertEquals(server1, this.test.getServerForChat(chat1, Collections.EMPTY_SET));
+        Assert.assertEquals(server1, this.test.getServerForChat(chat2, Collections.EMPTY_SET));
+    }
+
+    @Test(expected = NoServerAvailableException.class)
+    public void serverMetadata_affinityRetry() throws NoServerAvailableException {
+        ServerTracker server1 = makeServerTracker(1);
+        UUID chat1 = UUID.randomUUID();
+        Assert.assertEquals(server1, this.test.getServerForChat(chat1, Collections.EMPTY_SET));
+        this.test.getServerForChat(chat1,
+                Collections.singleton(server1.getServerIdentifier()));
+    }
+
+    @Test
+    public void serverMetadata_affinityRetryNext() throws NoServerAvailableException {
+        ServerTracker server1 = makeServerTracker(1);
+        ServerTracker server2 = makeServerTracker(1);
+        UUID chat1 = UUID.randomUUID();
+        Assert.assertEquals(server1, this.test.getServerForChat(chat1, Collections.EMPTY_SET));
+        Assert.assertEquals(server2, this.test.getServerForChat(chat1,
+                Collections.singleton(server1.getServerIdentifier())));
+    }
+
+    @Test
+    public void serverMetadata_affinityRetryNext_Persistent() throws NoServerAvailableException {
+        ServerTracker server1 = makeServerTracker(1);
+        ServerTracker server2 = makeServerTracker(1);
+        UUID chat1 = UUID.randomUUID();
+        Assert.assertEquals(server2, this.test.getServerForChat(chat1,
+                Collections.singleton(server1.getServerIdentifier())));
+        Assert.assertEquals(server2, this.test.getServerForChat(chat1, Collections.EMPTY_SET));
+    }
+
+    @Test
+    public void serverMetadata_affinityRetryNext_Cleanup() throws NoServerAvailableException {
+        ServerTracker server1 = makeServerTracker(1);
+        ServerTracker server2 = makeServerTracker(1);
+        UUID chat1 = UUID.randomUUID();
+
+        this.test.getServerForChat(chat1, Collections.EMPTY_SET);
+        Assert.assertEquals(1, server1.getChatAffinity().size());
+        Assert.assertEquals(0, server2.getChatAffinity().size());
+
+        this.test.getServerForChat(chat1, Collections.singleton(server1.getServerIdentifier()));
+        Assert.assertEquals(0, server1.getChatAffinity().size());
+        Assert.assertEquals(1, server2.getChatAffinity().size());
+
     }
 
     @Test
     public void serverMetadata_NoTestServer() {
         try {
-            this.test.getServerFor(UUID.randomUUID(), RequestFor.Training);
+            this.test.getServerForUpload(UUID.randomUUID());
             Assert.fail("expected an exception");
         } catch (NoServerAvailableException noServerAvailable) {
         }
@@ -275,33 +321,33 @@ public class TestServerMetadata {
     @Test
     public void serverMetadata_TestServerAvailable() throws NoServerAvailableException {
         ServerTracker server1 = makeServerTracker(1, 1);
-        Assert.assertEquals(server1, this.test.getServerFor(UUID.randomUUID(), RequestFor.Training));
+        Assert.assertEquals(server1, this.test.getServerForUpload(UUID.randomUUID()));
     }
 
     @Test(expected = NoServerAvailableException.class)
     public void serverMetadata_OnlyEndingServerAvailable() throws NoServerAvailableException {
         ServerTracker server1 = makeServerTracker(1, 1);
         server1.endServerSession();
-        this.test.getServerFor(UUID.randomUUID(), RequestFor.Training);
+        this.test.getServerForUpload(UUID.randomUUID());
     }
 
     @Test
     public void serverMetadata_TwoTestServersAvailable() throws NoServerAvailableException {
         ServerTracker server1 = makeServerTracker(1, 1);
-        Assert.assertEquals(server1, this.test.getServerFor(UUID.randomUUID(), RequestFor.Training));
+        Assert.assertEquals(server1, this.test.getServerForUpload(UUID.randomUUID()));
         ServerTracker server2 = makeServerTracker(1, 1);
-        Assert.assertEquals(server1, this.test.getServerFor(UUID.randomUUID(), RequestFor.Training));
+        Assert.assertEquals(server1, this.test.getServerForUpload(UUID.randomUUID()));
         ServerTracker server3 = makeServerTracker(1, 1);
-        Assert.assertEquals(server1, this.test.getServerFor(UUID.randomUUID(), RequestFor.Training));
+        Assert.assertEquals(server1, this.test.getServerForUpload(UUID.randomUUID()));
     }
 
     @Test
     public void serverMetadata_HandoverWhenSessionEnding() throws NoServerAvailableException {
         ServerTracker server1 = makeServerTracker(1, 1);
         ServerTracker server2 = makeServerTracker(1, 1);
-        Assert.assertEquals(server1, this.test.getServerFor(UUID.randomUUID(), RequestFor.Training));
+        Assert.assertEquals(server1, this.test.getServerForUpload(UUID.randomUUID()));
         server1.endServerSession();
-        Assert.assertEquals(server2, this.test.getServerFor(UUID.randomUUID(), RequestFor.Training));
+        Assert.assertEquals(server2, this.test.getServerForUpload(UUID.randomUUID()));
     }
 
     @Test
@@ -338,14 +384,14 @@ public class TestServerMetadata {
         ServerTracker server1 = makeServerTracker(0, 1);
         ServerTracker server2 = makeServerTracker(0, 1);
         ServerTracker server3 = makeServerTracker(1, 1);
-        Assert.assertEquals(server3, this.test.getServerFor(UUID.randomUUID(), RequestFor.Training));
+        Assert.assertEquals(server3, this.test.getServerForUpload(UUID.randomUUID()));
     }
 
     private List<ServerTracker> getEndpointsFor10Aiids() {
         List<UUID> aiids = get10Uuids();
         return aiids.stream().map(aiid -> {
             try {
-                return this.test.getServerFor(aiid, RequestFor.Chat);
+                return this.test.getServerForChat(aiid, Collections.EMPTY_SET);
             } catch (NoServerAvailableException noServerAvailable) {
                 noServerAvailable.printStackTrace();
             }
@@ -392,13 +438,7 @@ public class TestServerMetadata {
         public synchronized void deleteSession(final UUID serverSessionID) {
             super.deleteSession(serverSessionID);
         }
-
-        @Override
-        public synchronized ServerTracker getServerFor(final UUID aiid, final RequestFor requestFor)
-                throws NoServerAvailableException {
-            return super.getServerFor(aiid, requestFor);
-        }
-
+        
     }
 
     public class FakeServerTracker extends ServerTracker {

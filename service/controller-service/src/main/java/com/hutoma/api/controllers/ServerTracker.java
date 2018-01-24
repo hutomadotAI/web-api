@@ -233,6 +233,10 @@ public class ServerTracker implements Callable, IServerEndpoint {
         this.affinity.clear();
     }
 
+    synchronized void removeChatAffinity(UUID aiid) {
+        this.affinity.remove(aiid);
+    }
+
     public UUID getSessionID() {
         return this.serverSessionID;
     }

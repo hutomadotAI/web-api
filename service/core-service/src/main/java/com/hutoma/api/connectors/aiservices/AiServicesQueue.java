@@ -97,7 +97,7 @@ public class AiServicesQueue extends ServerConnector {
                                       boolean setDbStatus) throws DatabaseException, AiServicesException {
 
         // get an endpoint map, i.e. a map from serverIdentifier to the actual servertracker object
-        Map<String, ServerTrackerInfo> map = controller.getVerifiedEndpointMap();
+        Map<String, ServerTrackerInfo> map = controller.getVerifiedEndpointMap(serializer);
         // get the status of the AI for the backend server we are dealing with
         BackendEngineStatus status = backendStatus.getEngineStatus(serverType);
 
