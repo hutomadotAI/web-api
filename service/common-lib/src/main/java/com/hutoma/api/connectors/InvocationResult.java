@@ -41,7 +41,7 @@ public class InvocationResult {
         return chatCallDurationMs;
     }
 
-    public int getattemptNumber() {
+    public int getAttemptNumber() {
         return attemptNumber;
     }
 }

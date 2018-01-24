@@ -127,11 +127,12 @@ public abstract class ChatBackendConnector {
             for (RequestInProgress future : futures) {
                 final InvocationResult result = waitForResult(future, timeoutMs);
 
-                LogMap logMap = LogMap.map("Op", "ChatWait");
+                LogMap logMap = LogMap.map("Op", "AwaitChat");
 
                 if (result != null) {
-                    logMap.add("Attempts", result.getattemptNumber());
-                    logMap.add("TotalRequestTime", result.getDurationMs());
+                    logMap.add("Attempts", result.getAttemptNumber());
+                    logMap.add("TotalRequestDurationMs", result.getDurationMs());
+                    logMap.add("CallDurationMs", result.getChatCallDurationMs());
                     Response.StatusType statusInfo = result.getResponse().getStatusInfo();
                     switch (statusInfo.getStatusCode()) {
                         case HttpURLConnection.HTTP_OK:
@@ -155,14 +156,16 @@ public abstract class ChatBackendConnector {
                         // otherwise attempt to deserialize the chat result
                         try {
                             String content = result.getResponse().readEntity(String.class);
-                            this.logger.logDebug("requestbase", "chat response from " + result.getEndpoint());
+                            this.logger.logDebug("requestbase",
+                                    "chat response from " + result.getEndpoint(),
+                                    logMap);
                             ChatResult chatResult = (ChatResult) this.serializer.deserialize(content, ChatResult.class);
                             UUID aiid = result.getAiid();
                             chatResult.setAiid(aiid);
                             chatResult.setElapsedTime(result.getDurationMs() / 1000.0);
                             map.put(aiid, chatResult);
                         } catch (JsonParseException jpe) {
-                            this.logger.logException(this.getLogFrom(), jpe);
+                            this.logger.logException(this.getLogFrom(), jpe, logMap);
                             throw new AiControllerException(jpe.getMessage());
                         }
                     }
