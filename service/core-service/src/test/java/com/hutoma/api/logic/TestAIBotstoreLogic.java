@@ -28,7 +28,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -381,7 +380,7 @@ public class TestAIBotstoreLogic {
     }
 
     @Test
-    public void testGetBotIcon() throws DatabaseException, IOException {
+    public void testGetBotIcon() throws DatabaseException {
         when(this.fakeDatabaseMarketplace.getBotIconPath(anyInt())).thenReturn(BOT_ICON_PATH);
         ApiString result = (ApiString) this.aiBotStoreLogic.getBotIcon(BOTID);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
@@ -389,14 +388,14 @@ public class TestAIBotstoreLogic {
     }
 
     @Test
-    public void testGetBotIcon_invalidBotId() throws DatabaseException, IOException {
+    public void testGetBotIcon_invalidBotId() throws DatabaseException {
         when(this.fakeDatabaseMarketplace.getBotIconPath(anyInt())).thenReturn(null);
         ApiResult result = this.aiBotStoreLogic.getBotIcon(BOTID);
         Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
     }
 
     @Test
-    public void testGetBotIcon_DBException() throws DatabaseException, IOException {
+    public void testGetBotIcon_DBException() throws DatabaseException {
         when(this.fakeDatabaseMarketplace.getBotIconPath(anyInt())).thenThrow(DatabaseException.class);
         ApiResult result = this.aiBotStoreLogic.getBotIcon(BOTID);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
@@ -404,7 +403,7 @@ public class TestAIBotstoreLogic {
 
 
     @Test
-    public void testUploadBotIcon() throws DatabaseException, IOException {
+    public void testUploadBotIcon() throws DatabaseException {
         // this test will never pass in windows because of posix file system commands
         org.junit.Assume.assumeTrue(!SystemUtils.IS_OS_WINDOWS);
 
@@ -415,7 +414,7 @@ public class TestAIBotstoreLogic {
     }
 
     @Test
-    public void testUploadBotIcon_DBException() throws DatabaseException, IOException {
+    public void testUploadBotIcon_DBException() throws DatabaseException {
 
         // this test will never pass in windows because of posix file system commands
         org.junit.Assume.assumeTrue(!SystemUtils.IS_OS_WINDOWS);
@@ -433,14 +432,14 @@ public class TestAIBotstoreLogic {
     }
 
     @Test
-    public void testUploadBotIcon_invalid_botId() throws DatabaseException, IOException {
+    public void testUploadBotIcon_invalid_botId() throws DatabaseException {
         when(this.fakeDatabaseMarketplace.saveBotIconPath(any(), anyInt(), any())).thenReturn(false);
         ApiResult result = this.aiBotStoreLogic.uploadBotIcon(DEVID_UUID, BOTID, this.botIconStream, this.iconContentDisp);
         Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
     }
 
     @Test
-    public void testUploadBotIcon_iconSize_overLimit() throws DatabaseException, IOException {
+    public void testUploadBotIcon_iconSize_overLimit() throws DatabaseException {
         prepareBotForUpload();
         ByteArrayInputStream bigStream = new ByteArrayInputStream(
                 new byte[(int) (AIBotStoreLogic.MAX_ICON_FILE_SIZE + 1)]);
@@ -456,7 +455,8 @@ public class TestAIBotstoreLogic {
 
     private static BotStructure getBotStructure() {
         return new BotStructure("bot", "desc", Collections.emptyList(), "aaa\nbbb", new HashMap<>(),
-                1, false, 1, 1.0, 1, Locale.UK.toLanguageTag(), "UTC", Collections.singletonList("Dunno"), "");
+                1, false, 1, 1.0, 1, Locale.UK.toLanguageTag(), "UTC", Collections.singletonList("Dunno"), "",
+                Collections.emptyList());
     }
 
     public static String getBotStructureTemplate() {

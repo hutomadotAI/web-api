@@ -1,11 +1,10 @@
 package com.hutoma.api.logic;
 
+import com.hutoma.api.common.BotStructureSerializer;
 import com.hutoma.api.common.Config;
-import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.logging.LogMap;
-import com.hutoma.api.connectors.db.DatabaseEntitiesIntents;
 import com.hutoma.api.connectors.db.DatabaseAI;
+import com.hutoma.api.connectors.db.DatabaseEntitiesIntents;
 import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.connectors.db.DatabaseMarketplace;
 import com.hutoma.api.connectors.db.DatabaseTransaction;
@@ -20,6 +19,8 @@ import com.hutoma.api.containers.sub.AiBot;
 import com.hutoma.api.containers.sub.BotStructure;
 import com.hutoma.api.containers.sub.DeveloperInfo;
 import com.hutoma.api.containers.sub.TrainingStatus;
+import com.hutoma.api.logging.ILogger;
+import com.hutoma.api.logging.LogMap;
 
 import org.apache.commons.io.FilenameUtils;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;

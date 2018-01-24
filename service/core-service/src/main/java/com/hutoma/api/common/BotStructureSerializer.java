@@ -1,12 +1,12 @@
-package com.hutoma.api.logic;
+package com.hutoma.api.common;
 
-import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.connectors.db.DatabaseAI;
 import com.hutoma.api.connectors.db.DatabaseEntitiesIntents;
 import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.ApiEntity;
 import com.hutoma.api.containers.ApiIntent;
+import com.hutoma.api.containers.sub.AiBot;
 import com.hutoma.api.containers.sub.BotStructure;
 import com.hutoma.api.containers.sub.IntentVariable;
 
@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class BotStructureSerializer {
 
@@ -45,9 +46,13 @@ public class BotStructureSerializer {
                 }
             }
         }
+
+        List<AiBot> linkedBots = database.getBotsLinkedToAi(devId, aiid);
+        bot.setLinkedBots(linkedBots.stream().map(AiBot::getBotId).collect(Collectors.toList()));
+
         return new BotStructure(bot.getName(), bot.getDescription(), intents, trainingFile,
                 entityMap, BOT_SCHEMA_VERSION, bot.getIsPrivate(), bot.getPersonality(),
                 bot.getConfidence(), bot.getVoice(), bot.getLanguage().toLanguageTag(), bot.getTimezone(),
-                bot.getDefaultChatResponses(), bot.getPassthroughUrl());
+                bot.getDefaultChatResponses(), bot.getPassthroughUrl(), bot.getLinkedBots());
     }
 }

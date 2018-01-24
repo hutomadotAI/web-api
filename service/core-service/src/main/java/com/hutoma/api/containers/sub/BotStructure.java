@@ -13,8 +13,6 @@ import java.util.Map;
  */
 public class BotStructure {
 
-    private static final String LOGFROM = "BotStructure";
-
     @SerializedName("name")
     private String name;
     @SerializedName("description")
@@ -43,12 +41,14 @@ public class BotStructure {
     private List<String> defaultResponses;
     @SerializedName("passthrough_url")
     private String passthroughUrl;
+    @SerializedName("linked_skills")
+    private List<Integer> linkedSkills;
 
     public BotStructure(final String name, final String description, final List<ApiIntent> intents,
                         final String trainingFile, final Map<String, ApiEntity> entities, final int version,
                         final boolean isPrivate, final int personality, final double confidence, final int voice,
                         final String language, final String timezone, final List<String> defaultResponses,
-                        final String passthroughUrl) {
+                        final String passthroughUrl, final List<Integer> linkedSkills) {
         this.name = name;
         this.description = description;
         this.intents = intents;
@@ -63,6 +63,7 @@ public class BotStructure {
         this.timezone = timezone;
         this.defaultResponses = defaultResponses;
         this.passthroughUrl = passthroughUrl;
+        this.linkedSkills = linkedSkills;
     }
 
     /**
@@ -84,6 +85,7 @@ public class BotStructure {
         this.timezone = other.timezone;
         this.defaultResponses = new ArrayList<>(other.defaultResponses);
         this.passthroughUrl = other.passthroughUrl;
+        this.linkedSkills = new ArrayList<>(other.linkedSkills);
     }
 
     public String getName() {
@@ -142,6 +144,10 @@ public class BotStructure {
         return this.passthroughUrl;
     }
 
+    public List<Integer> getLinkedSkills() {
+        return this.linkedSkills;
+    }
+
     public void setName(final String name) {
         this.name = name;
     }
@@ -196,5 +202,9 @@ public class BotStructure {
 
     public void setPassthroughUrl(final String passthroughUrl) {
         this.passthroughUrl = passthroughUrl;
+    }
+
+    public void setLinkedSkills(final List<Integer> linkedSkills) {
+        this.linkedSkills = linkedSkills;
     }
 }

@@ -26,7 +26,9 @@ import com.hutoma.api.validation.Validate;
 import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.mockito.ArgumentCaptor;
 
 import java.math.BigDecimal;
@@ -73,6 +75,9 @@ public class TestAILogic {
     private JsonSerializer fakeSerializer;
     private Validate fakeValidate;
     private DatabaseTransaction fakeTransaction;
+
+    @Rule
+    public final ExpectedException expectedException = ExpectedException.none();
 
     @Before
     public void setup() {
@@ -1156,6 +1161,56 @@ public class TestAILogic {
         this.aiLogic.createImportedBot(VALIDDEVID, botStructure);
     }
 
+    @Test
+    public void testCreateImportedBot_linkedBots_nonExisting() throws DatabaseException, AILogic.BotImportException {
+        setupFakeImport();
+        BotStructure botStructure = getBotstructure();
+        final int botId = 123;
+        botStructure.setLinkedSkills(Collections.singletonList(botId));
+        expectedException.expect(AILogic.BotImportException.class);
+        expectedException.expectMessage(String.format(AILogic.LINK_BOT_NOT_EXIST_TEMPLATE, botId));
+        this.aiLogic.createImportedBot(VALIDDEVID, botStructure);
+    }
+
+    @Test
+    public void testCreateImportedBot_linkedBots_notOwned() throws DatabaseException, AILogic.BotImportException {
+        setupFakeImport();
+        BotStructure botStructure = getBotstructure();
+        final int botId = 123;
+        final String botName = "skill1";
+        botStructure.setLinkedSkills(Collections.singletonList(botId));
+        when(this.fakeDatabaseMarketplace.getBotDetails(anyInt())).thenReturn(getAiBot(botId, botName));
+        expectedException.expect(AILogic.BotImportException.class);
+        expectedException.expectMessage(String.format(AILogic.LINK_BOT_NOT_OWNED_TEMPLATE, botName, botId));
+        this.aiLogic.createImportedBot(VALIDDEVID, botStructure);
+    }
+
+    @Test
+    public void testCreateImportedBot_linkedBots() throws DatabaseException, AILogic.BotImportException {
+        setupFakeImport();
+        BotStructure botStructure = getBotstructure();
+        final int botId = 123;
+        final String botName = "skill1";
+        botStructure.setLinkedSkills(Collections.singletonList(botId));
+        when(this.fakeTools.createNewRandomUUID()).thenReturn(AIID);
+        when(this.fakeDatabaseMarketplace.getPurchasedBots(any())).thenReturn(Arrays.asList(
+                getAiBot(999, "other"), getAiBot(botId, botName)));
+        when(this.fakeDatabaseMarketplace.getBotDetails(anyInt())).thenReturn(getAiBot(botId, botName));
+        this.aiLogic.createImportedBot(VALIDDEVID, botStructure);
+        verify(this.fakeDatabaseAi).linkBotToAi(VALIDDEVID, AIID, botId, this.fakeTransaction);
+    }
+
+    @Test(expected = AILogic.BotImportException.class)
+    public void testCreateImportedBot_linkedBots_getPurchasedBots_dbException() throws DatabaseException, AILogic.BotImportException {
+        setupFakeImport();
+        BotStructure botStructure = getBotstructure();
+        final int botId = 123;
+        botStructure.setLinkedSkills(Collections.singletonList(botId));
+        when(this.fakeTools.createNewRandomUUID()).thenReturn(AIID);
+        when(this.fakeDatabaseMarketplace.getPurchasedBots(any())).thenThrow(DatabaseException.class);
+        this.aiLogic.createImportedBot(VALIDDEVID, botStructure);
+    }
+
     private void setupFakeImport() throws DatabaseException {
         ApiAi ai = TestDataHelper.getSampleAI();
         UUID newAiid = UUID.fromString(ai.getAiid());
@@ -1180,7 +1235,7 @@ public class TestAILogic {
 
         return new BotStructure("ImportedBot", "Desc", intents,
         "Q\nA", entities, 1, false, 1, 0.4f, 1, "EN-en", "UTC", Collections.singletonList(ChatLogic.COMPLETELY_LOST_RESULT),
-        null);
+        null, Collections.emptyList());
     }
 
     private List<AiBot> generateBotsWithIds(final List<Integer> idList) {

@@ -2,6 +2,7 @@ package com.hutoma.api.logic;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.hutoma.api.access.Role;
+import com.hutoma.api.common.BotStructureSerializer;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Pair;
@@ -49,8 +50,13 @@ import javax.inject.Provider;
  */
 public class AILogic {
 
+    @VisibleForTesting
     static final String BOT_RO_MESSAGE = "Bot is read-only.";
-    private static final String IMPORT_GENERIC_ERROR = "There was an error importing the bot";
+    @VisibleForTesting
+    static final String LINK_BOT_NOT_OWNED_TEMPLATE = "The imported bot links to \"%s\" (id=%d) which you don't own.";
+    @VisibleForTesting
+    static final String LINK_BOT_NOT_EXIST_TEMPLATE = "The imported bot references a non-existing skill id (%d).";
+    private static final String IMPORT_GENERIC_ERROR = "There was an error importing the bot.";
     @VisibleForTesting
     static final Locale DEFAULT_LOCALE = Locale.US;
     private static final String LOGFROM = "ailogic";
@@ -802,6 +808,39 @@ public class AILogic {
             locale = DEFAULT_LOCALE;
         }
 
+        boolean hasLinkedSkills = importedBot.getLinkedSkills() != null && !importedBot.getLinkedSkills().isEmpty();
+
+        try {
+            if (hasLinkedSkills) {
+                // validate that the user owns all linked skills otherwise bail out
+                Set<Integer> purchasedBots = this.databaseMarketplace.getPurchasedBots(devId)
+                        .stream().map(AiBot::getBotId).collect(Collectors.toSet());
+
+                for (Integer linkedSkill : importedBot.getLinkedSkills()) {
+                    if (!purchasedBots.contains(linkedSkill)) {
+                        // If this is a real bot in the marketplace, at least give the user
+                        // some info on how to solve the problem
+                        AiBot missingBot = this.databaseMarketplace.getBotDetails(linkedSkill);
+                        if (missingBot != null) {
+                            this.logger.logUserInfoEvent(LOGFROM, "ImportBot - attempt to link skill not owned",
+                                    devId.toString(), LogMap.map("BotId",
+                                            missingBot.getBotId()).put("BotName", missingBot.getName()));
+                            throw new BotImportException(String.format(LINK_BOT_NOT_OWNED_TEMPLATE,
+                                    missingBot.getName(), missingBot.getBotId()));
+                        } else {
+                            this.logger.logUserInfoEvent(LOGFROM, "ImportBot - attempt to link non existing skill",
+                                    devId.toString(), LogMap.map("BotId", linkedSkill));
+                            throw new BotImportException(String.format(LINK_BOT_NOT_EXIST_TEMPLATE, linkedSkill));
+                        }
+                    }
+                }
+            }
+        } catch (DatabaseException ex) {
+            this.logger.logUserExceptionEvent(LOGFROM, "ImportBot - check linked bot ownership",
+                    devId.toString(), ex);
+            throw new BotImportException("There was an internal problem importing the bot.");
+        }
+
         ApiAi bot;
 
         try (DatabaseTransaction transaction = this.transactionProvider.get()) {
@@ -912,6 +951,13 @@ public class AILogic {
                     this.logger.logUserExceptionEvent(LOGFROM, "ImportBot - add training file", devId.toString(),
                             ex, logMap);
                     throw new BotImportException(IMPORT_GENERIC_ERROR);
+                }
+            }
+
+            // Link skills
+            if (hasLinkedSkills) {
+                for (Integer linkedSkill: importedBot.getLinkedSkills()) {
+                    this.databaseAi.linkBotToAi(devId, aiid, linkedSkill, transaction);
                 }
             }
 
