@@ -235,7 +235,7 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
             if (checkList.contains(APIParameter.BotStructure)) {
                 BotStructure botStructure = (BotStructure)
                         this.serializer.deserialize(request.getEntityStream(), BotStructure.class);
-                this.validateBotStructure(botStructure, getDevid(request));
+                this.validateBotStructure(botStructure, UUID.fromString(getDeveloperId(request)));
                 request.setProperty(APIParameter.BotStructure.toString(), botStructure);
             }
 
@@ -269,20 +269,6 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
             throws ParameterValidationException {
         if (obj == null) {
             throw new ParameterValidationException("parameter is null", paramName);
-        }
-    }
-
-    /***
-     * For internal fields that are json deserialized, if the data does not parse
-     * then the result is a null
-     * @param paramName
-     * @param obj
-     * @throws ParameterValidationException
-     */
-    private void checkParameterNotNullInvalid(final String paramName, final Object obj)
-            throws ParameterValidationException {
-        if (obj == null) {
-            throw new ParameterValidationException("parameter is null or invalid", paramName);
         }
     }
 
@@ -373,7 +359,7 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
      * @param entity The Entity.
      * @throws ParameterValidationException
      */
-    void validateEntity(ApiEntity entity) throws ParameterValidationException {
+    private void validateEntity(ApiEntity entity) throws ParameterValidationException {
         validateEntityName(ENTITYNAME, entity.getEntityName());
         validateOptionalObjectValues(ENTITYVALUE, entity.getEntityValueList());
     }
@@ -413,12 +399,12 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
                 }
             }
         } catch (Exception ex) {
+            this.logger.logUserExceptionEvent(LOGFROM, "Error validating bot import structure",
+                    devId.toString(), ex);
             if (ex instanceof ParameterValidationException) {
                 // rethrow
                 throw ex;
             } else {
-                this.logger.logUserExceptionEvent(LOGFROM, "Error validating bot import structure",
-                        devId.toString(), ex);
                 // We should have caught all possible parameter failures, but just in case...
                 throw new ParameterValidationException("Failed to process the bot structure.", "");
             }
