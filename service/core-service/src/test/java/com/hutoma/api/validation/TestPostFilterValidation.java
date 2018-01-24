@@ -18,6 +18,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.mockito.Mockito.mock;
@@ -101,7 +102,7 @@ public class TestPostFilterValidation {
     @Test(expected = ParameterValidationException.class)
     public void validateBotStructureInvalidEntity() throws ParameterValidationException {
         BotStructure botStructure = generateValidV1BotStructure();
-        HashMap<String, ApiEntity> entities = botStructure.getEntities();
+        Map<String, ApiEntity> entities = botStructure.getEntities();
         List<String> entityValues = new ArrayList<>();
         entityValues.add("_+[[*invalid");
         entities.put("invalid", new ApiEntity("_=]InvalidName", UUID.randomUUID(), entityValues, false));

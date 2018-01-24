@@ -1,5 +1,6 @@
 package com.hutoma.api.logic;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.hutoma.api.access.Role;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.JsonSerializer;
@@ -49,7 +50,9 @@ import javax.inject.Provider;
 public class AILogic {
 
     static final String BOT_RO_MESSAGE = "Bot is read-only.";
-    private static final Locale DEFAULT_LOCALE = Locale.US;
+    private static final String IMPORT_GENERIC_ERROR = "There was an error importing the bot";
+    @VisibleForTesting
+    static final Locale DEFAULT_LOCALE = Locale.US;
     private static final String LOGFROM = "ailogic";
     private final Config config;
     private final JsonSerializer jsonSerializer;
@@ -659,7 +662,6 @@ public class AILogic {
         try {
             createdBot = createImportedBot(devId, importedBot);
         } catch (BotImportException e) {
-            this.logger.logUserExceptionEvent(LOGFROM, "ImportBotV1", devId.toString(), e);
             return ApiError.getBadRequest(e.getMessage());
         }
 
@@ -789,7 +791,8 @@ public class AILogic {
         }
     }
 
-    private ApiAi createImportedBot(final UUID devId, final BotStructure importedBot) throws BotImportException {
+    @VisibleForTesting
+    ApiAi createImportedBot(final UUID devId, final BotStructure importedBot) throws BotImportException {
         // try to interpret the locale
         Locale locale;
         try {
@@ -818,19 +821,25 @@ public class AILogic {
             try {
                 bot = (ApiAi) result;
             } catch (ClassCastException e) {
-                throw new BotImportException(result.getStatus().getInfo(), e);
+                this.logger.logUserExceptionEvent(LOGFROM, "ImportBot - create ai", devId.toString(), e);
+                throw new BotImportException(IMPORT_GENERIC_ERROR);
             }
 
             UUID aiid = UUID.fromString(bot.getAiid());
+            LogMap logMap = LogMap.map("AIID", aiid);
 
             try {
                 bot = (ApiAi) this.getSingleAI(devId, aiid, transaction);
             } catch (Exception e) {
-                throw new BotImportException("Failed to retrieve newly imported bot.", e);
+                this.logger.logUserExceptionEvent(LOGFROM, "ImportBot - retrieve ai", devId.toString(),
+                        e, logMap);
+                throw new BotImportException(IMPORT_GENERIC_ERROR);
             }
 
             if (!this.databaseAi.updatePassthroughUrl(devId, aiid, importedBot.getPassthroughUrl(), transaction)) {
-                throw new BotImportException("Failed to setup the new bot");
+                this.logger.logUserErrorEvent(LOGFROM, "ImportBot - update passthrough url", devId.toString(),
+                        logMap);
+                throw new BotImportException(IMPORT_GENERIC_ERROR);
             }
 
             List<String> defaultResponses =
@@ -839,15 +848,19 @@ public class AILogic {
                             : importedBot.getDefaultResponses();
             if (!this.databaseAi.updateDefaultChatResponses(devId, aiid, defaultResponses,
                     this.jsonSerializer, transaction)) {
-                throw new BotImportException("Failed to setup the new bot");
+                this.logger.logUserErrorEvent(LOGFROM, "ImportBot - update default responses", devId.toString(),
+                        logMap);
+                throw new BotImportException(IMPORT_GENERIC_ERROR);
             }
 
-            List<Entity> userEntities = null;
+            List<Entity> userEntities;
             try {
                 // Add the entities that the user doesn't currently have.
                 userEntities = this.databaseEntitiesIntents.getEntities(devId);
             } catch (DatabaseException ex) {
-                throw new BotImportException("Can't retrieve users existing entities.", ex);
+                this.logger.logUserExceptionEvent(LOGFROM, "ImportBot - retrieving existing entities ai",
+                        devId.toString(), ex, logMap);
+                throw new BotImportException(IMPORT_GENERIC_ERROR);
             }
 
             try {
@@ -864,7 +877,9 @@ public class AILogic {
                     }
                 }
             } catch (DatabaseException ex) {
-                throw new BotImportException("Failed to create new entities from imported bot.", ex);
+                this.logger.logUserExceptionEvent(LOGFROM, "ImportBot - create entities", devId.toString(),
+                        ex, logMap);
+                throw new BotImportException(IMPORT_GENERIC_ERROR);
             }
 
             // Import intents.
@@ -877,12 +892,16 @@ public class AILogic {
                     if (webHook != null) {
                         if (!this.databaseEntitiesIntents.createWebHook(botAiid, webHook.getIntentName(),
                                 webHook.getEndpoint(), webHook.isEnabled(), transaction)) {
-                            throw new BotImportException("Failed to create the webhook for the imported bot");
+                            this.logger.logUserErrorEvent(LOGFROM, "ImportBot - create webhook", devId.toString(),
+                                    logMap);
+                            throw new BotImportException(IMPORT_GENERIC_ERROR);
                         }
                     }
                 }
             } catch (DatabaseException ex) {
-                throw new BotImportException("Failed to write intents for imported bot.", ex);
+                this.logger.logUserExceptionEvent(LOGFROM, "ImportBot - write intents", devId.toString(),
+                        ex, logMap);
+                throw new BotImportException(IMPORT_GENERIC_ERROR);
             }
 
             if (importedBot.getTrainingFile() != null) {
@@ -890,13 +909,17 @@ public class AILogic {
                 try {
                     this.databaseAi.updateAiTrainingFile(aiid, importedBot.getTrainingFile(), transaction);
                 } catch (Exception ex) {
-                    throw new BotImportException("Failed to add training file for imported bot.", ex);
+                    this.logger.logUserExceptionEvent(LOGFROM, "ImportBot - add training file", devId.toString(),
+                            ex, logMap);
+                    throw new BotImportException(IMPORT_GENERIC_ERROR);
                 }
             }
 
             transaction.commit();
         } catch (DatabaseException ex) {
-            throw new BotImportException("Failed to commit transaction.", ex);
+            this.logger.logUserExceptionEvent(LOGFROM, "ImportBot - commit transaction", devId.toString(),
+                    ex);
+            throw new BotImportException(IMPORT_GENERIC_ERROR);
         }
 
         return bot;
@@ -905,10 +928,6 @@ public class AILogic {
     static class BotImportException extends Exception {
         BotImportException(final String message) {
             super(message);
-        }
-
-        BotImportException(final String message, final Exception ex) {
-            super(message, ex);
         }
     }
 }

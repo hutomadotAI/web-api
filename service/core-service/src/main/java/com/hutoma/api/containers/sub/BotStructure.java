@@ -5,8 +5,8 @@ import com.hutoma.api.containers.ApiEntity;
 import com.hutoma.api.containers.ApiIntent;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by bretc on 10/08/2017.
@@ -36,7 +36,7 @@ public class BotStructure {
     @SerializedName("trainingFile")
     private String trainingFile;
     @SerializedName("entities")
-    private HashMap<String, ApiEntity> entities;
+    private Map<String, ApiEntity> entities;
     @SerializedName("version")
     private int version;
     @SerializedName("default_responses")
@@ -45,7 +45,7 @@ public class BotStructure {
     private String passthroughUrl;
 
     public BotStructure(final String name, final String description, final List<ApiIntent> intents,
-                        final String trainingFile, final HashMap<String, ApiEntity> entities, final int version,
+                        final String trainingFile, final Map<String, ApiEntity> entities, final int version,
                         final boolean isPrivate, final int personality, final double confidence, final int voice,
                         final String language, final String timezone, final List<String> defaultResponses,
                         final String passthroughUrl) {
@@ -102,7 +102,7 @@ public class BotStructure {
         return this.trainingFile;
     }
 
-    public HashMap<String, ApiEntity> getEntities() {
+    public Map<String, ApiEntity> getEntities() {
         return this.entities;
     }
 
@@ -158,7 +158,7 @@ public class BotStructure {
         this.trainingFile = trainingFile;
     }
 
-    public void setEntities(final HashMap<String, ApiEntity> entities) {
+    public void setEntities(final Map<String, ApiEntity> entities) {
         this.entities = entities;
     }
 

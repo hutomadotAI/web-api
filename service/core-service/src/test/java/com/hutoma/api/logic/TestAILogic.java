@@ -20,6 +20,7 @@ import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.containers.sub.UITrainingState;
 import com.hutoma.api.containers.sub.WebHook;
 import com.hutoma.api.logging.ILogger;
+import com.hutoma.api.validation.ParameterValidationException;
 import com.hutoma.api.validation.Validate;
 
 import org.joda.time.DateTime;
@@ -652,13 +653,27 @@ public class TestAILogic {
     }
 
     @Test
+    public void testExportBot_databaseException()  throws DatabaseException {
+        when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
+        when(this.fakeDatabaseEntitiesIntents.getIntents(any(), any())).thenThrow(DatabaseException.class);
+        ApiResult result = this.aiLogic.exportBotData(VALIDDEVID, AIID);
+        Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
+    }
+
+    @Test
     public void testExportBot_DoesntExist() {
         ApiResult result = this.aiLogic.exportBotData(VALIDDEVID, AIID);
         Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
     }
 
     @Test
-    public void testSetBotConfig_invalidVersion() throws DatabaseException {
+    public void testImportBot() {
+        ApiResult result = this.aiLogic.importBot(VALIDDEVID, null);
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testSetBotConfig_invalidVersion() {
         AiBotConfig config = this.generateAiBotConfig();
         config.setVersion(9999);
         ApiResult result = this.aiLogic.setAiBotConfig(DEVID_UUID, AIID, 1, config);
@@ -768,7 +783,7 @@ public class TestAILogic {
     }
 
     @Test
-    public void testSetAiBotConfiguration_invalidConfig() throws DatabaseException {
+    public void testSetAiBotConfiguration_invalidConfig() {
         AiBotConfig config = new AiBotConfig(new HashMap<String, String>() {{
             put("a", "b");
         }});
@@ -1038,6 +1053,136 @@ public class TestAILogic {
         }
     }
 
+    @Test
+    public void testCreateImportedBot() throws AILogic.BotImportException, DatabaseException {
+        setupFakeImport();
+        BotStructure botStructure = getBotstructure();
+        this.aiLogic.createImportedBot(VALIDDEVID, botStructure);
+    }
+
+    @Test
+    public void testCreateImportedBot_language_fallback()
+            throws AILogic.BotImportException, ParameterValidationException, DatabaseException{
+        setupFakeImport();
+        BotStructure botStructure = getBotstructure();
+        botStructure.setLanguage("NOT A REAL LANGUAGE");
+        when(this.fakeValidate.validateLocale(anyString(), anyString())).thenThrow(ParameterValidationException.class);
+        this.aiLogic.createImportedBot(VALIDDEVID, botStructure);
+        ArgumentCaptor<Locale> localeArg = ArgumentCaptor.forClass(Locale.class);
+        verify(this.fakeDatabaseAi).createAI(any(), anyString(), anyString(), any(), anyBoolean(), anyString(),
+                localeArg.capture(), anyString(), anyDouble(), anyInt(), anyInt(), any());
+        Assert.assertEquals(AILogic.DEFAULT_LOCALE, localeArg.getValue());
+    }
+
+    @Test(expected = AILogic.BotImportException.class)
+    public void testCreateImportedBot_createAi_genericException() throws AILogic.BotImportException, DatabaseException {
+        setupFakeImport();
+        when(this.fakeDatabaseAi.createAI(any(), anyString(), anyString(), any(), anyBoolean(), anyString(),
+                any(), anyString(), anyDouble(), anyInt(), anyInt(), any())).thenThrow(Exception.class);
+        BotStructure botStructure = getBotstructure();
+        this.aiLogic.createImportedBot(VALIDDEVID, botStructure);
+    }
+
+    @Test(expected = AILogic.BotImportException.class)
+    public void testCreateImportedBot_getAi_genericException() throws AILogic.BotImportException, DatabaseException {
+        setupFakeImport();
+        when(this.fakeDatabaseAi.getAI(any(), any(), any(), any())).thenThrow(Exception.class);
+        BotStructure botStructure = getBotstructure();
+        this.aiLogic.createImportedBot(VALIDDEVID, botStructure);
+    }
+
+    @Test(expected = AILogic.BotImportException.class)
+    public void testCreateImportedBot_entities_dbException() throws AILogic.BotImportException, DatabaseException {
+        setupFakeImport();
+        when(this.fakeDatabaseEntitiesIntents.getEntities(any())).thenThrow(DatabaseException.class);
+        BotStructure botStructure = getBotstructure();
+        this.aiLogic.createImportedBot(VALIDDEVID, botStructure);
+    }
+
+    @Test(expected = AILogic.BotImportException.class)
+    public void testCreateImportedBot_writeEntities_dbException() throws AILogic.BotImportException, DatabaseException {
+        setupFakeImport();
+        doThrow(DatabaseException.class).when(this.fakeDatabaseEntitiesIntents).writeEntity(any(), anyString(), any(), any());
+        BotStructure botStructure = getBotstructure();
+        this.aiLogic.createImportedBot(VALIDDEVID, botStructure);
+    }
+
+    @Test(expected = AILogic.BotImportException.class)
+    public void testCreateImportedBot_writeIntent_dbException() throws AILogic.BotImportException, DatabaseException {
+        setupFakeImport();
+        doThrow(DatabaseException.class).when(this.fakeDatabaseEntitiesIntents).writeIntent(any(), any(), anyString(), any(), any());
+        BotStructure botStructure = getBotstructure();
+        this.aiLogic.createImportedBot(VALIDDEVID, botStructure);
+    }
+
+    @Test(expected = AILogic.BotImportException.class)
+    public void testCreateImportedBot_writeIntent_webhook_dbException() throws AILogic.BotImportException, DatabaseException {
+        setupFakeImport();
+        when(this.fakeDatabaseEntitiesIntents.createWebHook(any(), anyString(), anyString(), anyBoolean(), any())).thenReturn(false);
+        BotStructure botStructure = getBotstructure();
+        this.aiLogic.createImportedBot(VALIDDEVID, botStructure);
+    }
+
+    @Test(expected = AILogic.BotImportException.class)
+    public void testCreateImportedBot_updateTrainingFile_dbException() throws AILogic.BotImportException, DatabaseException {
+        setupFakeImport();
+        when(this.fakeDatabaseAi.updateAiTrainingFile(any(), anyString(), any())).thenThrow(DatabaseException.class);
+        BotStructure botStructure = getBotstructure();
+        this.aiLogic.createImportedBot(VALIDDEVID, botStructure);
+    }
+
+    @Test(expected = AILogic.BotImportException.class)
+    public void testCreateImportedBot_commit_dbException() throws AILogic.BotImportException, DatabaseException {
+        setupFakeImport();
+        doThrow(DatabaseException.class).when(this.fakeTransaction).commit();
+        BotStructure botStructure = getBotstructure();
+        this.aiLogic.createImportedBot(VALIDDEVID, botStructure);
+    }
+
+    @Test(expected = AILogic.BotImportException.class)
+    public void testCreateImportedBot_updatePassthroughUrl_dbException() throws AILogic.BotImportException, DatabaseException {
+        setupFakeImport();
+        when(this.fakeDatabaseAi.updatePassthroughUrl(any(), any(), anyString(), any())).thenReturn(false);
+        BotStructure botStructure = getBotstructure();
+        botStructure.setPassthroughUrl("http://my.url");
+        this.aiLogic.createImportedBot(VALIDDEVID, botStructure);
+    }
+
+    @Test(expected = AILogic.BotImportException.class)
+    public void testCreateImportedBot_updateDefaultResponses_dbException() throws AILogic.BotImportException, DatabaseException {
+        setupFakeImport();
+        when(this.fakeDatabaseAi.updateDefaultChatResponses(any(), any(), any(), any(), any())).thenReturn(false);
+        BotStructure botStructure = getBotstructure();
+        this.aiLogic.createImportedBot(VALIDDEVID, botStructure);
+    }
+
+    private void setupFakeImport() throws DatabaseException {
+        ApiAi ai = TestDataHelper.getSampleAI();
+        UUID newAiid = UUID.fromString(ai.getAiid());
+        when(this.fakeTools.createNewRandomUUID()).thenReturn(newAiid);
+        when(this.fakeDatabaseAi.createAI(any(), anyString(), anyString(), any(), anyBoolean(), anyString(),
+                any(), anyString(), anyDouble(), anyInt(), anyInt(), any()))
+                .thenReturn(UUID.fromString(ai.getAiid()));
+        when(this.fakeDatabaseAi.getAI(any(), any(), any(), any())).thenReturn(ai);
+        when(this.fakeDatabaseAi.updatePassthroughUrl(any(), any(), any(), any())).thenReturn(true);
+        when(this.fakeDatabaseAi.updateDefaultChatResponses(any(), any(), any(), any(), any())).thenReturn(true);
+        when(this.fakeDatabaseEntitiesIntents.createWebHook(any(), anyString(), anyString(), anyBoolean(), any())).thenReturn(true);
+    }
+
+    private BotStructure getBotstructure() {
+        Map<String, ApiEntity> entities = new HashMap<>();
+        entities.put("ent1", new ApiEntity("ent1", VALIDDEVID));
+        List<ApiIntent> intents = new ArrayList<>();
+        final String intentName = "intent1";
+        ApiIntent intent = new ApiIntent(intentName, "in", "out");
+        intent.setWebHook(new WebHook(AIID, intentName, "http//endpoint", true));
+        intents.add(intent);
+
+        return new BotStructure("ImportedBot", "Desc", intents,
+        "Q\nA", entities, 1, false, 1, 0.4f, 1, "EN-en", "UTC", Collections.singletonList(ChatLogic.COMPLETELY_LOST_RESULT),
+        null);
+    }
+
     private List<AiBot> generateBotsWithIds(final List<Integer> idList) {
         List<AiBot> bots = new ArrayList<>();
         for (Integer id : idList) {
@@ -1052,27 +1197,24 @@ public class TestAILogic {
         Map<String, String> configApiKeys = new HashMap<>();
         configApiKeys.put("key1", "value1");
         configApiKeys.put("key2", "value2");
-        AiBotConfig config = new AiBotConfig(configApiKeys);
-        return config;
+        return new AiBotConfig(configApiKeys);
     }
 
     private Pair<UUID, UUID> generateLinkedBotIds() {
-        return new Pair<UUID, UUID>(UUID.randomUUID(), UUID.randomUUID());
+        return new Pair<>(UUID.randomUUID(), UUID.randomUUID());
     }
 
     private AiBotConfigDefinition generateAiBotConfigDefinition() {
         List<AiBotConfigDefinition.ApiKeyDescription> apiKeyDescriptions = new ArrayList<>();
         apiKeyDescriptions.add(new AiBotConfigDefinition.ApiKeyDescription("key1", "desc", "http://blah"));
         apiKeyDescriptions.add(new AiBotConfigDefinition.ApiKeyDescription("key2", "desc", "http://blah"));
-        AiBotConfigDefinition definition = new AiBotConfigDefinition(apiKeyDescriptions);
-        return definition;
+        return new AiBotConfigDefinition(apiKeyDescriptions);
     }
 
     private AiBotConfigWithDefinition generateAiBotConfigWithDefinition() {
         AiBotConfig config = generateAiBotConfig();
         AiBotConfigDefinition definition = generateAiBotConfigDefinition();
-        AiBotConfigWithDefinition def = new AiBotConfigWithDefinition(config, definition);
-        return def;
+        return new AiBotConfigWithDefinition(config, definition);
     }
 
     private ArrayList<ApiAi> getAIList() {
