@@ -162,7 +162,13 @@ public class ChatLogic {
             throws ChatFailedException, ChatStateHandler.ChatStateException {
         this.telemetryMap = LogMap.map("ChatOrigin", "Facebook")
                 .put("QFromFacebookUser", facebookOriginatingUser);
-        return chatCall(aiid, devId, question, chatId, null).getResult();
+
+        String passthrough = this.chatServices.getAIPassthroughUrl(devId, aiid);
+        if (passthrough != null) {
+            return chatPassthrough(aiid, devId, chatId, question, null, passthrough).getResult();
+        } else {
+            return chatCall(aiid, devId, question, chatId, null).getResult();
+        }
     }
 
     public ApiResult assistantChat(UUID aiid, UUID devId, String question, String chatId) {
