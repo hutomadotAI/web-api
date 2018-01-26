@@ -127,7 +127,10 @@ public class ChatLogic {
             WebHookResponse response = this.webHooks.executePassthroughWebhook(passthrough, chatResult, chatInfo);
 
             if (response != null) {
+                // copy the text reply
                 chatResult.setAnswer(response.getText());
+                // and copy the whole response to include any rich content
+                chatResult.setWebHookResponse(response);
             }
         } catch (WebHooks.WebHookExternalException callException) {
             this.chatLogger.logChatError(LOGFROM, devId.toString(), callException, this.telemetryMap);
