@@ -4,7 +4,6 @@ import com.hutoma.api.common.ControllerConfig;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.BackendServerType;
 import com.hutoma.api.connectors.NoServerAvailableException;
-import com.hutoma.api.connectors.RequestFor;
 import com.hutoma.api.containers.sub.ServerRegistration;
 import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.logging.AiServiceStatusLogger;
@@ -26,19 +25,18 @@ import static org.mockito.Mockito.mock;
  */
 public class TestControllerAiml {
 
-    AiServiceStatusLogger logger;
-    ControllerConfig config;
-    Tools tools;
-    ControllerAiml test;
-    ThreadSubPool fakeThreadSubPool;
+    private ControllerConfig config;
+    private Tools tools;
+    private ControllerAiml test;
+    private ThreadSubPool fakeThreadSubPool;
 
     @Before
-    public void setUp() throws Exception {
-        this.logger = mock(AiServiceStatusLogger.class);
+    public void setUp() {
         this.tools = mock(Tools.class);
         this.config = mock(ControllerConfig.class);
         this.fakeThreadSubPool = mock(ThreadSubPool.class);
-        this.test = new ControllerAiml(TestControllerAiml.this.config, this.fakeThreadSubPool, null, this.logger) {
+        this.test = new ControllerAiml(TestControllerAiml.this.config, this.fakeThreadSubPool, null,
+                mock(AiServiceStatusLogger.class), mock(QueueProcessor.class)) {
             @Override
             protected ServerTracker createNewServerTracker() {
                 return new FakeServerTracker(TestControllerAiml.this.config, TestControllerAiml.this.tools, this.logger);
@@ -49,7 +47,7 @@ public class TestControllerAiml {
     @Test
     public void testControllerAiml_noServer() {
         try {
-            this.test.getServerForChat(UUID.randomUUID(), Collections.EMPTY_SET);
+            this.test.getServerForChat(UUID.randomUUID(), Collections.emptySet());
         } catch (NoServerAvailableException noServerAvailable) {
             return;
         }
@@ -60,16 +58,16 @@ public class TestControllerAiml {
     public void testControllerAiml_oneServer() throws NoServerAvailableException {
         UUID ai1 = UUID.randomUUID();
         UUID sid = registerServer(ai1);
-        Assert.assertEquals(sid, this.test.getServerForChat(ai1, Collections.EMPTY_SET).getSessionID());
+        Assert.assertEquals(sid, this.test.getServerForChat(ai1, Collections.emptySet()).getSessionID());
     }
 
     @Test
-    public void testControllerAiml_requestDifferentAiid() throws NoServerAvailableException {
+    public void testControllerAiml_requestDifferentAiid() {
         UUID ai1 = UUID.randomUUID();
         UUID ai2 = UUID.randomUUID();
         registerServer(ai1);
         try {
-            this.test.getServerForChat(ai2, Collections.EMPTY_SET);
+            this.test.getServerForChat(ai2, Collections.emptySet());
         } catch (NoServerAvailableException noServerAvailable) {
             return;
         }
@@ -82,8 +80,8 @@ public class TestControllerAiml {
         UUID ai2 = UUID.randomUUID();
         UUID sid1 = registerServer(ai1);
         UUID sid2 = registerServer(ai2);
-        Assert.assertEquals(sid1, this.test.getServerForChat(ai1, Collections.EMPTY_SET).getSessionID());
-        Assert.assertEquals(sid2, this.test.getServerForChat(ai2, Collections.EMPTY_SET).getSessionID());
+        Assert.assertEquals(sid1, this.test.getServerForChat(ai1, Collections.emptySet()).getSessionID());
+        Assert.assertEquals(sid2, this.test.getServerForChat(ai2, Collections.emptySet()).getSessionID());
     }
 
     private UUID registerServer(UUID aiid) {
@@ -96,12 +94,12 @@ public class TestControllerAiml {
 
     public class FakeServerTracker extends ServerTracker {
 
-        public FakeServerTracker(final ControllerConfig config, final Tools tools, final ILogger logger) {
+        FakeServerTracker(final ControllerConfig config, final Tools tools, final ILogger logger) {
             super(config, tools, mock(JerseyClient.class), null, logger, null);
             testSetEndpointVerified(true);
         }
 
-        public void testSetEndpointVerified(boolean flag) {
+        void testSetEndpointVerified(boolean flag) {
             this.endpointVerified.set(flag);
         }
 

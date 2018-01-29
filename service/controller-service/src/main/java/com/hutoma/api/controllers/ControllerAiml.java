@@ -26,10 +26,15 @@ import javax.inject.Singleton;
 @Singleton
 public class ControllerAiml extends ControllerBase {
 
+    private final QueueProcessor queueProcessor;
+
     @Inject
     public ControllerAiml(final ControllerConfig config, final ThreadSubPool threadSubPool,
-                          final ServiceLocator serviceLocator, final AiServiceStatusLogger logger) {
+                          final ServiceLocator serviceLocator, final AiServiceStatusLogger logger,
+                          final QueueProcessor queueProcessor) {
         super(config, threadSubPool, serviceLocator, logger);
+        this.queueProcessor = queueProcessor;
+        this.queueProcessor.initialise(this, BackendServerType.AIML);
     }
 
     /***

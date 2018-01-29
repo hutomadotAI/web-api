@@ -25,7 +25,7 @@ public class ServerMetadata {
     protected ILogger logger;
     private int roundRobinIndex;
 
-    public ServerMetadata(final AiServiceStatusLogger logger) {
+    ServerMetadata(final AiServiceStatusLogger logger) {
         this.logger = logger;
         this.activeServerSessions = new LinkedHashMap<>();
         this.serverAiAffinity = new HashMap<>();
@@ -162,7 +162,7 @@ public class ServerMetadata {
         // find the first server in the affinity list
         // that has been verified
         return affinityList.stream()
-                .filter(server -> server.isEndpointVerified())
+                .filter(ServerTracker::isEndpointVerified)
                 .findFirst().orElse(null);
     }
 
@@ -204,7 +204,7 @@ public class ServerMetadata {
                 .filter(ServerTracker::isSessionNotEnding)
                 .filter(ServerTracker::canTrain)
                 .findFirst()
-                .orElseThrow(() -> new NoServerAvailableException());
+                .orElseThrow(NoServerAvailableException::new);
     }
 
     /***

@@ -40,13 +40,14 @@ public class ServerTracker implements Callable, IServerEndpoint {
     private final JsonSerializer jsonSerializer;
     private final ILogger logger;
     private final ThreadSubPool threadSubPool;
-    protected AtomicBoolean runFlag;
     private long lastValidHeartbeat = 0;
     private long lastHeartbeatAttempt = 0;
     private String serverIdentity = "(uninitialised)";
+    private ServerRegistration registration;
+
+    AtomicBoolean runFlag;
     UUID serverSessionID;
     AtomicBoolean endpointVerified;
-    private ServerRegistration registration;
 
     @Inject
     public ServerTracker(final ControllerConfig config, final Tools tools,
@@ -281,7 +282,7 @@ public class ServerTracker implements Callable, IServerEndpoint {
                 // pull out the payload data to avoid memory leaks
                 response.bufferEntity();
                 // return only the status code
-                return Integer.valueOf(response.getStatus());
+                return response.getStatus();
             } finally {
                 // if we had a valid response object then close it
                 if (response != null) {

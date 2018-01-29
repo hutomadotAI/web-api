@@ -5,7 +5,6 @@ import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.connectors.BackendServerType;
 import com.hutoma.api.connectors.IServerEndpoint;
 import com.hutoma.api.connectors.NoServerAvailableException;
-import com.hutoma.api.connectors.RequestFor;
 import com.hutoma.api.connectors.db.DatabaseAiStatusUpdates;
 import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.sub.ServerAiEntry;
@@ -30,10 +29,10 @@ import java.util.UUID;
 public abstract class ControllerBase extends ServerMetadata {
 
     private static final String LOGFROM = "controller";
-    protected final HashMap<UUID, String> aiHashCodes;
-    protected ThreadSubPool threadSubPool;
-    protected ServiceLocator serviceLocator;
-    protected HashSet<UUID> botExclusionList;
+    private final HashMap<UUID, String> aiHashCodes;
+    private ThreadSubPool threadSubPool;
+    private ServiceLocator serviceLocator;
+    private HashSet<UUID> botExclusionList;
     ControllerConfig config;
 
     public ControllerBase(final ControllerConfig config,
@@ -94,7 +93,7 @@ public abstract class ControllerBase extends ServerMetadata {
 
     public synchronized void setAllHashCodes(final List<ServerAiEntry> aiList) {
         this.aiHashCodes.clear();
-        aiList.stream().forEach(entry ->
+        aiList.forEach(entry ->
                 this.aiHashCodes.put(entry.getAiid(), entry.getAiHash()));
     }
 
