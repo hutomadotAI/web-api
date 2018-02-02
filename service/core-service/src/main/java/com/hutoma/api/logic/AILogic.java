@@ -902,45 +902,49 @@ public class AILogic {
                 throw new BotImportException(IMPORT_GENERIC_ERROR);
             }
 
-            try {
-                for (ApiEntity e : importedBot.getEntities().values()) {
-                    boolean hasEntity = false;
-                    for (Entity ue : userEntities) {
-                        if (ue.getName().equals(e.getEntityName())) {
-                            hasEntity = true;
-                            break;
+            if (importedBot.getEntities() != null && !importedBot.getEntities().isEmpty()) {
+                try {
+                    for (ApiEntity e : importedBot.getEntities().values()) {
+                        boolean hasEntity = false;
+                        for (Entity ue : userEntities) {
+                            if (ue.getName().equals(e.getEntityName())) {
+                                hasEntity = true;
+                                break;
+                            }
+                        }
+                        if (!hasEntity) {
+                            this.databaseEntitiesIntents.writeEntity(devId, e.getEntityName(), e, transaction);
                         }
                     }
-                    if (!hasEntity) {
-                        this.databaseEntitiesIntents.writeEntity(devId, e.getEntityName(), e, transaction);
-                    }
+                } catch (DatabaseException ex) {
+                    this.logger.logUserExceptionEvent(LOGFROM, "ImportBot - create entities", devId.toString(),
+                            ex, logMap);
+                    throw new BotImportException(IMPORT_GENERIC_ERROR);
                 }
-            } catch (DatabaseException ex) {
-                this.logger.logUserExceptionEvent(LOGFROM, "ImportBot - create entities", devId.toString(),
-                        ex, logMap);
-                throw new BotImportException(IMPORT_GENERIC_ERROR);
             }
 
             // Import intents.
-            try {
-                for (ApiIntent intent : importedBot.getIntents()) {
-                    UUID botAiid = UUID.fromString(bot.getAiid());
-                    this.databaseEntitiesIntents.writeIntent(devId, botAiid,
-                            intent.getIntentName(), intent, transaction);
-                    WebHook webHook = intent.getWebHook();
-                    if (webHook != null) {
-                        if (!this.databaseEntitiesIntents.createWebHook(botAiid, webHook.getIntentName(),
-                                webHook.getEndpoint(), webHook.isEnabled(), transaction)) {
-                            this.logger.logUserErrorEvent(LOGFROM, "ImportBot - create webhook", devId.toString(),
-                                    logMap);
-                            throw new BotImportException(IMPORT_GENERIC_ERROR);
+            if (importedBot.getIntents() != null && !importedBot.getIntents().isEmpty()) {
+                try {
+                    for (ApiIntent intent : importedBot.getIntents()) {
+                        UUID botAiid = UUID.fromString(bot.getAiid());
+                        this.databaseEntitiesIntents.writeIntent(devId, botAiid,
+                                intent.getIntentName(), intent, transaction);
+                        WebHook webHook = intent.getWebHook();
+                        if (webHook != null) {
+                            if (!this.databaseEntitiesIntents.createWebHook(botAiid, webHook.getIntentName(),
+                                    webHook.getEndpoint(), webHook.isEnabled(), transaction)) {
+                                this.logger.logUserErrorEvent(LOGFROM, "ImportBot - create webhook", devId.toString(),
+                                        logMap);
+                                throw new BotImportException(IMPORT_GENERIC_ERROR);
+                            }
                         }
                     }
+                } catch (DatabaseException ex) {
+                    this.logger.logUserExceptionEvent(LOGFROM, "ImportBot - write intents", devId.toString(),
+                            ex, logMap);
+                    throw new BotImportException(IMPORT_GENERIC_ERROR);
                 }
-            } catch (DatabaseException ex) {
-                this.logger.logUserExceptionEvent(LOGFROM, "ImportBot - write intents", devId.toString(),
-                        ex, logMap);
-                throw new BotImportException(IMPORT_GENERIC_ERROR);
             }
 
             if (importedBot.getTrainingFile() != null) {

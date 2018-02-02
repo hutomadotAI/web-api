@@ -44,6 +44,7 @@ public class TestServiceAi extends ServiceTestBase {
     private static final String BOT_BASEPATH = AI_PATH + "/bot";
     private static final String BOT_PATH = BOT_BASEPATH + "/" + BOTID;
     private static final String BOT_CLONE_PATH = AI_BASEPATH + "/" + AIID + "/clone";
+    private static final String IMPORT_BASEPATH = AI_BASEPATH + "/" + "import";
 
     private static MultivaluedMap<String, String> getCreateAiRequestParams() {
         return new MultivaluedHashMap<String, String>() {{
@@ -97,7 +98,7 @@ public class TestServiceAi extends ServiceTestBase {
     }
 
     @Test
-    public void testDeleteAI_clientToken_forbidden() throws DatabaseException {
+    public void testDeleteAI_clientToken_forbidden() {
         UUID aiid = UUID.randomUUID();
         MultivaluedHashMap<String, Object> authHeaders = getClientAuthHeaders(UUID.randomUUID(), aiid);
         final Response response = target(AI_BASEPATH + "/" + aiid).request().headers(authHeaders).delete();
@@ -167,7 +168,7 @@ public class TestServiceAi extends ServiceTestBase {
     }
 
     @Test
-    public void testGetLinkedBots_devId_invalid() throws DatabaseException {
+    public void testGetLinkedBots_devId_invalid() {
         final Response response = target(BOTS_BASEPATH).request().headers(noDevIdHeaders).get();
         Assert.assertEquals(HttpURLConnection.HTTP_UNAUTHORIZED, response.getStatus());
     }
@@ -187,7 +188,7 @@ public class TestServiceAi extends ServiceTestBase {
     }
 
     @Test
-    public void testLinkBotToAi_devId_invalid() throws DatabaseException {
+    public void testLinkBotToAi_devId_invalid() {
         final Response response = target(BOT_PATH)
                 .request()
                 .headers(noDevIdHeaders)
@@ -204,7 +205,7 @@ public class TestServiceAi extends ServiceTestBase {
     }
 
     @Test
-    public void testUnlLinkBotFromAi_devId_invalid() throws DatabaseException {
+    public void testUnlLinkBotFromAi_devId_invalid() {
         final Response response = target(BOT_PATH).request().headers(noDevIdHeaders).delete();
         Assert.assertEquals(HttpURLConnection.HTTP_UNAUTHORIZED, response.getStatus());
     }
@@ -217,7 +218,7 @@ public class TestServiceAi extends ServiceTestBase {
     }
 
     @Test
-    public void testGetPublishedBotForAI_devId_invalid() throws DatabaseException {
+    public void testGetPublishedBotForAI_devId_invalid() {
         final Response response = target(BOT_BASEPATH).request().headers(noDevIdHeaders).get();
         Assert.assertEquals(HttpURLConnection.HTTP_UNAUTHORIZED, response.getStatus());
     }
@@ -239,7 +240,7 @@ public class TestServiceAi extends ServiceTestBase {
     }
 
     @Test
-    public void testCloneBot_devId_invalid() throws DatabaseException {
+    public void testCloneBot_devId_invalid() {
         final Response response = target(BOT_CLONE_PATH)
                 .request()
                 .headers(noDevIdHeaders)
@@ -269,13 +270,49 @@ public class TestServiceAi extends ServiceTestBase {
     }
 
     @Test
-    public void testUpdateBotList_devId_invalid() throws DatabaseException {
+    public void testUpdateBotList_devId_invalid() {
         final Response response = target(BOTS_BASEPATH)
                 .queryParam("bot_list", 1)
                 .request()
                 .headers(noDevIdHeaders)
                 .post(Entity.text(""));
         Assert.assertEquals(HttpURLConnection.HTTP_UNAUTHORIZED, response.getStatus());
+    }
+
+    @Test
+    public void testImportBot() throws DatabaseException {
+        final UUID newAiid = UUID.randomUUID();
+        when(this.fakeTools.createNewRandomUUID()).thenReturn(newAiid);
+        when(this.fakeDatabaseAi.createAI(any(), anyString(), anyString(), any(), anyBoolean(),
+                anyString(), anyObject(), anyObject(), anyDouble(), anyInt(),
+                anyInt(), any())).thenReturn(newAiid);
+        when(this.fakeDatabaseAi.getAI(any(), any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
+        when(this.fakeDatabaseAi.updatePassthroughUrl(any(), any(), any(), any())).thenReturn(true);
+        when(this.fakeDatabaseAi.updateDefaultChatResponses(any(), any(), any(), any(), any())).thenReturn(true);
+        when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
+        final Response response = target(IMPORT_BASEPATH)
+                .request()
+                .headers(defaultHeaders)
+                .post(Entity.json(getExportedBotJson()));
+        Assert.assertEquals(HttpURLConnection.HTTP_CREATED, response.getStatus());
+    }
+
+    @Test
+    public void testImportBot_devId_invalid() {
+        final Response response = target(IMPORT_BASEPATH)
+                .request()
+                .headers(noDevIdHeaders)
+                .post(Entity.json(getExportedBotJson()));
+        Assert.assertEquals(HttpURLConnection.HTTP_UNAUTHORIZED, response.getStatus());
+    }
+
+    @Test
+    public void testImportBot_invalidJsonContent() {
+        final Response response = target(IMPORT_BASEPATH)
+                .request()
+                .headers(defaultHeaders)
+                .post(Entity.json("{}"));
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.getStatus());
     }
 
     @Override
@@ -289,6 +326,11 @@ public class TestServiceAi extends ServiceTestBase {
         binder.bind(AILogic.class).to(AILogic.class);
         binder.bind(AIIntegrationLogic.class).to(AIIntegrationLogic.class);
         return binder;
+    }
+
+    private String getExportedBotJson() {
+        return "{\"version\":1,\"name\":\"exported_bot\",\"description\":\"desc\",\"isPrivate\":false, \"personality\":0,"
+                + "\"confidence\":0.4000000059604645,\"voice\":1, \"language\":\"en-US\",\"timezone\":\"Europe\\/London\"}";
     }
 
     private ApiAi checkMaskedTrainingStatus(

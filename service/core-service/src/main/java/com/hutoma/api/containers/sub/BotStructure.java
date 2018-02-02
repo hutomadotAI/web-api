@@ -1,5 +1,7 @@
 package com.hutoma.api.containers.sub;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.gson.annotations.SerializedName;
 import com.hutoma.api.containers.ApiEntity;
 import com.hutoma.api.containers.ApiIntent;
@@ -11,6 +13,7 @@ import java.util.Map;
 /**
  * Created by bretc on 10/08/2017.
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class BotStructure {
 
     @SerializedName("name")
@@ -43,6 +46,10 @@ public class BotStructure {
     private String passthroughUrl;
     @SerializedName("linked_skills")
     private List<Integer> linkedSkills;
+
+    @VisibleForTesting
+    BotStructure() {
+    }
 
     public BotStructure(final String name, final String description, final List<ApiIntent> intents,
                         final String trainingFile, final Map<String, ApiEntity> entities, final int version,
