@@ -42,11 +42,6 @@ public class EntityLogic {
         final String devidString = devid.toString();
         try {
             List<Entity> entityList = this.database.getEntities(devid);
-            if (entityList.isEmpty()) {
-                this.logger.logUserTraceEvent(LOGFROM, "GetEntities", devidString,
-                        LogMap.map("Num Entities", "0"));
-                return ApiError.getNotFound();
-            }
             this.logger.logUserTraceEvent(LOGFROM, "GetEntities", devidString,
                     LogMap.map("Num Entities", entityList.size()));
             return new ApiEntityList(entityList).setSuccessStatus();
@@ -58,9 +53,14 @@ public class EntityLogic {
 
     public ApiResult getEntity(final UUID devid, final String entityName) {
         final String devidString = devid.toString();
+        LogMap logMap = LogMap.map("Entity", entityName);
         try {
             final ApiEntity entity = this.database.getEntity(devid, entityName);
-            this.logger.logUserTraceEvent(LOGFROM, "GetEntity", devidString, LogMap.map("Entity", entityName));
+            if (entity == null) {
+                this.logger.logUserWarnEvent(LOGFROM, "GetEntity - not found", devidString, logMap);
+                return ApiError.getNotFound();
+            }
+            this.logger.logUserTraceEvent(LOGFROM, "GetEntity", devidString, logMap);
             return entity.setSuccessStatus();
         } catch (final Exception e) {
             this.logger.logUserExceptionEvent(LOGFROM, "GetEntity", devidString, e);

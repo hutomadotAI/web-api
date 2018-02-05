@@ -74,7 +74,9 @@ public class DatabaseEntitiesIntents extends Database {
                 ApiEntity result = null;
                 ResultSet rs = transaction.getDatabaseCall().initialise("getEntityDetails", 2)
                         .add(devid).add(entityName).executeQuery();
-                if (rs.next()) {
+                if (!rs.next()) {
+                    return null;
+                } else {
                     boolean isSystem = rs.getBoolean("isSystem");
                     final ArrayList<String> entityValues = new ArrayList<>();
                     // only custom entities have values as system entities are handled externally
