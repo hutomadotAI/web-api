@@ -6,7 +6,6 @@ import com.hutoma.api.access.Role;
 import com.hutoma.api.access.Secured;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.containers.ApiResult;
-import com.hutoma.api.containers.ApiTrainingMaterials;
 import com.hutoma.api.logic.TrainingLogic;
 import com.hutoma.api.validation.APIParameter;
 import com.hutoma.api.validation.ParameterFilter;
@@ -154,7 +153,7 @@ public class TrainingEndpoint {
     @Path("/{aiid}/training/materials")
     @Secured({Role.ROLE_ADMIN, Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
     @ValidateParameters({APIParameter.AIID})
-    @Produces(MediaType.TEXT_PLAIN) // TODO: Produce MediaType.APPLICATION_OCTET_STREAM to support large files
+    @Produces(MediaType.APPLICATION_JSON)
     @StatusCodes({
             @ResponseCode(code = HttpURLConnection.HTTP_OK, condition = "Succeeded."),
             @ResponseCode(code = HttpURLConnection.HTTP_NOT_FOUND, condition = "AI not found"),
@@ -164,15 +163,9 @@ public class TrainingEndpoint {
             @RequestHeader(name = "Authorization", description = "Developer token")
     })
     public Response trainingGetMaterials(@Context ContainerRequestContext requestContext) {
-        ApiResult result = this.trainingLogic.getTrainingMaterials(
+        ApiResult result = this.trainingLogic.getTrainingFile(
                 ParameterFilter.getDevid(requestContext),
                 ParameterFilter.getAiid(requestContext));
-
-        // TODO: send out a properly formatted JSON response when we no longer use SQS.
-        return Response.status(result.getStatus().getCode())
-                .entity(result.getStatus().getCode() == HttpURLConnection.HTTP_OK
-                        ? ((ApiTrainingMaterials) result).getTrainingFile()
-                        : this.serializer.serialize(result))
-                .build();
+        return result.getResponse(serializer).build();
     }
 }

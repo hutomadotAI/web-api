@@ -3,6 +3,7 @@ package com.hutoma.api.tests.service;
 import com.hutoma.api.common.TestDataHelper;
 import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.ApiIntent;
+import com.hutoma.api.containers.ApiTrainingMaterials;
 import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.endpoints.TrainingEndpoint;
 import com.hutoma.api.logic.AILogic;
@@ -20,6 +21,7 @@ import org.mockito.Mock;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.util.Collections;
 import javax.ws.rs.client.Entity;
@@ -117,20 +119,24 @@ public class TestServiceTraining extends ServiceTestBase {
     }
 
     @Test
-    public void testGetTrainingMaterials() throws DatabaseException, IOException {
+    public void testGetTrainingMaterials() throws DatabaseException {
+        final String trainingFile = "QQQ\nAAA";
         when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(
                 TestDataHelper.getAi(TrainingStatus.AI_TRAINING_COMPLETE, false));
-        when(this.fakeAiServices.getTrainingMaterialsCommon(any(), any(), any())).thenReturn("Q1\nA1");
+        when(this.fakeDatabaseAi.getAiTrainingFile(any())).thenReturn(trainingFile);
         final Response response = target(TRAINING_BASEPATH)
                 .path("materials")
                 .request()
                 .headers(defaultHeaders)
                 .get();
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
+        ApiTrainingMaterials materials =
+                (ApiTrainingMaterials) new JsonSvcSerializer().deserialize((InputStream) response.getEntity(), ApiTrainingMaterials.class);
+        Assert.assertEquals(trainingFile, materials.getTrainingFile());
     }
 
     @Test
-    public void testGetTrainingMaterials_invalid_devId() throws DatabaseException, IOException {
+    public void testGetTrainingMaterials_invalid_devId() {
         final Response response = target(TRAINING_BASEPATH)
                 .path("materials")
                 .request()
@@ -182,10 +188,12 @@ public class TestServiceTraining extends ServiceTestBase {
         return response;
     }
 
+    @Override
     protected Class<?> getClassUnderTest() {
         return TrainingEndpoint.class;
     }
 
+    @Override
     protected AbstractBinder addAdditionalBindings(AbstractBinder binder) {
         binder.bind(TrainingLogic.class).to(TrainingLogic.class);
         binder.bind(AILogic.class).to(AILogic.class);

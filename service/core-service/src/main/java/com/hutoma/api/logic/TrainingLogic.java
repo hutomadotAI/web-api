@@ -448,6 +448,23 @@ public class TrainingLogic {
         return result;
     }
 
+    public ApiResult getTrainingFile(final UUID devId, final UUID aiid) {
+        LogMap logMap = LogMap.map("AIID", aiid);
+        try {
+
+            ApiAi ai = this.databaseAi.getAI(devId, aiid, this.jsonSerializer);
+            if (ai == null) {
+                this.logger.logUserInfoEvent(LOGFROM, "Training file request for unknown aiid",
+                        devId.toString(), logMap);
+                return ApiError.getNotFound();
+            }
+            return new ApiTrainingMaterials(this.databaseAi.getAiTrainingFile(aiid)).setSuccessStatus();
+        } catch (Exception ex) {
+            this.logger.logUserExceptionEvent(LOGFROM, "GetTrainingFile", devId.toString(), ex, logMap);
+            return ApiError.getInternalServerError();
+        }
+    }
+
     private boolean isTopicMarker(final String line) {
         return line.startsWith(TrainingLogic.TOPIC_MARKER);
     }
@@ -537,8 +554,7 @@ public class TrainingLogic {
     }
 
     private ApiResult uploadTrainingFile(final ApiAi ai, final UUID devid, final UUID aiid,
-                                         final String trainingMaterials, final TrainingFileParsingResult result)
-            throws DatabaseException {
+                                         final String trainingMaterials, final TrainingFileParsingResult result) {
         final String devidString = devid.toString();
         try {
             this.aiServices.uploadTraining(ai.getBackendStatus(), devid, aiid, trainingMaterials);
