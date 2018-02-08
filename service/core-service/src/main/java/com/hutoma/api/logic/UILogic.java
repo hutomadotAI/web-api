@@ -1,21 +1,30 @@
 package com.hutoma.api.logic;
 
-import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.connectors.db.DatabaseAI;
+import com.hutoma.api.connectors.db.DatabaseEntitiesIntents;
 import com.hutoma.api.connectors.db.DatabaseMarketplace;
 import com.hutoma.api.connectors.db.DatabaseUI;
+import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.ApiError;
+import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.AiBot;
+import com.hutoma.api.containers.sub.AiSkillSummary;
+import com.hutoma.api.containers.ui.ApiAiDetails;
 import com.hutoma.api.containers.ui.ApiBotstoreCategoryItemList;
 import com.hutoma.api.containers.ui.ApiBotstoreItem;
 import com.hutoma.api.containers.ui.ApiBotstoreItemList;
 import com.hutoma.api.containers.ui.BotstoreItem;
+import com.hutoma.api.logging.ILogger;
+import com.hutoma.api.logging.LogMap;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
 import javax.inject.Inject;
 
 /**
@@ -24,15 +33,20 @@ import javax.inject.Inject;
 public class UILogic {
     private static final String LOGFROM = "uilogic";
     private final DatabaseUI databaseUi;
+    private final DatabaseAI databaseAi;
     private final DatabaseMarketplace databaseMarketplace;
+    private final DatabaseEntitiesIntents databaseEntitiesIntents;
     private final ILogger logger;
     private final JsonSerializer serializer;
 
     @Inject
-    public UILogic(final DatabaseUI databaseUi, final DatabaseMarketplace databaseMarketplace, final ILogger logger,
-                   final JsonSerializer serializer) {
+    public UILogic(final DatabaseUI databaseUi, final DatabaseMarketplace databaseMarketplace,
+            final DatabaseAI databaseAi, final DatabaseEntitiesIntents databaseEntitiesIntents, final ILogger logger,
+            final JsonSerializer serializer) {
         this.databaseUi = databaseUi;
+        this.databaseAi = databaseAi;
         this.databaseMarketplace = databaseMarketplace;
+        this.databaseEntitiesIntents = databaseEntitiesIntents;
         this.logger = logger;
         this.serializer = serializer;
     }
@@ -48,11 +62,10 @@ public class UILogic {
      * @return the ApiResult containing the list of botstore items, or an error.
      */
     public ApiResult getBotstoreList(final UUID devId, final int startFrom, final int pageSize,
-                                     final List<String> filterList,
-                                     final String orderField, final String orderDirection) {
+            final List<String> filterList, final String orderField, final String orderDirection) {
         try {
-            ApiBotstoreItemList list = this.databaseUi.getBotstoreList(
-                    startFrom, pageSize, filterList, orderField, orderDirection);
+            ApiBotstoreItemList list = this.databaseUi.getBotstoreList(startFrom, pageSize, filterList, orderField,
+                    orderDirection);
             if (devId != null) {
                 List<AiBot> ownedBots = this.databaseMarketplace.getPurchasedBots(devId);
                 HashSet<Integer> ownedSet = new HashSet<>();
@@ -122,6 +135,39 @@ public class UILogic {
             return result.setSuccessStatus();
         } catch (Exception ex) {
             this.logger.logUserExceptionEvent(LOGFROM, "getBotstoreBot", null, ex);
+            return ApiError.getInternalServerError();
+        }
+    }
+
+    /**
+     * Gets the details for an AI
+     * @param devId the developer id
+     * @param aiid the AI id
+     * @return the AI details
+     */
+    public ApiResult getAiDetails(final UUID devId, final UUID aiid) {
+        LogMap logMap = LogMap.map("AIID", aiid);
+        try {
+            ApiAi ai = this.databaseAi.getAI(devId, aiid, serializer);
+            if (ai == null) {
+                this.logger.logUserErrorEvent(LOGFROM, "GetAiDetails - not found", devId.toString(), logMap);
+                return ApiError.getNotFound();
+            }
+            String trainingFile = this.databaseAi.getAiTrainingFile(aiid);
+            List<String> intentNames = this.databaseEntitiesIntents.getIntents(devId, aiid);
+            List<ApiIntent> intents = new ArrayList<>();
+            for (String intentName : intentNames) {
+                intents.add(this.databaseEntitiesIntents.getIntent(aiid, intentName));
+            }
+            List<AiBot> linkedBots = this.databaseAi.getBotsLinkedToAi(devId, aiid);
+            List<AiSkillSummary> skills = new ArrayList<>();
+            for (AiBot bot : linkedBots) {
+                skills.add(new AiSkillSummary(bot));
+            }
+            this.logger.logUserInfoEvent(LOGFROM, "GetAiDetails", devId.toString(), logMap);
+            return new ApiAiDetails(trainingFile, intents, skills).setSuccessStatus();
+        } catch (Exception ex) {
+            this.logger.logUserExceptionEvent(LOGFROM, "getAiDetails", null, ex);
             return ApiError.getInternalServerError();
         }
     }

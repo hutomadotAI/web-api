@@ -1,5 +1,11 @@
 package com.hutoma.api.tests.service;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyDouble;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import com.hutoma.api.access.AuthFilter;
 import com.hutoma.api.access.RateLimitCheck;
 import com.hutoma.api.access.Role;
@@ -15,7 +21,17 @@ import com.hutoma.api.connectors.FacebookConnector;
 import com.hutoma.api.connectors.WebHooks;
 import com.hutoma.api.connectors.aiservices.AIServices;
 import com.hutoma.api.connectors.chat.AIChatServices;
-import com.hutoma.api.connectors.db.*;
+import com.hutoma.api.connectors.db.Database;
+import com.hutoma.api.connectors.db.DatabaseAI;
+import com.hutoma.api.connectors.db.DatabaseBackends;
+import com.hutoma.api.connectors.db.DatabaseCall;
+import com.hutoma.api.connectors.db.DatabaseConnectionPool;
+import com.hutoma.api.connectors.db.DatabaseEntitiesIntents;
+import com.hutoma.api.connectors.db.DatabaseException;
+import com.hutoma.api.connectors.db.DatabaseIntegrations;
+import com.hutoma.api.connectors.db.DatabaseMarketplace;
+import com.hutoma.api.connectors.db.DatabaseTransaction;
+import com.hutoma.api.connectors.db.TransactionalDatabaseCall;
 import com.hutoma.api.containers.sub.RateLimitStatus;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logic.ChatLogic;
@@ -27,6 +43,7 @@ import com.hutoma.api.thread.TrackedThreadSubPool;
 import com.hutoma.api.validation.PostFilter;
 import com.hutoma.api.validation.QueryFilter;
 import com.hutoma.api.validation.Validate;
+
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.compression.CompressionCodecs;
@@ -47,6 +64,12 @@ import org.mockito.MockitoAnnotations;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.UUID;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
+
 import javax.inject.Singleton;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.WebApplicationException;
@@ -54,10 +77,6 @@ import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
-
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * Created by pedrotei on 29/10/16.
@@ -70,7 +89,8 @@ public abstract class ServiceTestBase extends JerseyTest {
     protected static final BackendServerType AI_ENGINE = BackendServerType.WNET;
     protected static final MultivaluedHashMap<String, Object> noDevIdHeaders = new MultivaluedHashMap<>();
     @SuppressWarnings("unchecked")
-    protected static final MultivaluedHashMap<String, Object> defaultHeaders = getDevIdAuthHeaders(Role.ROLE_PLAN_1, DEVID);
+    protected static final MultivaluedHashMap<String, Object> defaultHeaders = getDevIdAuthHeaders(Role.ROLE_PLAN_1,
+            DEVID);
     @Mock
     protected DatabaseCall fakeDatabaseCall;
     @Mock
@@ -115,34 +135,30 @@ public abstract class ServiceTestBase extends JerseyTest {
     protected AiStrings fakeAiStrings;
 
     public static MultivaluedHashMap<String, Object> getDevIdAuthHeaders(final Role role, final UUID devId) {
-        return new MultivaluedHashMap<String, Object>() {{
-            put("Authorization", Collections.singletonList("Bearer " + getDevToken(devId, role)));
-        }};
+        return new MultivaluedHashMap<String, Object>() {
+            {
+                put("Authorization", Collections.singletonList("Bearer " + getDevToken(devId, role)));
+            }
+        };
     }
 
     public static String getDevToken(final UUID devId, final Role role) {
-        return Jwts.builder()
-                .claim("ROLE", role)
-                .setSubject(devId.toString())
-                .compressWith(CompressionCodecs.DEFLATE)
-                .signWith(SignatureAlgorithm.HS256, AUTH_ENCODING_KEY)
-                .compact();
+        return Jwts.builder().claim("ROLE", role).setSubject(devId.toString()).compressWith(CompressionCodecs.DEFLATE)
+                .signWith(SignatureAlgorithm.HS256, AUTH_ENCODING_KEY).compact();
     }
 
     public static String getClientToken(final UUID devId, final UUID aiid) {
-        return Jwts.builder()
-                .claim("ROLE", Role.ROLE_CLIENTONLY)
-                .claim("AIID", aiid.toString())
-                .setSubject(devId.toString())
-                .compressWith(CompressionCodecs.DEFLATE)
-                .signWith(SignatureAlgorithm.HS256, AUTH_ENCODING_KEY)
-                .compact();
+        return Jwts.builder().claim("ROLE", Role.ROLE_CLIENTONLY).claim("AIID", aiid.toString())
+                .setSubject(devId.toString()).compressWith(CompressionCodecs.DEFLATE)
+                .signWith(SignatureAlgorithm.HS256, AUTH_ENCODING_KEY).compact();
     }
 
     public MultivaluedHashMap<String, Object> getClientAuthHeaders(final UUID devId, final UUID aiid) {
-        return new MultivaluedHashMap<String, Object>() {{
-            put("Authorization", Collections.singletonList("Bearer " + getClientToken(devId, aiid)));
-        }};
+        return new MultivaluedHashMap<String, Object>() {
+            {
+                put("Authorization", Collections.singletonList("Bearer " + getClientToken(devId, aiid)));
+            }
+        };
     }
 
     static class InstanceFactory<T> implements Factory<T> {
@@ -169,26 +185,37 @@ public abstract class ServiceTestBase extends JerseyTest {
             protected void configure() {
 
                 // Bind all the external dependencies to mocks
-                bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeConfig)).to(Config.class).to(IThreadConfig.class).in(Singleton.class);
-                bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeDatabaseConnectionPool)).to(DatabaseConnectionPool.class).in(Singleton.class);
+                bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeConfig)).to(Config.class)
+                        .to(IThreadConfig.class).in(Singleton.class);
+                bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeDatabaseConnectionPool))
+                        .to(DatabaseConnectionPool.class).in(Singleton.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeDatabase)).to(Database.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeDatabaseAi)).to(DatabaseAI.class);
-                bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeDatabaseMarketplace)).to(DatabaseMarketplace.class);
-                bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeDatabaseEntitiesIntents)).to(DatabaseEntitiesIntents.class);
-                bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeDatabaseIntegrations)).to(DatabaseIntegrations.class);
-                bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeDatabaseBackends)).to(DatabaseBackends.class);
-                bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeDatabaseTransaction)).to(DatabaseTransaction.class);
+                bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeDatabaseMarketplace))
+                        .to(DatabaseMarketplace.class);
+                bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeDatabaseEntitiesIntents))
+                        .to(DatabaseEntitiesIntents.class);
+                bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeDatabaseIntegrations))
+                        .to(DatabaseIntegrations.class);
+                bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeDatabaseBackends))
+                        .to(DatabaseBackends.class);
+                bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeDatabaseTransaction))
+                        .to(DatabaseTransaction.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeDatabaseCall)).to(DatabaseCall.class);
-                bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeTransactionalDatabaseCall)).to(TransactionalDatabaseCall.class);
+                bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeTransactionalDatabaseCall))
+                        .to(TransactionalDatabaseCall.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeJerseyClient)).to(JerseyClient.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeAiChatServices)).to(AIChatServices.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeAiServices)).to(AIServices.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeTools)).to(Tools.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeWebHooks)).to(WebHooks.class);
-                bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeLogger)).to(ILogger.class).in(Singleton.class);
+                bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeLogger)).to(ILogger.class)
+                        .in(Singleton.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeAccessLogger)).to(AccessLogger.class);
-                bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeEntityRecognizer)).to(EntityRecognizerService.class);
-                bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakefacebookConnector)).to(FacebookConnector.class);
+                bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeEntityRecognizer))
+                        .to(EntityRecognizerService.class);
+                bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakefacebookConnector))
+                        .to(FacebookConnector.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeAiStrings)).to(AiStrings.class);
 
                 // Bind all the internal dependencies to real classes
@@ -210,6 +237,26 @@ public abstract class ServiceTestBase extends JerseyTest {
         };
     }
 
+    /**
+     * Overrides the default logging.
+     * Grizzly uses the standard Java logging which writes to STDERR. This causes
+     * some IDEs to fail test runs since the tests wrote to STDERR, even if all the tests pass.
+     * This method overrides that behaviour by using a console handler that only writs to STDOUT.
+     */
+    protected void overrideDefaultLogging() {
+        Handler handler = new ConsoleHandler() {
+            {
+                setOutputStream(System.out);
+            }
+        };
+        // Remove all handlers
+        LogManager.getLogManager().reset();
+        Logger rootLogger = LogManager.getLogManager().getLogger("");
+        rootLogger.addHandler(handler);
+        rootLogger.setUseParentHandlers(false);
+        rootLogger.setLevel(Level.ALL);
+    }
+
     @SuppressWarnings("unchecked")
     protected <T> T deserializeResponse(Response response, Class<?> theClass) {
         JsonSvcSerializer serializer = new JsonSvcSerializer();
@@ -229,6 +276,9 @@ public abstract class ServiceTestBase extends JerseyTest {
 
     @Override
     protected Application configure() {
+
+        overrideDefaultLogging();
+
         // Use the first available port, to support tests running in parallel
         forceSet(TestProperties.CONTAINER_PORT, "0");
 
@@ -273,7 +323,8 @@ public abstract class ServiceTestBase extends JerseyTest {
         when(this.fakeConfig.getRateLimit_BotstorePublish_Frequency()).thenReturn(1.0);
 
         try {
-            when(this.fakeAiStrings.getDefaultChatResponses(any(), any())).thenReturn(Collections.singletonList(ChatLogic.COMPLETELY_LOST_RESULT));
+            when(this.fakeAiStrings.getDefaultChatResponses(any(), any()))
+                    .thenReturn(Collections.singletonList(ChatLogic.COMPLETELY_LOST_RESULT));
         } catch (AiStrings.AiStringsException ex) {
             // this will never happen, but on the zero in a million chance that it does ....
             ex.printStackTrace();
@@ -317,8 +368,7 @@ public abstract class ServiceTestBase extends JerseyTest {
 
         @Override
         public Response toResponse(Throwable throwable) {
-            return Response.status(500).entity(Exceptions.getStackTraceAsString(throwable)).type("text/plain")
-                    .build();
+            return Response.status(500).entity(Exceptions.getStackTraceAsString(throwable)).type("text/plain").build();
         }
     }
 }
