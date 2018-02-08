@@ -170,7 +170,7 @@ class userMgmt
         $api = new adminApi(base\sessionObject::isLoggedIn(), base\config::getAdminToken());
 
         if (!isset($_POST['logSysForgotPass']) && !isset($_GET['resetPassToken']) && !isset($_POST['logSysForgotPassChange'])) {
-            $html = '<form action="' . base\utils::curPageURL() . '" method="POST">';
+            $html = '<form method="POST">';
             $html .= "<div class='form-group has-feedback'>";
             $html .= "<input  type='email' class='form-control flat' id='logSysIdentification' placeholder='enter your email'  name='identification' />";
             $html .= "<span class='glyphicon glyphicon-envelope form-control-feedback'></span>";
@@ -197,7 +197,7 @@ class userMgmt
                  * The token is valid, display the new password form
                  */
                 $html = "<p>The reset token was authorized. You can now proceed with changing your password</p>";
-                $html .= "<form action='{$_SERVER['PHP_SELF']}' method='POST'>";
+                $html .= "<form method='POST'>";
                 $html .= "<input type='hidden' name='token' value='{$reset_pass_token}' />";
                 $html .= "<label>";
                 $html .= "<p>New Password</p>";
