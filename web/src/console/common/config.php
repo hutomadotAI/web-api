@@ -27,6 +27,16 @@ class config
         return null;
     }
 
+    public static function curloptSSLVerifyPeer() {
+        $verifypeer = getenv("CURLOPT_SSL_VERIFYPEER");
+        return isset($verifypeer) ? $verifypeer : true;
+    }
+
+    public static function curloptSSLVerifyHost() {
+        $verifyhost = getenv("CURLOPT_SSL_VERIFYHOST");
+        return isset($verifyhost) ? $verifyhost : 2;
+    }
+
     public static function getSmtp2GoApiToken() {
         return getenv("SMTP2GO_API_TOKEN");
     }

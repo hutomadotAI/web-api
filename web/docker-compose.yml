@@ -1,4 +1,4 @@
-version: '2'
+version: '3'
 
 services:
 
@@ -25,9 +25,12 @@ services:
     environment:
       # We should move environments variables to secret.env file as soon as it's get optional:
       # https://github.com/docker/compose/pull/3955
-      API_ADMIN_DEVTOKEN: 'eyJhbGciOiJIUzI1NiIsImNhbGciOiJERUYifQ.eNqqVgry93FVsgJT8Y4uvp5-SjpKxaVJQKHElNzMPKVaAAAAAP__.e-INR1D-L_sokTh9sZ9cBnImWI0n6yXXpDCmat1ca_c'
+      API_ADMIN_DEVTOKEN: ${API_ADMIN_DEVTOKEN}
+      SMTP2GO_API_TOKEN: ${SMTP2GO_API_TOKEN}
+      CURLOPT_SSL_VERIFYPEER: 0
+      CURLOPT_SSL_VERIFYHOST: 0
       LOG_SERVICE_ANALYTICS_URL: 'http://log-svc:8080/log'
-      HUTOMA_API_URL: http://10.132.0.4:8081/v1
+      HUTOMA_API_URL: https://dev.hutoma.com:8502/v1
       PHP_XDEBUG_ENABLED: 1
       XDEBUG_CONFIG: remote_host=192.168.1.255
     volumes:

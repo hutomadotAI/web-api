@@ -3,6 +3,7 @@
 namespace hutoma;
 
 include_once __DIR__ . "/curl.php";
+require_once __DIR__ . "/config.php";
 
 /**
  * Class curlHelper
@@ -44,9 +45,9 @@ class apiConnector extends curl
     {
         $this->addHeader('Authorization', 'Bearer ' . $devToken);
         // Forces cURL to verify the peer's certificate - disabling this allows MITM attacks!
-        $this->setOpt(CURLOPT_SSL_VERIFYPEER, true);
+        $this->setOpt(CURLOPT_SSL_VERIFYPEER, config::curloptSSLVerifyPeer());
         // Check the existence of a common name and also verify that it matches the hostname provided
-        $this->setOpt(CURLOPT_SSL_VERIFYHOST, 2);
+        $this->setOpt(CURLOPT_SSL_VERIFYHOST, config::curloptSSLVerifyHost());
     }
 
     /**
