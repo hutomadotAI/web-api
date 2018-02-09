@@ -7,7 +7,6 @@ import com.hutoma.api.connectors.db.DatabaseMarketplace;
 import com.hutoma.api.connectors.db.DatabaseUI;
 import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.ApiError;
-import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.AiBot;
 import com.hutoma.api.containers.sub.AiSkillSummary;
@@ -24,7 +23,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
 import javax.inject.Inject;
 
 /**
@@ -159,17 +157,13 @@ public class UILogic {
             }
             String trainingFile = this.databaseAi.getAiTrainingFile(aiid);
             List<String> intentNames = this.databaseEntitiesIntents.getIntents(devId, aiid);
-            List<ApiIntent> intents = new ArrayList<>();
-            for (String intentName : intentNames) {
-                intents.add(this.databaseEntitiesIntents.getIntent(aiid, intentName));
-            }
             List<AiBot> linkedBots = this.databaseAi.getBotsLinkedToAi(devId, aiid);
             List<AiSkillSummary> skills = new ArrayList<>();
             for (AiBot bot : linkedBots) {
                 skills.add(new AiSkillSummary(bot));
             }
             this.logger.logUserInfoEvent(LOGFROM, "GetAiDetails", devId.toString(), logMap);
-            return new ApiAiDetails(trainingFile, intents, skills).setSuccessStatus();
+            return new ApiAiDetails(trainingFile, intentNames, skills).setSuccessStatus();
         } catch (Exception ex) {
             this.logger.logUserExceptionEvent(LOGFROM, "getAiDetails", null, ex, logMap);
             return ApiError.getInternalServerError();

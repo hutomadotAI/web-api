@@ -1,11 +1,5 @@
 package com.hutoma.api.logic;
 
-import static com.hutoma.api.common.TestDataHelper.DEVID_UUID;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 import com.hutoma.api.common.DeveloperInfoHelper;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.TestBotHelper;
@@ -15,7 +9,6 @@ import com.hutoma.api.connectors.db.DatabaseEntitiesIntents;
 import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.connectors.db.DatabaseMarketplace;
 import com.hutoma.api.connectors.db.DatabaseUI;
-import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.AiBot;
 import com.hutoma.api.containers.ui.ApiAiDetails;
@@ -34,6 +27,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+
+import static com.hutoma.api.common.TestDataHelper.DEVID_UUID;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Created by pedrotei on 28/03/17.
@@ -178,23 +177,17 @@ public class TestUILogic {
     @Test
     public void testGetAiDetails() throws DatabaseException {
         final List<AiBot> linkedBots = Collections.singletonList(TestDataHelper.getAiBot(1, "bot1"));
-        final List<ApiIntent> intents = Arrays.asList(new ApiIntent("intent1", "", ""),
-                new ApiIntent("intent2", "", ""));
         final String trainingFile = "QQQ\nAAA";
+        final List<String> intentNameList = Arrays.asList("intent1", "intent2");
         when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(TestDataHelper.getAI());
         when(this.fakeDatabaseAi.getAiTrainingFile(any())).thenReturn(trainingFile);
-        when(this.fakeDatabaseEntitiesIntents.getIntents(any(), any()))
-                .thenReturn(Arrays.asList(intents.get(0).getIntentName(), intents.get(1).getIntentName()));
+        when(this.fakeDatabaseEntitiesIntents.getIntents(any(), any())).thenReturn(intentNameList);
         UUID aiid = UUID.fromString(TestDataHelper.getAI().getAiid());
-        when(this.fakeDatabaseEntitiesIntents.getIntent(aiid, intents.get(0).getIntentName()))
-                .thenReturn(intents.get(0));
-        when(this.fakeDatabaseEntitiesIntents.getIntent(aiid, intents.get(1).getIntentName()))
-                .thenReturn(intents.get(1));
         when(this.fakeDatabaseAi.getBotsLinkedToAi(any(), any())).thenReturn(linkedBots);
         ApiAiDetails result = (ApiAiDetails) this.uiLogic.getAiDetails(TestDataHelper.DEVID_UUID, TestDataHelper.AIID);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
         Assert.assertEquals(trainingFile, result.getTrainingFile());
-        Assert.assertEquals(intents, result.getIntents());
+        Assert.assertEquals(intentNameList, result.getIntents());
         Assert.assertEquals(linkedBots.size(), result.getSkills().size());
         Assert.assertEquals(linkedBots.get(0).getName(), result.getSkills().get(0).getName());
         Assert.assertEquals(linkedBots.get(0).getCategory(), result.getSkills().get(0).getCategory());
