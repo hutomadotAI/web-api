@@ -1,6 +1,8 @@
 package com.hutoma.api.endpoints;
 
 import com.hutoma.api.access.AuthFilter;
+import com.hutoma.api.access.Role;
+import com.hutoma.api.access.Secured;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Tools;
@@ -9,7 +11,9 @@ import com.hutoma.api.containers.ui.ApiBotstoreCategoryItemList;
 import com.hutoma.api.containers.ui.ApiBotstoreItem;
 import com.hutoma.api.containers.ui.ApiBotstoreItemList;
 import com.hutoma.api.logic.UILogic;
+import com.hutoma.api.validation.APIParameter;
 import com.hutoma.api.validation.ParameterFilter;
+import com.hutoma.api.validation.ValidateParameters;
 import com.webcohesion.enunciate.metadata.rs.RequestHeader;
 import com.webcohesion.enunciate.metadata.rs.RequestHeaders;
 import com.webcohesion.enunciate.metadata.rs.ResourceMethodSignature;
@@ -18,7 +22,6 @@ import com.webcohesion.enunciate.metadata.rs.StatusCodes;
 
 import java.net.HttpURLConnection;
 import java.util.List;
-
 import javax.inject.Inject;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
@@ -106,6 +109,8 @@ public class UIEndpoint {
 
         @GET
         @Path("ai/{aiid}/details")
+        @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
+        @ValidateParameters({APIParameter.AIID})
         @Produces(MediaType.APPLICATION_JSON)
         @StatusCodes({ @ResponseCode(code = HttpURLConnection.HTTP_OK, condition = "Succeeded."),
                         @ResponseCode(code = HttpURLConnection.HTTP_NOT_FOUND, condition = "Bot not found"),
@@ -113,7 +118,7 @@ public class UIEndpoint {
         @RequestHeaders({ @RequestHeader(name = "Authorization", description = "Developer token") })
         @ResourceMethodSignature(pathParams = { @PathParam("botId") }, output = ApiBotstoreItem.class)
         public Response getAiDetails(@Context ContainerRequestContext requestContext) {
-                ApiResult result = this.uiLogic.getAiDetails(AuthFilter.getDevIdFromHeader(requestContext, this.config),
+                ApiResult result = this.uiLogic.getAiDetails(ParameterFilter.getDevid(requestContext),
                                 ParameterFilter.getAiid(requestContext));
                 return result.getResponse(this.serializer).build();
         }

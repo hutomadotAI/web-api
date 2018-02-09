@@ -1,13 +1,5 @@
 package com.hutoma.api.tests.service;
 
-import static com.hutoma.api.common.DeveloperInfoHelper.DEVINFO;
-import static com.hutoma.api.common.TestBotHelper.SAMPLEBOT;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import com.hutoma.api.common.TestDataHelper;
 import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.connectors.db.DatabaseUI;
@@ -25,8 +17,13 @@ import java.net.HttpURLConnection;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
 import javax.ws.rs.core.Response;
+
+import static com.hutoma.api.common.DeveloperInfoHelper.DEVINFO;
+import static com.hutoma.api.common.TestBotHelper.SAMPLEBOT;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Mockito.*;
 
 /**
  * Created by pedrotei on 28/03/17.
@@ -64,7 +61,10 @@ public class TestServiceUI extends ServiceTestBase {
     public void testGetBotstoreItems_commaSeparatedFilterList() throws DatabaseException {
         when(this.fakeDatabaseUi.getBotstoreList(anyInt(), anyInt(), any(), any(), any()))
                 .thenReturn(new ApiBotstoreItemList(Collections.emptyList(), 0, 1, 1));
-        final Response response = target(UI_PATH_BOTSTORE).queryParam("filter", "a,b").request().headers(noDevIdHeaders)
+        final Response response = target(UI_PATH_BOTSTORE)
+                .queryParam("filter", "a,b")
+                .request()
+                .headers(noDevIdHeaders)
                 .get();
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
         List<String> expectedFilters = Arrays.asList("a", "b");
@@ -76,15 +76,20 @@ public class TestServiceUI extends ServiceTestBase {
     @Test
     public void testGetAiDetails() throws DatabaseException {
         when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(TestDataHelper.getAI());
-        final Response response = target(UI_PATH_AIDETAILS).request().headers(defaultHeaders).get();
+        final Response response = target(UI_PATH_AIDETAILS)
+                .request()
+                .headers(defaultHeaders)
+                .get();
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
     }
 
     private void testCallingGetBotStoreItem(final boolean isAuthenticated) throws DatabaseException {
         BotstoreItem item = new BotstoreItem(0, SAMPLEBOT, DEVINFO, false);
         when(this.fakeDatabaseUi.getBotstoreItem(anyInt(), any())).thenReturn(item);
-        final Response response = target(UI_PATH_BOTSTORE + "/" + SAMPLEBOT.getBotId()).request()
-                .headers(isAuthenticated ? defaultHeaders : noDevIdHeaders).get();
+        final Response response = target(UI_PATH_BOTSTORE + "/" + SAMPLEBOT.getBotId())
+                .request()
+                .headers(isAuthenticated ? defaultHeaders : noDevIdHeaders)
+                .get();
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
     }
 
@@ -92,8 +97,10 @@ public class TestServiceUI extends ServiceTestBase {
         BotstoreItem item = new BotstoreItem(0, SAMPLEBOT, DEVINFO, false);
         ApiBotstoreItemList itemList = new ApiBotstoreItemList(Collections.singletonList(item), 0, 1, 1);
         when(this.fakeDatabaseUi.getBotstoreList(anyInt(), anyInt(), any(), any(), any())).thenReturn(itemList);
-        final Response response = target(UI_PATH_BOTSTORE).request()
-                .headers(isAuthenticated ? defaultHeaders : noDevIdHeaders).get();
+        final Response response = target(UI_PATH_BOTSTORE)
+                .request()
+                .headers(isAuthenticated ? defaultHeaders : noDevIdHeaders)
+                .get();
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
     }
 

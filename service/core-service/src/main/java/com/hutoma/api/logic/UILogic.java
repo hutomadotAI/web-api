@@ -146,7 +146,11 @@ public class UILogic {
      * @return the AI details
      */
     public ApiResult getAiDetails(final UUID devId, final UUID aiid) {
-        LogMap logMap = LogMap.map("AIID", aiid);
+        if (devId == null || aiid == null) {
+            this.logger.logError(LOGFROM, "GetAiDetails - no AIID or DevId");
+            return ApiError.getBadRequest();
+        }
+        LogMap logMap = LogMap.map("AIID", aiid).put("DevId", devId);
         try {
             ApiAi ai = this.databaseAi.getAI(devId, aiid, serializer);
             if (ai == null) {
@@ -167,7 +171,7 @@ public class UILogic {
             this.logger.logUserInfoEvent(LOGFROM, "GetAiDetails", devId.toString(), logMap);
             return new ApiAiDetails(trainingFile, intents, skills).setSuccessStatus();
         } catch (Exception ex) {
-            this.logger.logUserExceptionEvent(LOGFROM, "getAiDetails", null, ex);
+            this.logger.logUserExceptionEvent(LOGFROM, "getAiDetails", null, ex, logMap);
             return ApiError.getInternalServerError();
         }
     }
