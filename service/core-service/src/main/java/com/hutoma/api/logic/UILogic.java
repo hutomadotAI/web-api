@@ -155,6 +155,8 @@ public class UILogic {
                 this.logger.logUserErrorEvent(LOGFROM, "GetAiDetails - not found", devId.toString(), logMap);
                 return ApiError.getNotFound();
             }
+            // Note that databaseAi.getAiTrainingFile will be null for when the row doesn't exist, or
+            // when the field is null, that's why we've validated the existence of the AI previously
             String trainingFile = this.databaseAi.getAiTrainingFile(aiid);
             List<String> intentNames = this.databaseEntitiesIntents.getIntents(devId, aiid);
             List<AiBot> linkedBots = this.databaseAi.getBotsLinkedToAi(devId, aiid);
@@ -163,7 +165,7 @@ public class UILogic {
                 skills.add(new AiSkillSummary(bot));
             }
             this.logger.logUserInfoEvent(LOGFROM, "GetAiDetails", devId.toString(), logMap);
-            return new ApiAiDetails(trainingFile, intentNames, skills).setSuccessStatus();
+            return new ApiAiDetails(trainingFile == null ? "" : trainingFile, intentNames, skills).setSuccessStatus();
         } catch (Exception ex) {
             this.logger.logUserExceptionEvent(LOGFROM, "getAiDetails", null, ex, logMap);
             return ApiError.getInternalServerError();
