@@ -1211,6 +1211,17 @@ public class TestAILogic {
         this.aiLogic.createImportedBot(VALIDDEVID, botStructure);
     }
 
+    @Test
+    public void testCreateImportedBot_createAi_nameClash_errorSurfaced() throws DatabaseException, AILogic.BotImportException {
+        setupFakeImport();
+        // Make createAI returning AIID not match the existing one to cause the "name clash" error
+        when(this.fakeTools.createNewRandomUUID()).thenReturn(UUID.randomUUID());
+        BotStructure botStructure = getBotstructure();
+        expectedException.expect(AILogic.BotImportException.class);
+        expectedException.expectMessage("A bot with that name already exists");
+        this.aiLogic.createImportedBot(VALIDDEVID, botStructure);
+    }
+
     private void setupFakeImport() throws DatabaseException {
         ApiAi ai = TestDataHelper.getSampleAI();
         UUID newAiid = UUID.fromString(ai.getAiid());

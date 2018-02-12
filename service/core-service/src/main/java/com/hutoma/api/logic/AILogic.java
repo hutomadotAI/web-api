@@ -1,6 +1,7 @@
 package com.hutoma.api.logic;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Strings;
 import com.hutoma.api.access.Role;
 import com.hutoma.api.common.BotStructureSerializer;
 import com.hutoma.api.common.Config;
@@ -856,6 +857,17 @@ public class AILogic {
                     locale,
                     importedBot.getTimezone(),
                     transaction);
+
+            if (result.getStatus().getCode() != HttpURLConnection.HTTP_OK) {
+                this.logger.logUserErrorEvent(LOGFROM, "ImportBot - create ai", devId.toString(),
+                        LogMap.map("ErrorCode", result.getStatus().getCode())
+                                .put("Message", result.getStatus().getInfo()));
+                // The info from an error on CreateAI should already be customer-friendly, so just
+                // pass it back to the user if there is already one.
+                throw new BotImportException(Strings.isNullOrEmpty(result.getStatus().getInfo())
+                        ? IMPORT_GENERIC_ERROR
+                        : result.getStatus().getInfo());
+            }
 
             try {
                 bot = (ApiAi) result;
