@@ -431,18 +431,21 @@ public class QueueProcessor extends TimerTask {
         }
 
         try {
-            // tell the chosen server to start training
-            this.queueServicesProvider.get().startTrainingDirect(this.serverType,
-                    currentStatus.getDevId(), queued.getAiid(),
-                    server.getServerUrl(), server.getServerIdentifier());
-
-
             // carefully set the AI status to indicate that the AI is training and the
             // slot is in use
             // when training actually starts the server will call us back to set status
             this.database.updateAIStatus(this.serverType, queued.getAiid(),
                     TrainingStatus.AI_TRAINING, server.getServerIdentifier(),
                     currentStatus.getTrainingProgress(), currentStatus.getTrainingError());
+
+            // send the start training command after setting the DB status to avoid status callback coming back
+            // before the the API is ready to receive it
+
+            // tell the chosen server to start training
+            this.queueServicesProvider.get().startTrainingDirect(this.serverType,
+                    currentStatus.getDevId(), queued.getAiid(),
+                    server.getServerUrl(), server.getServerIdentifier());
+
         } catch (ServerConnector.AiServicesException e) {
             handleTrainTaskFailure(queued, server, e);
         } catch (DatabaseException e) {

@@ -169,7 +169,7 @@ public class TestQueueProcessorCommand {
         doThrow(ServerConnector.AiServicesException.class).when(this.fakeQueueServices)
                 .startTrainingDirect(any(), any(), any(), anyString(), anyString());
         this.qproc.unqueueTrain(this.status, this.fakeServerTracker);
-        verify(this.fakeDatabase, never()).updateAIStatus(
+        verify(this.fakeDatabase, times(1)).updateAIStatus(
                 any(), any(), any(), anyString(), anyDouble(), anyDouble());
         verify(this.fakeDatabase, times(1))
                 .queueUpdate(any(), any(), anyBoolean(), anyInt(), any());
@@ -201,7 +201,7 @@ public class TestQueueProcessorCommand {
         doThrow(servicesException).when(this.fakeQueueServices)
                 .startTrainingDirect(any(), any(), any(), anyString(), anyString());
         this.qproc.unqueueTrain(this.status, this.fakeServerTracker);
-        verify(this.fakeDatabase, never()).updateAIStatus(
+        verify(this.fakeDatabase, times(1)).updateAIStatus(
                 any(), any(), any(), anyString(), anyDouble(), anyDouble());
         verify(this.fakeDatabase, times(1))
                 .queueUpdate(any(), any(), anyBoolean(), anyInt(), any());
@@ -217,7 +217,7 @@ public class TestQueueProcessorCommand {
         doThrow(DatabaseException.class).when(this.fakeDatabase)
                 .queueUpdate(any(), any(), anyBoolean(), anyInt(), any());
         this.qproc.unqueueTrain(this.status, this.fakeServerTracker);
-        verify(this.fakeDatabase, never()).updateAIStatus(
+        verify(this.fakeDatabase, times(1)).updateAIStatus(
                 any(), any(), any(), anyString(), anyDouble(), anyDouble());
     }
 
