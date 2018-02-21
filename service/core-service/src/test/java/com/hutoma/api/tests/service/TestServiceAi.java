@@ -78,12 +78,6 @@ public class TestServiceAi extends ServiceTestBase {
     }
 
     @Test
-    public void testGetSingle_QueuedNotMasked() throws DatabaseException {
-        ApiAi result = checkMaskedTrainingStatus(TrainingStatus.AI_TRAINING_QUEUED, 0.0);
-        Assert.assertEquals(TrainingStatus.AI_TRAINING_QUEUED, result.getSummaryStatusPublic());
-    }
-
-    @Test
     public void testGetSingle_QueuedMasked() throws DatabaseException {
         ApiAi result = checkMaskedTrainingStatus(TrainingStatus.AI_TRAINING_QUEUED, 0.1);
         Assert.assertEquals(TrainingStatus.AI_TRAINING, result.getSummaryStatusPublic());
@@ -337,8 +331,6 @@ public class TestServiceAi extends ServiceTestBase {
             TrainingStatus trainingStatus, double trainingProgress) throws DatabaseException {
         BackendStatus status = new BackendStatus();
         status.setEngineStatus(BackendServerType.WNET, new BackendEngineStatus(
-                trainingStatus, 0.0, trainingProgress));
-        status.setEngineStatus(BackendServerType.RNN, new BackendEngineStatus(
                 trainingStatus, 0.0, trainingProgress));
         when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(TestDataHelper.getAi(status));
         final Response response = target(AI_PATH).request().headers(defaultHeaders).get();

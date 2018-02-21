@@ -86,9 +86,9 @@ public abstract class ChatBackendConnector {
             serverEndpointRequestMulti.add(new ServerEndpointRequestMulti.ServerEndpointRequest(
                     aiDevId.getAiid(), Collections.EMPTY_LIST));
         });
-        Map<UUID, ApiServerEndpointMulti.ServerEndpointResponse> endpointMap = ais.isEmpty()?
-                new HashMap<>():
-                this.controllerConnector.getBackendChatEndpointMulti(serverEndpointRequestMulti, serializer);
+        Map<UUID, ApiServerEndpointMulti.ServerEndpointResponse> endpointMap = ais.isEmpty()
+                ? new HashMap<>()
+                : this.controllerConnector.getBackendChatEndpointMulti(serverEndpointRequestMulti, serializer);
 
         // check that there is an endpoint for each ai we need to call
         for (AiDevId ai : ais) {
@@ -229,12 +229,13 @@ public abstract class ChatBackendConnector {
         public AiControllerException(String message) {
             super(message);
         }
+
         public AiControllerException(final Throwable cause) {
             super(cause);
         }
     }
 
-    public static class AiControllerTimeoutException extends AiControllerException {
+    static class AiControllerTimeoutException extends AiControllerException {
         AiControllerTimeoutException(String message) {
             super(message);
         }

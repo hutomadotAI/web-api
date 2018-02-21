@@ -45,7 +45,7 @@ public class TestChatLogicIntents extends TestChatBase {
         MemoryVariable mv = new MemoryVariable("var", Arrays.asList("a", "b"));
         MemoryIntent mi = new MemoryIntent(intentName, AIID, CHATID, Collections.singletonList(mv));
         List<MemoryIntent> miList = Collections.singletonList(mi);
-        setupFakeChat(0.7d, MemoryIntentHandler.META_INTENT_TAG + intentName, 0.0d, AIMLRESULT, 0.3d, NEURALRESULT);
+        setupFakeChat(0.7d, MemoryIntentHandler.META_INTENT_TAG + intentName, 0.0d, AIMLRESULT);
         when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), anyString())).thenReturn(mi);
         when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), anyString())).thenReturn(mi);
         when(this.fakeIntentHandler.getCurrentIntentsStateForChat(any(), any())).thenReturn(miList);
@@ -90,7 +90,7 @@ public class TestChatLogicIntents extends TestChatBase {
         mv.setCurrentValue("a value"); // to fulfill
         MemoryIntent mi = new MemoryIntent(intentName, AIID, CHATID, Collections.singletonList(mv));
         setupFakeChat(0.7d, MemoryIntentHandler.META_INTENT_TAG + intentName,
-                0.0d, AIMLRESULT, 0.3d, NEURALRESULT);
+                0.0d, AIMLRESULT);
         when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), anyString())).thenReturn(mi);
         ApiIntent intent = new ApiIntent(intentName, "", "");
         intent.setResponses(Collections.singletonList("response"));
@@ -183,7 +183,7 @@ public class TestChatLogicIntents extends TestChatBase {
         MemoryVariable mv = new MemoryVariable("sys.any", null, true,
                 Arrays.asList("a", "b"), Collections.singletonList("prompt"), 1, 0, true, false, "label1");
         MemoryIntent mi = new MemoryIntent(intentName, AIID, CHATID, Collections.singletonList(mv));
-        setupFakeChat(0.7d, MemoryIntentHandler.META_INTENT_TAG + intentName, 0.0d, AIMLRESULT, 0.3d, NEURALRESULT);
+        setupFakeChat(0.7d, MemoryIntentHandler.META_INTENT_TAG + intentName, 0.0d, AIMLRESULT);
         when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), anyString())).thenReturn(mi);
         ApiIntent intent = new ApiIntent(intentName, "", "");
         intent.setResponses(Collections.singletonList("response"));
@@ -212,7 +212,7 @@ public class TestChatLogicIntents extends TestChatBase {
         MemoryVariable mv2 = new MemoryVariable("sys.any", null, true,
                 null, Collections.singletonList("prompt2"), 3, 0, true, false, labelSysAny2);
         MemoryIntent mi = new MemoryIntent(intentName, AIID, CHATID, Arrays.asList(mv1, mv2));
-        setupFakeChat(0.7d, MemoryIntentHandler.META_INTENT_TAG + intentName, 0.0d, AIMLRESULT, 0.3d, NEURALRESULT);
+        setupFakeChat(0.7d, MemoryIntentHandler.META_INTENT_TAG + intentName, 0.0d, AIMLRESULT);
         when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), anyString())).thenReturn(mi);
         ApiIntent intent = new ApiIntent(intentName, "", "");
         intent.setResponses(Collections.singletonList("response"));
@@ -458,7 +458,7 @@ public class TestChatLogicIntents extends TestChatBase {
                 "label2");
         MemoryIntent mi = new MemoryIntent("intent", AIID, UUID.randomUUID(), Arrays.asList(mv1, mv2), false);
         when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), any())).thenReturn(mi);
-        setupFakeChat(0.7d, MemoryIntentHandler.META_INTENT_TAG + "intent1", 0.0d, AIMLRESULT, 0.3d, NEURALRESULT);
+        setupFakeChat(0.7d, MemoryIntentHandler.META_INTENT_TAG + "intent1", 0.0d, AIMLRESULT);
 
         ApiResult result = null;
         // Exhaust prompts
@@ -495,7 +495,7 @@ public class TestChatLogicIntents extends TestChatBase {
         MemoryIntent mi = new MemoryIntent(intentName, AIID, CHATID, Arrays.asList(mv1, mv2, mv3));
 
 
-        setupFakeChat(0.7d, MemoryIntentHandler.META_INTENT_TAG + intentName, 0.0d, AIMLRESULT, 0.3d, NEURALRESULT);
+        setupFakeChat(0.7d, MemoryIntentHandler.META_INTENT_TAG + intentName, 0.0d, AIMLRESULT);
         when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), anyString())).thenReturn(mi);
         ApiIntent intent = new ApiIntent(intentName, "", "");
         when(this.fakeIntentHandler.getIntent(any(), any())).thenReturn(intent);

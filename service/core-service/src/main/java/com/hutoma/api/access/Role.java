@@ -18,9 +18,11 @@ public enum Role {
     ROLE_TEST(3);
 
     private int plan;
+
     Role(final int plan) {
         this.plan = plan;
     }
+
     public int getPlan() {
         return this.plan;
     }

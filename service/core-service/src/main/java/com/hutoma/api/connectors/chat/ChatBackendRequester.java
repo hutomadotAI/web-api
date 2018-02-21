@@ -102,7 +102,8 @@ public class ChatBackendRequester implements Callable<InvocationResult> {
                     serverEndpointRequestMulti.add(new ServerEndpointRequestMulti.ServerEndpointRequest(
                                 ai.getAiid(), alreadyTried));
                     Map<UUID, ApiServerEndpointMulti.ServerEndpointResponse> endpointMap =
-                            this.controllerConnector.getBackendChatEndpointMulti(serverEndpointRequestMulti, serializer);
+                            this.controllerConnector.getBackendChatEndpointMulti(
+                                    serverEndpointRequestMulti, serializer);
 
                     // make sure that we got a valid endpoint back from the controller
                     serverEndpointResponse = endpointMap.get(ai.getAiid());

@@ -56,7 +56,7 @@ public class TestServiceAiServices extends ServiceTestBase {
     }
 
     @Test
-    public void testUpdateStatus_invalidStatus() throws DatabaseException {
+    public void testUpdateStatus_invalidStatus() {
         String statusJson = getCommonAiStatusJson();
         statusJson = statusJson.replace(TrainingStatus.AI_READY_TO_TRAIN.value(), "NOT_A_REAL_STATUS");
         final Response response = sendStatusUpdateRequest(statusJson);
@@ -144,7 +144,6 @@ public class TestServiceAiServices extends ServiceTestBase {
     @Test
     public void testServerAffinity_BadSession() {
         when(this.fakeControllerWnet.updateAffinity(any(), any())).thenReturn(false);
-        when(this.fakeControllerRnn.updateAffinity(any(), any())).thenReturn(false);
         when(this.fakeControllerAiml.updateAffinity(any(), any())).thenReturn(false);
         ServerAffinity affinity = new ServerAffinity(ServiceTestBase.DEVID, Collections.singletonList(ServiceTestBase.AIID));
         String json = this.serializeObject(affinity);
@@ -163,22 +162,6 @@ public class TestServiceAiServices extends ServiceTestBase {
                 TestDataHelper.SESSIONID));
         final Response response = sendStatusUpdateRequest(statusJson);
         verify(this.fakeControllerWnet, times(1)).setHashCodeFor(ServiceTestBase.AIID, "hash");
-        verify(this.fakeControllerRnn, never()).setHashCodeFor(ServiceTestBase.AIID, "hash");
-        verify(this.fakeControllerAiml, never()).setHashCodeFor(ServiceTestBase.AIID, "hash");
-    }
-
-    @Test
-    public void testStatusUpdate_HashCode_Rnn() throws DatabaseException {
-        when(this.fakeDatabaseStatusUpdates.updateAIStatus(any())).thenReturn(true);
-        when(this.fakeDatabaseStatusUpdates.getAiQueueStatus(any(), any())).thenReturn(
-                new BackendEngineStatus(TrainingStatus.AI_TRAINING_QUEUED, 0.0, 0.0));
-        String statusJson = this.serializeObject(new AiStatus(ServiceTestBase.DEVID.toString(), ServiceTestBase.AIID,
-                TrainingStatus.AI_READY_TO_TRAIN, BackendServerType.RNN,
-                0.0, 0.0, "hash",
-                TestDataHelper.SESSIONID));
-        final Response response = sendStatusUpdateRequest(statusJson);
-        verify(this.fakeControllerWnet, never()).setHashCodeFor(ServiceTestBase.AIID, "hash");
-        verify(this.fakeControllerRnn, times(1)).setHashCodeFor(ServiceTestBase.AIID, "hash");
         verify(this.fakeControllerAiml, never()).setHashCodeFor(ServiceTestBase.AIID, "hash");
     }
 
@@ -191,7 +174,6 @@ public class TestServiceAiServices extends ServiceTestBase {
         String json = this.serializeObject(wnet);
         final Response response = sendRegistrationRequest(json);
         verify(this.fakeControllerWnet, times(1)).setAllHashCodes(any());
-        verify(this.fakeControllerRnn, never()).setAllHashCodes(any());
         verify(this.fakeControllerAiml, never()).setAllHashCodes(any());
     }
 
@@ -204,7 +186,6 @@ public class TestServiceAiServices extends ServiceTestBase {
         String json = this.serializeObject(wnet);
         final Response response = sendRegistrationRequest(json);
         verify(this.fakeControllerWnet, never()).setAllHashCodes(any());
-        verify(this.fakeControllerRnn, never()).setAllHashCodes(any());
         verify(this.fakeControllerAiml, never()).setAllHashCodes(any());
     }
 

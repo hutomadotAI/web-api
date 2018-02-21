@@ -4,8 +4,12 @@ import com.google.inject.Singleton;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
 
-import java.lang.reflect.Field;
-import java.util.concurrent.*;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 
 /**
@@ -44,7 +48,8 @@ public class ThreadPool {
 
         public ThreadPoolExecutorLogged(final ILogger logger, final int corePoolSize, final int maximumPoolSize,
                                         final long keepAliveTime, final TimeUnit unit,
-                                        final BlockingQueue<Runnable> workQueue, final RejectedExecutionHandler handler) {
+                                        final BlockingQueue<Runnable> workQueue,
+                                        final RejectedExecutionHandler handler) {
             super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, handler);
             this.logger = logger;
         }
@@ -63,13 +68,13 @@ public class ThreadPool {
             int poolSize = this.getPoolSize();
 
             // how many threads are currently active (one less if this is an end action)
-            int activeCount = this.getActiveCount() - ((action == Action.End)? 1:0);
+            int activeCount = this.getActiveCount() - ((action == Action.End) ? 1 : 0);
 
             // create logmap, add the Runnable hashcode to match starts to ends
             LogMap logMap = LogMap.map("Op", action.name())
                     .put("PoolSize", poolSize)
                     .put("ActiveCount", activeCount)
-                    .put("TaskHash", (r==null)? 0 : r.hashCode());
+                    .put("TaskHash", (r == null) ? 0 : r.hashCode());
 
             // log
             logger.logDebug(logFrom, String.format("Thread %s", action.name()),

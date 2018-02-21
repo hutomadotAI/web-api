@@ -50,12 +50,6 @@ public class ApiAi extends ApiResult {
     // value from 0.0 to 1.0 representing training progress on the WNET server
     @SerializedName("phase_1_progress")
     private double phase1Progress;
-    // value from 0.0 to 1.0 representing training progress on the deep learning server
-    @SerializedName("phase_2_progress")
-    private double phase2Progress;
-    // value from around 1.0 (100%) to 10000 or more (~0%)
-    @SerializedName("deep_learning_error")
-    private double deepLearningError;
     // true if the user has already successfully uploaded a training file for this ai
     @SerializedName("training_file_uploaded")
     private boolean trainingFileUploaded;
@@ -130,33 +124,10 @@ public class ApiAi extends ApiResult {
     /***
      * Reports "summary status" for both back-end servers by taking the one that is furthest behind.
      * @param wnetStatus
-     * @param rnnStatus
      * @return
      */
-    private static TrainingStatus getSummaryTrainingStatus(TrainingStatus wnetStatus, TrainingStatus rnnStatus) {
-        if (rnnStatus == null) {
-            return wnetStatus;
-        }
-
-        if ((wnetStatus == TrainingStatus.AI_ERROR) || (rnnStatus == TrainingStatus.AI_ERROR)) {
-            return TrainingStatus.AI_ERROR;
-        }
-        if ((wnetStatus == TrainingStatus.AI_UNDEFINED) || (rnnStatus == TrainingStatus.AI_UNDEFINED)) {
-            return TrainingStatus.AI_UNDEFINED;
-        }
-        if ((wnetStatus == TrainingStatus.AI_READY_TO_TRAIN) || (rnnStatus == TrainingStatus.AI_READY_TO_TRAIN)) {
-            return TrainingStatus.AI_READY_TO_TRAIN;
-        }
-        if ((wnetStatus == TrainingStatus.AI_TRAINING_QUEUED) || (rnnStatus == TrainingStatus.AI_TRAINING_QUEUED)) {
-            return TrainingStatus.AI_TRAINING_QUEUED;
-        }
-        if ((wnetStatus == TrainingStatus.AI_TRAINING_STOPPED) || (rnnStatus == TrainingStatus.AI_TRAINING_STOPPED)) {
-            return TrainingStatus.AI_TRAINING_STOPPED;
-        }
-        if ((wnetStatus == TrainingStatus.AI_TRAINING) || (rnnStatus == TrainingStatus.AI_TRAINING)) {
-            return TrainingStatus.AI_TRAINING;
-        }
-        return TrainingStatus.AI_TRAINING_COMPLETE;
+    private static TrainingStatus getSummaryTrainingStatus(TrainingStatus wnetStatus) {
+        return wnetStatus;
     }
 
     public UITrainingState getUiTrainingState() {
@@ -177,7 +148,7 @@ public class ApiAi extends ApiResult {
 
         // if we have any linked bots then set can_chat to true
         // otherwise leave it as it was set in the constructor
-        if (!linkedBots.isEmpty()) {
+        if (!this.linkedBots.isEmpty()) {
             this.canChat = true;
         }
     }
@@ -272,11 +243,9 @@ public class ApiAi extends ApiResult {
     }
 
     private void populateExtendedStatus() {
-        boolean isRnnEnabled = false;
 
         // unless we have servers online, this bot cannot be chatted with
         this.canChat = false;
-        this.phase2Progress = 0.0d;
 
         if (this.backendStatus == null) {
             this.summaryStatusReal = TrainingStatus.AI_UNDEFINED;
@@ -286,49 +255,28 @@ public class ApiAi extends ApiResult {
             TrainingStatus wnetStatus = wnet.getTrainingStatus();
             this.phase1Progress = clampProgress(wnetStatus, wnet.getTrainingProgress());
 
-            TrainingStatus rnnStatus = null;
-            isRnnEnabled = this.backendStatus.hasEngineStatus(BackendServerType.RNN);
-            if (isRnnEnabled) {
-                BackendEngineStatus rnn = this.backendStatus.getEngineStatus(BackendServerType.RNN);
-                rnnStatus = rnn.getTrainingStatus();
-                this.phase2Progress = clampProgress(rnnStatus, rnn.getTrainingProgress());
-                this.deepLearningError = rnn.getTrainingError();
-            }
-
-            this.summaryStatusReal = getSummaryTrainingStatus(wnetStatus, rnnStatus);
+            this.summaryStatusReal = getSummaryTrainingStatus(wnetStatus);
 
             // depending on which servers are in what state for the bot,
             // we can determine whether we can chat with it or not
             this.canChat = UITrainingState.canChat(wnetStatus);
         }
 
-        if (isRnnEnabled) {
-            // if the bot has been requeued, i.e. training started but paused for any reason
-            if ((this.summaryStatusReal == TrainingStatus.AI_TRAINING_QUEUED) && this.phase2Progress > 0.001) {
-                // then we hide the pause by reporting this bot as "training..."
-                this.summaryStatusPublic = TrainingStatus.AI_TRAINING;
-            } else {
-                this.summaryStatusPublic = this.summaryStatusReal;
-            }
+        this.summaryStatusPublic = this.summaryStatusReal;
 
-            this.uiTrainingState = new UITrainingState(
-                    // use the summary status to generate a uistatus
-                    this.summaryStatusPublic,
-                    // the first 25% is for WNET, the rest is RNN progress
-                    (this.phase1Progress * 0.25) + (this.phase2Progress * 0.75),
-                    // placeholder error until we can actually report the real training error
-                    "an error has occurred");
-        } else {
-            // Only WNET in use
-            this.summaryStatusPublic = this.summaryStatusReal;
-            this.uiTrainingState = new UITrainingState(
-                    // use the summary status to generate a uistatus
-                    this.summaryStatusPublic,
-                    // WNET accounts for the 100% of training time
-                    this.phase1Progress,
-                    // placeholder error until we can actually report the real training error
-                    "an error has occurred");
+        // if the bot has been requeued, i.e. training started but paused for any reason
+        // then we hide the pause by reporting this bot as "training..."
+        if (this.summaryStatusReal == TrainingStatus.AI_TRAINING_QUEUED) {
+            this.summaryStatusPublic     = TrainingStatus.AI_TRAINING;
         }
+
+        this.uiTrainingState = new UITrainingState(
+                // use the summary status to generate a uistatus
+                this.summaryStatusPublic,
+                // WNET accounts for the 100% of training time
+                this.phase1Progress,
+                // placeholder error until we can actually report the real training error
+                "an error has occurred");
 
     }
 

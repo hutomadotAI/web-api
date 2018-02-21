@@ -156,14 +156,13 @@ public class TestAILogic {
     /**
      * Common setup code for UI-status tests
      * @param wnet
-     * @param rnn
      * @param hasLinked
      * @return
      * @throws DatabaseException
      */
 
-    public ApiAi getSingleUIFields(TrainingStatus wnet, TrainingStatus rnn, boolean hasLinked) throws DatabaseException {
-        ApiAi ai = TestDataHelper.getAi(TestDataHelper.getBackendStatus(wnet, rnn));
+    public ApiAi getSingleUIFields(TrainingStatus wnet, boolean hasLinked) throws DatabaseException {
+        ApiAi ai = TestDataHelper.getAi(TestDataHelper.getBackendStatus(wnet));
         when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(ai);
         when(this.fakeDatabaseAi.getBotsLinkedToAi(any(), any(), any())).thenReturn(
                 hasLinked ? Collections.singletonList(TestDataHelper.getAiBot(1, "name"))
@@ -174,7 +173,7 @@ public class TestAILogic {
     @Test
     // no training, no linked bots so we cant chat
     public void testGetSingle_UI_empty() throws DatabaseException {
-        ApiAi result = getSingleUIFields(TrainingStatus.AI_UNDEFINED, TrainingStatus.AI_UNDEFINED, false);
+        ApiAi result = getSingleUIFields(TrainingStatus.AI_UNDEFINED, false);
         Assert.assertEquals(UITrainingState.Status.empty, result.getUiTrainingState().getUiTrainingStatus());
         Assert.assertFalse(result.isCanChat());
     }
@@ -182,15 +181,15 @@ public class TestAILogic {
     @Test
     // wnet is complete so we can chat
     public void testGetSingle_UI_training() throws DatabaseException {
-        ApiAi result = getSingleUIFields(TrainingStatus.AI_TRAINING_COMPLETE, TrainingStatus.AI_TRAINING, false);
-        Assert.assertEquals(UITrainingState.Status.training, result.getUiTrainingState().getUiTrainingStatus());
+        ApiAi result = getSingleUIFields(TrainingStatus.AI_TRAINING_COMPLETE, false);
+        Assert.assertEquals(UITrainingState.Status.completed, result.getUiTrainingState().getUiTrainingStatus());
         Assert.assertTrue(result.isCanChat());
     }
 
     @Test
     // no training but linked bots means we can chat
     public void testGetSingle_UI_linked() throws DatabaseException {
-        ApiAi result = getSingleUIFields(TrainingStatus.AI_UNDEFINED, TrainingStatus.AI_UNDEFINED, true);
+        ApiAi result = getSingleUIFields(TrainingStatus.AI_UNDEFINED, true);
         Assert.assertEquals(UITrainingState.Status.empty, result.getUiTrainingState().getUiTrainingStatus());
         Assert.assertTrue(result.isCanChat());
     }
@@ -198,7 +197,7 @@ public class TestAILogic {
     @Test
     // error in wnet training so we cant chat
     public void testGetSingle_UI_errors() throws DatabaseException {
-        ApiAi result = getSingleUIFields(TrainingStatus.AI_ERROR, TrainingStatus.AI_UNDEFINED, false);
+        ApiAi result = getSingleUIFields(TrainingStatus.AI_ERROR, false);
         Assert.assertEquals(UITrainingState.Status.error, result.getUiTrainingState().getUiTrainingStatus());
         Assert.assertTrue(result.getUiTrainingState().getErrorMessage().length() > 0);
         Assert.assertFalse(result.isCanChat());

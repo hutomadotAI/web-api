@@ -3,7 +3,6 @@ package com.hutoma.api;
 import com.hutoma.api.common.ControllerConfig;
 import com.hutoma.api.connectors.db.DatabaseConnectionPool;
 import com.hutoma.api.controllers.ControllerAiml;
-import com.hutoma.api.controllers.ControllerRnn;
 import com.hutoma.api.controllers.ControllerWnet;
 import com.hutoma.api.logging.AiServiceStatusLogger;
 import com.hutoma.api.logging.LogMap;
@@ -29,7 +28,6 @@ public class ServerInit implements ApplicationEventListener {
 
     private AiServiceStatusLogger logger;
     private ControllerWnet wnetController;
-    private ControllerRnn rnnController;
     private ControllerAiml aimlController;
 
     /**
@@ -44,9 +42,6 @@ public class ServerInit implements ApplicationEventListener {
                 break;
             case DESTROY_FINISHED:
                 this.wnetController.terminateQueue();
-                if (rnnController != null) {
-                    this.rnnController.terminateQueue();
-                }
                 this.aimlController.terminateQueue();
                 FluentLogger.flushAll();
                 FluentLogger.closeAll();
@@ -111,9 +106,6 @@ public class ServerInit implements ApplicationEventListener {
         // create the singleton instances so that the timers start
         // and with them the server monitoring
         this.wnetController = this.serviceLocator.getService(ControllerWnet.class);
-        if (config.isRnnEnabled()) {
-            this.rnnController = this.serviceLocator.getService(ControllerRnn.class);
-        }
         this.aimlController = this.serviceLocator.getService(ControllerAiml.class);
     }
 

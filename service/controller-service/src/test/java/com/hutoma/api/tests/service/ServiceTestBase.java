@@ -14,7 +14,6 @@ import com.hutoma.api.connectors.db.DatabaseConnectionPool;
 import com.hutoma.api.connectors.db.DatabaseTransaction;
 import com.hutoma.api.connectors.db.TransactionalDatabaseCall;
 import com.hutoma.api.controllers.ControllerAiml;
-import com.hutoma.api.controllers.ControllerRnn;
 import com.hutoma.api.controllers.ControllerWnet;
 import com.hutoma.api.logging.AiServiceStatusLogger;
 import com.hutoma.api.logging.ILogger;
@@ -86,8 +85,6 @@ public abstract class ServiceTestBase extends JerseyTest {
     protected ControllerAiml fakeControllerAiml;
     @Mock
     protected ControllerWnet fakeControllerWnet;
-    @Mock
-    protected ControllerRnn fakeControllerRnn;
 
     static class InstanceFactory<T> implements Factory<T> {
 
@@ -125,7 +122,6 @@ public abstract class ServiceTestBase extends JerseyTest {
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeTools)).to(Tools.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeControllerAiml)).to(ControllerAiml.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeControllerWnet)).to(ControllerWnet.class);
-                bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeControllerRnn)).to(ControllerRnn.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeLogger)).to(ILogger.class).in(Singleton.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeServicesStatusLogger)).to(AiServiceStatusLogger.class);
 
@@ -170,14 +166,10 @@ public abstract class ServiceTestBase extends JerseyTest {
         this.fakeServicesStatusLogger = mock(AiServiceStatusLogger.class);
         this.fakeControllerAiml = mock(ControllerAiml.class);
         this.fakeControllerWnet = mock(ControllerWnet.class);
-        this.fakeControllerRnn = mock(ControllerRnn.class);
 
         when(this.fakeControllerWnet.isActiveSession(eq(TestDataHelper.SESSIONID))).thenReturn(true);
         when(this.fakeControllerWnet.getSessionServerIdentifier(eq(TestDataHelper.SESSIONID))).thenReturn("wnet@fake");
         when(this.fakeControllerWnet.isPrimaryMaster(eq(TestDataHelper.SESSIONID))).thenReturn(true);
-        when(this.fakeControllerRnn.isActiveSession(eq(TestDataHelper.SESSIONID))).thenReturn(true);
-        when(this.fakeControllerRnn.getSessionServerIdentifier(eq(TestDataHelper.SESSIONID))).thenReturn("rnn@fake");
-        when(this.fakeControllerRnn.isPrimaryMaster(eq(TestDataHelper.SESSIONID))).thenReturn(true);
 
         ResourceConfig rc = new ResourceConfig(getClassUnderTest());
         AbstractBinder binder = this.getDefaultBindings();

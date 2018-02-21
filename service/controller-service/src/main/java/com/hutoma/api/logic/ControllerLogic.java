@@ -3,7 +3,6 @@ package com.hutoma.api.logic;
 import com.hutoma.api.connectors.BackendServerType;
 import com.hutoma.api.connectors.IServerEndpoint;
 import com.hutoma.api.connectors.NoServerAvailableException;
-import com.hutoma.api.connectors.RequestFor;
 import com.hutoma.api.connectors.ServerTrackerInfo;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiResult;
@@ -13,7 +12,6 @@ import com.hutoma.api.containers.ApiServerTrackerInfoMap;
 import com.hutoma.api.containers.sub.ServerEndpointRequestMulti;
 import com.hutoma.api.controllers.ControllerAiml;
 import com.hutoma.api.controllers.ControllerBase;
-import com.hutoma.api.controllers.ControllerRnn;
 import com.hutoma.api.controllers.ControllerWnet;
 import com.hutoma.api.controllers.ServerTracker;
 
@@ -29,11 +27,9 @@ public class ControllerLogic {
     private final Map<BackendServerType, ControllerBase> controllerMap = new HashMap<>();
 
     @Inject
-    public ControllerLogic(final ControllerAiml controllerAiml, final ControllerWnet controllerWnet,
-                           final ControllerRnn controllerRnn) {
+    public ControllerLogic(final ControllerAiml controllerAiml, final ControllerWnet controllerWnet) {
         controllerMap.put(BackendServerType.AIML, controllerAiml);
         controllerMap.put(BackendServerType.WNET, controllerWnet);
-        controllerMap.put(BackendServerType.RNN, controllerRnn);
     }
 
     public ApiResult getMap(final BackendServerType serverType) {
@@ -81,7 +77,7 @@ public class ControllerLogic {
         ControllerBase controller = controllerMap.get(backendServerType);
 
         // for every server requested (typically one main bot + one for every linked bot)
-        for(ServerEndpointRequestMulti.ServerEndpointRequest request:
+        for (ServerEndpointRequestMulti.ServerEndpointRequest request:
                 serverEndpointRequestMulti.getEndpointRequests()) {
             try {
                 // get the server to send the chat request to

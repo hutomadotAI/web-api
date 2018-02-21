@@ -74,9 +74,4 @@ public abstract class CommonConfig {
         }
         return defaultValue;
     }
-
-    public boolean isRnnEnabled() {
-        String val = getConfigFromProperties("rnn_enabled", "true");
-        return Boolean.parseBoolean(val);
-    }
 }

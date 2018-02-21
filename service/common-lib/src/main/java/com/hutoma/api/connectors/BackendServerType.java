@@ -10,9 +10,6 @@ public enum BackendServerType {
     @SerializedName("wnet")
     WNET("wnet"),
 
-    @SerializedName("rnn")
-    RNN("rnn"),
-
     @SerializedName("aiml")
     AIML("aiml");
 

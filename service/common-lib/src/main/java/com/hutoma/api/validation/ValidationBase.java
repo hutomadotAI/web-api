@@ -56,6 +56,7 @@ abstract class ValidationBase {
                 (message == null) ? "" : message),
                 null);
     }
+
     /***
      * Throw a validation exception if the string is too long
      * @param maxLength

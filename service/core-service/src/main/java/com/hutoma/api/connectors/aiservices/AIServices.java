@@ -8,7 +8,6 @@ import com.hutoma.api.connectors.BackendStatus;
 import com.hutoma.api.connectors.IConnectConfig;
 import com.hutoma.api.connectors.InvocationResult;
 import com.hutoma.api.connectors.NoServerAvailableException;
-import com.hutoma.api.connectors.RequestFor;
 import com.hutoma.api.connectors.ServerConnector;
 import com.hutoma.api.connectors.ServerTrackerInfo;
 import com.hutoma.api.connectors.db.DatabaseAI;
@@ -48,7 +47,6 @@ public class AIServices extends ServerConnector {
     private final DatabaseEntitiesIntents databaseEntitiesIntents;
     private final DatabaseAI databaseAi;
     private final WnetServicesConnector wnetServicesConnector;
-    private final RnnServicesConnector rnnServicesConnector;
 
     @Inject
     public AIServices(final DatabaseAI databaseAi,
@@ -58,14 +56,12 @@ public class AIServices extends ServerConnector {
                       final Tools tools, final JerseyClient jerseyClient,
                       final TrackedThreadSubPool threadSubPool,
                       final AiServicesQueue queueServices,
-                      final WnetServicesConnector wnetServicesConnector,
-                      final RnnServicesConnector rnnServicesConnector) {
+                      final WnetServicesConnector wnetServicesConnector) {
         super(logger, connectConfig, serializer, tools, jerseyClient, threadSubPool);
         this.queueServices = queueServices;
         this.databaseEntitiesIntents = databaseEntitiesIntents;
         this.databaseAi = databaseAi;
         this.wnetServicesConnector = wnetServicesConnector;
-        this.rnnServicesConnector = rnnServicesConnector;
     }
 
     /***
@@ -79,10 +75,6 @@ public class AIServices extends ServerConnector {
         try {
             this.queueServices.userActionStartTraining(status, BackendServerType.WNET, devId, aiid);
             this.wnetServicesConnector.kickQueueProcessor();
-            if (this.connectConfig.isRnnEnabled()) {
-                this.queueServices.userActionStartTraining(status, BackendServerType.RNN, devId, aiid);
-                this.rnnServicesConnector.kickQueueProcessor();
-            }
         } catch (DatabaseException e) {
             AiServicesException.throwWithSuppressed("failed to start training", e);
         }
@@ -100,10 +92,6 @@ public class AIServices extends ServerConnector {
         try {
             this.queueServices.userActionStopTraining(backendStatus, BackendServerType.WNET, this.wnetServicesConnector,
                     devId, aiid);
-            if (this.connectConfig.isRnnEnabled()) {
-                this.queueServices.userActionStopTraining(backendStatus, BackendServerType.RNN,
-                        this.rnnServicesConnector, devId, aiid);
-            }
         } catch (DatabaseException e) {
             AiServicesException.throwWithSuppressed("failed to stop training", e);
         }
@@ -122,11 +110,6 @@ public class AIServices extends ServerConnector {
             this.queueServices.userActionDelete(backendStatus, BackendServerType.WNET, this.wnetServicesConnector,
                     devId, aiid);
             this.wnetServicesConnector.kickQueueProcessor();
-            if (this.connectConfig.isRnnEnabled()) {
-                this.queueServices.userActionDelete(backendStatus, BackendServerType.RNN, this.rnnServicesConnector,
-                        devId, aiid);
-                this.rnnServicesConnector.kickQueueProcessor();
-            }
         } catch (DatabaseException e) {
             AiServicesException.throwWithSuppressed("failed to delete ai", e);
         }
@@ -151,14 +134,12 @@ public class AIServices extends ServerConnector {
 
     private List<String> getEndpointsForAllServerTypes() {
         List<String> list = new ArrayList<>();
-        Optional<ServerTrackerInfo> info = this.wnetServicesConnector.getVerifiedEndpointMap(serializer).values().stream()
+        Optional<ServerTrackerInfo> info = this.wnetServicesConnector
+                .getVerifiedEndpointMap(serializer)
+                .values()
+                .stream()
                 .findFirst();
         info.ifPresent(serverTrackerInfo -> list.add(serverTrackerInfo.getServerUrl()));
-        if (this.connectConfig.isRnnEnabled()) {
-            info = this.rnnServicesConnector.getVerifiedEndpointMap(serializer).values().stream()
-                    .findFirst();
-            info.ifPresent(serverTrackerInfo -> list.add(serverTrackerInfo.getServerUrl()));
-        }
         return list;
     }
 
@@ -179,10 +160,6 @@ public class AIServices extends ServerConnector {
         try {
             this.queueServices.userActionUpload(backendStatus, BackendServerType.WNET, this.wnetServicesConnector,
                     devId, aiid);
-            if (this.connectConfig.isRnnEnabled()) {
-                this.queueServices.userActionUpload(backendStatus, BackendServerType.RNN, this.rnnServicesConnector,
-                        devId, aiid);
-            }
         } catch (DatabaseException e) {
             AiServicesException.throwWithSuppressed("failed to upload training materials", e);
         }
@@ -192,26 +169,13 @@ public class AIServices extends ServerConnector {
         this.logger.logDebug(LOGFROM, "Issuing \"upload training\" command to backends for AI " + aiid.toString());
         for (String endpoint : this.getListOfPrimaryEndpoints(aiid)) {
 
-            // HACK! HACK!- temporarily pro-process the training file for RNN so that
-            // it doesn't contain any intent-generated lines
-            // Bug:2300
-            String trainingToSend = trainingMaterials;
-            try {
-                if (this.connectConfig.isRnnEnabled() && endpoint.equals(
-                        this.rnnServicesConnector.getBackendTrainingEndpoint(aiid, serializer).getServerUrl())) {
-                    trainingToSend = removeIntentExpressions(trainingMaterials);
-                }
-            } catch (NoServerAvailableException ex) {
-                // Shouldn't happen as this would first fail on getListOfPrimaryEndpoints()
-            }
-
             this.logger.logDebug(LOGFROM, "Sending training data to: " + endpoint);
             FormDataContentDisposition dispo = FormDataContentDisposition
                     .name("filename")
                     .fileName("training.txt")
-                    .size(trainingToSend.getBytes(Charsets.UTF_8).length)
+                    .size(trainingMaterials.getBytes(Charsets.UTF_8).length)
                     .build();
-            FormDataBodyPart bodyPart = new FormDataBodyPart(dispo, trainingToSend);
+            FormDataBodyPart bodyPart = new FormDataBodyPart(dispo, trainingMaterials);
             AiInfo info = new AiInfo(devId, aiid);
             FormDataMultiPart multipart = (FormDataMultiPart) new FormDataMultiPart()
                     .field("info", this.serializer.serialize(info), MediaType.APPLICATION_JSON_TYPE)
@@ -314,9 +278,6 @@ public class AIServices extends ServerConnector {
         try {
             List<String> endpoints = new ArrayList<>();
             endpoints.add(this.wnetServicesConnector.getBackendTrainingEndpoint(aiid, serializer).getServerUrl());
-            if (this.connectConfig.isRnnEnabled()) {
-                endpoints.add(this.rnnServicesConnector.getBackendTrainingEndpoint(aiid, serializer).getServerUrl());
-            }
             return endpoints;
         } catch (NoServerAvailableException noServer) {
             AiServicesException.throwWithSuppressed(noServer.getMessage(), noServer);

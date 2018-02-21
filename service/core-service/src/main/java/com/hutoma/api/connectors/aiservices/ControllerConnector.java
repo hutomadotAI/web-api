@@ -63,18 +63,23 @@ public abstract class ControllerConnector {
         this.kickQueue(this.getServerType());
     }
 
+    /**
+     * Gets from the controller a training backend endpoint for a given AI.
+     * @param aiid the AIID
+     * @param serializer the json serialiser
+     * @return the endpoint information
+     * @throws NoServerAvailableException if there are no servers available to process this request
+     */
     public IServerEndpoint getBackendTrainingEndpoint(final UUID aiid, final JsonSerializer serializer)
             throws NoServerAvailableException {
         return getBackendTrainingEndpoint(aiid, this.getServerType(), serializer);
     }
 
-    Map<String, ServerTrackerInfo> getVerifiedEndpointMap(final JsonSerializer serializer) {
-        return getVerifiedEndpointMap(this.getServerType(), serializer);
-    }
-
     /**
      * Gets from the controller a training backend endpoint for a given AI.
      * @param aiid the AIID
+     * @param serverType the server type
+     * @param serializer the json serialiser
      * @return the endpoint information
      * @throws NoServerAvailableException if there are no servers available to process this request
      */
@@ -127,8 +132,8 @@ public abstract class ControllerConnector {
      * @throws NoServerAvailableException
      * @throws ChatBackendConnector.AiControllerException
      */
-    public Map<UUID, ApiServerEndpointMulti.ServerEndpointResponse> getBackendChatEndpointMulti
-            (final ServerEndpointRequestMulti multiRequest, final JsonSerializer serializer)
+    public Map<UUID, ApiServerEndpointMulti.ServerEndpointResponse> getBackendChatEndpointMulti(
+            final ServerEndpointRequestMulti multiRequest, final JsonSerializer serializer)
             throws NoServerAvailableException,
             ChatBackendConnector.AiControllerException {
         if (multiRequest == null) {
@@ -163,6 +168,10 @@ public abstract class ControllerConnector {
                 response.close();
             }
         }
+    }
+
+    Map<String, ServerTrackerInfo> getVerifiedEndpointMap(final JsonSerializer serializer) {
+        return getVerifiedEndpointMap(this.getServerType(), serializer);
     }
 
     /**

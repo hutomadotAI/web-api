@@ -2,7 +2,6 @@ package com.hutoma.api.connectors.aiservices;
 
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.common.TestDataHelper;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.NoServerAvailableException;
 import com.hutoma.api.connectors.db.DatabaseAI;
@@ -79,7 +78,6 @@ public class TestAiServicesClient {
     private ThreadPool threadPool;
     private AiServicesQueue fakeQueueServices;
     private WnetServicesConnector fakeWnetServicesConnector;
-    private RnnServicesConnector fakeRnnServicesConnector;
 
     @BeforeClass
     public static void initializeClass() {
@@ -104,19 +102,16 @@ public class TestAiServicesClient {
         this.fakeTools = mock(Tools.class);
         this.fakeQueueServices = mock(AiServicesQueue.class);
         this.fakeWnetServicesConnector = mock(WnetServicesConnector.class);
-        this.fakeRnnServicesConnector = mock(RnnServicesConnector.class);
 
         when(this.fakeConfig.getThreadPoolMaxThreads()).thenReturn(32);
         when(this.fakeConfig.getThreadPoolIdleTimeMs()).thenReturn(10000L);
         when(this.fakeConfig.getBackendTrainingCallTimeoutMs()).thenReturn(20000L);
         this.threadPool = new ThreadPool(this.fakeConfig, this.fakeLogger);
 
-        when(this.fakeRnnServicesConnector.getBackendTrainingEndpoint(any(), any())).thenReturn(TestDataHelper.getEndpointFor(LOCAL_WEB_ENDPOINT));
-
         this.aiServices = new AIServices(this.fakeDatabaseAi, this.fakeDatabaseEntitiesIntents, this.fakeLogger,
                 this.fakeConfig, this.fakeSerializer,
                 this.fakeTools, JerseyClientBuilder.createClient(), new TrackedThreadSubPool(this.threadPool),
-                this.fakeQueueServices, this.fakeWnetServicesConnector, this.fakeRnnServicesConnector);
+                this.fakeQueueServices, this.fakeWnetServicesConnector);
     }
 
     @Test
@@ -144,13 +139,11 @@ public class TestAiServicesClient {
     public void testUploadTraining() throws AIServices.AiServicesException, NoServerAvailableException {
         when(this.fakeWnetServicesConnector.getBackendTrainingEndpoint(any(), any()))
                 .thenReturn(getFakeServerEndpoint(LOCAL_WEB_ENDPOINT));
-        when(this.fakeRnnServicesConnector.getBackendTrainingEndpoint(any(), any()))
-                .thenReturn(getFakeServerEndpoint(LOCAL_WEB_ENDPOINT));
         // Need to have a real serializer here to transform the ai info
         AIServices thisAiServices = new AIServices(this.fakeDatabaseAi, this.fakeDatabaseEntitiesIntents,
                 this.fakeLogger, this.fakeConfig, new JsonSerializer(),
                 this.fakeTools, JerseyClientBuilder.createClient(), new TrackedThreadSubPool(this.threadPool),
-                this.fakeQueueServices, this.fakeWnetServicesConnector, this.fakeRnnServicesConnector);
+                this.fakeQueueServices, this.fakeWnetServicesConnector);
         thisAiServices.uploadTraining(null, DEVID, AIID, TRAINING_MATERIALS);
     }
 

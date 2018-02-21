@@ -265,9 +265,7 @@ public class TrainingLogic {
             TrainingStatus trainingStatus = ai.getSummaryAiStatus();
             BackendStatus backendStatus = ai.getBackendStatus();
             TrainingStatus statusWnet = backendStatus.getEngineStatus(BackendServerType.WNET).getTrainingStatus();
-            TrainingStatus statusRnn = backendStatus.getEngineStatus(BackendServerType.RNN).getTrainingStatus();
-            if (statusWnet == TrainingStatus.AI_TRAINING_QUEUED || statusWnet == TrainingStatus.AI_TRAINING
-                    || statusRnn == TrainingStatus.AI_TRAINING_QUEUED || statusRnn == TrainingStatus.AI_TRAINING) {
+            if (statusWnet == TrainingStatus.AI_TRAINING_QUEUED || statusWnet == TrainingStatus.AI_TRAINING) {
                 this.aiServices.stopTraining(backendStatus, devid, aiid);
                 this.logger.logUserTraceEvent(LOGFROM, "StopTraining", devidString, logMap);
                 return new ApiResult().setSuccessStatus("Training session stopped.");

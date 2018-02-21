@@ -43,10 +43,8 @@ public class AIChatServices extends ServerConnector {
 
     private static final String LOGFROM = "aichatservices";
     private final ChatWnetConnector backendWnetConnector;
-    private final ChatRnnConnector backendRnnConnector;
     private final ChatAimlConnector backendAimlConnector;
     private List<ChatBackendConnector.RequestInProgress> wnetFutures;
-    private List<ChatBackendConnector.RequestInProgress> rnnFutures;
     private List<ChatBackendConnector.RequestInProgress> aimlFutures;
     private Map<UUID, Double> minPMap = new HashMap<>();
     private final Config config;
@@ -61,11 +59,9 @@ public class AIChatServices extends ServerConnector {
                           final Tools tools, final Config config, final JerseyClient jerseyClient,
                           final TrackedThreadSubPool threadSubPool,
                           final ChatWnetConnector backendWnetConnector,
-                          final ChatRnnConnector backendRnnConnector,
                           final ChatAimlConnector backendAimlConnector) {
         super(logger, connectConfig, serializer, tools, jerseyClient, threadSubPool);
         this.backendWnetConnector = backendWnetConnector;
-        this.backendRnnConnector = backendRnnConnector;
         this.backendAimlConnector = backendAimlConnector;
         this.config = config;
         this.databaseAi = databaseAi;
@@ -130,28 +126,19 @@ public class AIChatServices extends ServerConnector {
 
         // make copies of the AI lists
         List<AiDevId> wnetAIs = new ArrayList<>(listAis);
-        List<AiDevId> rnnAIs = config.isRnnEnabled()
-                ? new ArrayList<>(listAis)
-                : new ArrayList<>();
 
         // add the AI to the list if the server can chat
         if (canChatWith.contains(BackendServerType.WNET)) {
             wnetAIs.add(new AiDevId(devId, aiid));
         }
-        if (canChatWith.contains(BackendServerType.RNN)) {
-            rnnAIs.add(new AiDevId(devId, aiid));
-        }
 
         // If we're issuing a chat request but there are no AIs available to serve it, just fail
-        if (wnetAIs.isEmpty() && rnnAIs.isEmpty() && !usedAimlBot) {
+        if (wnetAIs.isEmpty() && !usedAimlBot) {
             throw new AiNotReadyToChat("No AIs ready to chat");
         }
 
         if (!wnetAIs.isEmpty()) {
             this.wnetFutures = this.backendWnetConnector.issueChatRequests(parameters, wnetAIs, chatState);
-        }
-        if (!rnnAIs.isEmpty()) {
-            this.rnnFutures = this.backendRnnConnector.issueChatRequests(parameters, rnnAIs, chatState);
         }
     }
 
@@ -179,23 +166,8 @@ public class AIChatServices extends ServerConnector {
         return null;
     }
 
-    /***
-     * Waits for RNN calls to complete and returns the result
-     * @return map of results, or null if there were no requests
-     * @throws ChatBackendConnector.AiControllerException
-     */
-    public Map<UUID, ChatResult> awaitRnn() throws ChatBackendConnector.AiControllerException {
-        if (this.rnnFutures != null) {
-            return this.backendRnnConnector.waitForAll(this.rnnFutures, getRemainingTime());
-        }
-        return null;
-    }
-
     @Override
     public void abandonCalls() {
-        if (this.rnnFutures != null) {
-            this.rnnFutures.forEach(ChatBackendConnector.RequestInProgress::closeRequest);
-        }
         if (this.wnetFutures != null) {
             this.wnetFutures.forEach(ChatBackendConnector.RequestInProgress::closeRequest);
         }
@@ -203,7 +175,6 @@ public class AIChatServices extends ServerConnector {
             this.aimlFutures.forEach(ChatBackendConnector.RequestInProgress::closeRequest);
         }
         this.backendWnetConnector.abandonCalls();
-        this.backendRnnConnector.abandonCalls();
         this.backendAimlConnector.abandonCalls();
     }
 
@@ -239,16 +210,6 @@ public class AIChatServices extends ServerConnector {
             // wnet can only chat if training is complete
             if (wnetStatus == TrainingStatus.AI_TRAINING_COMPLETE) {
                 chatSet.add(BackendServerType.WNET);
-            }
-
-            if (this.config.isRnnEnabled()) {
-                TrainingStatus rnnStatus = result.getEngineStatus(BackendServerType.RNN).getTrainingStatus();
-                // rnn can chat if training is complete, stopped or in progress
-                if (rnnStatus == TrainingStatus.AI_TRAINING_COMPLETE
-                        || rnnStatus == TrainingStatus.AI_TRAINING_STOPPED
-                        || rnnStatus == TrainingStatus.AI_TRAINING) {
-                    chatSet.add(BackendServerType.RNN);
-                }
             }
         }
         return chatSet;

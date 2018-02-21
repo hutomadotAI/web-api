@@ -12,7 +12,6 @@ import com.hutoma.api.connectors.WebHooks;
 import com.hutoma.api.connectors.chat.AIChatServices;
 import com.hutoma.api.connectors.chat.ChatBackendConnector;
 import com.hutoma.api.connectors.db.DatabaseAI;
-import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.ApiChat;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.AiMinP;
@@ -80,7 +79,6 @@ public class TestChatBase {
         this.fakeAiStrings = mock(AiStrings.class);
 
         when(fakeConfig.getEncodingKey()).thenReturn(TestDataHelper.VALID_ENCODING_KEY);
-        when(this.fakeConfig.isRnnEnabled()).thenReturn(true);
 
         this.chatLogic = new ChatLogic(fakeConfig, mock(JsonSerializer.class), this.fakeChatServices, mock(Tools.class),
                 mock(ILogger.class), this.fakeIntentHandler, this.fakeRecognizer, mock(ChatLogger.class), this.fakeWebHooks,
@@ -142,16 +140,12 @@ public class TestChatBase {
      * @param wnetResponse
      * @param aimlConfidence
      * @param aimlResponse
-     * @param rnnConfidence
-     * @param rnnResponse
      * @throws ServerConnector.AiServicesException
      */
     void setupFakeChat(double wnetConfidence, String wnetResponse,
-                       double aimlConfidence, String aimlResponse,
-                       double rnnConfidence, String rnnResponse) throws
+                       double aimlConfidence, String aimlResponse) throws
             ChatBackendConnector.AiControllerException {
-        setupFakeChatWithHistory(wnetConfidence, wnetResponse, "", aimlConfidence, aimlResponse,
-                rnnConfidence, rnnResponse);
+        setupFakeChatWithHistory(wnetConfidence, wnetResponse, "", aimlConfidence, aimlResponse);
     }
 
     /***
@@ -161,13 +155,10 @@ public class TestChatBase {
      * @param wnetHistory
      * @param aimlConfidence
      * @param aimlResponse
-     * @param rnnConfidence
-     * @param rnnResponse
      * @throws ServerConnector.AiServicesException
      */
     void setupFakeChatWithHistory(double wnetConfidence, String wnetResponse, String wnetHistory,
-                                  double aimlConfidence, String aimlResponse,
-                                  double rnnConfidence, String rnnResponse) throws
+                                  double aimlConfidence, String aimlResponse) throws
             ChatBackendConnector.AiControllerException {
 
         ChatResult wnetResult = new ChatResult("Hi");
@@ -183,11 +174,6 @@ public class TestChatBase {
         aimlResult.setScore(aimlConfidence);
         aimlResult.setAnswer(aimlResponse);
         when(this.fakeChatServices.awaitAiml()).thenReturn(getChatResultMap(AIML_BOT_AIID, aimlResult));
-
-        ChatResult rnnResult = new ChatResult("Hi3");
-        rnnResult.setScore(rnnConfidence);
-        rnnResult.setAnswer(rnnResponse);
-        when(this.fakeChatServices.awaitRnn()).thenReturn(getChatResultMap(AIID, rnnResult));
     }
 
     Map<UUID, ChatResult> getChatResultMap(
@@ -215,7 +201,7 @@ public class TestChatBase {
                 "label");
         MemoryIntent mi = new MemoryIntent(intentName, AIID, CHATID, Collections.singletonList(mv));
 
-        setupFakeChat(0.9d, MemoryIntentHandler.META_INTENT_TAG + intentName, 0.3d, "", 0.3d, "");
+        setupFakeChat(0.9d, MemoryIntentHandler.META_INTENT_TAG + intentName, 0.3d, "");
         when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), any())).thenReturn(mi);
         return mi;
     }
@@ -255,7 +241,7 @@ public class TestChatBase {
         variables.add(persistentVariable);
         MemoryIntent mi = new MemoryIntent(intentName, AIID, CHATID, variables);
 
-        setupFakeChat(0.9d, MemoryIntentHandler.META_INTENT_TAG + intentName, 0.3d, "", 0.3d, "");
+        setupFakeChat(0.9d, MemoryIntentHandler.META_INTENT_TAG + intentName, 0.3d, "");
         when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), any())).thenReturn(mi);
         return mi;
     }

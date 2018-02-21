@@ -2,7 +2,6 @@ package com.hutoma.api.connectors.chat;
 
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.common.TestBotHelper;
 import com.hutoma.api.common.TestDataHelper;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.BackendEngineStatus;
@@ -30,7 +29,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-import static com.hutoma.api.common.TestBotHelper.BOTID;
 import static com.hutoma.api.common.TestBotHelper.SAMPLEBOT;
 import static com.hutoma.api.common.TestDataHelper.AIID;
 import static com.hutoma.api.common.TestDataHelper.DEVID_UUID;
@@ -47,7 +45,6 @@ public class TestAiChatServices {
     private DatabaseAI fakeDatabaseAi;
     private DatabaseUser fakeDatabaseUser;
     private ChatAimlConnector fakeRequestAiml;
-    private ChatRnnConnector fakeRequestRnn;
     private ChatWnetConnector fakeRequestWnet;
     private Config fakeConfig;
     private AIChatServices chatServices;
@@ -61,14 +58,12 @@ public class TestAiChatServices {
         this.fakeConfig = mock(Config.class);
         this.fakeRequestWnet = mock(ChatWnetConnector.class);
         this.fakeRequestAiml = mock(ChatAimlConnector.class);
-        this.fakeRequestRnn = mock(ChatRnnConnector.class);
         this.threadSubPool = mock(TrackedThreadSubPool.class);
-        when(this.fakeConfig.isRnnEnabled()).thenReturn(true);
         this.chatServices = new AIChatServices(
                 this.fakeDatabaseAi, mock(ILogger.class), fakeConfig, mock(JsonSerializer.class),
                 mock(Tools.class), this.fakeConfig, mock(JerseyClient.class),
                 this.threadSubPool,
-                this.fakeRequestWnet, this.fakeRequestRnn, this.fakeRequestAiml);
+                this.fakeRequestWnet, this.fakeRequestAiml);
     }
 
     @Test
@@ -76,10 +71,9 @@ public class TestAiChatServices {
             ChatBackendConnector.AiControllerException, DatabaseException, NoServerAvailableException {
         when(this.chatServices.getAIsLinkedToAi(any(), any())).thenReturn(Collections.emptyList());
         when(this.fakeDatabaseAi.getAIStatusReadOnly(any(), any())).thenReturn(TestDataHelper.getBackendStatus(
-                TrainingStatus.AI_TRAINING_COMPLETE, TrainingStatus.AI_TRAINING_COMPLETE));
+                TrainingStatus.AI_TRAINING_COMPLETE));
         this.issueStartChatRequests();
         verify(this.fakeRequestWnet).issueChatRequests(any(), any(), any());
-        verify(this.fakeRequestRnn).issueChatRequests(any(), any(), any());
         verify(this.fakeRequestAiml, never()).issueChatRequests(any(), any(), any());
     }
 
@@ -88,7 +82,7 @@ public class TestAiChatServices {
             ChatBackendConnector.AiControllerException, DatabaseException, NoServerAvailableException {
         when(this.chatServices.getAIsLinkedToAi(any(), any())).thenReturn(Collections.emptyList());
         when(this.fakeDatabaseAi.getAIStatusReadOnly(any(), any())).thenReturn(TestDataHelper.getBackendStatus(
-                TrainingStatus.AI_UNDEFINED, TrainingStatus.AI_UNDEFINED));
+                TrainingStatus.AI_UNDEFINED));
         this.issueStartChatRequests();
     }
 
@@ -99,10 +93,9 @@ public class TestAiChatServices {
         when(this.fakeDatabaseAi.getAisLinkedToAi(any(), any()))
                 .thenReturn(Collections.singletonList(new AiMinP(DEVID_UUID, SAMPLEBOT.getAiid(), 0.5)));
         when(this.fakeDatabaseAi.getAIStatusReadOnly(any(), any())).thenReturn(TestDataHelper.getBackendStatus(
-                TrainingStatus.AI_UNDEFINED, TrainingStatus.AI_UNDEFINED));
+                TrainingStatus.AI_UNDEFINED));
         this.issueStartChatRequests();
         verify(this.fakeRequestWnet, never()).issueChatRequests(any(), any(), any());
-        verify(this.fakeRequestRnn, never()).issueChatRequests(any(), any(), any());
         verify(this.fakeRequestAiml).issueChatRequests(any(), any(), any());
     }
 
@@ -113,42 +106,30 @@ public class TestAiChatServices {
         when(this.fakeDatabaseAi.getAisLinkedToAi(any(), any())).thenReturn(
                 Collections.singletonList(new AiMinP(DEVID_UUID, AIML_BOT_AIID, 0.5)));
         when(this.fakeDatabaseAi.getAIStatusReadOnly(any(), any())).thenReturn(TestDataHelper.getBackendStatus(
-                TrainingStatus.AI_TRAINING_COMPLETE, TrainingStatus.AI_TRAINING_COMPLETE));
+                TrainingStatus.AI_TRAINING_COMPLETE));
         this.issueStartChatRequests();
         verify(this.fakeRequestWnet).issueChatRequests(any(), any(), any());
-        verify(this.fakeRequestRnn).issueChatRequests(any(), any(), any());
         verify(this.fakeRequestAiml).issueChatRequests(any(), any(), any());
     }
 
     @Test
     public void canChatWithAi() throws DatabaseException {
         when(this.fakeDatabaseAi.getAIStatusReadOnly(any(), any())).thenReturn(TestDataHelper.getBackendStatus(
-                TrainingStatus.AI_TRAINING_COMPLETE, TrainingStatus.AI_TRAINING_COMPLETE));
+                TrainingStatus.AI_TRAINING_COMPLETE));
         Assert.assertTrue(this.chatServices.canChatWithAi(DEVID_UUID, AIID).contains(BackendServerType.WNET));
-        Assert.assertTrue(this.chatServices.canChatWithAi(DEVID_UUID, AIID).contains(BackendServerType.RNN));
     }
 
     @Test
     public void canChatWithAi_CantChat() throws DatabaseException {
         when(this.fakeDatabaseAi.getAIStatusReadOnly(any(), any())).thenReturn(TestDataHelper.getBackendStatus(
-                TrainingStatus.AI_UNDEFINED, TrainingStatus.AI_UNDEFINED));
+                TrainingStatus.AI_UNDEFINED));
         Assert.assertFalse(this.chatServices.canChatWithAi(DEVID_UUID, AIID).contains(BackendServerType.WNET));
-        Assert.assertFalse(this.chatServices.canChatWithAi(DEVID_UUID, AIID).contains(BackendServerType.RNN));
-    }
-
-    @Test
-    public void canChatWithAi_RnnQueued() throws DatabaseException {
-        when(this.fakeDatabaseAi.getAIStatusReadOnly(any(), any())).thenReturn(TestDataHelper.getBackendStatus(
-                TrainingStatus.AI_TRAINING_COMPLETE, TrainingStatus.AI_TRAINING_QUEUED));
-        Assert.assertTrue(this.chatServices.canChatWithAi(DEVID_UUID, AIID).contains(BackendServerType.WNET));
-        Assert.assertFalse(this.chatServices.canChatWithAi(DEVID_UUID, AIID).contains(BackendServerType.RNN));
     }
 
     @Test
     public void canChatWithAi_DBException() throws DatabaseException {
         when(this.fakeDatabaseAi.getAIStatusReadOnly(any(), any())).thenThrow(DatabaseException.class);
         Assert.assertFalse(this.chatServices.canChatWithAi(DEVID_UUID, AIID).contains(BackendServerType.WNET));
-        Assert.assertFalse(this.chatServices.canChatWithAi(DEVID_UUID, AIID).contains(BackendServerType.RNN));
     }
 
     @Test
@@ -157,7 +138,6 @@ public class TestAiChatServices {
         ChatState chatState = ChatState.getEmpty();
         BackendStatus beStatus = new BackendStatus();
         beStatus.setEngineStatus(BackendServerType.WNET, new BackendEngineStatus(TrainingStatus.AI_TRAINING_COMPLETE, 0.0, 1.0));
-        beStatus.setEngineStatus(BackendServerType.RNN, new BackendEngineStatus(TrainingStatus.AI_TRAINING_COMPLETE, 0.0, 1.0));
         when(this.fakeDatabaseAi.getAIStatusReadOnly(any(), any())).thenReturn(beStatus);
         // No linked bots
         when(this.fakeDatabaseAi.getAisLinkedToAi(any(), any())).thenReturn(Collections.emptyList());
@@ -175,7 +155,6 @@ public class TestAiChatServices {
         chatState.setConfidenceThreshold(minP);
         BackendStatus beStatus = new BackendStatus();
         beStatus.setEngineStatus(BackendServerType.WNET, new BackendEngineStatus(TrainingStatus.AI_TRAINING_COMPLETE, 0.0, 1.0));
-        beStatus.setEngineStatus(BackendServerType.RNN, new BackendEngineStatus(TrainingStatus.AI_TRAINING_COMPLETE, 0.0, 1.0));
         when(this.fakeDatabaseAi.getAIStatusReadOnly(any(), any())).thenReturn(beStatus);
 
         AiMinP bot1 = new AiMinP(DEVID_UUID, UUID.randomUUID(), 0.5);
@@ -194,57 +173,6 @@ public class TestAiChatServices {
     public void classtestChatservices_passthroughUrl_invalidAiidForDev() throws DatabaseException, ChatLogic.ChatFailedException {
         when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(null);
         this.chatServices.getAIPassthroughUrl(DEVID_UUID, AIID);
-    }
-
-    @Test
-    public void testChatServices_Rnn_disabled() throws ServerConnector.AiServicesException, ChatBackendConnector.AiControllerException,
-            NoServerAvailableException, DatabaseException {
-        BackendStatus beStatus = new BackendStatus();
-        beStatus.setEngineStatus(BackendServerType.WNET, new BackendEngineStatus(TrainingStatus.AI_TRAINING_COMPLETE, 0.0, 1.0));
-        beStatus.setEngineStatus(BackendServerType.RNN, new BackendEngineStatus(TrainingStatus.AI_TRAINING_COMPLETE, 0.0, 1.0));
-        when(this.fakeDatabaseAi.getAIStatusReadOnly(any(), any())).thenReturn(beStatus);
-        // Make sure we never even issue requests to RNN if we have it disabled
-        when(this.fakeConfig.isRnnEnabled()).thenReturn(false);
-        this.chatServices.startChatRequests(DEVID_UUID, AIID, CHATID, "question", ChatState.getEmpty());
-        verify(this.fakeRequestRnn, never()).issueChatRequests(anyMap(), anyList(), any());
-    }
-
-    @Test
-    public void testChatServices_RnnDisabled_LinkedBots() throws ServerConnector.AiServicesException,
-            ChatBackendConnector.AiControllerException,
-            NoServerAvailableException, DatabaseException {
-
-        AiMinP bot1 = new AiMinP(DEVID_UUID, UUID.randomUUID(), 0.5);
-        AiMinP bot2 = new AiMinP(DEVID_UUID, UUID.randomUUID(), 0.7);
-        List<AiMinP> linkedBots = Arrays.asList(bot1, bot2);
-
-        checkDisabledRnn(linkedBots);
-    }
-
-    @Test
-    public void testChatServices_RnnDisabled_LinkedBots_AIML() throws ServerConnector.AiServicesException,
-            ChatBackendConnector.AiControllerException,
-            NoServerAvailableException, DatabaseException {
-
-        when(this.fakeConfig.getAimlBotAiids()).thenReturn(Collections.singletonList(SAMPLEBOT.getAiid()));
-
-        AiMinP bot1 = new AiMinP(DEVID_UUID, UUID.randomUUID(), 0.5);
-        AiMinP bot2 = new AiMinP(DEVID_UUID, SAMPLEBOT.getAiid(), 0.7);
-        List<AiMinP> linkedBots = Arrays.asList(bot1, bot2);
-
-        checkDisabledRnn(linkedBots);
-    }
-
-    private void checkDisabledRnn(final List<AiMinP> linkedBots) throws DatabaseException, ServerConnector.AiServicesException, ChatBackendConnector.AiControllerException, NoServerAvailableException {
-        BackendStatus beStatus = new BackendStatus();
-        beStatus.setEngineStatus(BackendServerType.WNET, new BackendEngineStatus(TrainingStatus.AI_TRAINING_COMPLETE, 0.0, 1.0));
-        beStatus.setEngineStatus(BackendServerType.RNN, new BackendEngineStatus(TrainingStatus.AI_TRAINING_COMPLETE, 0.0, 1.0));
-        when(this.fakeDatabaseAi.getAisLinkedToAi(any(), any())).thenReturn(linkedBots);
-        when(this.fakeDatabaseAi.getAIStatusReadOnly(any(), any())).thenReturn(beStatus);
-        // Make sure we never even issue requests to RNN if we have it disabled
-        when(this.fakeConfig.isRnnEnabled()).thenReturn(false);
-        this.chatServices.startChatRequests(DEVID_UUID, AIID, CHATID, "question", ChatState.getEmpty());
-        verify(this.fakeRequestRnn, never()).issueChatRequests(anyMap(), anyList(), any());
     }
 
     private void issueStartChatRequests() throws ServerConnector.AiServicesException, ChatBackendConnector.AiControllerException, NoServerAvailableException {

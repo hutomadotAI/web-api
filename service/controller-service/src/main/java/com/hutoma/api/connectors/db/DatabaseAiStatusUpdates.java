@@ -39,9 +39,9 @@ public class DatabaseAiStatusUpdates extends Database {
      * Gets a summary of training slot status
      * i.e. for each individual server endpoint a count of active used training slots
      * and a count of used training slots that have not been updated in a while
-     * @param serverType
+     * @param serverType the server type
      * @param cutoffSeconds seconds that need to have passed for a training slot to be considered 'lapsed'
-     * @return
+     * @return a list of endpoint training slots
      * @throws DatabaseException
      */
     public List<ServerEndpointTrainingSlots> getQueueSlotCounts(
@@ -72,8 +72,8 @@ public class DatabaseAiStatusUpdates extends Database {
 
     /***
      * Takes the next queued item off the queue and returns it
-     * @param serverType
-     * @return
+     * @param serverType the server type
+     * @return the backend engine status, or null if there aren't any (or any supported)
      * @throws DatabaseException
      */
     public BackendEngineStatus queueTakeNext(BackendServerType serverType) throws DatabaseException {
@@ -99,9 +99,9 @@ public class DatabaseAiStatusUpdates extends Database {
     /***
      * Gets the full status of an item in the status table
      * Including its devid and whether the AI was deleted or not
-     * @param serverType
-     * @param aiid
-     * @return
+     * @param serverType the server type
+     * @param aiid the AI id
+     * @return the backend engine status or null if there aren't any (or any supported)
      * @throws DatabaseException
      */
     public BackendEngineStatus getAiQueueStatus(BackendServerType serverType, UUID aiid) throws DatabaseException {
@@ -115,11 +115,13 @@ public class DatabaseAiStatusUpdates extends Database {
                     .executeQuery();
             if (rs.next()) {
                 backendEngineStatus = DatabaseBackends.getBackendEngineStatus(rs).getB();
-                // also read the devid and the deleted flag from the ai table
-                final String devId = rs.getString("dev_id");
-                final UUID devIdUuid = UUID.fromString(devId);
-                backendEngineStatus.setDevId(devIdUuid);
-                backendEngineStatus.setDeleted(rs.getBoolean("deleted"));
+                if (backendEngineStatus != null) {
+                    // also read the devid and the deleted flag from the ai table
+                    final String devId = rs.getString("dev_id");
+                    final UUID devIdUuid = UUID.fromString(devId);
+                    backendEngineStatus.setDevId(devIdUuid);
+                    backendEngineStatus.setDeleted(rs.getBoolean("deleted"));
+                }
             }
             // if all goes well, commit
             transaction.commit();
@@ -135,7 +137,7 @@ public class DatabaseAiStatusUpdates extends Database {
      * Each bot is requeued so that the slot is effectively cleared
      * @param serverType
      * @param cutoffSeconds number of seconds with no updates after which the AI is considered lapsed
-     * @return
+     * @return the list of backend ending status
      * @throws DatabaseException
      */
     public List<BackendEngineStatus> recoverInterruptedTraining(
@@ -152,14 +154,16 @@ public class DatabaseAiStatusUpdates extends Database {
 
             while (rs.next()) {
                 BackendEngineStatus lapsed = DatabaseBackends.getBackendEngineStatus(rs).getB();
-                slots.add(lapsed);
+                if (lapsed != null) {
+                    slots.add(lapsed);
 
-                transaction.getDatabaseCall().initialise("queueRecover", 4)
-                        .add(serverType.value())
-                        .add(lapsed.getAiid())
-                        .add(QueueAction.TRAIN.value())
-                        .add(TrainingStatus.AI_TRAINING_QUEUED.value())
-                        .executeUpdate();
+                    transaction.getDatabaseCall().initialise("queueRecover", 4)
+                            .add(serverType.value())
+                            .add(lapsed.getAiid())
+                            .add(QueueAction.TRAIN.value())
+                            .add(TrainingStatus.AI_TRAINING_QUEUED.value())
+                            .executeUpdate();
+                }
             }
 
             transaction.commit();
@@ -326,7 +330,7 @@ public class DatabaseAiStatusUpdates extends Database {
      * @param devid
      * @param statusInDb
      * @param statusOnBackend
-     * @return
+     * @return whether the item has changed or not
      * @throws DatabaseException
      * @throws SQLException
      */

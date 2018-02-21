@@ -63,7 +63,6 @@ public class TestDataHelper {
     public static ApiAi getAi(TrainingStatus status, boolean isPrivate) {
         BackendStatus result = new BackendStatus();
         result.setEngineStatus(BackendServerType.WNET, new BackendEngineStatus(status, 0.0, 0.0));
-        result.setEngineStatus(BackendServerType.RNN, new BackendEngineStatus(status, 0.0, 0.0));
         return new ApiAi(AIID.toString(), "token", "name", "desc", DateTime.now(), isPrivate, result, true,
                 0, 0.0, 1, Locale.getDefault(), "UTC", null, "", DEFAULT_CHAT_RESPONSES, DEFAULT_API_KEY_DESC);
     }
@@ -79,15 +78,13 @@ public class TestDataHelper {
 
     private static BackendStatus setBackendEngineStatus(final TrainingStatus status) {
         BackendStatus bs = new BackendStatus();
-        bs.setEngineStatus(new AiStatus(DEVID, AIID, status, BackendServerType.RNN, 0.0, 1.0, "hash", SESSIONID));
         bs.setEngineStatus(new AiStatus(DEVID, AIID, status, BackendServerType.WNET, 0.0, 1.0, "hash", SESSIONID));
         bs.setEngineStatus(new AiStatus(DEVID, AIID, status, BackendServerType.AIML, 0.0, 1.0, "hash", SESSIONID));
         return bs;
     }
 
-    public static BackendStatus getBackendStatus(final TrainingStatus wnetStatus, final TrainingStatus rnnStatus) {
+    public static BackendStatus getBackendStatus(final TrainingStatus wnetStatus) {
         BackendStatus bs = new BackendStatus();
-        bs.setEngineStatus(new AiStatus(DEVID, AIID, rnnStatus, BackendServerType.RNN, 0.0, 1.0, "hash", SESSIONID));
         bs.setEngineStatus(new AiStatus(DEVID, AIID, wnetStatus, BackendServerType.WNET, 0.0, 1.0, "hash", SESSIONID));
         return bs;
     }

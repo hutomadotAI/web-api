@@ -16,7 +16,6 @@ import com.hutoma.api.containers.sub.ServerRegistration;
 import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.controllers.ControllerAiml;
 import com.hutoma.api.controllers.ControllerBase;
-import com.hutoma.api.controllers.ControllerRnn;
 import com.hutoma.api.controllers.ControllerWnet;
 import com.hutoma.api.logging.AiServiceStatusLogger;
 import com.hutoma.api.logging.ILogger;
@@ -41,7 +40,6 @@ public class AIServicesLogic {
     private final AiServiceStatusLogger serviceStatusLogger;
     private final ILogger logger;
     private final ControllerWnet controllerWnet;
-    private final ControllerRnn controllerRnn;
     private final ControllerAiml controllerAiml;
 
 
@@ -49,13 +47,12 @@ public class AIServicesLogic {
     public AIServicesLogic(final JsonSerializer jsonSerializer,
                            final DatabaseAiStatusUpdates database,
                            final AiServiceStatusLogger serviceStatusLogger, ILogger logger,
-                           final ControllerWnet controllerWnet, final ControllerRnn controllerRnn,
+                           final ControllerWnet controllerWnet,
                            final ControllerAiml controllerAiml) {
         this.jsonSerializer = jsonSerializer;
         this.database = database;
         this.serviceStatusLogger = serviceStatusLogger;
         this.controllerWnet = controllerWnet;
-        this.controllerRnn = controllerRnn;
         this.controllerAiml = controllerAiml;
         this.logger = logger;
     }
@@ -168,14 +165,8 @@ public class AIServicesLogic {
             BackendServerType updated = null;
             if (this.controllerWnet.updateAffinity(sid, aiList)) {
                 updated = BackendServerType.WNET;
-            } else {
-                if (this.controllerRnn.updateAffinity(sid, aiList)) {
-                    updated = BackendServerType.RNN;
-                } else {
-                    if (this.controllerAiml.updateAffinity(sid, aiList)) {
-                        updated = BackendServerType.AIML;
-                    }
-                }
+            } else if (this.controllerAiml.updateAffinity(sid, aiList)) {
+                updated = BackendServerType.AIML;
             }
             if (updated == null) {
                 return ApiError.getBadRequest("nonexistent session");
@@ -344,8 +335,6 @@ public class AIServicesLogic {
         switch (server) {
             case WNET:
                 return this.controllerWnet;
-            case RNN:
-                return this.controllerRnn;
             case AIML:
                 return this.controllerAiml;
             default:

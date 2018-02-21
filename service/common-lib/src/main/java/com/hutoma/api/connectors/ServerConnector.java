@@ -107,7 +107,8 @@ public class ServerConnector {
         return futures;
     }
 
-    protected void executeAndWait(final HashMap<String, Callable<InvocationResult>> callables) throws AiServicesException {
+    protected void executeAndWait(final HashMap<String, Callable<InvocationResult>> callables)
+            throws AiServicesException {
 
         HashMap<String, Future<InvocationResult>> futures = null;
         try {

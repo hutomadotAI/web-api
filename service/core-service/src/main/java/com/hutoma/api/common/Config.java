@@ -243,7 +243,9 @@ public class Config extends CommonConfig implements ILoggerConfig, IThreadConfig
         return getConfigFromProperties("entity_recognizer_url", "");
     }
 
-    public String getControllerEndpoint() { return getConfigFromProperties("controller_url", "http://localhost:8080/v1"); }
+    public String getControllerEndpoint() {
+        return getConfigFromProperties("controller_url", "http://localhost:8080/v1");
+    }
 
     public void validateConfigPresent() throws Exception {
         // Validate encoding key is present otherwise we can't sign

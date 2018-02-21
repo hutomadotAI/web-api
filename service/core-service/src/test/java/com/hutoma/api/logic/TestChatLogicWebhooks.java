@@ -50,7 +50,7 @@ public class TestChatLogicWebhooks extends TestChatBase {
         when(this.fakeWebHooks.getWebHookForIntent(any(), any())).thenReturn(VALID_WEBHOOK);
         when(this.fakeWebHooks.executeIntentWebHook(any(), any(), any(), any())).thenReturn(wr);
 
-        setupFakeChat(0.7d, MemoryIntentHandler.META_INTENT_TAG + intentName, 0.0d, AIMLRESULT, 0.3d, NEURALRESULT);
+        setupFakeChat(0.7d, MemoryIntentHandler.META_INTENT_TAG + intentName, 0.0d, AIMLRESULT);
         when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), anyString())).thenReturn(mi);
         ApiIntent intent = new ApiIntent(intentName, "", "");
         intent.setResponses(Collections.singletonList(INTENTRESPONSE));
@@ -81,7 +81,7 @@ public class TestChatLogicWebhooks extends TestChatBase {
         when(this.fakeDatabaseAi.getWebHook(any(), any())).thenReturn(wh);
         when(this.fakeWebHooks.getWebHookForIntent(any(), any())).thenReturn(VALID_WEBHOOK);
         when(this.fakeWebHooks.executeIntentWebHook(any(), any(), any(), any())).thenReturn(wr);
-        setupFakeChat(0.7d, MemoryIntentHandler.META_INTENT_TAG + intentName, 0.0d, AIMLRESULT, 0.3d, NEURALRESULT);
+        setupFakeChat(0.7d, MemoryIntentHandler.META_INTENT_TAG + intentName, 0.0d, AIMLRESULT);
         when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), anyString())).thenReturn(mi);
         ApiIntent intent = new ApiIntent(intentName, "", "");
         intent.setResponses(Collections.singletonList(INTENTRESPONSE));
@@ -111,7 +111,7 @@ public class TestChatLogicWebhooks extends TestChatBase {
         when(this.fakeWebHooks.getWebHookForIntent(any(), any())).thenReturn(new WebHook(AIID, "intent", "endpoint", false));
         when(this.fakeWebHooks.executeIntentWebHook(any(), any(), any(), any())).thenReturn(wr);
 
-        setupFakeChat(0.7d, MemoryIntentHandler.META_INTENT_TAG + intentName, 0.0d, AIMLRESULT, 0.3d, NEURALRESULT);
+        setupFakeChat(0.7d, MemoryIntentHandler.META_INTENT_TAG + intentName, 0.0d, AIMLRESULT);
         when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), anyString())).thenReturn(mi);
         ApiIntent intent = new ApiIntent(intentName, "", "");
         intent.setResponses(Collections.singletonList(INTENTRESPONSE));
@@ -157,7 +157,7 @@ public class TestChatLogicWebhooks extends TestChatBase {
         MemoryIntent mi = new MemoryIntent(intentName, AIID, CHATID, Collections.singletonList(mv));
         when(this.fakeWebHooks.getWebHookForIntent(any(), any())).thenReturn(VALID_WEBHOOK);
         setupFakeChat(0.7d,
-                MemoryIntentHandler.META_INTENT_TAG + intentName, 0.0d, AIMLRESULT, 0.3d, NEURALRESULT);
+                MemoryIntentHandler.META_INTENT_TAG + intentName, 0.0d, AIMLRESULT);
         when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), anyString())).thenReturn(mi);
         ApiIntent intent = new ApiIntent(intentName, "", "");
         intent.setResponses(Collections.singletonList(INTENTRESPONSE));

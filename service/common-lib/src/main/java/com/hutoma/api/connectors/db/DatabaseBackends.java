@@ -36,12 +36,14 @@ public class DatabaseBackends extends Database {
 
         try {
             BackendServerType serverType = BackendServerType.forValue(rs.getString("server_type"));
-            TrainingStatus trainingStatus = TrainingStatus.forValue(rs.getString("training_status"));
+            // If we can't map the server type it means it's either about a service we don't support anymore
+            // or there is some error in the db. In any case we can just ignore it.
+            if (serverType == null) {
+                return null;
+            }
             double trainingProgress = rs.getDouble("training_progress");
             double trainingError = rs.getDouble("training_error");
-            if (serverType == null) {
-                throw new DatabaseException("bad servertype");
-            }
+            TrainingStatus trainingStatus = TrainingStatus.forValue(rs.getString("training_status"));
             if (trainingStatus == null) {
                 throw new DatabaseException("bad trainingstatus");
             }
@@ -78,7 +80,9 @@ public class DatabaseBackends extends Database {
         BackendStatus status = new BackendStatus();
         while (rs.next()) {
             Pair<BackendServerType, BackendEngineStatus> update = getBackendEngineStatus(rs);
-            status.setEngineStatus(update.getA(), update.getB());
+            if (update != null) {
+                status.setEngineStatus(update.getA(), update.getB());
+            }
         }
 
         return status;
@@ -103,8 +107,10 @@ public class DatabaseBackends extends Database {
             UUID aiid = UUID.fromString(rs.getString("aiid"));
             Pair<BackendServerType, BackendEngineStatus> serverStatus =
                     getBackendEngineStatus(rs);
-            statuses.computeIfAbsent(aiid, x -> new BackendStatus())
-                    .setEngineStatus(serverStatus.getA(), serverStatus.getB());
+            if (serverStatus != null) {
+                statuses.computeIfAbsent(aiid, x -> new BackendStatus())
+                        .setEngineStatus(serverStatus.getA(), serverStatus.getB());
+            }
         }
         return statuses;
     }

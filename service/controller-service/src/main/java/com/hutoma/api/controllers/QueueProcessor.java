@@ -33,7 +33,6 @@ import javax.inject.Provider;
 
 /***
  * Only one of these should exist for each queuing controller.
- * i.e. one for WNET and one for RNN
  * When initialised, will start a thread that monitors the queue
  * and executes queued tasks
  */

@@ -379,53 +379,9 @@ public class ChatLogic {
                     this.telemetryMap.add("AIMLAnswered", aimlResult != null);
 
                     if (aimlResult == null || !aimlConfident) {
-                        // clear the locked AI
-                        this.chatState.setLockedAiid(null);
-
-                        // get a response from the RNN
-                        ChatResult rnnResult = null;
-
-                        // if the RNN times out, treat it as if it returned an empty response
-                        // i.e. carry on and take the best answer that we have
-                        try {
-                            rnnResult = this.interpretRnnResult(question,
-                                    this.chatState.getConfidenceThreshold());
-                        } catch (ChatBackendConnector.AiControllerTimeoutException ex) {
-                            // log the timeout if it happens
-                            this.telemetryMap.add("RnnTimeout", ex.getMessage());
-                        }
-
-                        // Currently RNN "cannot be trusted" as it doesn't provide an accurate confidence level
-                        this.telemetryMap.add("AnsweredWithConfidence", false);
-
-                        boolean answeredByRnn = false;
-
-                        if (rnnResult != null) {
-                            this.telemetryMap.add("RNNScore", rnnResult.getScore());
-                            // If the RNN was clueless or returned an empty response
-                            if (rnnResult.getAnswer() != null && !rnnResult.getAnswer().isEmpty()) {
-                                result = rnnResult;
-                                this.telemetryMap.add("AnsweredBy", "RNN");
-                                answeredByRnn = true;
-                            }
-                        }
-
-                        if (!answeredByRnn) {
-                            // Fallback to AIML only if we have an answer available (regardless of whether
-                            // it's confidence is above minP or not) and there's actually a response
-                            if (aimlResult != null && aimlResult.getScore() > JUST_ABOVE_ZERO
-                                    && !aimlResult.getAnswer().isEmpty()) {
-                                this.telemetryMap.add("FellBackToAIML", "true");
-                                this.telemetryMap.add("AnsweredBy", "AIML");
-                                result = aimlResult;
-                            } else {
-                                // TODO we need to figure out something
-                                this.telemetryMap.add("AnsweredBy", "NONE");
-                                result = getImCompletelyLostChatResult(devId, aiid, chatUuid, question);
-                            }
-                        }
-
-                        this.telemetryMap.add("RNNAnswered", rnnResult != null);
+                        // TODO we need to figure out something
+                        this.telemetryMap.add("AnsweredBy", "NONE");
+                        result = getImCompletelyLostChatResult(devId, aiid, chatUuid, question);
                     }
                 }
             }
@@ -455,7 +411,8 @@ public class ChatLogic {
                             .put("Error", webHookErrorString));
             this.telemetryMap.add("webHookCallFailure", webHookErrorString);
 
-        } catch (IntentException | ChatBackendConnector.AiControllerException | ServerConnector.AiServicesException ex) {
+        } catch (IntentException | ChatBackendConnector.AiControllerException
+                | ServerConnector.AiServicesException ex) {
             this.logger.logUserExceptionEvent(LOGFROM, "Chat - " + ex.getClass().getSimpleName(),
                     devIdString, ex, LogMap.map("AIID", aiid));
             this.chatLogger.logChatError(LOGFROM, devIdString, ex, this.telemetryMap);
@@ -543,7 +500,8 @@ public class ChatLogic {
                     if (mv.getTimesPrompted() >= mv.getTimesToPrompt()) {
                         mv.setRequested(false);
                         handledIntent = false;
-                        // clear the intent whenever a mandatory variable is not set within the allowed number of prompts
+                        // clear the intent whenever a mandatory variable is not set within
+                        // the allowed number of prompts
                         intentsToClear.add(currentIntent);
                     } else {
                         promptForVariable(mv, chatResult, intentLog);
@@ -888,44 +846,6 @@ public class ChatLogic {
 
         this.telemetryMap.add("AIMLAnswer", chatResult.getAnswer());
         this.telemetryMap.add("AIMLElapsedTime", chatResult.getElapsedTime());
-        return chatResult;
-    }
-
-    private ChatResult interpretRnnResult(final String question, final double confidenceThreshold)
-            throws ChatBackendConnector.AiControllerException {
-
-        if (!this.config.isRnnEnabled()) {
-            return null;
-        }
-
-        Map<UUID, ChatResult> allResults = this.chatServices.awaitRnn();
-        if (allResults == null) {
-            return null;
-        }
-
-        // Get the top score
-        ChatResult chatResult = getTopScore(allResults, question, confidenceThreshold);
-        UUID aiid = chatResult.getAiid();
-        this.telemetryMap.add("ResponseFromAI", aiid == null ? "" : aiid.toString());
-
-        if (chatResult.getAnswer() != null) {
-            // always reset the conversation if we have gone with a non-wnet result
-            chatResult.setResetConversation(true);
-            // remove trailing newline
-            chatResult.setAnswer(chatResult.getAnswer().trim());
-        } else {
-            chatResult.setAnswer("");
-            this.telemetryMap.add("RNNResponseNULL", "");
-        }
-
-        this.logger.logDebug(LOGFROM, String.format("RNN response in time %f with confidence %f",
-                toOneDecimalPlace(chatResult.getElapsedTime()), toOneDecimalPlace(chatResult.getScore())),
-                LogMap.map("AIID", aiid).put("ChatId", chatResult.getChatId()));
-
-        this.telemetryMap.add("RNNElapsedTime", chatResult.getElapsedTime());
-        this.telemetryMap.add("RNNAnswer", chatResult.getAnswer());
-        this.telemetryMap.add("RNNTopicOut", chatResult.getTopicOut());
-
         return chatResult;
     }
 

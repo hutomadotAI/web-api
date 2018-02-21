@@ -59,8 +59,10 @@ public class ControllerParameterFilter extends ValidationBase {
         return (BackendServerType) requestContext.getProperty(ControllerParameter.ServerType.toString());
     }
 
-    public static ServerEndpointRequestMulti getServerEndpointRequestMulti(final ContainerRequestContext requestContext) {
-        return (ServerEndpointRequestMulti) requestContext.getProperty(ControllerParameter.ServerEndpointMulti.toString());
+    public static ServerEndpointRequestMulti getServerEndpointRequestMulti(
+            final ContainerRequestContext requestContext) {
+        return (ServerEndpointRequestMulti)
+                requestContext.getProperty(ControllerParameter.ServerEndpointMulti.toString());
     }
 
 }

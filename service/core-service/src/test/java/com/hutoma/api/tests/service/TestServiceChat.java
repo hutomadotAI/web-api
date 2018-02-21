@@ -55,7 +55,6 @@ public class TestServiceChat extends ServiceTestBase {
     public void setup() throws ChatStateHandler.ChatStateException {
         when(this.fakeTools.createNewRandomUUID()).thenReturn(UUID.randomUUID());
         when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(ChatState.getEmpty());
-        when(this.fakeConfig.isRnnEnabled()).thenReturn(true);
     }
 
     @Test

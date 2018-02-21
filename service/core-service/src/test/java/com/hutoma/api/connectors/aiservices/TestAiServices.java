@@ -7,7 +7,6 @@ import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.BackendServerType;
 import com.hutoma.api.connectors.IServerEndpoint;
 import com.hutoma.api.connectors.NoServerAvailableException;
-import com.hutoma.api.connectors.RequestFor;
 import com.hutoma.api.connectors.ServerTrackerInfo;
 import com.hutoma.api.connectors.db.DatabaseAI;
 import com.hutoma.api.connectors.db.DatabaseEntitiesIntents;
@@ -47,7 +46,6 @@ public class TestAiServices {
     private static final UUID DEVID = UUID.fromString("780416b3-d8dd-4283-ace5-65cd5bc987cb");
     private static final UUID AIID = UUID.fromString("41c6e949-4733-42d8-bfcf-95192131137e");
     private static final String WNET_ENDPOINT = "http://wnet/endpoint1";
-    private static final String RNN_ENDPOINT = "http://rnn/endpoint1";
 
     private JsonSerializer fakeSerializer;
     private DatabaseAI fakeDatabaseAi;
@@ -59,7 +57,6 @@ public class TestAiServices {
     private JerseyClient fakeClient;
     private ControllerConnector fakeControllerConnector;
     private WnetServicesConnector fakeWnetServicesConnector;
-    private RnnServicesConnector fakeRnnServicesConnector;
 
     private AiServicesQueue fakeQueueServices;
     private AIServices aiServices;
@@ -81,7 +78,6 @@ public class TestAiServices {
         this.fakeQueueServices = mock(AiServicesQueue.class);
         this.fakeControllerConnector = mock(ControllerConnector.class);
         this.fakeWnetServicesConnector = mock(WnetServicesConnector.class);
-        this.fakeRnnServicesConnector = mock(RnnServicesConnector.class);
 
         when(this.fakeConfig.getThreadPoolMaxThreads()).thenReturn(32);
         when(this.fakeConfig.getThreadPoolIdleTimeMs()).thenReturn(10000L);
@@ -90,17 +86,13 @@ public class TestAiServices {
 
         when(this.fakeControllerConnector.getBackendTrainingEndpoint(AIID, BackendServerType.WNET, fakeSerializer))
                 .thenReturn(TestDataHelper.getEndpointFor(WNET_ENDPOINT));
-        when(this.fakeControllerConnector.getBackendTrainingEndpoint(AIID, BackendServerType.RNN, fakeSerializer))
-                .thenReturn(TestDataHelper.getEndpointFor(RNN_ENDPOINT));
         when(this.fakeControllerConnector.getBackendTrainingEndpoint(null, BackendServerType.WNET, fakeSerializer))
                 .thenReturn(TestDataHelper.getEndpointFor(WNET_ENDPOINT));
-        when(this.fakeControllerConnector.getBackendTrainingEndpoint(null, BackendServerType.RNN, fakeSerializer))
-                .thenReturn(TestDataHelper.getEndpointFor(RNN_ENDPOINT));
 
         this.aiServices = new AIServices(this.fakeDatabaseAi, this.fakeDatabaseEntitiesIntents, this.fakeLogger,
                 this.fakeConfig, this.fakeSerializer,
                 this.fakeTools, this.fakeClient, new TrackedThreadSubPool(threadPool), this.fakeQueueServices,
-                this.fakeWnetServicesConnector, this.fakeRnnServicesConnector);
+                this.fakeWnetServicesConnector);
     }
 
     @Test
@@ -109,13 +101,13 @@ public class TestAiServices {
     }
 
     @Test(expected = AIServices.AiServicesException.class)
-    public void testDeleteDev_serverError() throws AIServices.AiServicesException, DatabaseException, NoServerAvailableException {
+    public void testDeleteDev_serverError() throws AIServices.AiServicesException {
         fakeBackendServicesRegistered();
         testCommand_serverError((a, b) -> this.aiServices.deleteDev(DEVID), HttpMethod.DELETE);
     }
 
     @Test(expected = AIServices.AiServicesException.class)
-    public void testDeleteDev_response_noEntity() throws AIServices.AiServicesException, DatabaseException {
+    public void testDeleteDev_response_noEntity() throws AIServices.AiServicesException {
         fakeBackendServicesRegistered();
         testCommand_response_noEntity((a, b) -> this.aiServices.deleteDev(DEVID), HttpMethod.DELETE);
     }
@@ -125,7 +117,6 @@ public class TestAiServices {
         JerseyInvocation.Builder builder = TestDataHelper.mockJerseyClient(this.fakeClient);
         IServerEndpoint endpoint = getFakeServerEndpoint();
         when(this.fakeWnetServicesConnector.getBackendTrainingEndpoint(any(), any())).thenReturn(endpoint);
-        when(this.fakeRnnServicesConnector.getBackendTrainingEndpoint(any(), any())).thenReturn(endpoint);
         when(builder.post(any())).thenReturn(Response.ok(new ApiResult().setSuccessStatus()).build());
         this.aiServices.uploadTraining(null, DEVID, AIID, "training materials");
     }
@@ -212,7 +203,7 @@ public class TestAiServices {
     }
 
     private void testCommand(CheckedByConsumer<UUID, UUID> logicMethod, String verb)
-            throws AIServices.AiServicesException, DatabaseException {
+            throws AIServices.AiServicesException {
         JerseyInvocation.Builder builder = TestDataHelper.mockJerseyClient(this.fakeClient);
         switch (verb) {
             case HttpMethod.POST:
@@ -234,11 +225,10 @@ public class TestAiServices {
         Map<String, ServerTrackerInfo> map = new HashMap<>();
         map.put("key", new ServerTrackerInfo("url", "ident", 1, 1, true, true));
         when(this.fakeWnetServicesConnector.getVerifiedEndpointMap(any())).thenReturn(map);
-        when(this.fakeRnnServicesConnector.getVerifiedEndpointMap(any())).thenReturn(map);
     }
 
     private void testCommand_serverError(CheckedByConsumer<UUID, UUID> logicMethod, String verb)
-            throws AIServices.AiServicesException, DatabaseException {
+            throws AIServices.AiServicesException {
         JerseyInvocation.Builder builder = TestDataHelper.mockJerseyClient(this.fakeClient);
         switch (verb) {
             case HttpMethod.POST:
@@ -257,7 +247,7 @@ public class TestAiServices {
     }
 
     private void testCommand_response_noEntity(CheckedByConsumer<UUID, UUID> logicMethod, String verb)
-            throws AIServices.AiServicesException, DatabaseException {
+            throws AIServices.AiServicesException {
         JerseyInvocation.Builder builder = TestDataHelper.mockJerseyClient(this.fakeClient);
         switch (verb) {
             case HttpMethod.POST:

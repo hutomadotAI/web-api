@@ -8,7 +8,8 @@ import com.hutoma.api.thread.IThreadConfig;
 
 import javax.inject.Inject;
 
-public class ControllerConfig extends CommonConfig implements ILoggerConfig, IDatabaseConfig, IThreadConfig, IConnectConfig {
+public class ControllerConfig extends CommonConfig
+        implements ILoggerConfig, IDatabaseConfig, IThreadConfig, IConnectConfig {
 
     private static final String LOGFROM = "controllerconfig";
 

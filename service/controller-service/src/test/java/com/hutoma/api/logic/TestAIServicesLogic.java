@@ -11,7 +11,6 @@ import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.AiStatus;
 import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.controllers.ControllerAiml;
-import com.hutoma.api.controllers.ControllerRnn;
 import com.hutoma.api.controllers.ControllerWnet;
 import com.hutoma.api.logging.AiServiceStatusLogger;
 import com.hutoma.api.logging.ILogger;
@@ -52,7 +51,7 @@ public class TestAIServicesLogic {
         this.fakeControllerWnet = mock(ControllerWnet.class);
         this.aiServicesLogic = new AIServicesLogic(this.fakeSerializer, this.fakeDatabase,
                 this.fakeServicesStatusLogger, this.fakeLogger,
-                this.fakeControllerWnet, mock(ControllerRnn.class), mock(ControllerAiml.class));
+                this.fakeControllerWnet, mock(ControllerAiml.class));
         when(this.fakeControllerWnet.getSessionServerIdentifier(eq(TestDataHelper.SESSIONID))).thenReturn(ENDPOINTID);
         when(this.fakeControllerWnet.isActiveSession(eq(TestDataHelper.SESSIONID))).thenReturn(true);
         when(this.fakeControllerWnet.getSessionServerIdentifier(eq(TestDataHelper.ALT_SESSIONID))).thenReturn(ALT_ENDPOINTID);

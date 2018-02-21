@@ -134,6 +134,7 @@ public class DatabaseConnectionPool {
     private static class TrackedConnectionInfo {
         private long borrowTimestamp;
         private StackTraceElement[] stackTraceBorrow;
+
         TrackedConnectionInfo(final long borrowTimestamp, final StackTraceElement[] stackTrace) {
             this.borrowTimestamp = borrowTimestamp;
             this.stackTraceBorrow = stackTrace;
@@ -145,6 +146,7 @@ public class DatabaseConnectionPool {
         private String stackTrace;
         private boolean isClosed;
         private boolean isValid;
+
         LeakedConnectionInfo(final long durationMs, final String stackTrace, final boolean isClosed,
                              final boolean isValid) {
             this.durationMs = durationMs;

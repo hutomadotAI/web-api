@@ -16,19 +16,19 @@ import java.util.UUID;
 public class ServerRegistration {
 
     @SerializedName("ai_list")
-    public List<ServerAiEntry> aiList;
+    private List<ServerAiEntry> aiList;
 
     @SerializedName("server_type")
-    public BackendServerType serverType;
+    private BackendServerType serverType;
 
     @SerializedName("server_url")
-    public String serverUrl;
+    private String serverUrl;
 
     @SerializedName("training_capacity")
-    public int trainingCapacity;
+    private int trainingCapacity;
 
     @SerializedName("chat_capacity")
-    public int chatCapacity;
+    private int chatCapacity;
 
     /***
      * This will only be used in unit tests

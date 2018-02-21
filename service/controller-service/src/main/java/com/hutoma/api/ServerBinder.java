@@ -15,7 +15,6 @@ import com.hutoma.api.connectors.db.IDatabaseConfig;
 import com.hutoma.api.connectors.db.TransactionalDatabaseCall;
 import com.hutoma.api.controllers.AIQueueServices;
 import com.hutoma.api.controllers.ControllerAiml;
-import com.hutoma.api.controllers.ControllerRnn;
 import com.hutoma.api.controllers.ControllerWnet;
 import com.hutoma.api.controllers.QueueProcessor;
 import com.hutoma.api.controllers.ServerTracker;
@@ -89,7 +88,6 @@ public class ServerBinder extends AbstractBinder {
 
         // Controller
         bind(ControllerWnet.class).to(ControllerWnet.class).in(Singleton.class);
-        bind(ControllerRnn.class).to(ControllerRnn.class).in(Singleton.class);
         bind(ControllerAiml.class).to(ControllerAiml.class).in(Singleton.class);
         bind(QueueProcessor.class).to(QueueProcessor.class);
 
