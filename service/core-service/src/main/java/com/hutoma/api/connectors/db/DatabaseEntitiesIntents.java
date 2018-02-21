@@ -353,7 +353,7 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
      * @param devid
      * @param aiid
      * @param intentName
-     * @return
+     * @return whether the intent was successfully deleted or not
      * @throws DatabaseException
      */
     public boolean deleteIntent(final UUID devid, final UUID aiid, final String intentName) throws DatabaseException {

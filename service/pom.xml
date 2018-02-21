@@ -23,6 +23,8 @@
         <project.component.log4j.version>2.7</project.component.log4j.version>
         <!-- Test related component versions -->
         <project.component.junit.version>4.12</project.component.junit.version>
+        <project.component.checkstyle.version>8.8</project.component.checkstyle.version>
+        <project.component.maven-checkstyle.version>3.0.0</project.component.maven-checkstyle.version>
         <project.component.findbugs.version>3.0.1</project.component.findbugs.version>
         <project.component.mockito.version>2.0.52-beta</project.component.mockito.version>
         <project.component.surefire.version>2.20.1</project.component.surefire.version>

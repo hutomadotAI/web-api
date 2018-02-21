@@ -48,7 +48,7 @@ public class ServerMetadata {
      * in the format servertype@endpoint
      * e.g. wnet@http://ai-wnet:8080/ai
      * @param sessionID
-     * @return
+     * @return the endpoint string
      */
     public synchronized String getSessionServerIdentifier(UUID sessionID) {
         ServerTracker tracker = this.activeServerSessions.get(sessionID);
@@ -92,7 +92,7 @@ public class ServerMetadata {
     /***
      * Get the server identifier for the current primary master
      * for display and logging purposes
-     * @return
+     * @return the server identifier
      */
     public String getPrimaryMasterIdentifier() {
         Optional<ServerTracker> primary = getPrimaryMaster();
@@ -101,7 +101,7 @@ public class ServerMetadata {
 
     /***
      * Determine who is the primary master (if any)
-     * @return
+     * @return the primary master (if any)
      */
     private synchronized Optional<ServerTracker> getPrimaryMaster() {
         // lookup the current master server
@@ -113,7 +113,7 @@ public class ServerMetadata {
 
     /***
      * Gets a map of active, verified servers that are training-capable
-     * @return
+     * @return map of verified services
      */
     public synchronized Map<String, ServerTracker> getVerifiedEndpointMap() {
         return this.activeServerSessions.values().stream()
@@ -196,7 +196,7 @@ public class ServerMetadata {
     /***
      * Gets the first connected
      * @param aiid
-     * @return
+     * @return the server tracker
      * @throws NoServerAvailableException
      */
     protected synchronized ServerTracker getServerForUpload(final UUID aiid) throws NoServerAvailableException {
@@ -212,7 +212,7 @@ public class ServerMetadata {
      * and then add this server-aiid pair to the affinity table
      * @param aiid
      * @param alreadyTried
-     * @return
+     * @return the server tracker
      * @throws NoServerAvailableException
      */
     protected synchronized ServerTracker chooseServerToAssignAffinity(final UUID aiid,
@@ -313,7 +313,7 @@ public class ServerMetadata {
      * The server that processed the aiid last would get it.
      * If no server processed it last then a new one is assigned.
      * @param aiid
-     * @return
+     * @return the server tracker
      * @throws NoServerAvailableException
      */
     protected synchronized ServerTracker getServerForChat(UUID aiid, Set<String> alreadyTried)

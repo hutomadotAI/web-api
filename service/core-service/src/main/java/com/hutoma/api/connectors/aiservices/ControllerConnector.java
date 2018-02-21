@@ -128,14 +128,13 @@ public abstract class ControllerConnector {
     /***
      * For each bot in a list, get a chat endpoint and a valid hashcode for the instance
      * @param multiRequest
-     * @return
+     * @return the map of AIIDs and respective responses from the possible endpoints
      * @throws NoServerAvailableException
      * @throws ChatBackendConnector.AiControllerException
      */
     public Map<UUID, ApiServerEndpointMulti.ServerEndpointResponse> getBackendChatEndpointMulti(
             final ServerEndpointRequestMulti multiRequest, final JsonSerializer serializer)
-            throws NoServerAvailableException,
-            ChatBackendConnector.AiControllerException {
+            throws ChatBackendConnector.AiControllerException {
         if (multiRequest == null) {
             throw new IllegalArgumentException("multiRequest");
         }

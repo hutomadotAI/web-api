@@ -469,12 +469,10 @@ public class AIIntegrationLogic {
                                               final String greeting, final String getStarted,
                                               final LogMap logMap) throws FacebookException {
 
-        FacebookMessengerProfile profile = new FacebookMessengerProfile(
-                greeting, getStarted);
+        FacebookMessengerProfile profile = new FacebookMessengerProfile(greeting, getStarted);
         logMap.add("Facebook_Customise_Greeting", profile.isSetGreeting() ? "set" : "deleted");
         logMap.add("Facebook_Customise_GetStarted", profile.isSetGetStarted() ? "set" : "deleted");
-        this.facebookConnector.setFacebookMessengerProfile(
-                pageToken, profile);
+        this.facebookConnector.setFacebookMessengerProfile(pageToken, profile);
     }
 
 
@@ -485,14 +483,14 @@ public class AIIntegrationLogic {
      * @param aiid
      * @param integrationRecord
      * @param integrationMetadata
-     * @return
+     * @return the API result
      * @throws DatabaseException
      * @throws FacebookException
      */
     private ApiResult disconnect(final LogMap logMap, final UUID devid, final UUID aiid,
                                  final IntegrationRecord integrationRecord,
                                  final FacebookIntegrationMetadata integrationMetadata)
-            throws DatabaseException, FacebookException {
+            throws DatabaseException {
 
         try {
             // switch off customisations
@@ -551,7 +549,7 @@ public class AIIntegrationLogic {
     /***
      * Get a list of the user's pages that we can integrate with this bot
      * @param metadata
-     * @return
+     * @return the list of Facebook nodes
      * @throws FacebookException
      */
     private List<FacebookNode> getListOfUserPages(final FacebookIntegrationMetadata metadata) throws FacebookException {
@@ -559,7 +557,7 @@ public class AIIntegrationLogic {
         if (nodeList != null && nodeList.getData() != null) {
             return nodeList.getData();
         }
-        return Collections.EMPTY_LIST;
+        return Collections.emptyList();
     }
 
     /***
@@ -571,7 +569,7 @@ public class AIIntegrationLogic {
      * @param integrationRecord
      * @param integrationMetadata
      * @param page
-     * @return
+     * @return the API result
      * @throws DatabaseException
      * @throws FacebookException
      */

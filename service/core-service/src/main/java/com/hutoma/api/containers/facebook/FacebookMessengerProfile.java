@@ -1,6 +1,5 @@
 package com.hutoma.api.containers.facebook;
 
-import com.google.common.base.Strings;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.ArrayList;
@@ -52,9 +51,9 @@ public class FacebookMessengerProfile {
 
     public static class FacebookMessengerProfileDelete {
         @SerializedName("fields")
-        public List<String> toDelete;
+        private List<String> toDelete;
 
-        public FacebookMessengerProfileDelete() {
+        FacebookMessengerProfileDelete() {
             this.toDelete = new ArrayList<>();
         }
 
@@ -66,7 +65,7 @@ public class FacebookMessengerProfile {
     public static class FacebookMessengerProfileSet {
 
         @SerializedName("greeting")
-        public List<Greeting> greeting;
+        private List<Greeting> greeting;
         @SerializedName("get_started")
         private GetStarted getStarted;
 
@@ -80,7 +79,7 @@ public class FacebookMessengerProfile {
         @SerializedName("payload")
         private String payload;
 
-        public GetStarted(final String payload) {
+        GetStarted(final String payload) {
             this.payload = payload;
         }
     }
@@ -92,14 +91,14 @@ public class FacebookMessengerProfile {
         @SerializedName("text")
         private String text;
 
-        public Greeting(final String locale, final String text) {
+        Greeting(final String locale, final String text) {
             this.locale = locale;
             this.text = text;
         }
     }
 
-    protected boolean fieldHasNoContent(String field) {
-        return Strings.isNullOrEmpty(field) || field.trim().isEmpty();
+    private boolean fieldHasNoContent(final String field) {
+        return field == null || field.trim().isEmpty();
     }
 
 }

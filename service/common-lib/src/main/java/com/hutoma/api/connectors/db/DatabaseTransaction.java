@@ -30,7 +30,7 @@ public class DatabaseTransaction implements AutoCloseable {
 
     /***
      * Gets a DatabaseCall (wrapper for a single statetemnt) and sets it up for this transaction
-     * @return
+     * @return the database call
      * @throws DatabaseException
      */
     public DatabaseCall getDatabaseCall() throws DatabaseException {

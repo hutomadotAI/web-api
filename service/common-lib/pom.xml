@@ -43,6 +43,39 @@
                 </goals>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>${project.component.maven-checkstyle.version}</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.puppycrawl.tools</groupId>
+                        <artifactId>checkstyle</artifactId>
+                        <version>${project.component.checkstyle.version}</version>
+                    </dependency>
+                </dependencies>
+                <executions>
+                    <execution>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <configuration>
+                            <configLocation>${project.parent.basedir}/src/main/resources/checkstyle/google_checks.xml</configLocation>
+                            <suppressionsLocation>${project.parent.basedir}/src/main/resources/checkstyle/checkstyle_suppressions.xml</suppressionsLocation>
+                            <suppressionsFileExpression>checkstyle.suppressions.file</suppressionsFileExpression>
+                            <encoding>UTF-8</encoding>
+                            <consoleOutput>true</consoleOutput>
+                            <failsOnError>true</failsOnError>
+                            <linkXRef>false</linkXRef>
+                            <includeTestResources>false</includeTestResources>
+                            <logViolationsToConsole>true</logViolationsToConsole>
+                            <violationSeverity>warning</violationSeverity>
+                            <failsOnError>true</failsOnError>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>findbugs-maven-plugin</artifactId>
                 <version>${project.component.findbugs.version}</version>

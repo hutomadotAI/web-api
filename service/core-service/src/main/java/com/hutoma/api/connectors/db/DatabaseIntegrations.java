@@ -121,7 +121,7 @@ public class DatabaseIntegrations extends Database {
      * @param aiid
      * @param devid
      * @param integration
-     * @return
+     * @return the integration record
      * @throws DatabaseException
      */
     public IntegrationRecord getIntegration(final UUID aiid, final UUID devid,
@@ -143,7 +143,7 @@ public class DatabaseIntegrations extends Database {
      * @param devid
      * @param integration
      * @param updater
-     * @return
+     * @return the integration record
      * @throws DatabaseException
      */
     public IntegrationRecord updateIntegrationRecord(final UUID aiid, final UUID devid,

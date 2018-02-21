@@ -62,7 +62,7 @@ abstract class ValidationBase {
      * @param maxLength
      * @param paramName
      * @param param
-     * @return
+     * @return the parameter
      * @throws ParameterValidationException
      */
     String validateFieldLength(final int maxLength, final String paramName, final String param)

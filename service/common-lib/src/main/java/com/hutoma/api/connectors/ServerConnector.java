@@ -177,12 +177,11 @@ public class ServerConnector {
      * @param aiid
      * @param endpoint
      * @param params
-     * @return
+     * @return the map of endpoints and invocation results
      * @throws AiServicesException
      */
     protected HashMap<String, Callable<InvocationResult>> getTrainingCallableForEndpoint(
-            final UUID devId, final UUID aiid, final String endpoint, Map<String, String> params)
-            throws AiServicesException {
+            final UUID devId, final UUID aiid, final String endpoint, Map<String, String> params) {
         HashMap<String, Callable<InvocationResult>> callables = new HashMap<>();
         JerseyWebTarget target = this.jerseyClient.target(endpoint)
                 .path(devId.toString())

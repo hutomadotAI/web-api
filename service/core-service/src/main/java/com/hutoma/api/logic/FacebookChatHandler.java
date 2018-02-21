@@ -5,7 +5,6 @@ import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.FacebookConnector;
 import com.hutoma.api.connectors.FacebookException;
-import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.connectors.db.DatabaseIntegrations;
 import com.hutoma.api.containers.facebook.FacebookIntegrationMetadata;
 import com.hutoma.api.containers.facebook.FacebookMessageNode;
@@ -45,7 +44,7 @@ public class FacebookChatHandler implements Callable {
     private FacebookNotification.Messaging messaging;
 
     @Inject
-    public FacebookChatHandler(final DatabaseIntegrations databaseIntegrations, final ILogger logger,
+    FacebookChatHandler(final DatabaseIntegrations databaseIntegrations, final ILogger logger,
                                final JsonSerializer serializer,
                                final FacebookConnector facebookConnector,
                                final Provider<ChatLogic> chatLogicProvider,
@@ -72,7 +71,7 @@ public class FacebookChatHandler implements Callable {
 
     /***
      * Separate thread to handle the incoming message
-     * @return
+     * @return (void)
      * @throws Exception
      */
     @Override
@@ -253,8 +252,6 @@ public class FacebookChatHandler implements Callable {
                     IntegrationType.FACEBOOK, status, chatSuccess);
         } catch (RuntimeException re) {
             this.logger.logException(LOGFROM, re, logMap);
-        } catch (Exception e) {
-            this.logger.logException(LOGFROM, e, logMap);
         }
 
         return null;

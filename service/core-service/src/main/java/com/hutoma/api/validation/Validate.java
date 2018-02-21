@@ -186,7 +186,7 @@ public class Validate extends ValidationBase {
      * @param maxLength
      * @param paramName
      * @param paramList
-     * @return
+     * @return a list of parameters
      * @throws ParameterValidationException
      */
     List<String> validateFieldLengthsInList(final int maxLength, final String paramName, List<String> paramList)
@@ -218,9 +218,9 @@ public class Validate extends ValidationBase {
 
     /***
      * Interpret training source type and ensure it is valid
-     * @param paramName
-     * @param param
-     * @return
+     * @param paramName the parameter name
+     * @param param the parameter value
+     * @return the training type
      * @throws ParameterValidationException
      */
     TrainingLogic.TrainingType validateTrainingSourceType(final String paramName, final String param)

@@ -1,16 +1,15 @@
 package com.hutoma.api.connectors;
 
-import com.google.common.base.Strings;
 import com.google.gson.JsonParseException;
 import com.google.gson.annotations.SerializedName;
 import com.hutoma.api.common.JsonSerializer;
 
 public class FacebookException extends Exception {
 
-    public FacebookException() {
+    FacebookException() {
     }
 
-    public FacebookException(String genericError) {
+    public FacebookException(final String genericError) {
         super(genericError);
     }
 
@@ -23,20 +22,21 @@ public class FacebookException extends Exception {
      * @param deserializer
      * @return
      */
-    public static FacebookException exceptionMapper(
-            int httpErrorCode, String httpError, String response, JsonSerializer deserializer) {
+    public static FacebookException exceptionMapper(final int httpErrorCode, final String httpError,
+                                                    final String response, final JsonSerializer deserializer) {
         FacebookErrorResponse errorResponse = null;
-        try {
-            if (!Strings.isNullOrEmpty(response)) {
-                errorResponse = (FacebookErrorResponse)
-                        deserializer.deserialize(response, FacebookErrorResponse.class);
+        if (response != null && !response.isEmpty()) {
+            try {
+                    errorResponse = (FacebookErrorResponse)
+                            deserializer.deserialize(response, FacebookErrorResponse.class);
+
+            } catch (JsonParseException jpe) {
+                // fallthrough to nullcheck
             }
-        } catch (JsonParseException jpe) {
-            // fallthrough to nullcheck
         }
-        if ((errorResponse == null) || (errorResponse.error == null)) {
+        if (errorResponse == null || errorResponse.error == null) {
             // if this was a 200 then something else failed
-            if ((httpErrorCode == 200)) {
+            if (httpErrorCode == 200) {
                 return new FacebookException("Failed to parse error data");
             }
             // otherwise it's an http error, probably not from facebook
@@ -58,10 +58,10 @@ public class FacebookException extends Exception {
 
     public static class FacebookHttpException extends FacebookException {
 
-        protected int httpErrorCode;
-        protected String httpError;
+        int httpErrorCode;
+        String httpError;
 
-        public FacebookHttpException(int httpErrorCode, String httpError) {
+        FacebookHttpException(int httpErrorCode, String httpError) {
             this.httpError = httpError;
             this.httpErrorCode = httpErrorCode;
         }
@@ -74,13 +74,13 @@ public class FacebookException extends Exception {
 
     public static class FacebookGraphException extends FacebookHttpException {
 
-        protected String facebookErrorType;
-        protected String facebookErrorMessage;
-        protected int facebookErrorCode;
+        String facebookErrorType;
+        String facebookErrorMessage;
+        int facebookErrorCode;
 
-        public FacebookGraphException(final int httpErrorCode, final String httpError,
-                                      final String facebookErrorType, final String facebookErrorMessage,
-                                      final int facebookErrorCode) {
+        FacebookGraphException(final int httpErrorCode, final String httpError,
+                               final String facebookErrorType, final String facebookErrorMessage,
+                               final int facebookErrorCode) {
             super(httpErrorCode, httpError);
             this.facebookErrorType = facebookErrorType;
             this.facebookErrorMessage = facebookErrorMessage;

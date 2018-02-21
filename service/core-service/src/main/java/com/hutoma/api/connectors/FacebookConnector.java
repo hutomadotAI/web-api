@@ -32,7 +32,6 @@ import static org.glassfish.jersey.client.ClientProperties.READ_TIMEOUT;
 
 public class FacebookConnector {
 
-    private static final String LOGFROM = "facebookconnector";
     private Config config;
     private ILogger logger;
     private JerseyClient jerseyClient;
@@ -53,7 +52,7 @@ public class FacebookConnector {
      * Tokens are typically of two hour or two month validity.
      * If it is longer than a month then we consider it short-lived.
      * @param token
-     * @return
+     * @return whether it's short lived or not
      */
     public boolean isShortLivedToken(final FacebookToken token) {
         return (token.getExpiresInSeconds() > 0) // token does expire
@@ -64,7 +63,7 @@ public class FacebookConnector {
      * If we are sent a short-lived token then we call facebook api to swap it for a long-lived one
      * @see <a href="https://developers.facebook.com/docs/facebook-login/access-tokens/expiration-and-extension">Facebook docs</a>
      * @param shortToken
-     * @return
+     * @return the Facebook token
      * @throws FacebookException
      */
     public FacebookToken getLongFromShortLivedToken(final FacebookToken shortToken) throws FacebookException {
@@ -83,7 +82,7 @@ public class FacebookConnector {
      * We send the code to Facebook to get an access token.
      * @see <a href="https://developers.facebook.com/docs/facebook-login/access-tokens/expiration-and-extension">Facebook docs</a>
      * @param facebookConnect
-     * @return
+     * @return the Facebook token
      * @throws FacebookException
      */
     public FacebookToken getFacebookUserToken(final FacebookConnect facebookConnect) throws FacebookException {
@@ -136,7 +135,7 @@ public class FacebookConnector {
     /***
      * Get the Facebook userid and name from an access token
      * @param token
-     * @return
+     * @return the Facebook node
      * @throws FacebookException
      */
     public FacebookNode getFacebookUserFromToken(final FacebookToken token) throws FacebookException {
@@ -152,7 +151,7 @@ public class FacebookConnector {
      * Get a list of Facebook pages that this user owns or administers
      * These are candidates for facebook chat integration
      * @param accessToken
-     * @return
+     * @return the Facebook node list
      * @throws FacebookException
      */
     public FacebookNodeList getUserPages(final String accessToken) throws FacebookException {
@@ -300,7 +299,7 @@ public class FacebookConnector {
     /***
      * Shared code that handles calls resulting in an access token
      * @param target
-     * @return
+     * @return the Facebook token
      * @throws FacebookException
      */
     private FacebookToken getFacebookToken(final JerseyWebTarget target) throws FacebookException {
@@ -325,7 +324,7 @@ public class FacebookConnector {
      * By default, send an empty body on POST and PUT
      * @param target
      * @param requestmethod
-     * @return
+     * @return the response entity for the webcall
      * @throws FacebookException
      */
     private String webCall(final JerseyWebTarget target, final RequestMethod requestmethod, final int readTimeout)
@@ -338,7 +337,7 @@ public class FacebookConnector {
      * @param target
      * @param requestmethod
      * @param entity
-     * @return
+     * @return the response entity for the webcall
      * @throws FacebookException
      */
     private String webCall(final JerseyWebTarget target, final RequestMethod requestmethod,
@@ -383,11 +382,11 @@ public class FacebookConnector {
                 default:
                     throw response.hasEntity()
                             ? FacebookException.exceptionMapper(statusInfo.getStatusCode(),
-                            statusInfo.getReasonPhrase(),
-                            response.readEntity(String.class), this.jsonSerializer)
+                                statusInfo.getReasonPhrase(),
+                                response.readEntity(String.class), this.jsonSerializer)
                             : FacebookException.exceptionMapper(statusInfo.getStatusCode(),
-                            statusInfo.getReasonPhrase(),
-                            null, this.jsonSerializer);
+                                statusInfo.getReasonPhrase(),
+                                null, this.jsonSerializer);
             }
         } catch (FacebookException fe) {
             throw fe;
@@ -418,7 +417,7 @@ public class FacebookConnector {
             this.message = null;
         }
 
-        public SendMessage(final String recipient, final SenderAction senderAction) {
+        SendMessage(final String recipient, final SenderAction senderAction) {
             this.recipient = new Recipient();
             this.recipient.id = recipient;
             this.senderAction = senderAction;

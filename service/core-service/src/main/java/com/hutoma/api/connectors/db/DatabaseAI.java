@@ -174,7 +174,7 @@ public class DatabaseAI extends Database  {
      * Combines the statuses of one AI and returns them as a BackendStatus object
      * @param devId
      * @param aiid
-     * @return
+     * @return the backend status
      * @throws DatabaseException
      */
     public BackendStatus getAIStatusReadOnly(final UUID devId, final UUID aiid)
@@ -189,7 +189,7 @@ public class DatabaseAI extends Database  {
     /***
      * Get data for all the dev's AIs
      * @param devid
-     * @return
+     * @return the list of AIs
      * @throws DatabaseException
      */
     public List<ApiAi> getAllAIs(final UUID devid, final JsonSerializer serializer) throws DatabaseException {

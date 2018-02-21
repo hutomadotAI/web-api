@@ -271,7 +271,7 @@ public class AIServices extends ServerConnector {
     /***
      * Get a list containing the primary endpoints (i.e. one of each backend type)
      * @param aiid
-     * @return
+     * @return list of primary endpoints
      * @throws AiServicesException
      */
     private List<String> getListOfPrimaryEndpoints(final UUID aiid) throws AiServicesException {
