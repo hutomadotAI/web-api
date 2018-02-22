@@ -82,6 +82,14 @@ public class Config extends CommonConfig implements ILoggerConfig, IThreadConfig
         return Double.parseDouble(getConfigFromProperties("ratelimit_quickread_frequency", "0.5"));
     }
 
+    public double getRateLimit_PollStatus_BurstRequests() {
+        return Double.parseDouble(getConfigFromProperties("ratelimit_pollstatus_burst", "5.0"));
+    }
+
+    public double getRateLimit_PollStatus_Frequency() {
+        return Double.parseDouble(getConfigFromProperties("ratelimit_pollstatus_frequency", "0.2"));
+    }
+    
     /***
      * Allow the load testing user ROLE_TEST to burst at 20000 chat requests
      * @return

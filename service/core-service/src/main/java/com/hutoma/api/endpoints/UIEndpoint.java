@@ -1,46 +1,52 @@
-package com.hutoma.api.endpoints;
+        package com.hutoma.api.endpoints;
 
-import com.hutoma.api.access.AuthFilter;
-import com.hutoma.api.access.Role;
-import com.hutoma.api.access.Secured;
-import com.hutoma.api.common.Config;
-import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.common.Tools;
-import com.hutoma.api.containers.ApiResult;
-import com.hutoma.api.containers.ui.ApiBotstoreCategoryItemList;
-import com.hutoma.api.containers.ui.ApiBotstoreItem;
-import com.hutoma.api.containers.ui.ApiBotstoreItemList;
-import com.hutoma.api.logic.UILogic;
-import com.hutoma.api.validation.APIParameter;
-import com.hutoma.api.validation.ParameterFilter;
-import com.hutoma.api.validation.ValidateParameters;
-import com.webcohesion.enunciate.metadata.rs.RequestHeader;
-import com.webcohesion.enunciate.metadata.rs.RequestHeaders;
-import com.webcohesion.enunciate.metadata.rs.ResourceMethodSignature;
-import com.webcohesion.enunciate.metadata.rs.ResponseCode;
-import com.webcohesion.enunciate.metadata.rs.StatusCodes;
+        import com.hutoma.api.access.AuthFilter;
+        import com.hutoma.api.access.RateKey;
+        import com.hutoma.api.access.RateLimit;
+        import com.hutoma.api.access.Role;
+        import com.hutoma.api.access.Secured;
+        import com.hutoma.api.common.Config;
+        import com.hutoma.api.common.JsonSerializer;
+        import com.hutoma.api.common.Tools;
+        import com.hutoma.api.containers.ApiAiWithConfig;
+        import com.hutoma.api.containers.ApiResult;
+        import com.hutoma.api.containers.ui.ApiBotstoreCategoryItemList;
+        import com.hutoma.api.containers.ui.ApiBotstoreItem;
+        import com.hutoma.api.containers.ui.ApiBotstoreItemList;
+        import com.hutoma.api.logic.AILogic;
+        import com.hutoma.api.logic.UILogic;
+        import com.hutoma.api.validation.APIParameter;
+        import com.hutoma.api.validation.ParameterFilter;
+        import com.hutoma.api.validation.ValidateParameters;
+        import com.webcohesion.enunciate.metadata.rs.RequestHeader;
+        import com.webcohesion.enunciate.metadata.rs.RequestHeaders;
+        import com.webcohesion.enunciate.metadata.rs.ResourceMethodSignature;
+        import com.webcohesion.enunciate.metadata.rs.ResponseCode;
+        import com.webcohesion.enunciate.metadata.rs.StatusCodes;
+        import com.webcohesion.enunciate.metadata.rs.TypeHint;
 
-import java.net.HttpURLConnection;
-import java.util.List;
-import javax.inject.Inject;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+        import java.net.HttpURLConnection;
+        import java.util.List;
+        import javax.inject.Inject;
+        import javax.inject.Provider;
+        import javax.ws.rs.DefaultValue;
+        import javax.ws.rs.GET;
+        import javax.ws.rs.Path;
+        import javax.ws.rs.PathParam;
+        import javax.ws.rs.Produces;
+        import javax.ws.rs.QueryParam;
+        import javax.ws.rs.container.ContainerRequestContext;
+        import javax.ws.rs.core.Context;
+        import javax.ws.rs.core.MediaType;
+        import javax.ws.rs.core.Response;
 
-/**
- * Endpoint for UI only features.
- * This endpoint should not be accessible to developers, only for internal use and to support
- * corp customers implementing their own frontend.
- */
-@Path("/ui/")
-public class UIEndpoint {
+        /**
+        * Endpoint for UI only features.
+        * This endpoint should not be accessible to developers, only for internal use and to support
+        * corp customers implementing their own frontend.
+        */
+        @Path("/ui/")
+        public class UIEndpoint {
         public static final String DEFAULT_START_FROM = "0";
         public static final String DEFAULT_PAGE_SIZE = "100";
         public static final String DEFAULT_ORDER_FIELD = "";
@@ -48,10 +54,14 @@ public class UIEndpoint {
         private final JsonSerializer serializer;
         private final UILogic uiLogic;
         private final Config config;
+        private final Provider<AILogic> aiLogicProvider;
 
         @Inject
-        public UIEndpoint(final UILogic uiLogic, final JsonSerializer serializer, final Config config) {
+        public UIEndpoint(final UILogic uiLogic,
+                          final Provider<AILogic> aiLogicProvider,
+                          final JsonSerializer serializer, final Config config) {
                 this.uiLogic = uiLogic;
+                this.aiLogicProvider = aiLogicProvider;
                 this.serializer = serializer;
                 this.config = config;
         }
@@ -122,4 +132,25 @@ public class UIEndpoint {
                                 ParameterFilter.getAiid(requestContext));
                 return result.getResponse(this.serializer).build();
         }
-}
+
+        /**
+         * Get the detail for a single bot the user owns
+         * but using a different ratelimit key
+         * @param requestContext
+         * @return
+         */
+        @Path("ai/{aiid}")
+        @GET
+        @RateLimit(RateKey.PollStatus)
+        @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
+        @ValidateParameters({APIParameter.AIID})
+        @Produces(MediaType.APPLICATION_JSON)
+        @TypeHint(ApiAiWithConfig.class)
+        public Response getSingleAIPoll(
+                @Context ContainerRequestContext requestContext) {
+                ApiResult result = this.aiLogicProvider.get().getSingleAI(
+                        ParameterFilter.getDevid(requestContext),
+                        ParameterFilter.getAiid(requestContext));
+                return result.getResponse(this.serializer).build();
+        }
+        }

@@ -1,11 +1,15 @@
 package com.hutoma.api.tests.service;
 
 import com.hutoma.api.common.TestDataHelper;
+import com.hutoma.api.connectors.aiservices.AIServices;
 import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.connectors.db.DatabaseUI;
+import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.ui.ApiBotstoreItemList;
 import com.hutoma.api.containers.ui.BotstoreItem;
 import com.hutoma.api.endpoints.UIEndpoint;
+import com.hutoma.api.logic.AIIntegrationLogic;
+import com.hutoma.api.logic.AILogic;
 import com.hutoma.api.logic.UILogic;
 
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
@@ -33,6 +37,7 @@ public class TestServiceUI extends ServiceTestBase {
     private static final String UI_PATH = "/ui";
     private static final String UI_PATH_BOTSTORE = UI_PATH + "/botstore";
     private static final String UI_PATH_AIDETAILS = UI_PATH + "/ai/" + AIID + "/details";
+    private static final String UI_PATH_AIPOLL = UI_PATH + "/ai/" + AIID;
 
     @Mock
     private DatabaseUI fakeDatabaseUi;
@@ -83,6 +88,16 @@ public class TestServiceUI extends ServiceTestBase {
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
     }
 
+    @Test
+    public void testGetAIPollStatus() throws DatabaseException {
+        ApiAi ai = TestDataHelper.getAI();
+        when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(ai);
+        final Response response = target(UI_PATH_AIPOLL ).request().headers(defaultHeaders).get();
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
+        ApiAi responseAi = deserializeResponse(response, ApiAi.class);
+        Assert.assertEquals(ai.getAiid(), responseAi.getAiid());
+    }
+
     private void testCallingGetBotStoreItem(final boolean isAuthenticated) throws DatabaseException {
         BotstoreItem item = new BotstoreItem(0, SAMPLEBOT, DEVINFO, false);
         when(this.fakeDatabaseUi.getBotstoreItem(anyInt(), any())).thenReturn(item);
@@ -113,7 +128,9 @@ public class TestServiceUI extends ServiceTestBase {
         this.fakeDatabaseUi = mock(DatabaseUI.class);
 
         binder.bind(UILogic.class).to(UILogic.class);
-
+        binder.bind(AIServices.class).to(AIServices.class);
+        binder.bind(AILogic.class).to(AILogic.class);
+        binder.bind(AIIntegrationLogic.class).to(AIIntegrationLogic.class);
         binder.bindFactory(new InstanceFactory<>(TestServiceUI.this.fakeDatabaseUi)).to(DatabaseUI.class);
 
         return binder;
