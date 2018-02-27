@@ -1,8 +1,0 @@
-{
-  "name": "web-api",
-  "version": "1.0.0",
-  "description": "Internal building tools",
-  "devDependencies": {
-    "uglify-es": "^3.1.0"
-  }
-}

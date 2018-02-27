@@ -51,7 +51,6 @@ modules.xml
 
 .DS_Store
 
-
 # Prevent churn on API artifacts
 **/DevX/API/.idea/artifacts/*xml
 
@@ -60,12 +59,6 @@ modules.xml
 
 #Python
 *.pyc
-
-**/node_modules
-
-# Statics
-web/src/console/dist/assets/
-web/src/console/dist/manifest.php
 
 # VS code
 .vscode
