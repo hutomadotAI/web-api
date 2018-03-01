@@ -10,7 +10,7 @@ import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.containers.sub.WebHook;
 import com.hutoma.api.containers.sub.WebHookResponse;
 import com.hutoma.api.logging.ILogger;
-import com.hutoma.api.logic.ChatRequestInfo;
+import com.hutoma.api.containers.sub.ChatRequestInfo;
 
 import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.client.JerseyInvocation;

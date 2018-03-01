@@ -27,6 +27,14 @@ import com.hutoma.api.logging.CentralLogger;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.ILoggerConfig;
 import com.hutoma.api.logic.*;
+import com.hutoma.api.logic.chat.ChatAimlHandler;
+import com.hutoma.api.logic.chat.ChatDefaultHandler;
+import com.hutoma.api.logic.chat.ChatIntentHandler;
+import com.hutoma.api.logic.chat.ChatPassthroughHandler;
+import com.hutoma.api.logic.chat.ChatRequestTrigger;
+import com.hutoma.api.logic.chat.ChatWnetHandler;
+import com.hutoma.api.logic.chat.ChatWorkflow;
+import com.hutoma.api.logic.chat.IntentProcessor;
 import com.hutoma.api.memory.ChatStateHandler;
 import com.hutoma.api.memory.ExternalEntityRecognizer;
 import com.hutoma.api.memory.IEntityRecognizer;
@@ -110,6 +118,16 @@ public class ServerBinder extends AbstractBinder {
         bind(FacebookIntegrationLogic.class).to(FacebookIntegrationLogic.class);
         bind(AnalyticsLogic.class).to(AnalyticsLogic.class);
         bind(AiStrings.class).to(AiStrings.class);
+        bind(IntentProcessor.class).to(IntentProcessor.class);
+
+        // Chat workflow
+        bind(ChatWorkflow.class).to(ChatWorkflow.class).to(Singleton.class);
+        bind(ChatPassthroughHandler.class).to(ChatPassthroughHandler.class);
+        bind(ChatIntentHandler.class).to(ChatIntentHandler.class);
+        bind(ChatRequestTrigger.class).to(ChatRequestTrigger.class);
+        bind(ChatAimlHandler.class).to(ChatAimlHandler.class);
+        bind(ChatWnetHandler.class).to(ChatWnetHandler.class);
+        bind(ChatDefaultHandler.class).to(ChatDefaultHandler.class);
 
         // other
         bind(JsonSerializer.class).to(JsonSerializer.class);

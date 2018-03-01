@@ -2,20 +2,21 @@ package com.hutoma.api.connectors;
 
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonParseException;
-import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.logging.LogMap;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.db.DatabaseAI;
 import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.connectors.db.DatabaseMarketplace;
 import com.hutoma.api.containers.AiBotConfig;
+import com.hutoma.api.containers.sub.ChatRequestInfo;
 import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.containers.sub.WebHook;
 import com.hutoma.api.containers.sub.WebHookPayload;
 import com.hutoma.api.containers.sub.WebHookResponse;
-import com.hutoma.api.logic.ChatRequestInfo;
+import com.hutoma.api.logging.ILogger;
+import com.hutoma.api.logging.LogMap;
+import com.hutoma.api.logic.chat.ChatBaseException;
 
 import org.apache.commons.codec.binary.Hex;
 import org.glassfish.jersey.client.ClientProperties;
@@ -68,7 +69,7 @@ public class WebHooks {
     public WebHookResponse executeIntentWebHook(final WebHook webHook, final MemoryIntent intent,
                                                 final ChatResult chatResult, final ChatRequestInfo chatInfo)
             throws WebHookException {
-        final String devIdString = chatInfo.devId.toString();
+        final String devIdString = chatInfo.getDevId().toString();
         if (webHook == null) {
             throw new WebHookInternalException("Webhook cannot be null");
         }
@@ -79,8 +80,8 @@ public class WebHooks {
 
         AiBotConfig config;
         try {
-            config = this.databaseAi.getBotConfigForWebhookCall(chatInfo.devId, chatInfo.aiid, intent.getAiid(),
-                    this.serializer);
+            config = this.databaseAi.getBotConfigForWebhookCall(chatInfo.getDevId(), chatInfo.getAiid(),
+                    intent.getAiid(), this.serializer);
         } catch (DatabaseException e) {
             throw new WebHookInternalException("Webhook aborted due to failure to load config", e);
         }
@@ -90,7 +91,8 @@ public class WebHooks {
                 ChatResult.getUserViewable(chatResult),
                 chatInfo, config);
 
-        WebHookResponse webHookResponse = this.executeWebhook(webHookEndpoint, payload, devIdString, chatInfo.aiid);
+        WebHookResponse webHookResponse = this.executeWebhook(webHookEndpoint, payload, devIdString,
+                chatInfo.getAiid());
 
         this.logger.logInfo(LOGFROM,
                 String.format("Successfully executed webhook for aiid %s and intent %s",
@@ -98,7 +100,7 @@ public class WebHooks {
                 LogMap.map("Intent", intent.getName())
                         .put("AIID", intent.getAiid())
                         .put("Endpoint", webHook.getEndpoint())
-                        .put("ChatId", chatInfo.chatId)
+                        .put("ChatId", chatInfo.getChatId())
                         .put("ObfuscatedChatSession", payload.getObfuscatedChatSession()));
         return webHookResponse;
     }
@@ -106,7 +108,7 @@ public class WebHooks {
     public WebHookResponse executePassthroughWebhook(final String passthroughUrl, final ChatResult chatResult,
                                                      final ChatRequestInfo chatInfo)
             throws WebHookException {
-        final String devIdString = chatInfo.devId.toString();
+        final String devIdString = chatInfo.getDevId().toString();
 
         if (passthroughUrl == null || passthroughUrl.isEmpty()) {
             throw new WebHookExternalException("Invalid URL for passthrough webhook");
@@ -116,13 +118,13 @@ public class WebHooks {
                 ChatResult.getUserViewable(chatResult),
                 chatInfo, null);
 
-        WebHookResponse webHookResponse = this.executeWebhook(passthroughUrl, payload, devIdString, chatInfo.aiid);
+        WebHookResponse webHookResponse = this.executeWebhook(passthroughUrl, payload, devIdString, chatInfo.getAiid());
         this.logger.logInfo(LOGFROM,
                 String.format("Successfully executed chat webhook for aiid %s",
-                        chatInfo.aiid),
-                LogMap.map("AIID", chatInfo.aiid)
+                        chatInfo.getAiid()),
+                LogMap.map("AIID", chatInfo.getAiid())
                         .put("Endpoint", passthroughUrl)
-                        .put("ChatId", chatInfo.chatId)
+                        .put("ChatId", chatInfo.getChatId())
                         .put("ObfuscatedChatSession", payload.getObfuscatedChatSession()));
         return webHookResponse;
     }
@@ -254,7 +256,7 @@ public class WebHooks {
      * Base class for exceptions due to web hooks.
      * Shouldn't directly use this class, use one of the derived classes instead.
      */
-    public static class WebHookException extends Exception {
+    public static class WebHookException extends ChatBaseException {
         protected WebHookException(String message) {
             super(message);
         }

@@ -3,7 +3,6 @@ package com.hutoma.api.logic;
 import com.google.common.collect.ImmutableMap;
 import com.hutoma.api.common.ChatLogger;
 import com.hutoma.api.common.Config;
-import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.TestDataHelper;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.AiStrings;
@@ -21,6 +20,14 @@ import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.containers.sub.MemoryVariable;
 import com.hutoma.api.containers.sub.WebHook;
 import com.hutoma.api.logging.ILogger;
+import com.hutoma.api.logic.chat.ChatAimlHandler;
+import com.hutoma.api.logic.chat.ChatDefaultHandler;
+import com.hutoma.api.logic.chat.ChatIntentHandler;
+import com.hutoma.api.logic.chat.ChatPassthroughHandler;
+import com.hutoma.api.logic.chat.ChatRequestTrigger;
+import com.hutoma.api.logic.chat.ChatWnetHandler;
+import com.hutoma.api.logic.chat.ChatWorkflow;
+import com.hutoma.api.logic.chat.IntentProcessor;
 import com.hutoma.api.memory.ChatStateHandler;
 import com.hutoma.api.memory.IEntityRecognizer;
 import com.hutoma.api.memory.IMemoryIntentHandler;
@@ -54,8 +61,8 @@ public class TestChatBase {
     static final String MEMORY_VARIABLE_PROMPT = "prompt1";
     static final WebHook VALID_WEBHOOK = new WebHook(AIID, "intent", "endpoint", true);
     private static final UUID AIML_BOT_AIID = UUID.fromString("bd2700ff-279b-4bac-ad2f-85a5275ac073");
-
     private static final String QUESTION = "question";
+
     AIChatServices fakeChatServices;
     IEntityRecognizer fakeRecognizer;
     IMemoryIntentHandler fakeIntentHandler;
@@ -65,6 +72,15 @@ public class TestChatBase {
     ChatLogic chatLogic;
     protected Config fakeConfig;
     private AiStrings fakeAiStrings;
+    ChatWorkflow fakeChatWorkflow;
+    ChatPassthroughHandler fakePassthroughHandler;
+    ChatIntentHandler fakeChatIntenthHandler;
+    ChatRequestTrigger fakeRequestBETrigger;
+    ChatWnetHandler fakeWnetHandler;
+    ChatAimlHandler fakeAimlHandler;
+    ChatDefaultHandler fakeDefaultHandler;
+    IntentProcessor intentProcessor;
+
 
     @Before
     public void setup() {
@@ -77,25 +93,35 @@ public class TestChatBase {
         this.fakeConfig = mock(Config.class);
         this.fakeWebHooks = mock(WebHooks.class);
         this.fakeAiStrings = mock(AiStrings.class);
+        this.fakeChatWorkflow = mock(ChatWorkflow.class);
+        this.intentProcessor = new IntentProcessor(this.fakeRecognizer, this.fakeIntentHandler, this.fakeWebHooks, mock(ILogger.class));
+
+        this.fakePassthroughHandler = new ChatPassthroughHandler(this.fakeChatServices, this.fakeWebHooks, mock(Tools.class),
+                mock(ChatLogger.class), mock(ILogger.class));
+        this.fakeChatIntenthHandler = new ChatIntentHandler(this.fakeIntentHandler, this.intentProcessor);
+        this.fakeRequestBETrigger = new ChatRequestTrigger(this.fakeChatServices);
+        this.fakeWnetHandler = new ChatWnetHandler(this.fakeIntentHandler, this.intentProcessor, mock(ILogger.class));
+        this.fakeAimlHandler = new ChatAimlHandler(mock(ILogger.class));
+        this.fakeDefaultHandler = new ChatDefaultHandler(this.fakeAiStrings, mock(ILogger.class));
+
 
         when(fakeConfig.getEncodingKey()).thenReturn(TestDataHelper.VALID_ENCODING_KEY);
 
-        this.chatLogic = new ChatLogic(fakeConfig, mock(JsonSerializer.class), this.fakeChatServices, mock(Tools.class),
-                mock(ILogger.class), this.fakeIntentHandler, this.fakeRecognizer, mock(ChatLogger.class), this.fakeWebHooks,
-                this.fakeChatStateHandler, this.fakeAiStrings);
+        when(this.fakeChatWorkflow.getHandlers()).thenReturn(
+                Arrays.asList(this.fakePassthroughHandler, this.fakeChatIntenthHandler,
+                        this.fakeRequestBETrigger, this.fakeWnetHandler,
+                        this.fakeAimlHandler, this.fakeDefaultHandler));
+
+        this.chatLogic = new ChatLogic(this.fakeChatServices, this.fakeChatStateHandler, mock(Tools.class),
+                mock(ILogger.class), mock(ChatLogger.class), this.fakeChatWorkflow);
 
         try {
             when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(ChatState.getEmpty());
-            when(this.fakeAiStrings.getDefaultChatResponses(any(), any())).thenReturn(Collections.singletonList(ChatLogic.COMPLETELY_LOST_RESULT));
-            when(this.fakeAiStrings.getRandomDefaultChatResponse(any(), any())).thenReturn(ChatLogic.COMPLETELY_LOST_RESULT);
+            when(this.fakeAiStrings.getDefaultChatResponses(any(), any())).thenReturn(Collections.singletonList(TestDataHelper.DEFAULT_CHAT_RESPONSE));
+            when(this.fakeAiStrings.getRandomDefaultChatResponse(any(), any())).thenReturn(TestDataHelper.DEFAULT_CHAT_RESPONSE);
         } catch (AiStrings.AiStringsException | ChatStateHandler.ChatStateException ex) {
             ex.printStackTrace();
         }
-    }
-
-    private ApiResult getAssistantChat(float min_p, String
-            question) {
-        return this.chatLogic.assistantChat(AIID, DEVID_UUID, question, CHATID.toString());
     }
 
     void validateStateSaved(final ChatResult returnedResult, final UUID usedAiid) {
@@ -128,10 +154,6 @@ public class TestChatBase {
         }
 
         return this.chatLogic.chat(AIID, DEVID_UUID, question, CHATID.toString(), null);
-    }
-
-    ApiResult getAssistantChat(float min_p) {
-        return this.getAssistantChat(min_p, QUESTION);
     }
 
     /***

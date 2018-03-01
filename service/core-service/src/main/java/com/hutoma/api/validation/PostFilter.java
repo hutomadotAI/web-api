@@ -14,7 +14,7 @@ import com.hutoma.api.containers.sub.IntentVariable;
 import com.hutoma.api.containers.sub.WebHook;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
-import com.hutoma.api.logic.ChatLogic;
+import com.hutoma.api.logic.chat.ChatDefaultHandler;
 
 import org.apache.logging.log4j.util.Strings;
 import org.glassfish.jersey.message.internal.MediaTypes;
@@ -198,7 +198,7 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
             // We should receive a Json list
             String jsonList = getFirst(form.get(DEFAULT_CHAT_RESPONSES));
             List<String> list = jsonList.isEmpty()
-                    ? Collections.singletonList(ChatLogic.COMPLETELY_LOST_RESULT)
+                    ? Collections.singletonList(ChatDefaultHandler.COMPLETELY_LOST_RESULT)
                     : this.serializer.deserializeList(jsonList);
             request.setProperty(APIParameter.DefaultChatResponses.toString(), list);
         }

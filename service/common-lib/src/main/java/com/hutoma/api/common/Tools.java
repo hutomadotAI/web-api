@@ -129,4 +129,8 @@ public class Tools {
         sb.append(textQualifier);
         return sb.toString();
     }
+
+    public static double toOneDecimalPlace(double input) {
+        return Math.round(input * 10.0d) / 10.0d;
+    }
 }

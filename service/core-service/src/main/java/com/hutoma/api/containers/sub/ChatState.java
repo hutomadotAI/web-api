@@ -1,5 +1,7 @@
 package com.hutoma.api.containers.sub;
 
+import com.hutoma.api.connectors.chat.AIChatServices;
+
 import org.joda.time.DateTime;
 
 import java.util.HashMap;
@@ -16,6 +18,7 @@ public class ChatState {
     private HashMap<String, String> entityValues;
     private double confidenceThreshold;
     private ChatHandoverTarget chatTarget;
+    private AIChatServices aiChatServices;
 
     public ChatState(final DateTime timestamp, final String topic, final String history, final UUID lockedAiid,
                      final HashMap<String, String> entityValues, final double confidenceThreshold,
@@ -93,5 +96,13 @@ public class ChatState {
 
     public void setChatTarget(final ChatHandoverTarget target) {
         this.chatTarget = target;
+    }
+
+    public void setAiChatServices(final AIChatServices aiChatServices) {
+        this.aiChatServices = aiChatServices;
+    }
+
+    public AIChatServices getAiChatServices() {
+        return this.aiChatServices;
     }
 }

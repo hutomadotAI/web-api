@@ -23,6 +23,7 @@ import com.hutoma.api.containers.sub.Entity;
 import com.hutoma.api.containers.sub.WebHook;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
+import com.hutoma.api.logic.chat.ChatDefaultHandler;
 import com.hutoma.api.validation.ParameterValidationException;
 import com.hutoma.api.validation.Validate;
 import io.jsonwebtoken.Jwts;
@@ -895,7 +896,7 @@ public class AILogic {
 
             List<String> defaultResponses =
                     (importedBot.getDefaultResponses() == null || importedBot.getDefaultResponses().isEmpty())
-                            ? Collections.singletonList(ChatLogic.COMPLETELY_LOST_RESULT)
+                            ? Collections.singletonList(ChatDefaultHandler.COMPLETELY_LOST_RESULT)
                             : importedBot.getDefaultResponses();
             if (!this.databaseAi.updateDefaultChatResponses(devId, aiid, defaultResponses,
                     this.jsonSerializer, transaction)) {

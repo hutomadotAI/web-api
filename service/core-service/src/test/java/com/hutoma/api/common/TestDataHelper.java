@@ -11,7 +11,7 @@ import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.sub.AiBot;
 import com.hutoma.api.containers.sub.AiStatus;
 import com.hutoma.api.containers.sub.TrainingStatus;
-import com.hutoma.api.logic.ChatLogic;
+import com.hutoma.api.logic.chat.ChatDefaultHandler;
 
 import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.client.JerseyInvocation;
@@ -40,7 +40,8 @@ public class TestDataHelper {
     public static final UUID AIID = UUID.fromString("41c6e949-4733-42d8-bfcf-95192131137e");
     public static final UUID SESSIONID = UUID.fromString("e6a7d7b4-245a-44ad-8018-5c0516583713");
     public static final UUID ALT_SESSIONID = UUID.fromString("f29a1eed-6094-464a-b335-c0885a501750");
-    public static final List<String> DEFAULT_CHAT_RESPONSES = Collections.singletonList(ChatLogic.COMPLETELY_LOST_RESULT);
+    public static final String DEFAULT_CHAT_RESPONSE = ChatDefaultHandler.COMPLETELY_LOST_RESULT;
+    public static final List<String> DEFAULT_CHAT_RESPONSES = Collections.singletonList(DEFAULT_CHAT_RESPONSE);
     public static final AiBotConfigDefinition DEFAULT_API_KEY_DESC = new AiBotConfigDefinition(null);
     public static final String VALID_ENCODING_KEY = "RW1wdHlUZXN0S2V5";
 

@@ -1244,7 +1244,8 @@ public class TestAILogic {
         intents.add(intent);
 
         return new BotStructure("ImportedBot", "Desc", intents,
-        "Q\nA", entities, 1, false, 1, 0.4f, 1, "EN-en", "UTC", Collections.singletonList(ChatLogic.COMPLETELY_LOST_RESULT),
+        "Q\nA", entities, 1, false, 1, 0.4f, 1, "EN-en", "UTC",
+                Collections.singletonList(TestDataHelper.DEFAULT_CHAT_RESPONSE),
         null, Collections.emptyList());
     }
 

@@ -16,7 +16,6 @@ import com.hutoma.api.containers.sub.IntegrationType;
 import com.hutoma.api.containers.sub.MemoryVariable;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
-import com.hutoma.api.memory.ChatStateHandler;
 import com.hutoma.api.validation.ParameterValidationException;
 import com.hutoma.api.validation.QueryFilter;
 
@@ -362,7 +361,7 @@ public class FacebookChatHandler implements Callable {
             // otherwise get a status message
             responseList.add(new FacebookResponseSegment.FacebookResponseTextSegment(
                     e.getApiError().getStatus().getInfo()));
-        } catch (ChatStateHandler.ChatStateException ex) {
+        } catch (Exception ex) {
             this.logger.logUserExceptionEvent(LOGFROM, "GetChatResponse", integrationRecord.getDevid().toString(),
                     ex);
         }

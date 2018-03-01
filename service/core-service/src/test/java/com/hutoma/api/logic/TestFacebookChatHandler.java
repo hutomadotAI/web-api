@@ -1,27 +1,28 @@
 package com.hutoma.api.logic;
 
 import com.hutoma.api.common.Config;
-import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.TestDataHelper;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.FacebookConnector;
 import com.hutoma.api.connectors.FacebookException;
+import com.hutoma.api.connectors.NoServerAvailableException;
+import com.hutoma.api.connectors.ServerConnector;
+import com.hutoma.api.connectors.chat.ChatBackendConnector;
 import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.connectors.db.DatabaseIntegrations;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.facebook.FacebookIntegrationMetadata;
 import com.hutoma.api.containers.facebook.FacebookMessageNode;
-import com.hutoma.api.containers.facebook.FacebookNode;
 import com.hutoma.api.containers.facebook.FacebookNotification;
 import com.hutoma.api.containers.facebook.FacebookResponseSegment;
-import com.hutoma.api.containers.facebook.FacebookToken;
 import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.containers.sub.IntegrationRecord;
 import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.containers.sub.MemoryVariable;
 import com.hutoma.api.containers.sub.WebHookResponse;
-import com.hutoma.api.memory.ChatStateHandler;
+import com.hutoma.api.logging.ILogger;
+import com.hutoma.api.logic.chat.ChatBaseException;
 import com.hutoma.api.validation.ParameterValidationException;
 import com.hutoma.api.validation.QueryFilter;
 
@@ -96,7 +97,8 @@ public class TestFacebookChatHandler {
             + "\"recipient\":{\"id\":\"632106133664550\"},\"timestamp\":1498224297854}]}]}";
 
     @Before
-    public void setup() throws DatabaseException, FacebookException, ChatLogic.ChatFailedException, ChatStateHandler.ChatStateException, ParameterValidationException {
+    public void setup() throws DatabaseException, ChatBaseException, ServerConnector.AiServicesException,
+            ChatBackendConnector.AiControllerException, NoServerAvailableException {
         this.fakeConfig = mock(Config.class);
         this.serializer = new JsonSerializer();
         this.fakeDatabaseIntegrations = mock(DatabaseIntegrations.class);

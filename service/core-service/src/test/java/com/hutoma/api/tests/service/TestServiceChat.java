@@ -2,6 +2,8 @@ package com.hutoma.api.tests.service;
 
 import com.google.common.collect.ImmutableMap;
 import com.hutoma.api.common.ChatLogger;
+import com.hutoma.api.common.Tools;
+import com.hutoma.api.connectors.WebHooks;
 import com.hutoma.api.connectors.chat.ChatBackendConnector;
 import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.ApiChat;
@@ -10,7 +12,16 @@ import com.hutoma.api.containers.sub.ChatState;
 import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.containers.sub.MemoryVariable;
 import com.hutoma.api.endpoints.ChatEndpoint;
+import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logic.ChatLogic;
+import com.hutoma.api.logic.chat.IntentProcessor;
+import com.hutoma.api.logic.chat.ChatAimlHandler;
+import com.hutoma.api.logic.chat.ChatDefaultHandler;
+import com.hutoma.api.logic.chat.ChatIntentHandler;
+import com.hutoma.api.logic.chat.ChatPassthroughHandler;
+import com.hutoma.api.logic.chat.ChatRequestTrigger;
+import com.hutoma.api.logic.chat.ChatWnetHandler;
+import com.hutoma.api.logic.chat.ChatWorkflow;
 import com.hutoma.api.memory.ChatStateHandler;
 import com.hutoma.api.memory.IEntityRecognizer;
 import com.hutoma.api.memory.IMemoryIntentHandler;
@@ -43,18 +54,34 @@ public class TestServiceChat extends ServiceTestBase {
     private static final String CHAT_HANDOVER = CHAT_PATH + "/target";
 
     @Mock
-    protected IMemoryIntentHandler fakeMemoryIntentHandler;
+    private IMemoryIntentHandler fakeMemoryIntentHandler;
     @Mock
-    protected IEntityRecognizer fakeEntityRecognizer;
+    private IEntityRecognizer fakeEntityRecognizer;
     @Mock
-    protected ChatLogger fakeChatTelemetryLogger;
+    private ChatLogger fakeChatTelemetryLogger;
     @Mock
-    protected ChatStateHandler fakeChatStateHandler;
+    private ChatStateHandler fakeChatStateHandler;
+
+    IEntityRecognizer fakeRecognizer;
+    private ChatPassthroughHandler fakePassthroughHandler;
+    private ChatIntentHandler fakeChatIntenthHandler;
+    private ChatRequestTrigger fakeRequestBETrigger;
+    private ChatWnetHandler fakeWnetHandler;
+    private ChatAimlHandler fakeAimlHandler;
+    private ChatDefaultHandler fakeDefaultHandler;
+    private IntentProcessor fakeIntentProcessorLogic;
+    private ChatWorkflow fakeChatWorkflow;
 
     @Before
     public void setup() throws ChatStateHandler.ChatStateException {
+
         when(this.fakeTools.createNewRandomUUID()).thenReturn(UUID.randomUUID());
         when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(ChatState.getEmpty());
+
+        when(this.fakeChatWorkflow.getHandlers()).thenReturn(
+                Arrays.asList(this.fakePassthroughHandler, this.fakeChatIntenthHandler,
+                        this.fakeRequestBETrigger, this.fakeWnetHandler,
+                        this.fakeAimlHandler, this.fakeDefaultHandler));
     }
 
     @Test
@@ -119,7 +146,7 @@ public class TestServiceChat extends ServiceTestBase {
     }
 
     @Test
-    public void testChat_response_includesVariablesMap() {
+    public void testChat_response_includesVariablesMap() throws ChatLogic.IntentException, WebHooks.WebHookException {
         UUID chatId = UUID.randomUUID();
         String label1 = "label1";
         String label2 = "label2";
@@ -130,7 +157,10 @@ public class TestServiceChat extends ServiceTestBase {
         List<MemoryVariable> vars = Arrays.asList(mv1, mv2);
         MemoryIntent mi = new MemoryIntent("intent1", AIID, chatId, vars, false);
         List<MemoryIntent> intents = Collections.singletonList(mi);
+        final ChatResult chatResult = new ChatResult("response");
+        chatResult.setScore(0.8);
         when(this.fakeMemoryIntentHandler.getCurrentIntentsStateForChat(any(), any())).thenReturn(intents);
+        when(this.fakeIntentProcessorLogic.processIntent(any(), any(), any(), any(), any())).thenReturn(true);
 
         final Response response = target(CHAT_PATH)
                 .queryParam("q", "blablabla")
@@ -162,7 +192,7 @@ public class TestServiceChat extends ServiceTestBase {
     }
 
     @Test
-    public void testChat_handover_invalidTarget() throws DatabaseException {
+    public void testChat_handover_invalidTarget() {
         final Response response = target(CHAT_HANDOVER)
                 .queryParam("target", "thisIsNotAValidTarget")
                 .queryParam("chatId", "")
@@ -189,6 +219,17 @@ public class TestServiceChat extends ServiceTestBase {
         this.fakeEntityRecognizer = mock(IEntityRecognizer.class);
         this.fakeChatTelemetryLogger = mock(ChatLogger.class);
         this.fakeChatStateHandler = mock(ChatStateHandler.class);
+        this.fakeRecognizer = mock(IEntityRecognizer.class);
+        this.fakeChatWorkflow = mock(ChatWorkflow.class);
+        this.fakeIntentProcessorLogic = mock(IntentProcessor.class);
+
+        this.fakePassthroughHandler = new ChatPassthroughHandler(this.fakeAiChatServices, this.fakeWebHooks, mock(Tools.class),
+                mock(ChatLogger.class), mock(ILogger.class));
+        this.fakeChatIntenthHandler = new ChatIntentHandler(this.fakeMemoryIntentHandler, this.fakeIntentProcessorLogic);
+        this.fakeRequestBETrigger = new ChatRequestTrigger(this.fakeAiChatServices);
+        this.fakeWnetHandler = new ChatWnetHandler(this.fakeMemoryIntentHandler, this.fakeIntentProcessorLogic, mock(ILogger.class));
+        this.fakeAimlHandler = new ChatAimlHandler(mock(ILogger.class));
+        this.fakeDefaultHandler = new ChatDefaultHandler(this.fakeAiStrings, mock(ILogger.class));
 
         binder.bind(ChatLogic.class).to(ChatLogic.class);
 
@@ -196,6 +237,7 @@ public class TestServiceChat extends ServiceTestBase {
         binder.bindFactory(new InstanceFactory<>(TestServiceChat.this.fakeEntityRecognizer)).to(IEntityRecognizer.class);
         binder.bindFactory(new InstanceFactory<>(TestServiceChat.this.fakeChatTelemetryLogger)).to(ChatLogger.class);
         binder.bindFactory(new InstanceFactory<>(TestServiceChat.this.fakeChatStateHandler)).to(ChatStateHandler.class);
+        binder.bindFactory(new InstanceFactory<>(TestServiceChat.this.fakeChatWorkflow)).to(ChatWorkflow.class);
 
         return binder;
     }

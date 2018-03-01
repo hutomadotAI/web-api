@@ -28,6 +28,13 @@ public final class LogMap {
         this.map = otherMap == null ? new LinkedHashMap<>() : convertMapValues(otherMap);
     }
 
+    /**
+     * Clears the map.
+     */
+    public void clear() {
+        this.map.clear();
+    }
+
     private static LinkedHashMap<String, Object> convertMapValues(final Map<String, Object> otherMap) {
         if (otherMap == null) {
             return null;

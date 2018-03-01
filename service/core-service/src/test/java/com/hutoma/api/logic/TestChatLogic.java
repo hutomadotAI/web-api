@@ -1,6 +1,7 @@
 package com.hutoma.api.logic;
 
 import com.google.common.collect.ImmutableMap;
+import com.hutoma.api.common.TestDataHelper;
 import com.hutoma.api.connectors.NoServerAvailableException;
 import com.hutoma.api.connectors.ServerConnector;
 import com.hutoma.api.connectors.WebHooks;
@@ -10,9 +11,12 @@ import com.hutoma.api.containers.ApiChat;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.ChatHandoverTarget;
+import com.hutoma.api.containers.sub.ChatRequestInfo;
 import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.containers.sub.ChatState;
 import com.hutoma.api.containers.sub.WebHookResponse;
+import com.hutoma.api.logging.LogMap;
+import com.hutoma.api.logic.chat.IChatHandler;
 import com.hutoma.api.memory.ChatStateHandler;
 
 import org.joda.time.DateTime;
@@ -21,6 +25,8 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
 import java.net.HttpURLConnection;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -38,26 +44,27 @@ public class TestChatLogic extends TestChatBase {
      */
     @Test
     public void testChat_Valid_Semantic() throws ChatBackendConnector.AiControllerException {
-        setupFakeChat(0.7d, SEMANTICRESULT, 0.5d, AIMLRESULT);
+        final ChatResult chatResult = buildChatResult();
+        when(this.fakeChatServices.awaitWnet()).thenReturn(ImmutableMap.of(chatResult.getAiid(), chatResult));
         ApiResult result = getChat(0.2f);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
-        Assert.assertEquals(SEMANTICRESULT, ((ApiChat) result).getResult().getAnswer());
+        Assert.assertEquals(chatResult.getAnswer(), ((ApiChat) result).getResult().getAnswer());
     }
 
     /***
      * Valid aiml net response.
      */
     @Test
-    public void testChat_Valid_Aiml() throws ChatBackendConnector.AiControllerException {
-        setupFakeChat(0.7d, SEMANTICRESULT, 0.5d, AIMLRESULT);
+    public void testChat_Valid_Aiml() throws Exception {
+        final ChatResult chatResult = buildChatResult();
+        when(this.fakeChatServices.awaitAiml()).thenReturn(ImmutableMap.of(chatResult.getAiid(), chatResult));
         ApiResult result = getChat(0.9f);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
-        Assert.assertEquals(AIMLRESULT, ((ApiChat) result).getResult().getAnswer());
+        Assert.assertEquals(chatResult.getAnswer(), ((ApiChat) result).getResult().getAnswer());
     }
 
     @Test
-    public void testChat_ErrorSemantic() throws ChatBackendConnector.AiControllerException {
-        setupFakeChat(0.7d, SEMANTICRESULT, 0.0d, AIMLRESULT);
+    public void testChat_ErrorSemantic() throws Exception {
         when(this.fakeChatServices.awaitWnet()).thenThrow(ChatBackendConnector.AiControllerException.class);
         ApiResult result = getChat(0.2f);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
@@ -65,7 +72,6 @@ public class TestChatLogic extends TestChatBase {
 
     @Test
     public void testChat_ErrorAiml() throws ChatBackendConnector.AiControllerException {
-        setupFakeChat(0.7d, SEMANTICRESULT, 0.5d, AIMLRESULT);
         when(this.fakeChatServices.awaitAiml()).thenThrow(ChatBackendConnector.AiControllerException.class);
         ApiResult result = getChat(0.9f);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
@@ -197,23 +203,13 @@ public class TestChatLogic extends TestChatBase {
         Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
     }
 
-    /***
-     * Tests for a valid semantic response from assistant.
-     */
-    @Test
-    public void testAssistant_Valid_Semantic() {
-        ApiResult result = getAssistantChat(0.2f);
-        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
-        Assert.assertEquals(ASSISTANTRESULT, ((ApiChat) result).getResult().getAnswer());
-    }
-
     @Test
     public void testChat_noAiml_wnetNotConfident() throws ChatBackendConnector.AiControllerException {
         setupFakeChat(0.0d, "", 0.0d, "");
         when(this.fakeChatServices.awaitAiml()).thenReturn(null);
         ApiChat result = (ApiChat) getChat(0.9f);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
-        Assert.assertEquals(ChatLogic.COMPLETELY_LOST_RESULT, result.getResult().getAnswer());
+        Assert.assertEquals(TestDataHelper.DEFAULT_CHAT_RESPONSE, result.getResult().getAnswer());
     }
 
     @Test
@@ -223,7 +219,7 @@ public class TestChatLogic extends TestChatBase {
         when(this.fakeChatServices.awaitAiml()).thenReturn(null);
         ApiChat result = (ApiChat) getChat(0.9f);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
-        Assert.assertEquals(ChatLogic.COMPLETELY_LOST_RESULT, result.getResult().getAnswer());
+        Assert.assertEquals(TestDataHelper.DEFAULT_CHAT_RESPONSE, result.getResult().getAnswer());
     }
 
 
@@ -232,7 +228,7 @@ public class TestChatLogic extends TestChatBase {
         setupFakeChat(0.0d, "wnet", 0.0d, "aiml");
         ApiChat result = (ApiChat) getChat(0.9f);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
-        Assert.assertEquals(ChatLogic.COMPLETELY_LOST_RESULT, result.getResult().getAnswer());
+        Assert.assertEquals(TestDataHelper.DEFAULT_CHAT_RESPONSE, result.getResult().getAnswer());
     }
 
     @Test
@@ -406,7 +402,7 @@ public class TestChatLogic extends TestChatBase {
         when(this.fakeChatServices.awaitWnet()).thenReturn(wnetResults);
         ApiChat result = (ApiChat) getChat(0.0);
         Assert.assertEquals(0.0, result.getResult().getScore(), 0.0001);
-        Assert.assertEquals(ChatLogic.COMPLETELY_LOST_RESULT, result.getResult().getAnswer());
+        Assert.assertEquals(TestDataHelper.DEFAULT_CHAT_RESPONSE, result.getResult().getAnswer());
     }
 
     @Test
@@ -418,7 +414,7 @@ public class TestChatLogic extends TestChatBase {
         Assert.assertEquals(ChatHandoverTarget.Human.getStringValue(), result.getResult().getChatTarget());
         Assert.assertEquals(1.0, result.getResult().getScore(), 0.00001);
         Assert.assertNull(result.getResult().getAnswer());
-        // We never make any backend requestss
+        // We never make any backend requests
         verify(this.fakeChatServices, never()).awaitWnet();
         verify(this.fakeChatServices, never()).awaitAiml();
         // We don't process any intents
@@ -488,5 +484,58 @@ public class TestChatLogic extends TestChatBase {
         doThrow(Exception.class).when(this.fakeChatStateHandler).saveState(any(), any(), any(), any());
         ApiResult result = this.chatLogic.handOver(AIID, DEVID_UUID, CHATID.toString(), ChatHandoverTarget.Human);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testChatWorkflow_noHandlers() {
+        when(this.fakeChatWorkflow.getHandlers()).thenReturn(Collections.emptyList());
+        ApiResult result = getChat(0.0);
+        Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testChatWorkflow_noDefaultHandler() {
+        IChatHandler other = buildChatHandler("answer1", false);
+        when(this.fakeChatWorkflow.getHandlers()).thenReturn(Collections.singletonList(other));
+        ApiResult result = getChat(0.0);
+        Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testChatWorkflow_fallbackNextHandler() {
+        final String responseLastHandler = "response2";
+        IChatHandler other = buildChatHandler("answer1", false);
+        IChatHandler last = buildChatHandler(responseLastHandler, true);
+        when(this.fakeChatWorkflow.getHandlers()).thenReturn(Arrays.asList(other, last));
+        ApiChat result = (ApiChat) getChat(0.0);
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+        Assert.assertEquals(responseLastHandler, result.getResult().getAnswer());
+    }
+
+    private IChatHandler buildChatHandler(final String response, final boolean complete) {
+        return new IChatHandler() {
+            @Override
+            public ChatResult doWork(final ChatRequestInfo requestInfo, final ChatResult currentResult, final LogMap telemetryMap) {
+                ChatResult r = new ChatResult("query");
+                r.setAnswer(response);
+                return r;
+            }
+
+            @Override
+            public boolean chatCompleted() {
+                return complete;
+            }
+        };
+    }
+
+    private ChatResult buildChatResult() {
+        ChatResult chatResult = new ChatResult("question");
+        chatResult.setAnswer("my answer");
+        chatResult.setScore(0.7);
+        chatResult.setAiid(AIID);
+        ChatState chatState = ChatState.getEmpty();
+        chatState.setAiChatServices(this.fakeChatServices);
+        chatResult.setChatState(chatState);
+        return chatResult;
     }
 }

@@ -1,10 +1,11 @@
 package com.hutoma.api.memory;
 
-import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.logging.LogMap;
 import com.hutoma.api.connectors.db.DatabaseAI;
 import com.hutoma.api.containers.sub.ChatState;
+import com.hutoma.api.logging.ILogger;
+import com.hutoma.api.logging.LogMap;
+import com.hutoma.api.logic.chat.ChatBaseException;
 
 import org.joda.time.DateTime;
 
@@ -22,7 +23,7 @@ public class ChatStateHandler {
     private final JsonSerializer jsonSerializer;
 
     @Inject
-    public ChatStateHandler(final DatabaseAI databaseAi, final ILogger logger, final JsonSerializer jsonSerializer) {
+    ChatStateHandler(final DatabaseAI databaseAi, final ILogger logger, final JsonSerializer jsonSerializer) {
         this.databaseAi = databaseAi;
         this.logger = logger;
         this.jsonSerializer = jsonSerializer;
@@ -63,23 +64,15 @@ public class ChatStateHandler {
         }
     }
 
-    public static class ChatStateException extends Exception {
-        public ChatStateException(final String message) {
+    public static class ChatStateException extends ChatBaseException {
+        ChatStateException(final String message) {
             super(message);
-        }
-
-        public ChatStateException(final Exception ex) {
-            super(ex);
         }
     }
 
     public static class ChatStateUserException extends ChatStateException {
-        public ChatStateUserException(final String message) {
+        ChatStateUserException(final String message) {
             super(message);
-        }
-
-        public ChatStateUserException(final Exception ex) {
-            super(ex);
         }
     }
 }

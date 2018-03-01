@@ -1,11 +1,5 @@
 package com.hutoma.api.tests.service;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyDouble;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 import com.hutoma.api.access.AuthFilter;
 import com.hutoma.api.access.RateLimitCheck;
 import com.hutoma.api.access.Role;
@@ -21,21 +15,11 @@ import com.hutoma.api.connectors.FacebookConnector;
 import com.hutoma.api.connectors.WebHooks;
 import com.hutoma.api.connectors.aiservices.AIServices;
 import com.hutoma.api.connectors.chat.AIChatServices;
-import com.hutoma.api.connectors.db.Database;
-import com.hutoma.api.connectors.db.DatabaseAI;
-import com.hutoma.api.connectors.db.DatabaseBackends;
-import com.hutoma.api.connectors.db.DatabaseCall;
-import com.hutoma.api.connectors.db.DatabaseConnectionPool;
-import com.hutoma.api.connectors.db.DatabaseEntitiesIntents;
-import com.hutoma.api.connectors.db.DatabaseException;
-import com.hutoma.api.connectors.db.DatabaseIntegrations;
-import com.hutoma.api.connectors.db.DatabaseMarketplace;
-import com.hutoma.api.connectors.db.DatabaseTransaction;
-import com.hutoma.api.connectors.db.TransactionalDatabaseCall;
+import com.hutoma.api.connectors.db.*;
 import com.hutoma.api.containers.sub.RateLimitStatus;
 import com.hutoma.api.logging.ILogger;
-import com.hutoma.api.logic.ChatLogic;
 import com.hutoma.api.logic.FacebookChatHandler;
+import com.hutoma.api.logic.chat.ChatDefaultHandler;
 import com.hutoma.api.thread.IThreadConfig;
 import com.hutoma.api.thread.ThreadPool;
 import com.hutoma.api.thread.ThreadSubPool;
@@ -43,7 +27,6 @@ import com.hutoma.api.thread.TrackedThreadSubPool;
 import com.hutoma.api.validation.PostFilter;
 import com.hutoma.api.validation.QueryFilter;
 import com.hutoma.api.validation.Validate;
-
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.compression.CompressionCodecs;
@@ -69,7 +52,6 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
-
 import javax.inject.Singleton;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.WebApplicationException;
@@ -78,12 +60,16 @@ import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
 
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 /**
  * Created by pedrotei on 29/10/16.
  */
 public abstract class ServiceTestBase extends JerseyTest {
 
-    public static final String AUTH_ENCODING_KEY = "U0hBUkVEX1NFQ1JFVA==";
+    private static final String AUTH_ENCODING_KEY = "U0hBUkVEX1NFQ1JFVA==";
     protected static final UUID DEVID = UUID.fromString("68d5bbd6-9c20-49b3-acca-f996fe65d534");
     protected static final UUID AIID = UUID.fromString("41c6e949-4733-42d8-bfcf-95192131137e");
     protected static final BackendServerType AI_ENGINE = BackendServerType.WNET;
@@ -326,7 +312,7 @@ public abstract class ServiceTestBase extends JerseyTest {
 
         try {
             when(this.fakeAiStrings.getDefaultChatResponses(any(), any()))
-                    .thenReturn(Collections.singletonList(ChatLogic.COMPLETELY_LOST_RESULT));
+                    .thenReturn(Collections.singletonList(ChatDefaultHandler.COMPLETELY_LOST_RESULT));
         } catch (AiStrings.AiStringsException ex) {
             // this will never happen, but on the zero in a million chance that it does ....
             ex.printStackTrace();
@@ -355,7 +341,7 @@ public abstract class ServiceTestBase extends JerseyTest {
         return rc;
     }
 
-    protected String getTestsBaseLocation() {
+    String getTestsBaseLocation() {
         return this.getClass().getProtectionDomain().getCodeSource().getLocation().getFile();
     }
 

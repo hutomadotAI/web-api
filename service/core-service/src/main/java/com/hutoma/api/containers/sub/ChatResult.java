@@ -35,6 +35,8 @@ public class ChatResult {
     private List<MemoryIntent> intents;
     @SerializedName("chatTarget")
     private String chatTarget;
+    @SerializedName("timestamp")
+    private long timestamp;
 
     // result of a webhook call if one was made
     private transient WebHookResponse webHookResponse;
@@ -45,6 +47,8 @@ public class ChatResult {
     // the actual bot ID that provided the result
     private transient UUID aiid;
     private transient boolean resetConversation;
+
+    private transient ChatState chatState;
 
     public ChatResult(final String query) {
         this.query = query;
@@ -189,6 +193,14 @@ public class ChatResult {
         this.promptForIntentVariable = promptForIntentVariable;
     }
 
+    public void setTimestamp(final long timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public long getTimestamp() {
+        return this.timestamp;
+    }
+
     public void setChatTarget(final String chatTarget) {
         this.chatTarget = chatTarget;
     }
@@ -208,5 +220,13 @@ public class ChatResult {
                     .collect(Collectors.toList());
         }
         return chatResult;
+    }
+
+    public ChatState getChatState() {
+        return this.chatState;
+    }
+
+    public void setChatState(final ChatState chatState) {
+        this.chatState = chatState;
     }
 }
