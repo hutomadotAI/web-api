@@ -78,6 +78,7 @@ public class TestAiServicesClient {
     private ThreadPool threadPool;
     private AiServicesQueue fakeQueueServices;
     private WnetServicesConnector fakeWnetServicesConnector;
+    private SvmServicesConnector fakeSvmServicesConnector;
 
     @BeforeClass
     public static void initializeClass() {
@@ -102,6 +103,7 @@ public class TestAiServicesClient {
         this.fakeTools = mock(Tools.class);
         this.fakeQueueServices = mock(AiServicesQueue.class);
         this.fakeWnetServicesConnector = mock(WnetServicesConnector.class);
+        this.fakeSvmServicesConnector = mock(SvmServicesConnector.class);
 
         when(this.fakeConfig.getThreadPoolMaxThreads()).thenReturn(32);
         when(this.fakeConfig.getThreadPoolIdleTimeMs()).thenReturn(10000L);
@@ -111,7 +113,7 @@ public class TestAiServicesClient {
         this.aiServices = new AIServices(this.fakeDatabaseAi, this.fakeDatabaseEntitiesIntents, this.fakeLogger,
                 this.fakeConfig, this.fakeSerializer,
                 this.fakeTools, JerseyClientBuilder.createClient(), new TrackedThreadSubPool(this.threadPool),
-                this.fakeQueueServices, this.fakeWnetServicesConnector);
+                this.fakeQueueServices, this.fakeWnetServicesConnector, this.fakeSvmServicesConnector);
     }
 
     @Test
@@ -131,7 +133,7 @@ public class TestAiServicesClient {
     }
 
     @Test
-    public void testDeleteDev() throws AIServices.AiServicesException, NoServerAvailableException {
+    public void testDeleteDev() throws AIServices.AiServicesException {
         this.aiServices.deleteDev(DEVID);
     }
 
@@ -143,7 +145,7 @@ public class TestAiServicesClient {
         AIServices thisAiServices = new AIServices(this.fakeDatabaseAi, this.fakeDatabaseEntitiesIntents,
                 this.fakeLogger, this.fakeConfig, new JsonSerializer(),
                 this.fakeTools, JerseyClientBuilder.createClient(), new TrackedThreadSubPool(this.threadPool),
-                this.fakeQueueServices, this.fakeWnetServicesConnector);
+                this.fakeQueueServices, this.fakeWnetServicesConnector, this.fakeSvmServicesConnector);
         thisAiServices.uploadTraining(null, DEVID, AIID, TRAINING_MATERIALS);
     }
 

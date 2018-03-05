@@ -11,7 +11,10 @@ public enum BackendServerType {
     WNET("wnet"),
 
     @SerializedName("aiml")
-    AIML("aiml");
+    AIML("aiml"),
+
+    @SerializedName("svm")
+    SVM("svm");
 
     private final String value;
 
@@ -23,7 +26,7 @@ public enum BackendServerType {
         Optional<BackendServerType> serverType = Arrays.stream(BackendServerType.values())
                 .filter(x -> x.value.equals(value))
                 .findFirst();
-        return serverType.isPresent() ? serverType.get() : null;
+        return serverType.orElse(null);
     }
 
     public String value() {

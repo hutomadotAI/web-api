@@ -3,6 +3,7 @@ package com.hutoma.api;
 import com.hutoma.api.common.ControllerConfig;
 import com.hutoma.api.connectors.db.DatabaseConnectionPool;
 import com.hutoma.api.controllers.ControllerAiml;
+import com.hutoma.api.controllers.ControllerSvm;
 import com.hutoma.api.controllers.ControllerWnet;
 import com.hutoma.api.logging.AiServiceStatusLogger;
 import com.hutoma.api.logging.LogMap;
@@ -29,6 +30,7 @@ public class ServerInit implements ApplicationEventListener {
     private AiServiceStatusLogger logger;
     private ControllerWnet wnetController;
     private ControllerAiml aimlController;
+    private ControllerSvm svmController;
 
     /**
      * Application event handler.
@@ -107,6 +109,7 @@ public class ServerInit implements ApplicationEventListener {
         // and with them the server monitoring
         this.wnetController = this.serviceLocator.getService(ControllerWnet.class);
         this.aimlController = this.serviceLocator.getService(ControllerAiml.class);
+        this.svmController = this.serviceLocator.getService(ControllerSvm.class);
     }
 
 }

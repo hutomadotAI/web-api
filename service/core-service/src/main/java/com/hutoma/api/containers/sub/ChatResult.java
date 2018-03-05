@@ -73,6 +73,7 @@ public class ChatResult {
         this.aiid = source.aiid;
         this.chatTarget = source.chatTarget;
         this.webHookResponse = source.webHookResponse;
+        this.chatState = source.chatState;
     }
 
     public ChatResult(final UUID chatId, final double score, final String query, final String answer,
@@ -83,6 +84,7 @@ public class ChatResult {
         this.elapsedTime = elapsedTime;
         this.chatId = chatId;
         this.webHookResponse = webHookResponse;
+        this.chatState = ChatState.getEmpty();
     }
 
     public String getAnswer() {

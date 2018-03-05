@@ -16,10 +16,12 @@ import com.hutoma.api.connectors.WebHooks;
 import com.hutoma.api.connectors.aiservices.AIServices;
 import com.hutoma.api.connectors.aiservices.AiServicesQueue;
 import com.hutoma.api.connectors.aiservices.AimlServicesConnector;
+import com.hutoma.api.connectors.aiservices.SvmServicesConnector;
 import com.hutoma.api.connectors.aiservices.WnetServicesConnector;
 import com.hutoma.api.connectors.chat.AIChatServices;
 import com.hutoma.api.connectors.chat.ChatAimlConnector;
 import com.hutoma.api.connectors.chat.ChatBackendRequester;
+import com.hutoma.api.connectors.chat.ChatSvmConnector;
 import com.hutoma.api.connectors.chat.ChatWnetConnector;
 import com.hutoma.api.connectors.db.*;
 import com.hutoma.api.containers.facebook.FacebookMachineID;
@@ -32,6 +34,7 @@ import com.hutoma.api.logic.chat.ChatDefaultHandler;
 import com.hutoma.api.logic.chat.ChatIntentHandler;
 import com.hutoma.api.logic.chat.ChatPassthroughHandler;
 import com.hutoma.api.logic.chat.ChatRequestTrigger;
+import com.hutoma.api.logic.chat.ChatSvmHandler;
 import com.hutoma.api.logic.chat.ChatWnetHandler;
 import com.hutoma.api.logic.chat.ChatWorkflow;
 import com.hutoma.api.logic.chat.IntentProcessor;
@@ -127,6 +130,7 @@ public class ServerBinder extends AbstractBinder {
         bind(ChatRequestTrigger.class).to(ChatRequestTrigger.class);
         bind(ChatAimlHandler.class).to(ChatAimlHandler.class);
         bind(ChatWnetHandler.class).to(ChatWnetHandler.class);
+        bind(ChatSvmHandler.class).to(ChatSvmHandler.class);
         bind(ChatDefaultHandler.class).to(ChatDefaultHandler.class);
 
         // other
@@ -147,9 +151,11 @@ public class ServerBinder extends AbstractBinder {
         bind(AIChatServices.class).to(AIChatServices.class);
         bind(ChatWnetConnector.class).to(ChatWnetConnector.class);
         bind(ChatAimlConnector.class).to(ChatAimlConnector.class);
+        bind(ChatSvmConnector.class).to(ChatSvmConnector.class);
         bind(EntityRecognizerService.class).to(EntityRecognizerService.class);
         bind(WnetServicesConnector.class).to(WnetServicesConnector.class).in(Singleton.class);
         bind(AimlServicesConnector.class).to(AimlServicesConnector.class);
+        bind(SvmServicesConnector.class).to(SvmServicesConnector.class);
         bind(AiServicesQueue.class).to(AiServicesQueue.class);
         bind(ChatBackendRequester.class).to(ChatBackendRequester.class);
 

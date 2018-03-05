@@ -57,6 +57,7 @@ public class TestAiServices {
     private JerseyClient fakeClient;
     private ControllerConnector fakeControllerConnector;
     private WnetServicesConnector fakeWnetServicesConnector;
+    private SvmServicesConnector fakeSvmServicesConnector;
 
     private AiServicesQueue fakeQueueServices;
     private AIServices aiServices;
@@ -78,6 +79,7 @@ public class TestAiServices {
         this.fakeQueueServices = mock(AiServicesQueue.class);
         this.fakeControllerConnector = mock(ControllerConnector.class);
         this.fakeWnetServicesConnector = mock(WnetServicesConnector.class);
+        this.fakeSvmServicesConnector = mock(SvmServicesConnector.class);
 
         when(this.fakeConfig.getThreadPoolMaxThreads()).thenReturn(32);
         when(this.fakeConfig.getThreadPoolIdleTimeMs()).thenReturn(10000L);
@@ -92,7 +94,7 @@ public class TestAiServices {
         this.aiServices = new AIServices(this.fakeDatabaseAi, this.fakeDatabaseEntitiesIntents, this.fakeLogger,
                 this.fakeConfig, this.fakeSerializer,
                 this.fakeTools, this.fakeClient, new TrackedThreadSubPool(threadPool), this.fakeQueueServices,
-                this.fakeWnetServicesConnector);
+                this.fakeWnetServicesConnector, this.fakeSvmServicesConnector);
     }
 
     @Test

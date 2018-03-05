@@ -71,6 +71,7 @@ public class ChatLogic {
             apiChatResult = new ApiChat(currentResult.getChatId(), currentResult.getTimestamp());
             // clean up the chat result to remove excessive detail
             apiChatResult.setResult(ChatResult.getUserViewable(currentResult));
+            apiChatResult.setTimestamp(currentResult.getTimestamp());
 
         } catch (ChatFailedException ex) {
             this.logger.logUserTraceEvent(LOGFROM, "Chat - failed", devIdString,
@@ -112,7 +113,6 @@ public class ChatLogic {
                 .put("SessionId", apiChatResult.getChatId()));
 
         this.telemetryMap.clear();
-
 
         return apiChatResult.setSuccessStatus();
     }
@@ -166,10 +166,16 @@ public class ChatLogic {
             }
 
             // log which handlers run and their runtime
-            this.logger.logDebug(LOGFROM, "Processed chat handlers", LogMap.map("AIID", aiid)
-                    .put("Handlers", processedHandlers.entrySet().stream()
-                            .map(e -> String.format("%s:%d", e.getKey().getClass().getSimpleName(), e.getValue()))
-                            .collect(Collectors.joining(", "))));
+            LogMap handlersMap = LogMap.map("AIID", aiid);
+            for (Map.Entry<IChatHandler, Long> entry: processedHandlers.entrySet()) {
+                handlersMap.add(String.format("Handler.%s.runtime", entry.getKey().getClass().getSimpleName()),
+                        entry.getValue());
+            }
+            handlersMap.add("Handler.order",
+                    processedHandlers.keySet().stream()
+                            .map(k -> k.getClass().getSimpleName())
+                            .collect(Collectors.joining(", ")));
+            this.logger.logDebug(LOGFROM, "Processed chat handlers", handlersMap);
 
             if (!chatAnswered) {
                 this.logger.logError(LOGFROM, "Default chat handler not configured");
@@ -177,19 +183,21 @@ public class ChatLogic {
             }
         }
 
-        // prepare to send back a result
-        currentResult.setScore(Tools.toOneDecimalPlace(currentResult.getScore()));
-
-        // set the chat response time to the whole duration since the start of the request until now
-        currentResult.setElapsedTime((this.tools.getTimestamp() - currentResult.getTimestamp()) / 1000.d);
-        currentResult.setChatTarget(this.chatState.getChatTarget().getStringValue());
-
         this.chatState.setTopic(currentResult.getTopicOut());
         this.chatState.setHistory(currentResult.getHistory());
         this.chatStateHandler.saveState(devId, aiid, currentResult.getChatId(), this.chatState);
 
-        //this.telemetryMap.add("MinP", minP);
-        this.telemetryMap.add("RequestDuration", this.tools.getTimestamp() - requestStartTimestamp);
+        // prepare to send back a result
+        currentResult.setScore(Tools.toOneDecimalPlace(currentResult.getScore()));
+
+        long requestDurationMs = this.tools.getTimestamp() - requestStartTimestamp;
+        // set the chat response time to the whole duration since the start of the request until now
+        currentResult.setElapsedTime(requestDurationMs / 1000.d);
+        currentResult.setTimestamp(requestStartTimestamp);
+        currentResult.setChatTarget(this.chatState.getChatTarget().getStringValue());
+
+
+        this.telemetryMap.add("RequestDuration", requestDurationMs);
         this.telemetryMap.add("ResponseSent", currentResult.getAnswer());
         this.telemetryMap.add("Score", currentResult.getScore());
         this.telemetryMap.add("LockedToAi",

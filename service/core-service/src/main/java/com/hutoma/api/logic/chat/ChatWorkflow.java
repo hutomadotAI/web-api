@@ -24,6 +24,7 @@ public class ChatWorkflow {
                         final ChatRequestTrigger requestBETrigger,
                         final ChatWnetHandler wnetHandler,
                         final ChatAimlHandler aimlHandler,
+                        final ChatSvmHandler svmHandler,
                         final ChatDefaultHandler defaultHandler) {
 
         // Handlers are executed based on its position in the list
@@ -31,6 +32,7 @@ public class ChatWorkflow {
                 passthroughHandler,
                 intentHandler,
                 requestBETrigger,
+                svmHandler,
                 wnetHandler,
                 aimlHandler,
                 defaultHandler

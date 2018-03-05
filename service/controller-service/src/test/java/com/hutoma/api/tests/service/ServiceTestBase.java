@@ -14,6 +14,7 @@ import com.hutoma.api.connectors.db.DatabaseConnectionPool;
 import com.hutoma.api.connectors.db.DatabaseTransaction;
 import com.hutoma.api.connectors.db.TransactionalDatabaseCall;
 import com.hutoma.api.controllers.ControllerAiml;
+import com.hutoma.api.controllers.ControllerSvm;
 import com.hutoma.api.controllers.ControllerWnet;
 import com.hutoma.api.logging.AiServiceStatusLogger;
 import com.hutoma.api.logging.ILogger;
@@ -58,33 +59,35 @@ public abstract class ServiceTestBase extends JerseyTest {
     protected static final UUID AIID = UUID.fromString("41c6e949-4733-42d8-bfcf-95192131137e");
     protected static final BackendServerType AI_ENGINE = BackendServerType.WNET;
     @Mock
-    protected DatabaseCall fakeDatabaseCall;
+    private DatabaseCall fakeDatabaseCall;
     @Mock
-    protected Database fakeDatabase;
+    private Database fakeDatabase;
     @Mock
-    protected DatabaseBackends fakeDatabaseBackends;
+    private DatabaseBackends fakeDatabaseBackends;
     @Mock
     protected DatabaseAiStatusUpdates fakeDatabaseStatusUpdates;
     @Mock
-    protected DatabaseTransaction fakeDatabaseTransaction;
+    private DatabaseTransaction fakeDatabaseTransaction;
     @Mock
-    protected TransactionalDatabaseCall fakeTransactionalDatabaseCall;
+    private TransactionalDatabaseCall fakeTransactionalDatabaseCall;
     @Mock
-    protected DatabaseConnectionPool fakeDatabaseConnectionPool;
+    private DatabaseConnectionPool fakeDatabaseConnectionPool;
     @Mock
-    protected ILogger fakeLogger;
+    private ILogger fakeLogger;
     @Mock
-    protected ControllerConfig fakeConfig;
+    private ControllerConfig fakeConfig;
     @Mock
-    protected JerseyClient fakeJerseyClient;
+    private JerseyClient fakeJerseyClient;
     @Mock
-    protected AiServiceStatusLogger fakeServicesStatusLogger;
+    private AiServiceStatusLogger fakeServicesStatusLogger;
     @Mock
-    protected Tools fakeTools;
+    private Tools fakeTools;
     @Mock
-    protected ControllerAiml fakeControllerAiml;
+    ControllerAiml fakeControllerAiml;
     @Mock
-    protected ControllerWnet fakeControllerWnet;
+    ControllerWnet fakeControllerWnet;
+    @Mock
+    private ControllerSvm fakeControllerSvm;
 
     static class InstanceFactory<T> implements Factory<T> {
 
@@ -104,7 +107,7 @@ public abstract class ServiceTestBase extends JerseyTest {
         }
     }
 
-    protected AbstractBinder getDefaultBindings() {
+    private AbstractBinder getDefaultBindings() {
         return new AbstractBinder() {
             @Override
             protected void configure() {
@@ -122,6 +125,7 @@ public abstract class ServiceTestBase extends JerseyTest {
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeTools)).to(Tools.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeControllerAiml)).to(ControllerAiml.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeControllerWnet)).to(ControllerWnet.class);
+                bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeControllerSvm)).to(ControllerSvm.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeLogger)).to(ILogger.class).in(Singleton.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeServicesStatusLogger)).to(AiServiceStatusLogger.class);
 
@@ -166,6 +170,7 @@ public abstract class ServiceTestBase extends JerseyTest {
         this.fakeServicesStatusLogger = mock(AiServiceStatusLogger.class);
         this.fakeControllerAiml = mock(ControllerAiml.class);
         this.fakeControllerWnet = mock(ControllerWnet.class);
+        this.fakeControllerSvm = mock(ControllerSvm.class);
 
         when(this.fakeControllerWnet.isActiveSession(eq(TestDataHelper.SESSIONID))).thenReturn(true);
         when(this.fakeControllerWnet.getSessionServerIdentifier(eq(TestDataHelper.SESSIONID))).thenReturn("wnet@fake");
@@ -191,11 +196,7 @@ public abstract class ServiceTestBase extends JerseyTest {
         return rc;
     }
 
-    protected String getTestsBaseLocation() {
-        return this.getClass().getProtectionDomain().getCodeSource().getLocation().getFile();
-    }
-
-    protected String serializeObject(Object obj) {
+    String serializeObject(Object obj) {
         JsonSvcSerializer serializer = new JsonSvcSerializer();
         return serializer.serialize(obj);
     }

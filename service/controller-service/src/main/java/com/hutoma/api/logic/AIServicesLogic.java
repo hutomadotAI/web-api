@@ -16,6 +16,7 @@ import com.hutoma.api.containers.sub.ServerRegistration;
 import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.controllers.ControllerAiml;
 import com.hutoma.api.controllers.ControllerBase;
+import com.hutoma.api.controllers.ControllerSvm;
 import com.hutoma.api.controllers.ControllerWnet;
 import com.hutoma.api.logging.AiServiceStatusLogger;
 import com.hutoma.api.logging.ILogger;
@@ -41,19 +42,22 @@ public class AIServicesLogic {
     private final ILogger logger;
     private final ControllerWnet controllerWnet;
     private final ControllerAiml controllerAiml;
+    private final ControllerSvm controllerSvm;
 
 
     @Inject
-    public AIServicesLogic(final JsonSerializer jsonSerializer,
+    AIServicesLogic(final JsonSerializer jsonSerializer,
                            final DatabaseAiStatusUpdates database,
                            final AiServiceStatusLogger serviceStatusLogger, ILogger logger,
                            final ControllerWnet controllerWnet,
-                           final ControllerAiml controllerAiml) {
+                           final ControllerAiml controllerAiml,
+                           final ControllerSvm controllerSvm) {
         this.jsonSerializer = jsonSerializer;
         this.database = database;
         this.serviceStatusLogger = serviceStatusLogger;
         this.controllerWnet = controllerWnet;
         this.controllerAiml = controllerAiml;
+        this.controllerSvm = controllerSvm;
         this.logger = logger;
     }
 
@@ -337,6 +341,8 @@ public class AIServicesLogic {
                 return this.controllerWnet;
             case AIML:
                 return this.controllerAiml;
+            case SVM:
+                return this.controllerSvm;
             default:
         }
         return null;

@@ -25,6 +25,7 @@ import com.hutoma.api.logic.chat.ChatDefaultHandler;
 import com.hutoma.api.logic.chat.ChatIntentHandler;
 import com.hutoma.api.logic.chat.ChatPassthroughHandler;
 import com.hutoma.api.logic.chat.ChatRequestTrigger;
+import com.hutoma.api.logic.chat.ChatSvmHandler;
 import com.hutoma.api.logic.chat.ChatWnetHandler;
 import com.hutoma.api.logic.chat.ChatWorkflow;
 import com.hutoma.api.logic.chat.IntentProcessor;
@@ -78,6 +79,7 @@ public class TestChatBase {
     ChatRequestTrigger fakeRequestBETrigger;
     ChatWnetHandler fakeWnetHandler;
     ChatAimlHandler fakeAimlHandler;
+    ChatSvmHandler fakeSvmHandler;
     ChatDefaultHandler fakeDefaultHandler;
     IntentProcessor intentProcessor;
 
@@ -103,13 +105,13 @@ public class TestChatBase {
         this.fakeWnetHandler = new ChatWnetHandler(this.fakeIntentHandler, this.intentProcessor, mock(ILogger.class));
         this.fakeAimlHandler = new ChatAimlHandler(mock(ILogger.class));
         this.fakeDefaultHandler = new ChatDefaultHandler(this.fakeAiStrings, mock(ILogger.class));
-
+        this.fakeSvmHandler = new ChatSvmHandler(mock(ILogger.class));
 
         when(fakeConfig.getEncodingKey()).thenReturn(TestDataHelper.VALID_ENCODING_KEY);
 
         when(this.fakeChatWorkflow.getHandlers()).thenReturn(
                 Arrays.asList(this.fakePassthroughHandler, this.fakeChatIntenthHandler,
-                        this.fakeRequestBETrigger, this.fakeWnetHandler,
+                        this.fakeRequestBETrigger, this.fakeSvmHandler, this.fakeWnetHandler,
                         this.fakeAimlHandler, this.fakeDefaultHandler));
 
         this.chatLogic = new ChatLogic(this.fakeChatServices, this.fakeChatStateHandler, mock(Tools.class),

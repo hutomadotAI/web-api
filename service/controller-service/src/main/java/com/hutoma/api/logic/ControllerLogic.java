@@ -12,6 +12,7 @@ import com.hutoma.api.containers.ApiServerTrackerInfoMap;
 import com.hutoma.api.containers.sub.ServerEndpointRequestMulti;
 import com.hutoma.api.controllers.ControllerAiml;
 import com.hutoma.api.controllers.ControllerBase;
+import com.hutoma.api.controllers.ControllerSvm;
 import com.hutoma.api.controllers.ControllerWnet;
 import com.hutoma.api.controllers.ServerTracker;
 
@@ -27,9 +28,12 @@ public class ControllerLogic {
     private final Map<BackendServerType, ControllerBase> controllerMap = new HashMap<>();
 
     @Inject
-    public ControllerLogic(final ControllerAiml controllerAiml, final ControllerWnet controllerWnet) {
+    public ControllerLogic(final ControllerAiml controllerAiml,
+                           final ControllerWnet controllerWnet,
+                           final ControllerSvm controllerSvm) {
         controllerMap.put(BackendServerType.AIML, controllerAiml);
         controllerMap.put(BackendServerType.WNET, controllerWnet);
+        controllerMap.put(BackendServerType.SVM, controllerSvm);
     }
 
     public ApiResult getMap(final BackendServerType serverType) {
