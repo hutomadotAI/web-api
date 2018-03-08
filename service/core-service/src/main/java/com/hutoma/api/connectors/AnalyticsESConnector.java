@@ -76,7 +76,7 @@ public class AnalyticsESConnector {
                 response = client.prepareSearch(CHATLOGS_INDEX)
                         .setSearchType(SearchType.DEFAULT)
                         .setQuery(query)
-                        .addSort("timestamp", SortOrder.ASC)
+                        .addSort(CHATLOGS_DATETIME_FIELD, SortOrder.ASC)
                         .setSize(DEFAULT_PAGE_SIZE)
                         .setFrom(startItem)
                         .get();
