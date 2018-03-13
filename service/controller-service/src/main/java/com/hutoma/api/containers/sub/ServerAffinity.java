@@ -12,9 +12,9 @@ import java.util.UUID;
 public class ServerAffinity {
 
     @SerializedName("server_session_id")
-    public UUID serverSessionID;
+    private UUID serverSessionID;
     @SerializedName("ai_list")
-    public List<UUID> aiList;
+    private List<UUID> aiList;
 
     /***
      * Only for use in testing

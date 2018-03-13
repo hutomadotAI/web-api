@@ -25,7 +25,7 @@ public class AiServiceStatusLogger extends CentralLogger {
     private static final String SERVER = "Server";
     private static final String OPERATION = "Op";
 
-    public static String logUuid(UUID uuid) {
+    private static String logUuid(UUID uuid) {
         return (uuid == null) ? "null" : uuid.toString().substring(0, 7);
     }
 

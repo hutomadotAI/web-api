@@ -145,6 +145,7 @@ public class TestServiceAiServices extends ServiceTestBase {
     public void testServerAffinity_BadSession() {
         when(this.fakeControllerWnet.updateAffinity(any(), any())).thenReturn(false);
         when(this.fakeControllerAiml.updateAffinity(any(), any())).thenReturn(false);
+        when(this.fakeControllerSvm.updateAffinity(any(), any())).thenReturn(false);
         ServerAffinity affinity = new ServerAffinity(ServiceTestBase.DEVID, Collections.singletonList(ServiceTestBase.AIID));
         String json = this.serializeObject(affinity);
         final Response response = sendAffinityRequest(json);

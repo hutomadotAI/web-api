@@ -15,6 +15,7 @@ import com.hutoma.api.connectors.db.IDatabaseConfig;
 import com.hutoma.api.connectors.db.TransactionalDatabaseCall;
 import com.hutoma.api.controllers.AIQueueServices;
 import com.hutoma.api.controllers.ControllerAiml;
+import com.hutoma.api.controllers.ControllerMap;
 import com.hutoma.api.controllers.ControllerSvm;
 import com.hutoma.api.controllers.ControllerWnet;
 import com.hutoma.api.controllers.QueueProcessor;
@@ -76,6 +77,7 @@ public class ServerBinder extends AbstractBinder {
         // business logic
         bind(ControllerLogic.class).to(ControllerLogic.class);
         bind(AIServicesLogic.class).to(AIServicesLogic.class);
+        bind(ControllerMap.class).to(ControllerMap.class);
 
         // other
         bind(JsonSerializer.class).to(JsonSerializer.class);

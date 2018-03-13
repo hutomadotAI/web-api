@@ -2,9 +2,7 @@ package com.hutoma.api;
 
 import com.hutoma.api.common.ControllerConfig;
 import com.hutoma.api.connectors.db.DatabaseConnectionPool;
-import com.hutoma.api.controllers.ControllerAiml;
-import com.hutoma.api.controllers.ControllerSvm;
-import com.hutoma.api.controllers.ControllerWnet;
+import com.hutoma.api.controllers.ControllerMap;
 import com.hutoma.api.logging.AiServiceStatusLogger;
 import com.hutoma.api.logging.LogMap;
 
@@ -28,9 +26,7 @@ public class ServerInit implements ApplicationEventListener {
     private ServiceLocator serviceLocator;
 
     private AiServiceStatusLogger logger;
-    private ControllerWnet wnetController;
-    private ControllerAiml aimlController;
-    private ControllerSvm svmController;
+    private ControllerMap controllerMap;
 
     /**
      * Application event handler.
@@ -43,8 +39,7 @@ public class ServerInit implements ApplicationEventListener {
                 initialise(applicationEvent);
                 break;
             case DESTROY_FINISHED:
-                this.wnetController.terminateQueue();
-                this.aimlController.terminateQueue();
+                this.controllerMap.terminateQueues();
                 FluentLogger.flushAll();
                 FluentLogger.closeAll();
                 break;
@@ -107,9 +102,7 @@ public class ServerInit implements ApplicationEventListener {
 
         // create the singleton instances so that the timers start
         // and with them the server monitoring
-        this.wnetController = this.serviceLocator.getService(ControllerWnet.class);
-        this.aimlController = this.serviceLocator.getService(ControllerAiml.class);
-        this.svmController = this.serviceLocator.getService(ControllerSvm.class);
+        this.controllerMap = this.serviceLocator.getService(ControllerMap.class);
     }
 
 }

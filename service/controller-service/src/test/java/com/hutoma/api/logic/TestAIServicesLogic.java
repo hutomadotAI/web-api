@@ -11,6 +11,7 @@ import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.AiStatus;
 import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.controllers.ControllerAiml;
+import com.hutoma.api.controllers.ControllerMap;
 import com.hutoma.api.controllers.ControllerSvm;
 import com.hutoma.api.controllers.ControllerWnet;
 import com.hutoma.api.logging.AiServiceStatusLogger;
@@ -42,6 +43,7 @@ public class TestAIServicesLogic {
 
     private AIServicesLogic aiServicesLogic;
     private BackendEngineStatus backendStatus;
+    private ControllerMap fakeControllerMap;
 
     @Before
     public void setup() throws DatabaseException {
@@ -50,9 +52,10 @@ public class TestAIServicesLogic {
         this.fakeServicesStatusLogger = mock(AiServiceStatusLogger.class);
         this.fakeLogger = mock(ILogger.class);
         this.fakeControllerWnet = mock(ControllerWnet.class);
+        this.fakeControllerMap = new ControllerMap(this.fakeControllerWnet, mock(ControllerAiml.class), mock(ControllerSvm.class));
+
         this.aiServicesLogic = new AIServicesLogic(this.fakeSerializer, this.fakeDatabase,
-                this.fakeServicesStatusLogger, this.fakeLogger,
-                this.fakeControllerWnet, mock(ControllerAiml.class), mock(ControllerSvm.class));
+                this.fakeServicesStatusLogger, this.fakeLogger, this.fakeControllerMap);
         when(this.fakeControllerWnet.getSessionServerIdentifier(eq(TestDataHelper.SESSIONID))).thenReturn(ENDPOINTID);
         when(this.fakeControllerWnet.isActiveSession(eq(TestDataHelper.SESSIONID))).thenReturn(true);
         when(this.fakeControllerWnet.getSessionServerIdentifier(eq(TestDataHelper.ALT_SESSIONID))).thenReturn(ALT_ENDPOINTID);

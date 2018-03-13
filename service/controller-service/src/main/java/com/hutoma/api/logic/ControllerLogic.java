@@ -10,10 +10,8 @@ import com.hutoma.api.containers.ApiServerEndpoint;
 import com.hutoma.api.containers.ApiServerEndpointMulti;
 import com.hutoma.api.containers.ApiServerTrackerInfoMap;
 import com.hutoma.api.containers.sub.ServerEndpointRequestMulti;
-import com.hutoma.api.controllers.ControllerAiml;
 import com.hutoma.api.controllers.ControllerBase;
-import com.hutoma.api.controllers.ControllerSvm;
-import com.hutoma.api.controllers.ControllerWnet;
+import com.hutoma.api.controllers.ControllerMap;
 import com.hutoma.api.controllers.ServerTracker;
 
 import java.util.ArrayList;
@@ -25,19 +23,16 @@ import javax.inject.Inject;
 
 public class ControllerLogic {
 
-    private final Map<BackendServerType, ControllerBase> controllerMap = new HashMap<>();
+    private final ControllerMap controllerMap;
 
     @Inject
-    public ControllerLogic(final ControllerAiml controllerAiml,
-                           final ControllerWnet controllerWnet,
-                           final ControllerSvm controllerSvm) {
-        controllerMap.put(BackendServerType.AIML, controllerAiml);
-        controllerMap.put(BackendServerType.WNET, controllerWnet);
-        controllerMap.put(BackendServerType.SVM, controllerSvm);
+    public ControllerLogic(final ControllerMap controllerMap) {
+        this.controllerMap = controllerMap;
     }
 
     public ApiResult getMap(final BackendServerType serverType) {
-        Map<String, ServerTracker> trackerMap = this.controllerMap.get(serverType).getVerifiedEndpointMap();
+        Map<String, ServerTracker> trackerMap = this.controllerMap.getControllerFor(serverType)
+                .getVerifiedEndpointMap();
         Map<String, ServerTrackerInfo> trackerInfoMap = new HashMap<>();
         for (Map.Entry<String, ServerTracker> entry: trackerMap.entrySet()) {
             ServerTracker t = entry.getValue();
@@ -52,7 +47,7 @@ public class ControllerLogic {
     public ApiResult getBackendTrainingEndpoint(final UUID aiid,
                                                 final BackendServerType serverType) {
         try {
-            IServerEndpoint endpoint = this.controllerMap.get(serverType)
+            IServerEndpoint endpoint = this.controllerMap.getControllerFor(serverType)
                     .getUploadBackendEndpoint(aiid);
             return new ApiServerEndpoint(endpoint).setSuccessStatus();
         } catch (NoServerAvailableException ex) {
@@ -64,7 +59,7 @@ public class ControllerLogic {
 
     public ApiResult kickQueue(final BackendServerType serverType) {
         try {
-            this.controllerMap.get(serverType).kickQueue();
+            this.controllerMap.getControllerFor(serverType).kickQueue();
             return new ApiResult().setSuccessStatus();
         } catch (Exception ex) {
             return ApiError.getInternalServerError();
@@ -78,7 +73,7 @@ public class ControllerLogic {
         List<ApiServerEndpointMulti.ServerEndpointResponse> results = new ArrayList<>();
 
         // get the controller
-        ControllerBase controller = controllerMap.get(backendServerType);
+        ControllerBase controller = controllerMap.getControllerFor(backendServerType);
 
         // for every server requested (typically one main bot + one for every linked bot)
         for (ServerEndpointRequestMulti.ServerEndpointRequest request:

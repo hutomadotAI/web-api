@@ -14,10 +14,8 @@ import com.hutoma.api.containers.sub.ServerAffinity;
 import com.hutoma.api.containers.sub.ServerAiEntry;
 import com.hutoma.api.containers.sub.ServerRegistration;
 import com.hutoma.api.containers.sub.TrainingStatus;
-import com.hutoma.api.controllers.ControllerAiml;
 import com.hutoma.api.controllers.ControllerBase;
-import com.hutoma.api.controllers.ControllerSvm;
-import com.hutoma.api.controllers.ControllerWnet;
+import com.hutoma.api.controllers.ControllerMap;
 import com.hutoma.api.logging.AiServiceStatusLogger;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
@@ -40,25 +38,19 @@ public class AIServicesLogic {
     private final DatabaseAiStatusUpdates database;
     private final AiServiceStatusLogger serviceStatusLogger;
     private final ILogger logger;
-    private final ControllerWnet controllerWnet;
-    private final ControllerAiml controllerAiml;
-    private final ControllerSvm controllerSvm;
+    private final ControllerMap controllerMap;
 
 
     @Inject
     AIServicesLogic(final JsonSerializer jsonSerializer,
                            final DatabaseAiStatusUpdates database,
                            final AiServiceStatusLogger serviceStatusLogger, ILogger logger,
-                           final ControllerWnet controllerWnet,
-                           final ControllerAiml controllerAiml,
-                           final ControllerSvm controllerSvm) {
+                           final ControllerMap controllerMap) {
         this.jsonSerializer = jsonSerializer;
         this.database = database;
         this.serviceStatusLogger = serviceStatusLogger;
-        this.controllerWnet = controllerWnet;
-        this.controllerAiml = controllerAiml;
-        this.controllerSvm = controllerSvm;
         this.logger = logger;
+        this.controllerMap = controllerMap;
     }
 
     public ApiResult updateAIStatus(final AiStatus status) {
@@ -73,7 +65,7 @@ public class AIServicesLogic {
             }
 
             // figure out which controller this is for
-            ControllerBase controller = getControllerFor(status.getAiEngine());
+            ControllerBase controller = controllerMap.getControllerFor(status.getAiEngine());
             if (controller == null) {
                 this.serviceStatusLogger.logError(LOGFROM,
                         "No registered controller for engine " + status.getAiEngine());
@@ -126,7 +118,7 @@ public class AIServicesLogic {
     public ApiResult registerServer(final ServerRegistration registration) {
         UUID serverSessionID;
         try {
-            ControllerBase controller = getControllerFor(registration.getServerType());
+            ControllerBase controller = controllerMap.getControllerFor(registration.getServerType());
             if (controller != null) {
                 // create a session and make it active
                 serverSessionID = controller.registerServer(registration);
@@ -166,16 +158,10 @@ public class AIServicesLogic {
         List<UUID> aiList = serverAffinity.getAiList();
 
         try {
-            BackendServerType updated = null;
-            if (this.controllerWnet.updateAffinity(sid, aiList)) {
-                updated = BackendServerType.WNET;
-            } else if (this.controllerAiml.updateAffinity(sid, aiList)) {
-                updated = BackendServerType.AIML;
-            }
+            BackendServerType updated = controllerMap.updateAffinity(sid, aiList);
             if (updated == null) {
                 return ApiError.getBadRequest("nonexistent session");
             }
-
             this.serviceStatusLogger.logAffinityUpdate(LOGFROM, updated, serverAffinity);
 
             return new ApiResult().setSuccessStatus("server affinity updated");
@@ -333,19 +319,6 @@ public class AIServicesLogic {
                 registration.getAiList().stream()
                         .collect(Collectors.toMap(ServerAiEntry::getAiid, Function.identity()));
         controller.synchroniseDBStatuses(this.database, this.jsonSerializer, registration.getServerType(), result);
-    }
-
-    private ControllerBase getControllerFor(BackendServerType server) {
-        switch (server) {
-            case WNET:
-                return this.controllerWnet;
-            case AIML:
-                return this.controllerAiml;
-            case SVM:
-                return this.controllerSvm;
-            default:
-        }
-        return null;
     }
 
     public static class StatusTransitionRejectedException extends Exception {

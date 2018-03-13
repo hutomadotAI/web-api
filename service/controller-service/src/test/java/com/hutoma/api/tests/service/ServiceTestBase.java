@@ -14,6 +14,7 @@ import com.hutoma.api.connectors.db.DatabaseConnectionPool;
 import com.hutoma.api.connectors.db.DatabaseTransaction;
 import com.hutoma.api.connectors.db.TransactionalDatabaseCall;
 import com.hutoma.api.controllers.ControllerAiml;
+import com.hutoma.api.controllers.ControllerMap;
 import com.hutoma.api.controllers.ControllerSvm;
 import com.hutoma.api.controllers.ControllerWnet;
 import com.hutoma.api.logging.AiServiceStatusLogger;
@@ -87,7 +88,8 @@ public abstract class ServiceTestBase extends JerseyTest {
     @Mock
     ControllerWnet fakeControllerWnet;
     @Mock
-    private ControllerSvm fakeControllerSvm;
+    ControllerSvm fakeControllerSvm;
+    private ControllerMap fakeControllerMap;
 
     static class InstanceFactory<T> implements Factory<T> {
 
@@ -128,6 +130,7 @@ public abstract class ServiceTestBase extends JerseyTest {
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeControllerSvm)).to(ControllerSvm.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeLogger)).to(ILogger.class).in(Singleton.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeServicesStatusLogger)).to(AiServiceStatusLogger.class);
+                bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeControllerMap)).to(ControllerMap.class);
 
                 // Bind all the internal dependencies to real classes
                 bind(JsonSerializer.class).to(JsonSerializer.class);
@@ -171,6 +174,7 @@ public abstract class ServiceTestBase extends JerseyTest {
         this.fakeControllerAiml = mock(ControllerAiml.class);
         this.fakeControllerWnet = mock(ControllerWnet.class);
         this.fakeControllerSvm = mock(ControllerSvm.class);
+        this.fakeControllerMap = new ControllerMap(this.fakeControllerWnet, this.fakeControllerAiml, this.fakeControllerSvm);
 
         when(this.fakeControllerWnet.isActiveSession(eq(TestDataHelper.SESSIONID))).thenReturn(true);
         when(this.fakeControllerWnet.getSessionServerIdentifier(eq(TestDataHelper.SESSIONID))).thenReturn("wnet@fake");
