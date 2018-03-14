@@ -14,6 +14,7 @@ import com.hutoma.api.connectors.db.DatabaseConnectionPool;
 import com.hutoma.api.connectors.db.DatabaseTransaction;
 import com.hutoma.api.connectors.db.TransactionalDatabaseCall;
 import com.hutoma.api.controllers.ControllerAiml;
+import com.hutoma.api.controllers.ControllerEmb;
 import com.hutoma.api.controllers.ControllerMap;
 import com.hutoma.api.controllers.ControllerSvm;
 import com.hutoma.api.controllers.ControllerWnet;
@@ -89,6 +90,8 @@ public abstract class ServiceTestBase extends JerseyTest {
     ControllerWnet fakeControllerWnet;
     @Mock
     ControllerSvm fakeControllerSvm;
+    @Mock
+    ControllerEmb fakeControllerEmb;
     private ControllerMap fakeControllerMap;
 
     static class InstanceFactory<T> implements Factory<T> {
@@ -128,6 +131,7 @@ public abstract class ServiceTestBase extends JerseyTest {
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeControllerAiml)).to(ControllerAiml.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeControllerWnet)).to(ControllerWnet.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeControllerSvm)).to(ControllerSvm.class);
+                bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeControllerEmb)).to(ControllerEmb.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeLogger)).to(ILogger.class).in(Singleton.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeServicesStatusLogger)).to(AiServiceStatusLogger.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeControllerMap)).to(ControllerMap.class);
@@ -174,7 +178,8 @@ public abstract class ServiceTestBase extends JerseyTest {
         this.fakeControllerAiml = mock(ControllerAiml.class);
         this.fakeControllerWnet = mock(ControllerWnet.class);
         this.fakeControllerSvm = mock(ControllerSvm.class);
-        this.fakeControllerMap = new ControllerMap(this.fakeControllerWnet, this.fakeControllerAiml, this.fakeControllerSvm);
+        this.fakeControllerMap = new ControllerMap(this.fakeControllerWnet, this.fakeControllerAiml,
+                this.fakeControllerSvm, this.fakeControllerEmb);
 
         when(this.fakeControllerWnet.isActiveSession(eq(TestDataHelper.SESSIONID))).thenReturn(true);
         when(this.fakeControllerWnet.getSessionServerIdentifier(eq(TestDataHelper.SESSIONID))).thenReturn("wnet@fake");

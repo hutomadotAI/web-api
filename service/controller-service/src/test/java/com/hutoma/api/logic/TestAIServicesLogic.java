@@ -11,6 +11,7 @@ import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.AiStatus;
 import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.controllers.ControllerAiml;
+import com.hutoma.api.controllers.ControllerEmb;
 import com.hutoma.api.controllers.ControllerMap;
 import com.hutoma.api.controllers.ControllerSvm;
 import com.hutoma.api.controllers.ControllerWnet;
@@ -52,7 +53,8 @@ public class TestAIServicesLogic {
         this.fakeServicesStatusLogger = mock(AiServiceStatusLogger.class);
         this.fakeLogger = mock(ILogger.class);
         this.fakeControllerWnet = mock(ControllerWnet.class);
-        this.fakeControllerMap = new ControllerMap(this.fakeControllerWnet, mock(ControllerAiml.class), mock(ControllerSvm.class));
+        this.fakeControllerMap = new ControllerMap(this.fakeControllerWnet, mock(ControllerAiml.class),
+                mock(ControllerSvm.class), mock(ControllerEmb.class));
 
         this.aiServicesLogic = new AIServicesLogic(this.fakeSerializer, this.fakeDatabase,
                 this.fakeServicesStatusLogger, this.fakeLogger, this.fakeControllerMap);

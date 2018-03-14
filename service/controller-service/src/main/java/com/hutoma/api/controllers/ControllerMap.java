@@ -14,11 +14,13 @@ public class ControllerMap {
 
     @Inject
     public ControllerMap(final ControllerWnet controllerWnet,
-                  final ControllerAiml controllerAiml,
-                  final ControllerSvm controllerSvm) {
+                         final ControllerAiml controllerAiml,
+                         final ControllerSvm controllerSvm,
+                         final ControllerEmb controllerEmb) {
         controllerMap.put(BackendServerType.AIML, controllerAiml);
         controllerMap.put(BackendServerType.WNET, controllerWnet);
         controllerMap.put(BackendServerType.SVM, controllerSvm);
+        controllerMap.put(BackendServerType.EMB, controllerEmb);
     }
 
     public ControllerBase getControllerFor(final BackendServerType server) {
@@ -36,6 +38,8 @@ public class ControllerMap {
             updated = BackendServerType.AIML;
         } else if (getControllerFor(BackendServerType.SVM).updateAffinity(sid, aiList)) {
             updated = BackendServerType.SVM;
+        } else if (getControllerFor(BackendServerType.EMB).updateAffinity(sid, aiList)) {
+            updated = BackendServerType.EMB;
         }
         return updated;
     }

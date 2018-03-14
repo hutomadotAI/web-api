@@ -14,7 +14,10 @@ public enum BackendServerType {
     AIML("aiml"),
 
     @SerializedName("svm")
-    SVM("svm");
+    SVM("svm"),
+
+    @SerializedName("emb")
+    EMB("emb");
 
     private final String value;
 

@@ -16,6 +16,7 @@ import com.hutoma.api.connectors.db.TransactionalDatabaseCall;
 import com.hutoma.api.controllers.AIQueueServices;
 import com.hutoma.api.controllers.ControllerAiml;
 import com.hutoma.api.controllers.ControllerMap;
+import com.hutoma.api.controllers.ControllerEmb;
 import com.hutoma.api.controllers.ControllerSvm;
 import com.hutoma.api.controllers.ControllerWnet;
 import com.hutoma.api.controllers.QueueProcessor;
@@ -93,6 +94,7 @@ public class ServerBinder extends AbstractBinder {
         bind(ControllerWnet.class).to(ControllerWnet.class).in(Singleton.class);
         bind(ControllerAiml.class).to(ControllerAiml.class).in(Singleton.class);
         bind(ControllerSvm.class).to(ControllerSvm.class).in(Singleton.class);
+        bind(ControllerEmb.class).to(ControllerEmb.class).in(Singleton.class);
         bind(QueueProcessor.class).to(QueueProcessor.class);
 
         // AI Services Status specialized logger
