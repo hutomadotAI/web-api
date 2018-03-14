@@ -16,11 +16,13 @@ import com.hutoma.api.connectors.WebHooks;
 import com.hutoma.api.connectors.aiservices.AIServices;
 import com.hutoma.api.connectors.aiservices.AiServicesQueue;
 import com.hutoma.api.connectors.aiservices.AimlServicesConnector;
+import com.hutoma.api.connectors.aiservices.BackendServicesConnectors;
 import com.hutoma.api.connectors.aiservices.SvmServicesConnector;
 import com.hutoma.api.connectors.aiservices.WnetServicesConnector;
 import com.hutoma.api.connectors.chat.AIChatServices;
 import com.hutoma.api.connectors.chat.ChatAimlConnector;
 import com.hutoma.api.connectors.chat.ChatBackendRequester;
+import com.hutoma.api.connectors.chat.ChatConnectors;
 import com.hutoma.api.connectors.chat.ChatSvmConnector;
 import com.hutoma.api.connectors.chat.ChatWnetConnector;
 import com.hutoma.api.connectors.db.*;
@@ -132,6 +134,7 @@ public class ServerBinder extends AbstractBinder {
         bind(ChatWnetHandler.class).to(ChatWnetHandler.class);
         bind(ChatSvmHandler.class).to(ChatSvmHandler.class);
         bind(ChatDefaultHandler.class).to(ChatDefaultHandler.class);
+        bind(ChatConnectors.class).to(ChatConnectors.class);
 
         // other
         bind(JsonSerializer.class).to(JsonSerializer.class);
@@ -158,6 +161,7 @@ public class ServerBinder extends AbstractBinder {
         bind(SvmServicesConnector.class).to(SvmServicesConnector.class);
         bind(AiServicesQueue.class).to(AiServicesQueue.class);
         bind(ChatBackendRequester.class).to(ChatBackendRequester.class);
+        bind(BackendServicesConnectors.class).to(BackendServicesConnectors.class);
 
         // UI
         bind(UILogic.class).to(UILogic.class);

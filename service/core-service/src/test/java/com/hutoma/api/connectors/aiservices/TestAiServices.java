@@ -58,6 +58,7 @@ public class TestAiServices {
     private ControllerConnector fakeControllerConnector;
     private WnetServicesConnector fakeWnetServicesConnector;
     private SvmServicesConnector fakeSvmServicesConnector;
+    private BackendServicesConnectors fakeConnectors;
 
     private AiServicesQueue fakeQueueServices;
     private AIServices aiServices;
@@ -91,10 +92,12 @@ public class TestAiServices {
         when(this.fakeControllerConnector.getBackendTrainingEndpoint(null, BackendServerType.WNET, fakeSerializer))
                 .thenReturn(TestDataHelper.getEndpointFor(WNET_ENDPOINT));
 
+        this.fakeConnectors = new BackendServicesConnectors(this.fakeWnetServicesConnector, this.fakeSvmServicesConnector);
+
         this.aiServices = new AIServices(this.fakeDatabaseAi, this.fakeDatabaseEntitiesIntents, this.fakeLogger,
                 this.fakeConfig, this.fakeSerializer,
                 this.fakeTools, this.fakeClient, new TrackedThreadSubPool(threadPool), this.fakeQueueServices,
-                this.fakeWnetServicesConnector, this.fakeSvmServicesConnector);
+                this.fakeConnectors);
     }
 
     @Test

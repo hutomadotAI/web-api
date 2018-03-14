@@ -16,7 +16,6 @@ import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.sub.AiMinP;
 import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.containers.sub.ChatState;
-import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
 import com.hutoma.api.logic.ChatLogic;
@@ -42,15 +41,10 @@ import javax.inject.Inject;
 public class AIChatServices extends ServerConnector {
 
     private static final String LOGFROM = "aichatservices";
-    private final ChatWnetConnector backendWnetConnector;
-    private final ChatAimlConnector backendAimlConnector;
-    private final ChatSvmConnector backendSvmConnector;
-    private List<ChatBackendConnector.RequestInProgress> wnetFutures;
-    private List<ChatBackendConnector.RequestInProgress> aimlFutures;
-    private List<ChatBackendConnector.RequestInProgress> svmFutures;
     private Map<UUID, Double> minPMap = new HashMap<>();
     private final Config config;
     private final DatabaseAI databaseAi;
+    private final ChatConnectors chatConnectors;
 
     private long requestDeadline;
 
@@ -60,15 +54,11 @@ public class AIChatServices extends ServerConnector {
                           final JsonSerializer serializer,
                           final Tools tools, final Config config, final JerseyClient jerseyClient,
                           final TrackedThreadSubPool threadSubPool,
-                          final ChatWnetConnector backendWnetConnector,
-                          final ChatAimlConnector backendAimlConnector,
-                          final ChatSvmConnector backendSvmConnedtor) {
+                          final ChatConnectors chatConnectors) {
         super(logger, connectConfig, serializer, tools, jerseyClient, threadSubPool);
-        this.backendWnetConnector = backendWnetConnector;
-        this.backendAimlConnector = backendAimlConnector;
-        this.backendSvmConnector = backendSvmConnedtor;
         this.config = config;
         this.databaseAi = databaseAi;
+        this.chatConnectors = chatConnectors;
     }
 
     /***
@@ -116,7 +106,7 @@ public class AIChatServices extends ServerConnector {
 
         // if there are any AIML bots then start the calls
         if (!aimlAis.isEmpty()) {
-            this.aimlFutures = this.backendAimlConnector.issueChatRequests(parameters, aimlAis, chatState);
+            this.chatConnectors.issueChatRequests(BackendServerType.AIML, parameters, aimlAis, chatState);
             usedAimlBot = true;
         }
 
@@ -142,68 +132,23 @@ public class AIChatServices extends ServerConnector {
         }
 
         if (!wnetAIs.isEmpty()) {
-            this.wnetFutures = this.backendWnetConnector.issueChatRequests(parameters, wnetAIs, chatState);
+            chatConnectors.issueChatRequests(BackendServerType.WNET, parameters, wnetAIs, chatState);
         }
 
         if (canChatWith.contains(BackendServerType.SVM)) {
             // Should be able to chat with the same AIs that WNET
-            this.svmFutures = this.backendSvmConnector.issueChatRequests(parameters, wnetAIs, chatState);
+            chatConnectors.issueChatRequests(BackendServerType.SVM, parameters, wnetAIs, chatState);
         }
     }
 
-    /***
-     * Waits for WNET calls to complete and returns the result
-     * @return map of results, or null if there were no requests
-     * @throws ChatBackendConnector.AiControllerException
-     */
-    public Map<UUID, ChatResult> awaitWnet() throws ChatBackendConnector.AiControllerException {
-        if (this.wnetFutures != null) {
-            return this.backendWnetConnector.waitForAll(this.wnetFutures, getRemainingTime());
-        }
-        return null;
-    }
-
-    /***
-     * Waits for AIML calls to complete and returns the result
-     * @return map of results, or null if there were no requests
-     * @throws ChatBackendConnector.AiControllerException
-     */
-    public Map<UUID, ChatResult> awaitAiml() throws ChatBackendConnector.AiControllerException {
-        if (this.aimlFutures != null) {
-            return this.backendAimlConnector.waitForAll(this.aimlFutures, getRemainingTime());
-        }
-        return null;
-    }
-
-    /***
-     * Waits for SVM calls to complete and returns the result
-     * @return map of results, or null if there were no requests
-     */
-    public Map<UUID, ChatResult> awaitSvm() {
-        try {
-            if (this.svmFutures != null) {
-                // Limit the request timeout to prevent adding too much latency to the real chat requests
-                return this.backendSvmConnector.waitForAll(this.svmFutures, Math.min(1000, getRemainingTime()));
-            }
-        } catch (ChatBackendConnector.AiControllerException ex) {
-            // For now we want to ignore all exceptions from this connector since
-            // we're just using it as a shadow service
-            this.logger.logDebug(LOGFROM, "SVM timed out");
-        }
-        return null;
+    public Map<UUID, ChatResult> awaitBackend(final BackendServerType serverType)
+            throws ChatBackendConnector.AiControllerException {
+        return this.chatConnectors.awaitBackend(serverType, getRemainingTime(), this.logger);
     }
 
     @Override
     public void abandonCalls() {
-        if (this.wnetFutures != null) {
-            this.wnetFutures.forEach(ChatBackendConnector.RequestInProgress::closeRequest);
-        }
-        if (this.aimlFutures != null) {
-            this.aimlFutures.forEach(ChatBackendConnector.RequestInProgress::closeRequest);
-        }
-        this.backendWnetConnector.abandonCalls();
-        this.backendAimlConnector.abandonCalls();
-        this.backendSvmConnector.abandonCalls();
+        this.chatConnectors.abandonCalls();
     }
 
     public List<AiMinP> getAIsLinkedToAi(final UUID devId, final UUID aiid)
@@ -223,26 +168,17 @@ public class AIChatServices extends ServerConnector {
      */
     Set<BackendServerType> canChatWithAi(final UUID devId, final UUID aiid) {
         // by default chat with nothing
-        HashSet<BackendServerType> chatSet = new HashSet<>();
-        BackendStatus result = null;
+        Set<BackendServerType> chatSet = new HashSet<>();
+        BackendStatus backendStatus = null;
         try {
             // try to get the real status from the database
-            result = this.databaseAi.getAIStatusReadOnly(devId, aiid);
+            backendStatus = this.databaseAi.getAIStatusReadOnly(devId, aiid);
         } catch (DatabaseException ex) {
             // if it fails, log the error and keep the set null
             this.logger.logException(LOGFROM, ex);
         }
-        if (result != null) {
-            // get the status of each backend server for this ai
-            TrainingStatus wnetStatus = result.getEngineStatus(BackendServerType.WNET).getTrainingStatus();
-            // wnet can only chat if training is complete
-            if (wnetStatus == TrainingStatus.AI_TRAINING_COMPLETE) {
-                chatSet.add(BackendServerType.WNET);
-            }
-            TrainingStatus svmStatus = result.getEngineStatus(BackendServerType.SVM).getTrainingStatus();
-            if (svmStatus == TrainingStatus.AI_TRAINING_COMPLETE) {
-                chatSet.add(BackendServerType.SVM);
-            }
+        if (backendStatus != null) {
+            chatSet = this.chatConnectors.canChatWith(backendStatus);
         }
         return chatSet;
     }

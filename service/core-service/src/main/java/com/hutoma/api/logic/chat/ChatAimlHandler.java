@@ -1,6 +1,7 @@
 package com.hutoma.api.logic.chat;
 
 import com.hutoma.api.common.Tools;
+import com.hutoma.api.connectors.BackendServerType;
 import com.hutoma.api.connectors.ServerConnector;
 import com.hutoma.api.connectors.chat.AIChatServices;
 import com.hutoma.api.connectors.chat.ChatBackendConnector;
@@ -74,7 +75,7 @@ public class ChatAimlHandler extends ChatGenericBackend implements IChatHandler 
                                            final double confidenceThreshold, final LogMap telemetryMap)
             throws ChatBackendConnector.AiControllerException {
 
-        Map<UUID, ChatResult> allResults = this.chatServices.awaitAiml();
+        Map<UUID, ChatResult> allResults = this.chatServices.awaitBackend(BackendServerType.AIML);
         if (allResults == null) {
             return null;
         }

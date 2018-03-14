@@ -3,13 +3,11 @@ package com.hutoma.api.connectors.aiservices;
 import com.google.gson.annotations.SerializedName;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Tools;
-import com.hutoma.api.connectors.BackendServerType;
 import com.hutoma.api.connectors.BackendStatus;
 import com.hutoma.api.connectors.IConnectConfig;
 import com.hutoma.api.connectors.InvocationResult;
 import com.hutoma.api.connectors.NoServerAvailableException;
 import com.hutoma.api.connectors.ServerConnector;
-import com.hutoma.api.connectors.ServerTrackerInfo;
 import com.hutoma.api.connectors.db.DatabaseAI;
 import com.hutoma.api.connectors.db.DatabaseEntitiesIntents;
 import com.hutoma.api.connectors.db.DatabaseException;
@@ -29,7 +27,6 @@ import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
 import java.util.Scanner;
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -46,8 +43,8 @@ public class AIServices extends ServerConnector {
     private final AiServicesQueue queueServices;
     private final DatabaseEntitiesIntents databaseEntitiesIntents;
     private final DatabaseAI databaseAi;
-    private final WnetServicesConnector wnetServicesConnector;
-    private final SvmServicesConnector svmServicesConnector;
+    private final BackendServicesConnectors connectors;
+
 
     @Inject
     public AIServices(final DatabaseAI databaseAi,
@@ -57,14 +54,12 @@ public class AIServices extends ServerConnector {
                       final Tools tools, final JerseyClient jerseyClient,
                       final TrackedThreadSubPool threadSubPool,
                       final AiServicesQueue queueServices,
-                      final WnetServicesConnector wnetServicesConnector,
-                      final SvmServicesConnector svmServicesConnector) {
+                      final BackendServicesConnectors connectors) {
         super(logger, connectConfig, serializer, tools, jerseyClient, threadSubPool);
         this.queueServices = queueServices;
         this.databaseEntitiesIntents = databaseEntitiesIntents;
         this.databaseAi = databaseAi;
-        this.wnetServicesConnector = wnetServicesConnector;
-        this.svmServicesConnector = svmServicesConnector;
+        this.connectors = connectors;
     }
 
     /***
@@ -74,12 +69,10 @@ public class AIServices extends ServerConnector {
      * @param aiid
      * @throws AiServicesException
      */
-    public void startTraining(BackendStatus status, final UUID devId, final UUID aiid) throws AiServicesException {
+    public void startTraining(final BackendStatus status, final UUID devId, final UUID aiid)
+            throws AiServicesException {
         try {
-            this.queueServices.userActionStartTraining(status, BackendServerType.WNET, devId, aiid);
-            this.queueServices.userActionStartTraining(status, BackendServerType.SVM, devId, aiid);
-            this.wnetServicesConnector.kickQueueProcessor();
-            this.svmServicesConnector.kickQueueProcessor();
+            this.connectors.startTraining(this.queueServices, status, devId, aiid);
         } catch (DatabaseException e) {
             AiServicesException.throwWithSuppressed("failed to start training", e);
         }
@@ -95,10 +88,7 @@ public class AIServices extends ServerConnector {
     public void stopTraining(final BackendStatus backendStatus, final UUID devId, final UUID aiid)
             throws AiServicesException {
         try {
-            this.queueServices.userActionStopTraining(backendStatus, BackendServerType.WNET, this.wnetServicesConnector,
-                    devId, aiid);
-            this.queueServices.userActionStopTraining(backendStatus, BackendServerType.SVM, this.svmServicesConnector,
-                    devId, aiid);
+            this.connectors.stopTraining(this.queueServices, backendStatus, devId, aiid);
         } catch (DatabaseException e) {
             AiServicesException.throwWithSuppressed("failed to stop training", e);
         }
@@ -114,12 +104,7 @@ public class AIServices extends ServerConnector {
     public void deleteAI(final BackendStatus backendStatus, final UUID devId, final UUID aiid)
             throws AiServicesException {
         try {
-            this.queueServices.userActionDelete(backendStatus, BackendServerType.WNET, this.wnetServicesConnector,
-                    devId, aiid);
-            this.queueServices.userActionDelete(backendStatus, BackendServerType.SVM, this.svmServicesConnector,
-                    devId, aiid);
-            this.wnetServicesConnector.kickQueueProcessor();
-            this.svmServicesConnector.kickQueueProcessor();
+            this.connectors.deleteAi(this.queueServices, backendStatus, devId, aiid);
         } catch (DatabaseException e) {
             AiServicesException.throwWithSuppressed("failed to delete ai", e);
         }
@@ -143,20 +128,7 @@ public class AIServices extends ServerConnector {
     }
 
     private List<String> getEndpointsForAllServerTypes() {
-        List<String> list = new ArrayList<>();
-        Optional<ServerTrackerInfo> info = this.wnetServicesConnector
-                .getVerifiedEndpointMap(serializer)
-                .values()
-                .stream()
-                .findFirst();
-        info.ifPresent(serverTrackerInfo -> list.add(serverTrackerInfo.getServerUrl()));
-        Optional<ServerTrackerInfo> infoSvm = this.svmServicesConnector
-                .getVerifiedEndpointMap(serializer)
-                .values()
-                .stream()
-                .findFirst();
-        infoSvm.ifPresent(serverTrackerInfo -> list.add(serverTrackerInfo.getServerUrl()));
-        return list;
+        return connectors.getEndpointsForAllServerTypes(this.serializer);
     }
 
     /***
@@ -174,10 +146,7 @@ public class AIServices extends ServerConnector {
         // for each type of server, send a stop command (if needed),
         // set the status and the queue state
         try {
-            this.queueServices.userActionUpload(backendStatus, BackendServerType.WNET, this.wnetServicesConnector,
-                    devId, aiid);
-            this.queueServices.userActionUpload(backendStatus, BackendServerType.SVM, this.svmServicesConnector,
-                    devId, aiid);
+            connectors.uploadTraining(this.queueServices, backendStatus, devId, aiid);
         } catch (DatabaseException e) {
             AiServicesException.throwWithSuppressed("failed to upload training materials", e);
         }
@@ -294,17 +263,7 @@ public class AIServices extends ServerConnector {
      */
     private List<String> getListOfPrimaryEndpoints(final UUID aiid) throws AiServicesException {
         try {
-            List<String> endpoints = new ArrayList<>();
-            endpoints.add(this.wnetServicesConnector.getBackendTrainingEndpoint(aiid, serializer).getServerUrl());
-
-            try {
-                endpoints.add(this.svmServicesConnector.getBackendTrainingEndpoint(aiid, serializer).getServerUrl());
-            } catch (Exception ex) {
-                // ignore for SVM as this is only for testing at the moment
-                this.logger.logDebug(LOGFROM, "Exception when obtaining SVM training endpoint",
-                        LogMap.map("Message", ex.getMessage()));
-            }
-            return endpoints;
+            return connectors.getListOfPrimaryEndpoints(aiid, this.serializer, this.logger);
         } catch (NoServerAvailableException noServer) {
             AiServicesException.throwWithSuppressed(noServer.getMessage(), noServer);
         }

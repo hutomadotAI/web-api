@@ -50,6 +50,7 @@ public class TestAiChatServices {
     private Config fakeConfig;
     private AIChatServices chatServices;
     private TrackedThreadSubPool threadSubPool;
+    private ChatConnectors fakeChatConnectors;
 
 
     @Before
@@ -61,11 +62,12 @@ public class TestAiChatServices {
         this.fakeRequestAiml = mock(ChatAimlConnector.class);
         this.fakeRequestSvm = mock(ChatSvmConnector.class);
         this.threadSubPool = mock(TrackedThreadSubPool.class);
+        this.fakeChatConnectors = new ChatConnectors(this.fakeRequestWnet, this.fakeRequestAiml, this.fakeRequestSvm);
+
         this.chatServices = new AIChatServices(
                 this.fakeDatabaseAi, mock(ILogger.class), fakeConfig, mock(JsonSerializer.class),
                 mock(Tools.class), this.fakeConfig, mock(JerseyClient.class),
-                this.threadSubPool,
-                this.fakeRequestWnet, this.fakeRequestAiml, this.fakeRequestSvm);
+                this.threadSubPool, this.fakeChatConnectors);
     }
 
     @Test

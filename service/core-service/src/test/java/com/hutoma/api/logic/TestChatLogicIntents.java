@@ -1,6 +1,7 @@
 package com.hutoma.api.logic;
 
 import com.hutoma.api.common.Pair;
+import com.hutoma.api.connectors.BackendServerType;
 import com.hutoma.api.connectors.chat.ChatBackendConnector;
 import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.ApiChat;
@@ -420,7 +421,7 @@ public class TestChatLogicIntents extends TestChatBase {
         ChatResult wnetResult = new ChatResult("Hi");
         wnetResult.setScore(0.9f);
         wnetResult.setAnswer(wnetAnswer);
-        when(this.fakeChatServices.awaitWnet()).thenReturn(getChatResultMap(AIID, wnetResult));
+        when(this.fakeChatServices.awaitBackend(BackendServerType.WNET)).thenReturn(getChatResultMap(AIID, wnetResult));
         ApiResult result = getChat(0.5f, "nothing to see here.");
         ChatResult r = ((ApiChat) result).getResult();
         Assert.assertNull(r.getIntents());

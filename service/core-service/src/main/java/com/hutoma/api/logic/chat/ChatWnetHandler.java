@@ -1,6 +1,7 @@
 package com.hutoma.api.logic.chat;
 
 import com.hutoma.api.common.Tools;
+import com.hutoma.api.connectors.BackendServerType;
 import com.hutoma.api.connectors.ServerConnector;
 import com.hutoma.api.connectors.WebHooks;
 import com.hutoma.api.connectors.chat.AIChatServices;
@@ -107,7 +108,7 @@ public class ChatWnetHandler extends ChatGenericBackend implements IChatHandler 
                                                final LogMap telemetryMap)
             throws ChatBackendConnector.AiControllerException {
 
-        Map<UUID, ChatResult> allResults = this.chatServices.awaitWnet();
+        Map<UUID, ChatResult> allResults = this.chatServices.awaitBackend(BackendServerType.WNET);
         if (allResults == null) {
             return null;
         }

@@ -1,7 +1,9 @@
 package com.hutoma.api.logic.chat;
 
+import com.hutoma.api.connectors.BackendServerType;
 import com.hutoma.api.connectors.ServerConnector;
 import com.hutoma.api.connectors.chat.AIChatServices;
+import com.hutoma.api.connectors.chat.ChatBackendConnector;
 import com.hutoma.api.containers.sub.ChatRequestInfo;
 import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.containers.sub.ChatState;
@@ -29,7 +31,7 @@ public class ChatSvmHandler extends ChatGenericBackend implements IChatHandler {
     public ChatResult doWork(final ChatRequestInfo requestInfo,
                              final ChatResult currentResult,
                              final LogMap telemetryMap)
-            throws ServerConnector.AiServicesException {
+            throws ServerConnector.AiServicesException, ChatBackendConnector.AiControllerException {
         ChatState state = currentResult.getChatState();
         this.chatServices = state.getAiChatServices();
 
@@ -38,7 +40,7 @@ public class ChatSvmHandler extends ChatGenericBackend implements IChatHandler {
         }
 
         // wait for SVM to return
-        Map<UUID, ChatResult> allResults = this.chatServices.awaitSvm();
+        Map<UUID, ChatResult> allResults = this.chatServices.awaitBackend(BackendServerType.SVM);
         if (allResults == null) {
             telemetryMap.add("SVM.answered", false);
             return currentResult;

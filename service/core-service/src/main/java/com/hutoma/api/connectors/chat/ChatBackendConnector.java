@@ -84,7 +84,7 @@ public abstract class ChatBackendConnector {
         ServerEndpointRequestMulti serverEndpointRequestMulti = new ServerEndpointRequestMulti();
         ais.forEach(aiDevId -> {
             serverEndpointRequestMulti.add(new ServerEndpointRequestMulti.ServerEndpointRequest(
-                    aiDevId.getAiid(), Collections.EMPTY_LIST));
+                    aiDevId.getAiid(), Collections.emptyList()));
         });
         Map<UUID, ApiServerEndpointMulti.ServerEndpointResponse> endpointMap = ais.isEmpty()
                 ? new HashMap<>()

@@ -79,6 +79,7 @@ public class TestAiServicesClient {
     private AiServicesQueue fakeQueueServices;
     private WnetServicesConnector fakeWnetServicesConnector;
     private SvmServicesConnector fakeSvmServicesConnector;
+    private BackendServicesConnectors fakeConnectors;
 
     @BeforeClass
     public static void initializeClass() {
@@ -110,10 +111,12 @@ public class TestAiServicesClient {
         when(this.fakeConfig.getBackendTrainingCallTimeoutMs()).thenReturn(20000L);
         this.threadPool = new ThreadPool(this.fakeConfig, this.fakeLogger);
 
+        this.fakeConnectors = new BackendServicesConnectors(this.fakeWnetServicesConnector, this.fakeSvmServicesConnector);
+
         this.aiServices = new AIServices(this.fakeDatabaseAi, this.fakeDatabaseEntitiesIntents, this.fakeLogger,
                 this.fakeConfig, this.fakeSerializer,
                 this.fakeTools, JerseyClientBuilder.createClient(), new TrackedThreadSubPool(this.threadPool),
-                this.fakeQueueServices, this.fakeWnetServicesConnector, this.fakeSvmServicesConnector);
+                this.fakeQueueServices, this.fakeConnectors);
     }
 
     @Test
@@ -145,7 +148,7 @@ public class TestAiServicesClient {
         AIServices thisAiServices = new AIServices(this.fakeDatabaseAi, this.fakeDatabaseEntitiesIntents,
                 this.fakeLogger, this.fakeConfig, new JsonSerializer(),
                 this.fakeTools, JerseyClientBuilder.createClient(), new TrackedThreadSubPool(this.threadPool),
-                this.fakeQueueServices, this.fakeWnetServicesConnector, this.fakeSvmServicesConnector);
+                this.fakeQueueServices, this.fakeConnectors);
         thisAiServices.uploadTraining(null, DEVID, AIID, TRAINING_MATERIALS);
     }
 

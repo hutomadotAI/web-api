@@ -2,6 +2,7 @@ package com.hutoma.api.logic;
 
 import com.google.common.collect.ImmutableMap;
 import com.hutoma.api.common.TestDataHelper;
+import com.hutoma.api.connectors.BackendServerType;
 import com.hutoma.api.connectors.NoServerAvailableException;
 import com.hutoma.api.connectors.ServerConnector;
 import com.hutoma.api.connectors.WebHooks;
@@ -45,7 +46,7 @@ public class TestChatLogic extends TestChatBase {
     @Test
     public void testChat_Valid_Semantic() throws ChatBackendConnector.AiControllerException {
         final ChatResult chatResult = buildChatResult();
-        when(this.fakeChatServices.awaitWnet()).thenReturn(ImmutableMap.of(chatResult.getAiid(), chatResult));
+        when(this.fakeChatServices.awaitBackend(BackendServerType.WNET)).thenReturn(ImmutableMap.of(chatResult.getAiid(), chatResult));
         ApiResult result = getChat(0.2f);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
         Assert.assertEquals(chatResult.getAnswer(), ((ApiChat) result).getResult().getAnswer());
@@ -57,7 +58,7 @@ public class TestChatLogic extends TestChatBase {
     @Test
     public void testChat_Valid_Aiml() throws Exception {
         final ChatResult chatResult = buildChatResult();
-        when(this.fakeChatServices.awaitAiml()).thenReturn(ImmutableMap.of(chatResult.getAiid(), chatResult));
+        when(this.fakeChatServices.awaitBackend(BackendServerType.AIML)).thenReturn(ImmutableMap.of(chatResult.getAiid(), chatResult));
         ApiResult result = getChat(0.9f);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
         Assert.assertEquals(chatResult.getAnswer(), ((ApiChat) result).getResult().getAnswer());
@@ -65,14 +66,14 @@ public class TestChatLogic extends TestChatBase {
 
     @Test
     public void testChat_ErrorSemantic() throws Exception {
-        when(this.fakeChatServices.awaitWnet()).thenThrow(ChatBackendConnector.AiControllerException.class);
+        when(this.fakeChatServices.awaitBackend(BackendServerType.WNET)).thenThrow(ChatBackendConnector.AiControllerException.class);
         ApiResult result = getChat(0.2f);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
 
     @Test
     public void testChat_ErrorAiml() throws ChatBackendConnector.AiControllerException {
-        when(this.fakeChatServices.awaitAiml()).thenThrow(ChatBackendConnector.AiControllerException.class);
+        when(this.fakeChatServices.awaitBackend(BackendServerType.AIML)).thenThrow(ChatBackendConnector.AiControllerException.class);
         ApiResult result = getChat(0.9f);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
@@ -107,7 +108,7 @@ public class TestChatLogic extends TestChatBase {
     @Test
     public void testChat_Wnet_AiNotFound() throws ChatBackendConnector.AiControllerException {
         setupFakeChat(0.7d, SEMANTICRESULT, 0.0d, AIMLRESULT);
-        when(this.fakeChatServices.awaitWnet()).thenThrow(ChatBackendConnector.AiNotFoundException.class);
+        when(this.fakeChatServices.awaitBackend(BackendServerType.WNET)).thenThrow(ChatBackendConnector.AiNotFoundException.class);
         ApiResult result = getChat(0.9f);
         Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
     }
@@ -118,7 +119,7 @@ public class TestChatLogic extends TestChatBase {
     @Test
     public void testChat_Wnet_AiException() throws ChatBackendConnector.AiControllerException {
         setupFakeChat(0.7d, SEMANTICRESULT, 0.0d, AIMLRESULT);
-        when(this.fakeChatServices.awaitWnet()).thenThrow(ChatBackendConnector.AiControllerException.class);
+        when(this.fakeChatServices.awaitBackend(BackendServerType.WNET)).thenThrow(ChatBackendConnector.AiControllerException.class);
         ApiResult result = getChat(0.5f);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
@@ -129,7 +130,7 @@ public class TestChatLogic extends TestChatBase {
     @Test
     public void testChat_Aiml_AiException() throws ChatBackendConnector.AiControllerException {
         setupFakeChat(0.7d, SEMANTICRESULT, 0.5d, AIMLRESULT);
-        when(this.fakeChatServices.awaitAiml()).thenThrow(ChatBackendConnector.AiControllerException.class);
+        when(this.fakeChatServices.awaitBackend(BackendServerType.AIML)).thenThrow(ChatBackendConnector.AiControllerException.class);
         ApiResult result = getChat(0.9f);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
@@ -206,7 +207,7 @@ public class TestChatLogic extends TestChatBase {
     @Test
     public void testChat_noAiml_wnetNotConfident() throws ChatBackendConnector.AiControllerException {
         setupFakeChat(0.0d, "", 0.0d, "");
-        when(this.fakeChatServices.awaitAiml()).thenReturn(null);
+        when(this.fakeChatServices.awaitBackend(BackendServerType.AIML)).thenReturn(null);
         ApiChat result = (ApiChat) getChat(0.9f);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
         Assert.assertEquals(TestDataHelper.DEFAULT_CHAT_RESPONSE, result.getResult().getAnswer());
@@ -215,8 +216,8 @@ public class TestChatLogic extends TestChatBase {
     @Test
     public void testChat_noAiml_wnetNull() throws ChatBackendConnector.AiControllerException {
         setupFakeChat(0.0d, "", 0.0d, "");
-        when(this.fakeChatServices.awaitWnet()).thenReturn(null);
-        when(this.fakeChatServices.awaitAiml()).thenReturn(null);
+        when(this.fakeChatServices.awaitBackend(BackendServerType.WNET)).thenReturn(null);
+        when(this.fakeChatServices.awaitBackend(BackendServerType.AIML)).thenReturn(null);
         ApiChat result = (ApiChat) getChat(0.9f);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
         Assert.assertEquals(TestDataHelper.DEFAULT_CHAT_RESPONSE, result.getResult().getAnswer());
@@ -297,7 +298,7 @@ public class TestChatLogic extends TestChatBase {
         UUID cr2Uuid = UUID.randomUUID();
         Map<UUID, ChatResult> wnetResults = ImmutableMap.of(cr1Uuid, cr1, cr2Uuid, cr2);
         when(this.fakeChatServices.getMinPMap()).thenReturn(ImmutableMap.of(cr1Uuid, 0.5, cr2Uuid, 0.5));
-        when(this.fakeChatServices.awaitWnet()).thenReturn(wnetResults);
+        when(this.fakeChatServices.awaitBackend(BackendServerType.WNET)).thenReturn(wnetResults);
         validateStateSaved(cr1, cr1Uuid);
     }
 
@@ -314,7 +315,7 @@ public class TestChatLogic extends TestChatBase {
         ChatState initialChatState = new ChatState(DateTime.now(), null, null, cr1Uuid, new HashMap<>(), 0.5d, ChatHandoverTarget.Ai);
         when(this.fakeChatServices.getMinPMap()).thenReturn(ImmutableMap.of(cr1Uuid, 0.5, cr2Uuid, 0.5));
         when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(initialChatState);
-        when(this.fakeChatServices.awaitWnet()).thenReturn(wnetResults);
+        when(this.fakeChatServices.awaitBackend(BackendServerType.WNET)).thenReturn(wnetResults);
         validateStateSaved(cr1, cr1Uuid);
     }
 
@@ -331,7 +332,7 @@ public class TestChatLogic extends TestChatBase {
         ChatState initialChatState = new ChatState(DateTime.now(), null, null, cr1Uuid, new HashMap<>(), 0.5d, ChatHandoverTarget.Ai);
         when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(initialChatState);
         when(this.fakeChatServices.getMinPMap()).thenReturn(ImmutableMap.of(cr1Uuid, 0.5, cr2Uuid, 0.5));
-        when(this.fakeChatServices.awaitWnet()).thenReturn(wnetResults);
+        when(this.fakeChatServices.awaitBackend(BackendServerType.WNET)).thenReturn(wnetResults);
         validateStateSaved(cr2, cr2Uuid);
     }
 
@@ -348,12 +349,12 @@ public class TestChatLogic extends TestChatBase {
         ChatState initialChatState = new ChatState(DateTime.now(), null, null, cr1Uuid, new HashMap<>(), 0.5d, ChatHandoverTarget.Ai);
         when(this.fakeChatServices.getMinPMap()).thenReturn(ImmutableMap.of(cr1Uuid, 0.5, cr2Uuid, 0.5));
         when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(initialChatState);
-        when(this.fakeChatServices.awaitWnet()).thenReturn(wnetResults);
+        when(this.fakeChatServices.awaitBackend(BackendServerType.WNET)).thenReturn(wnetResults);
         ChatResult cr1Aiml = new ChatResult("question");
         cr1Aiml.setScore(0.6);
         ChatResult cr2Aiml = new ChatResult("question");
         cr2Aiml.setScore(0.7);
-        when(this.fakeChatServices.awaitAiml()).thenReturn(new HashMap<UUID, ChatResult>() {{
+        when(this.fakeChatServices.awaitBackend(BackendServerType.AIML)).thenReturn(new HashMap<UUID, ChatResult>() {{
             put(cr1Uuid, cr1Aiml);
             put(cr2Uuid, cr2Aiml);
         }});
@@ -375,14 +376,14 @@ public class TestChatLogic extends TestChatBase {
         ChatState initialChatState = new ChatState(DateTime.now(), null, null, cr1Uuid, new HashMap<>(), 0.5d, ChatHandoverTarget.Ai);
         when(this.fakeChatServices.getMinPMap()).thenReturn(ImmutableMap.of(cr1Uuid, 0.5, cr2Uuid, 0.5));
         when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(initialChatState);
-        when(this.fakeChatServices.awaitWnet()).thenReturn(wnetResults);
+        when(this.fakeChatServices.awaitBackend(BackendServerType.WNET)).thenReturn(wnetResults);
 
         // BOT2 has higher score in AIML
         ChatResult cr1Aiml = new ChatResult("question");
         cr1Aiml.setScore(0.6);
         ChatResult cr2Aiml = new ChatResult("question");
         cr2Aiml.setScore(0.7);
-        when(this.fakeChatServices.awaitAiml()).thenReturn(ImmutableMap.of(cr1Uuid, cr1Aiml, cr2Uuid, cr2Aiml));
+        when(this.fakeChatServices.awaitBackend(BackendServerType.AIML)).thenReturn(ImmutableMap.of(cr1Uuid, cr1Aiml, cr2Uuid, cr2Aiml));
         // We now expect to get the AIML one with the highest score
         validateStateSaved(cr2Aiml, cr2Uuid);
     }
@@ -399,7 +400,7 @@ public class TestChatLogic extends TestChatBase {
         UUID cr2Uuid = UUID.randomUUID();
         Map<UUID, ChatResult> wnetResults = ImmutableMap.of(cr1Uuid, cr1, cr2Uuid, cr2);
         when(this.fakeChatServices.getMinPMap()).thenReturn(ImmutableMap.of(cr1Uuid, minP1, cr2Uuid, minP2));
-        when(this.fakeChatServices.awaitWnet()).thenReturn(wnetResults);
+        when(this.fakeChatServices.awaitBackend(BackendServerType.WNET)).thenReturn(wnetResults);
         ApiChat result = (ApiChat) getChat(0.0);
         Assert.assertEquals(0.0, result.getResult().getScore(), 0.0001);
         Assert.assertEquals(TestDataHelper.DEFAULT_CHAT_RESPONSE, result.getResult().getAnswer());
@@ -415,8 +416,8 @@ public class TestChatLogic extends TestChatBase {
         Assert.assertEquals(1.0, result.getResult().getScore(), 0.00001);
         Assert.assertNull(result.getResult().getAnswer());
         // We never make any backend requests
-        verify(this.fakeChatServices, never()).awaitWnet();
-        verify(this.fakeChatServices, never()).awaitAiml();
+        verify(this.fakeChatServices, never()).awaitBackend(BackendServerType.WNET);
+        verify(this.fakeChatServices, never()).awaitBackend(BackendServerType.AIML);
         // We don't process any intents
         verify(this.fakeIntentHandler, never()).getIntent(any(), anyString());
     }

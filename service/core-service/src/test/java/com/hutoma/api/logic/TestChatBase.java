@@ -6,6 +6,7 @@ import com.hutoma.api.common.Config;
 import com.hutoma.api.common.TestDataHelper;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.AiStrings;
+import com.hutoma.api.connectors.BackendServerType;
 import com.hutoma.api.connectors.ServerConnector;
 import com.hutoma.api.connectors.WebHooks;
 import com.hutoma.api.connectors.chat.AIChatServices;
@@ -189,7 +190,7 @@ public class TestChatBase {
         wnetResult.setScore(wnetConfidence);
         wnetResult.setAnswer(wnetResponse);
         wnetResult.setHistory(wnetHistory);
-        when(this.fakeChatServices.awaitWnet()).thenReturn(getChatResultMap(AIID, wnetResult));
+        when(this.fakeChatServices.awaitBackend(BackendServerType.WNET)).thenReturn(getChatResultMap(AIID, wnetResult));
 
         when(this.fakeConfig.getAimlBotAiids()).thenReturn(Collections.singletonList(AIML_BOT_AIID));
         when(this.fakeChatServices.getAIsLinkedToAi(any(), any())).thenReturn(Collections.singletonList(
@@ -197,7 +198,7 @@ public class TestChatBase {
         ChatResult aimlResult = new ChatResult("Hi2");
         aimlResult.setScore(aimlConfidence);
         aimlResult.setAnswer(aimlResponse);
-        when(this.fakeChatServices.awaitAiml()).thenReturn(getChatResultMap(AIML_BOT_AIID, aimlResult));
+        when(this.fakeChatServices.awaitBackend(BackendServerType.AIML)).thenReturn(getChatResultMap(AIML_BOT_AIID, aimlResult));
     }
 
     Map<UUID, ChatResult> getChatResultMap(
