@@ -16,14 +16,14 @@ import java.util.Optional;
 import java.util.UUID;
 import javax.inject.Inject;
 
-public class ChatSvmHandler extends ChatGenericBackend implements IChatHandler {
+public class ChatEmbHandler extends ChatGenericBackend implements IChatHandler {
 
-    private static final String LOGFROM = "chatsvmhandler";
+    private static final String LOGFROM = "chatembhandler";
     private final ILogger logger;
     private AIChatServices chatServices;
 
     @Inject
-    public ChatSvmHandler(final ILogger logger) {
+    public ChatEmbHandler(final ILogger logger) {
         this.logger = logger;
     }
 
@@ -36,13 +36,13 @@ public class ChatSvmHandler extends ChatGenericBackend implements IChatHandler {
         this.chatServices = state.getAiChatServices();
 
         if (this.chatServices == null) {
-            throw new ServerConnector.AiServicesException("No chat services available to retrieve SVM responses");
+            throw new ServerConnector.AiServicesException("No chat services available to retrieve EMB responses");
         }
 
         // wait for SVM to return
-        Map<UUID, ChatResult> allResults = this.chatServices.awaitBackend(BackendServerType.SVM);
+        Map<UUID, ChatResult> allResults = this.chatServices.awaitBackend(BackendServerType.EMB);
         if (allResults == null) {
-            telemetryMap.add("SVM.answered", false);
+            telemetryMap.add("EMB.answered", false);
             return currentResult;
         }
 
@@ -52,10 +52,10 @@ public class ChatSvmHandler extends ChatGenericBackend implements IChatHandler {
                 .max(Comparator.comparingDouble(ChatResult::getScore));
         if (chatResultOpt.isPresent()) {
             ChatResult chatResult = chatResultOpt.get();
-            telemetryMap.add("SVM.response", chatResult.getAnswer());
-            telemetryMap.add("SVM.confidence", chatResult.getScore());
-            telemetryMap.add("SVM.elapsed", chatResult.getElapsedTime());
-            telemetryMap.add("SVM.answered", true);
+            telemetryMap.add("EMB.response", chatResult.getAnswer());
+            telemetryMap.add("EMB.confidence", chatResult.getScore());
+            telemetryMap.add("EMB.elapsed", chatResult.getElapsedTime());
+            telemetryMap.add("EMB.answered", true);
         }
         // For now just ignore the response and fallthrough
         return currentResult;

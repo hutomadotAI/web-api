@@ -57,7 +57,6 @@ public class TestAiServices {
     private JerseyClient fakeClient;
     private ControllerConnector fakeControllerConnector;
     private WnetServicesConnector fakeWnetServicesConnector;
-    private SvmServicesConnector fakeSvmServicesConnector;
     private BackendServicesConnectors fakeConnectors;
 
     private AiServicesQueue fakeQueueServices;
@@ -80,7 +79,6 @@ public class TestAiServices {
         this.fakeQueueServices = mock(AiServicesQueue.class);
         this.fakeControllerConnector = mock(ControllerConnector.class);
         this.fakeWnetServicesConnector = mock(WnetServicesConnector.class);
-        this.fakeSvmServicesConnector = mock(SvmServicesConnector.class);
 
         when(this.fakeConfig.getThreadPoolMaxThreads()).thenReturn(32);
         when(this.fakeConfig.getThreadPoolIdleTimeMs()).thenReturn(10000L);
@@ -92,7 +90,8 @@ public class TestAiServices {
         when(this.fakeControllerConnector.getBackendTrainingEndpoint(null, BackendServerType.WNET, fakeSerializer))
                 .thenReturn(TestDataHelper.getEndpointFor(WNET_ENDPOINT));
 
-        this.fakeConnectors = new BackendServicesConnectors(this.fakeWnetServicesConnector, this.fakeSvmServicesConnector);
+        this.fakeConnectors = new BackendServicesConnectors(this.fakeWnetServicesConnector,
+                mock(SvmServicesConnector.class), mock(EmbServicesConnector.class));
 
         this.aiServices = new AIServices(this.fakeDatabaseAi, this.fakeDatabaseEntitiesIntents, this.fakeLogger,
                 this.fakeConfig, this.fakeSerializer,
@@ -101,7 +100,7 @@ public class TestAiServices {
     }
 
     @Test
-    public void testDeleteDev() throws AIServices.AiServicesException, DatabaseException {
+    public void testDeleteDev() throws AIServices.AiServicesException {
         testCommand((a, b) -> this.aiServices.deleteDev(DEVID), HttpMethod.DELETE);
     }
 

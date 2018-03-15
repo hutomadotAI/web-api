@@ -23,9 +23,11 @@ public class BackendServicesConnectors {
 
     @Inject
     BackendServicesConnectors(final WnetServicesConnector wnetServicesConnector,
-                              final SvmServicesConnector svmServicesConnector) {
+                              final SvmServicesConnector svmServicesConnector,
+                              final EmbServicesConnector embServicesConnector) {
         connectors.add(new ConnectorItem(wnetServicesConnector, BackendServerType.WNET, false));
         connectors.add(new ConnectorItem(svmServicesConnector, BackendServerType.SVM, true));
+        connectors.add(new ConnectorItem(embServicesConnector, BackendServerType.EMB, true));
     }
 
     public void startTraining(final AiServicesQueue queueServices, final BackendStatus status,

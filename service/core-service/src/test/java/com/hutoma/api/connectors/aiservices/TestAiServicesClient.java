@@ -78,7 +78,6 @@ public class TestAiServicesClient {
     private ThreadPool threadPool;
     private AiServicesQueue fakeQueueServices;
     private WnetServicesConnector fakeWnetServicesConnector;
-    private SvmServicesConnector fakeSvmServicesConnector;
     private BackendServicesConnectors fakeConnectors;
 
     @BeforeClass
@@ -104,14 +103,14 @@ public class TestAiServicesClient {
         this.fakeTools = mock(Tools.class);
         this.fakeQueueServices = mock(AiServicesQueue.class);
         this.fakeWnetServicesConnector = mock(WnetServicesConnector.class);
-        this.fakeSvmServicesConnector = mock(SvmServicesConnector.class);
 
         when(this.fakeConfig.getThreadPoolMaxThreads()).thenReturn(32);
         when(this.fakeConfig.getThreadPoolIdleTimeMs()).thenReturn(10000L);
         when(this.fakeConfig.getBackendTrainingCallTimeoutMs()).thenReturn(20000L);
         this.threadPool = new ThreadPool(this.fakeConfig, this.fakeLogger);
 
-        this.fakeConnectors = new BackendServicesConnectors(this.fakeWnetServicesConnector, this.fakeSvmServicesConnector);
+        this.fakeConnectors = new BackendServicesConnectors(this.fakeWnetServicesConnector,
+                mock(SvmServicesConnector.class), mock(EmbServicesConnector.class));
 
         this.aiServices = new AIServices(this.fakeDatabaseAi, this.fakeDatabaseEntitiesIntents, this.fakeLogger,
                 this.fakeConfig, this.fakeSerializer,

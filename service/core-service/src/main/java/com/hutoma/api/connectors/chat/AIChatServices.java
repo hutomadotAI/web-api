@@ -139,6 +139,11 @@ public class AIChatServices extends ServerConnector {
             // Should be able to chat with the same AIs that WNET
             chatConnectors.issueChatRequests(BackendServerType.SVM, parameters, wnetAIs, chatState);
         }
+
+        if (canChatWith.contains(BackendServerType.EMB)) {
+            // Should be able to chat with the same AIs that WNET
+            chatConnectors.issueChatRequests(BackendServerType.EMB, parameters, wnetAIs, chatState);
+        }
     }
 
     public Map<UUID, ChatResult> awaitBackend(final BackendServerType serverType)

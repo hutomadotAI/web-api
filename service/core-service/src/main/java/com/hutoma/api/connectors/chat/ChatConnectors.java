@@ -24,11 +24,13 @@ public class ChatConnectors {
 
     @Inject
     ChatConnectors(final ChatWnetConnector backendWnetConnector,
-                          final ChatAimlConnector backendAimlConnector,
-                          final ChatSvmConnector backendSvmConnedtor) {
+                   final ChatAimlConnector backendAimlConnector,
+                   final ChatSvmConnector backendSvmConnector,
+                   final ChatEmbConnector backendEmbConnector) {
         connectorMap.put(BackendServerType.WNET, new ChatConnectorItem(backendWnetConnector, false));
         connectorMap.put(BackendServerType.AIML, new ChatConnectorItem(backendAimlConnector, false));
-        connectorMap.put(BackendServerType.SVM, new ChatConnectorItem(backendSvmConnedtor, true, 1000));
+        connectorMap.put(BackendServerType.SVM, new ChatConnectorItem(backendSvmConnector, true, 500));
+        connectorMap.put(BackendServerType.EMB, new ChatConnectorItem(backendEmbConnector, true, 500));
     }
 
     public Map<UUID, ChatResult> awaitBackend(final BackendServerType serverType, final int remainingTime,

@@ -4,7 +4,7 @@ import com.hutoma.api.common.Config;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.BackendServerType;
-import com.hutoma.api.connectors.aiservices.SvmServicesConnector;
+import com.hutoma.api.connectors.aiservices.EmbServicesConnector;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.thread.TrackedThreadSubPool;
 
@@ -14,25 +14,25 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 
 /**
- * SVM request adapter
+ * Embeddings SVM request adapter
  */
-public class ChatSvmConnector extends ChatBackendConnector {
+public class ChatEmbConnector extends ChatBackendConnector {
 
     @Inject
-    public ChatSvmConnector(final JerseyClient jerseyClient, final Tools tools, final Config config,
+    public ChatEmbConnector(final JerseyClient jerseyClient, final Tools tools, final Config config,
                             final TrackedThreadSubPool threadSubPool, final ILogger logger,
-                            final JsonSerializer serializer, final SvmServicesConnector controllerConnector,
+                            final JsonSerializer serializer, final EmbServicesConnector controllerConnector,
                             final Provider<ChatBackendRequester> requesterProvider) {
         super(jerseyClient, tools, config, threadSubPool, logger, serializer, controllerConnector, requesterProvider);
     }
 
     @Override
     protected String getLogFrom() {
-        return "RequestSVM";
+        return "RequestEMB";
     }
 
     @Override
     protected BackendServerType getServerType() {
-        return BackendServerType.SVM;
+        return BackendServerType.EMB;
     }
 }
