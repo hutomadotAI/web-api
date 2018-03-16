@@ -1,4 +1,4 @@
-FROM tomcat:8.5.24-jre8
+FROM tomcat:8.5.29-jre8-slim
 LABEL maintainer "pedrotei@hutoma.com"
 
 # Delete any existing root folder
