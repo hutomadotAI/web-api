@@ -3,7 +3,6 @@ package com.hutoma.api.logic;
 import com.hutoma.api.common.Pair;
 import com.hutoma.api.connectors.BackendServerType;
 import com.hutoma.api.connectors.chat.ChatBackendConnector;
-import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.ApiChat;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.ApiResult;
@@ -19,7 +18,6 @@ import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -396,7 +394,7 @@ public class TestChatLogicIntents extends TestChatBase {
      */
     @Test
     public void testChat_multiLineIntent_promptsExhausted()
-            throws ChatBackendConnector.AiControllerException, DatabaseException, ChatLogic.IntentException {
+            throws ChatBackendConnector.AiControllerException, ChatLogic.IntentException {
         final int maxPrompts = 3;
         MemoryIntent mi = getMemoryIntentForPrompt(maxPrompts, "prompt");
         // Make sure all variables are clean
@@ -426,6 +424,24 @@ public class TestChatLogicIntents extends TestChatBase {
         ChatResult r = ((ApiChat) result).getResult();
         Assert.assertNull(r.getIntents());
         Assert.assertEquals(wnetAnswer, r.getAnswer());
+    }
+
+    /**
+     * Tests an intent with no variables doesn't trigger calls to the entity recognizer
+     */
+    @Test
+    public void testChat_intent_noVariables_entityRecognizerNotCalled()
+            throws ChatBackendConnector.AiControllerException, ChatLogic.IntentException {
+        final String intentName = "intentA";
+        MemoryIntent mi = new MemoryIntent(intentName, AIID, CHATID, Collections.emptyList());
+        setupFakeChat(0.9d, MemoryIntentHandler.META_INTENT_TAG + intentName, 0.3d, "");
+        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), any())).thenReturn(mi);
+        ApiResult result = getChat(0.5f, "nothing to see here.");
+        ChatResult r = ((ApiChat) result).getResult();
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+        verify(this.fakeRecognizer, never()).retrieveEntities(any(), any());
+        Assert.assertTrue(r.getIntents().get(0).getVariables().isEmpty());
+        Assert.assertTrue(r.getIntents().get(0).isFulfilled());
     }
 
     /***
@@ -484,7 +500,7 @@ public class TestChatLogicIntents extends TestChatBase {
      */
     @Test
     public void testChat_intent_sameEntity_multipleVars_promptsForDisambiguationFirst()
-            throws ChatBackendConnector.AiControllerException, IOException, ChatLogic.IntentException {
+            throws ChatBackendConnector.AiControllerException, ChatLogic.IntentException {
         final String intentName = "intent1";
         final String sameEntityName = "sameEntityName";
         MemoryVariable mv1 = new MemoryVariable("entity1", null, true, Collections.singletonList("1"),

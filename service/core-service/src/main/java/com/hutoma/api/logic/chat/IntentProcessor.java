@@ -175,12 +175,15 @@ public class IntentProcessor {
 
         boolean handledIntent = false;
 
-        // At this stage we're guaranteed to have variables with different entity types
-        // Attempt to retrieve entities from the question
-        List<Pair<String, String>> entities = this.entityRecognizer.retrieveEntities(
-                chatInfo.getQuestion(), memoryVariables);
 
-        if (!entities.isEmpty()) {
+        List<Pair<String, String>> entities = null;
+        if (!currentIntent.getVariables().isEmpty()) {
+            // At this stage we're guaranteed to have variables with different entity types
+            // Attempt to retrieve entities from the question
+            entities = this.entityRecognizer.retrieveEntities(chatInfo.getQuestion(), memoryVariables);
+        }
+
+        if (entities != null && !entities.isEmpty()) {
             log.put("Entities retrieved", StringUtils.join(entities, ','));
 
             // If we're processing just one requested variable, we need to check if we have a value recognized
