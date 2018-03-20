@@ -71,7 +71,6 @@ public class ChatLogic {
             apiChatResult = new ApiChat(currentResult.getChatId(), currentResult.getTimestamp());
             // clean up the chat result to remove excessive detail
             apiChatResult.setResult(ChatResult.getUserViewable(currentResult));
-            apiChatResult.setTimestamp(currentResult.getTimestamp());
 
         } catch (ChatFailedException ex) {
             this.logger.logUserTraceEvent(LOGFROM, "Chat - failed", devIdString,

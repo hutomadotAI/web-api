@@ -159,9 +159,11 @@ public class TestServiceChat extends ServiceTestBase {
         MemoryIntent mi = new MemoryIntent("intent1", AIID, chatId, vars, false);
         List<MemoryIntent> intents = Collections.singletonList(mi);
         final ChatResult chatResult = new ChatResult("response");
+        final long timestamp = System.currentTimeMillis();
         chatResult.setScore(0.8);
         when(this.fakeMemoryIntentHandler.getCurrentIntentsStateForChat(any(), any())).thenReturn(intents);
         when(this.fakeIntentProcessorLogic.processIntent(any(), any(), any(), any(), any())).thenReturn(true);
+        when(this.fakeTools.getTimestamp()).thenReturn(timestamp);
 
         final Response response = target(CHAT_PATH)
                 .queryParam("q", "blablabla")
@@ -178,6 +180,8 @@ public class TestServiceChat extends ServiceTestBase {
         Assert.assertTrue(resultIntent.getVariablesMap().containsKey(label2));
         Assert.assertEquals(mv1.getName(), resultIntent.getVariablesMap().get(label1).getName());
         Assert.assertEquals(mv2.getName(), resultIntent.getVariablesMap().get(label2).getName());
+        Assert.assertEquals(timestamp, apiChat.getTimestamp());
+        Assert.assertEquals(apiChat.getTimestamp(), apiChat.getResult().getTimestamp());
     }
 
     @Test
