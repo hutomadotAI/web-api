@@ -66,3 +66,6 @@ modules.xml
 # VS code Java plugin
 .classpath
 .project
+
+Python virtual environment
+venv/

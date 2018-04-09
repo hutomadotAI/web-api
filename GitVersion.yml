@@ -1,0 +1,5 @@
+mode: ContinuousDeployment
+tag-prefix: 'v'
+branches: {}
+ignore:
+  sha: []
