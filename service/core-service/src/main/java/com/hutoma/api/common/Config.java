@@ -271,4 +271,12 @@ public class Config extends CommonConfig implements ILoggerConfig, IThreadConfig
         return getConfigFromProperties("fb_verify_token", "oYfoYghfwj1p0i7f");
     }
 
+
+    public int getMaxIntentUserSays() {
+        return Integer.parseInt(getConfigFromProperties("intent_max_usersays", "20"));
+    }
+
+    public int getMaxIntentResponses() {
+        return Integer.parseInt(getConfigFromProperties("intent_max_responses", "20"));
+    }
 }

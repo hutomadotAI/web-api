@@ -1,6 +1,7 @@
 package com.hutoma.api.validation;
 
 import com.google.gson.JsonParseException;
+import com.hutoma.api.common.Config;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.ApiEntity;
@@ -48,12 +49,16 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
 
     private static final String LOGFROM = "postfilter";
 
+    private final Config config;
+
     @Context
     private ResourceInfo resourceInfo;
 
     @Inject
-    public PostFilter(ILogger logger, Tools tools, JsonSerializer serializer) {
+    PostFilter(final ILogger logger, final Tools tools, final JsonSerializer serializer,
+               final Config config) {
         super(logger, tools, serializer);
+        this.config = config;
     }
 
     @Override
@@ -291,7 +296,7 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
      * @param intent The Intent.
      * @throws ParameterValidationException
      */
-    void validateIntent(ApiIntent intent) throws ParameterValidationException {
+    void validateIntent(final ApiIntent intent) throws ParameterValidationException {
         // validate name
         validateFieldLength(250, INTENTNAME, intent.getIntentName());
         validateAlphaNumPlusDashes(INTENTNAME, intent.getIntentName());
@@ -302,11 +307,23 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
                         validateFieldLengthsInList(250, INTENT_RESPONSES,
                                 filterControlCoalesceSpacesInList(intent.getResponses())), INTENT_RESPONSES));
 
+        // check responses limit
+        if (intent.getResponses().size() > config.getMaxIntentResponses()) {
+            throw new ParameterValidationException(String.format("number of responses (%d) exceeds limit (%d)",
+                    intent.getResponses().size(), config.getMaxIntentResponses()), INTENT_RESPONSES);
+        }
+
         // for each expression, filter, check against size limit, dedupe, remove empties, check one present
         intent.setUserSays(
                 dedupeAndEnsureNonEmptyList(
                         validateFieldLengthsInList(250, INTENT_USERSAYS,
                                 filterControlCoalesceSpacesInList(intent.getUserSays())), INTENT_USERSAYS));
+
+        // check expression limit
+        if (intent.getUserSays().size() > config.getMaxIntentUserSays()) {
+            throw new ParameterValidationException(String.format("number of expressions (%d) exceeds limit (%d)",
+                    intent.getUserSays().size(), config.getMaxIntentUserSays()), INTENT_USERSAYS);
+        }
 
         HashSet<String> labelsInUse = new HashSet<>();
         // for each variable

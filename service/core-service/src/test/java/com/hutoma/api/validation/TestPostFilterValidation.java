@@ -1,5 +1,6 @@
 package com.hutoma.api.validation;
 
+import com.hutoma.api.common.Config;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.TestDataHelper;
 import com.hutoma.api.common.Tools;
@@ -22,6 +23,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Created by bretc on 11/10/2017.
@@ -32,13 +34,19 @@ public class TestPostFilterValidation {
     private ILogger fakeLogger;
     private JsonSerializer fakeSerializer;
     private Tools fakeTools;
+    private Config fakeConfig;
 
     @Before
     public void setup() {
         this.fakeLogger = mock(ILogger.class);
         this.fakeTools = mock(Tools.class);
         this.fakeSerializer = mock(JsonSerializer.class);
-        this.postFilter = new PostFilter(this.fakeLogger, this.fakeTools, this.fakeSerializer);
+        this.fakeConfig = mock(Config.class);
+
+        when(this.fakeConfig.getMaxIntentResponses()).thenReturn(10);
+        when(this.fakeConfig.getMaxIntentUserSays()).thenReturn(10);
+
+        this.postFilter = new PostFilter(this.fakeLogger, this.fakeTools, this.fakeSerializer, this.fakeConfig);
     }
 
     @Test
@@ -286,11 +294,42 @@ public class TestPostFilterValidation {
         this.postFilter.validateIntent(intent);
     }
 
-    private ApiIntent createIntent(String name) {
+    @Test(expected = ParameterValidationException.class)
+    public void validateIntent_tooManyResponses() throws ParameterValidationException {
+        ApiIntent intent = createIntent("intent", this.fakeConfig.getMaxIntentResponses() + 1, 1);
+        this.postFilter.validateIntent(intent);
+    }
+
+    @Test(expected = ParameterValidationException.class)
+    public void validateIntent_tooManyUserSays() throws ParameterValidationException {
+        ApiIntent intent = createIntent("intent", 1, this.fakeConfig.getMaxIntentUserSays() + 1);
+        this.postFilter.validateIntent(intent);
+    }
+
+    @Test(expected = ParameterValidationException.class)
+    public void validateIntent_tooManyUserSays_and_tooManyResponses() throws ParameterValidationException {
+        ApiIntent intent = createIntent("intent", this.fakeConfig.getMaxIntentResponses() + 1,
+                this.fakeConfig.getMaxIntentUserSays() + 1);
+        this.postFilter.validateIntent(intent);
+    }
+
+    private static List<String> makeListRepeated(final String baseName, final int numCopies) {
+        List<String> list = new ArrayList<>(numCopies);
+        for (int i = 1; i <= numCopies; i++) {
+            list.add(String.format("%s%d", baseName, i));
+        }
+        return list;
+    }
+
+    private ApiIntent createIntent(final String name, final int numResponses, final int numUserSays) {
         ApiIntent intent = new ApiIntent(name == null ? "name" : name, "", "");
-        intent.setResponses(Collections.singletonList("response"));
-        intent.setUserSays(Collections.singletonList("usersays"));
+        intent.setResponses(makeListRepeated("response", numResponses));
+        intent.setUserSays(makeListRepeated("usersays", numUserSays));
         return intent;
+    }
+
+    private ApiIntent createIntent(String name) {
+        return createIntent(name, 1, 1);
     }
 
     private IntentVariable createIntentVariable(String entity_name, String label, int numPrompts, boolean required) {

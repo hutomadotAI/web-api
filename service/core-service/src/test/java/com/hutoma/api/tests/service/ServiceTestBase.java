@@ -310,6 +310,9 @@ public abstract class ServiceTestBase extends JerseyTest {
         when(this.fakeConfig.getRateLimit_BotstoreMetadata_Frequency()).thenReturn(1.0);
         when(this.fakeConfig.getRateLimit_BotstorePublish_Frequency()).thenReturn(1.0);
 
+        when(this.fakeConfig.getMaxIntentResponses()).thenReturn(10);
+        when(this.fakeConfig.getMaxIntentUserSays()).thenReturn(10);
+
         try {
             when(this.fakeAiStrings.getDefaultChatResponses(any(), any()))
                     .thenReturn(Collections.singletonList(ChatDefaultHandler.COMPLETELY_LOST_RESULT));
