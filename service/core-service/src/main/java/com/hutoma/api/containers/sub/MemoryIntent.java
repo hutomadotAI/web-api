@@ -40,7 +40,7 @@ public class MemoryIntent {
         this.variablesMap = getMapFromVariablesList(this.variables);
     }
 
-    private MemoryIntent(MemoryIntent source) {
+    private MemoryIntent(final MemoryIntent source) {
         this.name = source.name;
         this.aiid = source.aiid;
         this.chatId = source.chatId;

@@ -17,7 +17,7 @@ public class WebHook {
     @SerializedName("endpoint")
     private final String endpoint;
 
-    public WebHook(UUID aiid, String intentName, String endpoint, boolean enabled) {
+    public WebHook(final UUID aiid, final String intentName, final String endpoint, final boolean enabled) {
         this.aiid = aiid;
         this.intentName = intentName;
         this.endpoint = endpoint;

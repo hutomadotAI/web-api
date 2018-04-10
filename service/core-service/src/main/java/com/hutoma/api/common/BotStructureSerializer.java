@@ -37,6 +37,11 @@ public class BotStructureSerializer {
         HashMap<String, ApiEntity> entityMap = new HashMap<>();
         for (String intent : intentList) {
             ApiIntent apiIntent = databaseEntitiesIntents.getIntent(aiid, intent);
+            if (apiIntent.getWebHook() != null
+                    && !apiIntent.getWebHook().isEnabled()
+                    && apiIntent.getWebHook().getEndpoint().isEmpty()) {
+                apiIntent.setWebHook(null);
+            }
             intents.add(apiIntent);
 
             for (IntentVariable intentVariable : apiIntent.getVariables()) {

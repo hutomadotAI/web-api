@@ -92,7 +92,7 @@ public class ChatResult {
         return this.answer;
     }
 
-    public void setAnswer(String answer) {
+    public void setAnswer(final String answer) {
         this.answer = answer;
     }
 
@@ -104,11 +104,11 @@ public class ChatResult {
         this.query = query;
     }
 
-    public void setAction(String action) {
+    public void setAction(final String action) {
         this.action = action;
     }
 
-    public void setContext(String context) {
+    public void setContext(final String context) {
         this.context = context;
     }
 
@@ -116,7 +116,7 @@ public class ChatResult {
         return this.score;
     }
 
-    public void setScore(double score) {
+    public void setScore(final double score) {
         this.score = score;
     }
 
@@ -128,7 +128,7 @@ public class ChatResult {
         return this.topicOut;
     }
 
-    public void setTopicOut(String topicOut) {
+    public void setTopicOut(final String topicOut) {
         this.topicOut = topicOut;
     }
 
@@ -136,7 +136,7 @@ public class ChatResult {
         return this.elapsedTime;
     }
 
-    public void setElapsedTime(double elapsedTime) {
+    public void setElapsedTime(final double elapsedTime) {
         this.elapsedTime = elapsedTime;
     }
 
@@ -144,7 +144,7 @@ public class ChatResult {
         return this.chatId;
     }
 
-    public void setChatId(UUID chatId) {
+    public void setChatId(final UUID chatId) {
         this.chatId = chatId;
     }
 
@@ -152,7 +152,7 @@ public class ChatResult {
         return this.intents;
     }
 
-    public void setIntents(List<MemoryIntent> intents) {
+    public void setIntents(final List<MemoryIntent> intents) {
         this.intents = intents;
     }
 
@@ -160,7 +160,7 @@ public class ChatResult {
         return this.history;
     }
 
-    public void setHistory(String history) {
+    public void setHistory(final String history) {
         this.history = history;
     }
 
@@ -168,7 +168,7 @@ public class ChatResult {
         return this.aiid;
     }
 
-    public void setAiid(UUID aiid) {
+    public void setAiid(final UUID aiid) {
         this.aiid = aiid;
     }
 
@@ -215,7 +215,7 @@ public class ChatResult {
     /***
      * Clone a version of the chat result that we can send back to the user
      */
-    public static ChatResult getUserViewable(ChatResult source) {
+    public static ChatResult getUserViewable(final ChatResult source) {
         ChatResult chatResult = new ChatResult(source);
         if (source.getIntents() != null) {
             chatResult.intents = source.getIntents().stream()

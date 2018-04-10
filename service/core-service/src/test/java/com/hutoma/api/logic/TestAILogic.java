@@ -636,24 +636,33 @@ public class TestAILogic {
 
     @Test
     public void testExportBot() throws DatabaseException {
-        ApiEntity intentEntity = new ApiEntity("entity", VALIDDEVID);
         ApiIntent intent = new ApiIntent("intent_name", "topic_in", "topic_out");
         intent.setWebHook(new WebHook(AIID, "intent_name", "http://not.a.real.address:8080", true));
         intent.setUserSays(Collections.singletonList("test"));
         intent.setResponses(Collections.singletonList("ok"));
-        when(this.fakeDatabaseEntitiesIntents.getIntents(any(), any())).thenReturn(Collections.singletonList("intent_name"));
-        when(this.fakeDatabaseEntitiesIntents.getIntent(any(), any())).thenReturn(intent);
-        when(this.fakeDatabaseEntitiesIntents.getEntity(any(), any())).thenReturn(intentEntity);
-        when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
-        when(this.fakeDatabaseAi.getAiTrainingFile(any())).thenReturn("hello\nhi");
 
-        ApiBotStructure result = (ApiBotStructure) this.aiLogic.exportBotData(VALIDDEVID, AIID);
+        ApiBotStructure result = setupBotExport(intent);
         BotStructure bot = result.getBotStructure();
 
         Assert.assertEquals(TestDataHelper.getSampleAI().getName(), bot.getName());
         Assert.assertEquals(TestDataHelper.getSampleAI().getDescription(), bot.getDescription());
         Assert.assertEquals(intent.getIntentName(), bot.getIntents().get(0).getIntentName());
         Assert.assertEquals(intent.getWebHook(), bot.getIntents().get(0).getWebHook());
+    }
+
+    @Test
+    public void testExportBot_noWebhookIfNotPresent() throws DatabaseException {
+        ApiIntent intent = new ApiIntent("intent_name", "topic_in", "topic_out");
+        intent.setUserSays(Collections.singletonList("test"));
+        intent.setResponses(Collections.singletonList("ok"));
+
+        ApiBotStructure result = setupBotExport(intent);
+        BotStructure bot = result.getBotStructure();
+
+        Assert.assertEquals(TestDataHelper.getSampleAI().getName(), bot.getName());
+        Assert.assertEquals(TestDataHelper.getSampleAI().getDescription(), bot.getDescription());
+        Assert.assertEquals(intent.getIntentName(), bot.getIntents().get(0).getIntentName());
+        Assert.assertNull(bot.getIntents().get(0).getWebHook());
     }
 
     @Test
@@ -1316,6 +1325,17 @@ public class TestAILogic {
         when(this.fakeConfig.getMaxLinkedBotsPerAi()).thenReturn(maxLinkedBots);
         ApiResult result = this.aiLogic.linkBotToAI(DEVID_UUID, AIID, botToLink.getBotId());
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
+    }
+
+    private ApiBotStructure setupBotExport(final ApiIntent intent) throws DatabaseException {
+        ApiEntity intentEntity = new ApiEntity("entity", VALIDDEVID);
+        when(this.fakeDatabaseEntitiesIntents.getIntents(any(), any())).thenReturn(Collections.singletonList("intent_name"));
+        when(this.fakeDatabaseEntitiesIntents.getIntent(any(), any())).thenReturn(intent);
+        when(this.fakeDatabaseEntitiesIntents.getEntity(any(), any())).thenReturn(intentEntity);
+        when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
+        when(this.fakeDatabaseAi.getAiTrainingFile(any())).thenReturn("hello\nhi");
+
+        return (ApiBotStructure) this.aiLogic.exportBotData(VALIDDEVID, AIID);
     }
 }
 
