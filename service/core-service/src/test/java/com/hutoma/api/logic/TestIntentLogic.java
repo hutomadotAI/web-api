@@ -22,6 +22,7 @@ import org.junit.Test;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import javax.inject.Provider;
@@ -74,7 +75,7 @@ public class TestIntentLogic {
     @Test
     public void testGetIntents_Success() throws DatabaseException {
         when(this.fakeDatabase.checkAIBelongsToDevId(any(), any())).thenReturn(true);
-        when(this.fakeDatabaseEntitiesIntents.getIntents(any(), any())).thenReturn(getIntentsList());
+        when(this.fakeDatabaseEntitiesIntents.getIntentsDetails(any(), any())).thenReturn(getIntentsDetailsList());
         final ApiResult result = this.intentLogic.getIntents(DEVID_UUID, AIID);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
     }
@@ -82,10 +83,11 @@ public class TestIntentLogic {
     @Test
     public void testGetIntents_Success_Return() throws DatabaseException {
         when(this.fakeDatabase.checkAIBelongsToDevId(any(), any())).thenReturn(true);
-        when(this.fakeDatabaseEntitiesIntents.getIntents(any(), any())).thenReturn(getIntentsList());
+        when(this.fakeDatabaseEntitiesIntents.getIntentsDetails(any(), any())).thenReturn(getIntentsDetailsList());
         final ApiResult result = this.intentLogic.getIntents(DEVID_UUID, AIID);
         Assert.assertEquals(2, ((ApiIntentList) result).getIntentNames().size());
         Assert.assertEquals(INTENTNAME, ((ApiIntentList) result).getIntentNames().get(0));
+        Assert.assertEquals(INTENTNAME, ((ApiIntentList) result).getIntents().get(0).getIntentName());
     }
 
     @Test
@@ -258,5 +260,11 @@ public class TestIntentLogic {
 
     private List<String> getIntentsList() {
         return Arrays.asList(INTENTNAME, "intent2");
+    }
+
+    private ApiIntentList getIntentsDetailsList() {
+        ApiIntent intent = new ApiIntent(INTENTNAME, "topicIn", "topicOut");
+        ApiIntentList intentList = new ApiIntentList(AIID, getIntentsList(), Collections.singletonList(intent));
+        return intentList;
     }
 }

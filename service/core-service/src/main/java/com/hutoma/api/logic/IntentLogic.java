@@ -63,10 +63,10 @@ public class IntentLogic {
                         logMap);
                 return ApiError.getNotFound("AI not found for this Dev ID");
             }
-            final List<String> intentList = this.databaseEntitiesIntents.getIntents(devid, aiid);
+            final ApiIntentList intentDetailsList = this.databaseEntitiesIntents.getIntentsDetails(devid, aiid);
             this.logger.logUserTraceEvent(LOGFROM, "GetIntents", devidString,
-                    logMap.put("Num Intents", intentList.size()));
-            return new ApiIntentList(aiid, intentList).setSuccessStatus();
+                    logMap.put("Num Intents", intentDetailsList.getIntentNames().size()));
+            return intentDetailsList.setSuccessStatus();
         } catch (final Exception e) {
             this.logger.logUserExceptionEvent(LOGFROM, "GetIntents", devidString, e);
             return ApiError.getInternalServerError();

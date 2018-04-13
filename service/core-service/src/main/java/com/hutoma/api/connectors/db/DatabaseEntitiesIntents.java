@@ -4,6 +4,7 @@ import com.google.gson.internal.LinkedTreeMap;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.containers.ApiEntity;
 import com.hutoma.api.containers.ApiIntent;
+import com.hutoma.api.containers.ApiIntentList;
 import com.hutoma.api.containers.sub.Entity;
 import com.hutoma.api.containers.sub.IntentVariable;
 import com.hutoma.api.containers.sub.MemoryIntent;
@@ -107,6 +108,24 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
         }
     }
 
+    public ApiIntentList getIntentsDetails(final UUID devid, final UUID aiid) throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("getIntentsDetails", 2).add(devid).add(aiid);
+            ResultSet rs = call.executeQuery();
+            ArrayList<String> intentNames = new ArrayList<>();
+            ArrayList<ApiIntent> intents = new ArrayList<>();
+
+            while (rs.next()) {
+                String intentName = rs.getString("name");
+                intentNames.add(intentName);
+                intents.add(this.getIntent(aiid, intentName));
+            }
+            return new ApiIntentList(aiid, intentNames, intents);
+        } catch (final SQLException sqle) {
+            throw new DatabaseException(sqle);
+        }
+    }
+
     /***
      * Gets a fully populated intent object
      * including intent, usersays, variables and prompts
@@ -193,6 +212,7 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
             intent.setWebHook(this.getWebHook(aiid, intentName));
 
             return intent;
+
         } catch (SQLException sqle) {
             throw new DatabaseException(sqle);
         }
