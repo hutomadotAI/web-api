@@ -112,7 +112,7 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
 
     public ApiIntentList getIntentsDetails(final UUID devid, final UUID aiid) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("getIntentsDetails", 2).add(devid).add(aiid);
+            call.initialise("getIntents", 2).add(devid).add(aiid);
             ResultSet rs = call.executeQuery();
             ArrayList<String> intentNames = new ArrayList<>();
             ArrayList<ApiIntent> intents = new ArrayList<>();
