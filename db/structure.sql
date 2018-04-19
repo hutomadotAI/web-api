@@ -464,6 +464,7 @@ CREATE TABLE `intent` (
   `topic_in` varchar(250) DEFAULT NULL,
   `topic_out` varchar(250) DEFAULT NULL,
   `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `last_updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `aiid` (`aiid`,`name`),
   CONSTRAINT `intent_ibfk_1` FOREIGN KEY (`aiid`) REFERENCES `ai` (`aiid`) ON DELETE CASCADE
@@ -935,7 +936,8 @@ BEGIN
       SELECT `aiid`, `in_name`, `in_topic_in`, `in_topic_out`
       FROM ai
       WHERE `in_dev_id`=`dev_id` AND `in_aiid`=`aiid`
-    ON DUPLICATE KEY UPDATE `topic_in`=`in_topic_in`, `topic_out`=`in_topic_out`, `name`=`in_new_name`;
+    ON DUPLICATE KEY UPDATE `topic_in`=`in_topic_in`, `topic_out`=`in_topic_out`, `name`=`in_new_name`,
+      `last_updated` = CURRENT_TIMESTAMP;
   END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -2497,11 +2499,11 @@ CREATE DEFINER=`intentUser`@`127.0.0.1` PROCEDURE `getIntent`(
   IN in_aiid VARCHAR(50),
   IN in_name VARCHAR(250))
 BEGIN
-    SELECT `id`, `name`, `topic_in`, `topic_out`
+    SELECT `id`, `name`, `topic_in`, `topic_out`, `last_updated`
     FROM `intent`
     WHERE `intent`.`name`=`in_name`
-		AND `intent`.`aiid` = `in_aiid`;
-END ;;
+    AND `intent`.`aiid` = `in_aiid`;
+END;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;

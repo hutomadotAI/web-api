@@ -11,6 +11,8 @@ import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.containers.sub.MemoryVariable;
 import com.hutoma.api.logging.ILogger;
 
+import org.joda.time.DateTime;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -168,6 +170,7 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
 
             // build the intent
             ApiIntent intent = new ApiIntent(rs.getString("name"), rs.getString("topic_in"), rs.getString("topic_out"));
+            intent.setLastUpdated(new DateTime(rs.getTimestamp("last_updated")));
 
             // get the user triggers
             ResultSet saysRs = transaction.getDatabaseCall().initialise("getIntentUserSays", 2)
@@ -305,24 +308,6 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
         try (DatabaseCall call = this.callProvider.get()) {
             int rowCount = call.initialise("deleteEntity", 2).add(devid).add(entityId).executeUpdate();
             return rowCount > 0;
-        }
-    }
-
-    /***
-     * Add a new complete intent to the database,
-     * or update an intent previously called 'intentName' to the new intent.
-     * If intentName is different to the one specified in the intent then this will rename the intent.
-     * @param devid owner id
-     * @param aiid owner aiid
-     * @param intentName the old name if we are renaming the intent
-     * @param intent the new data
-     * @throws DatabaseException if something goes wrong
-     */
-    public void writeIntent(final UUID devid, final UUID aiid, final String intentName, final ApiIntent intent)
-            throws DatabaseException {
-        try (DatabaseTransaction transaction = this.transactionProvider.get()) {
-            this.writeIntent(devid, aiid, intentName, intent, transaction);
-            transaction.commit();
         }
     }
 

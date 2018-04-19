@@ -4,6 +4,8 @@ import com.google.gson.annotations.SerializedName;
 import com.hutoma.api.containers.sub.IntentVariable;
 import com.hutoma.api.containers.sub.WebHook;
 
+import org.joda.time.DateTime;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,6 +28,8 @@ public class ApiIntent extends ApiResult {
     private List<String> userSays = new ArrayList<>();
     @SerializedName("webhook")
     private WebHook webHook;
+    @SerializedName("last_updated")
+    private DateTime lastUpdated;
 
     public ApiIntent(String intentName, String topicIn, String topicOut) {
         this.intentName = intentName;
@@ -88,4 +92,7 @@ public class ApiIntent extends ApiResult {
         this.webHook = webHook;
     }
 
+    public void setLastUpdated(final DateTime lastUpdated) {
+        this.lastUpdated = lastUpdated;
+    }
 }
