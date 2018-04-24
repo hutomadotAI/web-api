@@ -337,7 +337,7 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
                     .add(intent.getTopicIn()).add(intent.getTopicOut())
                     .executeUpdate();
 
-            if (rowcount != 1) {
+            if (rowcount != 1 && rowcount != 2) { // insert=1, update=2
                 throw new DatabaseException("Failed to add/update intent");
             }
 
