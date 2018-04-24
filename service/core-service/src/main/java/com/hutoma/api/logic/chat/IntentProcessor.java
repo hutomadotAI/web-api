@@ -336,15 +336,19 @@ public class IntentProcessor {
     private void notifyIntentFulfilled(final ChatResult chatResult, final MemoryIntent memoryIntent, final UUID aiid,
                                        final LogMap telemetryMap) {
         memoryIntent.setIsFulfilled(true);
-        chatResult.setAnswer(getRandomIntentResponse(aiid, memoryIntent.getName()));
+        chatResult.setAnswer(getRandomIntentResponse(aiid, memoryIntent));
         telemetryMap.add("IntentFulfilled", memoryIntent.getName());
     }
 
-    private String getRandomIntentResponse(final UUID aiid, final String intentName) {
-        ApiIntent intent = this.intentHandler.getIntent(aiid, intentName);
+    private String getRandomIntentResponse(final UUID aiid, final MemoryIntent memoryIntent) {
+        ApiIntent intent = this.intentHandler.getIntent(aiid, memoryIntent.getName());
         if (intent != null) {
             List<String> responses = intent.getResponses();
-            return responses.get((int) (Math.random() * responses.size()));
+            String response = responses.get((int) (Math.random() * responses.size()));
+            for (MemoryVariable variable : memoryIntent.getVariables()) {
+                response = response.replace("$" + variable.getLabel(), variable.getCurrentValue());
+            }
+            return response;
         }
         return null;
     }
@@ -383,7 +387,7 @@ public class IntentProcessor {
                 }
             } catch (WebHooks.WebHookExternalException ex) {
                 // Set the default response
-                response = new WebHookResponse(getRandomIntentResponse(chatInfo.getAiid(), currentIntent.getName()));
+                response = new WebHookResponse(getRandomIntentResponse(chatInfo.getAiid(), currentIntent));
                 String webHookErrorString = ex.getMessage();
                 this.logger.logUserWarnEvent(LOGFROM,
                         "Call to WebHook failed for intent",
