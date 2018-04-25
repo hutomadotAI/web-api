@@ -21,15 +21,7 @@ import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.containers.sub.MemoryVariable;
 import com.hutoma.api.containers.sub.WebHook;
 import com.hutoma.api.logging.ILogger;
-import com.hutoma.api.logic.chat.ChatAimlHandler;
-import com.hutoma.api.logic.chat.ChatDefaultHandler;
-import com.hutoma.api.logic.chat.ChatIntentHandler;
-import com.hutoma.api.logic.chat.ChatPassthroughHandler;
-import com.hutoma.api.logic.chat.ChatRequestTrigger;
-import com.hutoma.api.logic.chat.ChatSvmHandler;
-import com.hutoma.api.logic.chat.ChatWnetHandler;
-import com.hutoma.api.logic.chat.ChatWorkflow;
-import com.hutoma.api.logic.chat.IntentProcessor;
+import com.hutoma.api.logic.chat.*;
 import com.hutoma.api.memory.ChatStateHandler;
 import com.hutoma.api.memory.IEntityRecognizer;
 import com.hutoma.api.memory.IMemoryIntentHandler;
@@ -49,6 +41,7 @@ import java.util.UUID;
 
 import static com.hutoma.api.common.TestDataHelper.AIID;
 import static com.hutoma.api.common.TestDataHelper.DEVID_UUID;
+import static com.hutoma.api.common.TestDataHelper.getSampleAI;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
@@ -57,8 +50,6 @@ public class TestChatBase {
 
     static final UUID CHATID = UUID.fromString("89da2d5f-3ce5-4749-adc3-1f2ff6073fea");
     static final String SEMANTICRESULT = "semanticresult";
-    static final String ASSISTANTRESULT = "Hello";
-    static final String NEURALRESULT = "neuralresult";
     static final String AIMLRESULT = "aimlresult";
     static final String MEMORY_VARIABLE_PROMPT = "prompt1";
     static final WebHook VALID_WEBHOOK = new WebHook(AIID, "intent", "endpoint", true);
@@ -75,6 +66,7 @@ public class TestChatBase {
     protected Config fakeConfig;
     private AiStrings fakeAiStrings;
     ChatWorkflow fakeChatWorkflow;
+    ChatHandoverHandler fakeHandoverHandler;
     ChatPassthroughHandler fakePassthroughHandler;
     ChatIntentHandler fakeChatIntenthHandler;
     ChatRequestTrigger fakeRequestBETrigger;
@@ -101,6 +93,7 @@ public class TestChatBase {
 
         this.fakePassthroughHandler = new ChatPassthroughHandler(this.fakeChatServices, this.fakeWebHooks, mock(Tools.class),
                 mock(ChatLogger.class), mock(ILogger.class));
+        this.fakeHandoverHandler = new ChatHandoverHandler(mock(Tools.class));
         this.fakeChatIntenthHandler = new ChatIntentHandler(this.fakeIntentHandler, this.intentProcessor);
         this.fakeRequestBETrigger = new ChatRequestTrigger(this.fakeChatServices);
         this.fakeWnetHandler = new ChatWnetHandler(this.fakeIntentHandler, this.intentProcessor, mock(ILogger.class));
@@ -111,15 +104,17 @@ public class TestChatBase {
         when(fakeConfig.getEncodingKey()).thenReturn(TestDataHelper.VALID_ENCODING_KEY);
 
         when(this.fakeChatWorkflow.getHandlers()).thenReturn(
-                Arrays.asList(this.fakePassthroughHandler, this.fakeChatIntenthHandler,
+                Arrays.asList(this.fakeHandoverHandler, this.fakePassthroughHandler, this.fakeChatIntenthHandler,
                         this.fakeRequestBETrigger, this.fakeSvmHandler, this.fakeWnetHandler,
                         this.fakeAimlHandler, this.fakeDefaultHandler));
 
         this.chatLogic = new ChatLogic(this.fakeChatServices, this.fakeChatStateHandler, mock(Tools.class),
                 mock(ILogger.class), mock(ChatLogger.class), this.fakeChatWorkflow);
 
+        ChatState emptyState = ChatState.getEmpty();
+        emptyState.setAi(getSampleAI());
         try {
-            when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(ChatState.getEmpty());
+            when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(emptyState);
             when(this.fakeAiStrings.getDefaultChatResponses(any(), any())).thenReturn(Collections.singletonList(TestDataHelper.DEFAULT_CHAT_RESPONSE));
             when(this.fakeAiStrings.getRandomDefaultChatResponse(any(), any())).thenReturn(TestDataHelper.DEFAULT_CHAT_RESPONSE);
         } catch (AiStrings.AiStringsException | ChatStateHandler.ChatStateException ex) {

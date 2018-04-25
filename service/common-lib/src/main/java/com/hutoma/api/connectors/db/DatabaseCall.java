@@ -12,6 +12,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.UUID;
 import javax.inject.Inject;
 
@@ -183,6 +184,16 @@ public class DatabaseCall implements AutoCloseable {
         checkPosition();
         try {
             this.statement.setInt(++this.paramSetIndex, param);
+        } catch (SQLException e) {
+            throw new DatabaseException(e);
+        }
+        return this;
+    }
+
+    public DatabaseCall add(final Timestamp param) throws DatabaseException {
+        checkPosition();
+        try {
+            this.statement.setTimestamp(++this.paramSetIndex, param);
         } catch (SQLException e) {
             throw new DatabaseException(e);
         }

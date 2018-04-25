@@ -39,4 +39,8 @@ abstract class ChatGenericBackend {
         chatResult.setQuery(question);
         return chatResult;
     }
+
+    static void markQuestionAnswered(final ChatState chatState) {
+        chatState.setBadAnswersCount(0);
+    }
 }

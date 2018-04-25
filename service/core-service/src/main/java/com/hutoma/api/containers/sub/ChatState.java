@@ -1,6 +1,7 @@
 package com.hutoma.api.containers.sub;
 
 import com.hutoma.api.connectors.chat.AIChatServices;
+import com.hutoma.api.containers.ApiAi;
 
 import org.joda.time.DateTime;
 
@@ -19,10 +20,14 @@ public class ChatState {
     private double confidenceThreshold;
     private ChatHandoverTarget chatTarget;
     private AIChatServices aiChatServices;
+    private DateTime resetHandoverTime;
+    private int badAnswersCount;
+
+    private transient ApiAi ai;
 
     public ChatState(final DateTime timestamp, final String topic, final String history, final UUID lockedAiid,
                      final HashMap<String, String> entityValues, final double confidenceThreshold,
-                     final ChatHandoverTarget chatTarget) {
+                     final ChatHandoverTarget chatTarget, final ApiAi ai) {
         this.timestamp = timestamp;
         this.topic = topic;
         this.history = history;
@@ -30,11 +35,13 @@ public class ChatState {
         this.entityValues = entityValues;
         this.confidenceThreshold = confidenceThreshold;
         this.chatTarget = chatTarget;
+        this.ai = ai;
     }
 
     public static ChatState getEmpty() {
         return new ChatState(
-                null, null, null, null, new HashMap<>(), 0.0d, ChatHandoverTarget.Ai
+                null, null, null, null, new HashMap<>(), 0.0d, ChatHandoverTarget.Ai,
+                null
         );
     }
 
@@ -104,5 +111,29 @@ public class ChatState {
 
     public AIChatServices getAiChatServices() {
         return this.aiChatServices;
+    }
+
+    public void setAi(final ApiAi ai) {
+        this.ai = ai;
+    }
+
+    public ApiAi getAi() {
+        return this.ai;
+    }
+
+    public void setHandoverResetTime(final DateTime resetHandoverTime) {
+        this.resetHandoverTime = resetHandoverTime;
+    }
+
+    public DateTime getResetHandoverTime() {
+        return this.resetHandoverTime;
+    }
+
+    public int getBadAnswersCount() {
+        return this.badAnswersCount;
+    }
+
+    public void setBadAnswersCount(final int badAnswersCount) {
+        this.badAnswersCount = badAnswersCount;
     }
 }

@@ -17,6 +17,7 @@ import java.util.UUID;
 
 import static com.hutoma.api.common.TestDataHelper.AIID;
 import static com.hutoma.api.common.TestDataHelper.DEVID_UUID;
+import static com.hutoma.api.common.TestDataHelper.getSampleAI;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
@@ -48,7 +49,8 @@ public class TestChatStateHandler {
     public void testChatStateHandler_getState() throws DatabaseException, ChatStateHandler.ChatStateException {
         final String topic = "theTopic";
         final DateTime timestamp = DateTime.now();
-        ChatState chatState = new ChatState(timestamp, topic, "theHistory", AIID, new HashMap<>(), 0.5d, ChatHandoverTarget.Ai);
+        ChatState chatState = new ChatState(timestamp, topic, "theHistory", AIID, new HashMap<>(), 0.5d,
+                ChatHandoverTarget.Ai, getSampleAI());
         when(this.fakeDatabaseAi.checkAIBelongsToDevId(any(), any())).thenReturn(true);
         when(this.fakeDatabaseAi.getChatState(any(), any(), any(), any())).thenReturn(chatState);
         ChatState result = this.chatStateHandler.getState(DEVID_UUID, AIID, UUID.randomUUID());
@@ -73,7 +75,8 @@ public class TestChatStateHandler {
     @Test
     public void testChatStateHandler_saveState() throws DatabaseException, ChatStateHandler.ChatStateException {
         final UUID chatId = UUID.randomUUID();
-        ChatState chatState = new ChatState(DateTime.now(), "theTopic", "theHistory", AIID, new HashMap<>(), 0.5d, ChatHandoverTarget.Ai);
+        ChatState chatState = new ChatState(DateTime.now(), "theTopic", "theHistory", AIID, new HashMap<>(), 0.5d,
+                ChatHandoverTarget.Ai, getSampleAI());
         when(this.fakeDatabaseAi.checkAIBelongsToDevId(any(), any())).thenReturn(true);
         this.chatStateHandler.saveState(DEVID_UUID, AIID, chatId, chatState);
         verify(this.fakeDatabaseAi).saveChatState(DEVID_UUID, chatId, chatState, fakeJsonSerializer);
@@ -82,7 +85,8 @@ public class TestChatStateHandler {
     @Test(expected = ChatStateHandler.ChatStateUserException.class)
     public void testChatStateHandler_saveState_aiidNotOwned() throws DatabaseException, ChatStateHandler.ChatStateException {
         final UUID chatId = UUID.randomUUID();
-        ChatState chatState = new ChatState(DateTime.now(), "theTopic", "theHistory", AIID, new HashMap<>(), 0.5d, ChatHandoverTarget.Ai);
+        ChatState chatState = new ChatState(DateTime.now(), "theTopic", "theHistory", AIID, new HashMap<>(), 0.5d,
+                ChatHandoverTarget.Ai, getSampleAI());
         when(this.fakeDatabaseAi.checkAIBelongsToDevId(any(), any())).thenReturn(false);
         this.chatStateHandler.saveState(DEVID_UUID, AIID, chatId, chatState);
     }
@@ -90,7 +94,8 @@ public class TestChatStateHandler {
     @Test(expected = ChatStateHandler.ChatStateException.class)
     public void testChatStateHandler_saveState_dbException() throws DatabaseException, ChatStateHandler.ChatStateException {
         final UUID chatId = UUID.randomUUID();
-        ChatState chatState = new ChatState(DateTime.now(), "theTopic", "theHistory", AIID, new HashMap<>(), 0.5d, ChatHandoverTarget.Ai);
+        ChatState chatState = new ChatState(DateTime.now(), "theTopic", "theHistory", AIID, new HashMap<>(), 0.5d,
+                ChatHandoverTarget.Ai, getSampleAI());
         when(this.fakeDatabaseAi.saveChatState(any(), any(), any(), any())).thenThrow(DatabaseException.class);
         this.chatStateHandler.saveState(DEVID_UUID, AIID, chatId, chatState);
         verify(this.fakeLogger).logUserExceptionEvent(anyString(), any(), anyString(), any());

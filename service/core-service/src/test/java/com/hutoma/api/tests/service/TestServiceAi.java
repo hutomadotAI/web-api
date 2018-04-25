@@ -14,7 +14,6 @@ import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.endpoints.AIEndpoint;
 import com.hutoma.api.logic.AIIntegrationLogic;
 import com.hutoma.api.logic.AILogic;
-import com.hutoma.api.logic.UILogic;
 
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.junit.Assert;
@@ -114,7 +113,7 @@ public class TestServiceAi extends ServiceTestBase {
     public void testUpdateAI() throws DatabaseException {
         when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(TestDataHelper.getAI());
         when(this.fakeDatabaseAi.updateAI(any(), any(), anyString(), anyBoolean(),
-                any(), anyString(), anyDouble(), anyInt(), anyInt(), any(), any())).thenReturn(true);
+                any(), anyString(), anyDouble(), anyInt(), anyInt(), any(), anyInt(), anyInt(), anyString(), any())).thenReturn(true);
         final Response response = target(AI_PATH).request().headers(defaultHeaders).post(
                 Entity.form(getCreateAiRequestParams()));
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
@@ -280,7 +279,7 @@ public class TestServiceAi extends ServiceTestBase {
         when(this.fakeTools.createNewRandomUUID()).thenReturn(newAiid);
         when(this.fakeDatabaseAi.createAI(any(), anyString(), anyString(), any(), anyBoolean(),
                 anyString(), anyObject(), anyObject(), anyDouble(), anyInt(),
-                anyInt(), any())).thenReturn(newAiid);
+                anyInt(), anyInt(), anyInt(), any(), any())).thenReturn(newAiid);
         when(this.fakeDatabaseAi.getAI(any(), any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
         when(this.fakeDatabaseAi.updatePassthroughUrl(any(), any(), any(), any())).thenReturn(true);
         when(this.fakeDatabaseAi.updateDefaultChatResponses(any(), any(), any(), any(), any())).thenReturn(true);

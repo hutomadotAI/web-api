@@ -43,6 +43,9 @@ CREATE TABLE `ai` (
   `deleted` tinyint(1) DEFAULT '0',
   `passthrough_url` varchar(2048) DEFAULT NULL,
   `api_keys_desc` JSON DEFAULT NULL,
+  `handover_message` varchar(2048) DEFAULT NULL,
+  `handover_reset_timeout` int(11) NOT NULL DEFAULT -1,
+  `error_threshold_handover` int(11) NOT NULL DEFAULT -1;
   PRIMARY KEY (`id`),
   UNIQUE KEY `aiid_UNIQUE` (`aiid`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
@@ -297,6 +300,8 @@ CREATE TABLE `chatState` (
   `entity_values` text,
   `confidence_threshold` DOUBLE DEFAULT NULL,
   `chat_target` TINYINT(1) DEFAULT 0,
+  `handover_reset` timestamp NULL DEFAULT NULL,
+  `bad_answers_count` int(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (`dev_id`,`chat_id`),
   UNIQUE KEY `chat_id_UNIQUE` (`chat_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -464,7 +469,7 @@ CREATE TABLE `intent` (
   `topic_in` varchar(250) DEFAULT NULL,
   `topic_out` varchar(250) DEFAULT NULL,
   `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `last_updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `last_updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `aiid` (`aiid`,`name`),
   CONSTRAINT `intent_ibfk_1` FOREIGN KEY (`aiid`) REFERENCES `ai` (`aiid`) ON DELETE CASCADE
@@ -730,7 +735,10 @@ CREATE DEFINER=`aiWriter`@`127.0.0.1` PROCEDURE `addAi`(
   IN `param_ui_ai_timezone` VARCHAR(50),
   IN `param_ui_ai_confidence` DOUBLE,
   IN `param_ui_ai_personality` BOOLEAN,
-  IN `param_ui_ai_voice` INT(11))
+  IN `param_ui_ai_voice` INT(11),
+  IN `param_error_threshold_handover` int(11),
+  IN `param_handover_reset_timeout` int(11),
+  IN `param_handover_message` varchar(2048))
     MODIFIES SQL DATA
 BEGIN
 
@@ -744,12 +752,12 @@ BEGIN
     INSERT INTO ai (aiid, ai_name, ai_description, dev_id, is_private,
                     client_token,
                     ui_ai_language, ui_ai_timezone, ui_ai_confidence, ui_ai_personality, ui_ai_voice,
-                    default_chat_responses)
+                    default_chat_responses, handover_message, handover_reset_timeout, error_threshold_handover)
     VALUES (param_aiid, param_ai_name, param_ai_description, param_dev_id, param_is_private,
                         param_client_token,
                         param_ui_ai_language,
                         param_ui_ai_timezone, param_ui_ai_confidence, param_ui_ai_personality, param_ui_ai_voice,
-            '["Erm...What?"]');
+            '["Erm...What?"]', param_handover_message, param_handover_reset_timeout, param_error_threshold_handover);
     SET var_named_aiid = `param_aiid`;
   END IF;
 
@@ -936,8 +944,7 @@ BEGIN
       SELECT `aiid`, `in_name`, `in_topic_in`, `in_topic_out`
       FROM ai
       WHERE `in_dev_id`=`dev_id` AND `in_aiid`=`aiid`
-    ON DUPLICATE KEY UPDATE `topic_in`=`in_topic_in`, `topic_out`=`in_topic_out`, `name`=`in_new_name`,
-      `last_updated` = CURRENT_TIMESTAMP;
+    ON DUPLICATE KEY UPDATE `topic_in`=`in_topic_in`, `topic_out`=`in_topic_out`, `name`=`in_new_name`;
   END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1564,6 +1571,9 @@ BEGIN
       `passthrough_url`,
       `default_chat_responses`,
       `api_keys_desc`,
+      `handover_reset_timeout`,
+      `handover_message`,
+      `error_threshold_handover`,
       `botStore`.`publishing_state` as `publishing_state`,
       (SELECT COUNT(`ai_training`.`aiid`)
        FROM `ai_training`
@@ -1708,6 +1718,9 @@ BEGIN
     `ai`.`passthrough_url`,
     `ai`.`default_chat_responses`,
     `ai`.`api_keys_desc`,
+    `ai`.`handover_reset_timeout`,
+    `ai`.`handover_message`,
+    `ai`.`error_threshold_handover`,
     (SELECT COUNT(`ai_training`.`aiid`)
      FROM `ai_training`
      WHERE `ai_training`.`aiid`=`ai`.`aiid`)
@@ -3535,18 +3548,22 @@ DELIMITER ;;
 CREATE DEFINER=`aiWriter`@`127.0.0.1` PROCEDURE `setChatState`(
   IN `param_devId` VARCHAR(50),
   IN `param_chatId` VARCHAR(50),
-  IN `param_timestamp` TIMESTAMP,
   IN `param_topic` VARCHAR(250),
   IN `param_history` VARCHAR(1024),
   IN `param_locked_aiid` VARCHAR(50),
   IN `param_entity_values` TEXT,
   IN `param_confidence_threshold` DOUBLE,
-  IN `param_chat_target` TINYINT(1))
+  IN `param_chat_target` TINYINT(1),
+  IN `param_handover_reset` TIMESTAMP,
+  IN `param_bad_answers_count` INT(11))
 BEGIN
-    INSERT INTO chatState (dev_id, chat_id, timestamp, topic, history, locked_aiid, entity_values, confidence_threshold, chat_target)
-    VALUES(param_devId, param_chatId, param_timestamp, param_topic, param_history, param_locked_aiid, param_entity_values, param_confidence_threshold, param_chat_target)
-    ON DUPLICATE KEY UPDATE timestamp = param_timestamp, topic = param_topic, history = param_history,
-      locked_aiid = param_locked_aiid, entity_values = param_entity_values, confidence_threshold = param_confidence_threshold, chat_target = param_chat_target;
+    INSERT INTO chatState (dev_id, chat_id, topic, history, locked_aiid, entity_values, confidence_threshold, chat_target, 
+      handover_reset, bad_answers_count)
+    VALUES(param_devId, param_chatId, param_topic, param_history, param_locked_aiid, param_entity_values, param_confidence_threshold, 
+      param_chat_target, param_handover_reset, param_bad_answers_count)
+    ON DUPLICATE KEY UPDATE topic = param_topic, history = param_history,
+      locked_aiid = param_locked_aiid, entity_values = param_entity_values, confidence_threshold = param_confidence_threshold, 
+      chat_target = param_chat_target, handover_reset = param_handover_reset, bad_answers_count = param_bad_answers_count;
   END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -3624,7 +3641,10 @@ CREATE DEFINER=`aiWriter`@`127.0.0.1` PROCEDURE `updateAi`(
   IN `param_ui_ai_confidence` DOUBLE,
   IN `param_ui_ai_personality` TINYINT(4),
   IN `param_ui_ai_voice` VARCHAR(50),
-  IN `param_default_chat_responses` TEXT)
+  IN `param_default_chat_responses` TEXT,
+  IN `param_error_threshold_handover` int(11),
+  IN `param_handover_reset_timeout` int(11),
+  IN `param_handover_message` varchar(2048))
     MODIFIES SQL DATA
 BEGIN
 
@@ -3637,7 +3657,10 @@ BEGIN
       ui_ai_confidence = param_ui_ai_confidence,
       ui_ai_personality = param_ui_ai_personality,
       ui_ai_voice = param_ui_ai_voice,
-      default_chat_responses = param_default_chat_responses
+      default_chat_responses = param_default_chat_responses,
+      handover_message = param_handover_message,
+      handover_reset_timeout = param_handover_reset_timeout,
+      error_threshold_handover = param_error_threshold_handover
     where aiid = param_aiid AND dev_id = param_dev_id;
 
   END ;;

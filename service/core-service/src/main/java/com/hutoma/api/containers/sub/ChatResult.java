@@ -85,7 +85,7 @@ public class ChatResult {
         this.elapsedTime = elapsedTime;
         this.chatId = chatId;
         this.webHookResponse = webHookResponse;
-        this.chatState = ChatState.getEmpty();
+        this.chatState = null;
     }
 
     public String getAnswer() {

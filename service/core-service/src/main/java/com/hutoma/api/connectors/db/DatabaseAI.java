@@ -19,6 +19,7 @@ import org.joda.time.DateTime;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -55,13 +56,14 @@ public class DatabaseAI extends Database  {
      * @throws DatabaseException if something goes wrong
      */
     private UUID createAI(final UUID aiid, final String name, final String description, final UUID devid,
-                         final boolean isPrivate,
-                         final String clientToken,
-                         final Locale language, final String timezoneString,
-                         final double confidence, final int personality, final int voice,
-                         final DatabaseCall databaseCall) throws DatabaseException {
+                          final boolean isPrivate,
+                          final String clientToken,
+                          final Locale language, final String timezoneString,
+                          final double confidence, final int personality, final int voice,
+                          final int errorThresholdHandover, final int handoverResetTimeout,
+                          final String handoverMessage, final DatabaseCall databaseCall) throws DatabaseException {
         try {
-            databaseCall.initialise("addAi", 11)
+            databaseCall.initialise("addAi", 14)
                     .add(aiid)
                     .add(name)
                     .add(description)
@@ -72,7 +74,10 @@ public class DatabaseAI extends Database  {
                     .add(timezoneString)
                     .add(confidence)
                     .add(personality)
-                    .add(voice);
+                    .add(voice)
+                    .add(errorThresholdHandover)
+                    .add(handoverResetTimeout)
+                    .add(handoverMessage);
             ResultSet result = databaseCall.executeQuery();
             if (result.next()) {
                 String namedAiid = result.getString("aiid");
@@ -108,6 +113,8 @@ public class DatabaseAI extends Database  {
                          final String clientToken,
                          final Locale language, final String timezoneString,
                          final double confidence, final int personality, final int voice,
+                         final int errorThresholdHandover, final int handoverResetTimeout,
+                         final String handoverMessage,
                          final DatabaseTransaction transaction)
             throws DatabaseException {
 
@@ -116,7 +123,8 @@ public class DatabaseAI extends Database  {
         }
         try (DatabaseCall call = transaction.getDatabaseCall()) {
             return createAI(aiid, name, description, devid, isPrivate, clientToken, language,
-                    timezoneString, confidence, personality, voice, call);
+                    timezoneString, confidence, personality, voice, errorThresholdHandover,
+                    handoverResetTimeout, handoverMessage, call);
         }
     }
 
@@ -140,22 +148,28 @@ public class DatabaseAI extends Database  {
                          final boolean isPrivate,
                          final String clientToken,
                          final Locale language, final String timezoneString,
-                         final double confidence, final int personality, final int voice)
+                         final double confidence, final int personality, final int voice,
+                         final int errorThresholdHandover, final int handoverResetTimeout,
+                         final String handoverMessage)
             throws DatabaseException {
 
         try (DatabaseCall call = this.callProvider.get()) {
             return createAI(aiid, name, description, devid, isPrivate, clientToken, language,
-                    timezoneString, confidence, personality, voice, call);
+                    timezoneString, confidence, personality, voice, errorThresholdHandover, handoverResetTimeout,
+                    handoverMessage, call);
         }
     }
 
     public boolean updateAI(final UUID devId, final UUID aiid, final String description, final boolean isPrivate,
                             final Locale language, final String timezoneString, final double confidence,
                             final int personality, final int voice, final List<String> defaultChatResponses,
+                            final int errorThresholdHandover,
+                            final int handoverResetTimeout,
+                            final String handoverMessage,
                             final JsonSerializer serializer)
             throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("updateAi", 10)
+            call.initialise("updateAi", 13)
                     .add(aiid)
                     .add(description)
                     .add(devId)
@@ -165,7 +179,10 @@ public class DatabaseAI extends Database  {
                     .add(confidence)
                     .add(personality)
                     .add(voice)
-                    .add(serializer.serialize(defaultChatResponses));
+                    .add(serializer.serialize(defaultChatResponses))
+                    .add(errorThresholdHandover)
+                    .add(handoverResetTimeout)
+                    .add(handoverMessage);
             return call.executeUpdate() > 0;
         }
     }
@@ -629,34 +646,36 @@ public class DatabaseAI extends Database  {
                 call.initialise("getChatState", 2).add(devId).add(chatId);
                 ResultSet rs = call.executeQuery();
                 if (rs.next()) {
-                    String entitiesJson = rs.getString("entity_values");
-                    HashMap<String, String> entities;
-                    if (entitiesJson == null) {
-                        entities = new HashMap<>();
-                    } else {
-                        entities = (HashMap<String, String>) jsonSerializer.deserialize(entitiesJson, HashMap.class);
-                    }
-
                     String lockedAiid = rs.getString("locked_aiid");
+                    String entitiesJson = rs.getString("entity_values");
+                    HashMap<String, String> entities = (entitiesJson == null)
+                            ? new HashMap<>()
+                            : (HashMap<String, String>) jsonSerializer.deserialize(entitiesJson, HashMap.class);
                     double confidenceThreshold = rs.getDouble("confidence_threshold");
                     if (rs.wasNull()) {
                         confidenceThreshold = ai.getConfidence();
                     }
-                    return new ChatState(
+                    ChatState chatState = new ChatState(
                             new DateTime(rs.getTimestamp("timestamp")),
                             rs.getString("topic"),
                             rs.getString("history"),
                             lockedAiid != null ? UUID.fromString(lockedAiid) : null,
                             entities,
                             confidenceThreshold,
-                            ChatHandoverTarget.fromInt(rs.getInt("chat_target"))
+                            ChatHandoverTarget.fromInt(rs.getInt("chat_target")),
+                            ai
                     );
+                    chatState.setBadAnswersCount(rs.getInt("bad_answers_count"));
+                    Timestamp resetTimestamp = rs.getTimestamp("handover_reset");
+                    chatState.setHandoverResetTime(resetTimestamp == null ? null : new DateTime(resetTimestamp));
+                    return chatState;
                 }
                 ChatState chatState = ChatState.getEmpty();
+                chatState.setAi(ai);
                 chatState.setConfidenceThreshold(ai.getConfidence());
                 return chatState;
             }
-        } catch (Exception ex) {
+        } catch (Throwable ex) {
             throw new DatabaseException(ex);
         }
     }
@@ -666,24 +685,26 @@ public class DatabaseAI extends Database  {
             throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             String lockedAiid = (chatState.getLockedAiid() != null) ? chatState.getLockedAiid().toString() : null;
-            call.initialise("setChatState", 9)
+            call.initialise("setChatState", 10)
                     .add(devId)
                     .add(chatId)
-                    .add(chatState.getTimestamp())
                     .add(limitSize(chatState.getTopic(), 250))
                     .add(limitSize(chatState.getHistory(), 1024))
                     .add(lockedAiid)
                     .add(chatState.getEntityValues().isEmpty()
                             ? null : jsonSerializer.serialize(chatState.getEntityValues()))
                     .add(chatState.getConfidenceThreshold())
-                    .add(chatState.getChatTarget().getIntValue());
+                    .add(chatState.getChatTarget().getIntValue())
+                    .add(chatState.getResetHandoverTime() == null
+                            ? null : new Timestamp(chatState.getResetHandoverTime().getMillis()))
+                    .add(chatState.getBadAnswersCount());
             return call.executeUpdate() > 0;
         }
     }
 
     private static ApiAi getAiFromResultset(final ResultSet rs, final BackendStatus backendStatus,
                                      final JsonSerializer serializer)
-            throws SQLException, DatabaseException {
+            throws SQLException {
         String localeString = rs.getString("ui_ai_language");
         String timezoneString = rs.getString("ui_ai_timezone");
         List<String> defaultChatResponses = serializer.deserializeList(rs.getString("default_chat_responses"));
@@ -726,6 +747,9 @@ public class DatabaseAI extends Database  {
         ai.setReadOnly(publishingState == AiBot.PublishingState.SUBMITTED
                 || publishingState == AiBot.PublishingState.PUBLISHED
                 || publishingState == AiBot.PublishingState.REMOVED);
+        ai.setErrorThresholdHandover(rs.getInt("error_threshold_handover"));
+        ai.setHandoverResetTimeoutSeconds(rs.getInt("handover_reset_timeout"));
+        ai.setHandoverMessage(rs.getString("handover_message"));
         return ai;
     }
 }

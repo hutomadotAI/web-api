@@ -109,7 +109,7 @@ public class TestAILogic {
     public void testCreate_Valid() throws DatabaseException {
         when(this.fakeTools.createNewRandomUUID()).thenReturn(AIID);
         TestDataHelper.mockDatabaseCreateAI(this.fakeDatabaseAi, TestDataHelper.AIID);
-        ApiResult result = this.aiLogic.createAI(DEVID_UUID, "name", "description", true, 0, 0.0, 1, null, "");
+        ApiResult result = callDefaultCreateAI();
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
     }
 
@@ -117,7 +117,7 @@ public class TestAILogic {
     public void testCreate_Valid_Token() throws DatabaseException {
         TestDataHelper.mockDatabaseCreateAI(this.fakeDatabaseAi, AIID);
         when(this.fakeTools.createNewRandomUUID()).thenReturn(AIID);
-        ApiResult result = this.aiLogic.createAI(DEVID_UUID, "name", "description", true, 0, 0.0, 1, null, "");
+        ApiResult result = callDefaultCreateAI();
         Assert.assertTrue(result instanceof ApiAi);
         Assert.assertNotNull(((ApiAi) result).getClient_token());
         Assert.assertFalse(((ApiAi) result).getClient_token().isEmpty());
@@ -127,15 +127,15 @@ public class TestAILogic {
     public void testCreate_DBFail_Error() throws DatabaseException {
         when(this.fakeDatabaseAi.createAI(any(), anyString(), anyString(), any(), anyBoolean(),
                 anyString(), anyObject(), anyObject(), anyDouble(), anyInt(),
-                anyInt(), any())).thenThrow(DatabaseException.class);
-        ApiResult result = this.aiLogic.createAI(DEVID_UUID, "name", "description", true, 0, 0.0, 1, null, "");
+                anyInt(), anyInt(), anyInt(), anyString(), any())).thenThrow(DatabaseException.class);
+        ApiResult result = callDefaultCreateAI();
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
 
     @Test
     public void testCreate_DB_NameClash() throws DatabaseException {
         TestDataHelper.mockDatabaseCreateAI(this.fakeDatabaseAi, UUID.randomUUID());
-        ApiResult result = this.aiLogic.createAI(DEVID_UUID, "name", "description", true, 0, 0.0, 1, null, "");
+        ApiResult result = callDefaultCreateAI();
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
     }
 
@@ -338,9 +338,8 @@ public class TestAILogic {
     public void testUpdateAi() throws DatabaseException {
         when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(TestDataHelper.getAI());
         when(this.fakeDatabaseAi.updateAI(any(), any(), anyString(), anyBoolean(),
-                any(), anyString(), anyDouble(), anyInt(), anyInt(), any(), any())).thenReturn(true);
-        ApiResult result = this.aiLogic.updateAI(DEVID_UUID, AIID, "desc", true, 0, 0.0, 0,
-                Locale.getDefault(), TimeZone.getDefault().toString(), DEFAULT_CHAT_RESPONSES);
+                any(), anyString(), anyDouble(), anyInt(), anyInt(), any(), anyInt(), anyInt(), any(), any())).thenReturn(true);
+        ApiResult result = callDefaultUpdateAI();
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
     }
 
@@ -348,25 +347,22 @@ public class TestAILogic {
     public void testUpdateAi_dbFail() throws DatabaseException {
         when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(TestDataHelper.getAI());
         when(this.fakeDatabaseAi.updateAI(any(), any(), anyString(), anyBoolean(),
-                any(), anyString(), anyDouble(), anyInt(), anyInt(), any(), any())).thenReturn(false);
-        ApiResult result = this.aiLogic.updateAI(DEVID_UUID, AIID, "desc", true, 0, 0.0, 0,
-                Locale.getDefault(), TimeZone.getDefault().toString(), DEFAULT_CHAT_RESPONSES);
+                any(), anyString(), anyDouble(), anyInt(), anyInt(), any(), anyInt(), anyInt(), anyString(), any())).thenReturn(false);
+        ApiResult result = callDefaultUpdateAI();
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
 
     @Test
     public void testUpdateAi_AI_notFound() throws DatabaseException {
         when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(null);
-        ApiResult result = this.aiLogic.updateAI(DEVID_UUID, AIID, "desc", true, 0, 0.0, 0,
-                Locale.getDefault(), TimeZone.getDefault().toString(), DEFAULT_CHAT_RESPONSES);
+        ApiResult result = callDefaultUpdateAI();
         Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
     }
 
     @Test
     public void testUpdateAi_AI_readonly() throws DatabaseException {
         setupAiReadonlyMode(this.fakeDatabaseAi);
-        ApiResult result = this.aiLogic.updateAI(DEVID_UUID, AIID, "desc", true, 0, 0.0, 0,
-                Locale.getDefault(), TimeZone.getDefault().toString(), DEFAULT_CHAT_RESPONSES);
+        ApiResult result = callDefaultUpdateAI();
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
     }
 
@@ -374,9 +370,9 @@ public class TestAILogic {
     public void testUpdateAi_dbException() throws DatabaseException {
         when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(TestDataHelper.getAI());
         when(this.fakeDatabaseAi.updateAI(any(), any(), anyString(), anyBoolean(),
-                any(), anyString(), anyDouble(), anyInt(), anyInt(), any(), any())).thenThrow(DatabaseException.class);
-        ApiResult result = this.aiLogic.updateAI(DEVID_UUID, AIID, "desc", true, 0, 0.0, 0,
-                Locale.getDefault(), TimeZone.getDefault().toString(), DEFAULT_CHAT_RESPONSES);
+                any(), anyString(), anyDouble(), anyInt(), anyInt(), any(), anyInt(), anyInt(), anyString(), any()))
+                .thenThrow(DatabaseException.class);
+        ApiResult result = callDefaultUpdateAI();
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
 
@@ -1083,7 +1079,7 @@ public class TestAILogic {
         this.aiLogic.createImportedBot(VALIDDEVID, botStructure);
         ArgumentCaptor<Locale> localeArg = ArgumentCaptor.forClass(Locale.class);
         verify(this.fakeDatabaseAi).createAI(any(), anyString(), anyString(), any(), anyBoolean(), anyString(),
-                localeArg.capture(), anyString(), anyDouble(), anyInt(), anyInt(), any());
+                localeArg.capture(), anyString(), anyDouble(), anyInt(), anyInt(), anyInt(), anyInt(), any(), any());
         Assert.assertEquals(AILogic.DEFAULT_LOCALE, localeArg.getValue());
     }
 
@@ -1091,7 +1087,7 @@ public class TestAILogic {
     public void testCreateImportedBot_createAi_genericException() throws AILogic.BotImportException, DatabaseException {
         setupFakeImport();
         when(this.fakeDatabaseAi.createAI(any(), anyString(), anyString(), any(), anyBoolean(), anyString(),
-                any(), anyString(), anyDouble(), anyInt(), anyInt(), any())).thenThrow(Exception.class);
+                any(), anyString(), anyDouble(), anyInt(), anyInt(), anyInt(), anyInt(), any(), any())).thenThrow(Exception.class);
         BotStructure botStructure = getBotstructure();
         this.aiLogic.createImportedBot(VALIDDEVID, botStructure);
     }
@@ -1235,7 +1231,7 @@ public class TestAILogic {
         UUID newAiid = UUID.fromString(ai.getAiid());
         when(this.fakeTools.createNewRandomUUID()).thenReturn(newAiid);
         when(this.fakeDatabaseAi.createAI(any(), anyString(), anyString(), any(), anyBoolean(), anyString(),
-                any(), anyString(), anyDouble(), anyInt(), anyInt(), any()))
+                any(), anyString(), anyDouble(), anyInt(), anyInt(), anyInt(), anyInt(), any(), any()))
                 .thenReturn(UUID.fromString(ai.getAiid()));
         when(this.fakeDatabaseAi.getAI(any(), any(), any(), any())).thenReturn(ai);
         when(this.fakeDatabaseAi.updatePassthroughUrl(any(), any(), any(), any())).thenReturn(true);
@@ -1336,6 +1332,15 @@ public class TestAILogic {
         when(this.fakeDatabaseAi.getAiTrainingFile(any())).thenReturn("hello\nhi");
 
         return (ApiBotStructure) this.aiLogic.exportBotData(VALIDDEVID, AIID);
+    }
+
+    private ApiResult callDefaultUpdateAI() {
+        return this.aiLogic.updateAI(DEVID_UUID, AIID, "desc", true, 0, 0.0, 0,
+                Locale.getDefault(), TimeZone.getDefault().toString(), DEFAULT_CHAT_RESPONSES, -1, -1, null);
+    }
+
+    private ApiResult callDefaultCreateAI() {
+        return this.aiLogic.createAI(DEVID_UUID, "name", "description", true, 0, 0.0, 1, null, "", -1, -1, null);
     }
 }
 

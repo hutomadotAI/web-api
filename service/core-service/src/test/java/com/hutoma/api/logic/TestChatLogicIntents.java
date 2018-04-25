@@ -28,6 +28,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static com.hutoma.api.common.TestDataHelper.AIID;
+import static com.hutoma.api.common.TestDataHelper.getSampleAI;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
@@ -275,7 +276,8 @@ public class TestChatLogicIntents extends TestChatBase {
 
         HashMap<String, String> entityValues = new HashMap<>();
         entityValues.put("persistent_var", "persistentValue");
-        ChatState state = new ChatState(DateTime.now(), null, null, null, entityValues, 0.5d, ChatHandoverTarget.Ai);
+        ChatState state = new ChatState(DateTime.now(), null, null, null, entityValues, 0.5d,
+                ChatHandoverTarget.Ai, getSampleAI());
         when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(state);
 
         // First question, triggers the intent but without the right entity value

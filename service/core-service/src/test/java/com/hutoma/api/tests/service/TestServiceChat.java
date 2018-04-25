@@ -2,6 +2,7 @@ package com.hutoma.api.tests.service;
 
 import com.google.common.collect.ImmutableMap;
 import com.hutoma.api.common.ChatLogger;
+import com.hutoma.api.common.TestDataHelper;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.BackendServerType;
 import com.hutoma.api.connectors.WebHooks;
@@ -77,7 +78,9 @@ public class TestServiceChat extends ServiceTestBase {
     public void setup() throws ChatStateHandler.ChatStateException {
 
         when(this.fakeTools.createNewRandomUUID()).thenReturn(UUID.randomUUID());
-        when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(ChatState.getEmpty());
+        ChatState emptyState = ChatState.getEmpty();
+        emptyState.setAi(TestDataHelper.getSampleAI());
+        when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(emptyState);
 
         when(this.fakeChatWorkflow.getHandlers()).thenReturn(
                 Arrays.asList(this.fakePassthroughHandler, this.fakeChatIntenthHandler,

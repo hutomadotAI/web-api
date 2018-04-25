@@ -1,10 +1,16 @@
 package com.hutoma.api.logic.chat;
 
+import com.google.common.base.Strings;
 import com.hutoma.api.connectors.AiStrings;
+import com.hutoma.api.containers.sub.ChatHandoverTarget;
+import com.hutoma.api.containers.sub.ChatRequestInfo;
 import com.hutoma.api.containers.sub.ChatResult;
+import com.hutoma.api.containers.sub.ChatState;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
-import com.hutoma.api.containers.sub.ChatRequestInfo;
+
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 
 import javax.inject.Inject;
 
@@ -26,6 +32,39 @@ public class ChatDefaultHandler implements IChatHandler {
     public ChatResult doWork(final ChatRequestInfo requestInfo,
                              final ChatResult currentResult,
                              final LogMap telemetryMap) {
+
+        // Check if we're handing over the conversation based on number of low score responses
+        ChatState state = currentResult.getChatState();
+        if (state.getAi().getErrorThresholdHandover() > 0) {
+
+            if (state.getBadAnswersCount() >= state.getAi().getErrorThresholdHandover()) {
+                state.setChatTarget(ChatHandoverTarget.Other);
+                state.setBadAnswersCount(0);
+                if (!Strings.isNullOrEmpty(state.getAi().getHandoverMessage())) {
+                    currentResult.setAnswer(state.getAi().getHandoverMessage());
+                } else {
+                    currentResult.setAnswer(null);
+                }
+                if (state.getAi().getHandoverResetTimeoutSeconds() > 0) {
+                    // Set the reset timeout datetime
+                    state.setHandoverResetTime(DateTime.now(DateTimeZone.UTC)
+                            .plusSeconds(state.getAi().getHandoverResetTimeoutSeconds()));
+                }
+            } else {
+                // we're still within the threshold, just increment the counter
+                state.setBadAnswersCount(state.getBadAnswersCount() + 1);
+                return sendDefaultErrorMessage(requestInfo, telemetryMap);
+            }
+
+        } else {
+            return sendDefaultErrorMessage(requestInfo, telemetryMap);
+        }
+
+        return currentResult;
+    }
+
+    private ChatResult sendDefaultErrorMessage(final ChatRequestInfo requestInfo,
+                                         final LogMap telemetryMap) {
         // TODO we need to figure out something
         telemetryMap.add("AnsweredBy", "NONE");
         ChatResult result = new ChatResult(requestInfo.getQuestion());
@@ -42,7 +81,6 @@ public class ChatDefaultHandler implements IChatHandler {
         result.setContext("");
         result.setTopicOut("");
         return result;
-
     }
 
     @Override

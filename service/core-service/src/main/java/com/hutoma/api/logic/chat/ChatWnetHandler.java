@@ -83,17 +83,20 @@ public class ChatWnetHandler extends ChatGenericBackend implements IChatHandler 
 
                 if (this.intentLogic.processIntent(requestInfo, aiidFromResult, memoryIntent, result, telemetryMap)) {
                     telemetryMap.add("AnsweredBy", "WNET");
+                    markQuestionAnswered(state);
                 } else {
                     // if intents processing returns false then we need to ignore WNET
                     this.wnetConfident = false;
                 }
             } else {
                 telemetryMap.add("AnsweredBy", "WNET");
+                markQuestionAnswered(state);
             }
         }
 
         telemetryMap.add("AnsweredWithConfidence", wnetConfident);
         telemetryMap.add("WNETAnswered", true);
+
 
         return result;
     }

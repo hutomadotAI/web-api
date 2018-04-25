@@ -21,32 +21,28 @@ public class ApiAi extends ApiResult {
     private final String aiid;
     @SerializedName("client_token")
     private final String clientToken;
-
-    @SerializedName("hmac_secret")
-    private final String hmacSecret;
-
+    @SerializedName("name")
     private String name;
+    @SerializedName("description")
     private String description;
+    @SerializedName("passthroughUrl")
     private String passthroughUrl;
-
     @SerializedName("created_on")
     private DateTime createdOn;
-
     @SerializedName("is_private")
     private boolean isPrivate;
-
+    @SerializedName("personality")
     private int personality; // aka. Learn from users
+    @SerializedName("confidence")
     private double confidence; // aka Create new answers
+    @SerializedName("voice")
     private int voice;
+    @SerializedName("language")
     private Locale language;
+    @SerializedName("timezone")
     private String timezone;
-    // transient because this should never be serialized along with the ApiAi object
-    private transient BackendStatus backendStatus;
-    // a single real status that represents the ai state on multiple backend servers
-    private transient TrainingStatus summaryStatusReal;
-    // a public version of summaryStatus, with requeueing phases masked as "training"
-    @SerializedName("ai_status")
-    private TrainingStatus summaryStatusPublic;
+    @SerializedName("hmac_secret")
+    private final String hmacSecret;
     // value from 0.0 to 1.0 representing training progress on the WNET server
     @SerializedName("phase_1_progress")
     private double phase1Progress;
@@ -67,6 +63,25 @@ public class ApiAi extends ApiResult {
     private UITrainingState uiTrainingState;
     @SerializedName("can_chat")
     private boolean canChat;
+    // a public version of summaryStatus, with requeueing phases masked as "training"
+    @SerializedName("ai_status")
+    private TrainingStatus summaryStatusPublic;
+    // how many seconds does a handover to non-AI operator gets reset after
+    @SerializedName("handover_reset_timeout_seconds")
+    private int handoverResetTimeoutSeconds;
+    // how many consecutive times responses with low scores are allowed to be sent to the user
+    // before automatically handing over to a non-AI operator (<0 never hand over)
+    @SerializedName("error_threshold_handover")
+    private int errorThresholdHandover;
+    @SerializedName("handover_message")
+    private String handoverMessage;
+
+
+    // transient because this should never be serialized along with the ApiAi object
+    private transient BackendStatus backendStatus;
+    // a single real status that represents the ai state on multiple backend servers
+    private transient TrainingStatus summaryStatusReal;
+
 
     public ApiAi(final String aiid, final String clientToken) {
         this.aiid = aiid;
@@ -240,6 +255,30 @@ public class ApiAi extends ApiResult {
 
     public void setReadOnly(final boolean isReadOnly) {
         this.readonly = isReadOnly;
+    }
+
+    public int getHandoverResetTimeoutSeconds() {
+        return this.handoverResetTimeoutSeconds;
+    }
+
+    public int getErrorThresholdHandover() {
+        return this.errorThresholdHandover;
+    }
+
+    public String getHandoverMessage() {
+        return this.handoverMessage;
+    }
+
+    public void setHandoverResetTimeoutSeconds(final int handoverResetTimeoutSeconds) {
+        this.handoverResetTimeoutSeconds = handoverResetTimeoutSeconds;
+    }
+
+    public void setErrorThresholdHandover(final int errorThresholdHandover) {
+        this.errorThresholdHandover = errorThresholdHandover;
+    }
+
+    public void setHandoverMessage(final String handoverMessage) {
+        this.handoverMessage = handoverMessage;
     }
 
     private void populateExtendedStatus() {

@@ -103,9 +103,12 @@ public class AILogic {
             final double confidence,
             final int voice,
             final Locale language,
-            final String timezone) {
+            final String timezone,
+            final int errorThresholdHandover,
+            final int handoverResetTimeout,
+            final String handoverMessage) {
         return this.createAI(devId, name, description, isPrivate, personality, confidence,
-                voice, language, timezone, null);
+                voice, language, timezone, errorThresholdHandover, handoverResetTimeout, handoverMessage, null);
     }
 
     private ApiResult createAI(
@@ -118,6 +121,9 @@ public class AILogic {
             final int voice,
             final Locale language,
             final String timezone,
+            final int errorThresholdHandover,
+            final int handoverResetTimeout,
+            final String handoverMessage,
             final DatabaseTransaction transaction) {
         final String devIdString = devId.toString();
         try {
@@ -144,7 +150,10 @@ public class AILogic {
                     timezone,
                     confidence,
                     personality,
-                    voice)
+                    voice,
+                    errorThresholdHandover,
+                    handoverResetTimeout,
+                    handoverMessage)
                     : this.databaseAi.createAI(
                     aiUUID,
                     name,
@@ -157,6 +166,9 @@ public class AILogic {
                     confidence,
                     personality,
                     voice,
+                    errorThresholdHandover,
+                    handoverResetTimeout,
+                    handoverMessage,
                     transaction);
 
             // if the stored procedure returns a different aiid then it didn't
@@ -185,7 +197,10 @@ public class AILogic {
             final int voice,
             final Locale language,
             final String timezone,
-            final List<String> defaultChatResponses) {
+            final List<String> defaultChatResponses,
+            final int errorThresholdHandover,
+            final int handoverResetTimeout,
+            final String handoverMessage) {
         final String devIdString = devId.toString();
         try {
             LogMap logMap = LogMap.map("AIID", aiid);
@@ -210,6 +225,9 @@ public class AILogic {
                     personality,
                     voice,
                     defaultChatResponses,
+                    errorThresholdHandover,
+                    handoverResetTimeout,
+                    handoverMessage,
                     this.jsonSerializer)) {
                 this.logger.logUserErrorEvent(LOGFROM, "UpdateAI - db fail updating ai", devIdString, logMap);
                 return ApiError.getInternalServerError();
@@ -857,6 +875,11 @@ public class AILogic {
                     importedBot.getVoice(),
                     locale,
                     importedBot.getTimezone(),
+                    // TODO: not adding handover-related stuff from linked bots since this will soon be changed
+                    // so adding default configuration
+                    -1,
+                    -1,
+                    null,
                     transaction);
 
             if (result.getStatus().getCode() != HttpURLConnection.HTTP_OK) {

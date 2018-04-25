@@ -146,40 +146,37 @@ public class ChatLogic {
         this.telemetryMap.add("Q", question);
         this.telemetryMap.add("Chat target", this.chatState.getChatTarget().toString());
 
-        if (!isHandedOver(currentResult, question)) {
+        if (chatWorkflow.getHandlers().isEmpty()) {
+            this.logger.logError(LOGFROM, "No chat handlers defined");
+            throw new ChatFailedException(ApiError.getInternalServerError());
+        }
 
-            if (chatWorkflow.getHandlers().isEmpty()) {
-                this.logger.logError(LOGFROM, "No chat handlers defined");
-                throw new ChatFailedException(ApiError.getInternalServerError());
+        Map<IChatHandler, Long> processedHandlers = new LinkedHashMap<>();
+        for (IChatHandler handler : this.chatWorkflow.getHandlers()) {
+            final long startHandler = this.tools.getTimestamp();
+            currentResult = handler.doWork(requestInfo, currentResult, this.telemetryMap);
+            processedHandlers.put(handler, this.tools.getTimestamp() - startHandler);
+            if (handler.chatCompleted()) {
+                chatAnswered = true;
+                break;
             }
+        }
 
-            Map<IChatHandler, Long> processedHandlers = new LinkedHashMap<>();
-            for (IChatHandler handler : this.chatWorkflow.getHandlers()) {
-                final long startHandler = this.tools.getTimestamp();
-                currentResult = handler.doWork(requestInfo, currentResult, this.telemetryMap);
-                processedHandlers.put(handler, this.tools.getTimestamp() - startHandler);
-                if (handler.chatCompleted()) {
-                    chatAnswered = true;
-                    break;
-                }
-            }
+        // log which handlers run and their runtime
+        LogMap handlersMap = LogMap.map("AIID", aiid);
+        for (Map.Entry<IChatHandler, Long> entry: processedHandlers.entrySet()) {
+            handlersMap.add(String.format("Handler.%s.runtime", entry.getKey().getClass().getSimpleName()),
+                    entry.getValue());
+        }
+        handlersMap.add("Handler.order",
+                processedHandlers.keySet().stream()
+                        .map(k -> k.getClass().getSimpleName())
+                        .collect(Collectors.joining(", ")));
+        this.logger.logDebug(LOGFROM, "Processed chat handlers", handlersMap);
 
-            // log which handlers run and their runtime
-            LogMap handlersMap = LogMap.map("AIID", aiid);
-            for (Map.Entry<IChatHandler, Long> entry: processedHandlers.entrySet()) {
-                handlersMap.add(String.format("Handler.%s.runtime", entry.getKey().getClass().getSimpleName()),
-                        entry.getValue());
-            }
-            handlersMap.add("Handler.order",
-                    processedHandlers.keySet().stream()
-                            .map(k -> k.getClass().getSimpleName())
-                            .collect(Collectors.joining(", ")));
-            this.logger.logDebug(LOGFROM, "Processed chat handlers", handlersMap);
-
-            if (!chatAnswered) {
-                this.logger.logError(LOGFROM, "Default chat handler not configured");
-                throw new ChatFailedException(ApiError.getInternalServerError());
-            }
+        if (!chatAnswered) {
+            this.logger.logError(LOGFROM, "Default chat handler not configured");
+            throw new ChatFailedException(ApiError.getInternalServerError());
         }
 
         this.chatState.setTopic(currentResult.getTopicOut());
@@ -223,23 +220,6 @@ public class ChatLogic {
         } catch (ChatStateHandler.ChatStateException | ChatFailedException ex) {
             throw ex;
         }
-    }
-
-    private boolean isHandedOver(final ChatResult chatResult, final String question) {
-        if (this.chatState.getChatTarget() != ChatHandoverTarget.Ai) {
-            chatResult.setQuery(question);
-            chatResult.setScore(1.0);
-            chatResult.setChatTarget(this.chatState.getChatTarget().getStringValue());
-            chatResult.setAnswer(null);
-            chatResult.setHistory(null);
-            chatResult.setTopicOut(null);
-            chatResult.setContext(null);
-            chatResult.setTopicIn(null);
-            chatResult.setElapsedTime(this.tools.getTimestamp() - chatResult.getTimestamp());
-            this.telemetryMap.add("RequestDuration", chatResult.getElapsedTime());
-            return true;
-        }
-        return false;
     }
 
     public ApiResult handOver(final UUID aiid, final UUID devId, final String chatId, final ChatHandoverTarget target) {

@@ -60,6 +60,7 @@ public class ChatAimlHandler extends ChatGenericBackend implements IChatHandler 
         if (this.isAimlConfident) {
             telemetryMap.add("AnsweredBy", "AIML");
             telemetryMap.add("AnsweredWithConfidence", true);
+            markQuestionAnswered(state);
         }
         aimlResult.setChatState(state);
         telemetryMap.add("AIMLAnswered", true);

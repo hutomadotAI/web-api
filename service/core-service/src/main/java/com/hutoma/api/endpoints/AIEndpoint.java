@@ -71,7 +71,10 @@ public class AIEndpoint {
             @Context ContainerRequestContext requestContext,
             @DefaultValue("false") @FormParam("is_private") boolean isPrivate,
             @DefaultValue("0") @FormParam("personality") int personality,
-            @DefaultValue("0") @FormParam("voice") int voice) {
+            @DefaultValue("0") @FormParam("voice") int voice,
+            @DefaultValue("-1") @FormParam("error_threshold_handover") int errorThresholdHandover,
+            @DefaultValue("-1") @FormParam("handover_reset_timeout") int handoverResetTimeout,
+            @DefaultValue("") @FormParam("handover_message") String handoverMessage) {
         ApiResult result = this.aiLogic.createAI(
                 ParameterFilter.getDevid(requestContext),
                 ParameterFilter.getAiName(requestContext),
@@ -81,7 +84,10 @@ public class AIEndpoint {
                 ParameterFilter.getAiConfidence(requestContext),
                 voice,
                 ParameterFilter.getLocale(requestContext),
-                ParameterFilter.getTimezone(requestContext));
+                ParameterFilter.getTimezone(requestContext),
+                errorThresholdHandover,
+                handoverResetTimeout,
+                handoverMessage);
         return result.getResponse(this.serializer).build();
     }
 
@@ -104,7 +110,10 @@ public class AIEndpoint {
             @Context ContainerRequestContext requestContext,
             @DefaultValue("false") @FormParam("is_private") boolean isPrivate,
             @DefaultValue("0") @FormParam("personality") int personality,
-            @DefaultValue("0") @FormParam("voice") int voice) {
+            @DefaultValue("0") @FormParam("voice") int voice,
+            @DefaultValue("-1") @FormParam("error_threshold_handover") int errorThresholdHandover,
+            @DefaultValue("-1") @FormParam("handover_reset_timeout") int handoverResetTimeout,
+            @DefaultValue("") @FormParam("handover_message") String handoverMessage) {
         ApiResult result = this.aiLogic.updateAI(
                 ParameterFilter.getDevid(requestContext),
                 ParameterFilter.getAiid(requestContext),
@@ -115,7 +124,10 @@ public class AIEndpoint {
                 voice,
                 ParameterFilter.getLocale(requestContext),
                 ParameterFilter.getTimezone(requestContext),
-                ParameterFilter.getDefaultChatResponses(requestContext));
+                ParameterFilter.getDefaultChatResponses(requestContext),
+                errorThresholdHandover,
+                handoverResetTimeout,
+                handoverMessage);
         return result.getResponse(this.serializer).build();
     }
 

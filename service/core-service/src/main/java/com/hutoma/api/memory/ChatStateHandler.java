@@ -8,6 +8,7 @@ import com.hutoma.api.logging.LogMap;
 import com.hutoma.api.logic.chat.ChatBaseException;
 
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 
 import java.util.UUID;
 import javax.inject.Inject;
@@ -51,7 +52,7 @@ public class ChatStateHandler {
             if (!this.databaseAi.checkAIBelongsToDevId(devId, aiid)) {
                 throw new ChatStateUserException("Unknown AI.");
             }
-            chatState.setTimestamp(DateTime.now());
+            chatState.setTimestamp(new DateTime(DateTimeZone.UTC));
             if (!this.databaseAi.saveChatState(devId, chatId, chatState, jsonSerializer)) {
                 this.logger.logUserErrorEvent(LOGFROM, "Could not save state for chat " + chatId,
                         devId.toString(), LogMap.map("ChatId", chatId));
