@@ -1005,19 +1005,13 @@ DELIMITER ;
 /*!50003 SET sql_mode              = '' */ ;
 DELIMITER ;;
 CREATE DEFINER=`userTableWriter`@`127.0.0.1` PROCEDURE `addUser`(
-  IN `username` VARCHAR(50),
-  IN `email` TINYTEXT,
-  IN `password` VARCHAR(64),
-  IN `password_salt` VARCHAR(250),
-  IN `first_name` VARCHAR(30),
-  IN `last_name` VARCHAR(30),
-  IN `dev_token` VARCHAR(250),
-  IN `plan_id` INT,
-  IN `dev_id` VARCHAR(50))
+  IN `param_dev_token` VARCHAR(250),
+  IN `param_plan_id` INT,
+  IN `param_dev_id` VARCHAR(50))
     MODIFIES SQL DATA
 BEGIN
-    INSERT INTO `users`(`username`, `email`, `password`, `password_salt`, `first_name`, `last_name`, `dev_token`, `plan_id`, `dev_id`)
-    VALUES (username, email, password,password_salt, first_name,last_name, dev_token,plan_id, dev_id);
+    INSERT INTO `users`(`dev_token`, `plan_id`, `dev_id`)
+    VALUES (param_dev_token, param_plan_id, param_dev_id);
   END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;

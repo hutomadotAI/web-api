@@ -8,6 +8,15 @@ USE `hutoma`;
 
 ALTER TABLE `intent` ADD COLUMN `last_updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER `topic_out`;
 
+ALTER TABLE `users`
+  DROP COLUMN `username`,
+  DROP COLUMN `email`,
+  DROP COLUMN `password`,
+  DROP COLUMN `password_salt`,
+  DROP COLUMN `first_name`,
+  DROP COLUMN `attempt`,
+  DROP COLUMN `last_name`;
+
 
 DROP PROCEDURE `addUpdateIntent`;
 
@@ -43,4 +52,19 @@ BEGIN
     WHERE `intent`.`name`=`in_name`
 		AND `intent`.`aiid` = `in_aiid`;
 END;;
+DELIMITER ;
+
+
+DROP PROCEDURE `addUser`;
+
+DELIMITER ;;
+CREATE DEFINER=`userTableWriter`@`127.0.0.1` PROCEDURE `addUser`(
+  IN `param_dev_token` VARCHAR(250),
+  IN `param_plan_id` INT,
+  IN `param_dev_id` VARCHAR(50))
+    MODIFIES SQL DATA
+BEGIN
+    INSERT INTO `users`(`dev_token`, `plan_id`, `dev_id`)
+    VALUES (param_dev_token, param_plan_id, param_dev_id);
+  END ;;
 DELIMITER ;

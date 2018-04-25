@@ -90,28 +90,28 @@ public class TestAdminLogic {
     @Test
     public void testCreate_KeyNull() throws DatabaseException {
         when(this.fakeConfig.getEncodingKey()).thenReturn(null);
-        when(this.fakeDatabaseUser.createDev(any(), any(), any(), any(), any(), any(), any(), anyInt(), any())).thenReturn(true);
+        when(this.fakeDatabaseUser.createDev(any(), anyInt(), any())).thenReturn(true);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, createDev().getStatus().getCode());
     }
 
     @Test
     public void testCreate_InvalidKey() throws DatabaseException {
         when(this.fakeConfig.getEncodingKey()).thenReturn("[]");
-        when(this.fakeDatabaseUser.createDev(any(), any(), any(), any(), any(), any(), any(), anyInt(), any())).thenReturn(true);
+        when(this.fakeDatabaseUser.createDev(any(), anyInt(), any())).thenReturn(true);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, createDev().getStatus().getCode());
     }
 
     @Test
     public void testCreate_ValidKeyUpdateFail() throws DatabaseException {
         when(this.fakeConfig.getEncodingKey()).thenReturn(TestDataHelper.VALID_ENCODING_KEY);
-        when(this.fakeDatabaseUser.createDev(any(), any(), any(), any(), any(), any(), any(), anyInt(), any())).thenReturn(false);
+        when(this.fakeDatabaseUser.createDev(any(), anyInt(), any())).thenReturn(false);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, createDev().getStatus().getCode());
     }
 
     @Test
     public void testCreate_ValidKeyDBFail() throws DatabaseException {
         when(this.fakeConfig.getEncodingKey()).thenReturn(TestDataHelper.VALID_ENCODING_KEY);
-        when(this.fakeDatabaseUser.createDev(any(), any(), any(), any(), any(), any(), any(), anyInt(), any()))
+        when(this.fakeDatabaseUser.createDev(any(), anyInt(), any()))
                 .thenThrow(DatabaseException.class);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, createDev().getStatus().getCode());
     }
@@ -289,7 +289,7 @@ public class TestAdminLogic {
 
     private void validKeyDBSuccess() throws DatabaseException {
         when(this.fakeConfig.getEncodingKey()).thenReturn(TestDataHelper.VALID_ENCODING_KEY);
-        when(this.fakeDatabaseUser.createDev(any(), any(), any(), any(), any(), any(), any(), anyInt(), any())).thenReturn(true);
+        when(this.fakeDatabaseUser.createDev(any(), anyInt(), any())).thenReturn(true);
     }
 
     private ApiResult createDev() {
@@ -297,8 +297,7 @@ public class TestAdminLogic {
     }
 
     private ApiResult createDev(final Role role, final int planId) {
-        return this.adminLogic.createDev(role.name(), "username", "email", "password",
-                "passSalt", "first_name", "last_time", planId);
+        return this.adminLogic.createDev(role.name(), planId);
     }
 
     private ApiResult deleteDev(UUID devid) {
@@ -311,9 +310,7 @@ public class TestAdminLogic {
 
     private static UserInfo getUserInfo(final String devId, final Role role, final int planId, final String encodingKey) {
         String token = AuthHelper.generateDevToken(UUID.fromString(devId), role.name(), encodingKey);
-        return new UserInfo("test user", "testuser", "test@email.com", DateTime.now(),
-                true, false, "password", "salt",
-                devId, "0", 1, token, planId);
+        return new UserInfo(DateTime.now(), true, false, devId, 1, token, planId);
     }
 
     private static List<UserInfo> getTestUsers() {

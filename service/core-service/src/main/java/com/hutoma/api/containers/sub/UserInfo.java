@@ -8,26 +8,14 @@ import org.joda.time.DateTime;
  * User information.
  */
 public class UserInfo {
-    @SerializedName("name")
-    private String name;
-    @SerializedName("username")
-    private String username;
-    @SerializedName("email")
-    private String email;
     @SerializedName("created")
     private DateTime created;
     @SerializedName("valid")
     private boolean valid;
     @SerializedName("internal")
     private boolean internal;
-    @SerializedName("encrypted_password")
-    private final String password;
-    @SerializedName("password_salt")
-    private final String passwordSalt;
     @SerializedName("dev_id")
     private final String devId;
-    @SerializedName("attempts")
-    private final String attempts;
     @SerializedName("id")
     private final int id;
     @SerializedName("dev_token")
@@ -35,19 +23,12 @@ public class UserInfo {
     @SerializedName("plan_id")
     private final int planId;
 
-    public UserInfo(final String name, final String username, final String email, final DateTime created,
-                    final boolean valid, final boolean internal, final String password, final String passwordSalt,
-                    final String devId, final String attempts, final int id, final String devToken, final int planId) {
-        this.name = name;
-        this.username = username;
-        this.email = email;
+    public UserInfo(final DateTime created, final boolean valid, final boolean internal,
+                    final String devId, final int id, final String devToken, final int planId) {
         this.created = created;
         this.valid = valid;
         this.internal = internal;
-        this.password = password;
-        this.passwordSalt = passwordSalt;
         this.devId = devId;
-        this.attempts = attempts;
         this.id = id;
         this.devToken = devToken;
         this.planId = planId;
