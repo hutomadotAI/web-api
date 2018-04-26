@@ -14,7 +14,7 @@ ALTER TABLE `ai`
   ADD COLUMN `error_threshold_handover` int(11) NOT NULL DEFAULT -1 AFTER `handover_reset_timeout`;
   
 ALTER TABLE `chatState`
-  ADD COLUMN `handover_reset` timestamp NULL DEFAULT NULL `chat_target`,
+  ADD COLUMN `handover_reset` timestamp NULL DEFAULT NULL AFTER `chat_target`,
   ADD COLUMN `bad_answers_count` int(11) NOT NULL DEFAULT 0 AFTER `handover_reset`;
 
 
