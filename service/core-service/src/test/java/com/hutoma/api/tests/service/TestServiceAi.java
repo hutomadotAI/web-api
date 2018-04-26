@@ -279,7 +279,7 @@ public class TestServiceAi extends ServiceTestBase {
         when(this.fakeTools.createNewRandomUUID()).thenReturn(newAiid);
         when(this.fakeDatabaseAi.createAI(any(), anyString(), anyString(), any(), anyBoolean(),
                 anyString(), anyObject(), anyObject(), anyDouble(), anyInt(),
-                anyInt(), anyInt(), anyInt(), any(), any())).thenReturn(newAiid);
+                anyInt(), any(), anyInt(), anyInt(), any(), any(), any())).thenReturn(newAiid);
         when(this.fakeDatabaseAi.getAI(any(), any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
         when(this.fakeDatabaseAi.updatePassthroughUrl(any(), any(), any(), any())).thenReturn(true);
         when(this.fakeDatabaseAi.updateDefaultChatResponses(any(), any(), any(), any(), any())).thenReturn(true);

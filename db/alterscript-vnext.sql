@@ -275,3 +275,50 @@ BEGIN
     VALUES (param_dev_token, param_plan_id, param_dev_id);
   END ;;
 DELIMITER ;
+
+
+DROP PROCEDURE `addAi`;
+
+DELIMITER ;;
+CREATE DEFINER=`aiWriter`@`127.0.0.1` PROCEDURE `addAi`(
+  IN `param_aiid` VARCHAR(50),
+  IN `param_ai_name` VARCHAR(50),
+  IN `param_ai_description` VARCHAR(250),
+  IN `param_dev_id` VARCHAR(50),
+  IN `param_is_private` TINYINT(1),
+  IN `param_client_token` VARCHAR(250),
+  IN `param_ui_ai_language` VARCHAR(10),
+  IN `param_ui_ai_timezone` VARCHAR(50),
+  IN `param_ui_ai_confidence` DOUBLE,
+  IN `param_ui_ai_personality` BOOLEAN,
+  IN `param_ui_ai_voice` INT(11),
+  IN `param_default_chat_responses` TEXT,
+  IN `param_error_threshold_handover` int(11),
+  IN `param_handover_reset_timeout` int(11),
+  IN `param_handover_message` varchar(2048))
+    MODIFIES SQL DATA
+BEGIN
+
+  DECLARE var_exists_count INT;
+  DECLARE var_named_aiid VARCHAR(50);
+
+  SELECT count(aiid), min(aiid) INTO var_exists_count, var_named_aiid
+  FROM ai WHERE `param_dev_id`=`ai`.`dev_id` AND `param_ai_name`=`ai`.`ai_name` AND `ai`.`deleted` = 0;
+
+  IF var_exists_count=0 THEN
+    INSERT INTO ai (aiid, ai_name, ai_description, dev_id, is_private,
+                    client_token,
+                    ui_ai_language, ui_ai_timezone, ui_ai_confidence, ui_ai_personality, ui_ai_voice,
+                    default_chat_responses, handover_message, handover_reset_timeout, error_threshold_handover)
+    VALUES (param_aiid, param_ai_name, param_ai_description, param_dev_id, param_is_private,
+                        param_client_token,
+                        param_ui_ai_language,
+                        param_ui_ai_timezone, param_ui_ai_confidence, param_ui_ai_personality, param_ui_ai_voice,
+            param_default_chat_responses, param_handover_message, param_handover_reset_timeout, param_error_threshold_handover);
+    SET var_named_aiid = `param_aiid`;
+  END IF;
+
+  SELECT var_named_aiid AS aiid;
+
+  END ;;
+DELIMITER ;

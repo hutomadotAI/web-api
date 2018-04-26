@@ -64,7 +64,7 @@ public class AIEndpoint {
     @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
     @ValidateParameters({APIParameter.DevID})
     @ValidatePost({APIParameter.AIName, APIParameter.AIDescription, APIParameter.AiConfidence,
-            APIParameter.Timezone, APIParameter.Locale})
+            APIParameter.Timezone, APIParameter.Locale, APIParameter.DefaultChatResponses})
     @Produces(MediaType.APPLICATION_JSON)
     @TypeHint(ApiAi.class)
     public Response createAI(
@@ -83,6 +83,7 @@ public class AIEndpoint {
                 personality,
                 ParameterFilter.getAiConfidence(requestContext),
                 voice,
+                ParameterFilter.getDefaultChatResponses(requestContext),
                 ParameterFilter.getLocale(requestContext),
                 ParameterFilter.getTimezone(requestContext),
                 errorThresholdHandover,

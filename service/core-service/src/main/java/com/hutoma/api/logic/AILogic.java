@@ -102,13 +102,15 @@ public class AILogic {
             final int personality,
             final double confidence,
             final int voice,
+            final List<String> defaultChatResponses,
             final Locale language,
             final String timezone,
             final int errorThresholdHandover,
             final int handoverResetTimeout,
             final String handoverMessage) {
         return this.createAI(devId, name, description, isPrivate, personality, confidence,
-                voice, language, timezone, errorThresholdHandover, handoverResetTimeout, handoverMessage, null);
+                voice, language, timezone, defaultChatResponses, errorThresholdHandover,
+                handoverResetTimeout, handoverMessage, null);
     }
 
     private ApiResult createAI(
@@ -121,6 +123,7 @@ public class AILogic {
             final int voice,
             final Locale language,
             final String timezone,
+            final List<String> defaultChatResponses,
             final int errorThresholdHandover,
             final int handoverResetTimeout,
             final String handoverMessage,
@@ -151,9 +154,11 @@ public class AILogic {
                     confidence,
                     personality,
                     voice,
+                    defaultChatResponses,
                     errorThresholdHandover,
                     handoverResetTimeout,
-                    handoverMessage)
+                    handoverMessage,
+                    this.jsonSerializer)
                     : this.databaseAi.createAI(
                     aiUUID,
                     name,
@@ -166,9 +171,11 @@ public class AILogic {
                     confidence,
                     personality,
                     voice,
+                    defaultChatResponses,
                     errorThresholdHandover,
                     handoverResetTimeout,
                     handoverMessage,
+                    this.jsonSerializer,
                     transaction);
 
             // if the stored procedure returns a different aiid then it didn't
@@ -180,7 +187,7 @@ public class AILogic {
             }
 
             this.logger.logUserTraceEvent(LOGFROM, "CreateAI", devIdString, LogMap.map("New AIID", aiUUID));
-            return new ApiAi(aiUUID.toString(), token).setSuccessStatus("successfully created");
+            return this.databaseAi.getAI(devId, aiUUID, this.jsonSerializer).setSuccessStatus("successfully created");
         } catch (Exception e) {
             this.logger.logUserExceptionEvent(LOGFROM, devIdString, null, e);
             return ApiError.getInternalServerError();
@@ -875,6 +882,7 @@ public class AILogic {
                     importedBot.getVoice(),
                     locale,
                     importedBot.getTimezone(),
+                    importedBot.getDefaultResponses(),
                     // TODO: not adding handover-related stuff from linked bots since this will soon be changed
                     // so adding default configuration
                     -1,
@@ -996,7 +1004,7 @@ public class AILogic {
 
             // Link skills
             if (hasLinkedSkills) {
-                for (Integer linkedSkill: importedBot.getLinkedSkills()) {
+                for (Integer linkedSkill : importedBot.getLinkedSkills()) {
                     this.databaseAi.linkBotToAi(devId, aiid, linkedSkill, transaction);
                 }
             }

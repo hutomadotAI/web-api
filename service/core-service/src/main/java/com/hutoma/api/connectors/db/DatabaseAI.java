@@ -60,10 +60,12 @@ public class DatabaseAI extends Database  {
                           final String clientToken,
                           final Locale language, final String timezoneString,
                           final double confidence, final int personality, final int voice,
+                          final List<String> defaultChatResponses,
                           final int errorThresholdHandover, final int handoverResetTimeout,
-                          final String handoverMessage, final DatabaseCall databaseCall) throws DatabaseException {
+                          final String handoverMessage, final JsonSerializer serializer,
+                          final DatabaseCall databaseCall) throws DatabaseException {
         try {
-            databaseCall.initialise("addAi", 14)
+            databaseCall.initialise("addAi", 15)
                     .add(aiid)
                     .add(name)
                     .add(description)
@@ -75,6 +77,7 @@ public class DatabaseAI extends Database  {
                     .add(confidence)
                     .add(personality)
                     .add(voice)
+                    .add(serializer.serialize(defaultChatResponses))
                     .add(errorThresholdHandover)
                     .add(handoverResetTimeout)
                     .add(handoverMessage);
@@ -113,8 +116,11 @@ public class DatabaseAI extends Database  {
                          final String clientToken,
                          final Locale language, final String timezoneString,
                          final double confidence, final int personality, final int voice,
-                         final int errorThresholdHandover, final int handoverResetTimeout,
+                         final List<String> defaultChatResponses,
+                         final int errorThresholdHandover,
+                         final int handoverResetTimeout,
                          final String handoverMessage,
+                         final JsonSerializer serializer,
                          final DatabaseTransaction transaction)
             throws DatabaseException {
 
@@ -123,8 +129,8 @@ public class DatabaseAI extends Database  {
         }
         try (DatabaseCall call = transaction.getDatabaseCall()) {
             return createAI(aiid, name, description, devid, isPrivate, clientToken, language,
-                    timezoneString, confidence, personality, voice, errorThresholdHandover,
-                    handoverResetTimeout, handoverMessage, call);
+                    timezoneString, confidence, personality, voice, defaultChatResponses, errorThresholdHandover,
+                    handoverResetTimeout, handoverMessage, serializer, call);
         }
     }
 
@@ -149,14 +155,16 @@ public class DatabaseAI extends Database  {
                          final String clientToken,
                          final Locale language, final String timezoneString,
                          final double confidence, final int personality, final int voice,
+                         final List<String> defaultChatResponses,
                          final int errorThresholdHandover, final int handoverResetTimeout,
-                         final String handoverMessage)
+                         final String handoverMessage, final JsonSerializer serializer)
             throws DatabaseException {
 
         try (DatabaseCall call = this.callProvider.get()) {
             return createAI(aiid, name, description, devid, isPrivate, clientToken, language,
-                    timezoneString, confidence, personality, voice, errorThresholdHandover, handoverResetTimeout,
-                    handoverMessage, call);
+                    timezoneString, confidence, personality, voice, defaultChatResponses,
+                    errorThresholdHandover, handoverResetTimeout,
+                    handoverMessage, serializer, call);
         }
     }
 

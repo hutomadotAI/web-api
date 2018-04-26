@@ -127,7 +127,7 @@ public class TestAILogic {
     public void testCreate_DBFail_Error() throws DatabaseException {
         when(this.fakeDatabaseAi.createAI(any(), anyString(), anyString(), any(), anyBoolean(),
                 anyString(), anyObject(), anyObject(), anyDouble(), anyInt(),
-                anyInt(), anyInt(), anyInt(), anyString(), any())).thenThrow(DatabaseException.class);
+                anyInt(), any(), anyInt(), anyInt(), anyString(), any())).thenThrow(DatabaseException.class);
         ApiResult result = callDefaultCreateAI();
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
@@ -1079,7 +1079,7 @@ public class TestAILogic {
         this.aiLogic.createImportedBot(VALIDDEVID, botStructure);
         ArgumentCaptor<Locale> localeArg = ArgumentCaptor.forClass(Locale.class);
         verify(this.fakeDatabaseAi).createAI(any(), anyString(), anyString(), any(), anyBoolean(), anyString(),
-                localeArg.capture(), anyString(), anyDouble(), anyInt(), anyInt(), anyInt(), anyInt(), any(), any());
+                localeArg.capture(), anyString(), anyDouble(), anyInt(), anyInt(), any(), anyInt(), anyInt(), any(), any(), any());
         Assert.assertEquals(AILogic.DEFAULT_LOCALE, localeArg.getValue());
     }
 
@@ -1087,7 +1087,7 @@ public class TestAILogic {
     public void testCreateImportedBot_createAi_genericException() throws AILogic.BotImportException, DatabaseException {
         setupFakeImport();
         when(this.fakeDatabaseAi.createAI(any(), anyString(), anyString(), any(), anyBoolean(), anyString(),
-                any(), anyString(), anyDouble(), anyInt(), anyInt(), anyInt(), anyInt(), any(), any())).thenThrow(Exception.class);
+                any(), anyString(), anyDouble(), anyInt(), anyInt(), any(), anyInt(), anyInt(), any(), any(), any())).thenThrow(Exception.class);
         BotStructure botStructure = getBotstructure();
         this.aiLogic.createImportedBot(VALIDDEVID, botStructure);
     }
@@ -1231,9 +1231,10 @@ public class TestAILogic {
         UUID newAiid = UUID.fromString(ai.getAiid());
         when(this.fakeTools.createNewRandomUUID()).thenReturn(newAiid);
         when(this.fakeDatabaseAi.createAI(any(), anyString(), anyString(), any(), anyBoolean(), anyString(),
-                any(), anyString(), anyDouble(), anyInt(), anyInt(), anyInt(), anyInt(), any(), any()))
+                any(), anyString(), anyDouble(), anyInt(), anyInt(), any(), anyInt(), anyInt(), any(), any(), any()))
                 .thenReturn(UUID.fromString(ai.getAiid()));
         when(this.fakeDatabaseAi.getAI(any(), any(), any(), any())).thenReturn(ai);
+        when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(ai);
         when(this.fakeDatabaseAi.updatePassthroughUrl(any(), any(), any(), any())).thenReturn(true);
         when(this.fakeDatabaseAi.updateDefaultChatResponses(any(), any(), any(), any(), any())).thenReturn(true);
         when(this.fakeDatabaseEntitiesIntents.createWebHook(any(), anyString(), anyString(), anyBoolean(), any())).thenReturn(true);
@@ -1339,8 +1340,9 @@ public class TestAILogic {
                 Locale.getDefault(), TimeZone.getDefault().toString(), DEFAULT_CHAT_RESPONSES, -1, -1, null);
     }
 
-    private ApiResult callDefaultCreateAI() {
-        return this.aiLogic.createAI(DEVID_UUID, "name", "description", true, 0, 0.0, 1, null, "", -1, -1, null);
+    private ApiResult callDefaultCreateAI() throws DatabaseException {
+        when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(getSampleAI());
+        return this.aiLogic.createAI(DEVID_UUID, "name", "description", true, 0, 0.0, 1, DEFAULT_CHAT_RESPONSES, null, "", -1, -1, null);
     }
 }
 
