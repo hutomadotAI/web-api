@@ -73,7 +73,7 @@ public class AIEndpoint {
             @DefaultValue("0") @FormParam("personality") int personality,
             @DefaultValue("0") @FormParam("voice") int voice,
             @DefaultValue("-1") @FormParam("error_threshold_handover") int errorThresholdHandover,
-            @DefaultValue("-1") @FormParam("handover_reset_timeout") int handoverResetTimeout,
+            @DefaultValue("-1") @FormParam("handover_reset_timeout_seconds") int handoverResetTimeout,
             @DefaultValue("") @FormParam("handover_message") String handoverMessage) {
         ApiResult result = this.aiLogic.createAI(
                 ParameterFilter.getDevid(requestContext),
@@ -113,7 +113,7 @@ public class AIEndpoint {
             @DefaultValue("0") @FormParam("personality") int personality,
             @DefaultValue("0") @FormParam("voice") int voice,
             @DefaultValue("-1") @FormParam("error_threshold_handover") int errorThresholdHandover,
-            @DefaultValue("-1") @FormParam("handover_reset_timeout") int handoverResetTimeout,
+            @DefaultValue("-1") @FormParam("handover_reset_timeout_seconds") int handoverResetTimeout,
             @DefaultValue("") @FormParam("handover_message") String handoverMessage) {
         ApiResult result = this.aiLogic.updateAI(
                 ParameterFilter.getDevid(requestContext),
