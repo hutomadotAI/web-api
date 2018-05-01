@@ -27,7 +27,7 @@ UNLOCK TABLES;
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES ('bot-support@hutoma.com','bot-support@hutoma.com','6194f28feb9934d7496a6f522d108fdebbf6ac9161123ef71f6d75b61b8ef0c7','PAgskb3GGJ1bss2N0MiS','Hutoma','2017-01-31 18:15:14','0','eyJhbGciOiJIUzI1NiIsImNhbGciOiJERUYifQ.eNqqVgry93FVsgJT8W5Brq5KOkrFpUlAkRRDkyQTE8Mk3VSjRCNdkyTLNN2kVMskXRNjA0MzE_NUQyMzU6VaAAAAAP__.oeOfH1ninCYCkjVOPC5IF4eZPBNpZCuI3_hS5HWP9CA',1,'d14b441b-e2a2-4b9f-be9b-4301647e1265','',1,1,0);
+INSERT INTO `users` VALUES ('2017-01-31 18:15:14','eyJhbGciOiJIUzI1NiIsImNhbGciOiJERUYifQ.eNqqVgry93FVsgJT8W5Brq5KOkrFpUlAkRRDkyQTE8Mk3VSjRCNdkyTLNN2kVMskXRNjA0MzE_NUQyMzU6VaAAAAAP__.oeOfH1ninCYCkjVOPC5IF4eZPBNpZCuI3_hS5HWP9CA',1,'d14b441b-e2a2-4b9f-be9b-4301647e1265',1,1,0);
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -73,7 +73,7 @@ UNLOCK TABLES;
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `hutoma`.`users` (`username`, `email`, `password`, `password_salt`, `first_name`, `dev_token`, `dev_id`, `last_name`) VALUES ('system-user', '', 'none', 'none', 'system user', '', '192a1677-551f-46bb-9188-04ed8a658926', '');
+INSERT INTO `hutoma`.`users` (`dev_token`, `dev_id`) VALUES ('', '192a1677-551f-46bb-9188-04ed8a658926');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 

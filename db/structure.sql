@@ -45,7 +45,7 @@ CREATE TABLE `ai` (
   `api_keys_desc` JSON DEFAULT NULL,
   `handover_message` varchar(2048) DEFAULT NULL,
   `handover_reset_timeout` int(11) NOT NULL DEFAULT -1,
-  `error_threshold_handover` int(11) NOT NULL DEFAULT -1;
+  `error_threshold_handover` int(11) NOT NULL DEFAULT -1,
   PRIMARY KEY (`id`),
   UNIQUE KEY `aiid_UNIQUE` (`aiid`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
@@ -646,17 +646,10 @@ DROP TABLE IF EXISTS `users`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `users` (
-  `username` varchar(50) NOT NULL,
-  `email` varchar(100) NOT NULL,
-  `password` varchar(64) NOT NULL,
-  `password_salt` varchar(250) NOT NULL,
-  `first_name` varchar(30) NOT NULL,
   `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `attempt` varchar(15) NOT NULL DEFAULT '0',
   `dev_token` varchar(250) NOT NULL,
   `plan_id` int(11) NOT NULL DEFAULT '0',
   `dev_id` varchar(50) NOT NULL,
-  `last_name` varchar(30) NOT NULL,
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `valid` tinyint(1) NOT NULL DEFAULT '1',
   `internal` tinyint(1) NOT NULL DEFAULT '0',
@@ -736,6 +729,7 @@ CREATE DEFINER=`aiWriter`@`127.0.0.1` PROCEDURE `addAi`(
   IN `param_ui_ai_confidence` DOUBLE,
   IN `param_ui_ai_personality` BOOLEAN,
   IN `param_ui_ai_voice` INT(11),
+  IN `param_default_chat_responses` TEXT,
   IN `param_error_threshold_handover` int(11),
   IN `param_handover_reset_timeout` int(11),
   IN `param_handover_message` varchar(2048))
@@ -757,7 +751,7 @@ BEGIN
                         param_client_token,
                         param_ui_ai_language,
                         param_ui_ai_timezone, param_ui_ai_confidence, param_ui_ai_personality, param_ui_ai_voice,
-            '["Erm...What?"]', param_handover_message, param_handover_reset_timeout, param_error_threshold_handover);
+            param_default_chat_responses, param_handover_message, param_handover_reset_timeout, param_error_threshold_handover);
     SET var_named_aiid = `param_aiid`;
   END IF;
 
