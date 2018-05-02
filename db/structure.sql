@@ -504,7 +504,7 @@ DROP TABLE IF EXISTS `intent_user_says`;
 CREATE TABLE `intent_user_says` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `intent_id` int(11) NOT NULL,
-  `says` varchar(250) NOT NULL,
+  `says` varchar(250) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
   `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `intent_id` (`intent_id`,`says`),

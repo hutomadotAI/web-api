@@ -8,6 +8,8 @@ USE `hutoma`;
 
 ALTER TABLE `intent` ADD COLUMN `last_updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP AFTER `topic_out`;
 
+ALTER TABLE `intent_user_says` MODIFY says VARCHAR(250) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL;
+
 ALTER TABLE `ai`
   ADD COLUMN `handover_message` varchar(2048) DEFAULT NULL AFTER `api_keys_desc`,
   ADD COLUMN `handover_reset_timeout` int(11) NOT NULL DEFAULT -1 AFTER `handover_message`,
