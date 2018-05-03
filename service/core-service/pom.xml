@@ -71,7 +71,6 @@
                             <encoding>UTF-8</encoding>
                             <consoleOutput>true</consoleOutput>
                             <failsOnError>true</failsOnError>
-                            <linkXRef>false</linkXRef>
                             <includeTestResources>false</includeTestResources>
                             <logViolationsToConsole>true</logViolationsToConsole>
                             <violationSeverity>warning</violationSeverity>
@@ -295,8 +294,8 @@
 
         <dependency>
             <groupId>org.elasticsearch.client</groupId>
-            <artifactId>transport</artifactId>
-            <version>5.4.0</version>
+            <artifactId>elasticsearch-rest-high-level-client</artifactId>
+            <version>6.2.4</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/com.jayway.restassured/rest-assured -->

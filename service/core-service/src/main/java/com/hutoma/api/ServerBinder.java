@@ -142,7 +142,7 @@ public class ServerBinder extends AbstractBinder {
         bind(FacebookConnector.class).to(FacebookConnector.class);
         bind(FacebookMachineID.class).to(FacebookMachineID.class).in(Singleton.class);
         bind(FacebookChatHandler.class).to(FacebookChatHandler.class);
-        bind(AnalyticsESConnector.class).to(AnalyticsESConnector.class);
+        bind(AnalyticsESConnector.class).to(AnalyticsESConnector.class).in(Singleton.class);
 
         // backend facing related structures
         bind(AIServices.class).to(AIServices.class);

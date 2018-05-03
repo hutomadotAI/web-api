@@ -1,25 +1,12 @@
 package com.hutoma.api.connectors;
 
-import com.hutoma.api.common.Config;
-import com.hutoma.api.common.JsonSerializer;
-
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.mockito.Mockito.mock;
-
 public class TestAnalyticsESConnector {
-
-    private AnalyticsESConnector connector;
-
-    @Before
-    public void setup() {
-        this.connector = new AnalyticsESConnector(mock(Config.class), mock(JsonSerializer.class));
-    }
 
     @SuppressWarnings("unchecked")
     @Test
