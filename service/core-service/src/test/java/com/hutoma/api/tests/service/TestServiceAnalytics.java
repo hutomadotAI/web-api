@@ -11,6 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.net.HttpURLConnection;
+import java.util.Collections;
 import javax.ws.rs.core.Response;
 
 import static org.mockito.Mockito.mock;
@@ -31,7 +32,7 @@ public class TestServiceAnalytics extends ServiceTestBase {
     public void setup() {
         when(this.fakeConfig.getRateLimit_Analytics_BurstRequests()).thenReturn(1.0);
         when(this.fakeConfig.getRateLimit_Analytics_Frequency()).thenReturn(1.0);
-        when(this.fakeConfig.getElasticSearchAnalyticsUrl()).thenReturn("");
+        when(this.fakeConfig.getElasticSearchAnalyticsUrls()).thenReturn(Collections.singletonList(""));
     }
 
     @Test

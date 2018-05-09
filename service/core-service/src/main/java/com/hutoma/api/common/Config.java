@@ -243,8 +243,8 @@ public class Config extends CommonConfig implements ILoggerConfig, IThreadConfig
         return Integer.parseInt(getConfigFromProperties("logging_fluent_port", "24224"));
     }
 
-    public String getElasticSearchAnalyticsUrl() {
-        return getConfigFromProperties("analytics_es_url", "");
+    public List<String> getElasticSearchAnalyticsUrls() {
+        return getCSList("analytics_es_urls");
     }
 
     public String getEntityRecognizerUrl() {

@@ -37,6 +37,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -48,6 +49,7 @@ public class AnalyticsESConnector {
     private static final String RESULT_DATE_FIELD_NAME = "date";
     private static final String RESULT_COUNT_FIELD_NAME = "count";
     private static final int DEFAULT_PAGE_SIZE = 100;
+    private static final TimeValue DEFAULT_SCROLL_TIMEOUT = TimeValue.timeValueSeconds(30L);
     private static final String LOGFROM = "analyticsesconnector";
 
     private final Config config;
@@ -125,7 +127,7 @@ public class AnalyticsESConnector {
 
             SearchRequest searchRequest = new SearchRequest(CHATLOGS_INDEX);
             searchRequest.source(searchSourceBuilder);
-            searchRequest.scroll(TimeValue.timeValueMinutes(1L));
+            searchRequest.scroll(DEFAULT_SCROLL_TIMEOUT);
 
             List<Map<String, Object>> listMap = new ArrayList<>();
             RestHighLevelClient client = getESClient();
@@ -136,7 +138,7 @@ public class AnalyticsESConnector {
             boolean hasMoreResults = response.getHits().totalHits == DEFAULT_PAGE_SIZE;
             while (hasMoreResults) {
                 SearchScrollRequest scrollRequest = new SearchScrollRequest(scrollId);
-                scrollRequest.scroll(TimeValue.timeValueSeconds(30));
+                scrollRequest.scroll(DEFAULT_SCROLL_TIMEOUT);
                 SearchResponse searchScrollResponse = client.searchScroll(scrollRequest);
                 scrollId = searchScrollResponse.getScrollId();
                 getSessionsAggregationByDate(searchScrollResponse, listMap);
@@ -177,7 +179,7 @@ public class AnalyticsESConnector {
 
             SearchRequest searchRequest = new SearchRequest(CHATLOGS_INDEX);
             searchRequest.source(searchSourceBuilder);
-            searchRequest.scroll(TimeValue.timeValueMinutes(1L));
+            searchRequest.scroll(DEFAULT_SCROLL_TIMEOUT);
 
             List<Map<String, Object>> listMap = new ArrayList<>();
             RestHighLevelClient client = getESClient();
@@ -187,7 +189,7 @@ public class AnalyticsESConnector {
             boolean hasMoreResults = response.getHits().totalHits == DEFAULT_PAGE_SIZE;
             while (hasMoreResults) {
                 SearchScrollRequest scrollRequest = new SearchScrollRequest(scrollId);
-                scrollRequest.scroll(TimeValue.timeValueSeconds(30));
+                scrollRequest.scroll(DEFAULT_SCROLL_TIMEOUT);
                 SearchResponse searchScrollResponse = client.searchScroll(scrollRequest);
                 scrollId = searchScrollResponse.getScrollId();
                 getInteractionsAggregationByDate(searchScrollResponse, listMap);
@@ -240,16 +242,18 @@ public class AnalyticsESConnector {
 
     private RestHighLevelClient getESClient() throws UnknownHostException, MalformedURLException {
         if (this.restClient == null) {
-            URL url = new URL(this.config.getElasticSearchAnalyticsUrl());
-            String serverName = url.getHost();
-            int serverPort = url.getPort();
-            this.restClient = new RestHighLevelClient(
-                    RestClient.builder(
-                        new HttpHost(serverName, serverPort, "http")));
+            List<String> urls = this.config.getElasticSearchAnalyticsUrls();
+            HttpHost[] hosts = new HttpHost[urls.size()];
+            for (int i = 0; i < urls.size(); i++) {
+                URL url = new URL(urls.get(i));
+                hosts[i] = new HttpHost(url.getHost(), url.getPort(), "http");
+            }
+
+            this.restClient = new RestHighLevelClient(RestClient.builder(hosts));
             try {
                 if (!this.restClient.ping()) {
                     this.logger.logError(LOGFROM, "Could not ping ES server");
-                    throw new UnknownHostException(String.format("%s:%d", serverName, serverPort));
+                    throw new UnknownHostException(urls.stream().collect(Collectors.joining(", ")));
                 }
             } catch (IOException ex) {
                 this.logger.logException(LOGFROM, ex);
