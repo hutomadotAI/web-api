@@ -23,14 +23,10 @@ public class ChatConnectors {
     private Map<BackendServerType, ChatConnectorItem> connectorMap = new LinkedHashMap<>();
 
     @Inject
-    ChatConnectors(final ChatWnetConnector backendWnetConnector,
-                   final ChatAimlConnector backendAimlConnector,
-                   final ChatSvmConnector backendSvmConnector,
+    ChatConnectors(final ChatAimlConnector backendAimlConnector,
                    final ChatEmbConnector backendEmbConnector) {
-        connectorMap.put(BackendServerType.WNET, new ChatConnectorItem(backendWnetConnector, false));
         connectorMap.put(BackendServerType.AIML, new ChatConnectorItem(backendAimlConnector, false));
-        connectorMap.put(BackendServerType.SVM, new ChatConnectorItem(backendSvmConnector, true, 500));
-        connectorMap.put(BackendServerType.EMB, new ChatConnectorItem(backendEmbConnector, true, 500));
+        connectorMap.put(BackendServerType.EMB, new ChatConnectorItem(backendEmbConnector, false));
     }
 
     public Map<UUID, ChatResult> awaitBackend(final BackendServerType serverType, final int remainingTime,

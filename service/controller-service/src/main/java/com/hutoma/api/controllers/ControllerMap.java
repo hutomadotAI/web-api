@@ -13,13 +13,9 @@ public class ControllerMap {
     private final Map<BackendServerType, ControllerBase> controllerMap = new HashMap<>();
 
     @Inject
-    public ControllerMap(final ControllerWnet controllerWnet,
-                         final ControllerAiml controllerAiml,
-                         final ControllerSvm controllerSvm,
+    public ControllerMap(final ControllerAiml controllerAiml,
                          final ControllerEmb controllerEmb) {
         controllerMap.put(BackendServerType.AIML, controllerAiml);
-        controllerMap.put(BackendServerType.WNET, controllerWnet);
-        controllerMap.put(BackendServerType.SVM, controllerSvm);
         controllerMap.put(BackendServerType.EMB, controllerEmb);
     }
 
@@ -32,12 +28,8 @@ public class ControllerMap {
 
     public BackendServerType updateAffinity(final UUID sid, final List<UUID> aiList) {
         BackendServerType updated = null;
-        if (getControllerFor(BackendServerType.WNET).updateAffinity(sid, aiList)) {
-            updated = BackendServerType.WNET;
-        } else if (getControllerFor(BackendServerType.AIML).updateAffinity(sid, aiList)) {
+        if (getControllerFor(BackendServerType.AIML).updateAffinity(sid, aiList)) {
             updated = BackendServerType.AIML;
-        } else if (getControllerFor(BackendServerType.SVM).updateAffinity(sid, aiList)) {
-            updated = BackendServerType.SVM;
         } else if (getControllerFor(BackendServerType.EMB).updateAffinity(sid, aiList)) {
             updated = BackendServerType.EMB;
         }

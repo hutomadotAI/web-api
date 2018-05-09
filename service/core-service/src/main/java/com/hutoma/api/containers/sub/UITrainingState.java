@@ -40,11 +40,11 @@ public class UITrainingState {
 
     /***
      * Given the status of the servers, determine whether we can chat to this bot
-     * @param wnetTrainingStatus
+     * @param embTrainingStatus
      * @return
      */
-    public static boolean canChat(TrainingStatus wnetTrainingStatus) {
-        return wnetTrainingStatus == TrainingStatus.AI_TRAINING_COMPLETE;
+    public static boolean canChat(final TrainingStatus embTrainingStatus) {
+        return embTrainingStatus == TrainingStatus.AI_TRAINING_COMPLETE;
     }
 
     public Status getUiTrainingStatus() {

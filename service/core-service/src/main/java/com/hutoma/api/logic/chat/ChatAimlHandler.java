@@ -86,7 +86,7 @@ public class ChatAimlHandler extends ChatGenericBackend implements IChatHandler 
         UUID aiid = chatResult.getAiid();
         telemetryMap.add("ResponseFromAI", aiid == null ? "" : aiid.toString());
 
-        // always reset the conversation if we have gone with a non-wnet result
+        // always reset the conversation if we have gone with a non-emb result
         chatResult.setResetConversation(true);
 
         // remove trailing newline

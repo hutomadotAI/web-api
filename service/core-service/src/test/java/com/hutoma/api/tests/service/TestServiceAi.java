@@ -330,7 +330,7 @@ public class TestServiceAi extends ServiceTestBase {
     private ApiAi checkMaskedTrainingStatus(
             TrainingStatus trainingStatus, double trainingProgress) throws DatabaseException {
         BackendStatus status = new BackendStatus();
-        status.setEngineStatus(BackendServerType.WNET, new BackendEngineStatus(
+        status.setEngineStatus(BackendServerType.EMB, new BackendEngineStatus(
                 trainingStatus, 0.0, trainingProgress));
         when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(TestDataHelper.getAi(status));
         final Response response = target(AI_PATH).request().headers(defaultHeaders).get();

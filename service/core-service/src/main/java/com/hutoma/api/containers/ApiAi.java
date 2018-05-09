@@ -43,7 +43,7 @@ public class ApiAi extends ApiResult {
     private String timezone;
     @SerializedName("hmac_secret")
     private final String hmacSecret;
-    // value from 0.0 to 1.0 representing training progress on the WNET server
+    // value from 0.0 to 1.0 representing training progress on the EMB server
     @SerializedName("phase_1_progress")
     private double phase1Progress;
     // true if the user has already successfully uploaded a training file for this ai
@@ -138,11 +138,11 @@ public class ApiAi extends ApiResult {
 
     /***
      * Reports "summary status" for both back-end servers by taking the one that is furthest behind.
-     * @param wnetStatus
+     * @param embStatus
      * @return
      */
-    private static TrainingStatus getSummaryTrainingStatus(TrainingStatus wnetStatus) {
-        return wnetStatus;
+    private static TrainingStatus getSummaryTrainingStatus(final TrainingStatus embStatus) {
+        return embStatus;
     }
 
     public UITrainingState getUiTrainingState() {
@@ -290,15 +290,15 @@ public class ApiAi extends ApiResult {
             this.summaryStatusReal = TrainingStatus.AI_UNDEFINED;
             this.phase1Progress = 0.0d;
         } else {
-            BackendEngineStatus wnet = this.backendStatus.getEngineStatus(BackendServerType.WNET);
-            TrainingStatus wnetStatus = wnet.getTrainingStatus();
-            this.phase1Progress = clampProgress(wnetStatus, wnet.getTrainingProgress());
+            BackendEngineStatus emb = this.backendStatus.getEngineStatus(BackendServerType.EMB);
+            TrainingStatus embStatus = emb.getTrainingStatus();
+            this.phase1Progress = clampProgress(embStatus, emb.getTrainingProgress());
 
-            this.summaryStatusReal = getSummaryTrainingStatus(wnetStatus);
+            this.summaryStatusReal = getSummaryTrainingStatus(embStatus);
 
             // depending on which servers are in what state for the bot,
             // we can determine whether we can chat with it or not
-            this.canChat = UITrainingState.canChat(wnetStatus);
+            this.canChat = UITrainingState.canChat(embStatus);
         }
 
         this.summaryStatusPublic = this.summaryStatusReal;
@@ -312,7 +312,7 @@ public class ApiAi extends ApiResult {
         this.uiTrainingState = new UITrainingState(
                 // use the summary status to generate a uistatus
                 this.summaryStatusPublic,
-                // WNET accounts for the 100% of training time
+                // EMB accounts for the 100% of training time
                 this.phase1Progress,
                 // placeholder error until we can actually report the real training error
                 "an error has occurred");

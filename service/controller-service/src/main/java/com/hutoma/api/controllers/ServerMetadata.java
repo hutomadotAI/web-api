@@ -46,7 +46,7 @@ public class ServerMetadata {
      * Returns a descriptive string, unique to the endpoint
      * that persists across sessions
      * in the format servertype@endpoint
-     * e.g. wnet@http://ai-wnet:8080/ai
+     * e.g. wmb@http://ai-emb:8080/ai
      * @param sessionID
      * @return the endpoint string
      */

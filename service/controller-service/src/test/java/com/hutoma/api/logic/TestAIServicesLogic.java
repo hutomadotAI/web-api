@@ -13,8 +13,6 @@ import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.controllers.ControllerAiml;
 import com.hutoma.api.controllers.ControllerEmb;
 import com.hutoma.api.controllers.ControllerMap;
-import com.hutoma.api.controllers.ControllerSvm;
-import com.hutoma.api.controllers.ControllerWnet;
 import com.hutoma.api.logging.AiServiceStatusLogger;
 import com.hutoma.api.logging.ILogger;
 
@@ -34,13 +32,13 @@ import static org.mockito.Mockito.*;
 public class TestAIServicesLogic {
 
     private static final String ENDPOINTID = "fake";
-    private static final BackendServerType AI_ENGINE = BackendServerType.WNET;
+    private static final BackendServerType AI_ENGINE = BackendServerType.EMB;
     private static final java.lang.String ALT_ENDPOINTID = "wrong server";
     private JsonSerializer fakeSerializer;
     private DatabaseAiStatusUpdates fakeDatabase;
     private AiServiceStatusLogger fakeServicesStatusLogger;
     private ILogger fakeLogger;
-    private ControllerWnet fakeControllerWnet;
+    private ControllerEmb fakeControllerEmb;
 
     private AIServicesLogic aiServicesLogic;
     private BackendEngineStatus backendStatus;
@@ -52,16 +50,15 @@ public class TestAIServicesLogic {
         this.fakeDatabase = mock(DatabaseAiStatusUpdates.class);
         this.fakeServicesStatusLogger = mock(AiServiceStatusLogger.class);
         this.fakeLogger = mock(ILogger.class);
-        this.fakeControllerWnet = mock(ControllerWnet.class);
-        this.fakeControllerMap = new ControllerMap(this.fakeControllerWnet, mock(ControllerAiml.class),
-                mock(ControllerSvm.class), mock(ControllerEmb.class));
+        this.fakeControllerEmb = mock(ControllerEmb.class);
+        this.fakeControllerMap = new ControllerMap(mock(ControllerAiml.class), this.fakeControllerEmb);
 
         this.aiServicesLogic = new AIServicesLogic(this.fakeSerializer, this.fakeDatabase,
                 this.fakeServicesStatusLogger, this.fakeLogger, this.fakeControllerMap);
-        when(this.fakeControllerWnet.getSessionServerIdentifier(eq(TestDataHelper.SESSIONID))).thenReturn(ENDPOINTID);
-        when(this.fakeControllerWnet.isActiveSession(eq(TestDataHelper.SESSIONID))).thenReturn(true);
-        when(this.fakeControllerWnet.getSessionServerIdentifier(eq(TestDataHelper.ALT_SESSIONID))).thenReturn(ALT_ENDPOINTID);
-        when(this.fakeControllerWnet.isActiveSession(eq(TestDataHelper.ALT_SESSIONID))).thenReturn(true);
+        when(this.fakeControllerEmb.getSessionServerIdentifier(eq(TestDataHelper.SESSIONID))).thenReturn(ENDPOINTID);
+        when(this.fakeControllerEmb.isActiveSession(eq(TestDataHelper.SESSIONID))).thenReturn(true);
+        when(this.fakeControllerEmb.getSessionServerIdentifier(eq(TestDataHelper.ALT_SESSIONID))).thenReturn(ALT_ENDPOINTID);
+        when(this.fakeControllerEmb.isActiveSession(eq(TestDataHelper.ALT_SESSIONID))).thenReturn(true);
         this.backendStatus = new BackendEngineStatus(TestDataHelper.AIID,
                 TrainingStatus.AI_TRAINING, 0.0, 0.0,
                 QueueAction.NONE, ENDPOINTID, new DateTime(0));
@@ -116,13 +113,13 @@ public class TestAIServicesLogic {
     @Test
     public void testUpdateAiStatus_hashCode() throws DatabaseException {
         AiStatus status = new AiStatus(TestDataHelper.DEVID, TestDataHelper.AIID,
-                TrainingStatus.AI_READY_TO_TRAIN, BackendServerType.WNET,
+                TrainingStatus.AI_READY_TO_TRAIN, BackendServerType.EMB,
                 0.0, 0.0, "hash",
                 TestDataHelper.SESSIONID);
         when(this.fakeDatabase.updateAIStatus(anyObject())).thenReturn(true);
         ApiResult result = this.aiServicesLogic.updateAIStatus(status);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
-        verify(this.fakeControllerWnet, times(1)).setHashCodeFor(TestDataHelper.AIID, "hash");
+        verify(this.fakeControllerEmb, times(1)).setHashCodeFor(TestDataHelper.AIID, "hash");
     }
 
     @Test
@@ -137,7 +134,7 @@ public class TestAIServicesLogic {
     }
 
     @Test
-    public void testUpdateAiStatus_deletedbot() throws DatabaseException {
+    public void testUpdateAiStatus_deletedbot() {
         AiStatus status = new AiStatus(TestDataHelper.DEVID, TestDataHelper.AIID,
                 TrainingStatus.AI_TRAINING, AI_ENGINE,
                 0.0, 0.0, "hash",
@@ -171,7 +168,7 @@ public class TestAIServicesLogic {
     }
 
     @Test
-    public void testUpdateAiStatus_reject_wrongServer_ifTraining() throws DatabaseException {
+    public void testUpdateAiStatus_reject_wrongServer_ifTraining() {
         AiStatus status = new AiStatus(TestDataHelper.DEVID, TestDataHelper.AIID,
                 TrainingStatus.AI_UNDEFINED, AI_ENGINE,
                 0.0, 0.0, "hash",

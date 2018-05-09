@@ -13,8 +13,8 @@ import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.containers.sub.ChatState;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logic.chat.ChatDefaultHandler;
+import com.hutoma.api.logic.chat.ChatEmbHandler;
 import com.hutoma.api.logic.chat.ChatHandoverHandler;
-import com.hutoma.api.logic.chat.ChatWnetHandler;
 import com.hutoma.api.logic.chat.ChatWorkflow;
 import com.hutoma.api.memory.ChatStateHandler;
 
@@ -130,7 +130,7 @@ public class TestChatLogicHandover  extends TestChatBase {
         ChatDefaultHandler defaultHandler = new ChatDefaultHandler(aiStrings, mock(ILogger.class));
         ChatHandoverHandler handoverHandler = new ChatHandoverHandler(tools);
         ChatWorkflow chatWorkflow = mock(ChatWorkflow.class);
-        ChatWnetHandler backendHandler = mock(ChatWnetHandler.class);
+        ChatEmbHandler backendHandler = mock(ChatEmbHandler.class);
         try {
             when(this.fakeChatServices.awaitBackend(BackendServerType.SVM)).thenReturn(
                     new HashMap<UUID, ChatResult>() {{put(UUID.fromString(initialState.getAi().getAiid()), chatResult);}});

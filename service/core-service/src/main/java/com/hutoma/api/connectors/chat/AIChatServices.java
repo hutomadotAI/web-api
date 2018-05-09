@@ -119,30 +119,20 @@ public class AIChatServices extends ServerConnector {
         Set<BackendServerType> canChatWith = canChatWithAi(devId, aiid);
 
         // make copies of the AI lists
-        List<AiDevId> wnetAIs = new ArrayList<>(listAis);
+        List<AiDevId> embAIs = new ArrayList<>(listAis);
 
         // add the AI to the list if the server can chat
-        if (canChatWith.contains(BackendServerType.WNET)) {
-            wnetAIs.add(new AiDevId(devId, aiid));
+        if (canChatWith.contains(BackendServerType.EMB)) {
+            embAIs.add(new AiDevId(devId, aiid));
         }
 
         // If we're issuing a chat request but there are no AIs available to serve it, just fail
-        if (wnetAIs.isEmpty() && !usedAimlBot) {
+        if (embAIs.isEmpty() && !usedAimlBot) {
             throw new AiNotReadyToChat("No AIs ready to chat");
         }
 
-        if (!wnetAIs.isEmpty()) {
-            chatConnectors.issueChatRequests(BackendServerType.WNET, parameters, wnetAIs, chatState);
-        }
-
-        if (canChatWith.contains(BackendServerType.SVM)) {
-            // Should be able to chat with the same AIs that WNET
-            chatConnectors.issueChatRequests(BackendServerType.SVM, parameters, wnetAIs, chatState);
-        }
-
-        if (canChatWith.contains(BackendServerType.EMB)) {
-            // Should be able to chat with the same AIs that WNET
-            chatConnectors.issueChatRequests(BackendServerType.EMB, parameters, wnetAIs, chatState);
+        if (!embAIs.isEmpty()) {
+            chatConnectors.issueChatRequests(BackendServerType.EMB, parameters, embAIs, chatState);
         }
     }
 

@@ -155,14 +155,14 @@ public class TestAILogic {
 
     /**
      * Common setup code for UI-status tests
-     * @param wnet
+     * @param trainingStatus
      * @param hasLinked
      * @return
      * @throws DatabaseException
      */
 
-    public ApiAi getSingleUIFields(TrainingStatus wnet, boolean hasLinked) throws DatabaseException {
-        ApiAi ai = TestDataHelper.getAi(TestDataHelper.getBackendStatus(wnet));
+    public ApiAi getSingleUIFields(TrainingStatus trainingStatus, boolean hasLinked) throws DatabaseException {
+        ApiAi ai = TestDataHelper.getAi(TestDataHelper.getBackendStatus(trainingStatus));
         when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(ai);
         when(this.fakeDatabaseAi.getBotsLinkedToAi(any(), any(), any())).thenReturn(
                 hasLinked ? Collections.singletonList(TestDataHelper.getAiBot(1, "name"))
@@ -179,7 +179,7 @@ public class TestAILogic {
     }
 
     @Test
-    // wnet is complete so we can chat
+    // emb is complete so we can chat
     public void testGetSingle_UI_training() throws DatabaseException {
         ApiAi result = getSingleUIFields(TrainingStatus.AI_TRAINING_COMPLETE, false);
         Assert.assertEquals(UITrainingState.Status.completed, result.getUiTrainingState().getUiTrainingStatus());
@@ -195,7 +195,7 @@ public class TestAILogic {
     }
 
     @Test
-    // error in wnet training so we cant chat
+    // error in emb training so we cant chat
     public void testGetSingle_UI_errors() throws DatabaseException {
         ApiAi result = getSingleUIFields(TrainingStatus.AI_ERROR, false);
         Assert.assertEquals(UITrainingState.Status.error, result.getUiTrainingState().getUiTrainingStatus());

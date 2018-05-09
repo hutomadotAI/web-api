@@ -80,61 +80,61 @@ public class TestServiceAiServices extends ServiceTestBase {
 
     @Test
     public void testServerRegister() {
-        ServerRegistration wnet = new ServerRegistration(BackendServerType.WNET, "http://test:8000/server", 2, 2);
-        wnet.addAI(ServiceTestBase.AIID, TrainingStatus.AI_TRAINING_COMPLETE, "hash");
-        String json = this.serializeObject(wnet);
+        ServerRegistration emb = new ServerRegistration(BackendServerType.EMB, "http://test:8000/server", 2, 2);
+        emb.addAI(ServiceTestBase.AIID, TrainingStatus.AI_TRAINING_COMPLETE, "hash");
+        String json = this.serializeObject(emb);
         final Response response = sendRegistrationRequest(json);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
     }
 
     @Test
     public void testServerRegister_nullAIID() {
-        ServerRegistration wnet = new ServerRegistration(BackendServerType.WNET, "http://test:8000/server", 2, 2);
-        wnet.addAI(null, TrainingStatus.AI_TRAINING_COMPLETE, "hash");
-        String json = this.serializeObject(wnet);
+        ServerRegistration emb = new ServerRegistration(BackendServerType.EMB, "http://test:8000/server", 2, 2);
+        emb.addAI(null, TrainingStatus.AI_TRAINING_COMPLETE, "hash");
+        String json = this.serializeObject(emb);
         final Response response = sendRegistrationRequest(json);
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.getStatus());
     }
 
     @Test
     public void testServerRegister_badAIID() {
-        ServerRegistration wnet = new ServerRegistration(BackendServerType.WNET, "http://test:8000/server", 2, 2);
-        wnet.addAI(ServiceTestBase.AIID, TrainingStatus.AI_TRAINING_COMPLETE, "hash");
-        String json = this.serializeObject(wnet).replace(ServiceTestBase.AIID.toString(), "be108d4e-9aed-4876-bxdc1-cfbf9ba1146a");
+        ServerRegistration emb = new ServerRegistration(BackendServerType.EMB, "http://test:8000/server", 2, 2);
+        emb.addAI(ServiceTestBase.AIID, TrainingStatus.AI_TRAINING_COMPLETE, "hash");
+        String json = this.serializeObject(emb).replace(ServiceTestBase.AIID.toString(), "be108d4e-9aed-4876-bxdc1-cfbf9ba1146a");
         final Response response = sendRegistrationRequest(json);
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.getStatus());
     }
 
     @Test
     public void testServerRegister_nullStatus() {
-        ServerRegistration wnet = new ServerRegistration(BackendServerType.WNET, "http://test:8000/server", 2, 2);
-        wnet.addAI(ServiceTestBase.AIID, null, "hash");
-        String json = this.serializeObject(wnet);
+        ServerRegistration emb = new ServerRegistration(BackendServerType.EMB, "http://test:8000/server", 2, 2);
+        emb.addAI(ServiceTestBase.AIID, null, "hash");
+        String json = this.serializeObject(emb);
         final Response response = sendRegistrationRequest(json);
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.getStatus());
     }
 
     @Test
     public void testServerRegister_badStatus() {
-        ServerRegistration wnet = new ServerRegistration(BackendServerType.WNET, "http://test:8000/server", 2, 2);
-        wnet.addAI(ServiceTestBase.AIID, TrainingStatus.AI_TRAINING_COMPLETE, "hash");
-        String json = this.serializeObject(wnet).replace(TrainingStatus.AI_TRAINING_COMPLETE.value(), "wrong_string");
+        ServerRegistration emb = new ServerRegistration(BackendServerType.EMB, "http://test:8000/server", 2, 2);
+        emb.addAI(ServiceTestBase.AIID, TrainingStatus.AI_TRAINING_COMPLETE, "hash");
+        String json = this.serializeObject(emb).replace(TrainingStatus.AI_TRAINING_COMPLETE.value(), "wrong_string");
         final Response response = sendRegistrationRequest(json);
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.getStatus());
     }
 
     @Test
     public void testServerRegister_WrongServerType() {
-        ServerRegistration wnet = new ServerRegistration(BackendServerType.WNET, "http://test:8000/server", 2, 2);
-        wnet.addAI(ServiceTestBase.AIID, TrainingStatus.AI_TRAINING_COMPLETE, "hash");
-        String json = this.serializeObject(wnet).replace("wnet", "other");
+        ServerRegistration emb = new ServerRegistration(BackendServerType.EMB, "http://test:8000/server", 2, 2);
+        emb.addAI(ServiceTestBase.AIID, TrainingStatus.AI_TRAINING_COMPLETE, "hash");
+        String json = this.serializeObject(emb).replace("emb", "other");
         final Response response = sendRegistrationRequest(json);
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.getStatus());
     }
 
     @Test
     public void testServerAffinity() {
-        when(this.fakeControllerWnet.updateAffinity(any(), any())).thenReturn(true);
+        when(this.fakeControllerEmb.updateAffinity(any(), any())).thenReturn(true);
         ServerAffinity affinity = new ServerAffinity(ServiceTestBase.DEVID, Collections.singletonList(ServiceTestBase.AIID));
         String json = this.serializeObject(affinity);
         final Response response = sendAffinityRequest(json);
@@ -143,9 +143,9 @@ public class TestServiceAiServices extends ServiceTestBase {
 
     @Test
     public void testServerAffinity_BadSession() {
-        when(this.fakeControllerWnet.updateAffinity(any(), any())).thenReturn(false);
+        when(this.fakeControllerEmb.updateAffinity(any(), any())).thenReturn(false);
         when(this.fakeControllerAiml.updateAffinity(any(), any())).thenReturn(false);
-        when(this.fakeControllerSvm.updateAffinity(any(), any())).thenReturn(false);
+        when(this.fakeControllerEmb.updateAffinity(any(), any())).thenReturn(false);
         ServerAffinity affinity = new ServerAffinity(ServiceTestBase.DEVID, Collections.singletonList(ServiceTestBase.AIID));
         String json = this.serializeObject(affinity);
         final Response response = sendAffinityRequest(json);
@@ -153,40 +153,40 @@ public class TestServiceAiServices extends ServiceTestBase {
     }
 
     @Test
-    public void testStatusUpdate_HashCode_Wnet() throws DatabaseException {
+    public void testStatusUpdate_HashCode_Emb() throws DatabaseException {
         when(this.fakeDatabaseStatusUpdates.updateAIStatus(any())).thenReturn(true);
         when(this.fakeDatabaseStatusUpdates.getAiQueueStatus(any(), any())).thenReturn(
                 new BackendEngineStatus(TrainingStatus.AI_TRAINING_QUEUED, 0.0, 0.0));
         String statusJson = this.serializeObject(new AiStatus(ServiceTestBase.DEVID.toString(), ServiceTestBase.AIID,
-                TrainingStatus.AI_READY_TO_TRAIN, BackendServerType.WNET,
+                TrainingStatus.AI_READY_TO_TRAIN, BackendServerType.EMB,
                 0.0, 0.0, "hash",
                 TestDataHelper.SESSIONID));
         final Response response = sendStatusUpdateRequest(statusJson);
-        verify(this.fakeControllerWnet, times(1)).setHashCodeFor(ServiceTestBase.AIID, "hash");
+        verify(this.fakeControllerEmb, times(1)).setHashCodeFor(ServiceTestBase.AIID, "hash");
         verify(this.fakeControllerAiml, never()).setHashCodeFor(ServiceTestBase.AIID, "hash");
     }
 
     @Test
     public void testServerRegister_Hashcodes() {
-        when(this.fakeControllerWnet.isPrimaryMaster(any())).thenReturn(true);
-        ServerRegistration wnet = new ServerRegistration(BackendServerType.WNET,
+        when(this.fakeControllerEmb.isPrimaryMaster(any())).thenReturn(true);
+        ServerRegistration emb = new ServerRegistration(BackendServerType.EMB,
                 "http://test:8000/server", 2, 2);
-        wnet.addAI(ServiceTestBase.AIID, TrainingStatus.AI_TRAINING_COMPLETE, "hash");
-        String json = this.serializeObject(wnet);
+        emb.addAI(ServiceTestBase.AIID, TrainingStatus.AI_TRAINING_COMPLETE, "hash");
+        String json = this.serializeObject(emb);
         final Response response = sendRegistrationRequest(json);
-        verify(this.fakeControllerWnet, times(1)).setAllHashCodes(any());
+        verify(this.fakeControllerEmb, times(1)).setAllHashCodes(any());
         verify(this.fakeControllerAiml, never()).setAllHashCodes(any());
     }
 
     @Test
     public void testServerRegister_Hashcodes_IgnoreNonMaster() {
-        when(this.fakeControllerWnet.isPrimaryMaster(any())).thenReturn(false);
-        ServerRegistration wnet = new ServerRegistration(BackendServerType.WNET,
+        when(this.fakeControllerEmb.isPrimaryMaster(any())).thenReturn(false);
+        ServerRegistration emb = new ServerRegistration(BackendServerType.EMB,
                 "http://test:8000/server", 2, 2);
-        wnet.addAI(ServiceTestBase.AIID, TrainingStatus.AI_TRAINING_COMPLETE, "hash");
-        String json = this.serializeObject(wnet);
+        emb.addAI(ServiceTestBase.AIID, TrainingStatus.AI_TRAINING_COMPLETE, "hash");
+        String json = this.serializeObject(emb);
         final Response response = sendRegistrationRequest(json);
-        verify(this.fakeControllerWnet, never()).setAllHashCodes(any());
+        verify(this.fakeControllerEmb, never()).setAllHashCodes(any());
         verify(this.fakeControllerAiml, never()).setAllHashCodes(any());
     }
 
@@ -227,7 +227,8 @@ public class TestServiceAiServices extends ServiceTestBase {
     }
 
     private String getCommonAiStatusJson() {
-        return this.serializeObject(new AiStatus(ServiceTestBase.DEVID.toString(), ServiceTestBase.AIID, TrainingStatus.AI_READY_TO_TRAIN, ServiceTestBase.AI_ENGINE,
+        return this.serializeObject(new AiStatus(ServiceTestBase.DEVID.toString(), ServiceTestBase.AIID,
+                TrainingStatus.AI_READY_TO_TRAIN, ServiceTestBase.AI_ENGINE,
                 0.0, 0.0, "hash",
                 TestDataHelper.SESSIONID));
     }

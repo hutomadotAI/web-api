@@ -47,7 +47,7 @@ public class TestChatLogic extends TestChatBase {
     @Test
     public void testChat_Valid_Semantic() throws ChatBackendConnector.AiControllerException {
         final ChatResult chatResult = buildChatResult();
-        when(this.fakeChatServices.awaitBackend(BackendServerType.WNET)).thenReturn(ImmutableMap.of(chatResult.getAiid(), chatResult));
+        when(this.fakeChatServices.awaitBackend(BackendServerType.EMB)).thenReturn(ImmutableMap.of(chatResult.getAiid(), chatResult));
         ApiResult result = getChat(0.2f);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
         Assert.assertEquals(chatResult.getAnswer(), ((ApiChat) result).getResult().getAnswer());
@@ -67,7 +67,7 @@ public class TestChatLogic extends TestChatBase {
 
     @Test
     public void testChat_ErrorSemantic() throws Exception {
-        when(this.fakeChatServices.awaitBackend(BackendServerType.WNET)).thenThrow(ChatBackendConnector.AiControllerException.class);
+        when(this.fakeChatServices.awaitBackend(BackendServerType.EMB)).thenThrow(ChatBackendConnector.AiControllerException.class);
         ApiResult result = getChat(0.2f);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
@@ -107,9 +107,9 @@ public class TestChatLogic extends TestChatBase {
      * Semantic server does not find AI.
      */
     @Test
-    public void testChat_Wnet_AiNotFound() throws ChatBackendConnector.AiControllerException {
+    public void testChat_Emb_AiNotFound() throws ChatBackendConnector.AiControllerException {
         setupFakeChat(0.7d, SEMANTICRESULT, 0.0d, AIMLRESULT);
-        when(this.fakeChatServices.awaitBackend(BackendServerType.WNET)).thenThrow(ChatBackendConnector.AiNotFoundException.class);
+        when(this.fakeChatServices.awaitBackend(BackendServerType.EMB)).thenThrow(ChatBackendConnector.AiNotFoundException.class);
         ApiResult result = getChat(0.9f);
         Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
     }
@@ -118,9 +118,9 @@ public class TestChatLogic extends TestChatBase {
      * Semantic server throws generic exception.
      */
     @Test
-    public void testChat_Wnet_AiException() throws ChatBackendConnector.AiControllerException {
+    public void testChat_Emb_AiException() throws ChatBackendConnector.AiControllerException {
         setupFakeChat(0.7d, SEMANTICRESULT, 0.0d, AIMLRESULT);
-        when(this.fakeChatServices.awaitBackend(BackendServerType.WNET)).thenThrow(ChatBackendConnector.AiControllerException.class);
+        when(this.fakeChatServices.awaitBackend(BackendServerType.EMB)).thenThrow(ChatBackendConnector.AiControllerException.class);
         ApiResult result = getChat(0.5f);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
@@ -206,7 +206,7 @@ public class TestChatLogic extends TestChatBase {
     }
 
     @Test
-    public void testChat_noAiml_wnetNotConfident() throws ChatBackendConnector.AiControllerException {
+    public void testChat_noAiml_embNotConfident() throws ChatBackendConnector.AiControllerException {
         setupFakeChat(0.0d, "", 0.0d, "");
         when(this.fakeChatServices.awaitBackend(BackendServerType.AIML)).thenReturn(null);
         ApiChat result = (ApiChat) getChat(0.9f);
@@ -215,9 +215,9 @@ public class TestChatLogic extends TestChatBase {
     }
 
     @Test
-    public void testChat_noAiml_wnetNull() throws ChatBackendConnector.AiControllerException {
+    public void testChat_noAiml_embNull() throws ChatBackendConnector.AiControllerException {
         setupFakeChat(0.0d, "", 0.0d, "");
-        when(this.fakeChatServices.awaitBackend(BackendServerType.WNET)).thenReturn(null);
+        when(this.fakeChatServices.awaitBackend(BackendServerType.EMB)).thenReturn(null);
         when(this.fakeChatServices.awaitBackend(BackendServerType.AIML)).thenReturn(null);
         ApiChat result = (ApiChat) getChat(0.9f);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
@@ -226,8 +226,8 @@ public class TestChatLogic extends TestChatBase {
 
 
     @Test
-    public void testChat_AimlNotConf_wnetNotConfident() throws ChatBackendConnector.AiControllerException {
-        setupFakeChat(0.0d, "wnet", 0.0d, "aiml");
+    public void testChat_AimlNotConf_embNotConfident() throws ChatBackendConnector.AiControllerException {
+        setupFakeChat(0.0d, "emb", 0.0d, "aiml");
         ApiChat result = (ApiChat) getChat(0.9f);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
         Assert.assertEquals(TestDataHelper.DEFAULT_CHAT_RESPONSE, result.getResult().getAnswer());
@@ -270,8 +270,8 @@ public class TestChatLogic extends TestChatBase {
     }
 
     @Test
-    public void testChat_botAffinity_noBots_wnetWins() throws ChatBackendConnector.AiControllerException {
-        final String response = "wnet";
+    public void testChat_botAffinity_noBots_embWins() throws ChatBackendConnector.AiControllerException {
+        final String response = "emb";
         setupFakeChat(0.2d, response, 0.0d, "");
         ApiChat result = (ApiChat) getChat(0.1f);
         Assert.assertEquals(response, result.getResult().getAnswer());
@@ -280,13 +280,13 @@ public class TestChatLogic extends TestChatBase {
     @Test
     public void testChat_botAffinity_noBots_stateHasUnknownLockedAiid() throws ChatBackendConnector.AiControllerException,
             ChatStateHandler.ChatStateException{
-        final String response = "wnet";
+        final String response = "emb";
         setupFakeChat(0.2d, response, 0.0d, "");
         when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(new ChatState(DateTime.now(),
                 null, null, UUID.randomUUID(), new HashMap<>(), 0.1d, ChatHandoverTarget.Ai,
                 getSampleAI()));
         ApiChat result = (ApiChat) getChat(0.1f);
-        // Verify we still get the answer from WNET and it doesn't try to get it from the invalid bot
+        // Verify we still get the answer from EMB and it doesn't try to get it from the invalid bot
         Assert.assertEquals(response, result.getResult().getAnswer());
     }
 
@@ -298,9 +298,9 @@ public class TestChatLogic extends TestChatBase {
         cr2.setScore(0.4);
         UUID cr1Uuid = UUID.randomUUID();
         UUID cr2Uuid = UUID.randomUUID();
-        Map<UUID, ChatResult> wnetResults = ImmutableMap.of(cr1Uuid, cr1, cr2Uuid, cr2);
+        Map<UUID, ChatResult> results = ImmutableMap.of(cr1Uuid, cr1, cr2Uuid, cr2);
         when(this.fakeChatServices.getMinPMap()).thenReturn(ImmutableMap.of(cr1Uuid, 0.5, cr2Uuid, 0.5));
-        when(this.fakeChatServices.awaitBackend(BackendServerType.WNET)).thenReturn(wnetResults);
+        when(this.fakeChatServices.awaitBackend(BackendServerType.EMB)).thenReturn(results);
         validateStateSaved(cr1, cr1Uuid);
     }
 
@@ -313,12 +313,12 @@ public class TestChatLogic extends TestChatBase {
         cr2.setScore(0.9);
         UUID cr1Uuid = UUID.randomUUID();
         UUID cr2Uuid = UUID.randomUUID();
-        Map<UUID, ChatResult> wnetResults = ImmutableMap.of(cr1Uuid, cr1, cr2Uuid, cr2);
+        Map<UUID, ChatResult> results = ImmutableMap.of(cr1Uuid, cr1, cr2Uuid, cr2);
         ChatState initialChatState = new ChatState(DateTime.now(), null, null, cr1Uuid, new HashMap<>(), 0.5d,
                 ChatHandoverTarget.Ai, getSampleAI());
         when(this.fakeChatServices.getMinPMap()).thenReturn(ImmutableMap.of(cr1Uuid, 0.5, cr2Uuid, 0.5));
         when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(initialChatState);
-        when(this.fakeChatServices.awaitBackend(BackendServerType.WNET)).thenReturn(wnetResults);
+        when(this.fakeChatServices.awaitBackend(BackendServerType.EMB)).thenReturn(results);
         validateStateSaved(cr1, cr1Uuid);
     }
 
@@ -331,12 +331,12 @@ public class TestChatLogic extends TestChatBase {
         cr2.setScore(0.9);
         UUID cr1Uuid = UUID.randomUUID();
         UUID cr2Uuid = UUID.randomUUID();
-        Map<UUID, ChatResult> wnetResults = ImmutableMap.of(cr1Uuid, cr1, cr2Uuid, cr2);
+        Map<UUID, ChatResult> results = ImmutableMap.of(cr1Uuid, cr1, cr2Uuid, cr2);
         ChatState initialChatState = new ChatState(DateTime.now(), null, null, cr1Uuid, new HashMap<>(), 0.5d,
                 ChatHandoverTarget.Ai, getSampleAI());
         when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(initialChatState);
         when(this.fakeChatServices.getMinPMap()).thenReturn(ImmutableMap.of(cr1Uuid, 0.5, cr2Uuid, 0.5));
-        when(this.fakeChatServices.awaitBackend(BackendServerType.WNET)).thenReturn(wnetResults);
+        when(this.fakeChatServices.awaitBackend(BackendServerType.EMB)).thenReturn(results);
         validateStateSaved(cr2, cr2Uuid);
     }
 
@@ -349,12 +349,12 @@ public class TestChatLogic extends TestChatBase {
         cr2.setScore(0.3);
         UUID cr1Uuid = UUID.randomUUID();
         UUID cr2Uuid = UUID.randomUUID();
-        Map<UUID, ChatResult> wnetResults = ImmutableMap.of(cr1Uuid, cr1, cr2Uuid, cr2);
+        Map<UUID, ChatResult> results = ImmutableMap.of(cr1Uuid, cr1, cr2Uuid, cr2);
         ChatState initialChatState = new ChatState(DateTime.now(), null, null, cr1Uuid, new HashMap<>(), 0.5d,
                 ChatHandoverTarget.Ai, getSampleAI());
         when(this.fakeChatServices.getMinPMap()).thenReturn(ImmutableMap.of(cr1Uuid, 0.5, cr2Uuid, 0.5));
         when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(initialChatState);
-        when(this.fakeChatServices.awaitBackend(BackendServerType.WNET)).thenReturn(wnetResults);
+        when(this.fakeChatServices.awaitBackend(BackendServerType.EMB)).thenReturn(results);
         ChatResult cr1Aiml = new ChatResult("question");
         cr1Aiml.setScore(0.6);
         ChatResult cr2Aiml = new ChatResult("question");
@@ -368,21 +368,21 @@ public class TestChatLogic extends TestChatBase {
     }
 
     @Test
-    public void testChat_botAffinity_bots_lockedToBot_wnet_aiml_score_order() throws ChatBackendConnector.AiControllerException,
+    public void testChat_botAffinity_bots_lockedToBot_emb_aiml_score_order() throws ChatBackendConnector.AiControllerException,
             ChatStateHandler.ChatStateException{
-        // BOT1 has higher score in WNET
+        // BOT1 has higher score in EMB
         ChatResult cr1 = new ChatResult("question");
         cr1.setScore(0.3);
         ChatResult cr2 = new ChatResult("question");
         cr2.setScore(0.2);
         UUID cr1Uuid = UUID.randomUUID();
         UUID cr2Uuid = UUID.randomUUID();
-        Map<UUID, ChatResult> wnetResults = ImmutableMap.of(cr1Uuid, cr1, cr2Uuid, cr2);
+        Map<UUID, ChatResult> results = ImmutableMap.of(cr1Uuid, cr1, cr2Uuid, cr2);
         ChatState initialChatState = new ChatState(DateTime.now(), null, null, cr1Uuid, new HashMap<>(), 0.5d,
                 ChatHandoverTarget.Ai, getSampleAI());
         when(this.fakeChatServices.getMinPMap()).thenReturn(ImmutableMap.of(cr1Uuid, 0.5, cr2Uuid, 0.5));
         when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(initialChatState);
-        when(this.fakeChatServices.awaitBackend(BackendServerType.WNET)).thenReturn(wnetResults);
+        when(this.fakeChatServices.awaitBackend(BackendServerType.EMB)).thenReturn(results);
 
         // BOT2 has higher score in AIML
         ChatResult cr1Aiml = new ChatResult("question");
@@ -404,9 +404,9 @@ public class TestChatLogic extends TestChatBase {
         cr2.setScore(minP2 - 0.1);
         UUID cr1Uuid = UUID.randomUUID();
         UUID cr2Uuid = UUID.randomUUID();
-        Map<UUID, ChatResult> wnetResults = ImmutableMap.of(cr1Uuid, cr1, cr2Uuid, cr2);
+        Map<UUID, ChatResult> results = ImmutableMap.of(cr1Uuid, cr1, cr2Uuid, cr2);
         when(this.fakeChatServices.getMinPMap()).thenReturn(ImmutableMap.of(cr1Uuid, minP1, cr2Uuid, minP2));
-        when(this.fakeChatServices.awaitBackend(BackendServerType.WNET)).thenReturn(wnetResults);
+        when(this.fakeChatServices.awaitBackend(BackendServerType.EMB)).thenReturn(results);
         ApiChat result = (ApiChat) getChat(0.0);
         Assert.assertEquals(0.0, result.getResult().getScore(), 0.0001);
         Assert.assertEquals(TestDataHelper.DEFAULT_CHAT_RESPONSE, result.getResult().getAnswer());
@@ -422,7 +422,7 @@ public class TestChatLogic extends TestChatBase {
         Assert.assertEquals(1.0, result.getResult().getScore(), 0.00001);
         Assert.assertNull(result.getResult().getAnswer());
         // We never make any backend requests
-        verify(this.fakeChatServices, never()).awaitBackend(BackendServerType.WNET);
+        verify(this.fakeChatServices, never()).awaitBackend(BackendServerType.EMB);
         verify(this.fakeChatServices, never()).awaitBackend(BackendServerType.AIML);
         // We don't process any intents
         verify(this.fakeIntentHandler, never()).getIntent(any(), anyString());

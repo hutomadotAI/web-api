@@ -45,7 +45,7 @@ public class TestAiServices {
 
     private static final UUID DEVID = UUID.fromString("780416b3-d8dd-4283-ace5-65cd5bc987cb");
     private static final UUID AIID = UUID.fromString("41c6e949-4733-42d8-bfcf-95192131137e");
-    private static final String WNET_ENDPOINT = "http://wnet/endpoint1";
+    private static final String EMB_ENDPOINT = "http://emb/endpoint1";
 
     private JsonSerializer fakeSerializer;
     private DatabaseAI fakeDatabaseAi;
@@ -56,7 +56,7 @@ public class TestAiServices {
     private Tools fakeTools;
     private JerseyClient fakeClient;
     private ControllerConnector fakeControllerConnector;
-    private WnetServicesConnector fakeWnetServicesConnector;
+    private EmbServicesConnector fakeEmbServicesConnector;
     private BackendServicesConnectors fakeConnectors;
 
     private AiServicesQueue fakeQueueServices;
@@ -78,20 +78,19 @@ public class TestAiServices {
         this.fakeClient = mock(JerseyClient.class);
         this.fakeQueueServices = mock(AiServicesQueue.class);
         this.fakeControllerConnector = mock(ControllerConnector.class);
-        this.fakeWnetServicesConnector = mock(WnetServicesConnector.class);
+        this.fakeEmbServicesConnector = mock(EmbServicesConnector.class);
 
         when(this.fakeConfig.getThreadPoolMaxThreads()).thenReturn(32);
         when(this.fakeConfig.getThreadPoolIdleTimeMs()).thenReturn(10000L);
         when(this.fakeConfig.getBackendTrainingCallTimeoutMs()).thenReturn(30000L);
         ThreadPool threadPool = new ThreadPool(this.fakeConfig, this.fakeLogger);
 
-        when(this.fakeControllerConnector.getBackendTrainingEndpoint(AIID, BackendServerType.WNET, fakeSerializer))
-                .thenReturn(TestDataHelper.getEndpointFor(WNET_ENDPOINT));
-        when(this.fakeControllerConnector.getBackendTrainingEndpoint(null, BackendServerType.WNET, fakeSerializer))
-                .thenReturn(TestDataHelper.getEndpointFor(WNET_ENDPOINT));
+        when(this.fakeControllerConnector.getBackendTrainingEndpoint(AIID, BackendServerType.EMB, fakeSerializer))
+                .thenReturn(TestDataHelper.getEndpointFor(EMB_ENDPOINT));
+        when(this.fakeControllerConnector.getBackendTrainingEndpoint(null, BackendServerType.EMB, fakeSerializer))
+                .thenReturn(TestDataHelper.getEndpointFor(EMB_ENDPOINT));
 
-        this.fakeConnectors = new BackendServicesConnectors(this.fakeWnetServicesConnector,
-                mock(SvmServicesConnector.class), mock(EmbServicesConnector.class));
+        this.fakeConnectors = new BackendServicesConnectors(this.fakeEmbServicesConnector);
 
         this.aiServices = new AIServices(this.fakeDatabaseAi, this.fakeDatabaseEntitiesIntents, this.fakeLogger,
                 this.fakeConfig, this.fakeSerializer,
@@ -120,7 +119,7 @@ public class TestAiServices {
     public void testUploadTraining() throws AIServices.AiServicesException, NoServerAvailableException {
         JerseyInvocation.Builder builder = TestDataHelper.mockJerseyClient(this.fakeClient);
         IServerEndpoint endpoint = getFakeServerEndpoint();
-        when(this.fakeWnetServicesConnector.getBackendTrainingEndpoint(any(), any())).thenReturn(endpoint);
+        when(this.fakeEmbServicesConnector.getBackendTrainingEndpoint(any(), any())).thenReturn(endpoint);
         when(builder.post(any())).thenReturn(Response.ok(new ApiResult().setSuccessStatus()).build());
         this.aiServices.uploadTraining(null, DEVID, AIID, "training materials");
     }
@@ -228,7 +227,7 @@ public class TestAiServices {
     private void fakeBackendServicesRegistered() {
         Map<String, ServerTrackerInfo> map = new HashMap<>();
         map.put("key", new ServerTrackerInfo("url", "ident", 1, 1, true, true));
-        when(this.fakeWnetServicesConnector.getVerifiedEndpointMap(any())).thenReturn(map);
+        when(this.fakeEmbServicesConnector.getVerifiedEndpointMap(any())).thenReturn(map);
     }
 
     private void testCommand_serverError(CheckedByConsumer<UUID, UUID> logicMethod, String verb)

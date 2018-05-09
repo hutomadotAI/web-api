@@ -70,9 +70,8 @@ public class TestChatBase {
     ChatPassthroughHandler fakePassthroughHandler;
     ChatIntentHandler fakeChatIntenthHandler;
     ChatRequestTrigger fakeRequestBETrigger;
-    ChatWnetHandler fakeWnetHandler;
     ChatAimlHandler fakeAimlHandler;
-    ChatSvmHandler fakeSvmHandler;
+    ChatEmbHandler fakeEmbHandler;
     ChatDefaultHandler fakeDefaultHandler;
     IntentProcessor intentProcessor;
 
@@ -96,16 +95,15 @@ public class TestChatBase {
         this.fakeHandoverHandler = new ChatHandoverHandler(mock(Tools.class));
         this.fakeChatIntenthHandler = new ChatIntentHandler(this.fakeIntentHandler, this.intentProcessor);
         this.fakeRequestBETrigger = new ChatRequestTrigger(this.fakeChatServices);
-        this.fakeWnetHandler = new ChatWnetHandler(this.fakeIntentHandler, this.intentProcessor, mock(ILogger.class));
+        this.fakeEmbHandler = new ChatEmbHandler(this.fakeIntentHandler, this.intentProcessor, mock(ILogger.class));
         this.fakeAimlHandler = new ChatAimlHandler(mock(ILogger.class));
         this.fakeDefaultHandler = new ChatDefaultHandler(this.fakeAiStrings, mock(ILogger.class));
-        this.fakeSvmHandler = new ChatSvmHandler(mock(ILogger.class));
 
         when(fakeConfig.getEncodingKey()).thenReturn(TestDataHelper.VALID_ENCODING_KEY);
 
         when(this.fakeChatWorkflow.getHandlers()).thenReturn(
                 Arrays.asList(this.fakeHandoverHandler, this.fakePassthroughHandler, this.fakeChatIntenthHandler,
-                        this.fakeRequestBETrigger, this.fakeSvmHandler, this.fakeWnetHandler,
+                        this.fakeRequestBETrigger, this.fakeEmbHandler,
                         this.fakeAimlHandler, this.fakeDefaultHandler));
 
         this.chatLogic = new ChatLogic(this.fakeChatServices, this.fakeChatStateHandler, mock(Tools.class),
@@ -156,36 +154,36 @@ public class TestChatBase {
 
     /***
      * Sets up fake responses from the AiChatServices layer
-     * @param wnetConfidence
-     * @param wnetResponse
+     * @param embConfidence
+     * @param embResponse
      * @param aimlConfidence
      * @param aimlResponse
      * @throws ServerConnector.AiServicesException
      */
-    void setupFakeChat(double wnetConfidence, String wnetResponse,
+    void setupFakeChat(double embConfidence, String embResponse,
                        double aimlConfidence, String aimlResponse) throws
             ChatBackendConnector.AiControllerException {
-        setupFakeChatWithHistory(wnetConfidence, wnetResponse, "", aimlConfidence, aimlResponse);
+        setupFakeChatWithHistory(embConfidence, embResponse, "", aimlConfidence, aimlResponse);
     }
 
     /***
      * Sets up fake responses from the AiChatServices layer
-     * @param wnetConfidence
-     * @param wnetResponse
-     * @param wnetHistory
+     * @param embConfidence
+     * @param embResponse
+     * @param embHistory
      * @param aimlConfidence
      * @param aimlResponse
      * @throws ServerConnector.AiServicesException
      */
-    void setupFakeChatWithHistory(double wnetConfidence, String wnetResponse, String wnetHistory,
+    void setupFakeChatWithHistory(double embConfidence, String embResponse, String embHistory,
                                   double aimlConfidence, String aimlResponse) throws
             ChatBackendConnector.AiControllerException {
 
-        ChatResult wnetResult = new ChatResult("Hi");
-        wnetResult.setScore(wnetConfidence);
-        wnetResult.setAnswer(wnetResponse);
-        wnetResult.setHistory(wnetHistory);
-        when(this.fakeChatServices.awaitBackend(BackendServerType.WNET)).thenReturn(getChatResultMap(AIID, wnetResult));
+        ChatResult chatResult = new ChatResult("Hi");
+        chatResult.setScore(embConfidence);
+        chatResult.setAnswer(embResponse);
+        chatResult.setHistory(embHistory);
+        when(this.fakeChatServices.awaitBackend(BackendServerType.EMB)).thenReturn(getChatResultMap(AIID, chatResult));
 
         when(this.fakeConfig.getAimlBotAiids()).thenReturn(Collections.singletonList(AIML_BOT_AIID));
         when(this.fakeChatServices.getAIsLinkedToAi(any(), any())).thenReturn(Collections.singletonList(

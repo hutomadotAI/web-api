@@ -63,7 +63,7 @@ public class QueueProcessor extends TimerTask {
     private long lastKicked = 0;
 
     @Inject
-    public QueueProcessor(final ControllerConfig config, final DatabaseAiStatusUpdates database,
+    QueueProcessor(final ControllerConfig config, final DatabaseAiStatusUpdates database,
                           final Provider<AIQueueServices> queueServicesProvider,
                           final Tools tools, AiServiceStatusLogger logger) {
         this.config = config;

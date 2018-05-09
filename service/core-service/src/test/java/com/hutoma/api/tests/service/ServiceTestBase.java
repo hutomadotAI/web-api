@@ -72,55 +72,55 @@ public abstract class ServiceTestBase extends JerseyTest {
     private static final String AUTH_ENCODING_KEY = "U0hBUkVEX1NFQ1JFVA==";
     protected static final UUID DEVID = UUID.fromString("68d5bbd6-9c20-49b3-acca-f996fe65d534");
     protected static final UUID AIID = UUID.fromString("41c6e949-4733-42d8-bfcf-95192131137e");
-    protected static final BackendServerType AI_ENGINE = BackendServerType.WNET;
-    protected static final MultivaluedHashMap<String, Object> noDevIdHeaders = new MultivaluedHashMap<>();
+    protected static final BackendServerType AI_ENGINE = BackendServerType.EMB;
+    static final MultivaluedHashMap<String, Object> noDevIdHeaders = new MultivaluedHashMap<>();
     @SuppressWarnings("unchecked")
     protected static final MultivaluedHashMap<String, Object> defaultHeaders = getDevIdAuthHeaders(Role.ROLE_PLAN_1,
             DEVID);
     @Mock
-    protected DatabaseCall fakeDatabaseCall;
+    DatabaseCall fakeDatabaseCall;
     @Mock
-    protected Database fakeDatabase;
+    Database fakeDatabase;
     @Mock
     protected DatabaseAI fakeDatabaseAi;
     @Mock
-    protected DatabaseMarketplace fakeDatabaseMarketplace;
+    DatabaseMarketplace fakeDatabaseMarketplace;
     @Mock
     protected DatabaseEntitiesIntents fakeDatabaseEntitiesIntents;
     @Mock
-    protected DatabaseIntegrations fakeDatabaseIntegrations;
+    DatabaseIntegrations fakeDatabaseIntegrations;
     @Mock
-    protected DatabaseBackends fakeDatabaseBackends;
+    DatabaseBackends fakeDatabaseBackends;
     @Mock
-    protected DatabaseTransaction fakeDatabaseTransaction;
+    DatabaseTransaction fakeDatabaseTransaction;
     @Mock
-    protected TransactionalDatabaseCall fakeTransactionalDatabaseCall;
+    TransactionalDatabaseCall fakeTransactionalDatabaseCall;
     @Mock
-    protected DatabaseConnectionPool fakeDatabaseConnectionPool;
+    DatabaseConnectionPool fakeDatabaseConnectionPool;
     @Mock
     protected ILogger fakeLogger;
     @Mock
     protected Config fakeConfig;
     @Mock
-    protected JerseyClient fakeJerseyClient;
+    JerseyClient fakeJerseyClient;
     @Mock
-    protected AIChatServices fakeAiChatServices;
+    AIChatServices fakeAiChatServices;
     @Mock
-    protected AIServices fakeAiServices;
+    AIServices fakeAiServices;
     @Mock
     protected Tools fakeTools;
     @Mock
-    protected WebHooks fakeWebHooks;
+    WebHooks fakeWebHooks;
     @Mock
-    protected AccessLogger fakeAccessLogger;
+    AccessLogger fakeAccessLogger;
     @Mock
-    protected EntityRecognizerService fakeEntityRecognizer;
+    EntityRecognizerService fakeEntityRecognizer;
     @Mock
-    protected FacebookConnector fakefacebookConnector;
+    FacebookConnector fakefacebookConnector;
     @Mock
-    protected AiStrings fakeAiStrings;
+    AiStrings fakeAiStrings;
 
-    public static MultivaluedHashMap<String, Object> getDevIdAuthHeaders(final Role role, final UUID devId) {
+    private static MultivaluedHashMap<String, Object> getDevIdAuthHeaders(final Role role, final UUID devId) {
         return new MultivaluedHashMap<String, Object>() {
             {
                 put("Authorization", Collections.singletonList("Bearer " + getDevToken(devId, role)));
@@ -128,18 +128,18 @@ public abstract class ServiceTestBase extends JerseyTest {
         };
     }
 
-    public static String getDevToken(final UUID devId, final Role role) {
+    private static String getDevToken(final UUID devId, final Role role) {
         return Jwts.builder().claim("ROLE", role).setSubject(devId.toString()).compressWith(CompressionCodecs.DEFLATE)
                 .signWith(SignatureAlgorithm.HS256, AUTH_ENCODING_KEY).compact();
     }
 
-    public static String getClientToken(final UUID devId, final UUID aiid) {
+    private static String getClientToken(final UUID devId, final UUID aiid) {
         return Jwts.builder().claim("ROLE", Role.ROLE_CLIENTONLY).claim("AIID", aiid.toString())
                 .setSubject(devId.toString()).compressWith(CompressionCodecs.DEFLATE)
                 .signWith(SignatureAlgorithm.HS256, AUTH_ENCODING_KEY).compact();
     }
 
-    public MultivaluedHashMap<String, Object> getClientAuthHeaders(final UUID devId, final UUID aiid) {
+    protected MultivaluedHashMap<String, Object> getClientAuthHeaders(final UUID devId, final UUID aiid) {
         return new MultivaluedHashMap<String, Object>() {
             {
                 put("Authorization", Collections.singletonList("Bearer " + getClientToken(devId, aiid)));
@@ -165,7 +165,7 @@ public abstract class ServiceTestBase extends JerseyTest {
         }
     }
 
-    protected AbstractBinder getDefaultBindings() {
+    private AbstractBinder getDefaultBindings() {
         return new AbstractBinder() {
             @Override
             protected void configure() {
@@ -229,7 +229,7 @@ public abstract class ServiceTestBase extends JerseyTest {
      * some IDEs to fail test runs since the tests wrote to STDERR, even if all the tests pass.
      * This method overrides that behaviour by using a console handler that only writs to STDOUT.
      */
-    protected void overrideDefaultLogging() {
+    private void overrideDefaultLogging() {
         Handler handler = new ConsoleHandler() {
             {
                 setOutputStream(System.out);

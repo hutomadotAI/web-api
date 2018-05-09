@@ -7,7 +7,7 @@ import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.TestDataHelper;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.InvocationResult;
-import com.hutoma.api.connectors.aiservices.WnetServicesConnector;
+import com.hutoma.api.connectors.aiservices.EmbServicesConnector;
 import com.hutoma.api.connectors.db.DatabaseAI;
 import com.hutoma.api.connectors.db.DatabaseUser;
 import com.hutoma.api.logging.ILogger;
@@ -16,11 +16,9 @@ import com.hutoma.api.thread.TrackedThreadSubPool;
 import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.client.JerseyInvocation;
 import org.glassfish.jersey.client.JerseyWebTarget;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.HashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeoutException;
@@ -33,11 +31,11 @@ public class TestChatBackendConnector {
     private DatabaseAI fakeDatabaseAi;
     private DatabaseUser fakeDatabaseUser;
     private Config fakeConfig;
-    private ChatWnetConnectorUnderTest connector;
+    private ChatEmbConnectorUnderTest connector;
     private JerseyClient fakeJerseyClient;
     private Tools fakeTools;
     private TrackedThreadSubPool fakeTrackedThreadPool;
-    private WnetServicesConnector fakeWnetServicesConnector;
+    private EmbServicesConnector fakeEmbServicesConnector;
     private JerseyInvocation.Builder fakeJerseyBuilder;
     private JerseyWebTarget fakeTarget;
     private ChatBackendConnector.RequestInProgress fakeRequestInProgress;
@@ -53,22 +51,22 @@ public class TestChatBackendConnector {
         this.fakeTarget = this.fakeJerseyClient.target("");
         this.fakeTools = new FakeTimerTools();
         this.fakeTrackedThreadPool = mock(TrackedThreadSubPool.class);
-        this.fakeWnetServicesConnector = mock(WnetServicesConnector.class);
+        this.fakeEmbServicesConnector = mock(EmbServicesConnector.class);
         this.fakeRequestInProgress = mock(ChatBackendConnector.RequestInProgress.class);
         this.fakeFuture = mock(Future.class);
         when(fakeRequestInProgress.getFuture()).thenReturn(fakeFuture);
 
-        this.connector = new ChatWnetConnectorUnderTest(this.fakeJerseyClient, this.fakeTools, this.fakeConfig,
+        this.connector = new ChatEmbConnectorUnderTest(this.fakeJerseyClient, this.fakeTools, this.fakeConfig,
                 this.fakeTrackedThreadPool,
-                mock(ILogger.class), mock(JsonSerializer.class), this.fakeWnetServicesConnector);
+                mock(ILogger.class), mock(JsonSerializer.class), this.fakeEmbServicesConnector);
     }
 
-    public static class ChatWnetConnectorUnderTest extends ChatWnetConnector {
+    public static class ChatEmbConnectorUnderTest extends ChatEmbConnector {
 
-        public ChatWnetConnectorUnderTest(final JerseyClient jerseyClient, final Tools tools, final Config config,
-                                          final TrackedThreadSubPool threadSubPool, final ILogger logger,
-                                          final JsonSerializer serializer,
-                                          final WnetServicesConnector controllerConnector) {
+        ChatEmbConnectorUnderTest(final JerseyClient jerseyClient, final Tools tools, final Config config,
+                                         final TrackedThreadSubPool threadSubPool, final ILogger logger,
+                                         final JsonSerializer serializer,
+                                         final EmbServicesConnector controllerConnector) {
             super(jerseyClient, tools, config, threadSubPool, logger, serializer, controllerConnector,
                     mock(Provider.class));
         }

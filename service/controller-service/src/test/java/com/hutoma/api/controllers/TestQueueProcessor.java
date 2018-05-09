@@ -139,7 +139,7 @@ public class TestQueueProcessor {
 
         this.qproc = new QueueProcessorTest(this.fakeConfig, this.fakeDatabase, fakeQueueServicesProvider,
                 this.fakeTools, mock(AiServiceStatusLogger.class));
-        this.qproc.initialise(this.fakeController, BackendServerType.WNET);
+        this.qproc.initialise(this.fakeController, BackendServerType.EMB);
 
         this.fakeData = create(null, ENDPOINT1, 0, 1, 0, true);
 

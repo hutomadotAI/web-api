@@ -18,10 +18,10 @@ import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logic.ChatLogic;
 import com.hutoma.api.logic.chat.ChatAimlHandler;
 import com.hutoma.api.logic.chat.ChatDefaultHandler;
+import com.hutoma.api.logic.chat.ChatEmbHandler;
 import com.hutoma.api.logic.chat.ChatIntentHandler;
 import com.hutoma.api.logic.chat.ChatPassthroughHandler;
 import com.hutoma.api.logic.chat.ChatRequestTrigger;
-import com.hutoma.api.logic.chat.ChatWnetHandler;
 import com.hutoma.api.logic.chat.ChatWorkflow;
 import com.hutoma.api.logic.chat.IntentProcessor;
 import com.hutoma.api.memory.ChatStateHandler;
@@ -68,7 +68,7 @@ public class TestServiceChat extends ServiceTestBase {
     private ChatPassthroughHandler fakePassthroughHandler;
     private ChatIntentHandler fakeChatIntenthHandler;
     private ChatRequestTrigger fakeRequestBETrigger;
-    private ChatWnetHandler fakeWnetHandler;
+    private ChatEmbHandler fakeEmbHandler;
     private ChatAimlHandler fakeAimlHandler;
     private ChatDefaultHandler fakeDefaultHandler;
     private IntentProcessor fakeIntentProcessorLogic;
@@ -84,7 +84,7 @@ public class TestServiceChat extends ServiceTestBase {
 
         when(this.fakeChatWorkflow.getHandlers()).thenReturn(
                 Arrays.asList(this.fakePassthroughHandler, this.fakeChatIntenthHandler,
-                        this.fakeRequestBETrigger, this.fakeWnetHandler,
+                        this.fakeRequestBETrigger, this.fakeEmbHandler,
                         this.fakeAimlHandler, this.fakeDefaultHandler));
     }
 
@@ -96,7 +96,7 @@ public class TestServiceChat extends ServiceTestBase {
         semanticAnalysisResult.setAnswer(answer);
         semanticAnalysisResult.setScore(score);
         when(this.fakeAiChatServices.getMinPMap()).thenReturn(ImmutableMap.of(AIID, score - 0.1));
-        when(this.fakeAiChatServices.awaitBackend(BackendServerType.WNET)).thenReturn(ImmutableMap.of(AIID, semanticAnalysisResult));
+        when(this.fakeAiChatServices.awaitBackend(BackendServerType.EMB)).thenReturn(ImmutableMap.of(AIID, semanticAnalysisResult));
 
         final Response response = buildChatDefaultParams(target(CHAT_PATH)).request().headers(defaultHeaders).get();
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
@@ -235,7 +235,7 @@ public class TestServiceChat extends ServiceTestBase {
                 mock(ChatLogger.class), mock(ILogger.class));
         this.fakeChatIntenthHandler = new ChatIntentHandler(this.fakeMemoryIntentHandler, this.fakeIntentProcessorLogic);
         this.fakeRequestBETrigger = new ChatRequestTrigger(this.fakeAiChatServices);
-        this.fakeWnetHandler = new ChatWnetHandler(this.fakeMemoryIntentHandler, this.fakeIntentProcessorLogic, mock(ILogger.class));
+        this.fakeEmbHandler = new ChatEmbHandler(this.fakeMemoryIntentHandler, this.fakeIntentProcessorLogic, mock(ILogger.class));
         this.fakeAimlHandler = new ChatAimlHandler(mock(ILogger.class));
         this.fakeDefaultHandler = new ChatDefaultHandler(this.fakeAiStrings, mock(ILogger.class));
 

@@ -36,7 +36,7 @@ public class TestServerTracker {
         this.testClass = new ServerTrackerUnderTest(this.fakeConfig, this.tools,
                 mock(JerseyClient.class), mock(JsonSerializer.class), mock(ILogger.class),
                 mock(ThreadSubPool.class));
-        this.testClass.trackServer(new ServerRegistration(BackendServerType.WNET, "url", 1, 1));
+        this.testClass.trackServer(new ServerRegistration(BackendServerType.EMB, "url", 1, 1));
     }
 
     @Test

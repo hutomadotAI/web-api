@@ -416,16 +416,16 @@ public class TestChatLogicIntents extends TestChatBase {
         }
 
         // Next answer should exit intent handling and go through normal chat processing
-        final String wnetAnswer = "wnet answer";
+        final String embAnswer = "emb answer";
         when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), anyString())).thenReturn(null);
-        ChatResult wnetResult = new ChatResult("Hi");
-        wnetResult.setScore(0.9f);
-        wnetResult.setAnswer(wnetAnswer);
-        when(this.fakeChatServices.awaitBackend(BackendServerType.WNET)).thenReturn(getChatResultMap(AIID, wnetResult));
+        ChatResult chatResult = new ChatResult("Hi");
+        chatResult.setScore(0.9f);
+        chatResult.setAnswer(embAnswer);
+        when(this.fakeChatServices.awaitBackend(BackendServerType.EMB)).thenReturn(getChatResultMap(AIID, chatResult));
         ApiResult result = getChat(0.5f, "nothing to see here.");
         ChatResult r = ((ApiChat) result).getResult();
         Assert.assertNull(r.getIntents());
-        Assert.assertEquals(wnetAnswer, r.getAnswer());
+        Assert.assertEquals(embAnswer, r.getAnswer());
     }
 
     /**

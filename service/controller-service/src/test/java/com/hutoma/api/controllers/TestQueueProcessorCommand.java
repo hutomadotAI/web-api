@@ -233,7 +233,7 @@ public class TestQueueProcessorCommand {
         when(fakeQueueServicesProvider.get()).thenReturn(this.fakeQueueServices);
         this.qproc = new QueueProcessorCommandTest(this.fakeConfig, this.fakeDatabase,
                 fakeQueueServicesProvider, mock(Tools.class));
-        this.qproc.initialise(this.fakeController, BackendServerType.WNET);
+        this.qproc.initialise(this.fakeController, BackendServerType.EMB);
 
         this.status = new BackendEngineStatus(
                 TestDataHelper.AIID,

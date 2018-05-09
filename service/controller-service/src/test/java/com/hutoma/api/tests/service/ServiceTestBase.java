@@ -16,8 +16,6 @@ import com.hutoma.api.connectors.db.TransactionalDatabaseCall;
 import com.hutoma.api.controllers.ControllerAiml;
 import com.hutoma.api.controllers.ControllerEmb;
 import com.hutoma.api.controllers.ControllerMap;
-import com.hutoma.api.controllers.ControllerSvm;
-import com.hutoma.api.controllers.ControllerWnet;
 import com.hutoma.api.logging.AiServiceStatusLogger;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.thread.IThreadConfig;
@@ -59,7 +57,7 @@ public abstract class ServiceTestBase extends JerseyTest {
 
     protected static final UUID DEVID = UUID.fromString("68d5bbd6-9c20-49b3-acca-f996fe65d534");
     protected static final UUID AIID = UUID.fromString("41c6e949-4733-42d8-bfcf-95192131137e");
-    protected static final BackendServerType AI_ENGINE = BackendServerType.WNET;
+    protected static final BackendServerType AI_ENGINE = BackendServerType.EMB;
     @Mock
     private DatabaseCall fakeDatabaseCall;
     @Mock
@@ -67,7 +65,7 @@ public abstract class ServiceTestBase extends JerseyTest {
     @Mock
     private DatabaseBackends fakeDatabaseBackends;
     @Mock
-    protected DatabaseAiStatusUpdates fakeDatabaseStatusUpdates;
+    DatabaseAiStatusUpdates fakeDatabaseStatusUpdates;
     @Mock
     private DatabaseTransaction fakeDatabaseTransaction;
     @Mock
@@ -86,10 +84,6 @@ public abstract class ServiceTestBase extends JerseyTest {
     private Tools fakeTools;
     @Mock
     ControllerAiml fakeControllerAiml;
-    @Mock
-    ControllerWnet fakeControllerWnet;
-    @Mock
-    ControllerSvm fakeControllerSvm;
     @Mock
     ControllerEmb fakeControllerEmb;
     private ControllerMap fakeControllerMap;
@@ -129,8 +123,6 @@ public abstract class ServiceTestBase extends JerseyTest {
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeJerseyClient)).to(JerseyClient.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeTools)).to(Tools.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeControllerAiml)).to(ControllerAiml.class);
-                bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeControllerWnet)).to(ControllerWnet.class);
-                bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeControllerSvm)).to(ControllerSvm.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeControllerEmb)).to(ControllerEmb.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeLogger)).to(ILogger.class).in(Singleton.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeServicesStatusLogger)).to(AiServiceStatusLogger.class);
@@ -176,14 +168,12 @@ public abstract class ServiceTestBase extends JerseyTest {
         this.fakeTools = mock(Tools.class);
         this.fakeServicesStatusLogger = mock(AiServiceStatusLogger.class);
         this.fakeControllerAiml = mock(ControllerAiml.class);
-        this.fakeControllerWnet = mock(ControllerWnet.class);
-        this.fakeControllerSvm = mock(ControllerSvm.class);
-        this.fakeControllerMap = new ControllerMap(this.fakeControllerWnet, this.fakeControllerAiml,
-                this.fakeControllerSvm, this.fakeControllerEmb);
+        this.fakeControllerEmb = mock(ControllerEmb.class);
+        this.fakeControllerMap = new ControllerMap(this.fakeControllerAiml, this.fakeControllerEmb);
 
-        when(this.fakeControllerWnet.isActiveSession(eq(TestDataHelper.SESSIONID))).thenReturn(true);
-        when(this.fakeControllerWnet.getSessionServerIdentifier(eq(TestDataHelper.SESSIONID))).thenReturn("wnet@fake");
-        when(this.fakeControllerWnet.isPrimaryMaster(eq(TestDataHelper.SESSIONID))).thenReturn(true);
+        when(this.fakeControllerEmb.isActiveSession(eq(TestDataHelper.SESSIONID))).thenReturn(true);
+        when(this.fakeControllerEmb.getSessionServerIdentifier(eq(TestDataHelper.SESSIONID))).thenReturn("emb@fake");
+        when(this.fakeControllerEmb.isPrimaryMaster(eq(TestDataHelper.SESSIONID))).thenReturn(true);
 
         ResourceConfig rc = new ResourceConfig(getClassUnderTest());
         AbstractBinder binder = this.getDefaultBindings();

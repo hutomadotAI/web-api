@@ -77,7 +77,7 @@ public class TestAiServicesClient {
     private AIServices aiServices;
     private ThreadPool threadPool;
     private AiServicesQueue fakeQueueServices;
-    private WnetServicesConnector fakeWnetServicesConnector;
+    private EmbServicesConnector fakeEmbServicesConnector;
     private BackendServicesConnectors fakeConnectors;
 
     @BeforeClass
@@ -93,7 +93,7 @@ public class TestAiServicesClient {
     }
 
     @Before
-    public void setup() throws NoServerAvailableException {
+    public void setup() {
         this.fakeSerializer = mock(JsonSerializer.class);
         this.fakeConfig = mock(Config.class);
         this.fakeDatabaseAi = mock(DatabaseAI.class);
@@ -102,15 +102,14 @@ public class TestAiServicesClient {
         this.fakeLogger = mock(ILogger.class);
         this.fakeTools = mock(Tools.class);
         this.fakeQueueServices = mock(AiServicesQueue.class);
-        this.fakeWnetServicesConnector = mock(WnetServicesConnector.class);
+        this.fakeEmbServicesConnector = mock(EmbServicesConnector.class);
 
         when(this.fakeConfig.getThreadPoolMaxThreads()).thenReturn(32);
         when(this.fakeConfig.getThreadPoolIdleTimeMs()).thenReturn(10000L);
         when(this.fakeConfig.getBackendTrainingCallTimeoutMs()).thenReturn(20000L);
         this.threadPool = new ThreadPool(this.fakeConfig, this.fakeLogger);
 
-        this.fakeConnectors = new BackendServicesConnectors(this.fakeWnetServicesConnector,
-                mock(SvmServicesConnector.class), mock(EmbServicesConnector.class));
+        this.fakeConnectors = new BackendServicesConnectors(this.fakeEmbServicesConnector);
 
         this.aiServices = new AIServices(this.fakeDatabaseAi, this.fakeDatabaseEntitiesIntents, this.fakeLogger,
                 this.fakeConfig, this.fakeSerializer,
@@ -141,7 +140,7 @@ public class TestAiServicesClient {
 
     @Test
     public void testUploadTraining() throws AIServices.AiServicesException, NoServerAvailableException {
-        when(this.fakeWnetServicesConnector.getBackendTrainingEndpoint(any(), any()))
+        when(this.fakeEmbServicesConnector.getBackendTrainingEndpoint(any(), any()))
                 .thenReturn(getFakeServerEndpoint(LOCAL_WEB_ENDPOINT));
         // Need to have a real serializer here to transform the ai info
         AIServices thisAiServices = new AIServices(this.fakeDatabaseAi, this.fakeDatabaseEntitiesIntents,
