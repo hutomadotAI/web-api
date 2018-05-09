@@ -6,6 +6,7 @@ import com.hutoma.api.connectors.chat.ChatBackendConnector;
 import com.hutoma.api.containers.ApiChat;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.ApiResult;
+import com.hutoma.api.containers.sub.ChatContext;
 import com.hutoma.api.containers.sub.ChatHandoverTarget;
 import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.containers.sub.ChatState;
@@ -277,7 +278,7 @@ public class TestChatLogicIntents extends TestChatBase {
         HashMap<String, String> entityValues = new HashMap<>();
         entityValues.put("persistent_var", "persistentValue");
         ChatState state = new ChatState(DateTime.now(), null, null, null, entityValues, 0.5d,
-                ChatHandoverTarget.Ai, getSampleAI());
+                ChatHandoverTarget.Ai, getSampleAI(), new ChatContext());
         when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(state);
 
         // First question, triggers the intent but without the right entity value

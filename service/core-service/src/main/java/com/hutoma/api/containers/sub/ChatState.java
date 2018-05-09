@@ -22,12 +22,13 @@ public class ChatState {
     private AIChatServices aiChatServices;
     private DateTime resetHandoverTime;
     private int badAnswersCount;
+    private ChatContext chatContext;
 
     private transient ApiAi ai;
 
     public ChatState(final DateTime timestamp, final String topic, final String history, final UUID lockedAiid,
                      final HashMap<String, String> entityValues, final double confidenceThreshold,
-                     final ChatHandoverTarget chatTarget, final ApiAi ai) {
+                     final ChatHandoverTarget chatTarget, final ApiAi ai, final ChatContext chatContext) {
         this.timestamp = timestamp;
         this.topic = topic;
         this.history = history;
@@ -36,12 +37,13 @@ public class ChatState {
         this.confidenceThreshold = confidenceThreshold;
         this.chatTarget = chatTarget;
         this.ai = ai;
+        this.chatContext = chatContext;
     }
 
     public static ChatState getEmpty() {
         return new ChatState(
                 null, null, null, null, new HashMap<>(), 0.0d, ChatHandoverTarget.Ai,
-                null
+                null, new ChatContext()
         );
     }
 
@@ -135,5 +137,9 @@ public class ChatState {
 
     public void setBadAnswersCount(final int badAnswersCount) {
         this.badAnswersCount = badAnswersCount;
+    }
+
+    public ChatContext getChatContext() {
+        return this.chatContext;
     }
 }

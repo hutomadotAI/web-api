@@ -10,11 +10,13 @@ import com.hutoma.api.containers.ApiAiWithConfig;
 import com.hutoma.api.containers.ApiLinkedBotData;
 import com.hutoma.api.containers.sub.AiBot;
 import com.hutoma.api.containers.sub.AiMinP;
+import com.hutoma.api.containers.sub.ChatContext;
 import com.hutoma.api.containers.sub.ChatHandoverTarget;
 import com.hutoma.api.containers.sub.ChatState;
 import com.hutoma.api.containers.sub.WebHook;
 import com.hutoma.api.logging.ILogger;
 
+import org.elasticsearch.common.Strings;
 import org.joda.time.DateTime;
 
 import java.sql.ResultSet;
@@ -663,6 +665,10 @@ public class DatabaseAI extends Database  {
                     if (rs.wasNull()) {
                         confidenceThreshold = ai.getConfidence();
                     }
+                    String contextJson = rs.getString("context");
+                    ChatContext context = Strings.isNullOrEmpty(contextJson)
+                        ? new ChatContext()
+                        : (ChatContext) jsonSerializer.deserialize(contextJson, ChatContext.class);
                     ChatState chatState = new ChatState(
                             new DateTime(rs.getTimestamp("timestamp")),
                             rs.getString("topic"),
@@ -671,7 +677,8 @@ public class DatabaseAI extends Database  {
                             entities,
                             confidenceThreshold,
                             ChatHandoverTarget.fromInt(rs.getInt("chat_target")),
-                            ai
+                            ai,
+                            context
                     );
                     chatState.setBadAnswersCount(rs.getInt("bad_answers_count"));
                     Timestamp resetTimestamp = rs.getTimestamp("handover_reset");
@@ -693,7 +700,7 @@ public class DatabaseAI extends Database  {
             throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             String lockedAiid = (chatState.getLockedAiid() != null) ? chatState.getLockedAiid().toString() : null;
-            call.initialise("setChatState", 10)
+            call.initialise("setChatState", 11)
                     .add(devId)
                     .add(chatId)
                     .add(limitSize(chatState.getTopic(), 250))
@@ -705,7 +712,8 @@ public class DatabaseAI extends Database  {
                     .add(chatState.getChatTarget().getIntValue())
                     .add(chatState.getResetHandoverTime() == null
                             ? null : new Timestamp(chatState.getResetHandoverTime().getMillis()))
-                    .add(chatState.getBadAnswersCount());
+                    .add(chatState.getBadAnswersCount())
+                    .add(jsonSerializer.serialize(chatState.getChatContext()));
             return call.executeUpdate() > 0;
         }
     }

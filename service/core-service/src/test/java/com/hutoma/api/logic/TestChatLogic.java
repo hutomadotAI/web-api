@@ -11,6 +11,7 @@ import com.hutoma.api.connectors.chat.ChatBackendConnector;
 import com.hutoma.api.containers.ApiChat;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiResult;
+import com.hutoma.api.containers.sub.ChatContext;
 import com.hutoma.api.containers.sub.ChatHandoverTarget;
 import com.hutoma.api.containers.sub.ChatRequestInfo;
 import com.hutoma.api.containers.sub.ChatResult;
@@ -32,9 +33,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import static com.hutoma.api.common.TestDataHelper.AIID;
-import static com.hutoma.api.common.TestDataHelper.DEVID_UUID;
-import static com.hutoma.api.common.TestDataHelper.getSampleAI;
+import static com.hutoma.api.common.TestDataHelper.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
@@ -284,7 +283,7 @@ public class TestChatLogic extends TestChatBase {
         setupFakeChat(0.2d, response, 0.0d, "");
         when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(new ChatState(DateTime.now(),
                 null, null, UUID.randomUUID(), new HashMap<>(), 0.1d, ChatHandoverTarget.Ai,
-                getSampleAI()));
+                getSampleAI(), new ChatContext()));
         ApiChat result = (ApiChat) getChat(0.1f);
         // Verify we still get the answer from EMB and it doesn't try to get it from the invalid bot
         Assert.assertEquals(response, result.getResult().getAnswer());
@@ -315,7 +314,7 @@ public class TestChatLogic extends TestChatBase {
         UUID cr2Uuid = UUID.randomUUID();
         Map<UUID, ChatResult> results = ImmutableMap.of(cr1Uuid, cr1, cr2Uuid, cr2);
         ChatState initialChatState = new ChatState(DateTime.now(), null, null, cr1Uuid, new HashMap<>(), 0.5d,
-                ChatHandoverTarget.Ai, getSampleAI());
+                ChatHandoverTarget.Ai, getSampleAI(), new ChatContext());
         when(this.fakeChatServices.getMinPMap()).thenReturn(ImmutableMap.of(cr1Uuid, 0.5, cr2Uuid, 0.5));
         when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(initialChatState);
         when(this.fakeChatServices.awaitBackend(BackendServerType.EMB)).thenReturn(results);
@@ -333,7 +332,7 @@ public class TestChatLogic extends TestChatBase {
         UUID cr2Uuid = UUID.randomUUID();
         Map<UUID, ChatResult> results = ImmutableMap.of(cr1Uuid, cr1, cr2Uuid, cr2);
         ChatState initialChatState = new ChatState(DateTime.now(), null, null, cr1Uuid, new HashMap<>(), 0.5d,
-                ChatHandoverTarget.Ai, getSampleAI());
+                ChatHandoverTarget.Ai, getSampleAI(), new ChatContext());
         when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(initialChatState);
         when(this.fakeChatServices.getMinPMap()).thenReturn(ImmutableMap.of(cr1Uuid, 0.5, cr2Uuid, 0.5));
         when(this.fakeChatServices.awaitBackend(BackendServerType.EMB)).thenReturn(results);
@@ -351,7 +350,7 @@ public class TestChatLogic extends TestChatBase {
         UUID cr2Uuid = UUID.randomUUID();
         Map<UUID, ChatResult> results = ImmutableMap.of(cr1Uuid, cr1, cr2Uuid, cr2);
         ChatState initialChatState = new ChatState(DateTime.now(), null, null, cr1Uuid, new HashMap<>(), 0.5d,
-                ChatHandoverTarget.Ai, getSampleAI());
+                ChatHandoverTarget.Ai, getSampleAI(), new ChatContext());
         when(this.fakeChatServices.getMinPMap()).thenReturn(ImmutableMap.of(cr1Uuid, 0.5, cr2Uuid, 0.5));
         when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(initialChatState);
         when(this.fakeChatServices.awaitBackend(BackendServerType.EMB)).thenReturn(results);
@@ -379,7 +378,7 @@ public class TestChatLogic extends TestChatBase {
         UUID cr2Uuid = UUID.randomUUID();
         Map<UUID, ChatResult> results = ImmutableMap.of(cr1Uuid, cr1, cr2Uuid, cr2);
         ChatState initialChatState = new ChatState(DateTime.now(), null, null, cr1Uuid, new HashMap<>(), 0.5d,
-                ChatHandoverTarget.Ai, getSampleAI());
+                ChatHandoverTarget.Ai, getSampleAI(), new ChatContext());
         when(this.fakeChatServices.getMinPMap()).thenReturn(ImmutableMap.of(cr1Uuid, 0.5, cr2Uuid, 0.5));
         when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(initialChatState);
         when(this.fakeChatServices.awaitBackend(BackendServerType.EMB)).thenReturn(results);
