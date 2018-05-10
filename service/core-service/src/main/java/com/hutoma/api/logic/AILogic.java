@@ -187,7 +187,8 @@ public class AILogic {
             }
 
             this.logger.logUserTraceEvent(LOGFROM, "CreateAI", devIdString, LogMap.map("New AIID", aiUUID));
-            return this.databaseAi.getAI(devId, aiUUID, this.jsonSerializer).setSuccessStatus("successfully created");
+            return this.databaseAi.getAI(devId, aiUUID, this.jsonSerializer, transaction)
+                    .setSuccessStatus("successfully created");
         } catch (Exception e) {
             this.logger.logUserExceptionEvent(LOGFROM, devIdString, null, e);
             return ApiError.getInternalServerError();

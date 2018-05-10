@@ -115,6 +115,7 @@ public class TestDataHelper {
 
     public static void mockDatabaseCreateAI(final DatabaseAI fakeDatabase, final UUID createdAiid) throws DatabaseException {
         when(fakeDatabase.getAI(any(), any(), any())).thenReturn(getSampleAI());
+        when(fakeDatabase.getAI(any(), any(), any(), any())).thenReturn(getSampleAI());
         when(fakeDatabase.createAI(any(), anyString(), anyString(), any(), anyBoolean(),
                 anyString(), anyObject(), anyObject(), anyDouble(), anyInt(),
                 anyInt(), any(), anyInt(), anyInt(), any(), any())).thenReturn(createdAiid);
