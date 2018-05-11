@@ -103,7 +103,8 @@ public class TestServiceAi extends ServiceTestBase {
     public void testCreateAI() throws DatabaseException {
         final UUID uuid = UUID.fromString("00000000-0000-0000-0000-000000000000");
         when(this.fakeTools.createNewRandomUUID()).thenReturn(uuid);
-        TestDataHelper.mockDatabaseCreateAI(this.fakeDatabaseAi, uuid);
+        TestDataHelper.mockDatabaseCreateAIInTrans(this.fakeDatabaseAi, uuid);
+        when(this.fakeDatabaseAi.getAI(any(), any(), any(), any())).thenReturn(TestDataHelper.getAI());
         final Response response = target(AI_BASEPATH).request().headers(defaultHeaders).post(
                 Entity.form(getCreateAiRequestParams()));
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());

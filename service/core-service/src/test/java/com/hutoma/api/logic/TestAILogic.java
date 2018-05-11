@@ -108,14 +108,14 @@ public class TestAILogic {
     @Test
     public void testCreate_Valid() throws DatabaseException {
         when(this.fakeTools.createNewRandomUUID()).thenReturn(AIID);
-        TestDataHelper.mockDatabaseCreateAI(this.fakeDatabaseAi, TestDataHelper.AIID);
+        TestDataHelper.mockDatabaseCreateAIInTrans(this.fakeDatabaseAi, TestDataHelper.AIID);
         ApiResult result = callDefaultCreateAI();
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
     }
 
     @Test
     public void testCreate_Valid_Token() throws DatabaseException {
-        TestDataHelper.mockDatabaseCreateAI(this.fakeDatabaseAi, AIID);
+        TestDataHelper.mockDatabaseCreateAIInTrans(this.fakeDatabaseAi, AIID);
         when(this.fakeTools.createNewRandomUUID()).thenReturn(AIID);
         ApiResult result = callDefaultCreateAI();
         Assert.assertTrue(result instanceof ApiAi);
@@ -134,7 +134,7 @@ public class TestAILogic {
 
     @Test
     public void testCreate_DB_NameClash() throws DatabaseException {
-        TestDataHelper.mockDatabaseCreateAI(this.fakeDatabaseAi, UUID.randomUUID());
+        TestDataHelper.mockDatabaseCreateAIInTrans(this.fakeDatabaseAi, UUID.randomUUID());
         ApiResult result = callDefaultCreateAI();
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
     }
@@ -1343,7 +1343,7 @@ public class TestAILogic {
     private ApiResult callDefaultCreateAI() throws DatabaseException {
         when(this.fakeDatabaseAi.getAI(any(), any(), any(), any())).thenReturn(getSampleAI());
         when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(getSampleAI());
-        return this.aiLogic.createAI(DEVID_UUID, "name", "description", true, 0, 0.0, 1, DEFAULT_CHAT_RESPONSES, null, "", -1, -1, null);
+        return this.aiLogic.createAI(DEVID_UUID, "name", "description", true, 0, 0.0, 1, DEFAULT_CHAT_RESPONSES, null, "", -1, -1, "handover");
     }
 }
 
