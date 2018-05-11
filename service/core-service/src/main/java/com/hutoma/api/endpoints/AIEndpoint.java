@@ -285,7 +285,7 @@ public class AIEndpoint {
                 ParameterFilter.getTimezone(requestContext),
                 Strings.isNullOrEmpty(defaultResponses)
                     ? Collections.emptyList()
-                    : this.serializer.deserializeList(defaultResponses),
+                    : this.serializer.deserializeListAutoDetect(defaultResponses),
                 passthroughUrl);
         return result.getResponse(this.serializer).build();
     }

@@ -660,7 +660,7 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
             throws DatabaseException {
         try {
             List<LinkedTreeMap<String, Object>> list =
-                    jsonSerializer.deserializeList(rs.getString("variables"));
+                    jsonSerializer.deserializeListAutoDetect(rs.getString("variables"));
             List<MemoryVariable> variables = new ArrayList<>();
             for (LinkedTreeMap<String, Object> e : list) {
                 @SuppressWarnings("unchecked")

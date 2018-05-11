@@ -723,7 +723,8 @@ public class DatabaseAI extends Database  {
             throws SQLException {
         String localeString = rs.getString("ui_ai_language");
         String timezoneString = rs.getString("ui_ai_timezone");
-        List<String> defaultChatResponses = serializer.deserializeList(rs.getString("default_chat_responses"));
+        List<String> defaultChatResponses = serializer.deserializeListAutoDetect(
+                rs.getString("default_chat_responses"));
         AiBotConfigDefinition definition = (AiBotConfigDefinition) serializer.deserialize(
                 rs.getString("api_keys_desc"), AiBotConfigDefinition.class);
 

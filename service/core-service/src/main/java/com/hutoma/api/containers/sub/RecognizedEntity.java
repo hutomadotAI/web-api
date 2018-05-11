@@ -1,10 +1,9 @@
 package com.hutoma.api.containers.sub;
 
 import com.google.gson.annotations.SerializedName;
-import com.google.gson.internal.LinkedTreeMap;
+import com.google.gson.reflect.TypeToken;
 import com.hutoma.api.common.JsonSerializer;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -37,19 +36,8 @@ public class RecognizedEntity {
      * @return the list of recognized entities
      */
     public static List<RecognizedEntity> deserialize(final String json, final JsonSerializer serializer) {
-        List<RecognizedEntity> entities = new ArrayList<>();
-        List<LinkedTreeMap> list = serializer.deserializeList(json);
-        for (LinkedTreeMap tm : list) {
-            if (tm.containsKey("value") && tm.containsKey("category")) {
-                RecognizedEntity re = new RecognizedEntity(tm.get("category").toString(), tm.get("value").toString());
-                if (tm.containsKey("start") && tm.containsKey("end")) {
-                    re.start = (int) Math.round((double) tm.get("start"));
-                    re.end = (int) Math.round((double) tm.get("end"));
-                }
-                entities.add(re);
-            }
-        }
-        return entities;
+        return serializer.deserializeList(json,
+                new TypeToken<List<RecognizedEntity>>() {}.getType());
     }
 
     /**

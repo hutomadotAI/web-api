@@ -204,7 +204,7 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
             String jsonList = getFirst(form.get(DEFAULT_CHAT_RESPONSES));
             List<String> list = jsonList.isEmpty()
                     ? Collections.singletonList(ChatDefaultHandler.COMPLETELY_LOST_RESULT)
-                    : this.serializer.deserializeList(jsonList);
+                    : this.serializer.deserializeListAutoDetect(jsonList);
             request.setProperty(APIParameter.DefaultChatResponses.toString(), list);
         }
         if (checkList.contains(APIParameter.PublishingType)) {

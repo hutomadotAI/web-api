@@ -15,31 +15,36 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 /**
- * Created by David MG on 02/08/2016.
+ * JSON serializer.
  */
 public class JsonSerializer {
 
     private final Gson gson;
 
-    public JsonSerializer() {
-        this.gson = new GsonBuilder()
-                .setPrettyPrinting()
+    public JsonSerializer(final boolean prettyPrinting) {
+        GsonBuilder builder = new GsonBuilder()
                 .registerTypeAdapter(DateTime.class, new DateTimeSerializer())
                 .registerTypeAdapter(Locale.class, new LocaleTypeAdapter())
-                .enableComplexMapKeySerialization()
-                .create();
+                .enableComplexMapKeySerialization();
+        if (prettyPrinting) {
+            builder.setPrettyPrinting();
+        }
+        this.gson = builder.create();
+    }
+
+    public JsonSerializer() {
+        this(true);
     }
 
     public String serialize(Object obj) {
         return this.gson.toJson(obj);
     }
 
+    @SuppressWarnings("unchecked")
     public Object deserialize(InputStream stream, Class resultClass) throws JsonParseException {
         try {
             Object obj = this.gson.fromJson(new InputStreamReader(stream, StandardCharsets.UTF_8), resultClass);
@@ -52,6 +57,7 @@ public class JsonSerializer {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public Object deserialize(String content, Class resultClass) throws JsonParseException {
         try {
             if (content == null) {
@@ -67,14 +73,13 @@ public class JsonSerializer {
         }
     }
 
-    public <T> List<T> deserializeList(String content) throws JsonParseException {
+    public <T> List<T> deserializeListAutoDetect(String content) throws JsonParseException {
         try {
             if (content == null) {
                 return null;
             }
-
-            List<T> list = this.gson.fromJson(content, new TypeToken<List<T>>() {
-            }.getType());
+            Type listType = new TypeToken<List<T>>(){}.getType();
+            List<T> list = this.gson.fromJson(content, listType);
             if (list == null) {
                 throw new JsonParseException("cannot deserialize valid object from json");
             }
@@ -84,17 +89,16 @@ public class JsonSerializer {
         }
     }
 
-    public Map<String, String> deserializeStringMap(String content) throws JsonParseException {
+    public <T> List<T> deserializeList(String content, Type listType) throws JsonParseException {
         try {
             if (content == null) {
-                return new HashMap<>();
+                return null;
             }
-            Map<String, String> stringMap = this.gson.fromJson(content, new TypeToken<Map<String, String>>() {
-            }.getType());
-            if (stringMap == null) {
+            List<T> list = this.gson.fromJson(content, listType);
+            if (list == null) {
                 throw new JsonParseException("cannot deserialize valid object from json");
             }
-            return stringMap;
+            return list;
         } catch (JsonSyntaxException jse) {
             throw new JsonParseException(jse);
         }
@@ -137,8 +141,7 @@ public class JsonSerializer {
                 return null;
             }
             String localeString = reader.nextString();
-            Locale locale = Locale.forLanguageTag(localeString);
-            return locale;
+            return Locale.forLanguageTag(localeString);
         }
     }
 }
