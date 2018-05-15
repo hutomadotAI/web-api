@@ -700,7 +700,7 @@ public class DatabaseAI extends Database  {
             throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             String lockedAiid = (chatState.getLockedAiid() != null) ? chatState.getLockedAiid().toString() : null;
-            call.initialise("setChatState", 11)
+            call.initialise("setChatState", 13)
                     .add(devId)
                     .add(chatId)
                     .add(limitSize(chatState.getTopic(), 250))

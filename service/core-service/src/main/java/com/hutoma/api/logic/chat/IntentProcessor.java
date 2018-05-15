@@ -204,6 +204,13 @@ public class IntentProcessor {
                 MemoryVariable memoryVariable = (MemoryVariable) entity;
                 chatResult.getChatState().setEntityValue(memoryVariable.getName(), memoryVariable.getCurrentValue());
             }
+
+            // Update context
+            for (MemoryVariable var: currentIntent.getVariables()) {
+                chatResult.getChatState().getChatContext().setValue(
+                        String.format("%s.%s", currentIntent.getName(), var.getLabel()),
+                        var.getCurrentValue());
+            }
         }
 
         // Check if there still are mandatory entities not currently fulfilled
