@@ -31,6 +31,8 @@ public class FacebookMessengerProfile {
         } else {
             this.profileSet.getStarted = new GetStarted(getStarted);
         }
+
+        this.profileDelete.toDelete.add("persistent_menu");
     }
 
     public boolean isSetGreeting() {
