@@ -146,7 +146,7 @@ public class Config extends CommonConfig implements ILoggerConfig, IThreadConfig
      * @return
      */
     public String getFacebookAppId() {
-        return getConfigFromProperties("fb_app_id", "843873759109923");
+        return getConfigFromProperties("fb_app_id", "232321750857183");
     }
 
     /***
@@ -156,7 +156,7 @@ public class Config extends CommonConfig implements ILoggerConfig, IThreadConfig
      * @return
      */
     public String getFacebookAppSecret() {
-        return getConfigFromProperties("fb_app_secret", "fe63413659258d447bff34c048978d9d");
+        return getConfigFromProperties("fb_app_secret", "6ae2f6491641af3fe98bf2725250d393");
     }
 
     /***
