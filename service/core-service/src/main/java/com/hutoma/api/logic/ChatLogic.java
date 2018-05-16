@@ -216,7 +216,7 @@ public class ChatLogic {
         this.telemetryMap.add("ChatOrigin", "Facebook");
         this.telemetryMap.add("QFromFacebookUser", facebookOriginatingUser);
         try {
-            return callChat(devId, aiid, question, chatId, null);
+            return callChat(devId, aiid, chatId, question, null);
         } catch (ChatStateHandler.ChatStateException | ChatFailedException ex) {
             throw ex;
         }
