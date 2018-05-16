@@ -955,11 +955,11 @@ BEGIN
       SELECT `intent`.`id`, `entity`.`id`, `in_required`, `in_n_prompts`, `in_value`, `in_label`
       FROM `intent`, `entity`
       WHERE `intent`.`id` =
-            (SELECT `id` FROM `intent` 
+            (SELECT `id` FROM `intent`
 				WHERE `in_intent_name`=`name` AND `in_aiid`=`aiid` AND `in_aiid` IN
 					(SELECT `aiid` FROM `ai` WHERE `in_dev_id`=`dev_id`))
             AND `entity`.`id` =
-                (SELECT `id` FROM `entity` WHERE 
+                (SELECT `id` FROM `entity` WHERE
 					(`entity`.`dev_id`=`in_dev_id` OR `entity`.`isSystem`=1)
 					AND `in_entity_name`=`name`)
     ON DUPLICATE KEY UPDATE
@@ -1034,9 +1034,9 @@ DELIMITER ;
 /*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 CREATE DEFINER=`aiWriter`@`127.0.0.1` PROCEDURE `addWebhook`(
-    IN `aiid` VARCHAR(50), 
-    IN `intent_name` VARCHAR(250), 
-    IN `endpoint` VARCHAR(2048), 
+    IN `aiid` VARCHAR(50),
+    IN `intent_name` VARCHAR(250),
+    IN `endpoint` VARCHAR(2048),
     IN `enabled` INT(1))
     MODIFIES SQL DATA
 BEGIN
@@ -1065,12 +1065,12 @@ CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `checkIntegrationUser`(
 BEGIN
 
 SELECT COUNT(`dev_id`) AS 'use_count'
-FROM `ai_integration` 
+FROM `ai_integration`
 INNER JOIN `ai` ON `ai_integration`.`aiid`=`ai`.`aiid`
 WHERE `integration`=`in_integration`
 AND `integrated_userid` = `in_integrated_userid`
 AND `dev_id`!=`in_devid`;
-    
+
   END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1160,7 +1160,7 @@ CREATE DEFINER=`entityUser`@`127.0.0.1` PROCEDURE `deleteEntity`(
 BEGIN
     DELETE FROM `entity` WHERE `in_dev_id`=`dev_id` AND `in_entity_id`=`id`
       AND NOT EXISTS (
-     SELECT NULL FROM `intent_variable` iv INNER JOIN `intent` ON `intent`.`id`=iv.`intent_id` INNER JOIN `ai` ON `ai`.`aiid`=`intent`.`aiid` 
+     SELECT NULL FROM `intent_variable` iv INNER JOIN `intent` ON `intent`.`id`=iv.`intent_id` INNER JOIN `ai` ON `ai`.`aiid`=`intent`.`aiid`
      WHERE iv.`entity_id`=`in_entity_id` AND `ai`.`deleted`=0);
 END ;;
 DELIMITER ;
@@ -1207,13 +1207,13 @@ CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `deleteIntegration`(
   IN `in_integration` VARCHAR(50))
 BEGIN
 
-DELETE `ai_integration` 
+DELETE `ai_integration`
 FROM `ai_integration` INNER JOIN `ai` ON `ai`.`aiid` = `ai_integration`.`aiid`
 WHERE `ai`.`dev_id` = `in_devid`
-AND `ai_integration`.`aiid`=`in_aiid` 
+AND `ai_integration`.`aiid`=`in_aiid`
 AND `integration`=`in_integration`;
 
-    
+
   END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1574,10 +1574,10 @@ SELECT `integrated_resource`, `integrated_userid`, `data`, `status`, `active`
 FROM `hutoma`.`ai_integration`
 INNER JOIN `ai` ON `ai`.`aiid` = `ai_integration`.`aiid`
 WHERE `ai`.`dev_id` = `in_devid`
-AND `ai_integration`.`aiid`=`in_aiid` 
+AND `ai_integration`.`aiid`=`in_aiid`
 AND `integration`=`in_integration`
 FOR UPDATE;
-    
+
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -2304,8 +2304,8 @@ DELIMITER ;;
 CREATE DEFINER=`entityUser`@`127.0.0.1` PROCEDURE `getEntities`(
   IN in_dev_id VARCHAR(50))
 BEGIN
-    SELECT `name`, `isSystem` FROM `entity` WHERE 
-    `entity`.`dev_id`=`in_dev_id` OR `entity`.`isSystem`=1;    
+    SELECT `name`, `isSystem` FROM `entity` WHERE
+    `entity`.`dev_id`=`in_dev_id` OR `entity`.`isSystem`=1;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
