@@ -1,6 +1,6 @@
 package com.hutoma.api.connectors.db;
 
-import com.google.gson.internal.LinkedTreeMap;
+import com.google.gson.reflect.TypeToken;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.containers.ApiEntity;
 import com.hutoma.api.containers.ApiIntent;
@@ -10,9 +10,11 @@ import com.hutoma.api.containers.sub.IntentVariable;
 import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.containers.sub.MemoryVariable;
 import com.hutoma.api.logging.ILogger;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import org.joda.time.DateTime;
 
+import java.lang.reflect.Type;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -223,9 +225,9 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
 
     /**
      * Writes (or updates) and entity
-     * @param devid the developer id
+     * @param devid         the developer id
      * @param entityOldName the entity's old name
-     * @param entity the entity's new name
+     * @param entity        the entity's new name
      * @throws DatabaseException if something goes wrong
      */
     public void writeEntity(final UUID devid, final String entityOldName, final ApiEntity entity)
@@ -238,10 +240,10 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
 
     /**
      * Writes (or updates) and entity
-     * @param devid the developer id
+     * @param devid         the developer id
      * @param entityOldName the entity's old name
-     * @param entity the entity's new name
-     * @param transaction the transaction it should be enrolled in
+     * @param entity        the entity's new name
+     * @param transaction   the transaction it should be enrolled in
      * @throws DatabaseException if something goes wrong
      */
     public void writeEntity(final UUID devid, final String entityOldName, final ApiEntity entity,
@@ -400,38 +402,11 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
         }
     }
 
-    public List<MemoryIntent> getMemoryIntentsForChat(final UUID aiid, final UUID chatId,
-                                                      final JsonSerializer jsonSerializer)
-            throws DatabaseException {
-        try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("getMemoryIntentsForChat", 2).add(aiid).add(chatId);
-            ResultSet rs = call.executeQuery();
-            List<MemoryIntent> intents = new ArrayList<>();
-            try {
-                while (rs.next()) {
-                    intents.add(loadMemoryIntent(rs, jsonSerializer));
-                }
-            } catch (SQLException sqle) {
-                throw new DatabaseException(sqle);
-            }
-            return intents;
-        }
-    }
+    public void resetIntentsStateForAi(final UUID devId, final UUID aiid) throws DatabaseException {
 
-    public boolean deleteAllMemoryIntents(final UUID aiid) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("deleteAllMemoryIntents", 1).add(aiid);
-            return call.executeUpdate() > 0;
-        }
-    }
-
-    public boolean deleteMemoryIntent(final MemoryIntent intent) throws DatabaseException {
-        try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("deleteMemoryIntent", 3)
-                    .add(intent.getName())
-                    .add(intent.getAiid())
-                    .add(intent.getChatId());
-            return call.executeUpdate() > 0;
+            call.initialise("resetChatStatesForAi", 2).add(devId).add(aiid);
+            call.executeUpdate();
         }
     }
 
@@ -656,28 +631,13 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
                 .executeUpdate();
     }
 
+    @SuppressFBWarnings("DM_NEW_FOR_GETCLASS")
     private static MemoryIntent loadMemoryIntent(final ResultSet rs, final JsonSerializer jsonSerializer)
             throws DatabaseException {
         try {
-            List<LinkedTreeMap<String, Object>> list =
-                    jsonSerializer.deserializeListAutoDetect(rs.getString("variables"));
-            List<MemoryVariable> variables = new ArrayList<>();
-            for (LinkedTreeMap<String, Object> e : list) {
-                @SuppressWarnings("unchecked")
-                MemoryVariable memoryVariable = new MemoryVariable(
-                        e.get("entity").toString(),
-                        e.containsKey("value") ? e.get("value").toString() : null,
-                        (boolean) e.get("mandatory"),
-                        (List<String>) e.get("entity_keys"),
-                        (List<String>) e.get("prompts"),
-                        (int) Math.round((double) e.get("max_prompts")),
-                        (int) Math.round((double) e.get("times_prompted")),
-                        (boolean) e.get("system_entity"),
-                        (boolean) e.get("persistent"),
-                        e.containsKey("label") ? e.get("label").toString() : "");
-                memoryVariable.setRequested((boolean) e.get("requested"));
-                variables.add(memoryVariable);
-            }
+            Type listType = new TypeToken<List<MemoryVariable>>() {}.getClass();
+            List<MemoryVariable> variables = jsonSerializer.deserializeList(rs.getString("variables"),
+                    listType);
             return new MemoryIntent(rs.getString("name"),
                     UUID.fromString(rs.getString("aiid")),
                     UUID.fromString(rs.getString("chatId")),

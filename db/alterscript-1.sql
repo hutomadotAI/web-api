@@ -1,9 +1,3 @@
-/*
-The purpose of this script file is to include all the db alterations
-required for the next deployment.
-*/
-
-
 USE `hutoma`;
 
 ALTER TABLE `chatState` ADD COLUMN `context` MEDIUMTEXT NULL DEFAULT NULL AFTER `bad_answers_count`;

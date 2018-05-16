@@ -5,25 +5,42 @@ import com.hutoma.api.containers.ApiAi;
 
 import org.joda.time.DateTime;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
  * Chat state.
  */
 public class ChatState {
+
+    // Timestamp of the chat interaction
     private DateTime timestamp;
+    // AIID for the bot currently locked for the conversation (until it has a low scoring answer)
     private UUID lockedAiid;
+    // Current topic - TODO: never really used, consider removing
     private String topic;
+    // Conversation history - TODO: only used in WNET, consider removing
     private String history;
     private HashMap<String, String> entityValues;
     private double confidenceThreshold;
+    // Chat target (whether it's been handed over to another system or not)
     private ChatHandoverTarget chatTarget;
+    // ChatServices service
     private AIChatServices aiChatServices;
+    // Timestamp for when we should reset the handover and pass the control back to the AI
     private DateTime resetHandoverTime;
+    // Number of low scoring answers in a row
     private int badAnswersCount;
+    // Current context for the conversation
     private ChatContext chatContext;
+    // List of intents that are currently in flight
+    private List<MemoryIntent> currentIntents;
 
+    // We want to carry this structure around for convenience for the handlers (and avoid
+    // having to re-load this from DB multiple times)
     private transient ApiAi ai;
 
     public ChatState(final DateTime timestamp, final String topic, final String history, final UUID lockedAiid,
@@ -38,6 +55,7 @@ public class ChatState {
         this.chatTarget = chatTarget;
         this.ai = ai;
         this.chatContext = chatContext;
+        this.currentIntents = new ArrayList<>();
     }
 
     public static ChatState getEmpty() {
@@ -141,5 +159,34 @@ public class ChatState {
 
     public ChatContext getChatContext() {
         return this.chatContext;
+    }
+
+    public List<MemoryIntent> getCurrentIntents() {
+        return this.currentIntents;
+    }
+
+    public void setCurrentIntents(final List<MemoryIntent> currentIntents) {
+        this.currentIntents = currentIntents;
+    }
+
+    public void clearFromCurrentIntents(final List<MemoryIntent> intentsToRemove) {
+        this.currentIntents.removeAll(intentsToRemove);
+    }
+
+    public MemoryIntent getMemoryIntent(final String intentName) {
+        Optional<MemoryIntent> opt = this.currentIntents.stream()
+                .filter(x -> x.getName().equals(intentName)).findFirst();
+        return opt.orElse(null);
+    }
+
+    public void updateMemoryIntent(final MemoryIntent intent) {
+        for (int i = 0; i < this.currentIntents.size(); i++) {
+            if (intent.getName().equals(this.currentIntents.get(i).getName())) {
+                this.currentIntents.set(i, intent);
+                return;
+            }
+        }
+        // not found, add it
+        this.currentIntents.add(intent);
     }
 }

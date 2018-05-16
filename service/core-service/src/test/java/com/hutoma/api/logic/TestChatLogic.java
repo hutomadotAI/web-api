@@ -159,9 +159,9 @@ public class TestChatLogic extends TestChatBase {
     }
 
     /*
-         * Tests for correct passthrough on bots that provide a valid url.
-         * @throws RequestBase.AiControllerException.
-         */
+     * Tests for correct passthrough on bots that provide a valid url.
+     * @throws RequestBase.AiControllerException.
+     */
     @Test
     public void testChat_botPassthrough() throws ChatBackendConnector.AiControllerException, WebHooks.WebHookException,
             ChatLogic.ChatFailedException {
@@ -179,9 +179,9 @@ public class TestChatLogic extends TestChatBase {
     }
 
     /*
-        * Tests that passthrough is ignored with an empty string url.
-        * @throws RequestBase.AiControllerException.
-        */
+     * Tests that passthrough is ignored with an empty string url.
+     * @throws RequestBase.AiControllerException.
+     */
     @Test
     public void testChat_botPassthroughIgnored() throws ChatBackendConnector.AiControllerException, WebHooks.WebHookException,
             ChatLogic.ChatFailedException {
@@ -262,7 +262,7 @@ public class TestChatLogic extends TestChatBase {
     @Test
     public void testChat_IntentError() throws ChatBackendConnector.AiControllerException, ChatLogic.IntentException {
         setupFakeChat(0.7d, SEMANTICRESULT, 0.5d, AIMLRESULT);
-        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), anyString()))
+        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), anyString(), any()))
                 .thenThrow(new ChatLogic.IntentException("test"));
         ApiResult result = getChat(0.2f);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
@@ -278,7 +278,7 @@ public class TestChatLogic extends TestChatBase {
 
     @Test
     public void testChat_botAffinity_noBots_stateHasUnknownLockedAiid() throws ChatBackendConnector.AiControllerException,
-            ChatStateHandler.ChatStateException{
+            ChatStateHandler.ChatStateException {
         final String response = "emb";
         setupFakeChat(0.2d, response, 0.0d, "");
         when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(new ChatState(DateTime.now(),
@@ -305,7 +305,7 @@ public class TestChatLogic extends TestChatBase {
 
     @Test
     public void testChat_botAffinity_bots_lockedToBot_stillLockedEvenWithOtherHigherConfidence() throws ChatBackendConnector.AiControllerException,
-            ChatStateHandler.ChatStateException{
+            ChatStateHandler.ChatStateException {
         ChatResult cr1 = new ChatResult("Hi");
         cr1.setScore(0.6);
         ChatResult cr2 = new ChatResult("Hi2");
@@ -323,7 +323,7 @@ public class TestChatLogic extends TestChatBase {
 
     @Test
     public void testChat_botAffinity_bots_lockedToBot_lowConfidenceSwitchToHigherConfidenceBot() throws ChatBackendConnector.AiControllerException,
-            ChatStateHandler.ChatStateException{
+            ChatStateHandler.ChatStateException {
         ChatResult cr1 = new ChatResult("Hi");
         cr1.setScore(0.2);
         ChatResult cr2 = new ChatResult("Hi2");
@@ -341,7 +341,7 @@ public class TestChatLogic extends TestChatBase {
 
     @Test
     public void testChat_botAffinity_bots_lockedToBot_allLowConfidence() throws ChatBackendConnector.AiControllerException,
-            ChatStateHandler.ChatStateException{
+            ChatStateHandler.ChatStateException {
         ChatResult cr1 = new ChatResult("question");
         cr1.setScore(0.2);
         ChatResult cr2 = new ChatResult("question");
@@ -368,7 +368,7 @@ public class TestChatLogic extends TestChatBase {
 
     @Test
     public void testChat_botAffinity_bots_lockedToBot_emb_aiml_score_order() throws ChatBackendConnector.AiControllerException,
-            ChatStateHandler.ChatStateException{
+            ChatStateHandler.ChatStateException {
         // BOT1 has higher score in EMB
         ChatResult cr1 = new ChatResult("question");
         cr1.setScore(0.3);

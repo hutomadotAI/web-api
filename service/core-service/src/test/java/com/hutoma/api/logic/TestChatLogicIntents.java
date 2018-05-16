@@ -47,9 +47,9 @@ public class TestChatLogicIntents extends TestChatBase {
         MemoryIntent mi = new MemoryIntent(intentName, AIID, CHATID, Collections.singletonList(mv));
         List<MemoryIntent> miList = Collections.singletonList(mi);
         setupFakeChat(0.7d, MemoryIntentHandler.META_INTENT_TAG + intentName, 0.0d, AIMLRESULT);
-        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), anyString())).thenReturn(mi);
-        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), anyString())).thenReturn(mi);
-        when(this.fakeIntentHandler.getCurrentIntentsStateForChat(any(), any())).thenReturn(miList);
+        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), anyString(), any())).thenReturn(mi);
+        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), anyString(), any())).thenReturn(mi);
+        when(this.fakeIntentHandler.getCurrentIntentsStateForChat(any())).thenReturn(miList);
         ApiResult result = getChat(0.5f);
         ChatResult r = ((ApiChat) result).getResult();
         Assert.assertEquals(1, r.getIntents().size());
@@ -69,7 +69,7 @@ public class TestChatLogicIntents extends TestChatBase {
         Assert.assertTrue(mi.isFulfilled());
         Assert.assertEquals(1, result.getResult().getIntents().size());
         Assert.assertTrue(result.getResult().getIntents().get(0).isFulfilled());
-        verify(this.fakeIntentHandler).clearIntents(any());
+        Assert.assertTrue(result.getResult().getChatState().getCurrentIntents().isEmpty());
     }
 
     /***
@@ -92,11 +92,11 @@ public class TestChatLogicIntents extends TestChatBase {
         MemoryIntent mi = new MemoryIntent(intentName, AIID, CHATID, Collections.singletonList(mv));
         setupFakeChat(0.7d, MemoryIntentHandler.META_INTENT_TAG + intentName,
                 0.0d, AIMLRESULT);
-        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), anyString())).thenReturn(mi);
+        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), anyString(), any())).thenReturn(mi);
         ApiIntent intent = new ApiIntent(intentName, "", "");
         intent.setResponses(Collections.singletonList("response"));
         when(this.fakeIntentHandler.getIntent(any(), any())).thenReturn(intent);
-        when(this.fakeIntentHandler.getCurrentIntentsStateForChat(any(), any())).thenReturn(Collections.singletonList(mi));
+        when(this.fakeIntentHandler.getCurrentIntentsStateForChat(any())).thenReturn(Collections.singletonList(mi));
         return mi;
     }
 
@@ -110,11 +110,9 @@ public class TestChatLogicIntents extends TestChatBase {
         ChatResult r = ((ApiChat) result).getResult();
         // The answer is the prompt
         Assert.assertEquals(MEMORY_VARIABLE_PROMPT, r.getAnswer());
-        // The intent status is updated to storage
-        verify(this.fakeIntentHandler).updateStatus(mi);
         // And timesPrompted is incremented
         Assert.assertEquals(1, mi.getVariables().get(0).getTimesPrompted());
-        verify(this.fakeIntentHandler, never()).clearIntents(any());
+        Assert.assertFalse(r.getChatState().getCurrentIntents().isEmpty());
     }
 
     /***
@@ -135,7 +133,7 @@ public class TestChatLogicIntents extends TestChatBase {
         // And timesPrompted is not incremented
         Assert.assertEquals(1, mi.getVariables().get(0).getTimesPrompted());
         // we need to clear the intent if we exceeded the number of prompts
-        verify(this.fakeIntentHandler, times(1)).clearIntents(any());
+        verify(this.fakeIntentHandler, times(1)).clearIntents(any(), any());
     }
 
     /***
@@ -150,10 +148,10 @@ public class TestChatLogicIntents extends TestChatBase {
         }};
         when(this.fakeRecognizer.retrieveEntities(any(), any())).thenReturn(entities);
         Assert.assertFalse(mi.isFulfilled());
-        ApiResult result = getChat(0.5f, "nothing to see here.");
+        ApiChat result = (ApiChat) getChat(0.5f, "nothing to see here.");
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
         Assert.assertTrue(mi.isFulfilled());
-        verify(this.fakeIntentHandler).clearIntents(any());
+        Assert.assertTrue(result.getResult().getChatState().getCurrentIntents().isEmpty());
     }
 
     /***
@@ -169,7 +167,6 @@ public class TestChatLogicIntents extends TestChatBase {
         ApiResult result = getChat(0.5f, "nothing to see here.");
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
         Assert.assertFalse(mi.isFulfilled());
-        verify(this.fakeIntentHandler, never()).updateStatus(mi);
     }
 
 
@@ -185,17 +182,17 @@ public class TestChatLogicIntents extends TestChatBase {
                 Arrays.asList("a", "b"), Collections.singletonList("prompt"), 1, 0, true, false, "label1");
         MemoryIntent mi = new MemoryIntent(intentName, AIID, CHATID, Collections.singletonList(mv));
         setupFakeChat(0.7d, MemoryIntentHandler.META_INTENT_TAG + intentName, 0.0d, AIMLRESULT);
-        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), anyString())).thenReturn(mi);
+        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), anyString(), any())).thenReturn(mi);
         ApiIntent intent = new ApiIntent(intentName, "", "");
         intent.setResponses(Collections.singletonList("response"));
         when(this.fakeIntentHandler.getIntent(any(), any())).thenReturn(intent);
-        when(this.fakeIntentHandler.getCurrentIntentsStateForChat(any(), any())).thenReturn(Collections.singletonList(mi));
+        when(this.fakeIntentHandler.getCurrentIntentsStateForChat(any())).thenReturn(Collections.singletonList(mi));
         ApiChat result = (ApiChat) getChat(0.5f);
         Assert.assertFalse(mi.isFulfilled());
         result = (ApiChat) getChat(0.5f, "nothing to see here.");
         Assert.assertTrue(mi.getVariables().get(0).getCurrentValue().equals("nothing to see here."));
         Assert.assertTrue(mi.isFulfilled());
-        verify(this.fakeIntentHandler).clearIntents(any());
+        Assert.assertTrue(result.getResult().getChatState().getCurrentIntents().isEmpty());
     }
 
     /***
@@ -214,11 +211,11 @@ public class TestChatLogicIntents extends TestChatBase {
                 null, Collections.singletonList("prompt2"), 3, 0, true, false, labelSysAny2);
         MemoryIntent mi = new MemoryIntent(intentName, AIID, CHATID, Arrays.asList(mv1, mv2));
         setupFakeChat(0.7d, MemoryIntentHandler.META_INTENT_TAG + intentName, 0.0d, AIMLRESULT);
-        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), anyString())).thenReturn(mi);
+        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), anyString(), any())).thenReturn(mi);
         ApiIntent intent = new ApiIntent(intentName, "", "");
         intent.setResponses(Collections.singletonList("response"));
         when(this.fakeIntentHandler.getIntent(any(), any())).thenReturn(intent);
-        when(this.fakeIntentHandler.getCurrentIntentsStateForChat(any(), any())).thenReturn(Collections.singletonList(mi));
+        when(this.fakeIntentHandler.getCurrentIntentsStateForChat(any())).thenReturn(Collections.singletonList(mi));
 
         // First question triggers the intent
         ApiChat result = (ApiChat) getChat(0.5f, "nothing to see here");
@@ -290,7 +287,7 @@ public class TestChatLogicIntents extends TestChatBase {
         Assert.assertEquals(mi.getName(), r.getIntents().get(0).getName());
         Assert.assertFalse(r.getIntents().get(0).isFulfilled());
 
-        when(this.fakeIntentHandler.getCurrentIntentsStateForChat(any(), any()))
+        when(this.fakeIntentHandler.getCurrentIntentsStateForChat(any()))
                 .thenReturn(Collections.singletonList(r.getIntents().get(0)));
         // Second question, the answer to the prompt with the right entity value
         final String varValue = "_value_";
@@ -328,7 +325,7 @@ public class TestChatLogicIntents extends TestChatBase {
         Assert.assertEquals(mi.getName(), r.getIntents().get(0).getName());
         Assert.assertFalse(r.getIntents().get(0).isFulfilled());
 
-        when(this.fakeIntentHandler.getCurrentIntentsStateForChat(any(), any()))
+        when(this.fakeIntentHandler.getCurrentIntentsStateForChat(any()))
                 .thenReturn(Collections.singletonList(mi));
 
         // Second question, the answer to the prompt with the right entity value
@@ -368,8 +365,8 @@ public class TestChatLogicIntents extends TestChatBase {
         // Verify answer is the prompt for the first variable
         Assert.assertEquals(mi.getVariables().get(0).getPrompts().get(0), r.getAnswer());
         Assert.assertEquals(1, r.getIntents().get(0).getVariables().get(0).getTimesPrompted());
-        verify(this.fakeIntentHandler).updateStatus(mi);
-        verify(this.fakeIntentHandler, never()).clearIntents(any());
+        Assert.assertEquals(1, r.getChatState().getCurrentIntents().size());
+        Assert.assertEquals(mi, r.getChatState().getCurrentIntents().get(0));
 
         // Second question, the answer to the prompt with the right entity value
         final String varValue = "_value_";
@@ -388,8 +385,7 @@ public class TestChatLogicIntents extends TestChatBase {
         Assert.assertEquals(1, r.getIntents().get(0).getVariables().get(0).getTimesPrompted());
         // Score is 1.0
         Assert.assertEquals(1.0d, r.getScore(), 0.00000001d);
-        verify(this.fakeIntentHandler).updateStatus(mi);
-        verify(this.fakeIntentHandler).clearIntents(any());
+        Assert.assertTrue(r.getChatState().getCurrentIntents().isEmpty());
     }
 
     /***
@@ -418,7 +414,7 @@ public class TestChatLogicIntents extends TestChatBase {
 
         // Next answer should exit intent handling and go through normal chat processing
         final String embAnswer = "emb answer";
-        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), anyString())).thenReturn(null);
+        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), anyString(), any())).thenReturn(null);
         ChatResult chatResult = new ChatResult("Hi");
         chatResult.setScore(0.9f);
         chatResult.setAnswer(embAnswer);
@@ -438,7 +434,7 @@ public class TestChatLogicIntents extends TestChatBase {
         final String intentName = "intentA";
         MemoryIntent mi = new MemoryIntent(intentName, AIID, CHATID, Collections.emptyList());
         setupFakeChat(0.9d, MemoryIntentHandler.META_INTENT_TAG + intentName, 0.3d, "");
-        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), any())).thenReturn(mi);
+        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), any(), any())).thenReturn(mi);
         ApiResult result = getChat(0.5f, "nothing to see here.");
         ChatResult r = ((ApiChat) result).getResult();
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
@@ -452,7 +448,7 @@ public class TestChatLogicIntents extends TestChatBase {
      */
     @Test
     public void testChat_multiVariable_promptsExhausted_intentReset()
-            throws ChatBackendConnector.AiControllerException, ChatLogic.IntentException {
+            throws ChatBackendConnector.AiControllerException, ChatLogic.IntentException, ChatStateHandler.ChatStateException {
         final int maxPrompts = 1;
         MemoryVariable mv1 = new MemoryVariable(
                 "var1",
@@ -477,7 +473,7 @@ public class TestChatLogicIntents extends TestChatBase {
                 false,
                 "label2");
         MemoryIntent mi = new MemoryIntent("intent", AIID, UUID.randomUUID(), Arrays.asList(mv1, mv2), false);
-        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), any())).thenReturn(mi);
+        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), any(), any())).thenReturn(mi);
         setupFakeChat(0.7d, MemoryIntentHandler.META_INTENT_TAG + "intent1", 0.0d, AIMLRESULT);
 
         ApiResult result = null;
@@ -494,7 +490,7 @@ public class TestChatLogicIntents extends TestChatBase {
         }
         // Answer to the last prompt with something unrelated, so that the intent is cleared
         result = getChat(0.5f, "nothing to see here.");
-        verify(this.fakeIntentHandler).clearIntents(Collections.singletonList(mi));
+        verify(this.fakeIntentHandler, times(1)).clearIntents(any(), any());
     }
 
     /***
@@ -516,10 +512,10 @@ public class TestChatLogicIntents extends TestChatBase {
 
 
         setupFakeChat(0.7d, MemoryIntentHandler.META_INTENT_TAG + intentName, 0.0d, AIMLRESULT);
-        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), anyString())).thenReturn(mi);
+        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), anyString(), any())).thenReturn(mi);
         ApiIntent intent = new ApiIntent(intentName, "", "");
         when(this.fakeIntentHandler.getIntent(any(), any())).thenReturn(intent);
-        when(this.fakeIntentHandler.getCurrentIntentsStateForChat(any(), any())).thenReturn(Collections.singletonList(mi));
+        when(this.fakeIntentHandler.getCurrentIntentsStateForChat(any())).thenReturn(Collections.singletonList(mi));
 
         // Issue the first chat request
         ChatResult result = ((ApiChat) getChat(0.5f)).getResult();

@@ -32,8 +32,8 @@ public class ChatEmbHandler extends ChatGenericBackend implements IChatHandler {
     @VisibleForTesting
     @Inject
     public ChatEmbHandler(final IMemoryIntentHandler intentHandler,
-                   final IntentProcessor intentLogic,
-                   final ILogger logger) {
+                          final IntentProcessor intentLogic,
+                          final ILogger logger) {
         this.intentHandler = intentHandler;
         this.intentLogic = intentLogic;
         this.logger = logger;
@@ -95,14 +95,14 @@ public class ChatEmbHandler extends ChatGenericBackend implements IChatHandler {
     }
 
     private boolean processIntents(final ChatRequestInfo requestInfo,
-                                final ChatResult result,
-                                final ChatState state,
-                                final LogMap telemetryMap)
+                                   final ChatResult result,
+                                   final ChatState state,
+                                   final LogMap telemetryMap)
             throws ChatLogic.IntentException, WebHooks.WebHookException {
 
         UUID aiidFromResult = result.getAiid();
         MemoryIntent memoryIntent = this.intentHandler.parseAiResponseForIntent(
-                requestInfo.getDevId(), aiidFromResult, requestInfo.getChatId(), result.getAnswer());
+                requestInfo.getDevId(), aiidFromResult, requestInfo.getChatId(), result.getAnswer(), state);
         if (memoryIntent != null // Intent was recognized
                 && !memoryIntent.isFulfilled()) {
 
@@ -124,8 +124,8 @@ public class ChatEmbHandler extends ChatGenericBackend implements IChatHandler {
     }
 
     private ChatResult getTopResult(final ChatState state,
-                                  final ChatRequestInfo requestInfo,
-                                  final LogMap telemetryMap)
+                                    final ChatRequestInfo requestInfo,
+                                    final LogMap telemetryMap)
             throws ChatBackendConnector.AiControllerException {
 
         Map<UUID, ChatResult> allResults = this.chatServices.awaitBackend(BackendServerType.EMB);

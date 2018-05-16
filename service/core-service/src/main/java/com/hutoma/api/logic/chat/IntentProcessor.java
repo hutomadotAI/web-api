@@ -56,8 +56,10 @@ public class IntentProcessor {
      * @return whether there was an intent to process or not
      * @throws ChatLogic.IntentException WebHooks.WebHookException
      */
-    public boolean processIntent(final ChatRequestInfo chatInfo, final UUID aiidForMemoryIntents,
-                                 final MemoryIntent currentIntent, final ChatResult chatResult,
+    public boolean processIntent(final ChatRequestInfo chatInfo,
+                                 final UUID aiidForMemoryIntents,
+                                 final MemoryIntent currentIntent,
+                                 final ChatResult chatResult,
                                  final LogMap telemetryMap)
             throws ChatLogic.IntentException, WebHooks.WebHookException {
 
@@ -70,7 +72,7 @@ public class IntentProcessor {
         intentLog.put("Name", currentIntent.getName());
 
         List<MemoryIntent> intentsToClear = new ArrayList<>();
-        boolean handledIntent = false;
+        boolean handledIntent;
 
         // Are we in the middle of an entity value request?
         Optional<MemoryVariable> requestedVariable = currentIntent.getVariables()
@@ -140,7 +142,7 @@ public class IntentProcessor {
             // If we get a webhook exception it means the variables have been processed and we have fulfilled
             // the intent, thus triggering the webhook. So for now clear the variables so that the intent can be
             // fully processed again.
-            this.intentHandler.clearIntents(Collections.singletonList(currentIntent));
+            this.intentHandler.clearIntents(chatResult.getChatState(), Collections.singletonList(currentIntent));
 
             // rethrow for bubbling up
             throw ex;
@@ -148,13 +150,17 @@ public class IntentProcessor {
 
         chatResult.setIntents(Collections.singletonList(currentIntent));
 
-        if (!intentsToClear.contains(currentIntent)) {
-            this.intentHandler.updateStatus(currentIntent);
+        if (currentIntent.isFulfilled()) {
+            chatResult.getChatState().getCurrentIntents().remove(currentIntent);
+        } else {
+            if (!intentsToClear.contains(currentIntent)) {
+                chatResult.getChatState().updateMemoryIntent(currentIntent);
+            }
         }
 
         // Clear fulfilled intents or intents which have exhausted their prompts, so they can be triggered again
         if (!intentsToClear.isEmpty()) {
-            this.intentHandler.clearIntents(intentsToClear);
+            this.intentHandler.clearIntents(chatResult.getChatState(), intentsToClear);
         }
 
         intentLog.put("Handled", handledIntent);

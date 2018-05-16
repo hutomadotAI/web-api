@@ -1,5 +1,6 @@
 package com.hutoma.api.connectors.db;
 
+import com.google.gson.reflect.TypeToken;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Pair;
 import com.hutoma.api.connectors.BackendStatus;
@@ -13,12 +14,14 @@ import com.hutoma.api.containers.sub.AiMinP;
 import com.hutoma.api.containers.sub.ChatContext;
 import com.hutoma.api.containers.sub.ChatHandoverTarget;
 import com.hutoma.api.containers.sub.ChatState;
+import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.containers.sub.WebHook;
 import com.hutoma.api.logging.ILogger;
 
 import org.elasticsearch.common.Strings;
 import org.joda.time.DateTime;
 
+import java.lang.reflect.Type;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -31,7 +34,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
-public class DatabaseAI extends Database  {
+public class DatabaseAI extends Database {
 
 
     @Inject
@@ -252,7 +255,7 @@ public class DatabaseAI extends Database  {
     }
 
     public ApiAi getAI(final UUID devid, final UUID aiid, final JsonSerializer serializer,
-                              final DatabaseTransaction transaction) throws DatabaseException {
+                       final DatabaseTransaction transaction) throws DatabaseException {
         if (transaction == null) {
             throw new IllegalArgumentException("transaction");
         }
@@ -511,7 +514,7 @@ public class DatabaseAI extends Database  {
                                               final List<String> defaultChatResponses,
                                               final JsonSerializer serializer,
                                               final DatabaseTransaction transaction)
-        throws DatabaseException {
+            throws DatabaseException {
 
         try (DatabaseCall call = transaction == null ? this.callProvider.get() : transaction.getDatabaseCall()) {
             call.initialise("updateDefaultChatResponses", 3)
@@ -598,7 +601,6 @@ public class DatabaseAI extends Database  {
     }
 
 
-
     public List<AiMinP> getAisLinkedToAi(final UUID devId, final UUID aiid) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("getAisLinkedToAi", 2)
@@ -667,8 +669,8 @@ public class DatabaseAI extends Database  {
                     }
                     String contextJson = rs.getString("context");
                     ChatContext context = Strings.isNullOrEmpty(contextJson)
-                        ? new ChatContext()
-                        : (ChatContext) jsonSerializer.deserialize(contextJson, ChatContext.class);
+                            ? new ChatContext()
+                            : (ChatContext) jsonSerializer.deserialize(contextJson, ChatContext.class);
                     ChatState chatState = new ChatState(
                             new DateTime(rs.getTimestamp("timestamp")),
                             rs.getString("topic"),
@@ -680,6 +682,13 @@ public class DatabaseAI extends Database  {
                             ai,
                             context
                     );
+                    String intentsJson = rs.getString("current_intents");
+                    Type memoryIntentListType = new TypeToken<List<MemoryIntent>>() {
+                    }.getType();
+                    List<MemoryIntent> currentIntents = Strings.isNullOrEmpty(intentsJson)
+                            ? new ArrayList<>()
+                            : jsonSerializer.deserializeList(intentsJson, memoryIntentListType);
+                    chatState.setCurrentIntents(currentIntents);
                     chatState.setBadAnswersCount(rs.getInt("bad_answers_count"));
                     Timestamp resetTimestamp = rs.getTimestamp("handover_reset");
                     chatState.setHandoverResetTime(resetTimestamp == null ? null : new DateTime(resetTimestamp));
@@ -703,6 +712,7 @@ public class DatabaseAI extends Database  {
             call.initialise("setChatState", 13)
                     .add(devId)
                     .add(chatId)
+                    .add(chatState.getAi().getAiid())
                     .add(limitSize(chatState.getTopic(), 250))
                     .add(limitSize(chatState.getHistory(), 1024))
                     .add(lockedAiid)
@@ -713,13 +723,14 @@ public class DatabaseAI extends Database  {
                     .add(chatState.getResetHandoverTime() == null
                             ? null : new Timestamp(chatState.getResetHandoverTime().getMillis()))
                     .add(chatState.getBadAnswersCount())
-                    .add(jsonSerializer.serialize(chatState.getChatContext()));
+                    .add(jsonSerializer.serialize(chatState.getChatContext()))
+                    .add(jsonSerializer.serialize(chatState.getCurrentIntents()));
             return call.executeUpdate() > 0;
         }
     }
 
     private static ApiAi getAiFromResultset(final ResultSet rs, final BackendStatus backendStatus,
-                                     final JsonSerializer serializer)
+                                            final JsonSerializer serializer)
             throws SQLException {
         String localeString = rs.getString("ui_ai_language");
         String timezoneString = rs.getString("ui_ai_timezone");

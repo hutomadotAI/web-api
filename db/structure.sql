@@ -293,6 +293,7 @@ DROP TABLE IF EXISTS `chatState`;
 CREATE TABLE `chatState` (
   `dev_id` varchar(50) NOT NULL,
   `chat_id` varchar(50) NOT NULL,
+  `base_aiid` varchar(50) DEFAULT NULL,
   `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `topic` varchar(250) DEFAULT NULL,
   `history` varchar(1024) DEFAULT NULL,
@@ -303,8 +304,10 @@ CREATE TABLE `chatState` (
   `handover_reset` timestamp NULL DEFAULT NULL,
   `bad_answers_count` int(11) NOT NULL DEFAULT 0,
   `context` MEDIUMTEXT NULL DEFAULT NULL,
+  `current_intents` mediumtext,
   PRIMARY KEY (`dev_id`,`chat_id`),
-  UNIQUE KEY `chat_id_UNIQUE` (`chat_id`)
+  UNIQUE KEY `chat_id_UNIQUE` (`chat_id`),
+  KEY `idx_devid_aiid` (`dev_id`,`base_aiid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -584,27 +587,6 @@ CREATE TABLE `invite_codes` (
   `remaining_uses` int(11) NOT NULL,
   `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`code`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `memoryIntent`
---
-
-DROP TABLE IF EXISTS `memoryIntent`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `memoryIntent` (
-  `aiid` varchar(50) NOT NULL,
-  `chatId` varchar(50) NOT NULL,
-  `name` varchar(50) NOT NULL,
-  `variables` mediumtext NOT NULL,
-  `lastAccess` datetime NOT NULL,
-  `isFulfilled` tinyint(1) NOT NULL,
-  PRIMARY KEY (`aiid`,`chatId`),
-  UNIQUE KEY `idx_memoryIntent_aiid_chatId_name` (`aiid`,`chatId`,`name`),
-  KEY `idx_memoryIntent_lastAccess` (`lastAccess`),
-  KEY `idx_aiid` (`aiid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1162,25 +1144,6 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `deleteAllMemoryIntents` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8 */ ;
-/*!50003 SET character_set_results = utf8 */ ;
-/*!50003 SET collation_connection  = utf8_general_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = '' */ ;
-DELIMITER ;;
-CREATE DEFINER=`userTableWriter`@`127.0.0.1` PROCEDURE `deleteAllMemoryIntents`(IN `param_aiid` VARCHAR(50))
-BEGIN
-    DELETE FROM memoryIntent WHERE aiid = param_aiid;
-  END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `deleteEntity` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -1395,28 +1358,6 @@ BEGIN
              AND `in_aiid` IN
                  (SELECT `aiid` FROM `ai` WHERE `in_dev_id`=`dev_id`));
 
-  END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `deleteMemoryIntent` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8 */ ;
-/*!50003 SET character_set_results = utf8 */ ;
-/*!50003 SET collation_connection  = utf8_general_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = '' */ ;
-DELIMITER ;;
-CREATE DEFINER=`userTableWriter`@`127.0.0.1` PROCEDURE `deleteMemoryIntent`(
-  IN `param_name` VARCHAR(50),
-  IN `param_aiid` VARCHAR(50),
-  IN `param_chatId` VARCHAR(50))
-BEGIN
-    DELETE FROM memoryIntent WHERE aiid = param_aiid AND name = param_name AND chatId = param_chatId;
   END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -2741,44 +2682,7 @@ FOR UPDATE;
 
 END ;;
 DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `getMemoryIntent` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8 */ ;
-/*!50003 SET character_set_results = utf8 */ ;
-/*!50003 SET collation_connection  = utf8_general_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = '' */ ;
-DELIMITER ;;
-CREATE DEFINER=`userTableReader`@`127.0.0.1` PROCEDURE `getMemoryIntent`(IN `param_name` VARCHAR(50), IN `param_aiid` VARCHAR(50), IN `param_chatId` VARCHAR(50))
-BEGIN
-    SELECT * FROM memoryIntent WHERE aiid = param_aiid AND chatId = param_chatId AND `name` = param_name;
-  END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `getMemoryIntentsForChat` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8 */ ;
-/*!50003 SET character_set_results = utf8 */ ;
-/*!50003 SET collation_connection  = utf8_general_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = '' */ ;
-DELIMITER ;;
-CREATE DEFINER=`userTableReader`@`127.0.0.1` PROCEDURE `getMemoryIntentsForChat`(IN `param_aiid` VARCHAR(50), IN `param_chatId` VARCHAR(50))
-BEGIN
-    SELECT * FROM memoryIntent WHERE aiid = param_aiid AND chatId = param_chatId;
-  END ;;
-DELIMITER ;
+
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
@@ -3543,6 +3447,7 @@ DELIMITER ;;
 CREATE DEFINER=`aiWriter`@`127.0.0.1` PROCEDURE `setChatState`(
   IN `param_devId` VARCHAR(50),
   IN `param_chatId` VARCHAR(50),
+  IN `param_base_aiid` VARCHAR(50),
   IN `param_topic` VARCHAR(250),
   IN `param_history` VARCHAR(1024),
   IN `param_locked_aiid` VARCHAR(50),
@@ -3551,17 +3456,18 @@ CREATE DEFINER=`aiWriter`@`127.0.0.1` PROCEDURE `setChatState`(
   IN `param_chat_target` TINYINT(1),
   IN `param_handover_reset` TIMESTAMP,
   IN `param_bad_answers_count` INT(11),
-  IN `param_context` MEDIUMTEXT))
+  IN `param_context` MEDIUMTEXT,
+  IN `param_current_intents` MEDIUMTEXT)
 BEGIN
-    INSERT INTO chatState (dev_id, chat_id, topic, history, locked_aiid, entity_values, confidence_threshold, chat_target, 
-      handover_reset, bad_answers_count, context)
-    VALUES(param_devId, param_chatId, param_topic, param_history, param_locked_aiid, param_entity_values, param_confidence_threshold, 
-      param_chat_target, param_handover_reset, param_bad_answers_count, param_context)
-    ON DUPLICATE KEY UPDATE topic = param_topic, history = param_history,
-      locked_aiid = param_locked_aiid, entity_values = param_entity_values, confidence_threshold = param_confidence_threshold, 
-      chat_target = param_chat_target, handover_reset = param_handover_reset, bad_answers_count = param_bad_answers_count,
-      context = param_context;
-  END ;;
+  INSERT INTO chatState (dev_id, chat_id, base_aiid, topic, history, locked_aiid, entity_values, confidence_threshold, chat_target, 
+    handover_reset, bad_answers_count, context, current_intents)
+  VALUES(param_devId, param_chatId, param_base_aiid, param_topic, param_history, param_locked_aiid, param_entity_values, param_confidence_threshold, 
+    param_chat_target, param_handover_reset, param_bad_answers_count, param_context, param_current_intents)
+  ON DUPLICATE KEY UPDATE base_aiid = param_base_aiid, topic = param_topic, history = param_history,
+    locked_aiid = param_locked_aiid, entity_values = param_entity_values, confidence_threshold = param_confidence_threshold, 
+    chat_target = param_chat_target, handover_reset = param_handover_reset, bad_answers_count = param_bad_answers_count,
+    context = param_context, current_intents = param_current_intents;
+END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -3909,29 +3815,6 @@ UPDATE `ai_integration` SET
  AND `integration`=`in_integration`;
  
 END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `updateMemoryIntent` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8 */ ;
-/*!50003 SET character_set_results = utf8 */ ;
-/*!50003 SET collation_connection  = utf8_general_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = '' */ ;
-DELIMITER ;;
-CREATE DEFINER=`userTableWriter`@`127.0.0.1` PROCEDURE `updateMemoryIntent`(IN `param_name` VARCHAR(50), IN `param_aiid` VARCHAR(50), IN `param_chatId` VARCHAR(50),
-                                                                            IN `param_variables` MEDIUMTEXT, IN `param_isFulFilled` TINYINT(1))
-BEGIN
-    INSERT INTO memoryIntent (aiid, chatId, name, variables, lastAccess, isFulfilled)
-    VALUES(param_aiid, param_chatId, param_name, param_variables, NOW(), param_isFulFilled)
-
-    ON DUPLICATE KEY UPDATE variables = param_variables, lastAccess = NOW(), isFulfilled = param_isFulFilled;
-  END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;

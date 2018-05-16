@@ -35,7 +35,7 @@ public class ChatIntentHandler implements IChatHandler {
         UUID aiidForMemoryIntents = currentResult.getChatState().getLockedAiid() == null
                 ? requestInfo.getAiid() : currentResult.getChatState().getLockedAiid();
         List<MemoryIntent> intentsForChat = this.intentHandler.getCurrentIntentsStateForChat(
-                aiidForMemoryIntents, requestInfo.getChatId());
+                currentResult.getChatState());
 
         // For now we should only have one active intent per chat.
         MemoryIntent currentIntent = intentsForChat.isEmpty() ? null : intentsForChat.get(0);

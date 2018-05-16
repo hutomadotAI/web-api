@@ -28,7 +28,7 @@ import com.webcohesion.enunciate.metadata.rs.StatusCodes;
 import com.webcohesion.enunciate.metadata.rs.TypeHint;
 
 import java.net.HttpURLConnection;
-import java.util.Collections;
+import java.util.ArrayList;
 import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.container.ContainerRequestContext;
@@ -284,8 +284,8 @@ public class AIEndpoint {
                 ParameterFilter.getLocale(requestContext),
                 ParameterFilter.getTimezone(requestContext),
                 Strings.isNullOrEmpty(defaultResponses)
-                    ? Collections.emptyList()
-                    : this.serializer.deserializeListAutoDetect(defaultResponses),
+                        ? new ArrayList<>()
+                        : this.serializer.deserializeListAutoDetect(defaultResponses),
                 passthroughUrl);
         return result.getResponse(this.serializer).build();
     }

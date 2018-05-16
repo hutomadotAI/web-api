@@ -6,6 +6,7 @@ import com.hutoma.api.connectors.db.DatabaseEntitiesIntents;
 import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.ApiEntity;
 import com.hutoma.api.containers.ApiIntent;
+import com.hutoma.api.containers.sub.ChatState;
 import com.hutoma.api.containers.sub.IntentVariable;
 import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.containers.sub.MemoryVariable;
@@ -49,13 +50,14 @@ public class MemoryIntentHandler implements IMemoryIntentHandler {
      */
     @Override
     public MemoryIntent parseAiResponseForIntent(final UUID devId, final UUID aiid, final UUID chatId,
-                                                 final String response) throws ChatLogic.IntentException {
+                                                 final String response, final ChatState state)
+            throws ChatLogic.IntentException {
         try {
             if (response.trim().startsWith(META_INTENT_TAG)) {
                 Matcher matcher = META_INTEG_PATTERN.matcher(response);
                 if (matcher.find()) {
                     String intentName = matcher.group(1);
-                    return this.loadIntentForAi(devId, aiid, chatId, intentName);
+                    return this.loadIntentForAi(devId, aiid, chatId, intentName, state);
                 }
             }
         } catch (DatabaseException de) {
@@ -65,51 +67,8 @@ public class MemoryIntentHandler implements IMemoryIntentHandler {
     }
 
     @Override
-    public List<MemoryIntent> getCurrentIntentsStateForChat(final UUID aiid, final UUID chatId) {
-        try {
-            return this.databaseIntents.getMemoryIntentsForChat(aiid, chatId, this.jsonSerializer);
-        } catch (DatabaseException e) {
-            this.logger.logException(LOGFROM, e);
-        }
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void updateStatus(final MemoryIntent intent) {
-        try {
-            this.databaseIntents.updateMemoryIntent(intent, this.jsonSerializer);
-        } catch (DatabaseException e) {
-            this.logger.logException(LOGFROM, e);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void deleteAllIntentsForAi(final UUID aiid) {
-        try {
-            this.databaseIntents.deleteAllMemoryIntents(aiid);
-        } catch (DatabaseException e) {
-            this.logger.logException(LOGFROM, e);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void clearIntents(final List<MemoryIntent> intents) {
-        try {
-            for (MemoryIntent intent : intents) {
-                this.databaseIntents.deleteMemoryIntent(intent);
-            }
-        } catch (DatabaseException e) {
-            this.logger.logException(LOGFROM, e);
-        }
+    public List<MemoryIntent> getCurrentIntentsStateForChat(final ChatState state) {
+        return state.getCurrentIntents();
     }
 
     /**
@@ -125,9 +84,19 @@ public class MemoryIntentHandler implements IMemoryIntentHandler {
         return null;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void clearIntents(final ChatState state, final List<MemoryIntent> intentsToRemove) {
+        state.getCurrentIntents().removeAll(intentsToRemove);
+    }
+
     private MemoryIntent loadIntentForAi(final UUID devId, final UUID aiid, final UUID chatId,
-                                         final String intentName) throws DatabaseException, ChatLogic.IntentException {
-        MemoryIntent intent = this.databaseIntents.getMemoryIntent(intentName, aiid, chatId, this.jsonSerializer);
+                                         final String intentName, final ChatState chatState)
+            throws DatabaseException, ChatLogic.IntentException {
+
+        MemoryIntent intent = chatState.getMemoryIntent(intentName);
         if (intent == null) {
             ApiIntent apiIntent = this.databaseIntents.getIntent(aiid, intentName);
             if (apiIntent == null) {
@@ -157,11 +126,19 @@ public class MemoryIntentHandler implements IMemoryIntentHandler {
                     variables.add(variable);
                 }
                 intent = new MemoryIntent(intentName, aiid, chatId, variables, false);
-                // write it to the db
-                this.databaseIntents.updateMemoryIntent(intent, this.jsonSerializer);
+                chatState.updateMemoryIntent(intent);
             }
         }
         return intent;
+    }
+
+    @Override
+    public void resetIntentsStateForAi(final UUID devId, final UUID aiid) {
+        try {
+            this.databaseIntents.resetIntentsStateForAi(devId, aiid);
+        } catch (DatabaseException e) {
+            this.logger.logException(LOGFROM, e);
+        }
     }
 
 }

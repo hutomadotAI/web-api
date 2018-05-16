@@ -22,7 +22,7 @@ public class RecognizedEntity {
     /**
      * Ctor.
      * @param category the entity category
-     * @param value the entity value
+     * @param value    the entity value
      */
     public RecognizedEntity(final String category, final String value) {
         this.category = category;

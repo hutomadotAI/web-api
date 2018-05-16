@@ -164,7 +164,7 @@ public class TestServiceChat extends ServiceTestBase {
         final ChatResult chatResult = new ChatResult("response");
         final long timestamp = System.currentTimeMillis();
         chatResult.setScore(0.8);
-        when(this.fakeMemoryIntentHandler.getCurrentIntentsStateForChat(any(), any())).thenReturn(intents);
+        when(this.fakeMemoryIntentHandler.getCurrentIntentsStateForChat(any())).thenReturn(intents);
         when(this.fakeIntentProcessorLogic.processIntent(any(), any(), any(), any(), any())).thenReturn(true);
         when(this.fakeTools.getTimestamp()).thenReturn(timestamp);
 

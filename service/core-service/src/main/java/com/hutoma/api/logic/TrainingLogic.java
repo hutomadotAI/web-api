@@ -222,7 +222,7 @@ public class TrainingLogic {
                 return ApiError.getInternalServerError();
             }
             // Delete all memory variables for this AI
-            this.memoryIntentHandler.deleteAllIntentsForAi(aiid);
+            this.memoryIntentHandler.resetIntentsStateForAi(devid, aiid);
             this.logger.logUserTraceEvent(LOGFROM, "StartTraining", devidString, logMap);
             return new ApiResult().setSuccessStatus("Training session started.");
         } else {
@@ -328,7 +328,7 @@ public class TrainingLogic {
                         }
                         this.aiServices.uploadTraining(ai.getBackendStatus(), devid, aiid, trainingMaterials);
                         // Delete all memory variables for this AI
-                        this.memoryIntentHandler.deleteAllIntentsForAi(aiid);
+                        this.memoryIntentHandler.resetIntentsStateForAi(devid, aiid);
                         this.logger.logUserTraceEvent(LOGFROM, "UpdateTraining", devidString, logMap);
                         return new ApiResult().setSuccessStatus("Training updated.");
                     } catch (AIServices.AiServicesException ex) {
