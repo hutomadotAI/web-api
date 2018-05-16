@@ -6,6 +6,8 @@ package com.hutoma.api.common;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import org.joda.time.DateTime;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -41,7 +43,8 @@ public class JerseyGsonProvider<T> implements MessageBodyReader<T>, MessageBodyW
     public JerseyGsonProvider() {
         GsonBuilder builder = new GsonBuilder()
                 .serializeNulls()
-                .enableComplexMapKeySerialization();
+                .enableComplexMapKeySerialization()
+                .registerTypeAdapter(DateTime.class, new JsonSerializer.DateTimeSerializer());
 
         this.gson = builder.create();
         this.prettyGson = builder.setPrettyPrinting().create();

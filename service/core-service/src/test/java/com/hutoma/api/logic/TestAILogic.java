@@ -1341,6 +1341,7 @@ public class TestAILogic {
     }
 
     private ApiResult callDefaultCreateAI() throws DatabaseException {
+        when(this.fakeDatabaseAi.getAI(any(), any(), any(), any())).thenReturn(getSampleAI());
         when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(getSampleAI());
         return this.aiLogic.createAI(DEVID_UUID, "name", "description", true, 0, 0.0, 1, DEFAULT_CHAT_RESPONSES, null, "", -1, -1, null);
     }
