@@ -261,7 +261,7 @@ public class AIEndpoint {
     @Path("{aiid}/clone")
     @POST
     @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
-    @ValidateParameters({APIParameter.DevID})
+    @ValidateParameters({APIParameter.DevID, APIParameter.AIID})
     @ValidatePost({APIParameter.AIName, APIParameter.AIDescription, APIParameter.AiConfidence,
             APIParameter.Timezone, APIParameter.Locale})
     @Produces(MediaType.APPLICATION_JSON)
