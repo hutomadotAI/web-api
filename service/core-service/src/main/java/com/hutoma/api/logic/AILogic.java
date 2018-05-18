@@ -108,9 +108,11 @@ public class AILogic {
             final int errorThresholdHandover,
             final int handoverResetTimeout,
             final String handoverMessage) {
-        return this.createAI(devId, name, description, isPrivate, personality, confidence,
+        try (DatabaseTransaction transaction = this.transactionProvider.get()) {
+            return this.createAI(devId, name, description, isPrivate, personality, confidence,
                 voice, language, timezone, defaultChatResponses, errorThresholdHandover,
-                handoverResetTimeout, handoverMessage, null);
+                handoverResetTimeout, handoverMessage, transaction);
+        }        
     }
 
     private ApiResult createAI(
@@ -128,6 +130,11 @@ public class AILogic {
             final int handoverResetTimeout,
             final String handoverMessage,
             final DatabaseTransaction transaction) {
+        
+        if (transaction == null) {
+            throw new IllegalArgumentException("transaction");
+        }
+
         final String devIdString = devId.toString();
         try {
             String encodingKey = this.config.getEncodingKey();
@@ -141,25 +148,7 @@ public class AILogic {
                     .signWith(SignatureAlgorithm.HS256, encodingKey)
                     .compact();
 
-            UUID namedAiid = transaction == null
-                    ? this.databaseAi.createAI(
-                    aiUUID,
-                    name,
-                    description,
-                    devId,
-                    isPrivate,
-                    token,
-                    language,
-                    timezone,
-                    confidence,
-                    personality,
-                    voice,
-                    defaultChatResponses,
-                    errorThresholdHandover,
-                    handoverResetTimeout,
-                    handoverMessage,
-                    this.jsonSerializer)
-                    : this.databaseAi.createAI(
+            UUID namedAiid = this.databaseAi.createAI(
                     aiUUID,
                     name,
                     description,
