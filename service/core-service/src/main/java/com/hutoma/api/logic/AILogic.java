@@ -109,10 +109,15 @@ public class AILogic {
             final int handoverResetTimeout,
             final String handoverMessage) {
         try (DatabaseTransaction transaction = this.transactionProvider.get()) {
-            return this.createAI(devId, name, description, isPrivate, personality, confidence,
-                voice, language, timezone, defaultChatResponses, errorThresholdHandover,
-                handoverResetTimeout, handoverMessage, transaction);
-        }        
+            ApiResult result = this.createAI(devId, name, description, isPrivate, personality, confidence,
+                    voice, language, timezone, defaultChatResponses, errorThresholdHandover,
+                    handoverResetTimeout, handoverMessage, transaction);
+            transaction.commit();
+            return result;
+        } catch (DatabaseException ex) {
+            this.logger.logUserExceptionEvent(LOGFROM, "createAi", devId.toString(), ex);
+            return ApiError.getInternalServerError();
+        }
     }
 
     private ApiResult createAI(
