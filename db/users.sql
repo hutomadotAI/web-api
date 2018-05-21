@@ -190,8 +190,6 @@ GRANT EXECUTE ON `hutoma`.* TO 'userTableReader'@'127.0.0.1';
 
 GRANT SELECT ON `hutoma`.`users` TO 'userTableReader'@'127.0.0.1';
 
-GRANT SELECT ON `hutoma`.`memoryIntent` TO 'userTableReader'@'127.0.0.1';
-
 GRANT SELECT ON `hutoma`.`devplan` TO `userTableReader`@'127.0.0.1';
 
 GRANT SELECT ON `hutoma`.`developerInfo` TO `userTableReader`@'127.0.0.1';
@@ -208,8 +206,6 @@ GRANT USAGE ON *.* TO 'userTableWriter'@'127.0.0.1' IDENTIFIED BY PASSWORD '*B9E
 GRANT EXECUTE ON `hutoma`.* TO 'userTableWriter'@'127.0.0.1';
 
 GRANT SELECT, INSERT, UPDATE ON `hutoma`.`users` TO 'userTableWriter'@'127.0.0.1';
-
-GRANT SELECT, INSERT, UPDATE, DELETE ON `hutoma`.`memoryIntent` TO 'userTableWriter'@'127.0.0.1';
 
 GRANT SELECT, INSERT, UPDATE, DELETE ON `hutoma`.`developerInfo` TO 'userTableWriter'@'127.0.0.1';
 

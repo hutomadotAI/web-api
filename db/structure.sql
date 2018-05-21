@@ -1554,7 +1554,7 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `getAiIntegration` */;
+/*!50003 DROP PROCEDURE IF EXISTS `getAiIntegrationForUpdate` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
@@ -4072,6 +4072,21 @@ CREATE DEFINER=`aiReader`@`127.0.0.1` PROCEDURE `getBotConfigDefinition`(
 BEGIN
     SELECT api_keys_desc FROM ai WHERE aiid = param_aiid AND dev_id = param_devId;
 END;;
+
+DELIMITER ;;
+CREATE DEFINER=`aiWriter`@`127.0.0.1` PROCEDURE `resetChatStatesForAi`(
+  IN `param_devId` VARCHAR(50),
+  IN `param_aiid` VARCHAR(50)
+)
+BEGIN
+  UPDATE `chatState`
+  SET 
+    `context` = NULL,
+    `current_intents` = NULL,
+    `bad_answers_count` = 0
+  WHERE `dev_id`=param_devId AND `base_aiid`=param_aiid;
+END ;;
+DELIMITER ;
 
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
