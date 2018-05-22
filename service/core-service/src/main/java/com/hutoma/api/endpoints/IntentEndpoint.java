@@ -37,6 +37,8 @@ public class IntentEndpoint {
     public IntentEndpoint(IntentLogic intentLogic, JsonSerializer serializer) {
         this.intentLogic = intentLogic;
         this.serializer = serializer;
+        // Allow nulls on Intent serialization
+        this.serializer.allowNullsOnSerialization();
     }
 
     @GET

@@ -56,6 +56,24 @@ public class TestJsonSerializer {
         Assert.assertEquals("d", list.get(1).member3.get(1));
     }
 
+    @Test
+    public void testSerialization_allowNulls() {
+        ObjTest obj = new ObjTest("aaa", 123, null);
+        JsonSerializer js = new JsonSerializer(false);
+        js.allowNullsOnSerialization();
+        String json = js.serialize(obj);
+        Assert.assertEquals("{\"member1\":\"aaa\",\"member2\":123,\"member3\":null}", json);
+    }
+
+    @Test
+    public void testSerialization_removeNulls() {
+        ObjTest obj = new ObjTest("aaa", 123, null);
+        JsonSerializer js = new JsonSerializer(false);
+        // Don't call JsonSerializer::allowNullsOnSerialization, as removing nulls should be the default
+        String json = js.serialize(obj);
+        Assert.assertEquals("{\"member1\":\"aaa\",\"member2\":123}", json);
+    }
+
     private static class ObjTest {
         private String member1;
         private int member2;

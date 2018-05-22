@@ -23,21 +23,20 @@ import java.util.Locale;
  */
 public class JsonSerializer {
 
-    private final Gson gson;
-
-    public JsonSerializer(final boolean prettyPrinting) {
-        GsonBuilder builder = new GsonBuilder()
-                .registerTypeAdapter(DateTime.class, new DateTimeSerializer())
-                .registerTypeAdapter(Locale.class, new LocaleTypeAdapter())
-                .enableComplexMapKeySerialization();
-        if (prettyPrinting) {
-            builder.setPrettyPrinting();
-        }
-        this.gson = builder.create();
-    }
+    private Gson gson;
+    private final boolean enablePrettyPrinting;
 
     public JsonSerializer() {
         this(true);
+    }
+
+    public JsonSerializer(final boolean prettyPrinting) {
+        this.enablePrettyPrinting = prettyPrinting;
+        this.gson = createGsonBuilder(prettyPrinting, false).create();
+    }
+
+    public void allowNullsOnSerialization() {
+        this.gson = createGsonBuilder(this.enablePrettyPrinting, true).create();
     }
 
     public String serialize(Object obj) {
@@ -102,6 +101,20 @@ public class JsonSerializer {
         } catch (JsonSyntaxException jse) {
             throw new JsonParseException(jse);
         }
+    }
+
+    private GsonBuilder createGsonBuilder(final boolean prettyPrinting, final boolean includeNulls) {
+        GsonBuilder builder = new GsonBuilder()
+                .registerTypeAdapter(DateTime.class, new DateTimeSerializer())
+                .registerTypeAdapter(Locale.class, new LocaleTypeAdapter())
+                .enableComplexMapKeySerialization();
+        if (prettyPrinting) {
+            builder.setPrettyPrinting();
+        }
+        if (includeNulls) {
+            builder.serializeNulls();
+        }
+        return builder;
     }
 
     public static class DateTimeSerializer implements JsonDeserializer<DateTime>,
