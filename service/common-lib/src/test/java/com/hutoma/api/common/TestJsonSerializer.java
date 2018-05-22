@@ -57,6 +57,7 @@ public class TestJsonSerializer {
         Assert.assertEquals("d", list.get(1).member3.get(1));
     }
 
+    @Test
     public void testDeserializeStringMap() {
         String json = "{\"a\":\"123\", \"b\":\"456\"}";
         JsonSerializer js = new JsonSerializer();
@@ -90,7 +91,7 @@ public class TestJsonSerializer {
         String json = js.serialize(obj);
         Assert.assertEquals("{\"member1\":\"aaa\",\"member2\":123}", json);
     }
-
+    
     private static class ObjTest {
         private String member1;
         private int member2;

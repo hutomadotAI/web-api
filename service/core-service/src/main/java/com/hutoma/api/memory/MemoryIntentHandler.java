@@ -27,6 +27,7 @@ import javax.inject.Inject;
 public class MemoryIntentHandler implements IMemoryIntentHandler {
 
     public static final String META_INTENT_TAG = "@meta.intent.";
+    private static final String INTENT_VARIABLE_NAME_PATTERN = "%s.%s"; // <intent name>.<variable name>
     private static final Pattern META_INTEG_PATTERN =
             Pattern.compile(META_INTENT_TAG.replaceAll("\\.", "\\\\.") + "([^\\s]+)");
     private static final String LOGFROM = "intenthandler";
@@ -141,4 +142,7 @@ public class MemoryIntentHandler implements IMemoryIntentHandler {
         }
     }
 
+    public static String getPrefixedVariableName(final String intentName, final String variableName) {
+        return String.format(INTENT_VARIABLE_NAME_PATTERN, intentName, variableName);
+    }
 }

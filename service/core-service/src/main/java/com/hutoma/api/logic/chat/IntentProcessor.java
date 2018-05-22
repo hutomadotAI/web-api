@@ -74,6 +74,10 @@ public class IntentProcessor {
         List<MemoryIntent> intentsToClear = new ArrayList<>();
         boolean handledIntent;
 
+        // Make sure all context_in variables are read and applied to the chat state
+        ApiIntent intent = this.intentHandler.getIntent(chatInfo.getAiid(), currentIntent.getName());
+        intent.getContextIn().forEach((k, v) -> chatResult.getChatState().getChatContext().setValue(k, v));
+
         // Are we in the middle of an entity value request?
         Optional<MemoryVariable> requestedVariable = currentIntent.getVariables()
                 .stream().filter(MemoryVariable::isRequested).findFirst();
@@ -95,7 +99,7 @@ public class IntentProcessor {
                         .filter(x -> x.getA().equals(mv.getName())).findFirst();
                 if (entityValue.isPresent() || mv.getName().equals(SYSANY)) {
                     handledIntent = processVariables(chatInfo, aiidForMemoryIntents, currentIntent, chatResult,
-                            Collections.singletonList(mv), intentsToClear, intentLog, telemetryMap);
+                            Collections.singletonList(mv), intentsToClear, intent, intentLog, telemetryMap);
 
                 } else {
                     // If we have prompted enough, then give up
@@ -133,7 +137,7 @@ public class IntentProcessor {
 
                 } else {
                     handledIntent = processVariables(chatInfo, aiidForMemoryIntents, currentIntent, chatResult,
-                            currentIntent.getVariables(), intentsToClear, intentLog, telemetryMap);
+                            currentIntent.getVariables(), intentsToClear, intent, intentLog, telemetryMap);
 
                 }
             }
@@ -152,6 +156,10 @@ public class IntentProcessor {
 
         if (currentIntent.isFulfilled()) {
             chatResult.getChatState().getCurrentIntents().remove(currentIntent);
+
+            // Make sure all context_out variables are read and applied to the chat state
+            intent.getContextOut().forEach((k, v) -> chatResult.getChatState().getChatContext().setValue(k, v));
+
         } else {
             if (!intentsToClear.contains(currentIntent)) {
                 chatResult.getChatState().updateMemoryIntent(currentIntent);
@@ -175,6 +183,7 @@ public class IntentProcessor {
                                      final ChatResult chatResult,
                                      final List<MemoryVariable> memoryVariables,
                                      final List<MemoryIntent> intentsToClear,
+                                     final ApiIntent intent,
                                      final Map<String, Object> log,
                                      final LogMap telemetryMap)
             throws ChatLogic.IntentException, WebHooks.WebHookException {
@@ -272,8 +281,8 @@ public class IntentProcessor {
         }
 
         if (allVariablesFilled) {
-            notifyIntentFulfilled(chatResult, currentIntent, aiidForMemoryIntents, telemetryMap);
-            checkAndExecuteWebhook(chatInfo, aiidForMemoryIntents, currentIntent, chatResult, log,
+            notifyIntentFulfilled(chatResult, currentIntent, aiidForMemoryIntents, intent, telemetryMap);
+            checkAndExecuteWebhook(chatInfo, aiidForMemoryIntents, currentIntent, chatResult, intent, log,
                     telemetryMap);
             intentsToClear.add(currentIntent);
             handledIntent = true;
@@ -346,15 +355,15 @@ public class IntentProcessor {
         log.put("Variable times to prompt", variable.getTimesToPrompt());
     }
 
-    private void notifyIntentFulfilled(final ChatResult chatResult, final MemoryIntent memoryIntent, final UUID aiid,
+    private void notifyIntentFulfilled(final ChatResult chatResult, final MemoryIntent memoryIntent,
+                                       final UUID aiid, final ApiIntent intent,
                                        final LogMap telemetryMap) {
         memoryIntent.setIsFulfilled(true);
-        chatResult.setAnswer(getRandomIntentResponse(aiid, memoryIntent));
+        chatResult.setAnswer(getRandomIntentResponse(aiid, memoryIntent, intent));
         telemetryMap.add("IntentFulfilled", memoryIntent.getName());
     }
 
-    private String getRandomIntentResponse(final UUID aiid, final MemoryIntent memoryIntent) {
-        ApiIntent intent = this.intentHandler.getIntent(aiid, memoryIntent.getName());
+    private String getRandomIntentResponse(final UUID aiid, final MemoryIntent memoryIntent, final ApiIntent intent) {
         if (intent != null) {
             List<String> responses = intent.getResponses();
             String response = responses.get((int) (Math.random() * responses.size()));
@@ -366,9 +375,12 @@ public class IntentProcessor {
         return null;
     }
 
-    private void checkAndExecuteWebhook(final ChatRequestInfo chatInfo, final UUID aiidForMemoryIntents,
+    private void checkAndExecuteWebhook(final ChatRequestInfo chatInfo,
+                                        final UUID aiidForMemoryIntents,
                                         final MemoryIntent currentIntent,
-                                        final ChatResult chatResult, final Map<String, Object> log,
+                                        final ChatResult chatResult,
+                                        final ApiIntent intent,
+                                        final Map<String, Object> log,
                                         final LogMap telemetryMap)
             throws WebHooks.WebHookException {
 
@@ -400,7 +412,7 @@ public class IntentProcessor {
                 }
             } catch (WebHooks.WebHookExternalException ex) {
                 // Set the default response
-                response = new WebHookResponse(getRandomIntentResponse(chatInfo.getAiid(), currentIntent));
+                response = new WebHookResponse(getRandomIntentResponse(chatInfo.getAiid(), currentIntent, intent));
                 String webHookErrorString = ex.getMessage();
                 this.logger.logUserWarnEvent(LOGFROM,
                         "Call to WebHook failed for intent",

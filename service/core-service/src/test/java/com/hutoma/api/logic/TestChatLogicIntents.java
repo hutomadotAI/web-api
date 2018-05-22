@@ -1,5 +1,6 @@
 package com.hutoma.api.logic;
 
+import com.google.common.collect.ImmutableMap;
 import com.hutoma.api.common.Pair;
 import com.hutoma.api.connectors.BackendServerType;
 import com.hutoma.api.connectors.chat.ChatBackendConnector;
@@ -44,12 +45,14 @@ public class TestChatLogicIntents extends TestChatBase {
     public void testChat_IntentRecognized() throws ChatBackendConnector.AiControllerException, ChatLogic.IntentException {
         final String intentName = "intent1";
         MemoryVariable mv = new MemoryVariable("var", Arrays.asList("a", "b"));
+        mv.setLabel("label");
+        mv.setCurrentValue("value");
         MemoryIntent mi = new MemoryIntent(intentName, AIID, CHATID, Collections.singletonList(mv));
         List<MemoryIntent> miList = Collections.singletonList(mi);
         setupFakeChat(0.7d, MemoryIntentHandler.META_INTENT_TAG + intentName, 0.0d, AIMLRESULT);
         when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), anyString(), any())).thenReturn(mi);
-        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), anyString(), any())).thenReturn(mi);
         when(this.fakeIntentHandler.getCurrentIntentsStateForChat(any())).thenReturn(miList);
+        when(this.fakeIntentHandler.getIntent(any(), anyString())).thenReturn(TestIntentLogic.getIntent());
         ApiResult result = getChat(0.5f);
         ChatResult r = ((ApiChat) result).getResult();
         Assert.assertEquals(1, r.getIntents().size());
@@ -272,6 +275,8 @@ public class TestChatLogicIntents extends TestChatBase {
             mv.setCurrentValue(null);
         }
 
+        when(this.fakeIntentHandler.getIntent(any(), anyString())).thenReturn(TestIntentLogic.getIntent());
+
         HashMap<String, String> entityValues = new HashMap<>();
         entityValues.put("persistent_var", "persistentValue");
         ChatState state = new ChatState(DateTime.now(), null, null, null, entityValues, 0.5d,
@@ -315,6 +320,8 @@ public class TestChatLogicIntents extends TestChatBase {
         for (MemoryVariable mv : mi.getVariables()) {
             mv.setCurrentValue(null);
         }
+
+        when(this.fakeIntentHandler.getIntent(any(), anyString())).thenReturn(TestIntentLogic.getIntent());
 
         // First question, triggers the intent but without the right entity value
         ApiResult result = getChat(0.5f, "nothing to see here.");
@@ -433,6 +440,7 @@ public class TestChatLogicIntents extends TestChatBase {
             throws ChatBackendConnector.AiControllerException, ChatLogic.IntentException {
         final String intentName = "intentA";
         MemoryIntent mi = new MemoryIntent(intentName, AIID, CHATID, Collections.emptyList());
+        when(this.fakeIntentHandler.getIntent(any(), anyString())).thenReturn(TestIntentLogic.getIntent());
         setupFakeChat(0.9d, MemoryIntentHandler.META_INTENT_TAG + intentName, 0.3d, "");
         when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), any(), any())).thenReturn(mi);
         ApiResult result = getChat(0.5f, "nothing to see here.");
@@ -474,6 +482,7 @@ public class TestChatLogicIntents extends TestChatBase {
                 "label2");
         MemoryIntent mi = new MemoryIntent("intent", AIID, UUID.randomUUID(), Arrays.asList(mv1, mv2), false);
         when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), any(), any())).thenReturn(mi);
+        when(this.fakeIntentHandler.getIntent(any(), anyString())).thenReturn(TestIntentLogic.getIntent());
         setupFakeChat(0.7d, MemoryIntentHandler.META_INTENT_TAG + "intent1", 0.0d, AIMLRESULT);
 
         ApiResult result = null;
@@ -562,4 +571,88 @@ public class TestChatLogicIntents extends TestChatBase {
         Assert.assertEquals(mv3.getEntityKeys().get(0), mv3.getCurrentValue());
     }
 
+    @Test
+    public void testChat_intent_contextIn_appliedWhenIntentRecognized()
+            throws ChatBackendConnector.AiControllerException, ChatLogic.IntentException {
+        final String contextInVarName = "varIn";
+        final String contextInVarValue = "valueIn";
+        final String intentName = "intent";
+        setupContextVariablesChatTest(intentName, contextInVarName, contextInVarValue, null, null);
+        ApiResult result = getChat(0.5f);
+        ChatResult r = ((ApiChat) result).getResult();
+        ChatContext ctx = r.getChatState().getChatContext();
+        Assert.assertEquals(contextInVarValue, ctx.getValue(contextInVarName));
+    }
+
+    @Test
+    public void testChat_intent_contextOut_appliedWhenIntentRecognized()
+            throws ChatBackendConnector.AiControllerException, ChatLogic.IntentException {
+        final String contextOutVarName = "varOut";
+        final String contextOutVarValue = "valueIOut";
+        final String intentName = "intent";
+        setupContextVariablesChatTest(intentName, null, null, contextOutVarName, contextOutVarValue);
+        ApiResult result = getChat(0.5f);
+        ChatResult r = ((ApiChat) result).getResult();
+        ChatContext ctx = r.getChatState().getChatContext();
+        Assert.assertEquals(contextOutVarValue, ctx.getValue(contextOutVarName));
+    }
+
+    @Test
+    public void testChat_intent_contextOutAndOut_appliedWhenIntentRecognized()
+            throws ChatBackendConnector.AiControllerException, ChatLogic.IntentException {
+        final String contextInVarName = "varIn";
+        final String contextInVarValue = "valueIn";
+        final String contextOutVarName = "varOut";
+        final String contextOutVarValue = "valueOut";
+        final String intentName = "intent";
+        setupContextVariablesChatTest(intentName, contextInVarName, contextInVarValue, contextOutVarName, contextOutVarValue);
+        ApiResult result = getChat(0.5f);
+        ChatResult r = ((ApiChat) result).getResult();
+        ChatContext ctx = r.getChatState().getChatContext();
+        Assert.assertEquals(contextInVarValue, ctx.getValue(contextInVarName));
+        // intent is fulfilled so context_out should be included
+        Assert.assertTrue(r.getIntents().get(0).isFulfilled());
+        Assert.assertEquals(contextOutVarValue, ctx.getValue(contextOutVarName));
+    }
+
+    @Test
+    public void testChat_intent_contextOut_notAppliedWhenIntentNotFulfilled()
+            throws ChatBackendConnector.AiControllerException, ChatLogic.IntentException {
+        final String intentName = "intent";
+        ApiIntent intent = TestIntentLogic.getIntent();
+        intent.setContextOut(ImmutableMap.of("aa", "bb"));
+        MemoryVariable mv = new MemoryVariable("entity1", null, true, Collections.singletonList("1"),
+                Collections.singletonList("prompt1"), 2, 0, false, false, "label1");
+        MemoryIntent mi = new MemoryIntent(intentName, AIID, CHATID, Collections.singletonList(mv));
+        List<MemoryIntent> miList = Collections.singletonList(mi);
+        setupFakeChat(0.7d, MemoryIntentHandler.META_INTENT_TAG + intentName, 0.0d, AIMLRESULT);
+        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), anyString(), any())).thenReturn(mi);
+        when(this.fakeIntentHandler.getCurrentIntentsStateForChat(any())).thenReturn(miList);
+        when(this.fakeIntentHandler.getIntent(any(), anyString())).thenReturn(intent);
+        ApiResult result = getChat(0.5f);
+        ChatResult r = ((ApiChat) result).getResult();
+        ChatContext ctx = r.getChatState().getChatContext();
+        // intent is NOT fulfilled so context_out should NOT be included
+        Assert.assertFalse(r.getIntents().get(0).isFulfilled());
+        Assert.assertFalse(ctx.isSet(MemoryIntentHandler.getPrefixedVariableName(intentName, "aa")));
+    }
+
+    private void setupContextVariablesChatTest(final String intentName,
+                                               final String contextInVarName, final String contextInVarValue,
+                                               final String contextOutVarName, final String contextOutVarValue)
+            throws ChatBackendConnector.AiControllerException, ChatLogic.IntentException {
+        ApiIntent intent = TestIntentLogic.getIntent();
+        if (contextInVarName != null) {
+            intent.setContextIn(ImmutableMap.of(contextInVarName, contextInVarValue));
+        }
+        if (contextOutVarName != null) {
+            intent.setContextOut(ImmutableMap.of(contextOutVarName, contextOutVarValue));
+        }
+        MemoryIntent mi = new MemoryIntent(intentName, AIID, CHATID, Collections.emptyList());
+        List<MemoryIntent> miList = Collections.singletonList(mi);
+        setupFakeChat(0.7d, MemoryIntentHandler.META_INTENT_TAG + intentName, 0.0d, AIMLRESULT);
+        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), anyString(), any())).thenReturn(mi);
+        when(this.fakeIntentHandler.getCurrentIntentsStateForChat(any())).thenReturn(miList);
+        when(this.fakeIntentHandler.getIntent(any(), anyString())).thenReturn(intent);
+    }
 }
