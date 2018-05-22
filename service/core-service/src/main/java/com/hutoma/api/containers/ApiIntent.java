@@ -7,7 +7,9 @@ import com.hutoma.api.containers.sub.WebHook;
 import org.joda.time.DateTime;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by David MG on 05/10/2016.
@@ -30,6 +32,10 @@ public class ApiIntent extends ApiResult {
     private WebHook webHook;
     @SerializedName("last_updated")
     private DateTime lastUpdated;
+    @SerializedName("context_in")
+    private Map<String, String> contextIn = new HashMap<>();
+    @SerializedName("context_out")
+    private Map<String, String> contextOut = new HashMap<>();
 
     public ApiIntent(String intentName, String topicIn, String topicOut) {
         this.intentName = intentName;
@@ -94,5 +100,21 @@ public class ApiIntent extends ApiResult {
 
     public void setLastUpdated(final DateTime lastUpdated) {
         this.lastUpdated = lastUpdated;
+    }
+
+    public Map<String, String> getContextIn() {
+        return this.contextIn;
+    }
+
+    public Map<String, String> getContextOut() {
+        return this.contextOut;
+    }
+
+    public void setContextIn(final Map<String, String> context) {
+        this.contextIn = context;
+    }
+
+    public void setContextOut(final Map<String, String> context) {
+        this.contextOut = context;
     }
 }

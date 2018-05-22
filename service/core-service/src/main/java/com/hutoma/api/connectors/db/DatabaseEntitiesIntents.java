@@ -1,5 +1,6 @@
 package com.hutoma.api.connectors.db;
 
+import com.google.common.base.Strings;
 import com.google.gson.reflect.TypeToken;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.containers.ApiEntity;
@@ -31,10 +32,15 @@ import javax.inject.Provider;
  */
 public class DatabaseEntitiesIntents extends DatabaseAI {
 
+    private final JsonSerializer serializer;
+
     @Inject
-    public DatabaseEntitiesIntents(ILogger logger, Provider<DatabaseCall> callProvider,
-                                   Provider<DatabaseTransaction> transactionProvider) {
+    public DatabaseEntitiesIntents(final ILogger logger,
+                                   final Provider<DatabaseCall> callProvider,
+                                   final Provider<DatabaseTransaction> transactionProvider,
+                                   final JsonSerializer serializer) {
         super(logger, callProvider, transactionProvider);
+        this.serializer = serializer;
     }
 
     public List<Entity> getEntities(final UUID devid) throws DatabaseException {
@@ -173,6 +179,14 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
             // build the intent
             ApiIntent intent = new ApiIntent(rs.getString("name"), rs.getString("topic_in"), rs.getString("topic_out"));
             intent.setLastUpdated(new DateTime(rs.getTimestamp("last_updated")));
+            String json = rs.getString("context_in");
+            if (!Strings.isNullOrEmpty(json)) {
+                intent.setContextIn(this.serializer.deserializeStringMap(json));
+            }
+            json = rs.getString("context_out");
+            if (!Strings.isNullOrEmpty(json)) {
+                intent.setContextOut(this.serializer.deserializeStringMap(json));
+            }
 
             // get the user triggers
             ResultSet saysRs = transaction.getDatabaseCall().initialise("getIntentUserSays", 2)
@@ -334,9 +348,17 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
         try {
 
             // add or update the intent
-            int rowcount = transaction.getDatabaseCall().initialise("addUpdateIntent", 6)
-                    .add(devid).add(aiid).add(intentName).add(intent.getIntentName())
-                    .add(intent.getTopicIn()).add(intent.getTopicOut())
+            int rowcount = transaction.getDatabaseCall().initialise("addUpdateIntent", 8)
+                    .add(devid)
+                    .add(aiid)
+                    .add(intentName)
+                    .add(intent.getIntentName())
+                    .add(intent.getTopicIn())
+                    .add(intent.getTopicOut())
+                    .add(intent.getContextIn() == null || intent.getContextIn().isEmpty()
+                            ? null : this.serializer.serialize(intent.getContextIn()))
+                    .add(intent.getContextOut() == null || intent.getContextOut().isEmpty()
+                            ? null : this.serializer.serialize(intent.getContextOut()))
                     .executeUpdate();
 
             if (rowcount != 1 && rowcount != 2) { // insert=1, update=2
@@ -365,27 +387,16 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
      */
     public boolean deleteIntent(final UUID devid, final UUID aiid, final String intentName) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
-            int rowCount = call.initialise("deleteIntent", 3).add(devid).add(aiid).add(intentName).executeUpdate();
+            int rowCount = call.initialise("deleteIntent", 3)
+                    .add(devid)
+                    .add(aiid)
+                    .add(intentName)
+                    .executeUpdate();
             return rowCount > 0;
         }
     }
 
-    public boolean updateMemoryIntent(final MemoryIntent intent, final JsonSerializer jsonSerializer)
-            throws DatabaseException {
-        try (DatabaseCall call = this.callProvider.get()) {
-            String variables = jsonSerializer.serialize(intent.getVariables());
-            call.initialise("updateMemoryIntent", 5)
-                    .add(intent.getName())
-                    .add(intent.getAiid())
-                    .add(intent.getChatId())
-                    .add(variables)
-                    .add(intent.isFulfilled());
-            return call.executeUpdate() > 0;
-        }
-    }
-
-    public MemoryIntent getMemoryIntent(final String intentName, final UUID aiid, UUID chatId,
-                                        final JsonSerializer jsonSerializer)
+    public MemoryIntent getMemoryIntent(final String intentName, final UUID aiid, UUID chatId)
             throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("getMemoryIntent", 3)
@@ -393,7 +404,7 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
             ResultSet rs = call.executeQuery();
             try {
                 if (rs.next()) {
-                    return loadMemoryIntent(rs, jsonSerializer);
+                    return loadMemoryIntent(rs, this.serializer);
                 }
                 return null;
             } catch (SQLException sqle) {

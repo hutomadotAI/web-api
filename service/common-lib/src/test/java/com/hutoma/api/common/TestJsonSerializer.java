@@ -7,6 +7,7 @@ import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 public class TestJsonSerializer {
 
@@ -54,6 +55,22 @@ public class TestJsonSerializer {
         Assert.assertEquals(456, list.get(1).member2);
         Assert.assertEquals("c", list.get(1).member3.get(0));
         Assert.assertEquals("d", list.get(1).member3.get(1));
+    }
+
+    public void testDeserializeStringMap() {
+        String json = "{\"a\":\"123\", \"b\":\"456\"}";
+        JsonSerializer js = new JsonSerializer();
+        Map<String, String> map = js.deserializeStringMap(json);
+        Assert.assertEquals(2, map.size());
+        Assert.assertEquals("123", map.get("a"));
+        Assert.assertEquals("456", map.get("b"));
+    }
+
+    @Test
+    public void testDeserializeStringMapNullOrEmpty() {
+        JsonSerializer js = new JsonSerializer();
+        Assert.assertTrue(js.deserializeStringMap(null).isEmpty());
+        Assert.assertTrue(js.deserializeStringMap("").isEmpty());
     }
 
     @Test

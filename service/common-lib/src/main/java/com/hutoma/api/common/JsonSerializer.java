@@ -15,8 +15,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * JSON serializer.
@@ -39,12 +41,24 @@ public class JsonSerializer {
         this.gson = createGsonBuilder(this.enablePrettyPrinting, true).create();
     }
 
+    /**
+     * Serializes an object into Json
+     * @param obj the object to serialize
+     * @return the json string
+     */
     public String serialize(Object obj) {
         return this.gson.toJson(obj);
     }
 
+    /**
+     * Deserializes a stream into an object.
+     * @param stream      the stream
+     * @param resultClass the type expected to deserialize
+     * @return the deserialized object
+     * @throws JsonParseException when there's an error parsing the input object
+     */
     @SuppressWarnings("unchecked")
-    public Object deserialize(InputStream stream, Class resultClass) throws JsonParseException {
+    public Object deserialize(final InputStream stream, final Class resultClass) throws JsonParseException {
         try {
             Object obj = this.gson.fromJson(new InputStreamReader(stream, StandardCharsets.UTF_8), resultClass);
             if (null == obj) {
@@ -56,8 +70,15 @@ public class JsonSerializer {
         }
     }
 
+    /**
+     * Deserializes a string into an object.
+     * @param content     the string content
+     * @param resultClass the type expected to deserialize
+     * @return the deserialized object
+     * @throws JsonParseException when there's an error parsing the input object
+     */
     @SuppressWarnings("unchecked")
-    public Object deserialize(String content, Class resultClass) throws JsonParseException {
+    public Object deserialize(final String content, final Class resultClass) throws JsonParseException {
         try {
             if (content == null) {
                 return null;
@@ -72,12 +93,19 @@ public class JsonSerializer {
         }
     }
 
-    public <T> List<T> deserializeListAutoDetect(String content) throws JsonParseException {
+    /**
+     * Deserializes a list into an object, auto-detecting the type (only works for simple types)
+     * @param content the json content
+     * @return the deserialized object
+     * @throws JsonParseException when there's an error parsing the input object
+     */
+    public <T> List<T> deserializeListAutoDetect(final String content) throws JsonParseException {
         try {
             if (content == null) {
                 return null;
             }
-            Type listType = new TypeToken<List<T>>(){}.getType();
+            Type listType = new TypeToken<List<T>>() {
+            }.getType();
             List<T> list = this.gson.fromJson(content, listType);
             if (list == null) {
                 throw new JsonParseException("cannot deserialize valid object from json");
@@ -88,7 +116,14 @@ public class JsonSerializer {
         }
     }
 
-    public <T> List<T> deserializeList(String content, Type listType) throws JsonParseException {
+    /**
+     * Deserializes a list into an object.
+     * @param content  the json content
+     * @param listType the list type expected to deserialize
+     * @return the deserialized object
+     * @throws JsonParseException when there's an error parsing the input object
+     */
+    public <T> List<T> deserializeList(final String content, final Type listType) throws JsonParseException {
         try {
             if (content == null) {
                 return null;
@@ -98,6 +133,28 @@ public class JsonSerializer {
                 throw new JsonParseException("cannot deserialize valid object from json");
             }
             return list;
+        } catch (JsonSyntaxException jse) {
+            throw new JsonParseException(jse);
+        }
+    }
+
+    /**
+     * Deserializes a Map where both keys and values are strings.
+     * @param content the json content
+     * @return the Map
+     * @throws JsonParseException
+     */
+    public Map<String, String> deserializeStringMap(final String content) throws JsonParseException {
+        try {
+            if (content == null || content.isEmpty()) {
+                return new HashMap<>();
+            }
+            Map<String, String> stringMap = this.gson.fromJson(content, new TypeToken<Map<String, String>>() {
+            }.getType());
+            if (stringMap == null) {
+                throw new JsonParseException("cannot deserialize valid object from json");
+            }
+            return stringMap;
         } catch (JsonSyntaxException jse) {
             throw new JsonParseException(jse);
         }

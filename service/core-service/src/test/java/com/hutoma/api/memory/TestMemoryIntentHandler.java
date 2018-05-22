@@ -129,7 +129,7 @@ public class TestMemoryIntentHandler {
         ApiEntity apiEntity = new ApiEntity(entityName, DEVID_UUID, Arrays.asList("a", "b"), false);
         apiIntent.addVariable(iv);
         when(this.fakeDatabaseEntities.getIntent(any(), anyString())).thenReturn(apiIntent);
-        when(this.fakeDatabaseEntities.getMemoryIntent(anyString(), any(), any(), any())).thenReturn(null);
+        when(this.fakeDatabaseEntities.getMemoryIntent(anyString(), any(), any())).thenReturn(null);
         when(this.fakeDatabaseEntities.getEntity(any(), anyString())).thenReturn(apiEntity);
         MemoryIntent mi = this.memoryIntentHandler.parseAiResponseForIntent(DEVID_UUID, AIID, CHATID, DEFAULT_INTENT, buildChatState());
         Assert.assertNotNull(mi.getVariables());
@@ -141,7 +141,7 @@ public class TestMemoryIntentHandler {
     @Test(expected = ChatLogic.IntentException.class)
     public void testLoadIntentForAiDBException() throws ChatLogic.IntentException, DatabaseException {
         DatabaseException exception = new DatabaseException("test");
-        when(this.fakeDatabaseEntities.getMemoryIntent(anyString(), any(), any(), any())).thenThrow(exception);
+        when(this.fakeDatabaseEntities.getMemoryIntent(anyString(), any(), any())).thenThrow(exception);
         this.memoryIntentHandler.parseAiResponseForIntent(DEVID_UUID, AIID, CHATID, DEFAULT_INTENT, buildChatState());
     }
 
@@ -213,7 +213,7 @@ public class TestMemoryIntentHandler {
         ChatState state = buildChatState();
         state.setCurrentIntents(Collections.singletonList(mi));
 
-        when(this.fakeDatabaseEntities.getMemoryIntent(any(), any(), any(), any())).thenReturn(mi);
+        when(this.fakeDatabaseEntities.getMemoryIntent(any(), any(), any())).thenReturn(mi);
         return this.memoryIntentHandler.parseAiResponseForIntent(DEVID_UUID, AIID, CHATID, response, state);
     }
 
