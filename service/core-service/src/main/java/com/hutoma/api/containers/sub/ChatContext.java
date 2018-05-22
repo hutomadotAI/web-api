@@ -2,8 +2,6 @@ package com.hutoma.api.containers.sub;
 
 import com.google.gson.annotations.SerializedName;
 
-import org.elasticsearch.common.Strings;
-
 import java.util.HashMap;
 
 public class ChatContext {
@@ -12,7 +10,7 @@ public class ChatContext {
     private HashMap<String, ChatVariableValue> variables = new HashMap<>();
 
     public void setValue(final String variable, final String value) {
-        if (Strings.isNullOrEmpty(value)) {
+        if (value == null) {
             variables.remove(variable);
         } else {
             variables.put(variable, new ChatVariableValue(value));
