@@ -1,5 +1,6 @@
 package com.hutoma.api.logic.chat;
 
+import com.google.common.base.Strings;
 import com.hutoma.api.common.ChatLogger;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.WebHooks;
@@ -43,7 +44,7 @@ public class ChatPassthroughHandler implements IChatHandler {
 
         String passthrough = this.chatServices.getAIPassthroughUrl(requestInfo.getDevId(), requestInfo.getAiid());
 
-        if (passthrough != null) {
+        if (!Strings.isNullOrEmpty(passthrough)) {
             this.hasPassthrough = true;
 
             final String devIdString = requestInfo.getDevId().toString();
