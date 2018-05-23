@@ -1,20 +1,23 @@
 package com.hutoma.api.containers.sub;
 
+import com.google.gson.annotations.SerializedName;
+
 public enum IntentConditionOperator {
-    ISSET("set"),
-    NOT_SET("!set"),
-    EQUALS("=="),
-    NOT_EQUALS("!="),
-    BIGGER_THAN(">"),
-    SMALLER_THAN("<");
+    @SerializedName("set")
+    SET,
 
-    private String opString;
+    @SerializedName("!set")
+    NOT_SET,
 
-    IntentConditionOperator(final String opString) {
-        this.opString = opString;
-    }
+    @SerializedName("==")
+    EQUALS,
 
-    public String getOpString() {
-        return this.opString;
-    }
+    @SerializedName("!=")
+    NOT_EQUALS,
+
+    @SerializedName("<")
+    BIGGER_THAN,
+
+    @SerializedName(">")
+    SMALLER_THAN;
 }

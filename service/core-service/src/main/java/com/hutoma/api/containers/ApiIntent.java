@@ -2,6 +2,7 @@ package com.hutoma.api.containers;
 
 import com.google.gson.annotations.SerializedName;
 import com.hutoma.api.containers.sub.IntentVariable;
+import com.hutoma.api.containers.sub.IntentVariableCondition;
 import com.hutoma.api.containers.sub.WebHook;
 
 import org.joda.time.DateTime;
@@ -36,6 +37,8 @@ public class ApiIntent extends ApiResult {
     private Map<String, String> contextIn = new HashMap<>();
     @SerializedName("context_out")
     private Map<String, String> contextOut = new HashMap<>();
+    @SerializedName("conditions_in")
+    private List<IntentVariableCondition> conditionsIn = new ArrayList<>();
 
     public ApiIntent(String intentName, String topicIn, String topicOut) {
         this.intentName = intentName;
@@ -116,5 +119,13 @@ public class ApiIntent extends ApiResult {
 
     public void setContextOut(final Map<String, String> context) {
         this.contextOut = context;
+    }
+
+    public void setConditionsIn(final List<IntentVariableCondition> conditionsIn) {
+        this.conditionsIn = conditionsIn;
+    }
+
+    public List<IntentVariableCondition> getConditionsIn() {
+        return this.conditionsIn;
     }
 }

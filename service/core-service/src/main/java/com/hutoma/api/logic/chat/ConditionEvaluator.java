@@ -40,7 +40,7 @@ public class ConditionEvaluator {
             String variableValue = chatContext.getValue(condition.getVariable());
 
             switch (condition.getOperator()) {
-                case ISSET:
+                case SET:
                     // Only here for completeness, since this has been already evaluated before
                 case NOT_SET:
                     // Only here for completeness, since this has been already evaluated before

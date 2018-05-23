@@ -17,14 +17,14 @@ public class TestConditionEvaluator {
     @Test
     public void testEvaluate_variableSet() {
         ConditionEvaluator ev = new ConditionEvaluator(Collections.singletonList(
-                new IntentVariableCondition("var", IntentConditionOperator.ISSET, null)));
+                new IntentVariableCondition("var", IntentConditionOperator.SET, null)));
         Assert.assertTrue(ev.evaluate(buildContext("var", "")));
     }
 
     @Test
     public void testEvaluate_variableSet_false() {
         ConditionEvaluator ev = new ConditionEvaluator(Collections.singletonList(
-                new IntentVariableCondition("var", IntentConditionOperator.ISSET, null)));
+                new IntentVariableCondition("var", IntentConditionOperator.SET, null)));
         Assert.assertFalse(ev.evaluate(buildContext("not_the_var", "")));
     }
 
@@ -140,7 +140,7 @@ public class TestConditionEvaluator {
         ConditionEvaluator ev = new ConditionEvaluator(Arrays.asList(
                 new IntentVariableCondition("var1", IntentConditionOperator.SMALLER_THAN, "100"),
                 new IntentVariableCondition("var2", IntentConditionOperator.EQUALS, "true"),
-                new IntentVariableCondition("var3", IntentConditionOperator.ISSET, "")
+                new IntentVariableCondition("var3", IntentConditionOperator.SET, "")
         ));
         Assert.assertTrue(ev.evaluate(buildContext("var1", "90", "var2", "true", "var3", "any_value_really")));
     }
@@ -150,7 +150,7 @@ public class TestConditionEvaluator {
         ConditionEvaluator ev = new ConditionEvaluator(Arrays.asList(
                 new IntentVariableCondition("var1", IntentConditionOperator.SMALLER_THAN, "100"),
                 new IntentVariableCondition("var2", IntentConditionOperator.EQUALS, "true"),
-                new IntentVariableCondition("var3", IntentConditionOperator.ISSET, "")
+                new IntentVariableCondition("var3", IntentConditionOperator.SET, "")
         ));
         Assert.assertFalse(ev.evaluate(buildContext("var1", "101", "var2", "false")));
     }
@@ -160,7 +160,7 @@ public class TestConditionEvaluator {
         ConditionEvaluator ev = new ConditionEvaluator(Arrays.asList(
                 new IntentVariableCondition("var1", IntentConditionOperator.SMALLER_THAN, "100"),
                 new IntentVariableCondition("var2", IntentConditionOperator.EQUALS, "false"),
-                new IntentVariableCondition("var3", IntentConditionOperator.ISSET, "")
+                new IntentVariableCondition("var3", IntentConditionOperator.SET, "")
         ));
         Assert.assertTrue(ev.evaluate(buildContext("var1", "90", "var2", "true", "var3", "any_value_really")));
     }

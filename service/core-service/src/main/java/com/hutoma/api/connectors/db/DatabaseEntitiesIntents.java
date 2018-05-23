@@ -8,6 +8,7 @@ import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.ApiIntentList;
 import com.hutoma.api.containers.sub.Entity;
 import com.hutoma.api.containers.sub.IntentVariable;
+import com.hutoma.api.containers.sub.IntentVariableCondition;
 import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.containers.sub.MemoryVariable;
 import com.hutoma.api.logging.ILogger;
@@ -187,6 +188,11 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
             if (!Strings.isNullOrEmpty(json)) {
                 intent.setContextOut(this.serializer.deserializeStringMap(json));
             }
+            json = rs.getString("conditions_in");
+            if (!Strings.isNullOrEmpty(json)) {
+                intent.setConditionsIn(this.serializer.deserializeList(json,
+                        new TypeToken<List<IntentVariableCondition>>(){}.getType()));
+            }
 
             // get the user triggers
             ResultSet saysRs = transaction.getDatabaseCall().initialise("getIntentUserSays", 2)
@@ -348,7 +354,7 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
         try {
 
             // add or update the intent
-            int rowcount = transaction.getDatabaseCall().initialise("addUpdateIntent", 8)
+            int rowcount = transaction.getDatabaseCall().initialise("addUpdateIntent", 9)
                     .add(devid)
                     .add(aiid)
                     .add(intentName)
@@ -359,6 +365,8 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
                             ? null : this.serializer.serialize(intent.getContextIn()))
                     .add(intent.getContextOut() == null || intent.getContextOut().isEmpty()
                             ? null : this.serializer.serialize(intent.getContextOut()))
+                    .add(intent.getConditionsIn() == null || intent.getConditionsIn().isEmpty()
+                            ? null : this.serializer.serialize(intent.getConditionsIn()))
                     .executeUpdate();
 
             if (rowcount != 1 && rowcount != 2) { // insert=1, update=2
