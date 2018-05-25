@@ -65,6 +65,11 @@ public class ChatStateHandler {
         }
     }
 
+    public void clear(final ChatState chatState) {
+        chatState.setCurrentIntents(null);
+
+    }
+
     public static class ChatStateException extends ChatBaseException {
         ChatStateException(final String message) {
             super(message);

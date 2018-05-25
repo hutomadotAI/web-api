@@ -84,6 +84,7 @@ public class IntentProcessor {
             } else {
                 chatResult.setScore(SCORE_INTENT_RECOGNIZED);
                 chatResult.setAnswer(intent.getConditionsFallthroughMessage());
+                chatResult.getChatState().clearFromCurrentIntents(Collections.singletonList(currentIntent));
                 telemetryMap.add("AnsweredBy", "IntentProcessor");
                 return true;
             }
@@ -230,6 +231,7 @@ public class IntentProcessor {
      */
     private boolean canExecuteIntent(final ApiIntent intent, final ChatResult chatResult) {
         // If the intent is gated on any conditionals, evaluate them
+        this.conditionEvaluator.setConditions(intent.getConditionsIn());
         if (!intent.getConditionsIn().isEmpty()) {
             ConditionEvaluator.Results results =
                     this.conditionEvaluator.evaluate(chatResult.getChatState().getChatContext());

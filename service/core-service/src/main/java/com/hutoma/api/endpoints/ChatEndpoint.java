@@ -112,6 +112,32 @@ public class ChatEndpoint {
         return result.getResponse(this.serializer).build();
     }
 
+    @POST
+    @Path("{aiid}/chat/reset")
+    @RateLimit(RateKey.Chat)
+    @Secured({Role.ROLE_CLIENTONLY, Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3,
+            Role.ROLE_PLAN_4})
+    @ValidateParameters({APIParameter.DevID, APIParameter.AIID, APIParameter.ChatID})
+    @StatusCodes({
+            @ResponseCode(code = HttpURLConnection.HTTP_OK, condition = "Succeeded."),
+            @ResponseCode(code = HttpURLConnection.HTTP_INTERNAL_ERROR, condition = "Internal error")
+    })
+    @RequestHeaders({
+            @RequestHeader(name = "Authorization", description = "Developer token")
+    })
+    @ResourceMethodSignature(
+            queryParams = {@QueryParam("chatId")}
+    )
+    public
+    Response resetChat(
+            @Context ContainerRequestContext requestContext) {
+        ApiResult result = this.chatLogic.resetChat(
+                ParameterFilter.getAiid(requestContext),
+                ParameterFilter.getDevid(requestContext),
+                ParameterFilter.getChatID(requestContext));
+        return result.getResponse(this.serializer).build();
+    }
+
     @GET
     @Path("load/{aiid}/chat")
     @RateLimit(RateKey.LoadTest)
