@@ -74,6 +74,7 @@ public class TestChatBase {
     ChatEmbHandler fakeEmbHandler;
     ChatDefaultHandler fakeDefaultHandler;
     IntentProcessor intentProcessor;
+    ConditionEvaluator fakeConditionEvaluator;
 
 
     @Before
@@ -88,7 +89,8 @@ public class TestChatBase {
         this.fakeWebHooks = mock(WebHooks.class);
         this.fakeAiStrings = mock(AiStrings.class);
         this.fakeChatWorkflow = mock(ChatWorkflow.class);
-        this.intentProcessor = new IntentProcessor(this.fakeRecognizer, this.fakeIntentHandler, this.fakeWebHooks, mock(ILogger.class));
+        this.fakeConditionEvaluator = mock(ConditionEvaluator.class);
+        this.intentProcessor = new IntentProcessor(this.fakeRecognizer, this.fakeIntentHandler, this.fakeWebHooks, this.fakeConditionEvaluator, mock(ILogger.class));
 
         this.fakePassthroughHandler = new ChatPassthroughHandler(this.fakeChatServices, this.fakeWebHooks, mock(Tools.class),
                 mock(ChatLogger.class), mock(ILogger.class));

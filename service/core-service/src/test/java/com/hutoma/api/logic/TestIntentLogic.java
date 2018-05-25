@@ -253,7 +253,7 @@ public class TestIntentLogic {
     }
 
     @Test
-    public void testUpdateIntent_triggersTrainingStop() throws DatabaseException {
+    public void testUpdateIntent_triggersTrainingStop() {
         this.intentLogic.writeIntent(DEVID_UUID, AIID, getIntent());
         verify(this.trainingLogic).stopTraining(any(), any());
     }

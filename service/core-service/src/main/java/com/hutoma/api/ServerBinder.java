@@ -29,15 +29,7 @@ import com.hutoma.api.logging.CentralLogger;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.ILoggerConfig;
 import com.hutoma.api.logic.*;
-import com.hutoma.api.logic.chat.ChatAimlHandler;
-import com.hutoma.api.logic.chat.ChatDefaultHandler;
-import com.hutoma.api.logic.chat.ChatEmbHandler;
-import com.hutoma.api.logic.chat.ChatHandoverHandler;
-import com.hutoma.api.logic.chat.ChatIntentHandler;
-import com.hutoma.api.logic.chat.ChatPassthroughHandler;
-import com.hutoma.api.logic.chat.ChatRequestTrigger;
-import com.hutoma.api.logic.chat.ChatWorkflow;
-import com.hutoma.api.logic.chat.IntentProcessor;
+import com.hutoma.api.logic.chat.*;
 import com.hutoma.api.memory.ChatStateHandler;
 import com.hutoma.api.memory.ExternalEntityRecognizer;
 import com.hutoma.api.memory.IEntityRecognizer;
@@ -121,6 +113,7 @@ public class ServerBinder extends AbstractBinder {
         bind(AnalyticsLogic.class).to(AnalyticsLogic.class);
         bind(AiStrings.class).to(AiStrings.class);
         bind(IntentProcessor.class).to(IntentProcessor.class);
+        bind(ConditionEvaluator.class).to(ConditionEvaluator.class);
 
         // Chat workflow
         bind(ChatWorkflow.class).to(ChatWorkflow.class).to(Singleton.class);

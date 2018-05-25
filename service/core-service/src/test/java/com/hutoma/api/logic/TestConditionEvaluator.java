@@ -18,112 +18,112 @@ public class TestConditionEvaluator {
     public void testEvaluate_variableSet() {
         ConditionEvaluator ev = new ConditionEvaluator(Collections.singletonList(
                 new IntentVariableCondition("var", IntentConditionOperator.SET, null)));
-        Assert.assertTrue(ev.evaluate(buildContext("var", "")));
+        Assert.assertTrue(ev.evaluate(buildContext("var", "")).passed());
     }
 
     @Test
     public void testEvaluate_variableSet_false() {
         ConditionEvaluator ev = new ConditionEvaluator(Collections.singletonList(
                 new IntentVariableCondition("var", IntentConditionOperator.SET, null)));
-        Assert.assertFalse(ev.evaluate(buildContext("not_the_var", "")));
+        Assert.assertFalse(ev.evaluate(buildContext("not_the_var", "")).passed());
     }
 
     @Test
     public void testEvaluate_variableNotSet() {
         ConditionEvaluator ev = new ConditionEvaluator(Collections.singletonList(
                 new IntentVariableCondition("var", IntentConditionOperator.NOT_SET, null)));
-        Assert.assertTrue(ev.evaluate(buildContext("not_the_var", "")));
+        Assert.assertTrue(ev.evaluate(buildContext("not_the_var", "")).passed());
     }
 
     @Test
     public void testEvaluate_variableNotSet_false() {
         ConditionEvaluator ev = new ConditionEvaluator(Collections.singletonList(
                 new IntentVariableCondition("var", IntentConditionOperator.NOT_SET, null)));
-        Assert.assertFalse(ev.evaluate(buildContext("var", "")));
+        Assert.assertTrue(ev.evaluate(buildContext("var", "")).failed());
     }
 
     @Test
     public void testEvaluate_variableIsEquals() {
         ConditionEvaluator ev = new ConditionEvaluator(Collections.singletonList(
                 new IntentVariableCondition("var", IntentConditionOperator.EQUALS, "aaa")));
-        Assert.assertTrue(ev.evaluate(buildContext("var", "aaa")));
+        Assert.assertTrue(ev.evaluate(buildContext("var", "aaa")).passed());
     }
 
     @Test
     public void testEvaluate_variableIsEquals_false() {
         ConditionEvaluator ev = new ConditionEvaluator(Collections.singletonList(
                 new IntentVariableCondition("var", IntentConditionOperator.EQUALS, "aaa")));
-        Assert.assertFalse(ev.evaluate(buildContext("var", "bbb")));
+        Assert.assertTrue(ev.evaluate(buildContext("var", "bbb")).failed());
     }
 
     @Test
     public void testEvaluate_variableIsNotEquals() {
         ConditionEvaluator ev = new ConditionEvaluator(Collections.singletonList(
                 new IntentVariableCondition("var", IntentConditionOperator.NOT_EQUALS, "aaa")));
-        Assert.assertTrue(ev.evaluate(buildContext("var", "bbb")));
+        Assert.assertTrue(ev.evaluate(buildContext("var", "bbb")).passed());
     }
 
     @Test
     public void testEvaluate_variableIsNotEquals_false() {
         ConditionEvaluator ev = new ConditionEvaluator(Collections.singletonList(
                 new IntentVariableCondition("var", IntentConditionOperator.NOT_EQUALS, "aaa")));
-        Assert.assertFalse(ev.evaluate(buildContext("var", "aaa")));
+        Assert.assertTrue(ev.evaluate(buildContext("var", "aaa")).failed());
     }
 
     @Test
     public void testEvaluate_variableBiggerThan_String() {
         ConditionEvaluator ev = new ConditionEvaluator(Collections.singletonList(
-                new IntentVariableCondition("var", IntentConditionOperator.BIGGER_THAN, "bbb")));
-        Assert.assertTrue(ev.evaluate(buildContext("var", "aaa")));
+                new IntentVariableCondition("var", IntentConditionOperator.GREATER_THAN, "bbb")));
+        Assert.assertTrue(ev.evaluate(buildContext("var", "aaa")).passed());
     }
 
     @Test
     public void testEvaluate_variableBiggerThan_String_false() {
         ConditionEvaluator ev = new ConditionEvaluator(Collections.singletonList(
-                new IntentVariableCondition("var", IntentConditionOperator.BIGGER_THAN, "aaa")));
-        Assert.assertFalse(ev.evaluate(buildContext("var", "bbb")));
+                new IntentVariableCondition("var", IntentConditionOperator.GREATER_THAN, "aaa")));
+        Assert.assertTrue(ev.evaluate(buildContext("var", "bbb")).failed());
     }
 
     @Test
     public void testEvaluate_variableBiggerThan_Number() {
         ConditionEvaluator ev = new ConditionEvaluator(Collections.singletonList(
-                new IntentVariableCondition("var", IntentConditionOperator.BIGGER_THAN, "100.0")));
-        Assert.assertTrue(ev.evaluate(buildContext("var", "100.1")));
+                new IntentVariableCondition("var", IntentConditionOperator.GREATER_THAN, "100.0")));
+        Assert.assertTrue(ev.evaluate(buildContext("var", "100.1")).passed());
     }
 
     @Test
     public void testEvaluate_variableBiggerThan_Number_false() {
         ConditionEvaluator ev = new ConditionEvaluator(Collections.singletonList(
-                new IntentVariableCondition("var", IntentConditionOperator.BIGGER_THAN, "100")));
-        Assert.assertFalse(ev.evaluate(buildContext("var", "99")));
+                new IntentVariableCondition("var", IntentConditionOperator.GREATER_THAN, "100")));
+        Assert.assertTrue(ev.evaluate(buildContext("var", "99")).failed());
     }
 
     @Test
     public void testEvaluate_variableBiggerThan_String_equals() {
         ConditionEvaluator ev = new ConditionEvaluator(Collections.singletonList(
-                new IntentVariableCondition("var", IntentConditionOperator.BIGGER_THAN, "abc")));
-        Assert.assertFalse(ev.evaluate(buildContext("var", "abc")));
+                new IntentVariableCondition("var", IntentConditionOperator.GREATER_THAN, "abc")));
+        Assert.assertTrue(ev.evaluate(buildContext("var", "abc")).failed());
     }
 
     @Test
     public void testEvaluate_variableSmallerThan_Number() {
         ConditionEvaluator ev = new ConditionEvaluator(Collections.singletonList(
                 new IntentVariableCondition("var", IntentConditionOperator.SMALLER_THAN, "0.01")));
-        Assert.assertTrue(ev.evaluate(buildContext("var", "0.009")));
+        Assert.assertTrue(ev.evaluate(buildContext("var", "0.009")).passed());
     }
 
     @Test
     public void testEvaluate_variableSmallerThan_Number_false() {
         ConditionEvaluator ev = new ConditionEvaluator(Collections.singletonList(
                 new IntentVariableCondition("var", IntentConditionOperator.SMALLER_THAN, "0.001")));
-        Assert.assertFalse(ev.evaluate(buildContext("var", "0.01")));
+        Assert.assertTrue(ev.evaluate(buildContext("var", "0.01")).failed());
     }
 
     @Test
     public void testEvaluate_variableSmallerThan_String_equals() {
         ConditionEvaluator ev = new ConditionEvaluator(Collections.singletonList(
                 new IntentVariableCondition("var", IntentConditionOperator.SMALLER_THAN, "abc")));
-        Assert.assertFalse(ev.evaluate(buildContext("var", "abc")));
+        Assert.assertTrue(ev.evaluate(buildContext("var", "abc")).failed());
     }
 
     @Test
@@ -132,7 +132,7 @@ public class TestConditionEvaluator {
         String varValue = "0.123abc1";
         ConditionEvaluator ev = new ConditionEvaluator(Collections.singletonList(
                 new IntentVariableCondition("var", IntentConditionOperator.SMALLER_THAN, conditionValue)));
-        Assert.assertTrue(ev.evaluate(buildContext("var", varValue)));
+        Assert.assertTrue(ev.evaluate(buildContext("var", varValue)).passed());
     }
 
     @Test
@@ -142,7 +142,7 @@ public class TestConditionEvaluator {
                 new IntentVariableCondition("var2", IntentConditionOperator.EQUALS, "true"),
                 new IntentVariableCondition("var3", IntentConditionOperator.SET, "")
         ));
-        Assert.assertTrue(ev.evaluate(buildContext("var1", "90", "var2", "true", "var3", "any_value_really")));
+        Assert.assertTrue(ev.evaluate(buildContext("var1", "90", "var2", "true", "var3", "any_value_really")).passed());
     }
 
     @Test
@@ -152,7 +152,7 @@ public class TestConditionEvaluator {
                 new IntentVariableCondition("var2", IntentConditionOperator.EQUALS, "true"),
                 new IntentVariableCondition("var3", IntentConditionOperator.SET, "")
         ));
-        Assert.assertFalse(ev.evaluate(buildContext("var1", "101", "var2", "false")));
+        Assert.assertTrue(ev.evaluate(buildContext("var1", "101", "var2", "false")).failed());
     }
 
     @Test
@@ -162,7 +162,7 @@ public class TestConditionEvaluator {
                 new IntentVariableCondition("var2", IntentConditionOperator.EQUALS, "false"),
                 new IntentVariableCondition("var3", IntentConditionOperator.SET, "")
         ));
-        Assert.assertTrue(ev.evaluate(buildContext("var1", "90", "var2", "true", "var3", "any_value_really")));
+        Assert.assertTrue(ev.evaluate(buildContext("var1", "90", "var2", "true", "var3", "any_value_really")).failed());
     }
 
     private ChatContext buildContext(final String ... values) {

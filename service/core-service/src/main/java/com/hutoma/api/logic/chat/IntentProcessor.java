@@ -34,16 +34,19 @@ public class IntentProcessor {
     private final IEntityRecognizer entityRecognizer;
     private final IMemoryIntentHandler intentHandler;
     private final WebHooks webHooks;
+    private final ConditionEvaluator conditionEvaluator;
     private final ILogger logger;
 
     @Inject
     public IntentProcessor(final IEntityRecognizer entityRecognizer,
                            final IMemoryIntentHandler intentHandler,
                            final WebHooks webHooks,
+                           final ConditionEvaluator conditionEvaluator,
                            final ILogger logger) {
         this.entityRecognizer = entityRecognizer;
         this.intentHandler = intentHandler;
         this.webHooks = webHooks;
+        this.conditionEvaluator = conditionEvaluator;
         this.logger = logger;
     }
 
@@ -71,11 +74,43 @@ public class IntentProcessor {
         Map<String, Object> intentLog = new HashMap<>();
         intentLog.put("Name", currentIntent.getName());
 
+        ApiIntent intent = this.intentHandler.getIntent(chatInfo.getAiid(), currentIntent.getName());
+        if (!canExecuteIntent(intent, chatResult)) {
+            return false;
+        }
+
+        // If the intent is gated on any conditionals, evaluate them
+        if (!intent.getConditionsIn().isEmpty()) {
+            ConditionEvaluator.Results results =
+                    this.conditionEvaluator.evaluate(chatResult.getChatState().getChatContext());
+            if (results.failed()) {
+                ConditionEvaluator.Result failed = results.firstFailed();
+                // failed cannot be null, but just doublecheck
+                if (failed == null) {
+                    this.logger.logError(LOGFROM, "No failed condition evaluation found when previously found!");
+                } else {
+                    this.logger.logInfo(LOGFROM, "IntentCondition - not met",
+                            LogMap.map("AIID", aiidForMemoryIntents)
+                                    .put("ChatId", chatResult.getChatId())
+                                    .put("Intent", currentIntent.getName())
+                                    .put("NumConditions", intent.getConditionsIn().size())
+                                    .put("FailedCondition", failed));
+                }
+                // bail out as we don't have yet the conditions to trigger the intent execution
+                return false;
+            } else {
+                this.logger.logInfo(LOGFROM, "IntentCondition - passed",
+                        LogMap.map("AIID", aiidForMemoryIntents)
+                                .put("ChatId", chatResult.getChatId())
+                                .put("Intent", currentIntent.getName())
+                                .put("NumConditions", intent.getConditionsIn().size()));
+            }
+        }
+
         List<MemoryIntent> intentsToClear = new ArrayList<>();
         boolean handledIntent;
 
         // Make sure all context_in variables are read and applied to the chat state
-        ApiIntent intent = this.intentHandler.getIntent(chatInfo.getAiid(), currentIntent.getName());
         intent.getContextIn().forEach((k, v) -> chatResult.getChatState().getChatContext().setValue(k, v));
 
         // Are we in the middle of an entity value request?
@@ -177,6 +212,43 @@ public class IntentProcessor {
         return handledIntent;
     }
 
+    /**
+     * Checks whether an intent can be executed based on the conditions associated with it.
+     * @param intent     the intent
+     * @param chatResult the current chat result
+     * @return whether the intent can be executed or not
+     */
+    private boolean canExecuteIntent(final ApiIntent intent, final ChatResult chatResult) {
+        // If the intent is gated on any conditionals, evaluate them
+        if (!intent.getConditionsIn().isEmpty()) {
+            ConditionEvaluator.Results results =
+                    this.conditionEvaluator.evaluate(chatResult.getChatState().getChatContext());
+            if (results.failed()) {
+                ConditionEvaluator.Result failed = results.firstFailed();
+                // failed cannot be null, but just doublecheck
+                if (failed == null) {
+                    this.logger.logError(LOGFROM, "No failed condition evaluation found when previously found!");
+                } else {
+                    this.logger.logInfo(LOGFROM, "IntentCondition - not met",
+                            LogMap.map("AIID", chatResult.getAiid())
+                                    .put("ChatId", chatResult.getChatId())
+                                    .put("Intent", intent.getIntentName())
+                                    .put("NumConditions", intent.getConditionsIn().size())
+                                    .put("FailedCondition", failed));
+                }
+                // bail out as we don't have yet the conditions to trigger the intent execution
+                return false;
+            } else {
+                this.logger.logInfo(LOGFROM, "IntentCondition - passed",
+                        LogMap.map("AIID", chatResult.getAiid())
+                                .put("ChatId", chatResult.getChatId())
+                                .put("Intent", intent.getIntentName())
+                                .put("NumConditions", intent.getConditionsIn().size()));
+            }
+        }
+        return true;
+    }
+
     private boolean processVariables(final ChatRequestInfo chatInfo,
                                      final UUID aiidForMemoryIntents,
                                      final MemoryIntent currentIntent,
@@ -221,7 +293,7 @@ public class IntentProcessor {
             }
 
             // Update context
-            for (MemoryVariable var: currentIntent.getVariables()) {
+            for (MemoryVariable var : currentIntent.getVariables()) {
                 chatResult.getChatState().getChatContext().setValue(
                         String.format("%s.%s", currentIntent.getName(), var.getLabel()),
                         var.getCurrentValue());

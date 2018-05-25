@@ -6,13 +6,19 @@ import com.hutoma.api.containers.sub.IntentVariableCondition;
 
 import java.text.NumberFormat;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class ConditionEvaluator {
 
-    private final List<IntentVariableCondition> conditions;
+    private List<IntentVariableCondition> conditions;
     private final NumberFormat numberFormat;
     private static final String NUMBER_MATCH_PATTERN = "^[-+]?\\d+(\\.\\d+)?$";
+
+    public ConditionEvaluator() {
+        this(new ArrayList<>());
+    }
 
     public ConditionEvaluator(final List<IntentVariableCondition> conditions) {
         this.conditions = conditions;
@@ -23,48 +29,73 @@ public class ConditionEvaluator {
         return this.conditions;
     }
 
-    public boolean evaluate(final ChatContext chatContext) {
+    public void setConditions(final List<IntentVariableCondition> conditions) {
+        this.conditions = conditions;
+    }
+
+    public Results evaluate(final ChatContext chatContext) {
+
+        Results results = new Results();
 
         for (IntentVariableCondition condition : this.conditions) {
+
+            Result result = new Result(condition);
 
             // shortcut - if the variable is not present, then bail out as the condition
             // cannot be evaluated
             if (condition.getOperator() == IntentConditionOperator.NOT_SET) {
                 if (chatContext.isSet(condition.getVariable())) {
-                    return false;
+                    result.setResult(ResultType.FAILED);
                 }
             } else if (!chatContext.isSet(condition.getVariable())) {
-                return false;
+                result.setResult(ResultType.FAILED);
+            }
+
+            // Failed already, so shortcut the evaluation and stop evaluating more conditions
+            if (result.getResult() == ResultType.FAILED) {
+                return results.add(result);
             }
 
             String variableValue = chatContext.getValue(condition.getVariable());
 
             switch (condition.getOperator()) {
                 case SET:
-                    // Only here for completeness, since this has been already evaluated before
+                    // fallthrough
                 case NOT_SET:
-                    // Only here for completeness, since this has been already evaluated before
+                    result.setResult(ResultType.PASSED);
                     break;
                 case EQUALS:
-                    return condition.getValue().equals(variableValue);
+                    result.setResult(condition.getValue().equals(variableValue)
+                            ? ResultType.PASSED : ResultType.FAILED);
+                    break;
                 case NOT_EQUALS:
-                    return !condition.getValue().equals(variableValue);
-                case BIGGER_THAN:
+                    result.setResult(!condition.getValue().equals(variableValue)
+                            ? ResultType.PASSED : ResultType.FAILED);
+                    break;
+                case GREATER_THAN:
                     // fallthrough
                 case SMALLER_THAN:
-                    return evaluateBiggerSmaller(condition.getValue(), variableValue, condition.getOperator());
+                    result.setResult(evaluateBiggerSmaller(condition.getValue(), variableValue, condition.getOperator())
+                            ? ResultType.PASSED : ResultType.FAILED);
+                    break;
                 default:
                     break;
+            }
+            results.add(result);
+
+            // Stop processing conditions if we've already failed
+            if (result.getResult() != ResultType.PASSED) {
+                return results;
             }
         }
 
 
-        return true;
+        return results;
     }
 
     private boolean evaluateBiggerSmaller(final String conditionValue, final String variableValue,
                                           final IntentConditionOperator operator) {
-        if (operator != IntentConditionOperator.BIGGER_THAN && operator != IntentConditionOperator.SMALLER_THAN) {
+        if (operator != IntentConditionOperator.GREATER_THAN && operator != IntentConditionOperator.SMALLER_THAN) {
             throw new IllegalArgumentException("operator");
         }
         // First try to convert both the condition and variable values into a numeric
@@ -73,7 +104,7 @@ public class ConditionEvaluator {
                 Number conditionValueNumber = this.numberFormat.parse(conditionValue);
                 Number variableValueNumber = this.numberFormat.parse(variableValue);
                 switch (operator) {
-                    case BIGGER_THAN:
+                    case GREATER_THAN:
                         return variableValueNumber.doubleValue() > conditionValueNumber.doubleValue();
                     case SMALLER_THAN:
                         return variableValueNumber.doubleValue() < conditionValueNumber.doubleValue();
@@ -92,7 +123,7 @@ public class ConditionEvaluator {
             return false;
         }
         switch (operator) {
-            case BIGGER_THAN:
+            case GREATER_THAN:
                 return result > 0;
             case SMALLER_THAN:
                 return result < 0;
@@ -102,5 +133,83 @@ public class ConditionEvaluator {
 
         // Should never get here
         return false;
+    }
+
+    public enum ResultType {
+        PASSED,
+        FAILED,
+        NOT_EVALUATED
+    }
+
+    public static class Result {
+        private IntentVariableCondition condition;
+        private ResultType result;
+
+        public Result(final IntentVariableCondition condition) {
+            this(condition, ResultType.NOT_EVALUATED);
+        }
+
+        public Result(final IntentVariableCondition condition, final ResultType result) {
+            this.condition = condition;
+            this.result = result;
+        }
+
+        public IntentVariableCondition getCondition() {
+            return this.condition;
+        }
+
+        public ResultType getResult() {
+            return this.result;
+        }
+
+        public void setResult(final ResultType result) {
+            this.result = result;
+        }
+
+        @Override
+        public String toString() {
+            return String.format("%s %s %s -> %s",
+                    this.condition.getVariable(), this.condition.getOperator().toString(),
+                    this.condition.getValue() == null ? "" : condition.getValue(), this.result.toString());
+        }
+    }
+
+    public static class Results {
+        private List<Result> results;
+
+        public Results() {
+            this(new ArrayList<>());
+        }
+
+        public Results(final List<Result> results) {
+            this.results = results;
+        }
+
+        public List<Result> getResults() {
+            return this.results;
+        }
+
+        public Results add(final Result result) {
+            this.results.add(result);
+            return this;
+        }
+
+        public boolean passed() {
+            return this.results.stream().allMatch(x -> x.getResult() == ResultType.PASSED);
+        }
+
+        public boolean allEvaluated() {
+            return this.results.stream().noneMatch(x -> x.getResult() == ResultType.NOT_EVALUATED);
+        }
+
+        public boolean failed() {
+            return this.results.stream().anyMatch(x -> x.getResult() == ResultType.FAILED
+                    || x.getResult() == ResultType.NOT_EVALUATED);
+        }
+
+        public Result firstFailed() {
+            Optional<Result> opt = this.results.stream().filter(x -> x.getResult() == ResultType.FAILED).findFirst();
+            return opt.orElse(null);
+        }
     }
 }

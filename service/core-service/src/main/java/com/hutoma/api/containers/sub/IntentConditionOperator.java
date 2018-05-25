@@ -3,21 +3,21 @@ package com.hutoma.api.containers.sub;
 import com.google.gson.annotations.SerializedName;
 
 public enum IntentConditionOperator {
-    @SerializedName("set")
+    @SerializedName("SET")
     SET,
 
-    @SerializedName("!set")
+    @SerializedName("NOT_SET")
     NOT_SET,
 
-    @SerializedName("==")
+    @SerializedName("EQUALS")
     EQUALS,
 
-    @SerializedName("!=")
+    @SerializedName("NOT_EQUALS")
     NOT_EQUALS,
 
-    @SerializedName("<")
-    BIGGER_THAN,
+    @SerializedName("SMALLER_THAN")
+    SMALLER_THAN,
 
-    @SerializedName(">")
-    SMALLER_THAN;
+    @SerializedName("GREATER_THAN")
+    GREATER_THAN;
 }

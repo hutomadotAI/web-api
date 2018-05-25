@@ -11,8 +11,11 @@ import com.hutoma.api.containers.sub.ChatContext;
 import com.hutoma.api.containers.sub.ChatHandoverTarget;
 import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.containers.sub.ChatState;
+import com.hutoma.api.containers.sub.IntentConditionOperator;
+import com.hutoma.api.containers.sub.IntentVariableCondition;
 import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.containers.sub.MemoryVariable;
+import com.hutoma.api.logic.chat.ConditionEvaluator;
 import com.hutoma.api.memory.ChatStateHandler;
 import com.hutoma.api.memory.MemoryIntentHandler;
 
@@ -616,6 +619,35 @@ public class TestChatLogicIntents extends TestChatBase {
     }
 
     @Test
+    public void testChat_intent_conditions_true()
+            throws ChatBackendConnector.AiControllerException, ChatLogic.IntentException {
+        final String intentName = "intent";
+        IntentVariableCondition condition = new IntentVariableCondition("a", IntentConditionOperator.SET, null);
+        ApiIntent intent = setupContextVariablesChatTest(intentName, null, null, null, null);
+        intent.setConditionsIn(Collections.singletonList(condition));
+        when(this.fakeConditionEvaluator.evaluate(any())).thenReturn(new ConditionEvaluator.Results(
+                Collections.singletonList(new ConditionEvaluator.Result(condition, ConditionEvaluator.ResultType.PASSED))));
+        ApiResult result = getChat(0.5f);
+        ChatResult r = ((ApiChat) result).getResult();
+        Assert.assertEquals(1, r.getIntents().size());
+        Assert.assertEquals(intentName, r.getIntents().get(0).getName());
+    }
+
+    @Test
+    public void testChat_intent_conditions_false()
+            throws ChatBackendConnector.AiControllerException, ChatLogic.IntentException {
+        final String intentName = "intent";
+        IntentVariableCondition condition = new IntentVariableCondition("a", IntentConditionOperator.SET, null);
+        ApiIntent intent = setupContextVariablesChatTest(intentName, null, null, null, null);
+        intent.setConditionsIn(Collections.singletonList(condition));
+        when(this.fakeConditionEvaluator.evaluate(any())).thenReturn(new ConditionEvaluator.Results(
+                Collections.singletonList(new ConditionEvaluator.Result(condition, ConditionEvaluator.ResultType.FAILED))));
+        ApiResult result = getChat(0.5f);
+        ChatResult r = ((ApiChat) result).getResult();
+        Assert.assertNull(r.getIntents());
+    }
+
+    @Test
     public void testChat_intent_contextOut_notAppliedWhenIntentNotFulfilled()
             throws ChatBackendConnector.AiControllerException, ChatLogic.IntentException {
         final String intentName = "intent";
@@ -637,7 +669,7 @@ public class TestChatLogicIntents extends TestChatBase {
         Assert.assertFalse(ctx.isSet(MemoryIntentHandler.getPrefixedVariableName(intentName, "aa")));
     }
 
-    private void setupContextVariablesChatTest(final String intentName,
+    private ApiIntent setupContextVariablesChatTest(final String intentName,
                                                final String contextInVarName, final String contextInVarValue,
                                                final String contextOutVarName, final String contextOutVarValue)
             throws ChatBackendConnector.AiControllerException, ChatLogic.IntentException {
@@ -654,5 +686,6 @@ public class TestChatLogicIntents extends TestChatBase {
         when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), anyString(), any())).thenReturn(mi);
         when(this.fakeIntentHandler.getCurrentIntentsStateForChat(any())).thenReturn(miList);
         when(this.fakeIntentHandler.getIntent(any(), anyString())).thenReturn(intent);
+        return intent;
     }
 }
