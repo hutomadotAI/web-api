@@ -14,6 +14,11 @@ import org.joda.time.DateTimeZone;
 
 import javax.inject.Inject;
 
+/**
+ * Chat default handler.
+ * Terminates the chat pipeline by getting invoked if no previous handler has signalled
+ * that the conversation has been handled.
+ */
 public class ChatDefaultHandler implements IChatHandler {
 
     public static final String COMPLETELY_LOST_RESULT = "Erm... What?";
@@ -22,12 +27,20 @@ public class ChatDefaultHandler implements IChatHandler {
     private final AiStrings aiStrings;
     private final ILogger logger;
 
+    /**
+     * Ctor with parameter injection.
+     * @param aiStrings the AIStrings
+     * @param logger    the logger
+     */
     @Inject
     public ChatDefaultHandler(final AiStrings aiStrings, final ILogger logger) {
         this.aiStrings = aiStrings;
         this.logger = logger;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public ChatResult doWork(final ChatRequestInfo requestInfo,
                              final ChatResult currentResult,
@@ -63,8 +76,14 @@ public class ChatDefaultHandler implements IChatHandler {
         return currentResult;
     }
 
+    /**
+     * Sends the default error message to the caller.
+     * @param requestInfo  the request info
+     * @param telemetryMap the telemetry structure
+     * @return the new chat result
+     */
     private ChatResult sendDefaultErrorMessage(final ChatRequestInfo requestInfo,
-                                         final LogMap telemetryMap) {
+                                               final LogMap telemetryMap) {
         // TODO we need to figure out something
         telemetryMap.add("AnsweredBy", "NONE");
         ChatResult result = new ChatResult(requestInfo.getQuestion());
@@ -78,11 +97,13 @@ public class ChatDefaultHandler implements IChatHandler {
                     requestInfo.getDevId().toString(), ex);
             result.setAnswer(COMPLETELY_LOST_RESULT);
         }
-        result.setContext("");
         result.setTopicOut("");
         return result;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean chatCompleted() {
         // This should always complete any chat session as it's the default handler

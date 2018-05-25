@@ -27,6 +27,9 @@ import java.util.Optional;
 import java.util.UUID;
 import javax.inject.Inject;
 
+/**
+ * Handled all the intent processing logic.
+ */
 public class IntentProcessor {
 
     private static final double SCORE_INTENT_RECOGNIZED = 1.0d;
@@ -261,6 +264,21 @@ public class IntentProcessor {
         return true;
     }
 
+    /**
+     * Processes the intent's variables.
+     * @param chatInfo             the chat request information
+     * @param aiidForMemoryIntents AI id for the intent being processed
+     * @param currentIntent        intent being processed
+     * @param chatResult           the current chat result
+     * @param memoryVariables      list of memory variables
+     * @param intentsToClear       list of intents to clear
+     * @param intent               intent definition
+     * @param log                  log structure
+     * @param telemetryMap         telemetry structure
+     * @return whether the intent was handled or not
+     * @throws ChatLogic.IntentException an exception during the intent processing
+     * @throws WebHooks.WebHookException an exception while calling the webhook
+     */
     private boolean processVariables(final ChatRequestInfo chatInfo,
                                      final UUID aiidForMemoryIntents,
                                      final MemoryIntent currentIntent,
@@ -370,11 +388,20 @@ public class IntentProcessor {
                     telemetryMap);
             intentsToClear.add(currentIntent);
             handledIntent = true;
+
+            if (intent.getResetContextOnExit()) {
+                chatResult.getChatState().getChatContext().clear();
+            }
         }
 
         return handledIntent;
     }
 
+    /**
+     * Gets the next variable to prompt, if any.
+     * @param currentIntent the current intent being processed
+     * @return the memory variable (or null if no variable to prompt)
+     */
     private MemoryVariable getNextVariableToPrompt(final MemoryIntent currentIntent) {
         MemoryVariable variable = getVariableToPromptFromEntityList(currentIntent.getVariables());
         List<MemoryVariable> vars = currentIntent.getUnfulfilledVariables();
@@ -392,6 +419,11 @@ public class IntentProcessor {
         return variable;
     }
 
+    /**
+     * Gets the next variable to prompt for from the variables list.
+     * @param variables the variables list
+     * @return the variable to prompt for next
+     */
     private MemoryVariable getVariableToPromptFromEntityList(List<MemoryVariable> variables) {
         Map<String, List<MemoryVariable>> entitiesMap = new HashMap<>();
         for (MemoryVariable variable : variables) {
@@ -421,6 +453,12 @@ public class IntentProcessor {
         return variableToPrompt;
     }
 
+    /**
+     * Updates the chat result to prompt the user with a variable.
+     * @param variable   the variable to prompt for
+     * @param chatResult the current chat result
+     * @param log        the log structure
+     */
     private void promptForVariable(final MemoryVariable variable, final ChatResult chatResult,
                                    final Map<String, Object> log) {
         // And prompt the user for the value for that variable
@@ -439,6 +477,14 @@ public class IntentProcessor {
         log.put("Variable times to prompt", variable.getTimesToPrompt());
     }
 
+    /**
+     * Notifies that the intent has beel fulfilled.
+     * @param chatResult   the current chat result
+     * @param memoryIntent the memory intent
+     * @param aiid         the AI id
+     * @param intent       the intent
+     * @param telemetryMap the telemetry structure
+     */
     private void notifyIntentFulfilled(final ChatResult chatResult, final MemoryIntent memoryIntent,
                                        final UUID aiid, final ApiIntent intent,
                                        final LogMap telemetryMap) {
@@ -447,6 +493,13 @@ public class IntentProcessor {
         telemetryMap.add("IntentFulfilled", memoryIntent.getName());
     }
 
+    /**
+     * Gets a random response form the list of intent responses.
+     * @param aiid         the AI id
+     * @param memoryIntent the memory intent
+     * @param intent       the intent
+     * @return the random response
+     */
     private String getRandomIntentResponse(final UUID aiid, final MemoryIntent memoryIntent, final ApiIntent intent) {
         if (intent != null) {
             List<String> responses = intent.getResponses();
@@ -459,6 +512,17 @@ public class IntentProcessor {
         return null;
     }
 
+    /**
+     * Check whether there's a webhook to execute, and call it.
+     * @param chatInfo             the chat request info
+     * @param aiidForMemoryIntents the AI id for the intent in flight
+     * @param currentIntent        the intent in flight
+     * @param chatResult           the current chat result
+     * @param intent               tje intent
+     * @param log                  the log structure
+     * @param telemetryMap         the telemetry structure
+     * @throws WebHooks.WebHookException if there is an exception calling the webhook
+     */
     private void checkAndExecuteWebhook(final ChatRequestInfo chatInfo,
                                         final UUID aiidForMemoryIntents,
                                         final MemoryIntent currentIntent,

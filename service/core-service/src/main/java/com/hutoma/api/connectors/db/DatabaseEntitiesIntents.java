@@ -191,9 +191,11 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
             json = rs.getString("conditions_in");
             if (!Strings.isNullOrEmpty(json)) {
                 intent.setConditionsIn(this.serializer.deserializeList(json,
-                        new TypeToken<List<IntentVariableCondition>>(){}.getType()));
+                        new TypeToken<List<IntentVariableCondition>>() {
+                        }.getType()));
             }
             intent.setConditionsFallthroughMessage(rs.getString("conditions_default_response"));
+            intent.setResetContextOnExit(rs.getBoolean("reset_context_on_exit"));
 
             // get the user triggers
             ResultSet saysRs = transaction.getDatabaseCall().initialise("getIntentUserSays", 2)
@@ -355,7 +357,7 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
         try {
 
             // add or update the intent
-            int rowcount = transaction.getDatabaseCall().initialise("addUpdateIntent", 10)
+            int rowcount = transaction.getDatabaseCall().initialise("addUpdateIntent", 11)
                     .add(devid)
                     .add(aiid)
                     .add(intentName)
@@ -369,6 +371,7 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
                     .add(intent.getConditionsIn() == null || intent.getConditionsIn().isEmpty()
                             ? null : this.serializer.serialize(intent.getConditionsIn()))
                     .add(intent.getConditionsFallthroughMessage())
+                    .add(intent.getResetContextOnExit())
                     .executeUpdate();
 
             if (rowcount != 1 && rowcount != 2) { // insert=1, update=2
@@ -656,7 +659,8 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
     private static MemoryIntent loadMemoryIntent(final ResultSet rs, final JsonSerializer jsonSerializer)
             throws DatabaseException {
         try {
-            Type listType = new TypeToken<List<MemoryVariable>>() {}.getClass();
+            Type listType = new TypeToken<List<MemoryVariable>>() {
+            }.getClass();
             List<MemoryVariable> variables = jsonSerializer.deserializeList(rs.getString("variables"),
                     listType);
             return new MemoryIntent(rs.getString("name"),

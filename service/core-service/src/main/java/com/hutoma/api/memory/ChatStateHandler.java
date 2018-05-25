@@ -2,6 +2,7 @@ package com.hutoma.api.memory;
 
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.connectors.db.DatabaseAI;
+import com.hutoma.api.containers.sub.ChatHandoverTarget;
 import com.hutoma.api.containers.sub.ChatState;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
@@ -67,7 +68,12 @@ public class ChatStateHandler {
 
     public void clear(final ChatState chatState) {
         chatState.setCurrentIntents(null);
-
+        chatState.getChatContext().clear();
+        chatState.setBadAnswersCount(0);
+        chatState.setChatTarget(ChatHandoverTarget.Ai);
+        chatState.setHistory(null);
+        chatState.setLockedAiid(null);
+        chatState.setTopic(null);
     }
 
     public static class ChatStateException extends ChatBaseException {
