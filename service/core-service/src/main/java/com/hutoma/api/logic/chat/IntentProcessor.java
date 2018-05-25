@@ -29,6 +29,7 @@ import javax.inject.Inject;
 
 public class IntentProcessor {
 
+    private static final double SCORE_INTENT_RECOGNIZED = 1.0d;
     private static final String LOGFROM = "chatintenthandler";
     private static final String SYSANY = "sys.any";
     private final IEntityRecognizer entityRecognizer;
@@ -71,12 +72,21 @@ public class IntentProcessor {
             return false;
         }
 
+        List<MemoryIntent> intentsToClear = new ArrayList<>();
+        boolean handledIntent;
         Map<String, Object> intentLog = new HashMap<>();
         intentLog.put("Name", currentIntent.getName());
 
         ApiIntent intent = this.intentHandler.getIntent(chatInfo.getAiid(), currentIntent.getName());
         if (!canExecuteIntent(intent, chatResult)) {
-            return false;
+            if (Strings.isNullOrEmpty(intent.getConditionsFallthroughMessage())) {
+                return false;
+            } else {
+                chatResult.setScore(SCORE_INTENT_RECOGNIZED);
+                chatResult.setAnswer(intent.getConditionsFallthroughMessage());
+                telemetryMap.add("AnsweredBy", "IntentProcessor");
+                return true;
+            }
         }
 
         // If the intent is gated on any conditionals, evaluate them
@@ -107,9 +117,6 @@ public class IntentProcessor {
             }
         }
 
-        List<MemoryIntent> intentsToClear = new ArrayList<>();
-        boolean handledIntent;
-
         // Make sure all context_in variables are read and applied to the chat state
         intent.getContextIn().forEach((k, v) -> chatResult.getChatState().getChatContext().setValue(k, v));
 
@@ -124,7 +131,7 @@ public class IntentProcessor {
 
                 telemetryMap.add("EntityRequested.Name", mv.getName());
                 telemetryMap.add("EntityRequested.Label", mv.getLabel());
-                chatResult.setScore(1.0d);
+                chatResult.setScore(SCORE_INTENT_RECOGNIZED);
 
                 // Attempt to retrieve entities from the question
                 List<Pair<String, String>> entities = this.entityRecognizer.retrieveEntities(chatInfo.getQuestion(),
@@ -187,7 +194,10 @@ public class IntentProcessor {
             throw ex;
         }
 
+        // Intent was handled, confidence is high
+        chatResult.setScore(SCORE_INTENT_RECOGNIZED);
         chatResult.setIntents(Collections.singletonList(currentIntent));
+        telemetryMap.add("AnsweredBy", "IntentProcessor");
 
         if (currentIntent.isFulfilled()) {
             chatResult.getChatState().getCurrentIntents().remove(currentIntent);

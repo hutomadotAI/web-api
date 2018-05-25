@@ -9,6 +9,8 @@ import com.hutoma.api.connectors.WebHooks;
 import com.hutoma.api.connectors.chat.ChatBackendConnector;
 import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.ApiChat;
+import com.hutoma.api.containers.sub.ChatContext;
+import com.hutoma.api.containers.sub.ChatHandoverTarget;
 import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.containers.sub.ChatState;
 import com.hutoma.api.containers.sub.MemoryIntent;
@@ -29,6 +31,7 @@ import com.hutoma.api.memory.IEntityRecognizer;
 import com.hutoma.api.memory.IMemoryIntentHandler;
 
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
+import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -44,6 +47,7 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.Response;
 
+import static com.hutoma.api.common.TestDataHelper.getSampleAI;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -150,7 +154,8 @@ public class TestServiceChat extends ServiceTestBase {
     }
 
     @Test
-    public void testChat_response_includesVariablesMap() throws ChatLogic.IntentException, WebHooks.WebHookException {
+    public void testChat_response_includesVariablesMap() throws ChatLogic.IntentException, WebHooks.WebHookException,
+            ChatStateHandler.ChatStateException {
         UUID chatId = UUID.randomUUID();
         String label1 = "label1";
         String label2 = "label2";
@@ -162,8 +167,17 @@ public class TestServiceChat extends ServiceTestBase {
         MemoryIntent mi = new MemoryIntent("intent1", AIID, chatId, vars, false);
         List<MemoryIntent> intents = Collections.singletonList(mi);
         final ChatResult chatResult = new ChatResult("response");
+        chatResult.setIntents(intents);
         final long timestamp = System.currentTimeMillis();
         chatResult.setScore(0.8);
+
+        // Need to set the state to the intents since we're mocking the intent processor's ::processIntent which is
+        // responsible for adding the intent to the state
+        ChatState state = new ChatState(DateTime.now(), null, null, null, null, 0.5d,
+                ChatHandoverTarget.Ai, getSampleAI(), new ChatContext());
+        state.setCurrentIntents(intents);
+        when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(state);
+
         when(this.fakeMemoryIntentHandler.getCurrentIntentsStateForChat(any())).thenReturn(intents);
         when(this.fakeIntentProcessorLogic.processIntent(any(), any(), any(), any(), any())).thenReturn(true);
         when(this.fakeTools.getTimestamp()).thenReturn(timestamp);

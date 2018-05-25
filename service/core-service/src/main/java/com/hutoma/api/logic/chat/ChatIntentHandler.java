@@ -42,10 +42,10 @@ public class ChatIntentHandler implements IChatHandler {
 
         if (this.intentLogic.processIntent(requestInfo, aiidForMemoryIntents, currentIntent, currentResult,
                 telemetryMap)) {
-            // Intent was handled, confidence is high
-            currentResult.setScore(1.0d);
-            currentResult.setIntents(Collections.singletonList(currentIntent));
-            telemetryMap.add("AnsweredBy", "IntentProcessor");
+            if (currentIntent != null && currentIntent.getName() != null
+                    && currentResult.getChatState().getMemoryIntent(currentIntent.getName()) != null) {
+                currentResult.setIntents(Collections.singletonList(currentIntent));
+            }
             this.answered = true;
             return currentResult;
         }

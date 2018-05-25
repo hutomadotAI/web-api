@@ -39,6 +39,8 @@ public class ApiIntent extends ApiResult {
     private Map<String, String> contextOut = new HashMap<>();
     @SerializedName("conditions_in")
     private List<IntentVariableCondition> conditionsIn = new ArrayList<>();
+    @SerializedName("conditions_default_response")
+    private String conditionsFallthroughMessage;
 
     public ApiIntent(String intentName, String topicIn, String topicOut) {
         this.intentName = intentName;
@@ -127,5 +129,13 @@ public class ApiIntent extends ApiResult {
 
     public List<IntentVariableCondition> getConditionsIn() {
         return this.conditionsIn;
+    }
+
+    public String getConditionsFallthroughMessage() {
+        return this.conditionsFallthroughMessage;
+    }
+
+    public void setConditionsFallthroughMessage(final String conditionsFallthroughMessage) {
+        this.conditionsFallthroughMessage = conditionsFallthroughMessage;
     }
 }

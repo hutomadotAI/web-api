@@ -193,6 +193,7 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
                 intent.setConditionsIn(this.serializer.deserializeList(json,
                         new TypeToken<List<IntentVariableCondition>>(){}.getType()));
             }
+            intent.setConditionsFallthroughMessage(rs.getString("conditions_default_response"));
 
             // get the user triggers
             ResultSet saysRs = transaction.getDatabaseCall().initialise("getIntentUserSays", 2)
@@ -354,7 +355,7 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
         try {
 
             // add or update the intent
-            int rowcount = transaction.getDatabaseCall().initialise("addUpdateIntent", 9)
+            int rowcount = transaction.getDatabaseCall().initialise("addUpdateIntent", 10)
                     .add(devid)
                     .add(aiid)
                     .add(intentName)
@@ -367,6 +368,7 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
                             ? null : this.serializer.serialize(intent.getContextOut()))
                     .add(intent.getConditionsIn() == null || intent.getConditionsIn().isEmpty()
                             ? null : this.serializer.serialize(intent.getConditionsIn()))
+                    .add(intent.getConditionsFallthroughMessage())
                     .executeUpdate();
 
             if (rowcount != 1 && rowcount != 2) { // insert=1, update=2
