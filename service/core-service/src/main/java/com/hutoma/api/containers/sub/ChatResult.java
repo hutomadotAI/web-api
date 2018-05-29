@@ -371,4 +371,8 @@ public class ChatResult {
     public void setChatState(final ChatState chatState) {
         this.chatState = chatState;
     }
+
+    public Map<String, String> getContext() {
+        return this.context;
+    }
 }

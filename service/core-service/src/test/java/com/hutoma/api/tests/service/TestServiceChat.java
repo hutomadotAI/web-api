@@ -41,6 +41,7 @@ import java.net.HttpURLConnection;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
@@ -222,6 +223,42 @@ public class TestServiceChat extends ServiceTestBase {
                 .headers(defaultHeaders)
                 .post(Entity.text(""));
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.getStatus());
+    }
+
+    @Test
+    public void testChat_response_includesContext() throws ChatLogic.IntentException, WebHooks.WebHookException, ChatStateHandler.ChatStateException {
+        final String var1Name = "var1";
+        final String var1Value = "value1";
+        final String var2Name = "var2";
+        final String var2Value = "value2";
+        UUID chatId = UUID.randomUUID();
+        ChatContext context = new ChatContext();
+        context.setValue(var1Name, var1Value);
+        context.setValue(var2Name, var2Value);
+
+        MemoryIntent mi = new MemoryIntent("intent1", AIID, chatId, Collections.emptyList(), false);
+        List<MemoryIntent> intents = Collections.singletonList(mi);
+
+        ChatState state = new ChatState(DateTime.now(), null, null, null, null, 0.5d,
+                ChatHandoverTarget.Ai, getSampleAI(), context);
+        state.setCurrentIntents(intents);
+
+        when(this.fakeMemoryIntentHandler.getCurrentIntentsStateForChat(any())).thenReturn(intents);
+        when(this.fakeIntentProcessorLogic.processIntent(any(), any(), any(), any(), any())).thenReturn(true);
+        when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(state);
+        when(this.fakeTools.getTimestamp()).thenReturn(System.currentTimeMillis());
+
+        final Response response = target(CHAT_PATH)
+                .queryParam("q", "blablabla")
+                .queryParam("chatId", "")
+                .request().headers(defaultHeaders).get();
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
+        ApiChat apiChat = deserializeResponse(response, ApiChat.class);
+        Assert.assertNotNull(apiChat.getResult().getContext());
+        Map<String, String> ctx = apiChat.getResult().getContext();
+        Assert.assertEquals(2, ctx.size());
+        Assert.assertEquals(var1Value, ctx.get(var1Name));
+        Assert.assertEquals(var2Value, ctx.get(var2Name));
     }
 
     private WebTarget buildChatDefaultParams(WebTarget webTarget) {
