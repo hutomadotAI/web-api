@@ -9,6 +9,7 @@ import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.ApiAiBotList;
 import com.hutoma.api.containers.ApiAiList;
+import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.AiBot;
 import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.endpoints.AIEndpoint;
@@ -227,7 +228,7 @@ public class TestServiceAi extends ServiceTestBase {
         when(this.fakeDatabaseAi.updatePassthroughUrl(any(), any(), anyString(), any())).thenReturn(true);
         when(this.fakeDatabaseAi.updateDefaultChatResponses(any(), any(), any(), any(), any())).thenReturn(true);
         TestDataHelper.mockDatabaseCreateAIInTrans(this.fakeDatabaseAi, aiid);
-          final Response response = target(BOT_CLONE_PATH)
+        final Response response = target(BOT_CLONE_PATH)
                 .request()
                 .headers(defaultHeaders)
                 .post(Entity.form(getCreateAiRequestParams()));
@@ -308,6 +309,24 @@ public class TestServiceAi extends ServiceTestBase {
                 .headers(defaultHeaders)
                 .post(Entity.json("{}"));
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.getStatus());
+    }
+
+    @Test
+    public void testImportBot_duplicateIntentNames() {
+        final String origJson = getExportedBotJson();
+        final String json = origJson.substring(0, origJson.length() - 1) + ","
+                + "\"intents\":["
+                + "{\"intent_name\": \"intent0\", \"responses\":[\"r0\"],\"user_says\":[\"us0\"]},"
+                + "{\"intent_name\": \"intent1\", \"responses\":[\"r1\"],\"user_says\":[\"us1\"]},"
+                + "{\"intent_name\": \"intent1\", \"responses\":[\"r2\"],\"user_says\":[\"us2\"]}]}";
+        final Response response = target(IMPORT_BASEPATH)
+                .request()
+                .headers(defaultHeaders)
+                .post(Entity.json(json));
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.getStatus());
+        ApiResult result = deserializeResponse(response, ApiResult.class);
+        Assert.assertTrue(result.getStatus().getInfo().contains("duplicate intent name"));
+        Assert.assertTrue(result.getStatus().getInfo().contains("intent1"));
     }
 
     @Override

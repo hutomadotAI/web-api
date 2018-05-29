@@ -411,8 +411,15 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
                 }
             }
             if (botStructure.getIntents() != null) {
+                Set<String> intentNames = new HashSet<>();
                 for (ApiIntent intent : botStructure.getIntents()) {
+                    if (intentNames.contains(intent.getIntentName())) {
+                        throw new ParameterValidationException(String.format(
+                                "duplicate intent name: %s",
+                                intent.getIntentName()), INTENTNAME);
+                    }
                     this.validateIntent(intent);
+                    intentNames.add(intent.getIntentName());
                 }
             }
         } catch (Exception ex) {
