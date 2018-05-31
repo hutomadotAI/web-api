@@ -3,6 +3,7 @@ package com.hutoma.api.logic.chat;
 import com.hutoma.api.connectors.WebHooks;
 import com.hutoma.api.containers.sub.ChatRequestInfo;
 import com.hutoma.api.containers.sub.ChatResult;
+import com.hutoma.api.containers.sub.ChatState;
 import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.logging.LogMap;
 import com.hutoma.api.logic.ChatLogic;
@@ -32,10 +33,16 @@ public class ChatIntentHandler implements IChatHandler {
                              final LogMap telemetryMap)
             throws WebHooks.WebHookException, ChatLogic.IntentException {
 
-        UUID aiidForMemoryIntents = currentResult.getChatState().getLockedAiid() == null
-                ? requestInfo.getAiid() : currentResult.getChatState().getLockedAiid();
-        List<MemoryIntent> intentsForChat = this.intentHandler.getCurrentIntentsStateForChat(
-                currentResult.getChatState());
+        ChatState chatState = currentResult.getChatState();
+        UUID aiidForMemoryIntents = chatState.getLockedAiid() == null
+                ? requestInfo.getAiid() : chatState.getLockedAiid();
+        List<MemoryIntent> intentsForChat = this.intentHandler.getCurrentIntentsStateForChat(chatState);
+
+        // Clean up all expired variables
+        chatState.getChatContext().cleanupExpiredVariables();
+
+        // Decrement lifetime of variables
+        chatState.getChatContext().decrementVariablesTurnLifetime();
 
         // For now we should only have one active intent per chat.
         MemoryIntent currentIntent = intentsForChat.isEmpty() ? null : intentsForChat.get(0);
@@ -43,7 +50,7 @@ public class ChatIntentHandler implements IChatHandler {
         if (this.intentLogic.processIntent(requestInfo, aiidForMemoryIntents, currentIntent, currentResult,
                 telemetryMap)) {
             if (currentIntent != null && currentIntent.getName() != null
-                    && currentResult.getChatState().getMemoryIntent(currentIntent.getName()) != null) {
+                    && chatState.getMemoryIntent(currentIntent.getName()) != null) {
                 currentResult.setIntents(Collections.singletonList(currentIntent));
             }
             this.answered = true;

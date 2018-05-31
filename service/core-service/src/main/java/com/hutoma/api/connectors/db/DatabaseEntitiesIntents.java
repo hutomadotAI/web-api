@@ -550,6 +550,7 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
                     readCurrentRs.getInt("id"),
                     readCurrentRs.getBoolean("isPersistent"),
                     readCurrentRs.getString("label"));
+            old.setLifetimeTurns(readCurrentRs.getInt("lifetime_turns"));
             currentSet.put(old.getId(), old);
         }
 
@@ -567,7 +568,6 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
         for (IntentVariable obsoleteVar : currentSet.values()) {
             intentVariableDeleteOld(transaction, devid, aiid, intent, obsoleteVar);
         }
-
     }
 
     /***
@@ -586,7 +586,7 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
             throws DatabaseException, SQLException {
 
         // generate the call params
-        ResultSet updateVarRs = transaction.getDatabaseCall().initialise("addUpdateIntentVariable", 8)
+        ResultSet updateVarRs = transaction.getDatabaseCall().initialise("addUpdateIntentVariable", 9)
                 .add(devid)
                 .add(aiid)
                 .add(intent.getIntentName())
@@ -595,6 +595,7 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
                 .add(intentVariable.getNumPrompts())
                 .add(intentVariable.getValue())
                 .add(intentVariable.getLabel())
+                .add(intentVariable.getLifetimeTurns())
                 .executeQuery();
 
         // we are expecting some results; if not then something has gone very wrong

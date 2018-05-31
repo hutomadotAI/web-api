@@ -23,9 +23,23 @@ public class ChatContext {
      */
     public void setValue(final String variable, final String value) {
         if (value == null) {
-            variables.remove(variable);
+            this.variables.remove(variable);
         } else {
-            variables.put(variable, new ChatVariableValue(value));
+            this.variables.put(variable, new ChatVariableValue(value));
+        }
+    }
+
+    /**
+     * Sets a value for a variable.
+     * Note that setting a variable to a null value will effectively remove it.
+     * @param variable     the variable name
+     * @param value        the value for the variable
+     * @param turnLifetime the number of turns after which this variable will be deleted
+     */
+    public void setValue(final String variable, final String value, final int turnLifetime) {
+        setValue(variable, value);
+        if (this.variables.containsKey(variable)) {
+            this.variables.get(variable).setLifespanTurns(turnLifetime);
         }
     }
 
@@ -69,15 +83,40 @@ public class ChatContext {
     }
 
     /**
+     * Cleans up all the expired variables (number of turns remaining is zero)
+     */
+    public void cleanupExpiredVariables() {
+        this.variables.entrySet().removeIf(x -> x.getValue().lifespanTurns == 0);
+    }
+
+    /**
+     * Decreases the turn lifetime for all variables (if they have a lifetime)
+     */
+    public void decrementVariablesTurnLifetime() {
+        for (ChatVariableValue value : this.variables.values()) {
+            if (value.lifespanTurns > 0) {
+                value.lifespanTurns--;
+            }
+        }
+    }
+
+    public ChatVariableValue getVariable(final String variable) {
+        return this.variables.get(variable);
+    }
+
+    /**
      * Private class for defining a variable value.
      * Currently this just holds string value, but allows future extensibility.
      */
-    private static class ChatVariableValue {
+    public static class ChatVariableValue {
         @SerializedName("value")
         private String value;
+        @SerializedName("lifespan_turns")
+        private int lifespanTurns;
 
         ChatVariableValue(final String value) {
             this.value = value;
+            this.lifespanTurns = -1;
         }
 
         public void setValue(final String value) {
@@ -86,6 +125,14 @@ public class ChatContext {
 
         public String getValue() {
             return this.value;
+        }
+
+        void setLifespanTurns(final int lifespanTurns) {
+            this.lifespanTurns = lifespanTurns;
+        }
+
+        public int getLifespanTurns() {
+            return this.lifespanTurns;
         }
     }
 }

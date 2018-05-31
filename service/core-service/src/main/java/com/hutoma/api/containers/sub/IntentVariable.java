@@ -29,6 +29,8 @@ public class IntentVariable {
     private List<String> prompts;
     @SerializedName("label")
     private String label;
+    @SerializedName("lifetime_turns")
+    private int lifetimeTurns;
 
 
     public IntentVariable(final String entityName, final UUID devOwner, final boolean required, final int numPrompts,
@@ -100,5 +102,13 @@ public class IntentVariable {
 
     public String getLabel() {
         return this.label;
+    }
+
+    public int getLifetimeTurns() {
+        return this.lifetimeTurns;
+    }
+
+    public void setLifetimeTurns(final int lifetimeTurns) {
+        this.lifetimeTurns = lifetimeTurns;
     }
 }

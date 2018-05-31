@@ -668,6 +668,47 @@ public class TestChatLogicIntents extends TestChatBase {
         Assert.assertFalse(ctx.isSet(MemoryIntentHandler.getPrefixedVariableName(intentName, "aa")));
     }
 
+    @Test
+    public void testChat_intent_variableLifetime_defaults() throws ChatStateHandler.ChatStateException {
+        final String varName = "var";
+        ChatContext ctx = new ChatContext();
+        ctx.setValue(varName, "value");
+        ChatState state = new ChatState(DateTime.now(), null, null, null, null, 0.5d,
+                ChatHandoverTarget.Ai, getSampleAI(), ctx);
+        when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(state);
+        Assert.assertEquals(-1, ctx.getVariable(varName).getLifespanTurns());
+        getChat(0.5f);
+        Assert.assertNotNull(ctx.getValue(varName));
+        Assert.assertEquals(-1, ctx.getVariable(varName).getLifespanTurns());
+    }
+
+    @Test
+    public void testChat_intent_variableLifetime_decrements_and_getsCleared() throws ChatStateHandler.ChatStateException {
+        final String varName = "var";
+        ChatContext ctx = new ChatContext();
+        // Set the lifetime of the variable to 3 turns
+        ctx.setValue(varName, "value", 3);
+        ChatState state = new ChatState(DateTime.now(), null, null, null, null, 0.5d,
+                ChatHandoverTarget.Ai, getSampleAI(), ctx);
+        when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(state);
+        // First turn
+        getChat(0.5f);
+        // lifetime should now be next 2 turns
+        Assert.assertEquals(2, ctx.getVariable(varName).getLifespanTurns());
+        // Second turn
+        getChat(0.5f);
+        // lifetime should now be next 1 turn
+        Assert.assertEquals(1, ctx.getVariable(varName).getLifespanTurns());
+        // Third turn
+        getChat(0.5f);
+        // Variable should be now cleared on the next turn
+        Assert.assertEquals(0, ctx.getVariable(varName).getLifespanTurns());
+        // Fourth turn
+        getChat(0.5f);
+        // Validate variable has been cleared
+        Assert.assertNull(ctx.getVariable(varName));
+    }
+
     private ApiIntent setupContextVariablesChatTest(final String intentName,
                                                final String contextInVarName, final String contextInVarValue,
                                                final String contextOutVarName, final String contextOutVarValue)

@@ -40,7 +40,7 @@ public class IntentLogic {
     private final Provider<DatabaseTransaction> databaseTransactionProvider;
 
     @Inject
-    public IntentLogic(final Config config, final ILogger logger, final DatabaseEntitiesIntents databaseEntitiesIntents,
+    IntentLogic(final Config config, final ILogger logger, final DatabaseEntitiesIntents databaseEntitiesIntents,
                        final DatabaseAI databaseAi, final TrainingLogic trainingLogic,
                        final JsonSerializer jsonSerializer,
                        final Provider<DatabaseTransaction> transactionProvider) {
@@ -100,9 +100,18 @@ public class IntentLogic {
         }
     }
 
-    public ApiResult writeIntent(final UUID devid, UUID aiid, ApiIntent intent) {
+    public ApiResult writeIntent(final UUID devid, final UUID aiid, final ApiIntent intent) {
         String devidString = devid.toString();
         LogMap logMap = LogMap.map("AIID", aiid).put("IntentName", intent.getIntentName());
+
+        // Make sure we don't have variables set with lifetime = 0 turns since this would immediately
+        // delete the variable on the first turn, render it useless.
+        for (IntentVariable v: intent.getVariables()) {
+            if (v.getLifetimeTurns() == 0) {
+                v.setLifetimeTurns(-1);
+            }
+        }
+
         try {
             ApiAi ai = this.databaseAi.getAI(devid, aiid, this.jsonSerializer);
             if (ai.isReadOnly()) {
@@ -187,7 +196,7 @@ public class IntentLogic {
         }
     }
 
-    public ApiResult deleteIntent(final UUID devid, UUID aiid, String intentName) {
+    public ApiResult deleteIntent(final UUID devid, final UUID aiid, final String intentName) {
         String devidString = devid.toString();
         try {
             LogMap logMap = LogMap.map("AIID", aiid).put("IntentName", intentName);

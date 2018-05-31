@@ -258,6 +258,15 @@ public class TestIntentLogic {
         verify(this.trainingLogic).stopTraining(any(), any());
     }
 
+    @Test
+    public void testSaveIntent_entityValueLifetime_cannotBeCreatedWith0Turns() {
+        ApiIntent intent = TestIntentLogic.getIntent();
+        intent.getVariables().get(0).setLifetimeTurns(0);
+        this.intentLogic.writeIntent(DEVID_UUID, AIID, intent);
+        // When it's attempted to be created with 0 turns we change it to -1 (no lifetime)
+        Assert.assertEquals(-1, intent.getVariables().get(0).getLifetimeTurns());
+    }
+
     private List<String> getIntentsList() {
         return Arrays.asList(INTENTNAME, "intent2");
     }
