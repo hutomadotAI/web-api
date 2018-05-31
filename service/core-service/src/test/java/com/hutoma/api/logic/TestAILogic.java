@@ -242,7 +242,10 @@ public class TestAILogic {
         ArrayList<ApiAi> returnList = getAIList();
         when(this.fakeDatabaseAi.getAllAIs(eq(VALIDDEVID), any())).thenReturn(new ArrayList<>());
         ApiResult result = this.aiLogic.getAIs(VALIDDEVID);
-        Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+        ApiAiList list = (ApiAiList) result;
+        Assert.assertNotNull(list.getAiList());
+        Assert.assertTrue(list.getAiList().isEmpty());
     }
 
     @Test

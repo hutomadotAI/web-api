@@ -246,10 +246,6 @@ public class AILogic {
         final String devIdString = devId.toString();
         try {
             List<ApiAi> aiList = this.databaseAi.getAllAIs(devId, this.jsonSerializer);
-            if (aiList.isEmpty()) {
-                this.logger.logUserTraceEvent(LOGFROM, "GetAIs - empty list", devIdString);
-                return ApiError.getNotFound();
-            }
             this.logger.logUserTraceEvent(LOGFROM, "GetAIs", devIdString);
             return new ApiAiList(aiList).setSuccessStatus();
         } catch (Exception e) {
