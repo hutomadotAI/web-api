@@ -297,7 +297,8 @@ public class AIIntegrationLogic {
                 this.logger.logUserWarnEvent(LOGFROM, "facebook account already in use", devid.toString(),
                         logMap);
                 return ApiError.getConflict(
-                        "Cannot connect. Another user has already registered that Facebook account.");
+                        "Cannot connect as account already in use. "
+                        + "Please disconnect from other account or contact support");
             }
 
             // make sure we got the permissions we require
