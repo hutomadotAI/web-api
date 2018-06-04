@@ -1,0 +1,41 @@
+version: '3'
+
+services:
+  # Assumes word2vec GIT is in same parent folder as embedding GIT.
+  api-db:
+    build:
+      context: ../db
+    volumes:
+      - ./temp/data/db:/var/lib/mysql
+
+  api-svc:
+    build:
+      context: ../service/core-service
+    volumes:
+      - ./temp/data/boticon:/boticon
+    environment:
+    - API_CONNECTION_STRING=jdbc:mysql://api-db:3306/hutoma?user=hutoma_caller&password=>YR"khuN*.gF)V4#&zeroDateTimeBehavior=convertToNull&xdevapi.ssl-mode=DISABLED
+    - API_CONTROLLER_URL=http://api-ctrl:8080/v1
+    - API_ENCODING_KEY=L0562EMBfnLadKy57nxo9btyi3BEKm9m+DoNvGcfZa+DjHsXwTl+BwCE4NeKEAagfkhYBFvhvJoAgtugSsQOfw==
+    - API_ENTITY_RECOGNIZER_URL=http://api-entity:9095/ner
+
+  api-ctrl:
+    build:
+      context: ../service/controller-service
+    environment:
+    - API_CONNECTION_STRING=jdbc:mysql://api-db:3306/hutoma?user=hutoma_caller&password=>YR"khuN*.gF)V4#&zeroDateTimeBehavior=convertToNull&xdevapi.ssl-mode=DISABLED
+
+  api-entity:
+    image: eu.gcr.io/hutoma-backend/api/entity_recognizer:1.0.1-ci.2
+    environment:
+    - ERS_MINIMAL_SERVER=1
+
+  ai-dummy-chat-core:
+    image: eu.gcr.io/hutoma-backend/backend/dummy:0.3.24
+    volumes:
+      - ./temp/data/chat-core-training:/ai
+    environment:
+    - AI_CHAT_CAPACITY=1
+    - AI_TRAINING_CAPACITY=1
+    - API_BACKEND_STATUS_ENDPOINT=http://api-ctrl:8080/v1
+    
