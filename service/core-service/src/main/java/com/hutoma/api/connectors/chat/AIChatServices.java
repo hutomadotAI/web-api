@@ -209,7 +209,7 @@ public class AIChatServices extends ServerConnector {
     }
 
     public static class AiNotReadyToChat extends AiServicesException {
-        AiNotReadyToChat(final String message) {
+        public AiNotReadyToChat(final String message) {
             super(message);
         }
     }

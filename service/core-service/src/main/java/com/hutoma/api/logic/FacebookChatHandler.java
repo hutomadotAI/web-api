@@ -5,6 +5,7 @@ import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.FacebookConnector;
 import com.hutoma.api.connectors.FacebookException;
+import com.hutoma.api.connectors.chat.AIChatServices;
 import com.hutoma.api.connectors.db.DatabaseIntegrations;
 import com.hutoma.api.containers.facebook.FacebookIntegrationMetadata;
 import com.hutoma.api.containers.facebook.FacebookMessageNode;
@@ -361,9 +362,13 @@ public class FacebookChatHandler implements Callable {
             // otherwise get a status message
             responseList.add(new FacebookResponseSegment.FacebookResponseTextSegment(
                     e.getApiError().getStatus().getInfo()));
+        } catch (AIChatServices.AiNotReadyToChat e) {
+            // the bot is not trained
+            responseList.add(new FacebookResponseSegment.FacebookResponseTextSegment("not ready to chat"));
         } catch (Exception ex) {
             this.logger.logUserExceptionEvent(LOGFROM, "GetChatResponse", integrationRecord.getDevid().toString(),
                     ex);
+            responseList.add(new FacebookResponseSegment.FacebookResponseTextSegment("something went wrong"));
         }
         return responseList;
     }

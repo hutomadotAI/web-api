@@ -8,6 +8,7 @@ import com.hutoma.api.connectors.FacebookConnector;
 import com.hutoma.api.connectors.FacebookException;
 import com.hutoma.api.connectors.NoServerAvailableException;
 import com.hutoma.api.connectors.ServerConnector;
+import com.hutoma.api.connectors.chat.AIChatServices;
 import com.hutoma.api.connectors.chat.ChatBackendConnector;
 import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.connectors.db.DatabaseIntegrations;
@@ -411,6 +412,24 @@ public class TestFacebookChatHandler {
                 anyString(), Matchers.eq(FacebookConnector.SendMessage.SenderAction.typing_on));
         verify(this.fakeConnector, never()).sendFacebookSenderAction(anyString(),
                 anyString(), Matchers.eq(FacebookConnector.SendMessage.SenderAction.typing_off));
+    }
+
+    @Test
+    public void test_ChatError_NotReady() throws Exception {
+        when(this.fakeChatLogic.chatFacebook(Matchers.eq(TestDataHelper.AIID), any(), any(), any(), any()))
+                .thenThrow(new AIChatServices.AiNotReadyToChat("dummy exception"));
+        this.chatHandler.call();
+        verify(this.fakeConnector, times(1)).sendFacebookMessage(
+                anyString(), anyString(), any());
+    }
+
+    @Test
+    public void test_ChatError_ChatFailed() throws Exception {
+        when(this.fakeChatLogic.chatFacebook(Matchers.eq(TestDataHelper.AIID), any(), any(), any(), any()))
+                .thenThrow(new ChatLogic.ChatFailedException(ApiError.getInternalServerError()));
+        this.chatHandler.call();
+        verify(this.fakeConnector, times(1)).sendFacebookMessage(
+                anyString(), anyString(), any());
     }
 
     @Test
