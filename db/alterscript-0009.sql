@@ -8,5 +8,5 @@ CREATE TABLE `migration_status`  (
   PRIMARY KEY (`enforce_one_row`)
 ) ENGINE=InnoDB;
 
-INSERT INTO migration_status (enforce_one_row, migration_date, migration_id)
-  VALUES ('only', '2018-06-06', 9);
+REPLACE INTO migration_status (enforce_one_row, migration_date, migration_id)
+  VALUES ('only', CURDATE(), 9);
