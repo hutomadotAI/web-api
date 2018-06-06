@@ -11,6 +11,7 @@ import mysql.connector
 SCRIPT_PATH = Path(os.path.dirname(os.path.realpath(__file__)))
 ROOT_DIR = SCRIPT_PATH.parent.parent
 ALTERSCRIPT_PATH = ROOT_DIR/'db'
+ALTERSCRIPT_INCLUDED_PATH = ALTERSCRIPT_PATH / 'alterscript_included'
 
 MIGRATIONS_TABLE = """CREATE TABLE IF NOT EXISTS `migration_status`  (
   `enforce_one_row` enum('only') not null unique default 'only',
@@ -36,10 +37,15 @@ def get_migration_level(cnx, cursor):
 
 def apply_alterscripts(cnx, cursor, migration_level):
     REGEX_ALTER_INDEX = re.compile("alterscript-(\d+).sql")
+    alterscript_included = sorted([int(REGEX_ALTER_INDEX.match(file.name).group(1))
+                    for file in ALTERSCRIPT_INCLUDED_PATH.glob("alterscript-*.sql")])
+    first_item = alterscript_included[0]
+    last_item = alterscript_included[-1]
+    print("Alterscripts included in structure.sql from {} to {}".format(first_item, last_item))
     alterscripts = sorted([int(REGEX_ALTER_INDEX.match(file.name).group(1))
                     for file in ALTERSCRIPT_PATH.glob("alterscript-*.sql")])
-    first_item = alterscripts[0]
-    last_item = alterscripts[-1]
+    first_item = min(first_item, alterscripts[0])
+    last_item = max(last_item, alterscripts[-1])
     print("Alterscripts from {} to {} available".format(first_item, last_item))
 
     if migration_level >= last_item:
@@ -47,7 +53,16 @@ def apply_alterscripts(cnx, cursor, migration_level):
     else:
         migration_start = migration_level + 1
         migration_range = range(max(first_item, migration_start), last_item + 1)
-        migrations = zip(migration_range, [ALTERSCRIPT_PATH / 'alterscript-{:04d}.sql'.format(ii) for ii in migration_range])
+        migrations = []
+
+        for ii in migration_range:
+            if ii in alterscript_included:
+                migrations.append((ii, ALTERSCRIPT_INCLUDED_PATH / 'alterscript-{:04d}.sql'.format(ii)))
+            elif ii in alterscripts:
+                migrations.append((ii, ALTERSCRIPT_PATH / 'alterscript-{:04d}.sql'.format(ii)))
+            else:
+                raise Exception("Missing alterscript " + ii)
+
         REGEX_DELIMITER = re.compile('DELIMITER *(\S*)',re.I)
         UPDATE_MIGRATION = ("REPLACE INTO migration_status "
                             "(enforce_one_row, migration_date, migration_id) " 

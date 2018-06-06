@@ -21,6 +21,16 @@ USE `hutoma`;
 -- Table structure for table `ai`
 --
 
+CREATE TABLE IF NOT EXISTS `migration_status`  (
+  `enforce_one_row` enum('only') not null unique default 'only',
+  `migration_date` date NOT NULL,
+  `migration_id` int(11) NOT NULL,
+  PRIMARY KEY (`enforce_one_row`)
+) ENGINE=InnoDB;
+
+REPLACE INTO migration_status (enforce_one_row, migration_date, migration_id)
+  VALUES ('only', CURDATE(), 2);
+
 DROP TABLE IF EXISTS `ai`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;

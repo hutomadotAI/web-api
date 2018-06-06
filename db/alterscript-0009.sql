@@ -1,7 +1,6 @@
 USE `hutoma`;
 
-DROP TABLE IF EXISTS `migration_status`;
-CREATE TABLE `migration_status`  (
+CREATE TABLE IF NOT EXISTS `migration_status`  (
   `enforce_one_row` enum('only') not null unique default 'only',
   `migration_date` date NOT NULL,
   `migration_id` int(11) NOT NULL,
