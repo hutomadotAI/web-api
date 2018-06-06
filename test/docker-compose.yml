@@ -5,25 +5,35 @@ services:
   api-db:
     build:
       context: ../db
+    ports:
+     - 10001:3306
     volumes:
-      - ./temp/data/db:/var/lib/mysql
+      - ./local_data/db:/var/lib/mysql
 
   api-svc:
     build:
       context: ../service/core-service
+    ports:
+     - 10002:8080
+     - 11001:5005
     volumes:
-      - ./temp/data/boticon:/boticon
+      - ./local_data/boticon:/boticon
     environment:
     - API_CONNECTION_STRING=jdbc:mysql://api-db:3306/hutoma?user=hutoma_caller&password=>YR"khuN*.gF)V4#&zeroDateTimeBehavior=convertToNull&xdevapi.ssl-mode=DISABLED
     - API_CONTROLLER_URL=http://api-ctrl:8080/v1
     - API_ENCODING_KEY=L0562EMBfnLadKy57nxo9btyi3BEKm9m+DoNvGcfZa+DjHsXwTl+BwCE4NeKEAagfkhYBFvhvJoAgtugSsQOfw==
     - API_ENTITY_RECOGNIZER_URL=http://api-entity:9095/ner
+    - JAVA_OPTS=-Xdebug -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005
 
   api-ctrl:
     build:
       context: ../service/controller-service
+    ports:
+     - 10003:8080
+     - 11002:5005
     environment:
     - API_CONNECTION_STRING=jdbc:mysql://api-db:3306/hutoma?user=hutoma_caller&password=>YR"khuN*.gF)V4#&zeroDateTimeBehavior=convertToNull&xdevapi.ssl-mode=DISABLED
+    - JAVA_OPTS=-Xdebug -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005
 
   api-entity:
     image: eu.gcr.io/hutoma-backend/api/entity_recognizer:1.0.1-ci.2
@@ -33,9 +43,11 @@ services:
   ai-dummy-chat-core:
     image: eu.gcr.io/hutoma-backend/backend/dummy:0.3.24
     volumes:
-      - ./temp/data/chat-core-training:/ai
+      - ./local_data/chat-core-training:/ai
     environment:
     - AI_CHAT_CAPACITY=1
     - AI_TRAINING_CAPACITY=1
     - API_BACKEND_STATUS_ENDPOINT=http://api-ctrl:8080/v1
-    
+    - BACKEND_TYPE=EMB
+    - TRAIN_TIME_SECONDS_PER_1000_QA=2.0
+
