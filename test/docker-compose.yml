@@ -40,14 +40,24 @@ services:
     environment:
     - ERS_MINIMAL_SERVER=1
 
-  ai-dummy-chat-core:
-    image: eu.gcr.io/hutoma-backend/backend/dummy:0.3.24
+  ai-dummy-emb:
+    image: eu.gcr.io/hutoma-backend/backend/dummy:0.3.31-paulan-fix-dummy-build.1
     volumes:
-      - ./local_data/chat-core-training:/ai
+      - ./local_data/emb-training:/ai
     environment:
     - AI_CHAT_CAPACITY=1
     - AI_TRAINING_CAPACITY=1
     - API_BACKEND_STATUS_ENDPOINT=http://api-ctrl:8080/v1
-    - BACKEND_TYPE=EMB
+    - BACKEND_TYPE=emb
     - TRAIN_TIME_SECONDS_PER_1000_QA=2.0
 
+  ai-dummy-aiml:
+    image: eu.gcr.io/hutoma-backend/backend/dummy:0.3.31-paulan-fix-dummy-build.1
+    volumes:
+      - ./local_data/aiml-training:/ai
+    environment:
+    - AI_CHAT_CAPACITY=1
+    - AI_TRAINING_CAPACITY=1
+    - API_BACKEND_STATUS_ENDPOINT=http://api-ctrl:8080/v1
+    - BACKEND_TYPE=aiml
+    - TRAIN_TIME_SECONDS_PER_1000_QA=2.0
