@@ -41,7 +41,7 @@ services:
     - ERS_MINIMAL_SERVER=1
 
   ai-dummy-emb:
-    image: eu.gcr.io/hutoma-backend/backend/dummy:0.3.31-paulan-fix-dummy-build.1
+    image: eu.gcr.io/hutoma-backend/backend/dummy:0.3.31
     volumes:
       - ./local_data/emb-training:/ai
     environment:
@@ -52,7 +52,7 @@ services:
     - TRAIN_TIME_SECONDS_PER_1000_QA=2.0
 
   ai-dummy-aiml:
-    image: eu.gcr.io/hutoma-backend/backend/dummy:0.3.31-paulan-fix-dummy-build.1
+    image: eu.gcr.io/hutoma-backend/backend/dummy:0.3.31
     volumes:
       - ./local_data/aiml-training:/ai
     environment:
