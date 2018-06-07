@@ -1,5 +1,5 @@
-FROM mysql:5.7
-MAINTAINER  Pedro Teixeira pedrotei@hutoma.com
+FROM mysql:5.7.22
+LABEL "maintainer"  "Pedro Teixeira pedrotei@hutoma.com"
 
 # API DB
 COPY structure.sql /docker-entrypoint-initdb.d/0.sql
@@ -11,6 +11,9 @@ COPY django_structure.sql /docker-entrypoint-initdb.d/3.sql
 
 # Test data - should not be added to production
 COPY test-data.sql /docker-entrypoint-initdb.d/4.sql
+
+# Copy all existing alterscripts
+COPY alterscript-*.sql /docker-entrypoint-initdb.d/
 
 # Default values for passwords and database name. Can be overridden on docker run
 ENV MYSQL_ROOT_PASSWORD=password

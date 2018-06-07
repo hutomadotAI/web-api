@@ -3,7 +3,7 @@
   <component name="Encoding">
     <file url="file://$PROJECT_DIR$" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/common-lib" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/controller-service" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/core-service" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/service-ear" charset="UTF-8" />
   </component>
 </project>

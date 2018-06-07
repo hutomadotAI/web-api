@@ -66,6 +66,7 @@ modules.xml
 # VS code Java plugin
 .classpath
 .project
+.factorypath
 
 Python virtual environment
 venv/

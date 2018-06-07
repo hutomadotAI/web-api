@@ -1,0 +1,15 @@
+[[source]]
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+mysql-connector-python = "*"
+
+
+[dev-packages]
+flake8 = "*"
+yapf = "*"
+
+[requires]
+python_version = "3.6"
