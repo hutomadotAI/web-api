@@ -17,7 +17,7 @@ public class AiStatus {
     private final String devId;
 
     @SerializedName("training_status")
-    private final String trainingStatus;
+    private String trainingStatus;
 
     @SerializedName("ai_engine")
     private final BackendServerType aiEngine;
@@ -61,6 +61,10 @@ public class AiStatus {
 
     public TrainingStatus getTrainingStatus() {
         return TrainingStatus.forValue(this.trainingStatus);
+    }
+
+    public void setTrainingStatus(final TrainingStatus trainingStatus) {
+        this.trainingStatus = trainingStatus.value();
     }
 
     public BackendServerType getAiEngine() {

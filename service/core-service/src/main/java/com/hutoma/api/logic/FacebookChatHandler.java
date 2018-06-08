@@ -119,6 +119,7 @@ public class FacebookChatHandler implements Callable {
 
                 default:
                     // some other type that we don't handle or care about ... yet.
+                    break;
             }
             logMap.add("Facebook_WebhookType", messageType.name());
 

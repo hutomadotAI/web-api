@@ -120,6 +120,7 @@ public class AiServicesQueue extends ServerConnector {
                             newStatus = TrainingStatus.AI_TRAINING_STOPPED;
                             break;
                         default:
+                            break;
                     }
                     // copy the old fields but set new status
                     this.database.updateAIStatus(serverType, aiid, newStatus,
