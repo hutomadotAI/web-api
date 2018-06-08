@@ -108,7 +108,7 @@ if __name__ == "__main__":
     # get token
     parser_get_token = subparsers.add_parser('get-token', help='Creates user and displays token for it')
     # find AIs
-    parser_find_ais = subparsers.add_parser('find-ais')
+    parser_find_ais = subparsers.add_parser('find-ais', help='List AIs for the user, can be used to search')
     parser_find_ais.add_argument('--expression', help='Search expression', default='')
     # get AI
     parser_get_ai = subparsers.add_parser('get-ai', help='Gets status of an AI')

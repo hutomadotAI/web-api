@@ -190,6 +190,7 @@ def make_config():
     parser.add_argument('--server', help='which server to target. rnn or wnet')
     parser.add_argument('--env', help='what environment to target. dev, sf, dev-old, sf-old')
     parser.add_argument('--bots', help='how many different bots to hit')
+    parser.add_argument('--no-chitchat', help="Don't test chit-chat", action="store_true")
 
     args = parser.parse_args()
 
@@ -215,8 +216,7 @@ def make_config():
         try:
             bot_count = int(args.bots)
         except ValueError:
-            print("Bad value for --bots: {}".format(args.bots))
-            exit(0)
+            raise Exception("Bad value for --bots: {}".format(args.bots))
     if not (1 <= bot_count <= 15):
         print("--bots must be between 1 and 15")
         exit(0)
@@ -226,10 +226,12 @@ def make_config():
                'sf': SnowflakeConfigNew(url, server, bot_count),
                'dev-old': Config(url, server, bot_count),
                'sf-old': SnowflakeConfigOld(url, server, bot_count)}
-    env = env if env in options.keys() else None
 
-    if not env:
-        print("Unrecognised config environment {}".format(args.env))
-        exit(-1)
+    try:
+        config = options[env]
+    except KeyError:
+        raise Exception("Unrecognised config environment {}".format(args.env))
+        
+    config.chitchat = not args.no_chitchat
 
-    return options[env]
+    return config

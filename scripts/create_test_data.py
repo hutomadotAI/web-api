@@ -38,21 +38,18 @@ def main():
         print('Creating {0} AI '.format(name))
         creation = de_rate_limit(hu_api.api.create_ai, requester, name, "Test AIML bot {}".format(tag))
         if not creation.success:
-            print("Error creating AI: {0}".format(creation.text))
-            exit(0)
+            raise Exception("Error creating AI: {0}".format(creation.text))
         aiid = creation.response["aiid"]
 
         print('Linking skill to aiml bot')
         link_up = de_rate_limit(hu_api.api.link_bot_to_ai, requester, aiid, bot_id)
         if not link_up:
-            print("Error linking new bot to skill")
-            exit(0)
+            raise Exception("Error linking new bot to skill")
         else:
             if link_up.status_code and link_up.status_code == 200:
                 pass
             else:
-                print("Error linking new bot {}".format(link_up.text if link_up.text else link_up))
-                exit(0)
+                raise Exception("Error linking new bot {}".format(link_up.text if link_up.text else link_up))
 
         return aiid
 
@@ -62,8 +59,7 @@ def main():
         print('Creating {0} AI '.format(name))
         creation = de_rate_limit(hu_api.api.create_ai, requester, name, "Test Intent bot {}".format(tag))
         if not creation.success:
-            print("Error creating AI: {0}".format(creation.text))
-            exit(0)
+            raise Exception("Error creating AI: {0}".format(creation.text))
         aiid = creation.response["aiid"]
 
         print('Creating intent')
@@ -80,14 +76,12 @@ def main():
                                               ["triggered {}".format(intent_name)])
             intent_create = de_rate_limit(hu_api.api.edit_intent, requester, aiid, intent)
             if not intent_create:
-                print("Error creating intent")
-                exit(0)
+                raise Exception("Error creating intent")
             else:
                 if intent_create.status_code and (intent_create.status_code // 100) == 2:
                     pass
                 else:
-                    print("Error creating intent {}".format(intent_create.text if intent_create.text else intent_create))
-                    exit(0)
+                    raise Exception("Error creating intent {}".format(intent_create.text if intent_create.text else intent_create))
 
         return aiid
 
@@ -196,7 +190,8 @@ def main():
     delete_test_ais(load_test_defs)
     delete_test_ais(chat_test_defs)
 
-    create_aiml_ai("chitchat", chat_test_defs.ai_prefix, config.aiml["chitchat"])
+    if config.chitchat:
+        create_aiml_ai("chitchat", chat_test_defs.ai_prefix, config.aiml["chitchat"])
     intent_only_aiid = create_intent_only_ai("intent", chat_test_defs.ai_prefix)
     create_and_train_new_ais(chat_test_defs)
 
@@ -205,6 +200,5 @@ def main():
 
 
 if __name__ == "__main__":
-
     config = make_config()
     main()
