@@ -189,7 +189,7 @@
             <plugin>
                 <groupId>com.webcohesion.enunciate</groupId>
                 <artifactId>enunciate-maven-plugin</artifactId>
-                <version>2.9.1</version>
+                <version>${project.component.enunciate.version}</version>
                 <executions>
                     <execution>
                         <phase>prepare-package</phase>

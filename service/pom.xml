@@ -29,8 +29,8 @@
         <project.component.mockito.version>2.0.52-beta</project.component.mockito.version>
         <project.component.surefire.version>2.20.1</project.component.surefire.version>
         <project.component.jacoco.version>0.7.9</project.component.jacoco.version>
-
-
+        <!-- Documentation related component versions -->
+        <project.component.enunciate.version>2.11.1</project.component.enunciate.version>
     </properties>
 
     <modules>
