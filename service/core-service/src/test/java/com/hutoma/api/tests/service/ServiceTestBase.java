@@ -5,6 +5,7 @@ import com.hutoma.api.access.RateLimitCheck;
 import com.hutoma.api.access.Role;
 import com.hutoma.api.common.AccessLogger;
 import com.hutoma.api.common.Config;
+import com.hutoma.api.common.CsvIntentReader;
 import com.hutoma.api.common.HTMLExtractor;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Tools;
@@ -215,6 +216,7 @@ public abstract class ServiceTestBase extends JerseyTest {
                 bind(ThreadSubPool.class).to(ThreadSubPool.class);
                 bind(TrackedThreadSubPool.class).to(TrackedThreadSubPool.class);
                 bind(FacebookChatHandler.class).to(FacebookChatHandler.class);
+                bind(CsvIntentReader.class).to(CsvIntentReader.class);
                 // Bind a mock of HttpServletRequest
                 bind(mock(HttpServletRequest.class)).to(HttpServletRequest.class);
 

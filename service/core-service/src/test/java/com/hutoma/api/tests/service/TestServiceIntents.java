@@ -1,119 +1,110 @@
 package com.hutoma.api.tests.service;
 
 import com.hutoma.api.common.TestDataHelper;
-import com.hutoma.api.connectors.aiservices.AIServices;
-import com.hutoma.api.connectors.db.DatabaseException;
-import com.hutoma.api.containers.ApiIntent;
-import com.hutoma.api.containers.sub.IntentVariable;
-import com.hutoma.api.containers.sub.WebHook;
-import com.hutoma.api.endpoints.IntentEndpoint;
-import com.hutoma.api.logic.AILogic;
+import com.hutoma.api.containers.ApiCsvImportResult;
+import com.hutoma.api.endpoints.IntentsEndpoint;
 import com.hutoma.api.logic.IntentLogic;
-import com.hutoma.api.logic.TestIntentLogic;
 import com.hutoma.api.logic.TrainingLogic;
 import com.hutoma.api.memory.IMemoryIntentHandler;
+import com.hutoma.api.memory.MemoryIntentHandler;
 
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
+import org.glassfish.jersey.media.multipart.FormDataMultiPart;
+import org.glassfish.jersey.media.multipart.MultiPartFeature;
+import org.glassfish.jersey.media.multipart.file.FileDataBodyPart;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.util.Collections;
-import java.util.UUID;
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.Response;
 
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doReturn;
 
 public class TestServiceIntents extends ServiceTestBase {
 
-    private static final String BASEPATH = "/intent/";
-    private IMemoryIntentHandler fakeMemoryIntentHandler;
+    private static final String PATH_INTENTS_CSV_UPLOAD = "/intents/" + TestDataHelper.AIID.toString() + "/csv";
 
     @Test
-    public void testSaveIntent() throws DatabaseException {
-        when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
-        when(this.fakeDatabaseAi.createWebHook(any(), anyString(), anyString(), anyBoolean(), any())).thenReturn(true);
-        ApiIntent intent = TestIntentLogic.getIntent();
-        intent.setUserSays(Collections.singletonList(
-                String.join("", Collections.nCopies(250, "A"))));
-        intent.setResponses(Collections.singletonList(
-                String.join("", Collections.nCopies(250, "A"))));
-        intent.setWebHook(new WebHook(TestDataHelper.AIID, "name",
-                String.join("", Collections.nCopies(2048, "A")), true));
-        intent.addVariable(new IntentVariable("entity", UUID.randomUUID(), true,
-                3, "somevalue", false, "label2")
-                .addPrompt(String.join("", Collections.nCopies(250, "A"))));
-        final Response response = sendRequest(BASEPATH + TestDataHelper.AIID.toString(),
-                this.serializeObject(intent));
-        Assert.assertEquals(HttpURLConnection.HTTP_CREATED, response.getStatus());
+    public void testImportIntentCsv() {
+        doReturn(1000).when(this.fakeConfig).getMaxUploadSizeKb();
+        final Response response = sendCsvUpload();
+        ApiCsvImportResult result = deserializeResponse(response, ApiCsvImportResult.class);
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
+        Assert.assertEquals(59, result.getImported().size());
     }
 
     @Test
-    public void testSaveIntent_LongResponse() {
-        ApiIntent intent = TestIntentLogic.getIntent();
-        intent.setResponses(Collections.singletonList(
-                String.join("", Collections.nCopies(250 + 1, "A"))));
-        final Response response = sendRequest(BASEPATH + TestDataHelper.AIID.toString(),
-                this.serializeObject(intent));
+    public void testImportIntentCsv_invalid_devId() {
+        doReturn(1000).when(this.fakeConfig).getMaxUploadSizeKb();
+        final Response response = sendCsvUpload(noDevIdHeaders);
+        Assert.assertEquals(HttpURLConnection.HTTP_UNAUTHORIZED, response.getStatus());
+    }
+
+    @Test
+    public void testImportIntentCsv_preventsUploadLargeFiles() {
+        doReturn(1).when(this.fakeConfig).getMaxUploadSizeKb();
+        final Response response = sendCsvUpload();
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.getStatus());
     }
 
     @Test
-    public void testSaveIntent_LongUserExpression() {
-        ApiIntent intent = TestIntentLogic.getIntent();
-        intent.setUserSays(Collections.singletonList(
-                String.join("", Collections.nCopies(250 + 1, "A"))));
-        final Response response = sendRequest(BASEPATH + TestDataHelper.AIID.toString(),
-                this.serializeObject(intent));
+    public void testImportIntentCsv_duplicateIntents() {
+        doReturn(1).when(this.fakeConfig).getMaxUploadSizeKb();
+        FormDataMultiPart multipart = generateCsvFileWithDuplicatesForUpload();
+        final Response response = sendUpload(defaultHeaders, multipart);
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.getStatus());
     }
 
-    @Test
-    public void testSaveIntent_LongPrompt() {
-        ApiIntent intent = TestIntentLogic.getIntent();
-        intent.addVariable(new IntentVariable("entity", UUID.randomUUID(), true,
-                3, "somevalue", false, "")
-                .addPrompt(String.join("", Collections.nCopies(250 + 1, "A"))));
-        final Response response = sendRequest(BASEPATH + TestDataHelper.AIID.toString(),
-                this.serializeObject(intent));
-        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.getStatus());
+    private Response sendCsvUpload() {
+        return sendCsvUpload(defaultHeaders);
     }
 
-    @Test
-    public void testSaveIntent_LongWebhookUrl() {
-        ApiIntent intent = TestIntentLogic.getIntent();
-        intent.setWebHook(new WebHook(TestDataHelper.AIID, "name",
-                String.join("", Collections.nCopies(2048 + 1, "A")), true));
-        final Response response = sendRequest(BASEPATH + TestDataHelper.AIID.toString(),
-                this.serializeObject(intent));
-        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.getStatus());
+    private Response sendCsvUpload(final MultivaluedHashMap<String, Object> headers) {
+        return sendUpload(headers, generateCsvFileForUpload());
     }
 
-    private Response sendRequest(final String path, final String statusJson) {
-        return target(path)
+    private Response sendUpload(final MultivaluedHashMap<String, Object> headers, final FormDataMultiPart multipart) {
+        final Response response = target(PATH_INTENTS_CSV_UPLOAD)
+                .register(MultiPartFeature.class)
                 .request()
-                .headers(defaultHeaders)
-                .post(Entity.json(statusJson));
+                .headers(headers)
+                .post(Entity.entity(multipart, multipart.getMediaType()));
+        try {
+            multipart.close();
+        } catch (IOException ex) {
+            Assert.fail("Exception: " + ex);
+        }
+        return response;
+    }
+
+    private FormDataMultiPart generateCsvFileForUpload() {
+        return generateFileForUpload("intents1.csv");
+    }
+
+    private FormDataMultiPart generateCsvFileWithDuplicatesForUpload() {
+        return generateFileForUpload("intents2.csv");
+    }
+
+    private FormDataMultiPart generateFileForUpload(final String filename) {
+        final FileDataBodyPart filePart = new FileDataBodyPart("file",
+                new File(getTestsBaseLocation(), String.format("test-textfiles/%s", filename)));
+        FormDataMultiPart formDataMultiPart = new FormDataMultiPart();
+        return (FormDataMultiPart) formDataMultiPart.bodyPart(filePart);
     }
 
     @Override
     protected Class<?> getClassUnderTest() {
-        return IntentEndpoint.class;
+        return IntentsEndpoint.class;
     }
 
     protected AbstractBinder addAdditionalBindings(AbstractBinder binder) {
         binder.bind(IntentLogic.class).to(IntentLogic.class);
         binder.bind(TrainingLogic.class).to(TrainingLogic.class);
-        binder.bind(AILogic.class).to(AILogic.class);
-
-        this.fakeMemoryIntentHandler = mock(IMemoryIntentHandler.class);
-        this.fakeAiServices = mock(AIServices.class);
-
-        binder.bindFactory(new InstanceFactory<>(this.fakeMemoryIntentHandler)).to(IMemoryIntentHandler.class);
-        binder.bindFactory(new InstanceFactory<>(this.fakeAiServices)).to(AIServices.class);
+        binder.bind(MemoryIntentHandler.class).to(IMemoryIntentHandler.class);
         return binder;
     }
 

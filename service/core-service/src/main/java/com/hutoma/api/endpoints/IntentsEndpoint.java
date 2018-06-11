@@ -11,8 +11,13 @@ import com.hutoma.api.validation.APIParameter;
 import com.hutoma.api.validation.ParameterFilter;
 import com.hutoma.api.validation.ValidateParameters;
 
+import org.glassfish.jersey.media.multipart.FormDataParam;
+
+import java.io.InputStream;
 import javax.inject.Inject;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.container.ContainerRequestContext;
@@ -49,4 +54,19 @@ public class IntentsEndpoint {
         return result.getResponse(this.serializer).build();
     }
 
+    @POST
+    @Path("{aiid}/csv")
+    @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @ValidateParameters({APIParameter.DevID, APIParameter.AIID})
+    public Response bulkImportFromCsv(
+            @Context final ContainerRequestContext requestContext,
+            @FormDataParam("file") InputStream uploadedInputStream) {
+        final ApiResult result = this.intentLogic.bulkImportFromCsv(
+                ParameterFilter.getDevid(requestContext),
+                ParameterFilter.getAiid(requestContext),
+                uploadedInputStream);
+        return result.getResponse(this.serializer).build();
+    }
 }

@@ -594,6 +594,4 @@ public class TrainingLogic {
         }
     }
 
-    private static class UploadTooLargeException extends Exception {
-    }
 }

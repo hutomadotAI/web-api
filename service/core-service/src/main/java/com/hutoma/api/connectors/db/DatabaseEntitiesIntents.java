@@ -347,7 +347,7 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
      * @param transaction the transaction to be enrolled in
      * @throws DatabaseException if something goes wrong
      */
-    public void writeIntent(final UUID devid, final UUID aiid, final String intentName, final ApiIntent intent,
+    public int writeIntent(final UUID devid, final UUID aiid, final String intentName, final ApiIntent intent,
                             final DatabaseTransaction transaction)
             throws DatabaseException {
 
@@ -384,6 +384,8 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
             updateIntentResponses(devid, aiid, intent, transaction);
             // synchronise variables and their prompts
             updateIntentVariables(devid, aiid, intent, transaction);
+
+            return rowcount;
 
         } catch (SQLException e) {
             throw new DatabaseException(e);

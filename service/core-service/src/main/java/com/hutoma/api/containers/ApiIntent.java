@@ -20,7 +20,7 @@ public class ApiIntent extends ApiResult {
     @SerializedName("variables")
     private final List<IntentVariable> variables = new ArrayList<>();
     @SerializedName("intent_name")
-    private final String intentName;
+    private String intentName;
     @SerializedName("topic_in")
     private final String topicIn;
     @SerializedName("topic_out")
@@ -62,6 +62,14 @@ public class ApiIntent extends ApiResult {
      */
     public String getIntentName() {
         return this.intentName;
+    }
+
+    /**
+     * Sets the intent name
+     * @param name the new name
+     */
+    public void setIntentName(final String name) {
+        this.intentName = name;
     }
 
     /**

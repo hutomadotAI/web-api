@@ -298,8 +298,7 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
      */
     void validateIntent(final ApiIntent intent) throws ParameterValidationException {
         // validate name
-        validateFieldLength(250, INTENTNAME, intent.getIntentName());
-        validateAlphaNumPlusDashes(INTENTNAME, intent.getIntentName());
+        validateIntentName(intent.getIntentName());
 
         // for each response, filter, check against size limit, dedupe, remove empties, check one present
         intent.setResponses(
@@ -360,8 +359,7 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
         WebHook webHook = intent.getWebHook();
         if (webHook != null) {
             this.checkParameterNotNull("enabled", webHook.isEnabled());
-            validateFieldLength(250, INTENTNAME, webHook.getIntentName());
-            validateAlphaNumPlusDashes(INTENTNAME, webHook.getIntentName());
+            validateIntentName(webHook.getIntentName());
 
             if (webHook.isEnabled()) {
                 validateFieldLength(2048, "endpoint", webHook.getEndpoint());

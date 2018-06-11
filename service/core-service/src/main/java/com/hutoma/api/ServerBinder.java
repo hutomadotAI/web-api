@@ -4,6 +4,7 @@ import com.hutoma.api.access.RateLimitCheck;
 import com.hutoma.api.common.AccessLogger;
 import com.hutoma.api.common.ChatLogger;
 import com.hutoma.api.common.Config;
+import com.hutoma.api.common.CsvIntentReader;
 import com.hutoma.api.common.HTMLExtractor;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Tools;
@@ -138,6 +139,7 @@ public class ServerBinder extends AbstractBinder {
         bind(FacebookMachineID.class).to(FacebookMachineID.class).in(Singleton.class);
         bind(FacebookChatHandler.class).to(FacebookChatHandler.class);
         bind(AnalyticsESConnector.class).to(AnalyticsESConnector.class).in(Singleton.class);
+        bind(CsvIntentReader.class).to(CsvIntentReader.class);
 
         // backend facing related structures
         bind(AIServices.class).to(AIServices.class);

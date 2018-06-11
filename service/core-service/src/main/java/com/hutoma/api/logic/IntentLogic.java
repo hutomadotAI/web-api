@@ -1,12 +1,14 @@
 package com.hutoma.api.logic;
 
 import com.hutoma.api.common.Config;
+import com.hutoma.api.common.CsvIntentReader;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.connectors.db.DatabaseAI;
 import com.hutoma.api.connectors.db.DatabaseEntitiesIntents;
 import com.hutoma.api.connectors.db.DatabaseIntegrityViolationException;
 import com.hutoma.api.connectors.db.DatabaseTransaction;
 import com.hutoma.api.containers.ApiAi;
+import com.hutoma.api.containers.ApiCsvImportResult;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.ApiIntentList;
@@ -15,9 +17,18 @@ import com.hutoma.api.containers.sub.IntentVariable;
 import com.hutoma.api.containers.sub.WebHook;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
+import com.hutoma.api.validation.ParameterValidationException;
+import com.hutoma.api.validation.Validate;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -38,12 +49,19 @@ public class IntentLogic {
     private final TrainingLogic trainingLogic;
     private final JsonSerializer jsonSerializer;
     private final Provider<DatabaseTransaction> databaseTransactionProvider;
+    private final CsvIntentReader csvIntentReader;
+    private final Validate validate;
 
     @Inject
-    IntentLogic(final Config config, final ILogger logger, final DatabaseEntitiesIntents databaseEntitiesIntents,
-                       final DatabaseAI databaseAi, final TrainingLogic trainingLogic,
-                       final JsonSerializer jsonSerializer,
-                       final Provider<DatabaseTransaction> transactionProvider) {
+    IntentLogic(final Config config,
+                final ILogger logger,
+                final DatabaseEntitiesIntents databaseEntitiesIntents,
+                final DatabaseAI databaseAi,
+                final TrainingLogic trainingLogic,
+                final JsonSerializer jsonSerializer,
+                final Provider<DatabaseTransaction> transactionProvider,
+                final CsvIntentReader csvIntentReader,
+                final Validate validate) {
         this.config = config;
         this.logger = logger;
         this.databaseEntitiesIntents = databaseEntitiesIntents;
@@ -51,6 +69,8 @@ public class IntentLogic {
         this.trainingLogic = trainingLogic;
         this.jsonSerializer = jsonSerializer;
         this.databaseTransactionProvider = transactionProvider;
+        this.csvIntentReader = csvIntentReader;
+        this.validate = validate;
     }
 
     public ApiResult getIntents(final UUID devid, final UUID aiid) {
@@ -219,6 +239,89 @@ public class IntentLogic {
             this.logger.logUserExceptionEvent(LOGFROM, "DeleteIntent", devidString, e);
             return ApiError.getInternalServerError();
         }
+    }
+
+    public ApiResult bulkImportFromCsv(final UUID devId,
+                                       final UUID aiid,
+                                       final InputStream uploadedInputStream) {
+        try {
+            long maxUploadFileSize = 1024L * this.config.getMaxUploadSizeKb();
+            String fileContents = getFile(maxUploadFileSize, uploadedInputStream);
+            ApiCsvImportResult results = this.csvIntentReader.parseIntents(fileContents);
+            Set<String> intentNames = new LinkedHashSet<>();
+
+            for (Iterator<ApiCsvImportResult.ImportResultSuccess> iterator = results.getImported().iterator();
+                    iterator.hasNext();) {
+                ApiIntent intent = iterator.next().getIntent();
+                if (intentNames.contains(intent.getIntentName())) {
+                    return ApiError.getBadRequest(String.format("Duplicate intent name: %s", intent.getIntentName()));
+                } else {
+                    intentNames.add(intent.getIntentName());
+                }
+                try {
+                    this.validate.validateIntentName(intent.getIntentName());
+                } catch (ParameterValidationException ex) {
+                    // Switch this into the errors list
+                    results.addError(String.format("Invalid intent name: %s", intent.getIntentName()));
+                    iterator.remove();
+                }
+            }
+
+            try (DatabaseTransaction transaction = this.databaseTransactionProvider.get()) {
+                for (ApiCsvImportResult.ImportResultSuccess imported: results.getImported()) {
+                    ApiIntent intent = imported.getIntent();
+                    int retval = this.databaseEntitiesIntents.writeIntent(devId, aiid, intent.getIntentName(),
+                            intent, transaction);
+                    // writeIntent can only return 1 or 2
+                    imported.setAction(retval == 1 ? "added" : "updated");
+                }
+                transaction.commit();
+            }
+
+            this.logger.logUserTraceEvent(LOGFROM, "CSV Import", devId.toString(),
+                    LogMap.map("NumImported", results.getImported().size())
+                            .put("NumErrors", results.getErrors().size())
+                            .put("NumWarnings", results.getWarnings().size()));
+            return results.setSuccessStatus();
+
+        } catch (UploadTooLargeException ex) {
+            this.logger.logUserInfoEvent(LOGFROM, "CSV upload too large", devId.toString());
+            return ApiError.getBadRequest(
+                    String.format("Upload too large. Maximum %dKb", this.config.getMaxUploadSizeKb()));
+        } catch (Exception ex) {
+            this.logger.logUserExceptionEvent(LOGFROM, "bulkimportcsv", devId.toString(), ex);
+            return ApiError.getInternalServerError();
+        }
+    }
+
+    private String getFile(final long maxUploadSize, final InputStream uploadedInputStream)
+            throws UploadTooLargeException, IOException {
+
+        StringBuilder sb = new StringBuilder();
+        long fileSize = 0;
+
+        BufferedReader reader = null;
+        try {
+            reader = new BufferedReader(new InputStreamReader(uploadedInputStream, StandardCharsets.UTF_8));
+            String line;
+            int lineSize;
+            while ((line = reader.readLine()) != null) {
+                lineSize = line.length() + 2;
+                // if the line doesn't push us over the upload limit
+                if ((fileSize + lineSize) < maxUploadSize) {
+                    fileSize += lineSize;
+                } else {
+                    throw new UploadTooLargeException();
+                }
+                sb.append(line);
+                sb.append("\n");
+            }
+        } finally {
+            if (null != reader) {
+                reader.close();
+            }
+        }
+        return sb.toString();
     }
 }
 

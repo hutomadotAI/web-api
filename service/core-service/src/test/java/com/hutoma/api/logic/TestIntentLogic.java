@@ -1,6 +1,7 @@
 package com.hutoma.api.logic;
 
 import com.hutoma.api.common.Config;
+import com.hutoma.api.common.CsvIntentReader;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.TestDataHelper;
 import com.hutoma.api.connectors.db.DatabaseAI;
@@ -8,23 +9,33 @@ import com.hutoma.api.connectors.db.DatabaseEntitiesIntents;
 import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.connectors.db.DatabaseIntegrityViolationException;
 import com.hutoma.api.connectors.db.DatabaseTransaction;
+import com.hutoma.api.containers.ApiCsvImportResult;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.ApiIntentList;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.IntentVariable;
 import com.hutoma.api.containers.sub.WebHook;
 import com.hutoma.api.logging.ILogger;
+import com.hutoma.api.validation.ParameterValidationException;
+import com.hutoma.api.validation.Validate;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import javax.inject.Provider;
 
 import static com.hutoma.api.common.TestDataHelper.*;
@@ -48,6 +59,8 @@ public class TestIntentLogic {
     private IntentLogic intentLogic;
     private ILogger fakeLogger;
     private TrainingLogic trainingLogic;
+    private CsvIntentReader fakeCsvIntentReader;
+    private Validate fakeValidator;
 
     public static ApiIntent getIntent() {
         return new ApiIntent(INTENTNAME, TOPICIN, TOPICOUT)
@@ -65,9 +78,13 @@ public class TestIntentLogic {
         this.fakeDatabase = mock(DatabaseAI.class);
         this.fakeLogger = mock(ILogger.class);
         this.trainingLogic = mock(TrainingLogic.class);
+        this.fakeCsvIntentReader = mock(CsvIntentReader.class);
+        this.fakeValidator = mock(Validate.class);
         this.intentLogic = new IntentLogic(this.fakeConfig, this.fakeLogger, this.fakeDatabaseEntitiesIntents,
-                this.fakeDatabase, this.trainingLogic, mock(JsonSerializer.class), this.fakeDatabaseTransactionProvider);
+                this.fakeDatabase, this.trainingLogic, mock(JsonSerializer.class), this.fakeDatabaseTransactionProvider,
+                this.fakeCsvIntentReader, this.fakeValidator );
 
+        when(this.fakeConfig.getMaxUploadSizeKb()).thenReturn(1000);
         when(this.fakeDatabaseTransactionProvider.get()).thenReturn(this.fakeDatabaseTransaction);
         when(this.fakeDatabase.getAI(any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
     }
@@ -259,6 +276,65 @@ public class TestIntentLogic {
     }
 
     @Test
+    public void testCsvBulkImport() {
+        final int numIntents = 5;
+        List<ApiIntent> intents = buildIntentList(numIntents);
+        ApiCsvImportResult results = buildCsvImportResult(intents);
+        when(this.fakeCsvIntentReader.parseIntents(anyString())).thenReturn(results);
+        ApiCsvImportResult result = (ApiCsvImportResult) this.intentLogic.bulkImportFromCsv(DEVID_UUID, AIID, createUpload(generateIntentsCsv(intents)));
+        validateIntentsReturned(intents, result);
+    }
+
+    @Test
+    public void testCsvBulkImport_duplicateIntentNames() {
+        final int numIntents = 3;
+        List<ApiIntent> intents = buildIntentList(numIntents);
+        intents.get(1).setIntentName("myintent");
+        intents.get(2).setIntentName("myintent");
+        ApiCsvImportResult results = buildCsvImportResult(intents);
+        when(this.fakeCsvIntentReader.parseIntents(anyString())).thenReturn(results);
+        ApiResult result = this.intentLogic.bulkImportFromCsv(DEVID_UUID, AIID, createUpload(generateIntentsCsv(intents)));
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testCsvBulkImport_invalidIntentName() throws ParameterValidationException {
+        List<ApiIntent> intents = buildIntentList(1);
+        ApiCsvImportResult results = buildCsvImportResult(intents);
+        when(this.fakeCsvIntentReader.parseIntents(anyString())).thenReturn(results);
+        doThrow(ParameterValidationException.class).when(this.fakeValidator).validateIntentName(any());
+        ApiCsvImportResult result = (ApiCsvImportResult) this.intentLogic.bulkImportFromCsv(DEVID_UUID, AIID, createUpload(generateIntentsCsv(intents)));
+        Assert.assertEquals(1, result.getErrors().size());
+        Assert.assertTrue(result.getImported().isEmpty());
+        Assert.assertTrue(result.getWarnings().isEmpty());
+    }
+
+    @Test
+    public void testCsvBulkImport_dbException() throws DatabaseException {
+        List<ApiIntent> intents = buildIntentList(1);
+        ApiCsvImportResult results = buildCsvImportResult(intents);
+        when(this.fakeCsvIntentReader.parseIntents(anyString())).thenReturn(results);
+        doThrow(DatabaseException.class).when(this.fakeDatabaseEntitiesIntents).writeIntent(any(), any(), any(), any(), any());
+        ApiResult result = this.intentLogic.bulkImportFromCsv(DEVID_UUID, AIID, createUpload(generateIntentsCsv(intents)));
+        Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testCsvBulkImport_added_updated() throws DatabaseException {
+        List<ApiIntent> intents = buildIntentList(2);
+        ApiCsvImportResult results = buildCsvImportResult(intents);
+        when(this.fakeCsvIntentReader.parseIntents(anyString())).thenReturn(results);
+        // pretend that the first time is an update and the second is an insert
+        when(this.fakeDatabaseEntitiesIntents.writeIntent(any(), any(), any(), any(), any())).thenReturn(2).thenReturn(1);
+        ApiCsvImportResult result = (ApiCsvImportResult) this.intentLogic.bulkImportFromCsv(DEVID_UUID, AIID, createUpload(generateIntentsCsv(intents)));
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+        Assert.assertEquals("intent0", result.getImported().get(0).getIntentName());
+        Assert.assertEquals("updated", result.getImported().get(0).getAction());
+        Assert.assertEquals("intent1", result.getImported().get(1).getIntentName());
+        Assert.assertEquals("added", result.getImported().get(1).getAction());
+    }
+
+    @Test
     public void testSaveIntent_entityValueLifetime_cannotBeCreatedWith0Turns() {
         ApiIntent intent = TestIntentLogic.getIntent();
         intent.getVariables().get(0).setLifetimeTurns(0);
@@ -267,13 +343,68 @@ public class TestIntentLogic {
         Assert.assertEquals(-1, intent.getVariables().get(0).getLifetimeTurns());
     }
 
+    private void validateIntentsReturned(final List<ApiIntent> expected, final ApiCsvImportResult actual) {
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, actual.getStatus().getCode());
+        Assert.assertEquals(expected.size(), actual.getImported().size());
+        for (int i = 0; i < expected.size(); i++) {
+            ApiIntent intent = actual.getImported().get(i).getIntent();
+            Assert.assertEquals("intent" + i, intent.getIntentName());
+            Assert.assertEquals("intent" + i, actual.getImported().get(i).getIntentName());
+            assertListEquals(expected.get(i).getUserSays(), intent.getUserSays());
+            assertListEquals(expected.get(i).getResponses(), intent.getResponses());
+        }
+    }
+
+    private ApiCsvImportResult buildCsvImportResult(final List<ApiIntent> imported) {
+        ApiCsvImportResult result = new ApiCsvImportResult();
+        imported.forEach(result::addImported);
+        return result;
+    }
+
+    private List<ApiIntent> buildIntentList(final int numIntents) {
+        List<ApiIntent> intents = new ArrayList<>();
+        for (int i = 0; i < numIntents; i++) {
+            ApiIntent intent = new ApiIntent("intent" + i, "", "");
+            intent.addUserSays("us0_" + i);
+            intent.addUserSays("us1_" + i);
+            intent.addResponse("r0_" + i);
+            intent.addResponse("r1_" + i);
+            intents.add(intent);
+        }
+        return intents;
+    }
+
     private List<String> getIntentsList() {
         return Arrays.asList(INTENTNAME, "intent2");
     }
 
     private ApiIntentList getIntentsDetailsList() {
         ApiIntent intent = new ApiIntent(INTENTNAME, "topicIn", "topicOut");
-        ApiIntentList intentList = new ApiIntentList(AIID, getIntentsList(), Collections.singletonList(intent));
-        return intentList;
+        return new ApiIntentList(AIID, getIntentsList(), Collections.singletonList(intent));
+    }
+
+    private void assertListEquals(final Collection collectionA, final Collection collectionB) {
+        Collection diff = CollectionUtils.disjunction(collectionA, collectionB);
+        if (!diff.isEmpty()) {
+            Assert.fail(String.format("Collections are different on the following objects: %s",
+                    diff.stream().map(Object::toString).collect(Collectors.joining(", "))));
+        }
+    }
+
+    private String generateIntentsCsv(final List<ApiIntent> intents) {
+        StringBuilder sb = new StringBuilder();
+        for (ApiIntent intent: intents) {
+            sb.append(intent.getIntentName()).append(",");
+            sb.append(StringUtils.join(intent.getUserSays(), ";"));
+            sb.append(",");
+            sb.append(StringUtils.join(intent.getResponses(), ";"));
+            sb.append("\n");
+        }
+        return sb.toString();
+    }
+
+    private InputStream createUpload(final String content) {
+        InputStream stream = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
+        return stream;
     }
 }

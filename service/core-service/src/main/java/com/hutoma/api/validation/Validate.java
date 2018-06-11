@@ -14,6 +14,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 
+import static com.hutoma.api.validation.ParameterFilter.INTENTNAME;
+
 /**
  * Created by David MG on 06/09/2016.
  */
@@ -103,6 +105,11 @@ public class Validate extends ValidationBase {
             sb.setLength((sb.length() - 1));
         }
         return sb.toString();
+    }
+
+    public void validateIntentName(final String intentName) throws ParameterValidationException {
+        validateFieldLength(250, INTENTNAME, intentName);
+        validateAlphaNumPlusDashes(INTENTNAME, intentName);
     }
 
     /***
@@ -305,7 +312,8 @@ public class Validate extends ValidationBase {
 
 
 
-    String validateAlphaNumPlusDashes(final String paramName, final String param) throws ParameterValidationException {
+    public String validateAlphaNumPlusDashes(final String paramName, final String param)
+            throws ParameterValidationException {
         return validatePattern(alphaNumericDashes, paramName, param);
     }
 
