@@ -105,14 +105,13 @@ public class ChatLogic {
         } finally {
             // once we've picked a result, abandon all the others to prevent hanging threads
             this.chatServices.abandonCalls();
+
+            this.telemetryMap.clear();
         }
 
-        // log the results
-        this.chatLogger.logUserTraceEvent(LOGFROM, "ApiChat", devIdString, this.telemetryMap);
+        // log the chat trace event
         this.logger.logUserTraceEvent(LOGFROM, "Chat", devIdString, LogMap.map("AIID", aiid)
                 .put("SessionId", apiChatResult.getChatId()));
-
-        this.telemetryMap.clear();
 
         return apiChatResult.setSuccessStatus();
     }
@@ -165,7 +164,7 @@ public class ChatLogic {
 
         // log which handlers run and their runtime
         LogMap handlersMap = LogMap.map("AIID", aiid);
-        for (Map.Entry<IChatHandler, Long> entry: processedHandlers.entrySet()) {
+        for (Map.Entry<IChatHandler, Long> entry : processedHandlers.entrySet()) {
             handlersMap.add(String.format("Handler.%s.runtime", entry.getKey().getClass().getSimpleName()),
                     entry.getValue());
         }
@@ -200,6 +199,9 @@ public class ChatLogic {
         this.telemetryMap.add("LockedToAi",
                 this.chatState.getLockedAiid() == null ? "" : this.chatState.getLockedAiid().toString());
 
+        // log the results
+        this.chatLogger.logUserTraceEvent(LOGFROM, "ApiChat", devId.toString(), this.telemetryMap);
+
         return currentResult;
     }
 
@@ -218,8 +220,8 @@ public class ChatLogic {
         this.telemetryMap.add("QFromFacebookUser", facebookOriginatingUser);
         try {
             return callChat(devId, aiid, chatId, question, null);
-        } catch (ChatStateHandler.ChatStateException | ChatFailedException ex) {
-            throw ex;
+        } finally {
+            this.telemetryMap.clear();
         }
     }
 
