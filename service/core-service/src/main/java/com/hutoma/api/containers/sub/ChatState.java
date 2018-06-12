@@ -1,5 +1,6 @@
 package com.hutoma.api.containers.sub;
 
+import com.google.gson.annotations.SerializedName;
 import com.hutoma.api.connectors.chat.AIChatServices;
 import com.hutoma.api.containers.ApiAi;
 
@@ -17,27 +18,41 @@ import java.util.UUID;
 public class ChatState {
 
     // Timestamp of the chat interaction
+    @SerializedName("timestamp")
     private DateTime timestamp;
     // AIID for the bot currently locked for the conversation (until it has a low scoring answer)
+    @SerializedName("lockedAiid")
     private UUID lockedAiid;
     // Current topic - TODO: never really used, consider removing
+    @SerializedName("topic")
     private String topic;
     // Conversation history - TODO: only used in WNET, consider removing
+    @SerializedName("history")
     private String history;
+    @SerializedName("entityValues")
     private HashMap<String, String> entityValues;
+    @SerializedName("confidenceThreshold")
     private double confidenceThreshold;
     // Chat target (whether it's been handed over to another system or not)
+    @SerializedName("chatTarget")
     private ChatHandoverTarget chatTarget;
-    // ChatServices service
-    private AIChatServices aiChatServices;
     // Timestamp for when we should reset the handover and pass the control back to the AI
+    @SerializedName("resetHandoverTime")
     private DateTime resetHandoverTime;
     // Number of low scoring answers in a row
+    @SerializedName("badAnswersCount")
     private int badAnswersCount;
     // Current context for the conversation
+    @SerializedName("chatContext")
     private ChatContext chatContext;
     // List of intents that are currently in flight
+    @SerializedName("currentIntents")
     private List<MemoryIntent> currentIntents;
+    @SerializedName("restart_chat_workflow")
+    private boolean restartChatWorkflow;
+
+    // ChatServices service
+    private transient AIChatServices aiChatServices;
 
     // We want to carry this structure around for convenience for the handlers (and avoid
     // having to re-load this from DB multiple times)
@@ -171,6 +186,14 @@ public class ChatState {
 
     public void clearFromCurrentIntents(final List<MemoryIntent> intentsToRemove) {
         this.currentIntents.removeAll(intentsToRemove);
+    }
+
+    public void restartChatWorkflow(final boolean restartChatWorkflow) {
+        this.restartChatWorkflow = restartChatWorkflow;
+    }
+
+    public boolean isRestartChatWorkflow() {
+        return this.restartChatWorkflow;
     }
 
     public MemoryIntent getMemoryIntent(final String intentName) {
