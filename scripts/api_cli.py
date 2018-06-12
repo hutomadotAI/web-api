@@ -93,6 +93,10 @@ def main(args, parser):
         elif command == "delete-all-ais":
             print("Delete all AIs")
             hu_api.api.delete_all_ais(requester)
+        elif command == "update-training":
+            ai_id = args.ai_id
+            print("Update training")
+            hu_api.api.update_training(requester, ai_id)
         else:
             arg_error(parser, "command '{}' is not recognized".format(command))
 
@@ -108,7 +112,7 @@ if __name__ == "__main__":
     # get token
     parser_get_token = subparsers.add_parser('get-token', help='Creates user and displays token for it')
     # find AIs
-    parser_find_ais = subparsers.add_parser('find-ais')
+    parser_find_ais = subparsers.add_parser('find-ais', help='List AIs for the user, can be used to search')
     parser_find_ais.add_argument('--expression', help='Search expression', default='')
     # get AI
     parser_get_ai = subparsers.add_parser('get-ai', help='Gets status of an AI')
@@ -132,6 +136,9 @@ if __name__ == "__main__":
     parser_chat = subparsers.add_parser('chat', help='Chat with an AI')
     parser_chat.add_argument('ai_id', help='AI ID')
     parser_chat.add_argument('chat_input', help='Chat input')
+    # update training
+    parser_update_training = subparsers.add_parser('update-training', help='Update training - causes chat-cores to be retrained')
+    parser_update_training.add_argument('ai_id', help='AI ID')
     # delete AI
     parser_delete = subparsers.add_parser('delete-ai', help='Delete an AI')
     parser_delete.add_argument('ai_id', help='AI ID')

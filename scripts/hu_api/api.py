@@ -90,19 +90,7 @@ class ApiRequester:
 
 
 def get_auth_code(url_root, proxies={}):
-    user = str(uuid.uuid4())
-    email = "abc@def.com"
-    # This is probably not correct, but PHP has fixed random string!
-    password = str(uuid.uuid4())
-    salt = str(uuid.uuid4())
-    to_hash = password.encode() + salt.encode()
-    password_salted = hashlib.sha256(to_hash).hexdigest()
-    query = {'role': 'ROLE_FREE',
-             'username': user,
-             'email': email,
-             'password': password_salted,
-             'first_name': 'api_script'
-             }
+    query = {'role': 'ROLE_FREE'}
     headers = {
         'Authorization': "Bearer eyJhbGciOiJIUzI1NiIsImNhbGciOiJERUYifQ.eNqqVgry93FVsgJT8Y4uvp5-SjpKxaVJQKHElNzMPKVaAAAAAP__.e-INR1D-L_sokTh9sZ9cBnImWI0n6yXXpDCmat1ca_c"}
     url = url_root + "/admin"

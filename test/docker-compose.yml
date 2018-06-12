@@ -1,7 +1,7 @@
 version: '3'
 
 services:
-  # Assumes word2vec GIT is in same parent folder as embedding GIT.
+  # API-DB container, map data folder locally, expose MySql as port 10001
   api-db:
     build:
       context: ../db
@@ -10,6 +10,8 @@ services:
     volumes:
       - ./local_data/db:/var/lib/mysql
 
+  # API-SVC container, map boticon folder, expose service as port 10002
+  # Expose Java debug on port 11001
   api-svc:
     build:
       context: ../service/core-service
@@ -25,6 +27,8 @@ services:
     - API_ENTITY_RECOGNIZER_URL=http://api-entity:9095/ner
     - JAVA_OPTS=-Xdebug -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005
 
+  # API-CTRL container, expose service as port 10003
+  # Expose Java debug on port 11002
   api-ctrl:
     build:
       context: ../service/controller-service
@@ -35,11 +39,13 @@ services:
     - API_CONNECTION_STRING=jdbc:mysql://api-db:3306/hutoma?user=hutoma_caller&password=>YR"khuN*.gF)V4#&zeroDateTimeBehavior=convertToNull&xdevapi.ssl-mode=DISABLED
     - JAVA_OPTS=-Xdebug -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005
 
+  # Entity recognizer in minimal server (English) mode to limit RAM use
   api-entity:
     image: eu.gcr.io/hutoma-backend/api/entity_recognizer:1.0.1-ci.2
     environment:
     - ERS_MINIMAL_SERVER=1
 
+  # Dummy chat core - "emb"
   ai-dummy-emb:
     image: eu.gcr.io/hutoma-backend/backend/dummy:0.3.31
     volumes:
@@ -51,6 +57,7 @@ services:
     - BACKEND_TYPE=emb
     - TRAIN_TIME_SECONDS_PER_1000_QA=2.0
 
+  # Dummy chat core - "aiml"
   ai-dummy-aiml:
     image: eu.gcr.io/hutoma-backend/backend/dummy:0.3.31
     volumes:

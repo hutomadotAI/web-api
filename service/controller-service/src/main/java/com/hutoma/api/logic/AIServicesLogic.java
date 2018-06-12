@@ -252,12 +252,24 @@ public class AIServicesLogic {
                 this.database.queueUpdate(statusUpdate.getAiEngine(), statusUpdate.getAiid(),
                         false, 0, QueueAction.NONE);
                 break;
-            // other states are always valid
-            case AI_ERROR:
             case AI_READY_TO_TRAIN:
+                if (previousStatus == TrainingStatus.AI_UNDEFINED) {
+                    // log the transition to READY_TO_TRAIN
+                    this.serviceStatusLogger.logStatusUpdate(LOGFROM, statusUpdate, true);
+                    // update the status to reflect it's going to be QUEUED
+                    statusUpdate.setTrainingStatus(TrainingStatus.AI_TRAINING_QUEUED);
+                    // queue training
+                    this.database.queueUpdate(statusUpdate.getAiEngine(), statusUpdate.getAiid(),
+                        true, 0, QueueAction.TRAIN);
+                }
+                break;
+
+            // other states are always valid
+            case AI_ERROR:            
             default:
                 this.database.queueUpdate(statusUpdate.getAiEngine(), statusUpdate.getAiid(),
                         false, 0, QueueAction.NONE);
+                break;
         }
         return true;
     }

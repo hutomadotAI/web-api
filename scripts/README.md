@@ -6,7 +6,7 @@ There are two main scripts in the main folder. One creates the test bots on the 
 `python.exe create_test_data.py --url https://dev.hutoma.com:8502/v1`
 
 * creates a number of training files containing question answer pairs taken from an english dictionary
-* creates one empty bot and links it to the chit-chat skill
+* creates one empty bot and links it to the chit-chat skill (unless you specify the `--no-chitchat` option)
 * creates one intent-only bot
 
 These are created, uploaded and trained on the target system via API calls.
