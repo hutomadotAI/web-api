@@ -1,6 +1,7 @@
 package com.hutoma.api.containers;
 
 import com.google.gson.annotations.SerializedName;
+import com.hutoma.api.containers.sub.IntentOutConditional;
 import com.hutoma.api.containers.sub.IntentVariable;
 import com.hutoma.api.containers.sub.IntentVariableCondition;
 import com.hutoma.api.containers.sub.WebHook;
@@ -43,6 +44,8 @@ public class ApiIntent extends ApiResult {
     private String conditionsFallthroughMessage;
     @SerializedName("reset_context_on_exit")
     private boolean resetContextOnExit;
+    @SerializedName("conditions_out")
+    private List<IntentOutConditional> intentOutConditionals = new ArrayList<>();
 
     /**
      * Ctor.
@@ -260,5 +263,21 @@ public class ApiIntent extends ApiResult {
      */
     public boolean getResetContextOnExit() {
         return this.resetContextOnExit;
+    }
+
+    /**
+     * Gets the list of conditional intents to execute after the current intent's fulfillment
+     * @return list of conditional intents
+     */
+    public List<IntentOutConditional> getIntentOutConditionals() {
+        return this.intentOutConditionals;
+    }
+
+    /**
+     * Sets the list of conditional intents to execute after the current intent's fulfillment
+     * @param intentOutConditionals list of conditional intents
+     */
+    public void setIntentOutConditionals(final List<IntentOutConditional> intentOutConditionals) {
+        this.intentOutConditionals = intentOutConditionals;
     }
 }
