@@ -6,11 +6,7 @@ import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.containers.ApiEntity;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.ApiIntentList;
-import com.hutoma.api.containers.sub.Entity;
-import com.hutoma.api.containers.sub.IntentVariable;
-import com.hutoma.api.containers.sub.IntentVariableCondition;
-import com.hutoma.api.containers.sub.MemoryIntent;
-import com.hutoma.api.containers.sub.MemoryVariable;
+import com.hutoma.api.containers.sub.*;
 import com.hutoma.api.logging.ILogger;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
@@ -194,6 +190,12 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
                         new TypeToken<List<IntentVariableCondition>>() {
                         }.getType()));
             }
+            json = rs.getString("transitions");
+            if (!Strings.isNullOrEmpty(json)) {
+                intent.setIntentOutConditionals(this.serializer.deserializeList(json,
+                        new TypeToken<List<IntentOutConditional>>() {
+                        }.getType()));
+            }
             intent.setConditionsFallthroughMessage(rs.getString("conditions_default_response"));
             intent.setResetContextOnExit(rs.getBoolean("reset_context_on_exit"));
 
@@ -357,7 +359,7 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
         try {
 
             // add or update the intent
-            int rowcount = transaction.getDatabaseCall().initialise("addUpdateIntent", 11)
+            int rowcount = transaction.getDatabaseCall().initialise("addUpdateIntent", 12)
                     .add(devid)
                     .add(aiid)
                     .add(intentName)
@@ -372,6 +374,8 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
                             ? null : this.serializer.serialize(intent.getConditionsIn()))
                     .add(intent.getConditionsFallthroughMessage())
                     .add(intent.getResetContextOnExit())
+                    .add(intent.getIntentOutConditionals() == null || intent.getIntentOutConditionals().isEmpty()
+                            ? null : this.serializer.serialize(intent.getIntentOutConditionals()))
                     .executeUpdate();
 
             if (rowcount != 1 && rowcount != 2) { // insert=1, update=2
