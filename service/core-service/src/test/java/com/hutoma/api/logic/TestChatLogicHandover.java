@@ -148,6 +148,6 @@ public class TestChatLogicHandover  extends TestChatBase {
 
         when (this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(initialState);
         return new ChatLogic(this.fakeChatServices, this.fakeChatStateHandler, tools,
-                mock(ILogger.class), mock(ChatLogger.class), chatWorkflow);
+                mock(ILogger.class), mock(ChatLogger.class), chatWorkflow, this.fakeConfig);
     }
 }

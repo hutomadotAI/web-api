@@ -99,38 +99,45 @@ public class MemoryIntentHandler implements IMemoryIntentHandler {
 
         MemoryIntent intent = chatState.getMemoryIntent(intentName);
         if (intent == null) {
-            ApiIntent apiIntent = this.databaseIntents.getIntent(aiid, intentName);
-            if (apiIntent == null) {
-                this.logger.logUserWarnEvent(LOGFROM, "Attempted to load non-existing intent",
-                        devId.toString(),
-                        LogMap.map("Intent", intentName).put("AIID", aiid)
-                            .put("chatId", chatId));
-                throw new ChatLogic.IntentException("Attempted to load non-existing intent");
-            } else {
-                List<MemoryVariable> variables = new ArrayList<>();
-                // This intent is not yet available in the db, so we need to initialize it from the existing
-                // intent configuration
-                for (IntentVariable intentVar : apiIntent.getVariables()) {
-                    ApiEntity apiEntity = this.databaseIntents.getEntity(intentVar.getDevOwner(),
-                            intentVar.getEntityName());
-                    MemoryVariable variable = new MemoryVariable(
-                            intentVar.getEntityName(),
-                            null,
-                            intentVar.isRequired(),
-                            apiEntity.getEntityValueList(),
-                            intentVar.getPrompts(),
-                            intentVar.getNumPrompts(),
-                            0,
-                            apiEntity.isSystem(),
-                            intentVar.isPersistent(),
-                            intentVar.getLabel());
-                    variables.add(variable);
-                }
-                intent = new MemoryIntent(intentName, aiid, chatId, variables, false);
-                chatState.updateMemoryIntent(intent);
-            }
+            intent = buildMemoryIntentFromIntentName(devId, aiid, intentName, chatId);
+            chatState.updateMemoryIntent(intent);
         }
         return intent;
+    }
+
+    @Override
+    public MemoryIntent buildMemoryIntentFromIntentName(final UUID devId, final UUID aiid, final String intentName,
+                                                        final UUID chatId)
+            throws DatabaseException, ChatLogic.IntentException {
+        ApiIntent apiIntent = this.databaseIntents.getIntent(aiid, intentName);
+        if (apiIntent == null) {
+            this.logger.logUserWarnEvent(LOGFROM, "Attempted to load non-existing intent",
+                    devId.toString(),
+                    LogMap.map("Intent", intentName).put("AIID", aiid)
+                            .put("chatId", chatId));
+            throw new ChatLogic.IntentException("Attempted to load non-existing intent");
+        } else {
+            List<MemoryVariable> variables = new ArrayList<>();
+            // This intent is not yet available in the db, so we need to initialize it from the existing
+            // intent configuration
+            for (IntentVariable intentVar : apiIntent.getVariables()) {
+                ApiEntity apiEntity = this.databaseIntents.getEntity(intentVar.getDevOwner(),
+                        intentVar.getEntityName());
+                MemoryVariable variable = new MemoryVariable(
+                        intentVar.getEntityName(),
+                        null,
+                        intentVar.isRequired(),
+                        apiEntity.getEntityValueList(),
+                        intentVar.getPrompts(),
+                        intentVar.getNumPrompts(),
+                        0,
+                        apiEntity.isSystem(),
+                        intentVar.isPersistent(),
+                        intentVar.getLabel());
+                variables.add(variable);
+            }
+            return new MemoryIntent(intentName, aiid, chatId, variables, false);
+        }
     }
 
     @Override

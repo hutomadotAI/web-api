@@ -109,7 +109,7 @@ public class TestChatBase {
                         this.fakeAimlHandler, this.fakeDefaultHandler));
 
         this.chatLogic = new ChatLogic(this.fakeChatServices, this.fakeChatStateHandler, mock(Tools.class),
-                mock(ILogger.class), mock(ChatLogger.class), this.fakeChatWorkflow);
+                mock(ILogger.class), mock(ChatLogger.class), this.fakeChatWorkflow, this.fakeConfig);
 
         ChatState emptyState = ChatState.getEmpty();
         emptyState.setAi(getSampleAI());

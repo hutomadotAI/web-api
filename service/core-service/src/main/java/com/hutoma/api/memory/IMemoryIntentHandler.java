@@ -1,5 +1,6 @@
 package com.hutoma.api.memory;
 
+import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.sub.ChatState;
 import com.hutoma.api.containers.sub.MemoryIntent;
@@ -51,4 +52,10 @@ public interface IMemoryIntentHandler {
      * @param intentsToRemove the list of intents to remove
      */
     void clearIntents(ChatState state, List<MemoryIntent> intentsToRemove);
+
+    MemoryIntent buildMemoryIntentFromIntentName(final UUID devId,
+                                                 final UUID aiid,
+                                                 final String intentName,
+                                                 final UUID chatId)
+            throws DatabaseException, ChatLogic.IntentException;
 }

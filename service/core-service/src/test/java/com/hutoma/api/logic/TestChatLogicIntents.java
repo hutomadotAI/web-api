@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.hutoma.api.common.Pair;
 import com.hutoma.api.connectors.BackendServerType;
 import com.hutoma.api.connectors.chat.ChatBackendConnector;
+import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.ApiChat;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.ApiResult;
@@ -12,6 +13,7 @@ import com.hutoma.api.containers.sub.ChatHandoverTarget;
 import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.containers.sub.ChatState;
 import com.hutoma.api.containers.sub.IntentConditionOperator;
+import com.hutoma.api.containers.sub.IntentOutConditional;
 import com.hutoma.api.containers.sub.IntentVariableCondition;
 import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.containers.sub.MemoryVariable;
@@ -23,6 +25,7 @@ import com.hutoma.api.memory.MemoryIntentHandler;
 import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.stubbing.OngoingStubbing;
 
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
@@ -33,8 +36,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static com.hutoma.api.common.TestDataHelper.AIID;
-import static com.hutoma.api.common.TestDataHelper.getSampleAI;
+import static com.hutoma.api.common.TestDataHelper.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
@@ -709,9 +711,104 @@ public class TestChatLogicIntents extends TestChatBase {
         Assert.assertNull(ctx.getVariable(varName));
     }
 
+    @Test
+    public void testChat_intent_conditionOut_chainIntent() throws ChatLogic.IntentException, DatabaseException {
+        ChatResult r = testIntentConditionOut("intent1", "intent2", ConditionEvaluator.ResultType.PASSED);
+        Assert.assertEquals("intent2", r.getIntents().get(0).getName());
+    }
+
+    @Test
+    public void testChat_intent_conditionOut_conditionNotMet_noChaining() throws ChatLogic.IntentException, DatabaseException {
+        ChatResult r = testIntentConditionOut("intent1", "intent2", ConditionEvaluator.ResultType.FAILED);
+        Assert.assertEquals("intent1", r.getIntents().get(0).getName());
+    }
+
+    @Test
+    public void testChat_intent_conditionOut_loopDetection_sameIntent() throws ChatLogic.IntentException, DatabaseException {
+        ChatResult r = testIntentConditionOut("intent1", "intent1", ConditionEvaluator.ResultType.PASSED);
+        Assert.assertEquals("intent1", r.getIntents().get(0).getName());
+        // we don't call the same intent again
+        verify(this.fakeIntentHandler, never()).buildMemoryIntentFromIntentName(any(), any(), anyString(), any());
+    }
+
+    @Test
+    public void testChat_intent_conditionOut_loopDetection_deeper() throws ChatLogic.IntentException, DatabaseException {
+
+        final int numIntents = 5;
+
+        MemoryVariable mv = new MemoryVariable("var", Arrays.asList("a", "b"));
+        mv.setLabel("label");
+        mv.setCurrentValue("value");
+        IntentVariableCondition condition = new IntentVariableCondition("var", IntentConditionOperator.SET, "");
+
+        List<ApiIntent> intents = new ArrayList<>();
+        List<MemoryIntent> memoryIntents = new ArrayList<>();
+        for (int i = 0; i < numIntents; i++) {
+            ApiIntent intent = new ApiIntent("intent" + i, "", "");
+            intent.addResponse("response" + i);
+            String triggerIntent = "intent" + (i == numIntents - 1 ? 0 : i + 1);
+            IntentOutConditional intentOutConditional = new IntentOutConditional(triggerIntent, Collections.singletonList(condition));
+            List<IntentOutConditional> intentOutConditionals = Collections.singletonList(intentOutConditional);
+            intent.setIntentOutConditionals(intentOutConditionals);
+            intents.add(intent);
+
+            memoryIntents.add(new MemoryIntent(intent.getIntentName(), AIID, CHATID, Collections.singletonList(mv)));
+
+            when(this.fakeIntentHandler.getIntent(AIID, intents.get(i).getIntentName())).thenReturn(intents.get(i));
+            when(this.fakeIntentHandler.buildMemoryIntentFromIntentName(DEVID_UUID, AIID, intents.get(i).getIntentName(), CHATID))
+                    .thenReturn(memoryIntents.get(i));
+        }
+
+        when(this.fakeConditionEvaluator.evaluate(any())).thenReturn(new ConditionEvaluator.Results(
+                Collections.singletonList(new ConditionEvaluator.Result(condition, ConditionEvaluator.ResultType.PASSED))));
+
+        OngoingStubbing stub = when(this.fakeIntentHandler.getCurrentIntentsStateForChat(any()));
+        for (int i = 0; i < numIntents; i++) {
+            stub = stub.thenReturn(Collections.singletonList(memoryIntents.get(i)));
+        }
+
+        ApiResult result = getChat(0.5f);
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
+        // Check recursion message - last one points back to first one
+        Assert.assertEquals("Recursion detected for intent intent0", result.getStatus().getInfo());
+        verify(this.fakeIntentHandler, times(numIntents + 1)).getCurrentIntentsStateForChat(any());
+    }
+
+    private ChatResult testIntentConditionOut(final String intent1Name, final String intent2Name, final ConditionEvaluator.ResultType evaluationResult)
+            throws ChatLogic.IntentException, DatabaseException {
+        MemoryVariable mv = new MemoryVariable("var", Arrays.asList("a", "b"));
+        mv.setLabel("label");
+        mv.setCurrentValue("value");
+
+        ApiIntent intent2 = new ApiIntent(intent2Name, "", "");
+        intent2.addResponse("response2");
+        MemoryIntent memoryIntent2 = new MemoryIntent(intent2.getIntentName(), AIID, CHATID, Collections.singletonList(mv));
+
+        ApiIntent intent1 = new ApiIntent(intent1Name, "", "");
+        intent1.addResponse("response1");
+        IntentVariableCondition condition = new IntentVariableCondition("var", IntentConditionOperator.SET, "");
+        IntentOutConditional intentOutConditional = new IntentOutConditional("intent2", Collections.singletonList(condition));
+        List<IntentOutConditional> intentOutConditionals = Collections.singletonList(intentOutConditional);
+        intent1.setIntentOutConditionals(intentOutConditionals);
+
+        MemoryIntent memoryIntent1 = new MemoryIntent(intent1.getIntentName(), AIID, CHATID, Collections.singletonList(mv));
+        List<MemoryIntent> miList = Collections.singletonList(memoryIntent1);
+
+        when(this.fakeIntentHandler.getIntent(AIID, intent1.getIntentName())).thenReturn(intent1);
+        when(this.fakeIntentHandler.getIntent(AIID, intent2.getIntentName())).thenReturn(intent2);
+        when(this.fakeIntentHandler.buildMemoryIntentFromIntentName(DEVID_UUID, AIID, intent2.getIntentName(), CHATID)).thenReturn(memoryIntent2);
+        when(this.fakeConditionEvaluator.evaluate(any())).thenReturn(new ConditionEvaluator.Results(
+                Collections.singletonList(new ConditionEvaluator.Result(condition, evaluationResult))));
+        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), anyString(), any())).thenReturn(memoryIntent1);
+        when(this.fakeIntentHandler.getCurrentIntentsStateForChat(any())).thenReturn(miList).thenReturn(Collections.singletonList(memoryIntent2));
+
+        ApiResult result = getChat(0.5f);
+        return ((ApiChat) result).getResult();
+    }
+
     private ApiIntent setupContextVariablesChatTest(final String intentName,
-                                               final String contextInVarName, final String contextInVarValue,
-                                               final String contextOutVarName, final String contextOutVarValue)
+                                                    final String contextInVarName, final String contextInVarValue,
+                                                    final String contextOutVarName, final String contextOutVarValue)
             throws ChatBackendConnector.AiControllerException, ChatLogic.IntentException {
         ApiIntent intent = TestIntentLogic.getIntent();
         if (contextInVarName != null) {

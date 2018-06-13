@@ -1,6 +1,7 @@
 package com.hutoma.api.logic;
 
 import com.hutoma.api.common.ChatLogger;
+import com.hutoma.api.common.Config;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.NoServerAvailableException;
 import com.hutoma.api.connectors.ServerConnector;
@@ -23,8 +24,11 @@ import com.hutoma.api.logic.chat.ChatWorkflow;
 import com.hutoma.api.logic.chat.IChatHandler;
 import com.hutoma.api.memory.ChatStateHandler;
 
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
@@ -42,20 +46,25 @@ public class ChatLogic {
     private final ChatStateHandler chatStateHandler;
     private final LogMap telemetryMap;
     private final ChatWorkflow chatWorkflow;
+    private final Config config;
     private ChatState chatState;
 
 
     @Inject
-    public ChatLogic(final AIChatServices chatServices, final ChatStateHandler chatStateHandler,
-                     final Tools tools, final ILogger logger,
+    public ChatLogic(final AIChatServices chatServices,
+                     final ChatStateHandler chatStateHandler,
+                     final Tools tools,
+                     final ILogger logger,
                      final ChatLogger chatLogger,
-                     final ChatWorkflow chatWorkflow) {
+                     final ChatWorkflow chatWorkflow,
+                     final Config config) {
         this.chatStateHandler = chatStateHandler;
         this.chatServices = chatServices;
         this.tools = tools;
         this.logger = logger;
         this.chatLogger = chatLogger;
         this.chatWorkflow = chatWorkflow;
+        this.config = config;
 
         this.telemetryMap = new LogMap((Map<String, Object>) null);
     }
@@ -93,6 +102,11 @@ public class ChatLogic {
                     devIdString, ex, LogMap.map("AIID", aiid));
             this.chatLogger.logChatError(LOGFROM, devIdString, ex, this.telemetryMap);
             return ApiError.getInternalServerError();
+        } catch (IntentUserException ex) {
+            this.logger.logUserTraceEvent(LOGFROM, "Chat - " + ex.getMessage(),
+                    devIdString, LogMap.map("AIID", aiid));
+            this.chatLogger.logChatError(LOGFROM, devIdString, ex, this.telemetryMap);
+            return ApiError.getBadRequest(ex.getMessage());
         } catch (IntentException ex) {
             this.logger.logUserExceptionEvent(LOGFROM, "Chat - " + ex.getClass().getSimpleName(),
                     devIdString, ex, LogMap.map("AIID", aiid));
@@ -151,14 +165,36 @@ public class ChatLogic {
             throw new ChatFailedException(ApiError.getInternalServerError());
         }
 
+        Set<String> executedIntents = new HashSet<>();
         Map<IChatHandler, Long> processedHandlers = new LinkedHashMap<>();
-        for (IChatHandler handler : this.chatWorkflow.getHandlers()) {
+        Iterator<IChatHandler> handlerIterator = this.chatWorkflow.getHandlers().iterator();
+        while (handlerIterator.hasNext()) {
+            IChatHandler handler = handlerIterator.next();
             final long startHandler = this.tools.getTimestamp();
             currentResult = handler.doWork(requestInfo, currentResult, this.telemetryMap);
             processedHandlers.put(handler, this.tools.getTimestamp() - startHandler);
             if (handler.chatCompleted()) {
-                chatAnswered = true;
-                break;
+
+                // Check if a handler requested for the workflow to restart
+                if (currentResult.getChatState() != null && currentResult.getChatState().isRestartChatWorkflow()) {
+                    // Guard against infinite recursion
+                    if (!currentResult.getChatState().getCurrentIntents().isEmpty()) {
+                        if (executedIntents.contains(
+                                currentResult.getChatState().getCurrentIntents().get(0).getName())) {
+                            throw new IntentUserException(String.format("Recursion detected for intent %s",
+                                    currentResult.getChatState().getCurrentIntents().get(0).getName()));
+                        } else {
+                            executedIntents.add(currentResult.getChatState().getCurrentIntents().get(0).getName());
+                        }
+                    }
+
+
+                    // Go back to the first handler
+                    handlerIterator = this.chatWorkflow.getHandlers().iterator();
+                } else {
+                    chatAnswered = true;
+                    break;
+                }
             }
         }
 
@@ -269,6 +305,16 @@ public class ChatLogic {
         }
 
         public IntentException(final Throwable cause) {
+            super(cause);
+        }
+    }
+
+    public static class IntentUserException extends IntentException {
+        public IntentUserException(final String message) {
+            super(message);
+        }
+
+        public IntentUserException(final Throwable cause) {
             super(cause);
         }
     }

@@ -3,9 +3,11 @@ package com.hutoma.api.logic.chat;
 import com.google.common.base.Strings;
 import com.hutoma.api.common.Pair;
 import com.hutoma.api.connectors.WebHooks;
+import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.sub.ChatRequestInfo;
 import com.hutoma.api.containers.sub.ChatResult;
+import com.hutoma.api.containers.sub.IntentOutConditional;
 import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.containers.sub.MemoryVariable;
 import com.hutoma.api.containers.sub.WebHook;
@@ -79,6 +81,8 @@ public class IntentProcessor {
         boolean handledIntent;
         Map<String, Object> intentLog = new HashMap<>();
         intentLog.put("Name", currentIntent.getName());
+
+        chatResult.getChatState().restartChatWorkflow(false);
 
         ApiIntent intent = this.intentHandler.getIntent(chatInfo.getAiid(), currentIntent.getName());
         if (!canExecuteIntent(intent, chatResult)) {
@@ -209,6 +213,29 @@ public class IntentProcessor {
             // Make sure all context_out variables are read and applied to the chat state
             intent.getContextOut().forEach((k, v) -> chatResult.getChatState().getChatContext().setValue(k, v));
 
+            // Check if there are any conditions out
+            if (!intent.getIntentOutConditionals().isEmpty()) {
+
+                for (IntentOutConditional outConditional: intent.getIntentOutConditionals()) {
+                    this.conditionEvaluator.setConditions(outConditional.getConditions());
+                    ConditionEvaluator.Results results = this.conditionEvaluator.evaluate(
+                            chatResult.getChatState().getChatContext());
+                    if (results.passed()) {
+                        try {
+                            MemoryIntent intentToTrigger = this.intentHandler.buildMemoryIntentFromIntentName(
+                                    chatInfo.getDevId(), chatInfo.getAiid(), outConditional.getIntentName(),
+                                    chatInfo.getChatId());
+                            chatResult.getChatState().getCurrentIntents().add(intentToTrigger);
+                            chatResult.getChatState().restartChatWorkflow(true);
+                            break;
+                        } catch (DatabaseException ex) {
+                            throw new ChatLogic.IntentException(ex);
+                        }
+                    }
+                }
+            }
+
+
         } else {
             if (!intentsToClear.contains(currentIntent)) {
                 chatResult.getChatState().updateMemoryIntent(currentIntent);
@@ -222,6 +249,9 @@ public class IntentProcessor {
 
         intentLog.put("Handled", handledIntent);
         telemetryMap.add("Intent", intentLog);
+        telemetryMap.add("IntentStream", telemetryMap.get().containsKey("IntentStream")
+                ? String.format("%s, %s", telemetryMap.get().get("IntentStream"), intent.getIntentName())
+                : intent.getIntentName());
 
         return handledIntent;
     }
