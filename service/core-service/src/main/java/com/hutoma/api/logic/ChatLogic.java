@@ -12,7 +12,6 @@ import com.hutoma.api.containers.ApiChat;
 import com.hutoma.api.containers.ApiChatApiHandover;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiResult;
-import com.hutoma.api.containers.ApiString;
 import com.hutoma.api.containers.sub.ChatHandoverTarget;
 import com.hutoma.api.containers.sub.ChatRequestInfo;
 import com.hutoma.api.containers.sub.ChatResult;
@@ -265,7 +264,7 @@ public class ChatLogic {
         try {
             this.chatState = this.chatStateHandler.getState(devId, aiid, UUID.fromString(chatId));
             this.chatStateHandler.clear(this.chatState);
-            return new ApiString("Chat state cleared").setSuccessStatus();
+            return new ApiResult().setSuccessStatus("Chat state cleared");
         } catch (ChatStateHandler.ChatStateException ex) {
             this.chatLogger.logUserExceptionEvent(LOGFROM, "resetchat", devId.toString(), ex);
             return ApiError.getInternalServerError();

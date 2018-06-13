@@ -128,6 +128,7 @@ public class ChatEndpoint {
     @ResourceMethodSignature(
             queryParams = {@QueryParam("chatId")}
     )
+    @Produces(MediaType.APPLICATION_JSON)
     public
     Response resetChat(
             @Context ContainerRequestContext requestContext) {

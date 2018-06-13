@@ -9,6 +9,7 @@ import com.hutoma.api.connectors.WebHooks;
 import com.hutoma.api.connectors.chat.ChatBackendConnector;
 import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.ApiChat;
+import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.ChatContext;
 import com.hutoma.api.containers.sub.ChatHandoverTarget;
 import com.hutoma.api.containers.sub.ChatResult;
@@ -59,6 +60,7 @@ import static org.mockito.Mockito.when;
 public class TestServiceChat extends ServiceTestBase {
     private static final String CHAT_PATH = "/ai/" + AIID + "/chat";
     private static final String CHAT_HANDOVER = CHAT_PATH + "/target";
+    private static final String CHAT_RESET = CHAT_PATH + "/reset";
 
     @Mock
     private IMemoryIntentHandler fakeMemoryIntentHandler;
@@ -259,6 +261,24 @@ public class TestServiceChat extends ServiceTestBase {
         Assert.assertEquals(2, ctx.size());
         Assert.assertEquals(var1Value, ctx.get(var1Name));
         Assert.assertEquals(var2Value, ctx.get(var2Name));
+    }
+
+    @Test
+    public void testChat_resetChat() {
+        final Response response = target(CHAT_RESET)
+                .queryParam("chatId", "")
+                .request().headers(defaultHeaders).post(Entity.text(""));
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
+        ApiResult result = deserializeResponse(response, ApiResult.class);
+        Assert.assertEquals("Chat state cleared", result.getStatus().getInfo());
+    }
+
+    @Test
+    public void testChat_resetChat_devId_invalid() {
+        final Response response = target(CHAT_RESET)
+                .queryParam("chatId", "")
+                .request().headers(noDevIdHeaders).post(Entity.text(""));
+        Assert.assertEquals(HttpURLConnection.HTTP_UNAUTHORIZED, response.getStatus());
     }
 
     private WebTarget buildChatDefaultParams(WebTarget webTarget) {
