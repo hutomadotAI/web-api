@@ -60,6 +60,7 @@ public class ChatPassthroughHandler implements IChatHandler {
             telemetryMap.add("AIID", requestInfo.getAiid());
             telemetryMap.add("ChatId", requestInfo.getChatId());
             telemetryMap.add("Q", requestInfo.getQuestion());
+            telemetryMap.add("PassthroughUrl", passthrough);
             telemetryMap.add("ChatType", "Passthrough");
 
             try {
@@ -79,6 +80,7 @@ public class ChatPassthroughHandler implements IChatHandler {
                         "Error occurred executing WebHook for passthrough",
                         chatInfo.getDevId().toString(),
                         LogMap.map("AIID", requestInfo.getAiid())
+                                .put("PassthroughUrl", passthrough)
                                 .put("Error", webhookException.getMessage()));
                 this.chatLogger.logChatError(LOGFROM, requestInfo.getDevId().toString(),
                         webhookException, telemetryMap);
