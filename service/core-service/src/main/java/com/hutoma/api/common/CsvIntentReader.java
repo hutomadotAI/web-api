@@ -3,10 +3,12 @@ package com.hutoma.api.common;
 import com.hutoma.api.containers.ApiCsvImportResult;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.logging.ILogger;
+import com.hutoma.api.validation.Validate;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 public class CsvIntentReader {
@@ -17,13 +19,15 @@ public class CsvIntentReader {
     private static final char DEFAULT_CELLLIST_SEPARATOR = ';';
     private static final String LINE_SEPARATOR_PATTERN = "\\R";
     private final ILogger logger;
+    private final Validate validate;
     private char separator;
     private char quote;
     private char cellListSeparator;
 
     @Inject
-    CsvIntentReader(final ILogger logger) {
+    CsvIntentReader(final ILogger logger, final Validate validate) {
         this.logger = logger;
+        this.validate = validate;
         this.separator = DEFAULT_SEPARATOR;
         this.quote = DEFAULT_QUOTE;
         this.cellListSeparator = DEFAULT_CELLLIST_SEPARATOR;
@@ -36,7 +40,20 @@ public class CsvIntentReader {
             for (int i = 0; i < lines.length; i++) {
                 ApiIntent intent = parseLine(lines[i].trim());
                 if (intent != null) {
-                    result.addImported(intent);
+
+                    if (!this.validate.isIntentNameValid(intent.getIntentName())) {
+                        result.addError(String.format("Invalid intent name: %s", intent.getIntentName()));
+                    } else if (intent.getResponses().isEmpty()
+                            || intent.getResponses().stream().allMatch(String::isEmpty)
+                            || !this.validate.areIntentResponsesValid(intent.getResponses())) {
+                        result.addError(String.format("No valid responses for intent %s", intent.getIntentName()));
+                    } else if (intent.getUserSays().isEmpty()
+                            || intent.getUserSays().stream().allMatch(String::isEmpty)
+                            || !this.validate.areIntentUserSaysValid(intent.getUserSays())) {
+                        result.addError(String.format("No valid expressions for intent %s", intent.getIntentName()));
+                    } else {
+                        result.addImported(intent);
+                    }
                 } else {
                     result.addWarning(String.format("No valid data to import at line %d", i + 1));
                 }
@@ -122,7 +139,7 @@ public class CsvIntentReader {
         if (cells.size() < 3) {
             return null;
         } else {
-            ApiIntent intent = new ApiIntent(cells.get(0), "", "");
+            ApiIntent intent = new ApiIntent(cells.get(0).trim(), "", "");
             getSeparatedStrings(cells.get(1), this.cellListSeparator).forEach(intent::addUserSays);
             getSeparatedStrings(cells.get(2), this.cellListSeparator).forEach(intent::addResponse);
             return intent;
@@ -130,6 +147,6 @@ public class CsvIntentReader {
     }
 
     private static List<String> getSeparatedStrings(final String str, final char separator) {
-        return Arrays.asList(str.split(String.format("%c", separator)));
+        return Arrays.stream(str.split(String.format("%c", separator))).map(String::trim).collect(Collectors.toList());
     }
 }

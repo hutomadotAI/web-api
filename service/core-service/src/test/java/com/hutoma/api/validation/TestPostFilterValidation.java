@@ -168,7 +168,7 @@ public class TestPostFilterValidation {
     @Test(expected = ParameterValidationException.class)
     public void validateIntent_LongUserExpression() throws ParameterValidationException {
         ApiIntent intent = createIntent(null);
-        intent.setUserSays(Collections.singletonList(TestDataHelper.stringOfLength(251)));
+        intent.setUserSays(Collections.singletonList(TestDataHelper.stringOfLength(Validate.INTENT_USERSAYS_MAX_LENGTH + 1)));
         this.postFilter.validateIntent(intent);
     }
 
@@ -204,7 +204,7 @@ public class TestPostFilterValidation {
     @Test(expected = ParameterValidationException.class)
     public void validateIntent_LongResponse() throws ParameterValidationException {
         ApiIntent intent = createIntent(null);
-        intent.setResponses(Collections.singletonList(TestDataHelper.stringOfLength(251)));
+        intent.setResponses(Collections.singletonList(TestDataHelper.stringOfLength(Validate.INTENT_RESPONSE_MAX_LENGTH + 1)));
         this.postFilter.validateIntent(intent);
     }
 

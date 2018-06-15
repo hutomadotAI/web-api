@@ -15,12 +15,16 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import static com.hutoma.api.validation.ParameterFilter.INTENTNAME;
+import static com.hutoma.api.validation.ParameterFilter.INTENT_RESPONSES;
+import static com.hutoma.api.validation.ParameterFilter.INTENT_USERSAYS;
 
 /**
  * Created by David MG on 06/09/2016.
  */
 public class Validate extends ValidationBase {
 
+    public static final int INTENT_RESPONSE_MAX_LENGTH = 1024;
+    public static final int INTENT_USERSAYS_MAX_LENGTH = 1024;
 
     private static final Pattern alphaNumericDashes = Pattern.compile("^[a-zA-Z0-9_-]+$");
     private static final Pattern entityNames = Pattern.compile("^[\\.a-zA-Z0-9_-]+$");
@@ -110,6 +114,15 @@ public class Validate extends ValidationBase {
     public void validateIntentName(final String intentName) throws ParameterValidationException {
         validateFieldLength(250, INTENTNAME, intentName);
         validateAlphaNumPlusDashes(INTENTNAME, intentName);
+    }
+
+    public boolean isIntentNameValid(final String intentName) {
+        try {
+            validateIntentName(intentName);
+            return true;
+        } catch (ParameterValidationException ex) {
+            return false;
+        }
     }
 
     /***
@@ -310,6 +323,27 @@ public class Validate extends ValidationBase {
         return param;
     }
 
+    public boolean areIntentResponsesValid(final List<String> responses) {
+        try {
+            dedupeAndEnsureNonEmptyList(
+                    validateFieldLengthsInList(INTENT_RESPONSE_MAX_LENGTH, INTENT_RESPONSES,
+                            filterControlCoalesceSpacesInList(responses)), INTENT_RESPONSES);
+            return true;
+        } catch (ParameterValidationException ex) {
+            return false;
+        }
+    }
+
+    public boolean areIntentUserSaysValid(final List<String> userSays) {
+        try {
+            dedupeAndEnsureNonEmptyList(
+                    validateFieldLengthsInList(INTENT_USERSAYS_MAX_LENGTH, INTENT_USERSAYS,
+                            filterControlCoalesceSpacesInList(userSays)), INTENT_USERSAYS);
+            return true;
+        } catch (ParameterValidationException ex) {
+            return false;
+        }
+    }
 
 
     public String validateAlphaNumPlusDashes(final String paramName, final String param)

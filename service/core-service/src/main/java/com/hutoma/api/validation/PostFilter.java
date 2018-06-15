@@ -21,7 +21,6 @@ import org.apache.logging.log4j.util.Strings;
 import org.glassfish.jersey.message.internal.MediaTypes;
 import org.glassfish.jersey.server.ContainerRequest;
 
-import java.io.IOException;
 import java.lang.reflect.AnnotatedElement;
 import java.util.Arrays;
 import java.util.Collections;
@@ -62,7 +61,7 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
     }
 
     @Override
-    public void filter(final ContainerRequestContext requestContext) throws IOException {
+    public void filter(final ContainerRequestContext requestContext) {
 
         // get the list of things that we need to validate
         final HashSet<APIParameter> checkList = new HashSet<>();
@@ -303,7 +302,7 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
         // for each response, filter, check against size limit, dedupe, remove empties, check one present
         intent.setResponses(
                 dedupeAndEnsureNonEmptyList(
-                        validateFieldLengthsInList(250, INTENT_RESPONSES,
+                        validateFieldLengthsInList(INTENT_RESPONSE_MAX_LENGTH, INTENT_RESPONSES,
                                 filterControlCoalesceSpacesInList(intent.getResponses())), INTENT_RESPONSES));
 
         // check responses limit
@@ -315,7 +314,7 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
         // for each expression, filter, check against size limit, dedupe, remove empties, check one present
         intent.setUserSays(
                 dedupeAndEnsureNonEmptyList(
-                        validateFieldLengthsInList(250, INTENT_USERSAYS,
+                        validateFieldLengthsInList(INTENT_USERSAYS_MAX_LENGTH, INTENT_USERSAYS,
                                 filterControlCoalesceSpacesInList(intent.getUserSays())), INTENT_USERSAYS));
 
         // check expression limit

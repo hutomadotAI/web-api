@@ -17,8 +17,6 @@ import com.hutoma.api.containers.sub.IntentVariable;
 import com.hutoma.api.containers.sub.WebHook;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
-import com.hutoma.api.validation.ParameterValidationException;
-import com.hutoma.api.validation.Validate;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -27,7 +25,6 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
@@ -50,7 +47,6 @@ public class IntentLogic {
     private final JsonSerializer jsonSerializer;
     private final Provider<DatabaseTransaction> databaseTransactionProvider;
     private final CsvIntentReader csvIntentReader;
-    private final Validate validate;
 
     @Inject
     IntentLogic(final Config config,
@@ -60,8 +56,7 @@ public class IntentLogic {
                 final TrainingLogic trainingLogic,
                 final JsonSerializer jsonSerializer,
                 final Provider<DatabaseTransaction> transactionProvider,
-                final CsvIntentReader csvIntentReader,
-                final Validate validate) {
+                final CsvIntentReader csvIntentReader) {
         this.config = config;
         this.logger = logger;
         this.databaseEntitiesIntents = databaseEntitiesIntents;
@@ -70,7 +65,6 @@ public class IntentLogic {
         this.jsonSerializer = jsonSerializer;
         this.databaseTransactionProvider = transactionProvider;
         this.csvIntentReader = csvIntentReader;
-        this.validate = validate;
     }
 
     public ApiResult getIntents(final UUID devid, final UUID aiid) {
@@ -250,21 +244,11 @@ public class IntentLogic {
             ApiCsvImportResult results = this.csvIntentReader.parseIntents(fileContents);
             Set<String> intentNames = new LinkedHashSet<>();
 
-            for (Iterator<ApiCsvImportResult.ImportResultSuccess> iterator = results.getImported().iterator();
-                    iterator.hasNext();) {
-                ApiIntent intent = iterator.next().getIntent();
-                if (intentNames.contains(intent.getIntentName())) {
-                    return ApiError.getBadRequest(String.format("Duplicate intent name: %s", intent.getIntentName()));
-                } else {
-                    intentNames.add(intent.getIntentName());
+            for (ApiCsvImportResult.ImportResultSuccess imported: results.getImported()) {
+                if (intentNames.contains(imported.getIntentName())) {
+                    return ApiError.getBadRequest(String.format("Duplicate intent name: %s", imported.getIntentName()));
                 }
-                try {
-                    this.validate.validateIntentName(intent.getIntentName());
-                } catch (ParameterValidationException ex) {
-                    // Switch this into the errors list
-                    results.addError(String.format("Invalid intent name: %s", intent.getIntentName()));
-                    iterator.remove();
-                }
+                intentNames.add(imported.getIntentName());
             }
 
             try (DatabaseTransaction transaction = this.databaseTransactionProvider.get()) {

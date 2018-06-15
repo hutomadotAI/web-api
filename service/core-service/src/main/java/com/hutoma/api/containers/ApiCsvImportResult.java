@@ -73,6 +73,10 @@ public class ApiCsvImportResult extends ApiResult {
         ImportResultWarning(final String warning) {
             this.warning = warning;
         }
+
+        public String getWarning() {
+            return this.warning;
+        }
     }
 
     public static class ImportResultError {
@@ -81,6 +85,10 @@ public class ApiCsvImportResult extends ApiResult {
 
         ImportResultError(final String error) {
             this.error = error;
+        }
+
+        public String getError() {
+            return this.error;
         }
     }
 }

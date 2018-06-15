@@ -3,19 +3,24 @@ package com.hutoma.api.common;
 import com.hutoma.api.containers.ApiCsvImportResult;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.logging.ILogger;
+import com.hutoma.api.validation.ParameterValidationException;
+import com.hutoma.api.validation.Validate;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
-import static org.mockito.Mockito.mock;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.*;
 
 public class TestCsvIntentReader {
 
     private ILogger fakeLogger;
+    private Validate fakeValidate;
 
     public TestCsvIntentReader() {
         this.fakeLogger = mock(ILogger.class);
+        this.fakeValidate = mock(Validate.class);
     }
 
     @Test
@@ -132,11 +137,62 @@ public class TestCsvIntentReader {
 
     @Test
     public void testCsvReader_intentsAndInvalidLines() {
+        when(this.fakeValidate.isIntentNameValid(anyString())).thenReturn(true);
+        when(this.fakeValidate.areIntentResponsesValid(anyList())).thenReturn(true);
+        when(this.fakeValidate.areIntentUserSaysValid(anyList())).thenReturn(true);
         ApiCsvImportResult result = getReader().parseIntents("name,us,r,\nNOT_VALID!\nname2,us2,r2");
         Assert.assertEquals(2, result.getImported().size());
         Assert.assertEquals(1, result.getWarnings().size());
         Assert.assertEquals("name", result.getImported().get(0).getIntent().getIntentName());
         Assert.assertEquals("name2", result.getImported().get(1).getIntent().getIntentName());
+    }
+
+    @Test
+    public void testCsvReader_spacesTrimmed() {
+        ApiIntent intent = getReader().parseLine("  name , us ; us2 , r ; r2 , ");
+        Assert.assertEquals("name", intent.getIntentName());
+        Assert.assertEquals("us", intent.getUserSays().get(0));
+        Assert.assertEquals("us2", intent.getUserSays().get(1));
+        Assert.assertEquals("r", intent.getResponses().get(0));
+        Assert.assertEquals("r2", intent.getResponses().get(1));
+    }
+
+    @Test
+    public void testCsvReader_intentsEmptyComponents() {
+        String[] lines = {"name,,r", "name,;,r", "name,us,,", "name,us,;"};
+        for (String line: lines) {
+            ApiCsvImportResult result = getReader().parseIntents(line);
+            Assert.assertTrue(result.getImported().isEmpty());
+            Assert.assertEquals(1, result.getErrors().size());
+        }
+    }
+
+    @Test
+    public void testCsvReader_invalidIntentName() throws ParameterValidationException {
+        doThrow(ParameterValidationException.class).when(this.fakeValidate).validateIntentName(anyString());
+        ApiCsvImportResult result = getReader().parseIntents("name,us,r");
+        Assert.assertTrue(result.getImported().isEmpty());
+        Assert.assertEquals(1, result.getErrors().size());
+        Assert.assertEquals("Invalid intent name: name", result.getErrors().get(0).getError());
+    }
+
+    @Test
+    public void testCsvReader_responsesNotValid() {
+        when(this.fakeValidate.isIntentNameValid(anyString())).thenReturn(true);
+        when(this.fakeValidate.areIntentResponsesValid(anyList())).thenReturn(false);
+        ApiCsvImportResult result = getReader().parseIntents("name,us,r");
+        Assert.assertTrue(result.getImported().isEmpty());
+        Assert.assertEquals(1, result.getErrors().size());
+    }
+
+    @Test
+    public void testCsvReader_userSaysNotValid() {
+        when(this.fakeValidate.isIntentNameValid(anyString())).thenReturn(true);
+        when(this.fakeValidate.areIntentResponsesValid(anyList())).thenReturn(true);
+        when(this.fakeValidate.areIntentUserSaysValid(anyList())).thenReturn(false);
+        ApiCsvImportResult result = getReader().parseIntents("name,us,r");
+        Assert.assertTrue(result.getImported().isEmpty());
+        Assert.assertEquals(1, result.getErrors().size());
     }
 
     private void testCsvReader_lineSeparator(final String lineSeparator) {
@@ -151,7 +207,7 @@ public class TestCsvIntentReader {
     }
 
     private CsvIntentReader getReader() {
-        return new CsvIntentReader(this.fakeLogger);
+        return new CsvIntentReader(this.fakeLogger, this.fakeValidate);
     }
 
     private String getLinesWithSeparator(final String line, final String separator, final int nCopies) {

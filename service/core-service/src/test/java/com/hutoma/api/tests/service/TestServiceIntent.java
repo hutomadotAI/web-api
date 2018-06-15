@@ -12,6 +12,7 @@ import com.hutoma.api.logic.IntentLogic;
 import com.hutoma.api.logic.TestIntentLogic;
 import com.hutoma.api.logic.TrainingLogic;
 import com.hutoma.api.memory.IMemoryIntentHandler;
+import com.hutoma.api.validation.Validate;
 
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.junit.Assert;
@@ -55,7 +56,7 @@ public class TestServiceIntent extends ServiceTestBase {
     public void testSaveIntent_LongResponse() {
         ApiIntent intent = TestIntentLogic.getIntent();
         intent.setResponses(Collections.singletonList(
-                String.join("", Collections.nCopies(250 + 1, "A"))));
+                String.join("", Collections.nCopies(Validate.INTENT_RESPONSE_MAX_LENGTH + 1, "A"))));
         final Response response = sendRequest(BASEPATH + TestDataHelper.AIID.toString(),
                 this.serializeObject(intent));
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.getStatus());
@@ -65,7 +66,7 @@ public class TestServiceIntent extends ServiceTestBase {
     public void testSaveIntent_LongUserExpression() {
         ApiIntent intent = TestIntentLogic.getIntent();
         intent.setUserSays(Collections.singletonList(
-                String.join("", Collections.nCopies(250 + 1, "A"))));
+                String.join("", Collections.nCopies(Validate.INTENT_USERSAYS_MAX_LENGTH + 1, "A"))));
         final Response response = sendRequest(BASEPATH + TestDataHelper.AIID.toString(),
                 this.serializeObject(intent));
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.getStatus());

@@ -16,7 +16,6 @@ import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.IntentVariable;
 import com.hutoma.api.containers.sub.WebHook;
 import com.hutoma.api.logging.ILogger;
-import com.hutoma.api.validation.ParameterValidationException;
 import com.hutoma.api.validation.Validate;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -79,10 +78,9 @@ public class TestIntentLogic {
         this.fakeLogger = mock(ILogger.class);
         this.trainingLogic = mock(TrainingLogic.class);
         this.fakeCsvIntentReader = mock(CsvIntentReader.class);
-        this.fakeValidator = mock(Validate.class);
         this.intentLogic = new IntentLogic(this.fakeConfig, this.fakeLogger, this.fakeDatabaseEntitiesIntents,
                 this.fakeDatabase, this.trainingLogic, mock(JsonSerializer.class), this.fakeDatabaseTransactionProvider,
-                this.fakeCsvIntentReader, this.fakeValidator );
+                this.fakeCsvIntentReader);
 
         when(this.fakeConfig.getMaxUploadSizeKb()).thenReturn(1000);
         when(this.fakeDatabaseTransactionProvider.get()).thenReturn(this.fakeDatabaseTransaction);
@@ -295,18 +293,6 @@ public class TestIntentLogic {
         when(this.fakeCsvIntentReader.parseIntents(anyString())).thenReturn(results);
         ApiResult result = this.intentLogic.bulkImportFromCsv(DEVID_UUID, AIID, createUpload(generateIntentsCsv(intents)));
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
-    }
-
-    @Test
-    public void testCsvBulkImport_invalidIntentName() throws ParameterValidationException {
-        List<ApiIntent> intents = buildIntentList(1);
-        ApiCsvImportResult results = buildCsvImportResult(intents);
-        when(this.fakeCsvIntentReader.parseIntents(anyString())).thenReturn(results);
-        doThrow(ParameterValidationException.class).when(this.fakeValidator).validateIntentName(any());
-        ApiCsvImportResult result = (ApiCsvImportResult) this.intentLogic.bulkImportFromCsv(DEVID_UUID, AIID, createUpload(generateIntentsCsv(intents)));
-        Assert.assertEquals(1, result.getErrors().size());
-        Assert.assertTrue(result.getImported().isEmpty());
-        Assert.assertTrue(result.getWarnings().isEmpty());
     }
 
     @Test
