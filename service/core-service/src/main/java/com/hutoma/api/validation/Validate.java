@@ -23,8 +23,8 @@ import static com.hutoma.api.validation.ParameterFilter.INTENT_USERSAYS;
  */
 public class Validate extends ValidationBase {
 
-    public static final int INTENT_RESPONSE_MAX_LENGTH = 1024;
-    public static final int INTENT_USERSAYS_MAX_LENGTH = 1024;
+    public static final int INTENT_RESPONSE_MAX_LENGTH = 1000;
+    public static final int INTENT_USERSAYS_MAX_LENGTH = 1000;
 
     private static final Pattern alphaNumericDashes = Pattern.compile("^[a-zA-Z0-9_-]+$");
     private static final Pattern entityNames = Pattern.compile("^[\\.a-zA-Z0-9_-]+$");
