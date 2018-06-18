@@ -882,7 +882,7 @@ public class AILogic {
                     transaction);
 
             if (result.getStatus().getCode() != HttpURLConnection.HTTP_OK) {
-                this.logger.logUserErrorEvent(LOGFROM, "ImportBot - create ai", devId.toString(),
+                this.logger.logUserInfoEvent(LOGFROM, "ImportBot - create ai", devId.toString(),
                         LogMap.map("ErrorCode", result.getStatus().getCode())
                                 .put("Message", result.getStatus().getInfo()));
                 // The info from an error on CreateAI should already be customer-friendly, so just
