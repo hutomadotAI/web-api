@@ -66,7 +66,8 @@ public class ChatStateHandler {
         }
     }
 
-    public void clear(final ChatState chatState) {
+    public void clear(final UUID devId, final UUID aiid, final UUID chatId, final ChatState chatState)
+            throws ChatStateException {
         chatState.setCurrentIntents(null);
         chatState.getChatContext().clear();
         chatState.setBadAnswersCount(0);
@@ -74,6 +75,7 @@ public class ChatStateHandler {
         chatState.setHistory(null);
         chatState.setLockedAiid(null);
         chatState.setTopic(null);
+        saveState(devId, aiid, chatId, chatState);
     }
 
     public static class ChatStateException extends ChatBaseException {

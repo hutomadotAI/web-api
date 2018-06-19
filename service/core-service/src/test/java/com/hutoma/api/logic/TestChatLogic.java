@@ -518,6 +518,14 @@ public class TestChatLogic extends TestChatBase {
         Assert.assertEquals(responseLastHandler, result.getResult().getAnswer());
     }
 
+    @Test
+    public void testChatReset() throws ChatStateHandler.ChatStateException {
+        ChatState state = ChatState.getEmpty();
+        when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(state);
+        ApiResult result = this.chatLogic.resetChat(DEVID_UUID, AIID, CHATID.toString());
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+    }
+
     private IChatHandler buildChatHandler(final String response, final boolean complete) {
         return new IChatHandler() {
             @Override

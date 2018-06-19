@@ -6,6 +6,7 @@ import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.sub.ChatContext;
 import com.hutoma.api.containers.sub.ChatHandoverTarget;
 import com.hutoma.api.containers.sub.ChatState;
+import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.logging.ILogger;
 
 import org.joda.time.DateTime;
@@ -13,6 +14,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -92,6 +94,33 @@ public class TestChatStateHandler {
         when(this.fakeDatabaseAi.saveChatState(any(), any(), any(), any())).thenThrow(DatabaseException.class);
         this.chatStateHandler.saveState(DEVID_UUID, AIID, chatId, chatState);
         verify(this.fakeLogger).logUserExceptionEvent(anyString(), any(), anyString(), any());
+    }
+
+    @Test
+    public void testChatStateHandler_clearState() throws ChatStateHandler.ChatStateException, DatabaseException {
+        UUID chatId = UUID.randomUUID();
+        ChatState state = ChatState.getEmpty();
+        MemoryIntent intent = new MemoryIntent("intent", AIID, chatId, Collections.emptyList());
+        state.setCurrentIntents(Collections.singletonList(intent));
+        state.getChatContext().setValue("var1", "val1");
+        state.setBadAnswersCount(10);
+        state.setChatTarget(ChatHandoverTarget.Human);
+        state.setHistory("history");
+        state.setLockedAiid(AIID);
+        state.setTopic("topic");
+        when(this.fakeDatabaseAi.checkAIBelongsToDevId(any(), any())).thenReturn(true);
+        this.chatStateHandler.clear(DEVID_UUID, AIID, chatId, state);
+        // Check everything has been reset
+        Assert.assertNull(state.getCurrentIntents());
+        Assert.assertNull(state.getChatContext().getValue("var1"));
+        Assert.assertEquals(0, state.getBadAnswersCount());
+        Assert.assertEquals(ChatHandoverTarget.Ai, state.getChatTarget());
+        Assert.assertNull(state.getHistory());
+        Assert.assertNull(state.getLockedAiid());
+        Assert.assertNull(state.getTopic());
+        // Make sure it has been saved to the db as well
+        verify(this.fakeDatabaseAi).saveChatState(any(), any(), any(), any());
+
     }
 
     private ChatState getTestChatState() {

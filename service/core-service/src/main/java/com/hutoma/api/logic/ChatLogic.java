@@ -262,8 +262,9 @@ public class ChatLogic {
 
     public ApiResult resetChat(final UUID aiid, final UUID devId, final String chatId) {
         try {
-            this.chatState = this.chatStateHandler.getState(devId, aiid, UUID.fromString(chatId));
-            this.chatStateHandler.clear(this.chatState);
+            UUID chatUuid = UUID.fromString(chatId);
+            this.chatState = this.chatStateHandler.getState(devId, aiid, chatUuid);
+            this.chatStateHandler.clear(devId, aiid, chatUuid, this.chatState);
             return new ApiResult().setSuccessStatus("Chat state cleared");
         } catch (ChatStateHandler.ChatStateException ex) {
             this.chatLogger.logUserExceptionEvent(LOGFROM, "resetchat", devId.toString(), ex);
