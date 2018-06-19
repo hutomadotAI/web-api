@@ -210,8 +210,13 @@ public class IntentProcessor {
         if (currentIntent.isFulfilled()) {
             chatResult.getChatState().getCurrentIntents().remove(currentIntent);
 
-            // Make sure all context_out variables are read and applied to the chat state
-            intent.getContextOut().forEach((k, v) -> chatResult.getChatState().getChatContext().setValue(k, v));
+            if (intent.getResetContextOnExit()) {
+                chatResult.getChatState().getChatContext().clear();
+                intentLog.put("ResetOnExit", intent.getResetContextOnExit());
+            } else {
+                // Make sure all context_out variables are read and applied to the chat state
+                intent.getContextOut().forEach((k, v) -> chatResult.getChatState().getChatContext().setValue(k, v));
+            }
 
             // Check if there are any conditions out
             if (!intent.getIntentOutConditionals().isEmpty()) {
@@ -246,7 +251,6 @@ public class IntentProcessor {
         if (!intentsToClear.isEmpty()) {
             this.intentHandler.clearIntents(chatResult.getChatState(), intentsToClear);
         }
-
         intentLog.put("Handled", handledIntent);
         telemetryMap.add("Intent", intentLog);
         telemetryMap.add("IntentStream", telemetryMap.get().containsKey("IntentStream")
@@ -418,10 +422,6 @@ public class IntentProcessor {
                     telemetryMap);
             intentsToClear.add(currentIntent);
             handledIntent = true;
-
-            if (intent.getResetContextOnExit()) {
-                chatResult.getChatState().getChatContext().clear();
-            }
         }
 
         return handledIntent;

@@ -1,5 +1,6 @@
 package com.hutoma.api.connectors.db;
 
+import com.google.common.base.Strings;
 import com.google.gson.reflect.TypeToken;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Pair;
@@ -18,7 +19,6 @@ import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.containers.sub.WebHook;
 import com.hutoma.api.logging.ILogger;
 
-import org.elasticsearch.common.Strings;
 import org.joda.time.DateTime;
 
 import java.lang.reflect.Type;
@@ -724,7 +724,8 @@ public class DatabaseAI extends Database {
                             ? null : new Timestamp(chatState.getResetHandoverTime().getMillis()))
                     .add(chatState.getBadAnswersCount())
                     .add(jsonSerializer.serialize(chatState.getChatContext()))
-                    .add(jsonSerializer.serialize(chatState.getCurrentIntents()));
+                    .add(chatState.getCurrentIntents() == null
+                            ? null : jsonSerializer.serialize(chatState.getCurrentIntents()));
             return call.executeUpdate() > 0;
         }
     }
