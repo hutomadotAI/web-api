@@ -590,7 +590,7 @@ public class TestTrainingLogic {
         when(this.fakeAiServices.getTrainingMaterialsCommon(any(), any(), any())).thenReturn(fileToUpload);
         ApiResult result = this.logic.updateTraining(DEVID_UUID, AIID);
         if (fileToUpload == null) {
-            Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
+            Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
         } else {
             Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
             verify(this.fakeAiServices).uploadTraining(any(), eq(DEVID_UUID), eq(AIID), eq(fileToUpload));

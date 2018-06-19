@@ -315,7 +315,7 @@ public class TrainingLogic {
                         if (trainingMaterials == null || trainingMaterials.isEmpty()) {
                             this.logger.logUserTraceEvent(LOGFROM, "UpdateTraining - no training data",
                                     devidString, logMap);
-                            return ApiError.getNotFound("There is no training data.");
+                            return ApiError.getBadRequest("There is no training data.");
                         }
                         // We only support AI_UNDEFINED when it's an intent-only AI (no training file), or when
                         // there's a backend error, to allow re-training
