@@ -50,6 +50,8 @@ public class ChatState {
     private List<MemoryIntent> currentIntents;
     @SerializedName("restart_chat_workflow")
     private boolean restartChatWorkflow;
+    @SerializedName("in_intent_loop")
+    private boolean inIntentLoop;
 
     // ChatServices service
     private transient AIChatServices aiChatServices;
@@ -211,5 +213,13 @@ public class ChatState {
         }
         // not found, add it
         this.currentIntents.add(intent);
+    }
+
+    public boolean isInIntentLoop() {
+        return this.inIntentLoop;
+    }
+
+    public void setInIntentLoop(final boolean inIntentLoop) {
+        this.inIntentLoop = inIntentLoop;
     }
 }

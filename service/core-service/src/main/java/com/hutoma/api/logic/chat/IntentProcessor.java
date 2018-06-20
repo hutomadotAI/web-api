@@ -218,6 +218,7 @@ public class IntentProcessor {
                 intent.getContextOut().forEach((k, v) -> chatResult.getChatState().getChatContext().setValue(k, v));
             }
 
+            boolean hasNextedIntentToExecute = false;
             // Check if there are any conditions out
             if (!intent.getIntentOutConditionals().isEmpty()) {
 
@@ -232,12 +233,19 @@ public class IntentProcessor {
                                     chatInfo.getChatId());
                             chatResult.getChatState().getCurrentIntents().add(intentToTrigger);
                             chatResult.getChatState().restartChatWorkflow(true);
+                            hasNextedIntentToExecute = true;
+                            chatResult.getChatState().setInIntentLoop(true);
                             break;
                         } catch (DatabaseException ex) {
+                            chatResult.getChatState().setInIntentLoop(false);
                             throw new ChatLogic.IntentException(ex);
                         }
                     }
                 }
+            }
+
+            if (!hasNextedIntentToExecute) {
+                chatResult.getChatState().setInIntentLoop(false);
             }
 
 
@@ -328,7 +336,8 @@ public class IntentProcessor {
 
 
         List<Pair<String, String>> entities = null;
-        if (!currentIntent.getVariables().isEmpty()) {
+        if (!currentIntent.getVariables().isEmpty()
+                && !chatResult.getChatState().isInIntentLoop()) { // we cannot infer variables in nested intents
             // At this stage we're guaranteed to have variables with different entity types
             // Attempt to retrieve entities from the question
             entities = this.entityRecognizer.retrieveEntities(chatInfo.getQuestion(), memoryVariables);
