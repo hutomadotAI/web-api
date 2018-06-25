@@ -50,6 +50,13 @@ public class TestConditionEvaluator {
     }
 
     @Test
+    public void testEvaluate_variableIsEquals_caseInsensitive() {
+        ConditionEvaluator ev = new ConditionEvaluator(Collections.singletonList(
+                new IntentVariableCondition("var", IntentConditionOperator.EQUALS, "aAa")));
+        Assert.assertTrue(ev.evaluate(buildContext("var", "aaa")).passed());
+    }
+
+    @Test
     public void testEvaluate_variableIsEquals_false() {
         ConditionEvaluator ev = new ConditionEvaluator(Collections.singletonList(
                 new IntentVariableCondition("var", IntentConditionOperator.EQUALS, "aaa")));
@@ -74,6 +81,13 @@ public class TestConditionEvaluator {
     public void testEvaluate_variableBiggerThan_String() {
         ConditionEvaluator ev = new ConditionEvaluator(Collections.singletonList(
                 new IntentVariableCondition("var", IntentConditionOperator.GREATER_THAN, "bbb")));
+        Assert.assertTrue(ev.evaluate(buildContext("var", "aaa")).passed());
+    }
+
+    @Test
+    public void testEvaluate_variableBiggerThan_String_caseInsensitive() {
+        ConditionEvaluator ev = new ConditionEvaluator(Collections.singletonList(
+                new IntentVariableCondition("var", IntentConditionOperator.GREATER_THAN, "AAb")));
         Assert.assertTrue(ev.evaluate(buildContext("var", "aaa")).passed());
     }
 
@@ -123,6 +137,13 @@ public class TestConditionEvaluator {
     public void testEvaluate_variableSmallerThan_String_equals() {
         ConditionEvaluator ev = new ConditionEvaluator(Collections.singletonList(
                 new IntentVariableCondition("var", IntentConditionOperator.SMALLER_THAN, "abc")));
+        Assert.assertTrue(ev.evaluate(buildContext("var", "abc")).failed());
+    }
+
+    @Test
+    public void testEvaluate_variableSmallerThan_String_equals_ignoreCase() {
+        ConditionEvaluator ev = new ConditionEvaluator(Collections.singletonList(
+                new IntentVariableCondition("var", IntentConditionOperator.SMALLER_THAN, "ABc")));
         Assert.assertTrue(ev.evaluate(buildContext("var", "abc")).failed());
     }
 

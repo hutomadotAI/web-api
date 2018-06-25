@@ -65,7 +65,7 @@ public class ConditionEvaluator {
                     result.setResult(ResultType.PASSED);
                     break;
                 case EQUALS:
-                    result.setResult(condition.getValue().equals(variableValue)
+                    result.setResult(condition.getValue().equalsIgnoreCase(variableValue)
                             ? ResultType.PASSED : ResultType.FAILED);
                     break;
                 case NOT_EQUALS:
@@ -117,7 +117,7 @@ public class ConditionEvaluator {
         }
 
         // Perform a lexicographic comparison
-        int result = conditionValue.compareTo(variableValue);
+        int result = conditionValue.compareToIgnoreCase(variableValue);
         if (result == 0) {
             // if they're equal they can't be bigger or smaller
             return false;
