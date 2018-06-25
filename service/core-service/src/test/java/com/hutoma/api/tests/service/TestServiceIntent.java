@@ -77,7 +77,7 @@ public class TestServiceIntent extends ServiceTestBase {
         ApiIntent intent = TestIntentLogic.getIntent();
         intent.addVariable(new IntentVariable("entity", UUID.randomUUID(), true,
                 3, "somevalue", false, "")
-                .addPrompt(String.join("", Collections.nCopies(250 + 1, "A"))));
+                .addPrompt(String.join("", Collections.nCopies(Validate.INTENT_PROMPT_MAX_LENGTH + 1, "A"))));
         final Response response = sendRequest(BASEPATH + TestDataHelper.AIID.toString(),
                 this.serializeObject(intent));
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.getStatus());

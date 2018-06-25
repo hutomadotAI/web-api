@@ -332,7 +332,7 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
                 validateEntityName(ENTITYNAME, variable.getEntityName());
 
                 // the list of prompts
-                List<String> prompts = validateFieldLengthsInList(250, INTENT_PROMPTLIST,
+                List<String> prompts = validateFieldLengthsInList(INTENT_PROMPT_MAX_LENGTH, INTENT_PROMPTLIST,
                         filterControlCoalesceSpacesInList(variable.getPrompts()));
                 if (variable.isRequired()) {
                     prompts = dedupeAndEnsureNonEmptyList(prompts, INTENT_PROMPTLIST);
