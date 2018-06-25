@@ -58,6 +58,7 @@ public class TestTrainingLogic {
 
     private static final String UURL = "url://";
     private static final String SOMETEXT = "some text\nsome response";
+    private static final String BADTEXT = "some 🐶 text\nsome 🦔 response";
     private static final String TEXTMULTILINE = "line\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\n";
     private static final String EOL = "\n";
     private static final String DEFAULT_TOPIC = topic("topic1");
@@ -214,6 +215,13 @@ public class TestTrainingLogic {
         when(this.fakeConfig.getMaxUploadSizeKb()).thenReturn(0);
         ApiResult result = this.logic.uploadFile(DEVID_UUID, AIID, TrainingLogic.TrainingType.DOCUMENT, UURL, stream, this.fakeContentDisposition);
         Assert.assertEquals(HttpURLConnection.HTTP_ENTITY_TOO_LARGE, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testTrain_Doc_UploadInvalidCharacters() {
+        InputStream stream = createUpload(BADTEXT);
+        ApiResult result = this.logic.uploadFile(DEVID_UUID, AIID, TrainingLogic.TrainingType.DOCUMENT, UURL, stream, this.fakeContentDisposition);
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
     }
 
     @Test

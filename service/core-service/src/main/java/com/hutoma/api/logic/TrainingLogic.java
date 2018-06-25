@@ -18,13 +18,16 @@ import com.hutoma.api.logging.LogMap;
 import com.hutoma.api.memory.IMemoryIntentHandler;
 import com.hutoma.api.validation.Validate;
 
+import org.apache.commons.lang.CharEncoding;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -170,6 +173,10 @@ public class TrainingLogic {
             this.logger.logUserTraceEvent(LOGFROM, "UploadFile - upload attempt was larger than maximum allowed",
                     devidString, logMap);
             return ApiError.getPayloadTooLarge();
+        } catch (InvalidCharacterException argument) {
+            this.logger.logUserTraceEvent(LOGFROM, "UploadFile - upload contained unencodable characters",
+                    devidString, logMap);
+            return ApiError.getInvalidCharacters();
         } catch (Exception e) {
             this.logger.logUserExceptionEvent(LOGFROM, "UploadFile", devidString, e);
             return ApiError.getInternalServerError();
@@ -520,10 +527,11 @@ public class TrainingLogic {
      * @param uploadedInputStream
      * @return list of strings
      * @throws UploadTooLargeException
+     * @throws InvalidCharacterException
      * @throws IOException
      */
     private ArrayList<String> getFile(final long maxUploadSize, final InputStream uploadedInputStream)
-            throws UploadTooLargeException, IOException {
+            throws UploadTooLargeException, InvalidCharacterException, IOException {
 
         ArrayList<String> source = new ArrayList<>();
         long fileSize = 0;
@@ -541,6 +549,10 @@ public class TrainingLogic {
                     fileSize += lineSize;
                 } else {
                     throw new UploadTooLargeException();
+                }
+                // Check the line can be encoded with the current DB encoding
+                if (!Charset.forName(CharEncoding.ISO_8859_1).newEncoder().canEncode(line)) {
+                    throw new InvalidCharacterException();
                 }
             }
         } finally {

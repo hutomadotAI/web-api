@@ -51,6 +51,10 @@ public class ApiError extends ApiResult {
         return ApiError.getError(HttpURLConnection.HTTP_ENTITY_TOO_LARGE, "Payload Too Large");
     }
 
+    public static ApiError getInvalidCharacters() {
+        return ApiError.getError(HttpURLConnection.HTTP_BAD_REQUEST, "Invalid Characters");
+    }
+
     /***
      * Create en error response for a bad request, with a list of resultevents to detail what went wrong
      * @param reason textual representation of what went wrong
