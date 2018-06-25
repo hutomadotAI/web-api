@@ -85,21 +85,6 @@ def main():
 
         return aiid
 
-    def train_start_ai(aiid, wait_for_ready=True):
-
-        print('Starting training')
-
-        while wait_for_ready:
-            status_request = de_rate_limit(hu_api.api.get_ai, requester, aiid)
-            if status_request.response["ai_status"] == "ai_ready_to_train":
-                break
-            else:
-                print("Waiting for status to flip ...")
-                time.sleep(1)
-
-        train = de_rate_limit(hu_api.api.start_training, requester, aiid)
-        if not train.success:
-            print("Error starting training: {0}".format(train.text))
 
     def train_update_ai(aiid):
 
@@ -162,8 +147,6 @@ def main():
         aiids = []
         for size, tag, filename in ai_defs.defs:
             aiids.append(create_upload_ai(size, tag, filename, ai_defs.ai_prefix))
-        for aiid in aiids:
-            train_start_ai(aiid)
 
     def have_we_got_the_files(ai_defs):
         missing_files = False
@@ -196,7 +179,6 @@ def main():
     create_and_train_new_ais(chat_test_defs)
 
     train_update_ai(intent_only_aiid)
-    train_start_ai(intent_only_aiid)
 
 
 if __name__ == "__main__":
