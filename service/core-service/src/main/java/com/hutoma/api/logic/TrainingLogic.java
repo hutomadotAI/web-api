@@ -317,15 +317,6 @@ public class TrainingLogic {
                                     devidString, logMap);
                             return ApiError.getBadRequest("There is no training data.");
                         }
-                        // We only support AI_UNDEFINED when it's an intent-only AI (no training file), or when
-                        // there's a backend error, to allow re-training
-                        if ((ai.getSummaryAiStatus() == TrainingStatus.AI_UNDEFINED
-                                || ai.getSummaryAiStatus() == TrainingStatus.AI_ERROR) && ai.trainingFileUploaded()) {
-                            this.logger.logUserTraceEvent(LOGFROM, "UpdateTraining - no training data",
-                                    devidString, logMap);
-                            return ApiError.getBadRequest("Invalid training status - make sure you have uploaded a "
-                                    + "training file and/or added intents.");
-                        }
                         this.aiServices.uploadTraining(ai.getBackendStatus(), devid, aiid, trainingMaterials);
                         // Delete all memory variables for this AI
                         this.memoryIntentHandler.resetIntentsStateForAi(devid, aiid);
