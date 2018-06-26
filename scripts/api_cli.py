@@ -19,7 +19,7 @@ def main(args, parser):
         arg_error(parser, "URL is not set")
 
     url_parsed = urllib.parse.urlparse(url_raw)
-    if url_parsed.scheme != 'http':
+    if (url_parsed.scheme != 'http' and url_parsed.scheme != 'https'):
         url_parsed = urllib.parse.urlparse('http://' + url_raw)
     url = url_parsed.geturl()
     print("API URL is", url)

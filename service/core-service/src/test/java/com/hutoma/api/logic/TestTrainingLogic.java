@@ -82,13 +82,7 @@ public class TestTrainingLogic {
                 TrainingStatus.AI_READY_TO_TRAIN,
                 TrainingStatus.AI_TRAINING_STOPPED,
                 TrainingStatus.AI_TRAINING_COMPLETE,
-                TrainingStatus.AI_TRAINING_QUEUED
-        };
-    }
-
-    @DataProvider
-    public static Object[] updateTraining_failureStates() {
-        return new Object[]{
+                TrainingStatus.AI_TRAINING_QUEUED,
                 TrainingStatus.AI_UNDEFINED,
                 TrainingStatus.AI_ERROR
         };
@@ -390,12 +384,6 @@ public class TestTrainingLogic {
     @UseDataProvider("updateTraining_successStates")
     public void testUpdateTraining_initialStates_success(TrainingStatus initialState) throws DatabaseException {
         testUpdateTraining_initialStates_common(initialState, HttpURLConnection.HTTP_OK);
-    }
-
-    @Test
-    @UseDataProvider("updateTraining_failureStates")
-    public void testUpdateTraining_initialStates_failure(TrainingStatus initialState) throws DatabaseException {
-        testUpdateTraining_initialStates_common(initialState, HttpURLConnection.HTTP_BAD_REQUEST);
     }
 
     @Test
