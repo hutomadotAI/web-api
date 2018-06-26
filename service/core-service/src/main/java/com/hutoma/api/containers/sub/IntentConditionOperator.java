@@ -19,5 +19,11 @@ public enum IntentConditionOperator {
     SMALLER_THAN,
 
     @SerializedName("GREATER_THAN")
-    GREATER_THAN;
+    GREATER_THAN,
+
+    @SerializedName("SMALLER_THAN_OR_EQUALS")
+    SMALLER_THAN_OR_EQUALS,
+
+    @SerializedName("GREATER_THAN_OR_EQUALS")
+    GREATER_THAN_OR_EQUALS;
 }

@@ -74,6 +74,10 @@ public class ConditionEvaluator {
                     break;
                 case GREATER_THAN:
                     // fallthrough
+                case GREATER_THAN_OR_EQUALS:
+                    // fallthrough
+                case SMALLER_THAN_OR_EQUALS:
+                    // fallthrough
                 case SMALLER_THAN:
                     result.setResult(evaluateBiggerSmaller(condition.getValue(), variableValue, condition.getOperator())
                             ? ResultType.PASSED : ResultType.FAILED);
@@ -95,7 +99,10 @@ public class ConditionEvaluator {
 
     private boolean evaluateBiggerSmaller(final String conditionValue, final String variableValue,
                                           final IntentConditionOperator operator) {
-        if (operator != IntentConditionOperator.GREATER_THAN && operator != IntentConditionOperator.SMALLER_THAN) {
+        if (operator != IntentConditionOperator.GREATER_THAN
+                && operator != IntentConditionOperator.SMALLER_THAN
+                && operator != IntentConditionOperator.GREATER_THAN_OR_EQUALS
+                && operator != IntentConditionOperator.SMALLER_THAN_OR_EQUALS) {
             throw new IllegalArgumentException("operator");
         }
         // First try to convert both the condition and variable values into a numeric
@@ -108,6 +115,10 @@ public class ConditionEvaluator {
                         return variableValueNumber.doubleValue() > conditionValueNumber.doubleValue();
                     case SMALLER_THAN:
                         return variableValueNumber.doubleValue() < conditionValueNumber.doubleValue();
+                    case GREATER_THAN_OR_EQUALS:
+                        return variableValueNumber.doubleValue() >= conditionValueNumber.doubleValue();
+                    case SMALLER_THAN_OR_EQUALS:
+                        return variableValueNumber.doubleValue() <= conditionValueNumber.doubleValue();
                     default:
                         break;
                 }
@@ -118,15 +129,16 @@ public class ConditionEvaluator {
 
         // Perform a lexicographic comparison
         int result = conditionValue.compareToIgnoreCase(variableValue);
-        if (result == 0) {
-            // if they're equal they can't be bigger or smaller
-            return false;
-        }
+
         switch (operator) {
             case GREATER_THAN:
                 return result > 0;
             case SMALLER_THAN:
                 return result < 0;
+            case GREATER_THAN_OR_EQUALS:
+                return result >= 0;
+            case SMALLER_THAN_OR_EQUALS:
+                return result <= 0;
             default:
                 break;
         }
