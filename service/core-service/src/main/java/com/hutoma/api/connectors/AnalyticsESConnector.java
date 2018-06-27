@@ -336,7 +336,7 @@ public class AnalyticsESConnector {
         }
 
         AnalyticsConnectorException(final Exception ex) {
-            super(ex);
+            super.addSuppressed(ex);
         }
     }
 }
