@@ -138,8 +138,18 @@ public class ChatLogic {
 
         final long requestStartTimestamp = this.tools.getTimestamp();
 
-        UUID chatId = (chatIdString == null || chatIdString.isEmpty())
-                ? UUID.randomUUID() : UUID.fromString(chatIdString);
+        UUID chatId;
+        if (chatIdString == null || chatIdString.isEmpty()) {
+            chatId = UUID.randomUUID();
+        } else {
+            try {
+                chatId = UUID.fromString(chatIdString);
+            }
+            catch (IllegalArgumentException ex) {
+                throw new ChatFailedException(ApiError.getBadRequest("Chat ID invalid"));
+            }
+        }
+
         ChatRequestInfo requestInfo = new ChatRequestInfo(devId, aiid, chatId, question, clientVariables);
         ChatResult currentResult = new ChatResult(question);
         currentResult.setTimestamp(this.tools.getTimestamp());
