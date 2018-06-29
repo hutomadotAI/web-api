@@ -6,7 +6,6 @@ import com.hutoma.api.containers.sub.ChatHandoverTarget;
 import com.hutoma.api.containers.sub.ChatState;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
-import com.hutoma.api.logic.chat.ChatBaseException;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -17,7 +16,7 @@ import javax.inject.Inject;
 /**
  * Handler for chat state.
  */
-public class ChatStateHandler {
+public class ChatStateHandlerMySql implements IChatStateHandler {
 
     private static final String LOGFROM = "chatstatehandler";
     private final DatabaseAI databaseAi;
@@ -25,12 +24,13 @@ public class ChatStateHandler {
     private final JsonSerializer jsonSerializer;
 
     @Inject
-    ChatStateHandler(final DatabaseAI databaseAi, final ILogger logger, final JsonSerializer jsonSerializer) {
+    ChatStateHandlerMySql(final DatabaseAI databaseAi, final ILogger logger, final JsonSerializer jsonSerializer) {
         this.databaseAi = databaseAi;
         this.logger = logger;
         this.jsonSerializer = jsonSerializer;
     }
 
+    @Override
     public ChatState getState(final UUID devId, final UUID aiid, final UUID chatId) throws ChatStateException {
         ChatState state = null;
         try {
@@ -47,6 +47,7 @@ public class ChatStateHandler {
         return state == null ? ChatState.getEmpty() : state;
     }
 
+    @Override
     public void saveState(final UUID devId, final UUID aiid, final UUID chatId, final ChatState chatState)
             throws ChatStateException {
         try {
@@ -66,6 +67,7 @@ public class ChatStateHandler {
         }
     }
 
+    @Override
     public void clear(final UUID devId, final UUID aiid, final UUID chatId, final ChatState chatState)
             throws ChatStateException {
         chatState.setCurrentIntents(null);
@@ -78,15 +80,4 @@ public class ChatStateHandler {
         saveState(devId, aiid, chatId, chatState);
     }
 
-    public static class ChatStateException extends ChatBaseException {
-        ChatStateException(final String message) {
-            super(message);
-        }
-    }
-
-    public static class ChatStateUserException extends ChatStateException {
-        ChatStateUserException(final String message) {
-            super(message);
-        }
-    }
 }

@@ -27,7 +27,8 @@ import com.hutoma.api.logic.chat.ChatPassthroughHandler;
 import com.hutoma.api.logic.chat.ChatRequestTrigger;
 import com.hutoma.api.logic.chat.ChatWorkflow;
 import com.hutoma.api.logic.chat.IntentProcessor;
-import com.hutoma.api.memory.ChatStateHandler;
+import com.hutoma.api.memory.ChatStateException;
+import com.hutoma.api.memory.ChatStateHandlerMySql;
 import com.hutoma.api.memory.IEntityRecognizer;
 import com.hutoma.api.memory.IMemoryIntentHandler;
 
@@ -69,7 +70,7 @@ public class TestServiceChat extends ServiceTestBase {
     @Mock
     private ChatLogger fakeChatTelemetryLogger;
     @Mock
-    private ChatStateHandler fakeChatStateHandler;
+    private ChatStateHandlerMySql fakeChatStateHandler;
 
     IEntityRecognizer fakeRecognizer;
     private ChatPassthroughHandler fakePassthroughHandler;
@@ -82,7 +83,7 @@ public class TestServiceChat extends ServiceTestBase {
     private ChatWorkflow fakeChatWorkflow;
 
     @Before
-    public void setup() throws ChatStateHandler.ChatStateException {
+    public void setup() throws ChatStateException {
 
         when(this.fakeTools.createNewRandomUUID()).thenReturn(UUID.randomUUID());
         ChatState emptyState = ChatState.getEmpty();
@@ -158,7 +159,7 @@ public class TestServiceChat extends ServiceTestBase {
 
     @Test
     public void testChat_response_includesVariablesMap() throws ChatLogic.IntentException, WebHooks.WebHookException,
-            ChatStateHandler.ChatStateException {
+            ChatStateException {
         UUID chatId = UUID.randomUUID();
         String label1 = "label1";
         String label2 = "label2";
@@ -228,7 +229,7 @@ public class TestServiceChat extends ServiceTestBase {
     }
 
     @Test
-    public void testChat_response_includesContext() throws ChatLogic.IntentException, WebHooks.WebHookException, ChatStateHandler.ChatStateException {
+    public void testChat_response_includesContext() throws ChatLogic.IntentException, WebHooks.WebHookException, ChatStateException {
         final String var1Name = "var1";
         final String var1Value = "value1";
         final String var2Name = "var2";
@@ -297,7 +298,7 @@ public class TestServiceChat extends ServiceTestBase {
         this.fakeMemoryIntentHandler = mock(IMemoryIntentHandler.class);
         this.fakeEntityRecognizer = mock(IEntityRecognizer.class);
         this.fakeChatTelemetryLogger = mock(ChatLogger.class);
-        this.fakeChatStateHandler = mock(ChatStateHandler.class);
+        this.fakeChatStateHandler = mock(ChatStateHandlerMySql.class);
         this.fakeRecognizer = mock(IEntityRecognizer.class);
         this.fakeChatWorkflow = mock(ChatWorkflow.class);
         this.fakeIntentProcessorLogic = mock(IntentProcessor.class);
@@ -315,7 +316,7 @@ public class TestServiceChat extends ServiceTestBase {
         binder.bindFactory(new InstanceFactory<>(TestServiceChat.this.fakeMemoryIntentHandler)).to(IMemoryIntentHandler.class);
         binder.bindFactory(new InstanceFactory<>(TestServiceChat.this.fakeEntityRecognizer)).to(IEntityRecognizer.class);
         binder.bindFactory(new InstanceFactory<>(TestServiceChat.this.fakeChatTelemetryLogger)).to(ChatLogger.class);
-        binder.bindFactory(new InstanceFactory<>(TestServiceChat.this.fakeChatStateHandler)).to(ChatStateHandler.class);
+        binder.bindFactory(new InstanceFactory<>(TestServiceChat.this.fakeChatStateHandler)).to(ChatStateHandlerMySql.class);
         binder.bindFactory(new InstanceFactory<>(TestServiceChat.this.fakeChatWorkflow)).to(ChatWorkflow.class);
 
         return binder;

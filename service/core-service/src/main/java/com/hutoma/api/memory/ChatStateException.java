@@ -1,0 +1,9 @@
+package com.hutoma.api.memory;
+
+import com.hutoma.api.logic.chat.ChatBaseException;
+
+public class ChatStateException extends ChatBaseException {
+    ChatStateException(final String message) {
+        super(message);
+    }
+}

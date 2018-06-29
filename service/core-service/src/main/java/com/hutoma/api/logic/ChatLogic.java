@@ -21,7 +21,9 @@ import com.hutoma.api.logging.LogMap;
 import com.hutoma.api.logic.chat.ChatBaseException;
 import com.hutoma.api.logic.chat.ChatWorkflow;
 import com.hutoma.api.logic.chat.IChatHandler;
-import com.hutoma.api.memory.ChatStateHandler;
+import com.hutoma.api.memory.ChatStateException;
+import com.hutoma.api.memory.ChatStateHandlerMySql;
+import com.hutoma.api.memory.ChatStateUserException;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -42,7 +44,7 @@ public class ChatLogic {
     private final ILogger logger;
     private final AIChatServices chatServices;
     private final ChatLogger chatLogger;
-    private final ChatStateHandler chatStateHandler;
+    private final ChatStateHandlerMySql chatStateHandler;
     private final LogMap telemetryMap;
     private final ChatWorkflow chatWorkflow;
     private final Config config;
@@ -51,7 +53,7 @@ public class ChatLogic {
 
     @Inject
     public ChatLogic(final AIChatServices chatServices,
-                     final ChatStateHandler chatStateHandler,
+                     final ChatStateHandlerMySql chatStateHandler,
                      final Tools tools,
                      final ILogger logger,
                      final ChatLogger chatLogger,
@@ -266,7 +268,7 @@ public class ChatLogic {
             this.chatState = this.chatStateHandler.getState(devId, aiid, chatUuid);
             this.chatStateHandler.clear(devId, aiid, chatUuid, this.chatState);
             return new ApiResult().setSuccessStatus("Chat state cleared");
-        } catch (ChatStateHandler.ChatStateException ex) {
+        } catch (ChatStateException ex) {
             this.chatLogger.logUserExceptionEvent(LOGFROM, "resetchat", devId.toString(), ex);
             return ApiError.getInternalServerError();
         }
@@ -290,7 +292,7 @@ public class ChatLogic {
                             .put("Current target", target.toString()));
             return new ApiChatApiHandover(chatUuid, target).setSuccessStatus(
                     String.format("Handed over to %s.", target.toString()));
-        } catch (ChatStateHandler.ChatStateUserException ex) {
+        } catch (ChatStateUserException ex) {
             this.chatLogger.logUserExceptionEvent(LOGFROM, "handover", devId.toString(), ex);
             return ApiError.getBadRequest(ex.getMessage());
         } catch (Exception ex) {

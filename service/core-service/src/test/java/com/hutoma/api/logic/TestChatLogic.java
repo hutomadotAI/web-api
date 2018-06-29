@@ -19,8 +19,9 @@ import com.hutoma.api.containers.sub.ChatState;
 import com.hutoma.api.containers.sub.WebHookResponse;
 import com.hutoma.api.logging.LogMap;
 import com.hutoma.api.logic.chat.IChatHandler;
-import com.hutoma.api.memory.ChatStateHandler;
+import com.hutoma.api.memory.ChatStateException;
 
+import com.hutoma.api.memory.ChatStateUserException;
 import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Test;
@@ -278,7 +279,7 @@ public class TestChatLogic extends TestChatBase {
 
     @Test
     public void testChat_botAffinity_noBots_stateHasUnknownLockedAiid() throws ChatBackendConnector.AiControllerException,
-            ChatStateHandler.ChatStateException {
+            ChatStateException {
         final String response = "emb";
         setupFakeChat(0.2d, response, 0.0d, "");
         when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(new ChatState(DateTime.now(),
@@ -305,7 +306,7 @@ public class TestChatLogic extends TestChatBase {
 
     @Test
     public void testChat_botAffinity_bots_lockedToBot_stillLockedEvenWithOtherHigherConfidence() throws ChatBackendConnector.AiControllerException,
-            ChatStateHandler.ChatStateException {
+            ChatStateException {
         ChatResult cr1 = new ChatResult("Hi");
         cr1.setScore(0.6);
         ChatResult cr2 = new ChatResult("Hi2");
@@ -323,7 +324,7 @@ public class TestChatLogic extends TestChatBase {
 
     @Test
     public void testChat_botAffinity_bots_lockedToBot_lowConfidenceSwitchToHigherConfidenceBot() throws ChatBackendConnector.AiControllerException,
-            ChatStateHandler.ChatStateException {
+            ChatStateException {
         ChatResult cr1 = new ChatResult("Hi");
         cr1.setScore(0.2);
         ChatResult cr2 = new ChatResult("Hi2");
@@ -341,7 +342,7 @@ public class TestChatLogic extends TestChatBase {
 
     @Test
     public void testChat_botAffinity_bots_lockedToBot_allLowConfidence() throws ChatBackendConnector.AiControllerException,
-            ChatStateHandler.ChatStateException {
+            ChatStateException {
         ChatResult cr1 = new ChatResult("question");
         cr1.setScore(0.2);
         ChatResult cr2 = new ChatResult("question");
@@ -368,7 +369,7 @@ public class TestChatLogic extends TestChatBase {
 
     @Test
     public void testChat_botAffinity_bots_lockedToBot_emb_aiml_score_order() throws ChatBackendConnector.AiControllerException,
-            ChatStateHandler.ChatStateException {
+            ChatStateException {
         // BOT1 has higher score in EMB
         ChatResult cr1 = new ChatResult("question");
         cr1.setScore(0.3);
@@ -412,7 +413,7 @@ public class TestChatLogic extends TestChatBase {
     }
 
     @Test
-    public void testChat_handedOver_fromPreviousState() throws ChatBackendConnector.AiControllerException, ChatStateHandler.ChatStateException {
+    public void testChat_handedOver_fromPreviousState() throws ChatBackendConnector.AiControllerException, ChatStateException {
         final ChatState state = ChatState.getEmpty();
         state.setChatTarget(ChatHandoverTarget.Human);
         when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(state);
@@ -428,7 +429,7 @@ public class TestChatLogic extends TestChatBase {
     }
 
     @Test
-    public void testChat_handedOver_toHuman() throws ChatStateHandler.ChatStateException {
+    public void testChat_handedOver_toHuman() throws ChatStateException {
         final ChatState state = ChatState.getEmpty();
         state.setChatTarget(ChatHandoverTarget.Ai);
         when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(state);
@@ -440,7 +441,7 @@ public class TestChatLogic extends TestChatBase {
     }
 
     @Test
-    public void testChat_handedOver_toAi() throws ChatStateHandler.ChatStateException {
+    public void testChat_handedOver_toAi() throws ChatStateException {
         final ChatState state = ChatState.getEmpty();
         state.setChatTarget(ChatHandoverTarget.Human);
         when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(state);
@@ -452,7 +453,7 @@ public class TestChatLogic extends TestChatBase {
     }
 
     @Test
-    public void testChat_handedOver_sameTarget() throws ChatStateHandler.ChatStateException {
+    public void testChat_handedOver_sameTarget() throws ChatStateException {
         final ChatState state = ChatState.getEmpty();
         state.setChatTarget(ChatHandoverTarget.Human);
         when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(state);
@@ -462,15 +463,15 @@ public class TestChatLogic extends TestChatBase {
 
     @Test
     public void testChat_handedOver_getCurrentState_chatStateException_dueToUser()
-            throws ChatStateHandler.ChatStateException {
-        when(this.fakeChatStateHandler.getState(any(), any(), any())).thenThrow(ChatStateHandler.ChatStateUserException.class);
+            throws ChatStateException {
+        when(this.fakeChatStateHandler.getState(any(), any(), any())).thenThrow(ChatStateUserException.class);
         ApiResult result = this.chatLogic.handOver(AIID, DEVID_UUID, CHATID.toString(), ChatHandoverTarget.Human);
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
     }
 
     @Test
     public void testChat_handedOver_getCurrentState_chatStateException_otherReason()
-            throws ChatStateHandler.ChatStateException {
+            throws ChatStateException {
         when(this.fakeChatStateHandler.getState(any(), any(), any())).thenThrow(Exception.class);
         ApiResult result = this.chatLogic.handOver(AIID, DEVID_UUID, CHATID.toString(), ChatHandoverTarget.Human);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
@@ -478,15 +479,15 @@ public class TestChatLogic extends TestChatBase {
 
     @Test
     public void testChat_handedOver_saveNewState_chatStateException_dueToUser()
-            throws ChatStateHandler.ChatStateException {
-        doThrow(ChatStateHandler.ChatStateUserException.class).when(this.fakeChatStateHandler).saveState(any(), any(), any(), any());
+            throws ChatStateException {
+        doThrow(ChatStateUserException.class).when(this.fakeChatStateHandler).saveState(any(), any(), any(), any());
         ApiResult result = this.chatLogic.handOver(AIID, DEVID_UUID, CHATID.toString(), ChatHandoverTarget.Human);
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
     }
 
     @Test
     public void testChat_handedOver_saveNewState_chatStateException_otherReason()
-            throws ChatStateHandler.ChatStateException {
+            throws ChatStateException {
         doThrow(Exception.class).when(this.fakeChatStateHandler).saveState(any(), any(), any(), any());
         ApiResult result = this.chatLogic.handOver(AIID, DEVID_UUID, CHATID.toString(), ChatHandoverTarget.Human);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
@@ -519,7 +520,7 @@ public class TestChatLogic extends TestChatBase {
     }
 
     @Test
-    public void testChatReset() throws ChatStateHandler.ChatStateException {
+    public void testChatReset() throws ChatStateException {
         ChatState state = ChatState.getEmpty();
         when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(state);
         ApiResult result = this.chatLogic.resetChat(DEVID_UUID, AIID, CHATID.toString());

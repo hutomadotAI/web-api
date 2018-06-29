@@ -19,7 +19,7 @@ import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.containers.sub.MemoryVariable;
 import com.hutoma.api.logic.chat.ChatDefaultHandler;
 import com.hutoma.api.logic.chat.ConditionEvaluator;
-import com.hutoma.api.memory.ChatStateHandler;
+import com.hutoma.api.memory.ChatStateException;
 import com.hutoma.api.memory.MemoryIntentHandler;
 
 import org.joda.time.DateTime;
@@ -273,7 +273,7 @@ public class TestChatLogicIntents extends TestChatBase {
     @Test
     public void testChat_multiLineIntent_fulfilledFromPersistence()
             throws ChatBackendConnector.AiControllerException,
-            ChatStateHandler.ChatStateException, ChatLogic.IntentException {
+            ChatStateException, ChatLogic.IntentException {
         MemoryIntent mi = getMultiEntityMemoryIntentForPrompt(3, "prompt");
 
         // Make sure all variables are clean
@@ -462,7 +462,7 @@ public class TestChatLogicIntents extends TestChatBase {
      */
     @Test
     public void testChat_multiVariable_promptsExhausted_intentReset()
-            throws ChatBackendConnector.AiControllerException, ChatLogic.IntentException, ChatStateHandler.ChatStateException {
+            throws ChatBackendConnector.AiControllerException, ChatLogic.IntentException, ChatStateException {
         final int maxPrompts = 1;
         MemoryVariable mv1 = new MemoryVariable(
                 "var1",
@@ -671,7 +671,7 @@ public class TestChatLogicIntents extends TestChatBase {
     }
 
     @Test
-    public void testChat_intent_variableLifetime_defaults() throws ChatStateHandler.ChatStateException {
+    public void testChat_intent_variableLifetime_defaults() throws ChatStateException {
         final String varName = "var";
         ChatContext ctx = new ChatContext();
         ctx.setValue(varName, "value");
@@ -685,7 +685,7 @@ public class TestChatLogicIntents extends TestChatBase {
     }
 
     @Test
-    public void testChat_intent_variableLifetime_decrements_and_getsCleared() throws ChatStateHandler.ChatStateException {
+    public void testChat_intent_variableLifetime_decrements_and_getsCleared() throws ChatStateException {
         final String varName = "var";
         ChatContext ctx = new ChatContext();
         // Set the lifetime of the variable to 3 turns

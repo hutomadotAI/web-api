@@ -26,11 +26,11 @@ import static org.mockito.Mockito.*;
 /**
  * Created by pedrotei on 17/05/17.
  */
-public class TestChatStateHandler {
+public class TestChatStateHandlerMySql {
 
     private DatabaseAI fakeDatabaseAi;
     private ILogger fakeLogger;
-    private ChatStateHandler chatStateHandler;
+    private ChatStateHandlerMySql chatStateHandler;
     private JsonSerializer fakeJsonSerializer;
 
     private static void assertChatStateEquals(final ChatState expected, final ChatState actual) {
@@ -43,11 +43,11 @@ public class TestChatStateHandler {
     public void setup() {
         this.fakeDatabaseAi = mock(DatabaseAI.class);
         this.fakeLogger = mock(ILogger.class);
-        this.chatStateHandler = new ChatStateHandler(fakeDatabaseAi, fakeLogger, fakeJsonSerializer);
+        this.chatStateHandler = new ChatStateHandlerMySql(fakeDatabaseAi, fakeLogger, fakeJsonSerializer);
     }
 
     @Test
-    public void testChatStateHandler_getState() throws DatabaseException, ChatStateHandler.ChatStateException {
+    public void testChatStateHandler_getState() throws DatabaseException, ChatStateException {
         ChatState chatState = getTestChatState();
         when(this.fakeDatabaseAi.checkAIBelongsToDevId(any(), any())).thenReturn(true);
         when(this.fakeDatabaseAi.getChatState(any(), any(), any(), any())).thenReturn(chatState);
@@ -56,7 +56,7 @@ public class TestChatStateHandler {
     }
 
     @Test
-    public void testChatStateHandler_getState_dbException() throws DatabaseException, ChatStateHandler.ChatStateException {
+    public void testChatStateHandler_getState_dbException() throws DatabaseException, ChatStateException {
         when(this.fakeDatabaseAi.checkAIBelongsToDevId(any(), any())).thenReturn(true);
         when(this.fakeDatabaseAi.getChatState(any(), any(), any(), any())).thenThrow(DatabaseException.class);
         ChatState result = this.chatStateHandler.getState(DEVID_UUID, AIID, UUID.randomUUID());
@@ -64,14 +64,14 @@ public class TestChatStateHandler {
         verify(this.fakeLogger).logUserExceptionEvent(anyString(), any(), anyString(), any());
     }
 
-    @Test(expected = ChatStateHandler.ChatStateUserException.class)
-    public void testChatStateHandler_getState_aiidNotOwned() throws DatabaseException, ChatStateHandler.ChatStateException {
+    @Test(expected = ChatStateUserException.class)
+    public void testChatStateHandler_getState_aiidNotOwned() throws DatabaseException, ChatStateException {
         when(this.fakeDatabaseAi.checkAIBelongsToDevId(any(), any())).thenReturn(false);
         this.chatStateHandler.getState(DEVID_UUID, AIID, UUID.randomUUID());
     }
 
     @Test
-    public void testChatStateHandler_saveState() throws DatabaseException, ChatStateHandler.ChatStateException {
+    public void testChatStateHandler_saveState() throws DatabaseException, ChatStateException {
         final UUID chatId = UUID.randomUUID();
         ChatState chatState = getTestChatState();
         when(this.fakeDatabaseAi.checkAIBelongsToDevId(any(), any())).thenReturn(true);
@@ -79,16 +79,16 @@ public class TestChatStateHandler {
         verify(this.fakeDatabaseAi).saveChatState(DEVID_UUID, chatId, chatState, fakeJsonSerializer);
     }
 
-    @Test(expected = ChatStateHandler.ChatStateUserException.class)
-    public void testChatStateHandler_saveState_aiidNotOwned() throws DatabaseException, ChatStateHandler.ChatStateException {
+    @Test(expected = ChatStateUserException.class)
+    public void testChatStateHandler_saveState_aiidNotOwned() throws DatabaseException, ChatStateException {
         final UUID chatId = UUID.randomUUID();
         ChatState chatState = getTestChatState();
         when(this.fakeDatabaseAi.checkAIBelongsToDevId(any(), any())).thenReturn(false);
         this.chatStateHandler.saveState(DEVID_UUID, AIID, chatId, chatState);
     }
 
-    @Test(expected = ChatStateHandler.ChatStateException.class)
-    public void testChatStateHandler_saveState_dbException() throws DatabaseException, ChatStateHandler.ChatStateException {
+    @Test(expected = ChatStateException.class)
+    public void testChatStateHandler_saveState_dbException() throws DatabaseException, ChatStateException {
         final UUID chatId = UUID.randomUUID();
         ChatState chatState = getTestChatState();
         when(this.fakeDatabaseAi.saveChatState(any(), any(), any(), any())).thenThrow(DatabaseException.class);
@@ -97,7 +97,7 @@ public class TestChatStateHandler {
     }
 
     @Test
-    public void testChatStateHandler_clearState() throws ChatStateHandler.ChatStateException, DatabaseException {
+    public void testChatStateHandler_clearState() throws ChatStateException, DatabaseException {
         UUID chatId = UUID.randomUUID();
         ChatState state = ChatState.getEmpty();
         MemoryIntent intent = new MemoryIntent("intent", AIID, chatId, Collections.emptyList());

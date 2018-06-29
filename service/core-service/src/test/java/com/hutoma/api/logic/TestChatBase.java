@@ -22,10 +22,7 @@ import com.hutoma.api.containers.sub.MemoryVariable;
 import com.hutoma.api.containers.sub.WebHook;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logic.chat.*;
-import com.hutoma.api.memory.ChatStateHandler;
-import com.hutoma.api.memory.IEntityRecognizer;
-import com.hutoma.api.memory.IMemoryIntentHandler;
-import com.hutoma.api.memory.MemoryIntentHandler;
+import com.hutoma.api.memory.*;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -61,7 +58,7 @@ public class TestChatBase {
     IMemoryIntentHandler fakeIntentHandler;
     WebHooks fakeWebHooks;
     DatabaseAI fakeDatabaseAi;
-    ChatStateHandler fakeChatStateHandler;
+    ChatStateHandlerMySql fakeChatStateHandler;
     ChatLogic chatLogic;
     protected Config fakeConfig;
     private AiStrings fakeAiStrings;
@@ -84,7 +81,7 @@ public class TestChatBase {
         this.fakeRecognizer = mock(IEntityRecognizer.class);
         this.fakeIntentHandler = mock(IMemoryIntentHandler.class);
         this.fakeDatabaseAi = mock(DatabaseAI.class);
-        this.fakeChatStateHandler = mock(ChatStateHandler.class);
+        this.fakeChatStateHandler = mock(ChatStateHandlerMySql.class);
         this.fakeConfig = mock(Config.class);
         this.fakeWebHooks = mock(WebHooks.class);
         this.fakeAiStrings = mock(AiStrings.class);
@@ -117,7 +114,7 @@ public class TestChatBase {
             when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(emptyState);
             when(this.fakeAiStrings.getDefaultChatResponses(any(), any())).thenReturn(Collections.singletonList(TestDataHelper.DEFAULT_CHAT_RESPONSE));
             when(this.fakeAiStrings.getRandomDefaultChatResponse(any(), any())).thenReturn(TestDataHelper.DEFAULT_CHAT_RESPONSE);
-        } catch (AiStrings.AiStringsException | ChatStateHandler.ChatStateException ex) {
+        } catch (AiStrings.AiStringsException | ChatStateException ex) {
             ex.printStackTrace();
         }
     }
@@ -128,7 +125,7 @@ public class TestChatBase {
         ArgumentCaptor<ChatState> argumentCaptor = ArgumentCaptor.forClass(ChatState.class);
         try {
             verify(this.fakeChatStateHandler).saveState(any(), any(), any(), argumentCaptor.capture());
-        } catch (ChatStateHandler.ChatStateException ex) {
+        } catch (ChatStateException ex) {
             ex.printStackTrace();
         }
         // And that the contains the lockedAiid value for the aiid with the highest score

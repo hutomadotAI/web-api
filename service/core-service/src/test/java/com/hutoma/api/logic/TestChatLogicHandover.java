@@ -16,7 +16,7 @@ import com.hutoma.api.logic.chat.ChatDefaultHandler;
 import com.hutoma.api.logic.chat.ChatEmbHandler;
 import com.hutoma.api.logic.chat.ChatHandoverHandler;
 import com.hutoma.api.logic.chat.ChatWorkflow;
-import com.hutoma.api.memory.ChatStateHandler;
+import com.hutoma.api.memory.ChatStateException;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -43,7 +43,7 @@ public class TestChatLogicHandover  extends TestChatBase {
      * Chat is handed over if the bad answer count goes over the threshold.
      */
     @Test
-    public void testChat_handover_triggeredIfNumErrorsAboveThreshold() throws ChatStateHandler.ChatStateException {
+    public void testChat_handover_triggeredIfNumErrorsAboveThreshold() throws ChatStateException {
         ChatLogic chatLogic = getLogicWithState(1, 1);
         ApiChat result = (ApiChat) chatLogic.chat(AIID, DEVID_UUID, RANDOM_QUESTION, CHATID.toString(), null);
         Assert.assertEquals(ChatHandoverTarget.Other.getStringValue(), result.getResult().getChatTarget());
@@ -54,7 +54,7 @@ public class TestChatLogicHandover  extends TestChatBase {
      * Chat is not handed over if the bad answer count is still under the threshold.
      */
     @Test
-    public void testChat_handover_notTriggeredIfNumErrorsBelowThreshold() throws ChatStateHandler.ChatStateException {
+    public void testChat_handover_notTriggeredIfNumErrorsBelowThreshold() throws ChatStateException {
         ChatLogic chatLogic = getLogicWithState(2, 0);
         ApiChat result = (ApiChat) chatLogic.chat(AIID, DEVID_UUID, RANDOM_QUESTION, CHATID.toString(), null);
         Assert.assertEquals(ChatHandoverTarget.Ai.getStringValue(), result.getResult().getChatTarget());
@@ -65,7 +65,7 @@ public class TestChatLogicHandover  extends TestChatBase {
      * Chat handover is reset if the handover reset time has passed.
      */
     @Test
-    public void testChat_handover_resetAfterTimeout() throws ChatStateHandler.ChatStateException {
+    public void testChat_handover_resetAfterTimeout() throws ChatStateException {
         ChatLogic chatLogic = getLogicWithState(2, 1,
                 new DateTime(DateTimeZone.UTC).plusSeconds(-1), ChatHandoverTarget.Other);
         ApiChat result = (ApiChat) chatLogic.chat(AIID, DEVID_UUID, RANDOM_QUESTION, CHATID.toString(), null);
@@ -76,7 +76,7 @@ public class TestChatLogicHandover  extends TestChatBase {
      * Chat handover is not reset if the handover reset time has not passed.
      */
     @Test
-    public void testChat_handover_noResetIfBeforeTimeout() throws ChatStateHandler.ChatStateException {
+    public void testChat_handover_noResetIfBeforeTimeout() throws ChatStateException {
         ChatHandoverTarget initialTarget = ChatHandoverTarget.Other;
         ChatLogic chatLogic = getLogicWithState(2, 1,
                 new DateTime(DateTimeZone.UTC).plusSeconds(10), initialTarget);
@@ -89,7 +89,7 @@ public class TestChatLogicHandover  extends TestChatBase {
      * Chat handover has no effect if the error threshold is not defined (<0).
      */
     @Test
-    public void testChat_handover_noHandoverIfErrorThresholdNotDefined() throws ChatStateHandler.ChatStateException {
+    public void testChat_handover_noHandoverIfErrorThresholdNotDefined() throws ChatStateException {
         ChatLogic chatLogic = getLogicWithState(-1, 1,
                 null, ChatHandoverTarget.Ai);
         ApiChat result = (ApiChat) chatLogic.chat(AIID, DEVID_UUID, RANDOM_QUESTION, CHATID.toString(), null);
@@ -99,14 +99,14 @@ public class TestChatLogicHandover  extends TestChatBase {
 
 
     private ChatLogic getLogicWithState(final int errorThresholdHandover, final int currBadAnswerCount)
-            throws ChatStateHandler.ChatStateException {
+            throws ChatStateException {
         return getLogicWithState(errorThresholdHandover, currBadAnswerCount, null,
                 ChatHandoverTarget.Ai);
     }
 
     private ChatLogic getLogicWithState(final int errorThresholdHandover, final int currBadAnswerCount,
                                         final DateTime handoverResetTime, final ChatHandoverTarget initialTarget)
-            throws ChatStateHandler.ChatStateException {
+            throws ChatStateException {
 
         ChatResult chatResult = new ChatResult(RANDOM_QUESTION);
         ChatState initialState = ChatState.getEmpty();
