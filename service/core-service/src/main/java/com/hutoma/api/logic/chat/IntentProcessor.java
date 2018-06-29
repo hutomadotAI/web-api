@@ -84,7 +84,7 @@ public class IntentProcessor {
 
         chatResult.getChatState().restartChatWorkflow(false);
 
-        ApiIntent intent = this.intentHandler.getIntent(chatInfo.getAiid(), currentIntent.getName());
+        ApiIntent intent = this.intentHandler.getIntent(aiidForMemoryIntents, currentIntent.getName());
         if (!canExecuteIntent(intent, chatResult)) {
             if (Strings.isNullOrEmpty(intent.getConditionsFallthroughMessage())) {
                 return false;
