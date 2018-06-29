@@ -52,7 +52,7 @@ public class ChatStateHandlerRedis implements IChatStateHandler {
         RedisFuture<TransactionResult> execResult = asyncCommands.exec();
         String chatStateString;
         try {
-            TransactionResult transactionResult = execResult.get();
+            execResult.get();
             String aiidRedis = aiidFuture.get();
             String devIdRedis = devidFuture.get();
             if (aiidRedis == null || devIdRedis == null) {
@@ -89,7 +89,7 @@ public class ChatStateHandlerRedis implements IChatStateHandler {
 
         RedisFuture<TransactionResult> execResult = asyncCommands.exec();
         try {
-            TransactionResult transactionResult = execResult.get();
+            execResult.get();
         } catch (Exception ex) {
             this.logger.logUserExceptionEvent(LOGFROM, ex.getMessage(), devId.toString(), ex);
             throw new ChatStateException("Failed to save state", ex);
