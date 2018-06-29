@@ -103,7 +103,7 @@ public class ChatLogic {
                     devIdString, ex, LogMap.map("AIID", aiid));
             this.chatLogger.logChatError(LOGFROM, devIdString, ex, this.telemetryMap);
             return ApiError.getInternalServerError();
-        } catch (IntentUserException ex) {
+        } catch (IntentUserException | ChatStateUserException ex) {
             this.logger.logUserTraceEvent(LOGFROM, "Chat - " + ex.getMessage(),
                     devIdString, LogMap.map("AIID", aiid));
             this.chatLogger.logChatError(LOGFROM, devIdString, ex, this.telemetryMap);
