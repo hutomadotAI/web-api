@@ -68,3 +68,15 @@ services:
     - API_BACKEND_STATUS_ENDPOINT=http://api-ctrl:8080/v1
     - BACKEND_TYPE=aiml
     - TRAIN_TIME_SECONDS_PER_1000_QA=2.0
+  
+  #
+  # Redis for caching
+  #
+  # Source: https://hub.docker.com/_/redis/
+  #
+  redis-chat-state:
+    image: redis:4.0.10-alpine
+    sysctls:
+      net.core.somaxconn: 1024
+    ports:
+      - 6379:6379
