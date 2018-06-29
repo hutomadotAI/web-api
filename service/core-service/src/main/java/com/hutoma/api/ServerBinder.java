@@ -31,7 +31,8 @@ import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.ILoggerConfig;
 import com.hutoma.api.logic.*;
 import com.hutoma.api.logic.chat.*;
-import com.hutoma.api.memory.ChatStateHandlerMySql;
+import com.hutoma.api.memory.IChatStateHandler;
+import com.hutoma.api.memory.ChatStateHandlerRedis;
 import com.hutoma.api.memory.ExternalEntityRecognizer;
 import com.hutoma.api.memory.IEntityRecognizer;
 import com.hutoma.api.memory.IMemoryIntentHandler;
@@ -133,7 +134,7 @@ public class ServerBinder extends AbstractBinder {
         bind(HTMLExtractor.class).to(HTMLExtractor.class);
         bind(Validate.class).to(Validate.class);
         bind(RateLimitCheck.class).to(RateLimitCheck.class);
-        bind(ChatStateHandlerMySql.class).to(ChatStateHandlerMySql.class);
+        bind(ChatStateHandlerRedis.class).to(ChatStateHandlerRedis.class).to(IChatStateHandler.class).in(Singleton.class);
         bind(WebHooks.class).to(WebHooks.class);
         bind(FacebookConnector.class).to(FacebookConnector.class);
         bind(FacebookMachineID.class).to(FacebookMachineID.class).in(Singleton.class);

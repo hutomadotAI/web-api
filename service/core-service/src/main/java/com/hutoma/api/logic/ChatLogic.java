@@ -22,7 +22,7 @@ import com.hutoma.api.logic.chat.ChatBaseException;
 import com.hutoma.api.logic.chat.ChatWorkflow;
 import com.hutoma.api.logic.chat.IChatHandler;
 import com.hutoma.api.memory.ChatStateException;
-import com.hutoma.api.memory.ChatStateHandlerMySql;
+import com.hutoma.api.memory.IChatStateHandler;
 import com.hutoma.api.memory.ChatStateUserException;
 
 import java.util.HashSet;
@@ -44,7 +44,7 @@ public class ChatLogic {
     private final ILogger logger;
     private final AIChatServices chatServices;
     private final ChatLogger chatLogger;
-    private final ChatStateHandlerMySql chatStateHandler;
+    private final IChatStateHandler chatStateHandler;
     private final LogMap telemetryMap;
     private final ChatWorkflow chatWorkflow;
     private final Config config;
@@ -53,7 +53,7 @@ public class ChatLogic {
 
     @Inject
     public ChatLogic(final AIChatServices chatServices,
-                     final ChatStateHandlerMySql chatStateHandler,
+                     final IChatStateHandler chatStateHandler,
                      final Tools tools,
                      final ILogger logger,
                      final ChatLogger chatLogger,
