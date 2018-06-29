@@ -53,16 +53,16 @@ public class ChatStateHandlerRedis implements IChatStateHandler {
         String chatStateString;
         try {
             TransactionResult transactionResult = execResult.get();
-            String aiid_redis = aiidFuture.get();
-            String devId_redis = devidFuture.get();
-            if (aiid_redis == null || devId_redis == null) {
+            String aiidRedis = aiidFuture.get();
+            String devIdRedis = devidFuture.get();
+            if (aiidRedis == null || devIdRedis == null) {
                 validateIds(devId, aiid);
                 return ChatState.getEmpty();
             }
-            if (!aiid_redis.equals(aiid.toString())) {
+            if (!aiidRedis.equals(aiid.toString())) {
                 throw new ChatStateUserException("aiid is mismatched");
             }
-            if (!devId_redis.equals(devId.toString())) {
+            if (!devIdRedis.equals(devId.toString())) {
                 throw new ChatStateUserException("devID is mismatched");
             }
             chatStateString = chatStateFuture.get();

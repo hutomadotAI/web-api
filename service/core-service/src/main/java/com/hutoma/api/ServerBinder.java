@@ -134,7 +134,8 @@ public class ServerBinder extends AbstractBinder {
         bind(HTMLExtractor.class).to(HTMLExtractor.class);
         bind(Validate.class).to(Validate.class);
         bind(RateLimitCheck.class).to(RateLimitCheck.class);
-        bind(ChatStateHandlerRedis.class).to(ChatStateHandlerRedis.class).to(IChatStateHandler.class).in(Singleton.class);
+        bind(ChatStateHandlerRedis.class).to(ChatStateHandlerRedis.class).to(IChatStateHandler.class)
+                .in(Singleton.class);
         bind(WebHooks.class).to(WebHooks.class);
         bind(FacebookConnector.class).to(FacebookConnector.class);
         bind(FacebookMachineID.class).to(FacebookMachineID.class).in(Singleton.class);
