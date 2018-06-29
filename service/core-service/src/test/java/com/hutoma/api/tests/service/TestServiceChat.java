@@ -27,10 +27,7 @@ import com.hutoma.api.logic.chat.ChatPassthroughHandler;
 import com.hutoma.api.logic.chat.ChatRequestTrigger;
 import com.hutoma.api.logic.chat.ChatWorkflow;
 import com.hutoma.api.logic.chat.IntentProcessor;
-import com.hutoma.api.memory.ChatStateException;
-import com.hutoma.api.memory.ChatStateHandlerMySql;
-import com.hutoma.api.memory.IEntityRecognizer;
-import com.hutoma.api.memory.IMemoryIntentHandler;
+import com.hutoma.api.memory.*;
 
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.joda.time.DateTime;
@@ -70,7 +67,7 @@ public class TestServiceChat extends ServiceTestBase {
     @Mock
     private ChatLogger fakeChatTelemetryLogger;
     @Mock
-    private ChatStateHandlerMySql fakeChatStateHandler;
+    private IChatStateHandler fakeChatStateHandler;
 
     IEntityRecognizer fakeRecognizer;
     private ChatPassthroughHandler fakePassthroughHandler;
@@ -316,7 +313,7 @@ public class TestServiceChat extends ServiceTestBase {
         binder.bindFactory(new InstanceFactory<>(TestServiceChat.this.fakeMemoryIntentHandler)).to(IMemoryIntentHandler.class);
         binder.bindFactory(new InstanceFactory<>(TestServiceChat.this.fakeEntityRecognizer)).to(IEntityRecognizer.class);
         binder.bindFactory(new InstanceFactory<>(TestServiceChat.this.fakeChatTelemetryLogger)).to(ChatLogger.class);
-        binder.bindFactory(new InstanceFactory<>(TestServiceChat.this.fakeChatStateHandler)).to(ChatStateHandlerMySql.class);
+        binder.bindFactory(new InstanceFactory<>(TestServiceChat.this.fakeChatStateHandler)).to(IChatStateHandler.class);
         binder.bindFactory(new InstanceFactory<>(TestServiceChat.this.fakeChatWorkflow)).to(ChatWorkflow.class);
 
         return binder;

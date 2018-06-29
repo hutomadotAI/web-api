@@ -58,7 +58,7 @@ public class TestChatBase {
     IMemoryIntentHandler fakeIntentHandler;
     WebHooks fakeWebHooks;
     DatabaseAI fakeDatabaseAi;
-    ChatStateHandlerMySql fakeChatStateHandler;
+    IChatStateHandler fakeChatStateHandler;
     ChatLogic chatLogic;
     protected Config fakeConfig;
     private AiStrings fakeAiStrings;
@@ -81,7 +81,7 @@ public class TestChatBase {
         this.fakeRecognizer = mock(IEntityRecognizer.class);
         this.fakeIntentHandler = mock(IMemoryIntentHandler.class);
         this.fakeDatabaseAi = mock(DatabaseAI.class);
-        this.fakeChatStateHandler = mock(ChatStateHandlerMySql.class);
+        this.fakeChatStateHandler = mock(IChatStateHandler.class);
         this.fakeConfig = mock(Config.class);
         this.fakeWebHooks = mock(WebHooks.class);
         this.fakeAiStrings = mock(AiStrings.class);
