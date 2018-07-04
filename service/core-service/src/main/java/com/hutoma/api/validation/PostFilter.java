@@ -299,33 +299,42 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
         // validate name
         validateIntentName(intent.getIntentName());
 
-        // for each response, filter, check against size limit, dedupe, remove empties, check one present
-        intent.setResponses(
-                dedupeAndEnsureNonEmptyList(
-                        validateFieldLengthsInList(INTENT_RESPONSE_MAX_LENGTH, INTENT_RESPONSES,
-                                filterControlCoalesceSpacesInList(intent.getResponses())), INTENT_RESPONSES));
+        if (intent.getResponses() != null && !intent.getResponses().isEmpty()) {
+            // for each response, filter, check against size limit, dedupe, remove empties, check one present
+            intent.setResponses(
+                    dedupeAndEnsureNonEmptyList(
+                            validateFieldLengthsInList(INTENT_RESPONSE_MAX_LENGTH, INTENT_RESPONSES,
+                                    filterControlCoalesceSpacesInList(intent.getResponses())), INTENT_RESPONSES));
 
-        // check responses limit
-        if (intent.getResponses().size() > config.getMaxIntentResponses()) {
-            throw new ParameterValidationException(String.format("number of responses (%d) exceeds limit (%d)",
-                    intent.getResponses().size(), config.getMaxIntentResponses()), INTENT_RESPONSES);
+            // check responses limit
+            if (intent.getResponses().size() > config.getMaxIntentResponses()) {
+                throw new ParameterValidationException(String.format("number of responses (%d) exceeds limit (%d)",
+                        intent.getResponses().size(), config.getMaxIntentResponses()), INTENT_RESPONSES);
+            }
         }
 
-        // for each expression, filter, check against size limit, dedupe, remove empties, check one present
-        intent.setUserSays(
-                dedupeAndEnsureNonEmptyList(
-                        validateFieldLengthsInList(INTENT_USERSAYS_MAX_LENGTH, INTENT_USERSAYS,
-                                filterControlCoalesceSpacesInList(intent.getUserSays())), INTENT_USERSAYS));
+        if (intent.getUserSays() != null && !intent.getUserSays().isEmpty()) {
+            // for each expression, filter, check against size limit, dedupe, remove empties, check one present
+            intent.setUserSays(
+                    dedupeAndEnsureNonEmptyList(
+                            validateFieldLengthsInList(INTENT_USERSAYS_MAX_LENGTH, INTENT_USERSAYS,
+                                    filterControlCoalesceSpacesInList(intent.getUserSays())), INTENT_USERSAYS));
+            // check expression limit
+            if (intent.getUserSays().size() > config.getMaxIntentUserSays()) {
+                throw new ParameterValidationException(String.format("number of expressions (%d) exceeds limit (%d)",
+                        intent.getUserSays().size(), config.getMaxIntentUserSays()), INTENT_USERSAYS);
+            }
+        }
 
-        // check expression limit
-        if (intent.getUserSays().size() > config.getMaxIntentUserSays()) {
-            throw new ParameterValidationException(String.format("number of expressions (%d) exceeds limit (%d)",
-                    intent.getUserSays().size(), config.getMaxIntentUserSays()), INTENT_USERSAYS);
+        if (intent.getUserSays() != null && !intent.getUserSays().isEmpty()
+                && (intent.getResponses() == null || intent.getResponses().isEmpty())) {
+            throw new ParameterValidationException("when specifying expressions then responses are required",
+                    INTENT_RESPONSES);
         }
 
         HashSet<String> labelsInUse = new HashSet<>();
         // for each variable
-        if (null != intent.getVariables()) {
+        if (intent.getVariables() != null) {
             for (IntentVariable variable : intent.getVariables()) {
                 // validate the name
                 validateFieldLength(250, ENTITYNAME, variable.getEntityName());

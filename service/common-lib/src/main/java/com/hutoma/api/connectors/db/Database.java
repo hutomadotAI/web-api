@@ -10,7 +10,10 @@ import com.hutoma.api.logging.ILogger;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collection;
+import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
@@ -143,5 +146,19 @@ public class Database {
             // if all goes well, commit
             transaction.commit();
         }
+    }
+
+    public static String getNullIfEmpty(final Collection collection, final Function<Collection, String> func) {
+        if (collection == null || collection.isEmpty()) {
+            return null;
+        }
+        return func.apply(collection);
+    }
+
+    public static String getNullIfEmpty(final Map map, final Function<Map, String> func) {
+        if (map == null || map.isEmpty()) {
+            return null;
+        }
+        return func.apply(map);
     }
 }

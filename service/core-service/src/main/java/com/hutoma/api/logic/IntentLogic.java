@@ -118,15 +118,18 @@ public class IntentLogic {
         String devidString = devid.toString();
         LogMap logMap = LogMap.map("AIID", aiid).put("IntentName", intent.getIntentName());
 
-        // Make sure we don't have variables set with lifetime = 0 turns since this would immediately
-        // delete the variable on the first turn, render it useless.
-        for (IntentVariable v: intent.getVariables()) {
-            if (v.getLifetimeTurns() == 0) {
-                v.setLifetimeTurns(-1);
-            }
-        }
-
         try {
+
+            // Make sure we don't have variables set with lifetime = 0 turns since this would immediately
+            // delete the variable on the first turn, render it useless.
+            if (intent.getVariables() != null) {
+                for (IntentVariable v : intent.getVariables()) {
+                    if (v.getLifetimeTurns() == 0) {
+                        v.setLifetimeTurns(-1);
+                    }
+                }
+            }
+
             ApiAi ai = this.databaseAi.getAI(devid, aiid, this.jsonSerializer);
             if (ai.isReadOnly()) {
                 this.logger.logUserTraceEvent(LOGFROM, "WriteIntent - Bot is RO", devidString, logMap);

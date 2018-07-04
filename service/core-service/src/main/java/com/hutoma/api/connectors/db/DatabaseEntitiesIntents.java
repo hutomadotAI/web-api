@@ -366,16 +366,12 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
                     .add(intent.getIntentName())
                     .add(intent.getTopicIn())
                     .add(intent.getTopicOut())
-                    .add(intent.getContextIn() == null || intent.getContextIn().isEmpty()
-                            ? null : this.serializer.serialize(intent.getContextIn()))
-                    .add(intent.getContextOut() == null || intent.getContextOut().isEmpty()
-                            ? null : this.serializer.serialize(intent.getContextOut()))
-                    .add(intent.getConditionsIn() == null || intent.getConditionsIn().isEmpty()
-                            ? null : this.serializer.serialize(intent.getConditionsIn()))
+                    .add(Database.getNullIfEmpty(intent.getContextIn(), this.serializer::serialize))
+                    .add(Database.getNullIfEmpty(intent.getContextOut(), this.serializer::serialize))
+                    .add(Database.getNullIfEmpty(intent.getConditionsIn(), this.serializer::serialize))
                     .add(intent.getConditionsFallthroughMessage())
                     .add(intent.getResetContextOnExit())
-                    .add(intent.getIntentOutConditionals() == null || intent.getIntentOutConditionals().isEmpty()
-                            ? null : this.serializer.serialize(intent.getIntentOutConditionals()))
+                    .add(Database.getNullIfEmpty(intent.getIntentOutConditionals(), this.serializer::serialize))
                     .executeUpdate();
 
             if (rowcount != 1 && rowcount != 2) { // insert=1, update=2
@@ -551,7 +547,8 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
             IntentVariable old = new IntentVariable(
                     readCurrentRs.getString("entity_name"),
                     devOwnerUUID,
-                    readCurrentRs.getBoolean("required"), readCurrentRs.getInt("n_prompts"),
+                    readCurrentRs.getBoolean("required"),
+                    readCurrentRs.getInt("n_prompts"),
                     readCurrentRs.getString("value"),
                     readCurrentRs.getInt("id"),
                     readCurrentRs.getBoolean("isPersistent"),

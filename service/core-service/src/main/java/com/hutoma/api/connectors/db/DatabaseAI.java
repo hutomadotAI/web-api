@@ -716,16 +716,14 @@ public class DatabaseAI extends Database {
                     .add(limitSize(chatState.getTopic(), 250))
                     .add(limitSize(chatState.getHistory(), 1024))
                     .add(lockedAiid)
-                    .add(chatState.getEntityValues().isEmpty()
-                            ? null : jsonSerializer.serialize(chatState.getEntityValues()))
+                    .add(Database.getNullIfEmpty(chatState.getEntityValues(), jsonSerializer::serialize))
                     .add(chatState.getConfidenceThreshold())
                     .add(chatState.getChatTarget().getIntValue())
                     .add(chatState.getResetHandoverTime() == null
                             ? null : new Timestamp(chatState.getResetHandoverTime().getMillis()))
                     .add(chatState.getBadAnswersCount())
                     .add(jsonSerializer.serialize(chatState.getChatContext()))
-                    .add(chatState.getCurrentIntents() == null
-                            ? null : jsonSerializer.serialize(chatState.getCurrentIntents()));
+                    .add(Database.getNullIfEmpty(chatState.getCurrentIntents(), jsonSerializer::serialize));
             return call.executeUpdate() > 0;
         }
     }
