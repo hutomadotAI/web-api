@@ -18,7 +18,9 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.net.URI;
+import java.net.ServerSocket;
 import java.util.List;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -35,7 +37,7 @@ import static org.mockito.Mockito.when;
  */
 public class TestEntityRecognizer {
 
-    private static final String LOCAL_WEB_SERVER = "http://127.0.0.1:9092";
+    private static final String LOCAL_WEB_SERVER_ADDR = "http://0.0.0.0";
     private static final String ENTITY_VALUE = "value1";
     private static final String ENTITY_CATEGORY = "category1";
     private static final int ENTITY_START = 1;
@@ -45,14 +47,25 @@ public class TestEntityRecognizer {
             ENTITY_VALUE, ENTITY_CATEGORY, ENTITY_START, ENTITY_END);
 
     private static HttpServer httpServer;
+    private static int listeningPort;
+    private static String localServer;
     private EntityRecognizerService erService;
     private Config fakeConfig;
 
     @BeforeClass
     public static void initializeClass() {
+        // Get an available listening port
+        try {
+            ServerSocket s = new ServerSocket(0);
+            listeningPort = s.getLocalPort();
+            s.close();
+        } catch (IOException ex) {
+            System.out.println(ex.getMessage());
+        }
+        localServer = String.format("%s:%d", LOCAL_WEB_SERVER_ADDR, listeningPort);
         final ResourceConfig rc = new ResourceConfig(TestServer.class);
         rc.register(MultiPartFeature.class);
-        httpServer = GrizzlyHttpServerFactory.createHttpServer(URI.create(LOCAL_WEB_SERVER), rc);
+        httpServer = GrizzlyHttpServerFactory.createHttpServer(URI.create(localServer), rc);
     }
 
     @AfterClass
@@ -63,7 +76,7 @@ public class TestEntityRecognizer {
     @Before
     public void setup() {
         this.fakeConfig = mock(Config.class);
-        when(this.fakeConfig.getEntityRecognizerUrl()).thenReturn(LOCAL_WEB_SERVER);
+        when(this.fakeConfig.getEntityRecognizerUrl()).thenReturn(localServer);
         this.erService = new EntityRecognizerService(mock(ILogger.class), new JsonSerializer(),
                 this.fakeConfig, JerseyClientBuilder.createClient());
     }
