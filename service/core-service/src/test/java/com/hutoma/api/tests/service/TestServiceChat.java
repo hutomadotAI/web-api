@@ -140,10 +140,53 @@ public class TestServiceChat extends ServiceTestBase {
     }
 
     @Test
+    public void testChat_chatIdGenerated() {
+        final Response response = target(CHAT_PATH).queryParam("q", "question")
+                .request().headers(defaultHeaders).get();
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
+        ApiChat apiChat = deserializeResponse(response, ApiChat.class);
+        Assert.assertNotNull(apiChat.getChatId());
+    }
+
+    @Test
+    public void testChat_chatIdRemembered() {
+        UUID chatId = UUID.randomUUID();
+        final Response response = target(CHAT_PATH).queryParam("q", "question")
+                .queryParam("chatId", chatId.toString())
+                .request().headers(defaultHeaders).get();
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
+        ApiChat apiChat = deserializeResponse(response, ApiChat.class);
+        Assert.assertEquals(chatId, apiChat.getChatId());
+    }
+
+    @Test
     public void testChat_invalidChatId() {
-        final Response response = target(CHAT_PATH).queryParam("q", "").queryParam("chatId", "invalid")
+        final Response response = target(CHAT_PATH).queryParam("q", "question")
+                .queryParam("chatId", "invalid")
                 .request().headers(defaultHeaders).get();
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.getStatus());
+    }
+
+    @Test
+    public void testChat_chatStateUserException() throws ChatStateHandler.ChatStateException {
+        UUID chatId = UUID.randomUUID();
+        when(this.fakeChatStateHandler.getState(any(), any(), any()))
+                .thenThrow(ChatStateHandler.ChatStateUserException.class);
+        final Response response = target(CHAT_PATH).queryParam("q", "question")
+                .queryParam("chatId", chatId.toString())
+                .request().headers(defaultHeaders).get();
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.getStatus());
+    }
+
+    @Test
+    public void testChat_chatStateException() throws ChatStateHandler.ChatStateException {
+        UUID chatId = UUID.randomUUID();
+        when(this.fakeChatStateHandler.getState(any(), any(), any()))
+                .thenThrow(ChatStateHandler.ChatStateException.class);
+        final Response response = target(CHAT_PATH).queryParam("q", "question")
+                .queryParam("chatId", chatId.toString())
+                .request().headers(defaultHeaders).get();
+        Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, response.getStatus());
     }
 
     @Test

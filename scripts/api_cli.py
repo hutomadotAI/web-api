@@ -81,7 +81,7 @@ def main(args, parser):
             ai_id = args.ai_id
             chat_in = args.chat_input
             print("Chat with AI {} with input '{}'".format(ai_id, chat_in))
-            answer = hu_api.api.chat(requester, ai_id, chat_in)
+            answer = hu_api.api.chat(requester, ai_id, chat_in, args.id)
             print(answer.text)
             print(answer.response)
         elif command == "delete-ai":
@@ -136,6 +136,8 @@ if __name__ == "__main__":
     parser_chat = subparsers.add_parser('chat', help='Chat with an AI')
     parser_chat.add_argument('ai_id', help='AI ID')
     parser_chat.add_argument('chat_input', help='Chat input')
+    parser_chat.add_argument('--id', help='Chat ID')
+    
     # update training
     parser_update_training = subparsers.add_parser('update-training', help='Update training - causes chat-cores to be retrained')
     parser_update_training.add_argument('ai_id', help='AI ID')

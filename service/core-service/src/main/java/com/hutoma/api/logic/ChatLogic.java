@@ -101,7 +101,7 @@ public class ChatLogic {
                     devIdString, ex, LogMap.map("AIID", aiid));
             this.chatLogger.logChatError(LOGFROM, devIdString, ex, this.telemetryMap);
             return ApiError.getInternalServerError();
-        } catch (IntentUserException ex) {
+        } catch (IntentUserException | ChatStateHandler.ChatStateUserException ex) {
             this.logger.logUserTraceEvent(LOGFROM, "Chat - " + ex.getMessage(),
                     devIdString, LogMap.map("AIID", aiid));
             this.chatLogger.logChatError(LOGFROM, devIdString, ex, this.telemetryMap);
@@ -136,8 +136,18 @@ public class ChatLogic {
 
         final long requestStartTimestamp = this.tools.getTimestamp();
 
-        UUID chatId = (chatIdString == null || chatIdString.isEmpty())
-                ? UUID.randomUUID() : UUID.fromString(chatIdString);
+        UUID chatId;
+        if (chatIdString == null || chatIdString.isEmpty()) {
+            chatId = UUID.randomUUID();
+        } else {
+            try {
+                chatId = UUID.fromString(chatIdString);
+            }
+            catch (IllegalArgumentException ex) {
+                throw new ChatFailedException(ApiError.getBadRequest("Chat ID invalid"));
+            }
+        }
+
         ChatRequestInfo requestInfo = new ChatRequestInfo(devId, aiid, chatId, question, clientVariables);
         ChatResult currentResult = new ChatResult(question);
         currentResult.setTimestamp(this.tools.getTimestamp());
