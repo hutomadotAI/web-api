@@ -147,6 +147,9 @@ public class CsvIntentReader {
     }
 
     private static List<String> getSeparatedStrings(final String str, final char separator) {
-        return Arrays.stream(str.split(String.format("%c", separator))).map(String::trim).collect(Collectors.toList());
+        return Arrays.stream(str.split(String.format("%c", separator)))
+                .map(String::trim)
+                .distinct()
+                .collect(Collectors.toList());
     }
 }

@@ -138,8 +138,8 @@ public class TestCsvIntentReader {
     @Test
     public void testCsvReader_intentsAndInvalidLines() {
         when(this.fakeValidate.isIntentNameValid(anyString())).thenReturn(true);
-        when(this.fakeValidate.areIntentResponsesValid(anyList())).thenReturn(true);
-        when(this.fakeValidate.areIntentUserSaysValid(anyList())).thenReturn(true);
+        when(this.fakeValidate.areIntentResponsesValid(any())).thenReturn(true);
+        when(this.fakeValidate.areIntentUserSaysValid(any())).thenReturn(true);
         ApiCsvImportResult result = getReader().parseIntents("name,us,r,\nNOT_VALID!\nname2,us2,r2");
         Assert.assertEquals(2, result.getImported().size());
         Assert.assertEquals(1, result.getWarnings().size());
@@ -179,7 +179,7 @@ public class TestCsvIntentReader {
     @Test
     public void testCsvReader_responsesNotValid() {
         when(this.fakeValidate.isIntentNameValid(anyString())).thenReturn(true);
-        when(this.fakeValidate.areIntentResponsesValid(anyList())).thenReturn(false);
+        when(this.fakeValidate.areIntentResponsesValid(any())).thenReturn(false);
         ApiCsvImportResult result = getReader().parseIntents("name,us,r");
         Assert.assertTrue(result.getImported().isEmpty());
         Assert.assertEquals(1, result.getErrors().size());
@@ -188,11 +188,31 @@ public class TestCsvIntentReader {
     @Test
     public void testCsvReader_userSaysNotValid() {
         when(this.fakeValidate.isIntentNameValid(anyString())).thenReturn(true);
-        when(this.fakeValidate.areIntentResponsesValid(anyList())).thenReturn(true);
-        when(this.fakeValidate.areIntentUserSaysValid(anyList())).thenReturn(false);
+        when(this.fakeValidate.areIntentResponsesValid(any())).thenReturn(true);
+        when(this.fakeValidate.areIntentUserSaysValid(any())).thenReturn(false);
         ApiCsvImportResult result = getReader().parseIntents("name,us,r");
         Assert.assertTrue(result.getImported().isEmpty());
         Assert.assertEquals(1, result.getErrors().size());
+    }
+
+    @Test
+    public void testCsvReader_userSaysDuplicate_deduped() {
+        CsvIntentReader csv = getReader();
+        ApiIntent intent = csv.parseLine("name,us1;us2;us3;us2,r");
+        Assert.assertEquals(3, intent.getUserSays().size());
+        Assert.assertEquals("us1", intent.getUserSays().get(0));
+        Assert.assertEquals("us2", intent.getUserSays().get(1));
+        Assert.assertEquals("us3", intent.getUserSays().get(2));
+    }
+
+    @Test
+    public void testCsvReader_responsesDuplicate_deduped() {
+        CsvIntentReader csv = getReader();
+        ApiIntent intent = csv.parseLine("name,us,r1;r2;r3;r2");
+        Assert.assertEquals(3, intent.getResponses().size());
+        Assert.assertEquals("r1", intent.getResponses().get(0));
+        Assert.assertEquals("r2", intent.getResponses().get(1));
+        Assert.assertEquals("r3", intent.getResponses().get(2));
     }
 
     private void testCsvReader_lineSeparator(final String lineSeparator) {
