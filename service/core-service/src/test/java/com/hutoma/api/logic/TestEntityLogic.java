@@ -215,6 +215,28 @@ public class TestEntityLogic {
         verify(this.trainingLogic, never()).stopTraining(any(), any());
     }
 
+    @Test
+    public void testReplaceEntity_entityDoesNotExist_Failure() throws DatabaseException {
+        when(this.fakeDatabase.getEntity(any(), anyString())).thenReturn(null);
+        final ApiResult result = this.entityLogic.replaceEntity(DEVID_UUID, "DIFFERENT_NAME", new ApiEntity("DIFFERENT_NAME", DEVID_UUID));
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testReplaceEntity_Update_Success() throws DatabaseException {
+        when(this.fakeDatabase.getEntity(any(), anyString())).thenReturn(getEntity());
+        final ApiResult result = this.entityLogic.replaceEntity(DEVID_UUID, ENTITY_NAME, new ApiEntity(ENTITY_NAME, DEVID_UUID));
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testReplaceEntity_Error() throws DatabaseException {
+        when(this.fakeDatabase.getEntity(any(), anyString())).thenReturn(getEntity());
+        doThrow(DatabaseException.class).when(this.fakeDatabase).writeEntity(any(), anyString(), any());
+        final ApiResult result = this.entityLogic.replaceEntity(DEVID_UUID, ENTITY_NAME, new ApiEntity(ENTITY_NAME, DEVID_UUID));
+        Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
+    }
+
 
     private List<Entity> getEntitiesList() {
         return Collections.singletonList(new Entity(ENTITY_NAME, false));
