@@ -366,11 +366,8 @@ public class IntentProcessor {
             }
 
             // Update context
-            for (MemoryVariable var : currentIntent.getVariables()) {
-                chatResult.getChatState().getChatContext().setValue(
-                        String.format("%s.%s", currentIntent.getName(), var.getLabel()),
-                        var.getCurrentValue());
-            }
+            currentIntent.getVariables().forEach(
+                    v -> chatResult.getChatState().getChatContext().setValue(v.getLabel(), v.getCurrentValue()));
         }
 
         // Check if there still are mandatory entities not currently fulfilled
@@ -529,6 +526,7 @@ public class IntentProcessor {
                                        final LogMap telemetryMap) {
         memoryIntent.setIsFulfilled(true);
         chatResult.setAnswer(getRandomIntentResponse(aiid, memoryIntent, intent));
+
         telemetryMap.add("IntentFulfilled", memoryIntent.getName());
     }
 
@@ -543,9 +541,6 @@ public class IntentProcessor {
         if (intent != null) {
             List<String> responses = intent.getResponses();
             String response = responses.get((int) (Math.random() * responses.size()));
-            for (MemoryVariable variable : memoryIntent.getVariables()) {
-                response = response.replace("$" + variable.getLabel(), variable.getCurrentValue());
-            }
             return response;
         }
         return null;

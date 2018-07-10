@@ -7,10 +7,7 @@ import com.hutoma.api.connectors.ServerConnector;
 import com.hutoma.api.connectors.WebHooks;
 import com.hutoma.api.connectors.chat.AIChatServices;
 import com.hutoma.api.connectors.chat.ChatBackendConnector;
-import com.hutoma.api.containers.sub.ChatRequestInfo;
-import com.hutoma.api.containers.sub.ChatResult;
-import com.hutoma.api.containers.sub.ChatState;
-import com.hutoma.api.containers.sub.MemoryIntent;
+import com.hutoma.api.containers.sub.*;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
 import com.hutoma.api.logic.ChatLogic;
@@ -111,6 +108,10 @@ public class ChatEmbHandler extends ChatGenericBackend implements IChatHandler {
             result.setChatState(state);
             if (this.intentLogic.processIntent(requestInfo, aiidFromResult, memoryIntent, result, telemetryMap)) {
                 telemetryMap.add("AnsweredBy", "EMB");
+
+                // Expand entity variables if intent is handled
+                extractContextVariables(result);
+
                 markQuestionAnswered(state);
             } else {
                 // if intents processing returns false then we need to ignore EMB
@@ -121,6 +122,18 @@ public class ChatEmbHandler extends ChatGenericBackend implements IChatHandler {
         }
 
         return false;
+    }
+
+    public void extractContextVariables(ChatResult result) {
+        if (result.getContext() != null) {
+            if (!result.getContext().isEmpty()) {
+                String response = result.getAnswer();
+                for (Map.Entry<String, String> value : result.getContext().entrySet()) {
+                    response = response.replace(String.format("$%s", value.getKey()), value.getValue());
+                }
+                result.setAnswer(response);
+            }
+        }
     }
 
     private ChatResult getTopResult(final ChatState state,
