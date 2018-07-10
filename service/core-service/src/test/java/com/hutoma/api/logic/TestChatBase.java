@@ -7,6 +7,7 @@ import com.hutoma.api.common.TestDataHelper;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.AiStrings;
 import com.hutoma.api.connectors.BackendServerType;
+import com.hutoma.api.connectors.NoServerAvailableException;
 import com.hutoma.api.connectors.ServerConnector;
 import com.hutoma.api.connectors.WebHooks;
 import com.hutoma.api.connectors.chat.AIChatServices;
@@ -136,11 +137,20 @@ public class TestChatBase {
 
     }
 
-    ApiResult getChat(double minP) {
-        return this.getChat(minP, QUESTION);
+    ChatResult getFacebookChat(double minP)
+            throws NoServerAvailableException, ChatBaseException,
+            ChatBackendConnector.AiControllerException, ServerConnector.AiServicesException {
+        return this.getFacebookChat(minP, QUESTION);
     }
 
-    ApiResult getChat(double minP, String question) {
+    ChatResult getFacebookChat(double minP, String question)
+            throws NoServerAvailableException, ChatBaseException,
+            ChatBackendConnector.AiControllerException, ServerConnector.AiServicesException {
+        mapMinP(minP);
+        return this.chatLogic.chatFacebook(AIID, DEVID_UUID, question, CHATID.toString(), "facebookuser");
+    }
+
+    private void mapMinP(final double minP) {
         // We need to check if the tests are already mocking the chat services' individual
         // confidence threshold (min_p)
         if (this.fakeChatServices.getMinPMap() != null) {
@@ -150,7 +160,16 @@ public class TestChatBase {
         } else {
             when(this.fakeChatServices.getMinPMap()).thenReturn(ImmutableMap.of(AIID, minP));
         }
+    }
 
+    ApiResult getChat(double minP) {
+        return this.getChat(minP, QUESTION);
+    }
+
+    ApiResult getChat(double minP, String question) {
+        // We need to check if the tests are already mocking the chat services' individual
+        // confidence threshold (min_p)
+        mapMinP(minP);
         return this.chatLogic.chat(AIID, DEVID_UUID, question, CHATID.toString(), null);
     }
 

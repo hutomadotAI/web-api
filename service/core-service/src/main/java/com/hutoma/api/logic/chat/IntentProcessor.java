@@ -588,7 +588,10 @@ public class IntentProcessor {
 
                 // log and set the text if there was any
                 if (!Strings.isNullOrEmpty(response.getText())) {
+                    // copy the text reply
                     chatResult.setAnswer(response.getText());
+                    // and copy the whole response to include any rich content
+                    chatResult.setWebHookResponse(response);
                     log.put("Webhook response", response.getText());
                 } else {
                     // otherwise we got no text

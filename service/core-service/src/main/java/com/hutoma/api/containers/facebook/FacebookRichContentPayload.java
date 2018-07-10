@@ -24,13 +24,17 @@ public class FacebookRichContentPayload {
     @SerializedName("sharable")
     private Boolean sharable = null;
 
+    public String getText() {
+        return text;
+    }
+
     @SerializedName("image_aspect_ratio")
     private String imageAspectRatio;
 
     @SerializedName("top_element_style")
     private ElementStyle topElementStyle;
 
-    FacebookRichContentPayload(final String payloadUrl, final TemplateType templateType, final String text,
+    public FacebookRichContentPayload(final String payloadUrl, final TemplateType templateType, final String text,
                                final List<FacebookRichContentButton> buttons,
                                final List<FacebookRichContentElement> elements,
                                final Boolean sharable, final String imageAspectRatio) {
