@@ -544,7 +544,9 @@ public class IntentProcessor {
             List<String> responses = intent.getResponses();
             String response = responses.get((int) (Math.random() * responses.size()));
             for (MemoryVariable variable : memoryIntent.getVariables()) {
-                response = response.replace("$" + variable.getLabel(), variable.getCurrentValue());
+                if (variable.getCurrentValue() != null) {
+                    response = response.replace("$" + variable.getLabel(), variable.getCurrentValue());
+                }
             }
             return response;
         }
