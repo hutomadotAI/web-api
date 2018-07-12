@@ -22,6 +22,7 @@ import com.hutoma.api.logic.chat.ChatBaseException;
 import com.hutoma.api.logic.chat.ChatWorkflow;
 import com.hutoma.api.logic.chat.IChatHandler;
 import com.hutoma.api.memory.ChatStateHandler;
+import org.parboiled.common.StringUtils;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -305,6 +306,32 @@ public class ChatLogic {
             return ApiError.getBadRequest(ex.getMessage());
         } catch (Exception ex) {
             this.chatLogger.logUserExceptionEvent(LOGFROM, "handover", devId.toString(), ex);
+            return ApiError.getInternalServerError();
+        }
+    }
+
+    public ApiResult setContextVariable(
+            final UUID aiid, final UUID devId, final String chatId, Map<String, String> variables) {
+        try {
+            UUID chatUuid = UUID.fromString(chatId);
+            if ((variables != null) && (!variables.isEmpty())) {
+                this.chatState = this.chatStateHandler.getState(devId, aiid, chatUuid);
+                for (Map.Entry<String, String> v : variables.entrySet()) {
+                    if (StringUtils.isEmpty(v.getKey())
+                            || (StringUtils.isEmpty(v.getValue()))) {
+                        return ApiError.getBadRequest("Invalid variable");
+                    } else {
+                        this.chatState.getChatContext().setValue(v.getKey(), v.getValue());
+                    }
+                }
+                this.chatStateHandler.saveState(devId, aiid, chatUuid, this.chatState);
+                return new ApiResult().setSuccessStatus();
+            } else {
+                // Empty or null map isnt a valid request
+                return ApiError.getBadRequest("Missing variables");
+            }
+        } catch (Exception ex) {
+            this.chatLogger.logUserExceptionEvent(LOGFROM, "setContextVariable", devId.toString(), ex);
             return ApiError.getInternalServerError();
         }
     }

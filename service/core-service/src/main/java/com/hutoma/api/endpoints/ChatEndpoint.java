@@ -11,6 +11,8 @@ import com.hutoma.api.logic.ChatLogic;
 import com.hutoma.api.validation.APIParameter;
 import com.hutoma.api.validation.ParameterFilter;
 import com.hutoma.api.validation.ValidateParameters;
+import com.hutoma.api.validation.ValidatePost;
+import com.sun.research.ws.wadl.Param;
 import com.webcohesion.enunciate.metadata.rs.RequestHeader;
 import com.webcohesion.enunciate.metadata.rs.RequestHeaders;
 import com.webcohesion.enunciate.metadata.rs.ResourceMethodSignature;
@@ -21,11 +23,7 @@ import com.webcohesion.enunciate.metadata.rs.TypeHint;
 import java.net.HttpURLConnection;
 import java.util.Map;
 import javax.inject.Inject;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -109,6 +107,35 @@ public class ChatEndpoint {
                 ParameterFilter.getDevid(requestContext),
                 ParameterFilter.getChatID(requestContext),
                 ParameterFilter.getChatHandoverTarget(requestContext));
+        return result.getResponse(this.serializer).build();
+    }
+
+    @PUT
+    @Path("{aiid}/chat/setVariables")
+    @RateLimit(RateKey.Chat)
+    @Secured({Role.ROLE_CLIENTONLY, Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3,
+            Role.ROLE_PLAN_4})
+    @ValidateParameters({APIParameter.DevID, APIParameter.AIID, APIParameter.ChatID})
+    @StatusCodes({
+            @ResponseCode(code = HttpURLConnection.HTTP_OK, condition = "Succeeded."),
+            @ResponseCode(code = HttpURLConnection.HTTP_BAD_REQUEST, condition = "Invalid variables"),
+            @ResponseCode(code = HttpURLConnection.HTTP_INTERNAL_ERROR, condition = "Internal error")
+    })
+    @RequestHeaders({
+            @RequestHeader(name = "Authorization", description = "Developer token")
+    })
+    @ResourceMethodSignature(
+            queryParams = {@QueryParam("chatId")}
+    )
+    @ValidatePost({APIParameter.ContextVariables})
+    public
+    Response setVariable(
+            @Context ContainerRequestContext requestContext) {
+        ApiResult result = this.chatLogic.setContextVariable(
+                ParameterFilter.getAiid(requestContext),
+                ParameterFilter.getDevid(requestContext),
+                ParameterFilter.getChatID(requestContext),
+                ParameterFilter.getContextVariables(requestContext));
         return result.getResponse(this.serializer).build();
     }
 

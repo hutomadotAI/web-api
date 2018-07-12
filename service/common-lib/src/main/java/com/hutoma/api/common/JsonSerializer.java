@@ -6,6 +6,7 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
 
+import org.apache.commons.io.IOUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
@@ -157,6 +158,20 @@ public class JsonSerializer {
             return stringMap;
         } catch (JsonSyntaxException jse) {
             throw new JsonParseException(jse);
+        }
+    }
+
+    /**
+     * Deserializes a Map where both keys and values are strings.
+     * @param content the json content
+     * @return the Map
+     * @throws JsonParseException
+     */
+    public Map<String, String> deserializeStringMap(final InputStream content) throws JsonParseException {
+        try {
+            return this.deserializeStringMap(IOUtils.toString(content, StandardCharsets.UTF_8.name()));
+        } catch (JsonSyntaxException | IOException ex) {
+            throw new JsonParseException(ex);
         }
     }
 

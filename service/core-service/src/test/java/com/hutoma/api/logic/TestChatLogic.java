@@ -526,6 +526,55 @@ public class TestChatLogic extends TestChatBase {
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
     }
 
+    @Test
+    public void testChat_setContextVariable()
+            throws ChatStateHandler.ChatStateException {
+        Map<String, String> variables = new HashMap<String, String>(){{ put("variable1", "value1"); }};
+        ApiResult result = this.chatLogic.setContextVariable(AIID, DEVID_UUID, CHATID.toString(), variables);
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+        verify(this.fakeChatStateHandler).saveState(any(), any(), any(), any());
+    }
+
+    @Test
+    public void testChat_setContextVariable_Multiple()
+            throws ChatStateHandler.ChatStateException {
+        Map<String, String> variables = new HashMap<String, String>(){{
+            put("variable1", "value1");
+            put("variable2", "value2"); }};
+        ApiResult result = this.chatLogic.setContextVariable(AIID, DEVID_UUID, CHATID.toString(), variables);
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+        verify(this.fakeChatStateHandler).saveState(any(), any(), any(), any());
+    }
+
+    @Test
+    public void testChat_setContextVariable_MissingValue()
+            throws ChatStateHandler.ChatStateException {
+        Map<String, String> variables = new HashMap<String, String>(){{
+            put("variable1", "value1");
+            put("variable2", ""); }};
+        ApiResult result = this.chatLogic.setContextVariable(AIID, DEVID_UUID, CHATID.toString(), variables);
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
+        verify(this.fakeChatStateHandler, never()).saveState(any(), any(), any(), any());
+    }
+
+    @Test
+    public void testChat_setContextVariable_EmptyMap()
+            throws ChatStateHandler.ChatStateException {
+        Map<String, String> variables = new HashMap<String, String>();
+        ApiResult result = this.chatLogic.setContextVariable(AIID, DEVID_UUID, CHATID.toString(), variables);
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
+        verify(this.fakeChatStateHandler, never()).saveState(any(), any(), any(), any());
+    }
+
+    @Test
+    public void testChat_setContextVariable_NullMap()
+            throws ChatStateHandler.ChatStateException {
+        Map<String, String> variables = null;
+        ApiResult result = this.chatLogic.setContextVariable(AIID, DEVID_UUID, CHATID.toString(), variables);
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
+        verify(this.fakeChatStateHandler, never()).saveState(any(), any(), any(), any());
+    }
+
     private IChatHandler buildChatHandler(final String response, final boolean complete) {
         return new IChatHandler() {
             @Override

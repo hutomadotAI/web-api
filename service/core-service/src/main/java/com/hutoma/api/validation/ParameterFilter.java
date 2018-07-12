@@ -14,6 +14,7 @@ import com.hutoma.api.logging.ILogger;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.UUID;
 import javax.inject.Inject;
 import javax.ws.rs.container.ContainerRequestContext;
@@ -145,6 +146,10 @@ public class ParameterFilter extends Validate {
 
     public static ChatHandoverTarget getChatHandoverTarget(final ContainerRequestContext requestContext) {
         return (ChatHandoverTarget) requestContext.getProperty(APIParameter.ChatHandoverTarget.toString());
+    }
+
+    public static Map<String, String> getContextVariables(final ContainerRequestContext requestContext) {
+        return (Map<String, String>) requestContext.getProperty(APIParameter.ContextVariables.toString());
     }
 
     /**

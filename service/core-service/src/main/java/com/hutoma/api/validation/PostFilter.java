@@ -22,12 +22,7 @@ import org.glassfish.jersey.message.internal.MediaTypes;
 import org.glassfish.jersey.server.ContainerRequest;
 
 import java.lang.reflect.AnnotatedElement;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import javax.annotation.Priority;
 import javax.inject.Inject;
 import javax.ws.rs.Priorities;
@@ -88,6 +83,8 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
                 case FacebookNotification:
                     //fallthrough
                 case FacebookCustomisations:
+                    //fallthrough
+                case ContextVariables:
                     expectingJson = true;
                     break;
 
@@ -261,6 +258,12 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
                         this.serializer.deserialize(request.getEntityStream(), ApiFacebookCustomisation.class);
                 validateFieldLength(1000, "greeting", facebookCustomisation.getPageGreeting());
                 request.setProperty(APIParameter.FacebookCustomisations.toString(), facebookCustomisation);
+            }
+
+            if (checkList.contains(APIParameter.ContextVariables)) {
+                Map<String, String> variables =
+                        this.serializer.deserializeStringMap(request.getEntityStream());
+                request.setProperty(APIParameter.ContextVariables.toString(), variables);
             }
 
         } catch (JsonParseException jpe) {

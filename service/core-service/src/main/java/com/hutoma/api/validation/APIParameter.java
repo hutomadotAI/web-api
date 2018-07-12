@@ -31,5 +31,6 @@ public enum APIParameter {
     AiStatusJson,
     ServerRegistration,
     ServerAffinity,
-    FacebookNotification
+    FacebookNotification,
+    ContextVariables
 }

@@ -70,7 +70,7 @@ public class TestJsonSerializer {
     @Test
     public void testDeserializeStringMapNullOrEmpty() {
         JsonSerializer js = new JsonSerializer();
-        Assert.assertTrue(js.deserializeStringMap(null).isEmpty());
+        Assert.assertTrue(js.deserializeStringMap((String)null).isEmpty());
         Assert.assertTrue(js.deserializeStringMap("").isEmpty());
     }
 
