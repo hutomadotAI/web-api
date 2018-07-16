@@ -23,7 +23,7 @@ public class TestChatEmbHandler extends TestChatBase {
      * Variable replacement
      */
     @Test
-    public void test_Variable_Replacement() throws ChatBackendConnector.AiControllerException {
+    public void test_Variable_Replacement() {
         ChatEmbHandler handler = new ChatEmbHandler(this.fakeIntentHandler, this.intentProcessor, mock(ILogger.class));
 
         ChatResult result = new ChatResult("");
@@ -39,7 +39,7 @@ public class TestChatEmbHandler extends TestChatBase {
      * Null context map
      */
     @Test
-    public void test_Replacement_No_Context_Map() throws ChatBackendConnector.AiControllerException {
+    public void test_Replacement_No_Context_Map() {
         ChatEmbHandler handler = new ChatEmbHandler(this.fakeIntentHandler, this.intentProcessor, mock(ILogger.class));
 
         ChatResult result = new ChatResult("");
@@ -54,12 +54,12 @@ public class TestChatEmbHandler extends TestChatBase {
      * Empty context map
      */
     @Test
-    public void test_Replacement_Empty_Context_Map() throws ChatBackendConnector.AiControllerException {
+    public void test_Replacement_Empty_Context_Map() {
         ChatEmbHandler handler = new ChatEmbHandler(this.fakeIntentHandler, this.intentProcessor, mock(ILogger.class));
 
         ChatResult result = new ChatResult("");
         result.setAnswer("hello $name");
-        result.setContext(new HashMap<String, String>());
+        result.setContext(new HashMap<>());
 
         handler.extractContextVariables(result);
 
@@ -70,7 +70,7 @@ public class TestChatEmbHandler extends TestChatBase {
      * Unmatched variables
      */
     @Test
-    public void test_Unmatched_Variable_Replacement() throws ChatBackendConnector.AiControllerException {
+    public void test_Unmatched_Variable_Replacement() {
         ChatEmbHandler handler = new ChatEmbHandler(this.fakeIntentHandler, this.intentProcessor, mock(ILogger.class));
 
         ChatResult result = new ChatResult("");
@@ -86,7 +86,7 @@ public class TestChatEmbHandler extends TestChatBase {
      * Multiple variable replacement
      */
     @Test
-    public void test_Multiple_Variable_Replacement() throws ChatBackendConnector.AiControllerException {
+    public void test_Multiple_Variable_Replacement() {
         ChatEmbHandler handler = new ChatEmbHandler(this.fakeIntentHandler, this.intentProcessor, mock(ILogger.class));
 
         ChatResult result = new ChatResult("");
@@ -96,5 +96,18 @@ public class TestChatEmbHandler extends TestChatBase {
         handler.extractContextVariables(result);
 
         Assert.assertEquals("hello bob, bob is going to reading", result.getAnswer());
+    }
+
+    /***
+     * Checks the replacement doesn't occur if the variable value is null
+     */
+    @Test
+    public void test_contextMap_nullValue() {
+        ChatEmbHandler handler = new ChatEmbHandler(this.fakeIntentHandler, this.intentProcessor, mock(ILogger.class));
+        ChatResult result = new ChatResult("");
+        result.setAnswer("hello $name");
+        result.setContext(new HashMap<String, String>(){{put("name", null);}});
+        handler.extractContextVariables(result);
+        Assert.assertEquals("hello $name", result.getAnswer());
     }
 }

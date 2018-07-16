@@ -129,7 +129,9 @@ public class ChatEmbHandler extends ChatGenericBackend implements IChatHandler {
             if (!result.getContext().isEmpty()) {
                 String response = result.getAnswer();
                 for (Map.Entry<String, String> value : result.getContext().entrySet()) {
-                    response = response.replace(String.format("$%s", value.getKey()), value.getValue());
+                    if (value.getValue() != null) {
+                        response = response.replace(String.format("$%s", value.getKey()), value.getValue());
+                    }
                 }
                 result.setAnswer(response);
             }
