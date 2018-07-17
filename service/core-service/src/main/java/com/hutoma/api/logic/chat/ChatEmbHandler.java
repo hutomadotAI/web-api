@@ -69,6 +69,7 @@ public class ChatEmbHandler extends ChatGenericBackend implements IChatHandler {
                     telemetryMap.add("IntentRecognized", true);
                     currentResult.setAnswer(result.getAnswer());
                     currentResult.setIntents(result.getIntents());
+                    currentResult.setWebHookResponse(result.getWebhookResponse());
                     currentResult.setScore(result.getScore());
                     if (!Strings.isNullOrEmpty(result.getPromptForIntentVariable())) {
                         currentResult.setPromptForIntentVariable(result.getPromptForIntentVariable());
