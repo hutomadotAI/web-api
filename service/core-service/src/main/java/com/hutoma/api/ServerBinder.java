@@ -124,6 +124,7 @@ public class ServerBinder extends AbstractBinder {
         bind(ChatRequestTrigger.class).to(ChatRequestTrigger.class);
         bind(ChatAimlHandler.class).to(ChatAimlHandler.class);
         bind(ChatEmbHandler.class).to(ChatEmbHandler.class);
+        bind(ContextVariableExtractor.class).to(ContextVariableExtractor.class);
         bind(ChatDefaultHandler.class).to(ChatDefaultHandler.class);
         bind(ChatConnectors.class).to(ChatConnectors.class);
 
