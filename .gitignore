@@ -68,5 +68,6 @@ modules.xml
 .project
 .factorypath
 
-Python virtual environment
+#Python virtual environment
 venv/
+.pytest_cache/
