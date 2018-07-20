@@ -1,113 +1,77 @@
 package com.hutoma.api.logic;
 
-import com.google.common.collect.ImmutableMap;
+import com.hutoma.api.common.TestDataHelper;
 import com.hutoma.api.connectors.BackendServerType;
+import com.hutoma.api.connectors.ServerConnector;
+import com.hutoma.api.connectors.WebHooks;
+import com.hutoma.api.connectors.chat.AIChatServices;
 import com.hutoma.api.connectors.chat.ChatBackendConnector;
-import com.hutoma.api.containers.ApiChat;
-import com.hutoma.api.containers.ApiResult;
-import com.hutoma.api.containers.sub.ChatResult;
+import com.hutoma.api.containers.sub.*;
 import com.hutoma.api.logging.ILogger;
+import com.hutoma.api.logging.LogMap;
 import com.hutoma.api.logic.chat.ChatEmbHandler;
+import com.hutoma.api.logic.chat.ContextVariableExtractor;
+import com.hutoma.api.logic.chat.IntentProcessor;
+import com.hutoma.api.memory.IMemoryIntentHandler;
+import org.joda.time.DateTime;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
-import java.net.HttpURLConnection;
 import java.util.HashMap;
+import java.util.UUID;
 
+import static com.hutoma.api.common.TestDataHelper.AIID;
+import static com.hutoma.api.common.TestDataHelper.getSampleAI;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class TestChatEmbHandler extends TestChatBase {
+public class TestChatEmbHandler {
 
-    /***
-     * Variable replacement
-     */
-    @Test
-    public void test_Variable_Replacement() {
-        ChatEmbHandler handler = new ChatEmbHandler(this.fakeIntentHandler, this.intentProcessor, mock(ILogger.class));
+    private ChatEmbHandler chatEmbHandler;
+    private IMemoryIntentHandler fakeIntentHandler;
+    private IntentProcessor fakeIntentProcessor;
+    private ContextVariableExtractor fakeContextVariableExtractor;
+    private AIChatServices fakeChatServices;
 
-        ChatResult result = new ChatResult("");
-        result.setAnswer("hello $name");
-        result.setContext(new HashMap<String, String>(){{put("name", "bob");}});
-
-        handler.extractContextVariables(result);
-
-        Assert.assertEquals("hello bob", result.getAnswer());
+    @Before
+    public void setup() {
+        this.fakeIntentHandler = mock(IMemoryIntentHandler.class);
+        this.fakeIntentProcessor = mock(IntentProcessor.class);
+        this.fakeContextVariableExtractor = mock(ContextVariableExtractor.class);
+        this.fakeChatServices = mock(AIChatServices.class);
+        this.chatEmbHandler = new ChatEmbHandler(this.fakeIntentHandler, this.fakeIntentProcessor,
+                this.fakeContextVariableExtractor, mock(ILogger.class));
     }
 
-    /***
-     * Null context map
-     */
     @Test
-    public void test_Replacement_No_Context_Map() {
-        ChatEmbHandler handler = new ChatEmbHandler(this.fakeIntentHandler, this.intentProcessor, mock(ILogger.class));
+    public void testEmbHandler_variableReplacement() throws ServerConnector.AiServicesException, ChatBackendConnector.AiControllerException,
+            ChatLogic.IntentException, WebHooks.WebHookException {
+        final String responseTemplate = "response %s";
+        final String variableValue = "myValue";
+        ChatRequestInfo chatInfo = new ChatRequestInfo(TestDataHelper.DEVID_UUID, TestDataHelper.AIID, UUID.randomUUID(),
+                "question", null);
+        ChatState chatState = new ChatState(DateTime.now(),
+                null, null, UUID.randomUUID(), new HashMap<>(), 0.1d, ChatHandoverTarget.Ai,
+                getSampleAI(), new ChatContext());
+        chatState.setAiChatServices(this.fakeChatServices);
+        ChatResult chatResult = new ChatResult("variable $var1");
+        chatResult.setChatState(chatState);
+        chatResult.setScore(0.9);
 
-        ChatResult result = new ChatResult("");
-        result.setAnswer("hello $name");
+        doAnswer(invocation -> {
+            Object arg = invocation.getArgument(0);
+            ((ChatResult) arg).setAnswer(String.format(responseTemplate, variableValue));
+            return null;
+        }).when(this.fakeContextVariableExtractor).extractContextVariables(any());
 
-        handler.extractContextVariables(result);
+        when(this.fakeChatServices.awaitBackend(BackendServerType.EMB)).thenReturn(new HashMap<UUID, ChatResult>() {{put(AIID, chatResult);}});
+        when(this.fakeChatServices.getMinPMap()).thenReturn(new HashMap<UUID, Double>(){{put(AIID, 0.1);}});
 
-        Assert.assertEquals("hello $name", result.getAnswer());
-    }
+        this.chatEmbHandler.doWork(chatInfo, chatResult, LogMap.map("a", "b"));
 
-    /***
-     * Empty context map
-     */
-    @Test
-    public void test_Replacement_Empty_Context_Map() {
-        ChatEmbHandler handler = new ChatEmbHandler(this.fakeIntentHandler, this.intentProcessor, mock(ILogger.class));
-
-        ChatResult result = new ChatResult("");
-        result.setAnswer("hello $name");
-        result.setContext(new HashMap<>());
-
-        handler.extractContextVariables(result);
-
-        Assert.assertEquals("hello $name", result.getAnswer());
-    }
-
-    /***
-     * Unmatched variables
-     */
-    @Test
-    public void test_Unmatched_Variable_Replacement() {
-        ChatEmbHandler handler = new ChatEmbHandler(this.fakeIntentHandler, this.intentProcessor, mock(ILogger.class));
-
-        ChatResult result = new ChatResult("");
-        result.setAnswer("hello $name");
-        result.setContext(new HashMap<String, String>(){{put("surname", "bob");}});
-
-        handler.extractContextVariables(result);
-
-        Assert.assertEquals("hello $name", result.getAnswer());
-    }
-
-    /***
-     * Multiple variable replacement
-     */
-    @Test
-    public void test_Multiple_Variable_Replacement() {
-        ChatEmbHandler handler = new ChatEmbHandler(this.fakeIntentHandler, this.intentProcessor, mock(ILogger.class));
-
-        ChatResult result = new ChatResult("");
-        result.setAnswer("hello $name, $name is going to $place");
-        result.setContext(new HashMap<String, String>(){{put("name", "bob"); put("place", "reading");}});
-
-        handler.extractContextVariables(result);
-
-        Assert.assertEquals("hello bob, bob is going to reading", result.getAnswer());
-    }
-
-    /***
-     * Checks the replacement doesn't occur if the variable value is null
-     */
-    @Test
-    public void test_contextMap_nullValue() {
-        ChatEmbHandler handler = new ChatEmbHandler(this.fakeIntentHandler, this.intentProcessor, mock(ILogger.class));
-        ChatResult result = new ChatResult("");
-        result.setAnswer("hello $name");
-        result.setContext(new HashMap<String, String>(){{put("name", null);}});
-        handler.extractContextVariables(result);
-        Assert.assertEquals("hello $name", result.getAnswer());
+        Assert.assertEquals(String.format(responseTemplate, variableValue), chatResult.getAnswer());
     }
 }

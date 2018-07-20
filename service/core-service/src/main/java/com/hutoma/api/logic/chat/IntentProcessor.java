@@ -41,6 +41,7 @@ public class IntentProcessor {
     private final IMemoryIntentHandler intentHandler;
     private final WebHooks webHooks;
     private final ConditionEvaluator conditionEvaluator;
+    private final ContextVariableExtractor contextVariableExtractor;
     private final ILogger logger;
 
     @Inject
@@ -48,11 +49,13 @@ public class IntentProcessor {
                            final IMemoryIntentHandler intentHandler,
                            final WebHooks webHooks,
                            final ConditionEvaluator conditionEvaluator,
+                           final ContextVariableExtractor contextVariableExtractor,
                            final ILogger logger) {
         this.entityRecognizer = entityRecognizer;
         this.intentHandler = intentHandler;
         this.webHooks = webHooks;
         this.conditionEvaluator = conditionEvaluator;
+        this.contextVariableExtractor = contextVariableExtractor;
         this.logger = logger;
     }
 
@@ -264,6 +267,10 @@ public class IntentProcessor {
         telemetryMap.add("IntentStream", telemetryMap.get().containsKey("IntentStream")
                 ? String.format("%s, %s", telemetryMap.get().get("IntentStream"), intent.getIntentName())
                 : intent.getIntentName());
+
+        if (handledIntent) {
+            this.contextVariableExtractor.extractContextVariables(chatResult);
+        }
 
         return handledIntent;
     }

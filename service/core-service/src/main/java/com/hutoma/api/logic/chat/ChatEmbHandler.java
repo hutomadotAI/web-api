@@ -23,6 +23,7 @@ public class ChatEmbHandler extends ChatGenericBackend implements IChatHandler {
     private final ILogger logger;
     private final IMemoryIntentHandler intentHandler;
     private final IntentProcessor intentLogic;
+    private final ContextVariableExtractor contextVariableExtractor;
     private AIChatServices chatServices;
     private boolean embConfident;
 
@@ -30,9 +31,11 @@ public class ChatEmbHandler extends ChatGenericBackend implements IChatHandler {
     @Inject
     public ChatEmbHandler(final IMemoryIntentHandler intentHandler,
                           final IntentProcessor intentLogic,
+                          final ContextVariableExtractor contextVariableExtractor,
                           final ILogger logger) {
         this.intentHandler = intentHandler;
         this.intentLogic = intentLogic;
+        this.contextVariableExtractor = contextVariableExtractor;
         this.logger = logger;
     }
 
@@ -81,6 +84,8 @@ public class ChatEmbHandler extends ChatGenericBackend implements IChatHandler {
                 // Not really used by EMB byt to maintain compat with WNET
                 currentResult.setHistory(result.getHistory());
 
+                this.contextVariableExtractor.extractContextVariables(currentResult);
+
                 telemetryMap.add("AnsweredBy", "EMB");
                 markQuestionAnswered(state);
             }
@@ -111,7 +116,7 @@ public class ChatEmbHandler extends ChatGenericBackend implements IChatHandler {
                 telemetryMap.add("AnsweredBy", "EMB");
 
                 // Expand entity variables if intent is handled
-                extractContextVariables(result);
+                this.contextVariableExtractor.extractContextVariables(result);
 
                 markQuestionAnswered(state);
             } else {
@@ -123,20 +128,6 @@ public class ChatEmbHandler extends ChatGenericBackend implements IChatHandler {
         }
 
         return false;
-    }
-
-    public void extractContextVariables(ChatResult result) {
-        if (result.getContext() != null) {
-            if (!result.getContext().isEmpty()) {
-                String response = result.getAnswer();
-                for (Map.Entry<String, String> value : result.getContext().entrySet()) {
-                    if (value.getValue() != null) {
-                        response = response.replace(String.format("$%s", value.getKey()), value.getValue());
-                    }
-                }
-                result.setAnswer(response);
-            }
-        }
     }
 
     private ChatResult getTopResult(final ChatState state,

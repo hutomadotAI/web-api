@@ -76,6 +76,7 @@ public class TestChatBase {
     ChatDefaultHandler fakeDefaultHandler;
     IntentProcessor intentProcessor;
     ConditionEvaluator fakeConditionEvaluator;
+    ContextVariableExtractor fakeContextVariableExtractor;
 
 
     @Before
@@ -91,14 +92,16 @@ public class TestChatBase {
         this.fakeAiStrings = mock(AiStrings.class);
         this.fakeChatWorkflow = mock(ChatWorkflow.class);
         this.fakeConditionEvaluator = mock(ConditionEvaluator.class);
-        this.intentProcessor = new IntentProcessor(this.fakeRecognizer, this.fakeIntentHandler, this.fakeWebHooks, this.fakeConditionEvaluator, mock(ILogger.class));
+        this.fakeContextVariableExtractor = mock(ContextVariableExtractor.class);
+        this.intentProcessor = new IntentProcessor(this.fakeRecognizer, this.fakeIntentHandler, this.fakeWebHooks,
+                this.fakeConditionEvaluator, this.fakeContextVariableExtractor, mock(ILogger.class));
 
         this.fakePassthroughHandler = new ChatPassthroughHandler(this.fakeChatServices, this.fakeWebHooks, mock(Tools.class),
                 mock(ChatLogger.class), mock(ILogger.class));
         this.fakeHandoverHandler = new ChatHandoverHandler(mock(Tools.class));
         this.fakeChatIntenthHandler = new ChatIntentHandler(this.fakeIntentHandler, this.intentProcessor);
         this.fakeRequestBETrigger = new ChatRequestTrigger(this.fakeChatServices);
-        this.fakeEmbHandler = new ChatEmbHandler(this.fakeIntentHandler, this.intentProcessor, mock(ILogger.class));
+        this.fakeEmbHandler = new ChatEmbHandler(this.fakeIntentHandler, this.intentProcessor, this.fakeContextVariableExtractor, mock(ILogger.class));
         this.fakeAimlHandler = new ChatAimlHandler(mock(ILogger.class));
         this.fakeDefaultHandler = new ChatDefaultHandler(this.fakeAiStrings, mock(ILogger.class));
 

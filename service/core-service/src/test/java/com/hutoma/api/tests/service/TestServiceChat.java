@@ -19,14 +19,7 @@ import com.hutoma.api.containers.sub.MemoryVariable;
 import com.hutoma.api.endpoints.ChatEndpoint;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logic.ChatLogic;
-import com.hutoma.api.logic.chat.ChatAimlHandler;
-import com.hutoma.api.logic.chat.ChatDefaultHandler;
-import com.hutoma.api.logic.chat.ChatEmbHandler;
-import com.hutoma.api.logic.chat.ChatIntentHandler;
-import com.hutoma.api.logic.chat.ChatPassthroughHandler;
-import com.hutoma.api.logic.chat.ChatRequestTrigger;
-import com.hutoma.api.logic.chat.ChatWorkflow;
-import com.hutoma.api.logic.chat.IntentProcessor;
+import com.hutoma.api.logic.chat.*;
 import com.hutoma.api.memory.ChatStateHandler;
 import com.hutoma.api.memory.IEntityRecognizer;
 import com.hutoma.api.memory.IMemoryIntentHandler;
@@ -349,7 +342,8 @@ public class TestServiceChat extends ServiceTestBase {
                 mock(ChatLogger.class), mock(ILogger.class));
         this.fakeChatIntenthHandler = new ChatIntentHandler(this.fakeMemoryIntentHandler, this.fakeIntentProcessorLogic);
         this.fakeRequestBETrigger = new ChatRequestTrigger(this.fakeAiChatServices);
-        this.fakeEmbHandler = new ChatEmbHandler(this.fakeMemoryIntentHandler, this.fakeIntentProcessorLogic, mock(ILogger.class));
+        this.fakeEmbHandler = new ChatEmbHandler(this.fakeMemoryIntentHandler, this.fakeIntentProcessorLogic,
+                mock(ContextVariableExtractor.class), mock(ILogger.class));
         this.fakeAimlHandler = new ChatAimlHandler(mock(ILogger.class));
         this.fakeDefaultHandler = new ChatDefaultHandler(this.fakeAiStrings, mock(ILogger.class));
 
