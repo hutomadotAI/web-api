@@ -7,14 +7,13 @@ import java.util.Map;
 public class ContextVariableExtractor {
 
     public void extractContextVariables(final ChatResult result) {
-        if (result.getContext() != null) {
-            if (!result.getContext().isEmpty()) {
-                String response = result.getAnswer();
-                for (Map.Entry<String, String> value : result.getContext().entrySet()) {
-                    response = response.replace(String.format("$%s", value.getKey()), value.getValue());
-                }
-                result.setAnswer(response);
+        if (result.getChatState() != null && result.getChatState().getChatContext() != null) {
+            String response = result.getAnswer();
+            for (Map.Entry<String, String> value :
+                    result.getChatState().getChatContext().getVariablesAsStringMap().entrySet()) {
+                response = response.replace(String.format("$%s", value.getKey()), value.getValue());
             }
+            result.setAnswer(response);
         }
     }
 }
