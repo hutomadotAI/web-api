@@ -219,6 +219,15 @@ public class TestTrainingLogic {
     }
 
     @Test
+    public void testTrain_Doc_UploadCP1252() {
+        // try to upload a document with all characters different from ISO-8859-1
+        // source: https://en.wikipedia.org/wiki/Windows-1252
+        InputStream stream = createUpload("€‚ƒ„…†‡ˆ‰Š‹Œ‘’“”•–—˜™š›œžŸ");
+        ApiResult result = this.logic.uploadFile(DEVID_UUID, AIID, TrainingLogic.TrainingType.DOCUMENT, UURL, stream, this.fakeContentDisposition);
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+    }
+
+    @Test
     public void testTrain_Doc_UploadNull() {
         when(this.fakeConfig.getMaxUploadSizeKb()).thenReturn(1);
         ApiResult result = this.logic.uploadFile(DEVID_UUID, AIID, TrainingLogic.TrainingType.DOCUMENT, UURL, null, this.fakeContentDisposition);

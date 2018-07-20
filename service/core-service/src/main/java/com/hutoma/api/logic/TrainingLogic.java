@@ -19,6 +19,7 @@ import com.hutoma.api.memory.IMemoryIntentHandler;
 import com.hutoma.api.validation.Validate;
 
 import org.apache.commons.lang.CharEncoding;
+import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 
 import java.io.BufferedReader;
@@ -26,6 +27,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
+import java.nio.charset.CharsetEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -173,9 +175,9 @@ public class TrainingLogic {
             this.logger.logUserTraceEvent(LOGFROM, "UploadFile - upload attempt was larger than maximum allowed",
                     devidString, logMap);
             return ApiError.getPayloadTooLarge();
-        } catch (InvalidCharacterException argument) {
+        } catch (InvalidCharacterException ex) {
             this.logger.logUserTraceEvent(LOGFROM, "UploadFile - upload contained unencodable characters",
-                    devidString, logMap);
+                    devidString, logMap.put("Lines", StringUtils.join(ex.getLinesWithErrors(), "\n")));
             return ApiError.getInvalidCharacters();
         } catch (Exception e) {
             this.logger.logUserExceptionEvent(LOGFROM, "UploadFile", devidString, e);
@@ -527,9 +529,10 @@ public class TrainingLogic {
         ArrayList<String> source = new ArrayList<>();
         long fileSize = 0;
 
-        BufferedReader reader = null;
-        try {
-            reader = new BufferedReader(new InputStreamReader(uploadedInputStream, StandardCharsets.UTF_8));
+        List<String> encodingErrorLines = new ArrayList<>();
+        CharsetEncoder dbCharset = Charset.forName("windows-1252").newEncoder();
+        try (BufferedReader reader =
+                     new BufferedReader(new InputStreamReader(uploadedInputStream, StandardCharsets.UTF_8))) {
             String line;
             int lineSize;
             while ((line = reader.readLine()) != null) {
@@ -542,14 +545,14 @@ public class TrainingLogic {
                     throw new UploadTooLargeException();
                 }
                 // Check the line can be encoded with the current DB encoding
-                if (!Charset.forName(CharEncoding.ISO_8859_1).newEncoder().canEncode(line)) {
-                    throw new InvalidCharacterException();
+                if (!dbCharset.canEncode(line)) {
+                    encodingErrorLines.add(line);
                 }
             }
-        } finally {
-            if (null != reader) {
-                reader.close();
-            }
+        }
+        if (!encodingErrorLines.isEmpty()) {
+            throw new InvalidCharacterException(encodingErrorLines);
+
         }
         return source;
     }
