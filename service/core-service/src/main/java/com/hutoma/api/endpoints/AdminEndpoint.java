@@ -5,6 +5,7 @@ import com.hutoma.api.access.Secured;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.logic.AdminLogic;
+import com.hutoma.api.logic.IntentLogic;
 
 import java.util.UUID;
 import javax.inject.Inject;
@@ -21,11 +22,16 @@ public class AdminEndpoint {
 
     private final AdminLogic adminLogic;
     private final JsonSerializer serializer;
+    private final IntentLogic intentLogic;
 
     @Inject
-    public AdminEndpoint(final AdminLogic adminLogic, final JsonSerializer serializer) {
+    public AdminEndpoint(final AdminLogic adminLogic,
+                         final IntentLogic intentLogic,
+                         final JsonSerializer serializer) {
         this.adminLogic = adminLogic;
         this.serializer = serializer;
+        this.intentLogic = intentLogic;
+
     }
 
     //curl -X POST -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsImNhbGciOiJERUYifQ.eNqqVgry93FVsgJT8Y4uvp5-SjpKxaVJQKHElNzMPKVaAAAAAP__.e-INR1D-L_sokTh9sZ9cBnImWI0n6yXXpDCmat1ca_c" http://localhost:8080/api/admin?id=test&role=ROLE_CLIENTONLY
@@ -83,5 +89,14 @@ public class AdminEndpoint {
             @DefaultValue("false") @QueryParam("dryrun") boolean dryrun) {
         ApiResult result = this.adminLogic.regenerateTokens(devId, dryrun);
         return result.getResponse(this.serializer).build();
+    }
+
+    @PUT
+    @Path("convert_intents")
+    @Secured({Role.ROLE_ADMIN})
+    @Produces(MediaType.APPLICATION_JSON)
+    @Deprecated
+    public Response convertIntentsToJson() {
+        return this.intentLogic.convertIntentsToJson().getResponse(this.serializer).build();
     }
 }

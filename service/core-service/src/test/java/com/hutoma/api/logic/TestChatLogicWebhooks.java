@@ -50,16 +50,14 @@ public class TestChatLogicWebhooks extends TestChatBase {
         mv.setCurrentValue("a value"); // to fulfill
         MemoryIntent mi = new MemoryIntent(intentName, AIID, CHATID, Collections.singletonList(mv));
 
-        WebHook wh = new WebHook(UUID.randomUUID(), "testName", "https://fakewebhookaddress/webhook", true);
         WebHookResponse wr = new WebHookResponse(webHookResponse);
-        when(this.fakeDatabaseAi.getWebHook(any(), any())).thenReturn(wh);
-        when(this.fakeWebHooks.getWebHookForIntent(any(), any())).thenReturn(VALID_WEBHOOK);
         when(this.fakeWebHooks.executeIntentWebHook(any(), any(), any(), any())).thenReturn(wr);
 
         setupFakeChat(0.7d, MemoryIntentHandler.META_INTENT_TAG + intentName, 0.0d, AIMLRESULT);
         when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), anyString(), any())).thenReturn(mi);
         ApiIntent intent = new ApiIntent(intentName, "", "");
         intent.setResponses(Collections.singletonList(INTENTRESPONSE));
+        intent.setWebHook(new WebHook(UUID.randomUUID(), "testName", "https://fakewebhookaddress/webhook", true));
         when(this.fakeIntentHandler.getIntent(any(), any())).thenReturn(intent);
         when(this.fakeIntentHandler.getCurrentIntentsStateForChat(any())).thenReturn(Collections.singletonList(mi));
 
@@ -83,8 +81,6 @@ public class TestChatLogicWebhooks extends TestChatBase {
         MemoryIntent mi = new MemoryIntent(intentName, AIID, CHATID, Collections.singletonList(mv));
         WebHook wh = new WebHook(UUID.randomUUID(), "testName", "https://fakewebhookaddress/webhook", true);
         WebHookResponse wr = new WebHookResponse(webHookResponse);
-        when(this.fakeDatabaseAi.getWebHook(any(), any())).thenReturn(wh);
-        when(this.fakeWebHooks.getWebHookForIntent(any(), any())).thenReturn(VALID_WEBHOOK);
         when(this.fakeWebHooks.executeIntentWebHook(any(), any(), any(), any())).thenReturn(wr);
         setupFakeChat(0.7d, MemoryIntentHandler.META_INTENT_TAG + intentName, 0.0d, AIMLRESULT);
         when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), anyString(), any())).thenReturn(mi);
@@ -114,16 +110,13 @@ public class TestChatLogicWebhooks extends TestChatBase {
         mv.setCurrentValue("a value"); // to fulfill
         MemoryIntent mi = new MemoryIntent(intentName, AIID, CHATID, Collections.singletonList(mv));
 
-        WebHook wh = new WebHook(UUID.randomUUID(), "testName", "https://fakewebhookaddress/webhook", true);
-
-        when(this.fakeDatabaseAi.getWebHook(any(), any())).thenReturn(wh);
-        when(this.fakeWebHooks.getWebHookForIntent(any(), any())).thenReturn(VALID_WEBHOOK);
         when(this.fakeWebHooks.executeIntentWebHook(any(), any(), any(), any())).thenReturn(wr);
 
         setupFakeChat(0.7d, MemoryIntentHandler.META_INTENT_TAG + intentName, 0.0d, AIMLRESULT);
         when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), anyString(), any())).thenReturn(mi);
         ApiIntent intent = new ApiIntent(intentName, "", "");
         intent.setResponses(Collections.singletonList(INTENTRESPONSE));
+        intent.setWebHook(new WebHook(UUID.randomUUID(), "testName", "https://fakewebhookaddress/webhook", true));
         when(this.fakeIntentHandler.getIntent(any(), any())).thenReturn(intent);
         when(this.fakeIntentHandler.getCurrentIntentsStateForChat(any())).thenReturn(Collections.singletonList(mi));
 
@@ -170,7 +163,6 @@ public class TestChatLogicWebhooks extends TestChatBase {
         MemoryIntent mi = new MemoryIntent(intentName, AIID, CHATID, Collections.singletonList(mv));
 
         WebHookResponse wr = new WebHookResponse(webHookResponse);
-        when(this.fakeWebHooks.getWebHookForIntent(any(), any())).thenReturn(new WebHook(AIID, "intent", "endpoint", false));
         when(this.fakeWebHooks.executeIntentWebHook(any(), any(), any(), any())).thenReturn(wr);
 
         setupFakeChat(0.7d, MemoryIntentHandler.META_INTENT_TAG + intentName, 0.0d, AIMLRESULT);
@@ -214,12 +206,12 @@ public class TestChatLogicWebhooks extends TestChatBase {
         MemoryVariable mv = new MemoryVariable("var", Arrays.asList("a", "b"));
         mv.setCurrentValue("a value"); // to fulfill
         MemoryIntent mi = new MemoryIntent(intentName, AIID, CHATID, Collections.singletonList(mv));
-        when(this.fakeWebHooks.getWebHookForIntent(any(), any())).thenReturn(VALID_WEBHOOK);
         setupFakeChat(0.7d,
                 MemoryIntentHandler.META_INTENT_TAG + intentName, 0.0d, AIMLRESULT);
         when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), anyString(), any())).thenReturn(mi);
         ApiIntent intent = new ApiIntent(intentName, "", "");
         intent.setResponses(Collections.singletonList(INTENTRESPONSE));
+        intent.setWebHook(VALID_WEBHOOK);
 
         when(this.fakeIntentHandler.getIntent(any(), any())).thenReturn(intent);
         when(this.fakeIntentHandler.getCurrentIntentsStateForChat(any())).thenReturn(Collections.singletonList(mi));

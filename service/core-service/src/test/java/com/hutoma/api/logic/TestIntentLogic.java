@@ -4,11 +4,7 @@ import com.hutoma.api.common.Config;
 import com.hutoma.api.common.CsvIntentReader;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.TestDataHelper;
-import com.hutoma.api.connectors.db.DatabaseAI;
-import com.hutoma.api.connectors.db.DatabaseEntitiesIntents;
-import com.hutoma.api.connectors.db.DatabaseException;
-import com.hutoma.api.connectors.db.DatabaseIntegrityViolationException;
-import com.hutoma.api.connectors.db.DatabaseTransaction;
+import com.hutoma.api.connectors.db.*;
 import com.hutoma.api.containers.ApiCsvImportResult;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.ApiIntentList;
@@ -80,7 +76,7 @@ public class TestIntentLogic {
         this.fakeCsvIntentReader = mock(CsvIntentReader.class);
         this.intentLogic = new IntentLogic(this.fakeConfig, this.fakeLogger, this.fakeDatabaseEntitiesIntents,
                 this.fakeDatabase, this.trainingLogic, mock(JsonSerializer.class), this.fakeDatabaseTransactionProvider,
-                this.fakeCsvIntentReader);
+                this.fakeCsvIntentReader, mock(DatabaseUser.class));
 
         when(this.fakeConfig.getMaxUploadSizeKb()).thenReturn(1000);
         when(this.fakeDatabaseTransactionProvider.get()).thenReturn(this.fakeDatabaseTransaction);
@@ -172,7 +168,7 @@ public class TestIntentLogic {
     }
 
     @Test
-    public void testWriteIntent_Success() throws DatabaseException {
+    public void testWriteIntent_Success(){
         final ApiResult result = this.intentLogic.writeIntent(DEVID_UUID, AIID, getIntent());
         Assert.assertEquals(HttpURLConnection.HTTP_CREATED, result.getStatus().getCode());
     }
@@ -248,16 +244,6 @@ public class TestIntentLogic {
         setupAiReadonlyMode(this.fakeDatabase);
         final ApiResult result = this.intentLogic.deleteIntent(DEVID_UUID, AIID, INTENTNAME);
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
-    }
-
-    @Test
-    public void testDeleteIntent_WebHookDeleted() throws DatabaseException {
-        WebHook wh = new WebHook(UUID.randomUUID(), "testName", "https://fakewebhook", true);
-        when(this.fakeDatabaseEntitiesIntents.deleteIntent(any(), any(), anyString())).thenReturn(true);
-        when(this.fakeDatabaseEntitiesIntents.getWebHook(any(), any())).thenReturn(wh);
-
-        this.intentLogic.deleteIntent(DEVID_UUID, AIID, INTENTNAME);
-        verify(this.fakeDatabaseEntitiesIntents).deleteWebHook(any(), any());
     }
 
     @Test

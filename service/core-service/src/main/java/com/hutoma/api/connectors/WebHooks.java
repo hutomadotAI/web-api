@@ -163,22 +163,6 @@ public class WebHooks {
         return deserializedResponse;
     }
 
-    /***
-     * Determines whether an active WebHook exists.
-     * @param intent The intent.
-     * @return the active WebHook if it exists, null otherwise.
-     */
-    public WebHook getWebHookForIntent(final MemoryIntent intent, final UUID devId) {
-        WebHook webHook = null;
-        try {
-            webHook = this.databaseAi.getWebHook(intent.getAiid(), intent.getName());
-        } catch (DatabaseException e) {
-            this.logger.logUserExceptionEvent(LOGFROM, "WebHook Database Error", devId.toString(), e);
-        }
-
-        return webHook;
-    }
-
     private WebHookResponse executeWebhook(final String webHookEndpoint, final WebHookPayload payload,
                                            final String devIdString, final UUID aiid)
             throws WebHookException {

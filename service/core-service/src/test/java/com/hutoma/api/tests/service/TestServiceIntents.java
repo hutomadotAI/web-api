@@ -1,6 +1,7 @@
 package com.hutoma.api.tests.service;
 
 import com.hutoma.api.common.TestDataHelper;
+import com.hutoma.api.connectors.db.DatabaseUser;
 import com.hutoma.api.containers.ApiCsvImportResult;
 import com.hutoma.api.endpoints.IntentsEndpoint;
 import com.hutoma.api.logic.IntentLogic;
@@ -23,6 +24,7 @@ import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.Response;
 
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
 public class TestServiceIntents extends ServiceTestBase {
 
@@ -105,6 +107,7 @@ public class TestServiceIntents extends ServiceTestBase {
         binder.bind(IntentLogic.class).to(IntentLogic.class);
         binder.bind(TrainingLogic.class).to(TrainingLogic.class);
         binder.bind(MemoryIntentHandler.class).to(IMemoryIntentHandler.class);
+        binder.bindFactory(new InstanceFactory<>(mock(DatabaseUser.class))).to(DatabaseUser.class);
         return binder;
     }
 

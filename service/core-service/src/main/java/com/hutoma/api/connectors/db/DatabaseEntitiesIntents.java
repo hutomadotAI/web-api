@@ -11,16 +11,12 @@ import com.hutoma.api.logging.ILogger;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 
 import java.lang.reflect.Type;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.OptionalInt;
-import java.util.UUID;
+import java.util.*;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
@@ -166,7 +162,61 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
         }
 
         try {
-            ResultSet rs = transaction.getDatabaseCall().initialise("getIntent", 2).add(aiid).add(intentName)
+            ResultSet rs = transaction.getDatabaseCall().initialise("getIntent", 2)
+                    .add(aiid)
+                    .add(intentName)
+                    .executeQuery();
+            if (!rs.next()) {
+                // the intent was not found at all
+                return null;
+            }
+
+            return (ApiIntent) this.serializer.deserialize(rs.getString("intent_json"), ApiIntent.class);
+        } catch (SQLException sqle) {
+            throw new DatabaseException(sqle);
+        }
+    }
+
+    /***
+     * Gets a fully populated intent object
+     * including intent, usersays, variables and prompts
+     * @param aiid the aiid that owns the intent
+     * @param intentName the intent name
+     * @return an intent
+     * @throws DatabaseException if things go wrong
+     */
+    @Deprecated
+    public ApiIntent getIntent_toDeprecate(final UUID aiid, final String intentName) throws DatabaseException {
+        try (DatabaseTransaction transaction = this.transactionProvider.get()) {
+            ApiIntent intent = getIntent_toDeprecate(aiid, intentName, transaction);
+            transaction.commit();
+            return intent;
+        }
+    }
+
+    /***
+     * Gets a fully populated intent object
+     * including intent, usersays, variables and prompts
+     * @param aiid the aiid that owns the intent
+     * @param intentName the intent name
+     * @param transaction the transaction it should be enrolled in
+     * @return an intent
+     * @throws DatabaseException if things go wrong
+     */
+    @Deprecated
+    public ApiIntent getIntent_toDeprecate(final UUID aiid,
+                                           final String intentName,
+                                           final DatabaseTransaction transaction)
+            throws DatabaseException {
+
+        if (transaction == null) {
+            throw new IllegalArgumentException("transaction");
+        }
+
+        try {
+            ResultSet rs = transaction.getDatabaseCall().initialise("getIntent_toDeprecate", 2)
+                    .add(aiid)
+                    .add(intentName)
                     .executeQuery();
             if (!rs.next()) {
                 // the intent was not found at all
@@ -350,46 +400,47 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
      * @throws DatabaseException if something goes wrong
      */
     public int writeIntent(final UUID devid, final UUID aiid, final String intentName, final ApiIntent intent,
-                            final DatabaseTransaction transaction)
+                                       final DatabaseTransaction transaction)
             throws DatabaseException {
 
         if (transaction == null) {
             throw new IllegalArgumentException("transaction");
         }
-        try {
 
-            // add or update the intent
-            int rowcount = transaction.getDatabaseCall().initialise("addUpdateIntent", 12)
-                    .add(devid)
-                    .add(aiid)
-                    .add(intentName)
-                    .add(intent.getIntentName())
-                    .add(intent.getTopicIn())
-                    .add(intent.getTopicOut())
-                    .add(Database.getNullIfEmpty(intent.getContextIn(), this.serializer::serialize))
-                    .add(Database.getNullIfEmpty(intent.getContextOut(), this.serializer::serialize))
-                    .add(Database.getNullIfEmpty(intent.getConditionsIn(), this.serializer::serialize))
-                    .add(intent.getConditionsFallthroughMessage())
-                    .add(intent.getResetContextOnExit())
-                    .add(Database.getNullIfEmpty(intent.getIntentOutConditionals(), this.serializer::serialize))
-                    .executeUpdate();
-
-            if (rowcount != 1 && rowcount != 2) { // insert=1, update=2
-                throw new DatabaseException("Failed to add/update intent");
-            }
-
-            // synchronise user says (change as needed)
-            updateIntentUserSays(devid, aiid, intent, transaction);
-            // synchronise responses (change as needed)
-            updateIntentResponses(devid, aiid, intent, transaction);
-            // synchronise variables and their prompts
-            updateIntentVariables(devid, aiid, intent, transaction);
-
-            return rowcount;
-
-        } catch (SQLException e) {
-            throw new DatabaseException(e);
+        intent.setLastUpdated(DateTime.now(DateTimeZone.UTC));
+        if (intent.getResponses() == null) {
+            intent.setResponses(new ArrayList<>());
         }
+        if (intent.getUserSays() == null) {
+            intent.setUserSays(new ArrayList<>());
+        }
+        if (intent.getContextIn() == null) {
+            intent.setContextIn(new HashMap<>());
+        }
+        if (intent.getContextOut() == null) {
+            intent.setContextOut(new HashMap<>());
+        }
+        if (intent.getConditionsIn() == null) {
+            intent.setConditionsIn(new ArrayList<>());
+        }
+        if (intent.getIntentOutConditionals() == null) {
+            intent.setIntentOutConditionals(new ArrayList<>());
+        }
+
+        // add or update the intent
+        int rowcount = transaction.getDatabaseCall().initialise("addUpdateIntent", 5)
+                .add(devid)
+                .add(aiid)
+                .add(intentName)
+                .add(intent.getIntentName())
+                .add(this.serializer.serialize(intent))
+                .executeUpdate();
+
+        if (rowcount != 1 && rowcount != 2) { // insert=1, update=2
+            throw new DatabaseException("Failed to add/update intent");
+        }
+
+        return rowcount;
     }
 
     /***
@@ -434,229 +485,6 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
             call.initialise("resetChatStatesForAi", 2).add(devId).add(aiid);
             call.executeUpdate();
         }
-    }
-
-    /***
-     * * Synchronise "user says" between database and new data
-     * @param devid
-     * @param aiid
-     * @param intent
-     * @param transaction
-     * @throws DatabaseException
-     * @throws SQLException
-     */
-    private void updateIntentUserSays(final UUID devid, final UUID aiid, final ApiIntent intent,
-                                      final DatabaseTransaction transaction)
-            throws DatabaseException, SQLException {
-
-        // read current
-        ResultSet readCurrentRs = transaction.getDatabaseCall().initialise("getIntentUserSays", 2)
-                .add(aiid).add(intent.getIntentName()).executeQuery();
-
-        HashSet<String> currentSet = new HashSet<>();
-        // put them into a set
-        while (readCurrentRs.next()) {
-            currentSet.add(readCurrentRs.getString("says"));
-        }
-
-        if (intent.getUserSays() != null) {
-            // for each new bit of data
-            for (String newValue : intent.getUserSays()) {
-                // mark it if it already existed
-                if (!currentSet.remove(newValue)) {
-                    // or add it if it didn't
-                    transaction.getDatabaseCall().initialise("addIntentUserSays", 4)
-                            .add(devid).add(aiid).add(intent.getIntentName()).add(newValue).executeUpdate();
-                }
-            }
-        }
-
-        // delete the old ones
-        for (String obsoleteValue : currentSet) {
-            transaction.getDatabaseCall().initialise("deleteIntentUserSays", 4)
-                    .add(devid).add(aiid).add(intent.getIntentName()).add(obsoleteValue).executeUpdate();
-        }
-    }
-
-    /***
-     * Synchronise user responses between database and new data
-     * @param devid
-     * @param aiid
-     * @param intent
-     * @param transaction
-     * @throws DatabaseException
-     * @throws SQLException
-     */
-    private void updateIntentResponses(final UUID devid, final UUID aiid, final ApiIntent intent,
-                                       final DatabaseTransaction transaction)
-            throws DatabaseException, SQLException {
-
-
-        // read current
-        ResultSet readCurrentRs = transaction.getDatabaseCall().initialise("getIntentResponses", 2)
-                .add(aiid).add(intent.getIntentName()).executeQuery();
-
-        // put them into a set
-        HashSet<String> currentSet = new HashSet<>();
-        while (readCurrentRs.next()) {
-            currentSet.add(readCurrentRs.getString("response"));
-        }
-
-
-        if (intent.getResponses() != null) {
-            // for each new bit of data
-            for (String newValue : intent.getResponses()) {
-                // mark it if it already existed
-                if (!currentSet.remove(newValue)) {
-                    // or add it if it didn't
-                    transaction.getDatabaseCall().initialise("addIntentResponse", 4)
-                            .add(devid).add(aiid).add(intent.getIntentName()).add(newValue).executeUpdate();
-                }
-            }
-        }
-
-        // delete the old ones
-        for (String obsoleteValue : currentSet) {
-            transaction.getDatabaseCall().initialise("deleteIntentResponse", 4)
-                    .add(devid).add(aiid).add(intent.getIntentName()).add(obsoleteValue).executeUpdate();
-        }
-    }
-
-    /***
-     * Synchronise new intent variables with old ones in the database
-     * @param devid
-     * @param aiid
-     * @param intent
-     * @param transaction
-     * @throws DatabaseException
-     * @throws SQLException
-     */
-    private void updateIntentVariables(final UUID devid, final UUID aiid, final ApiIntent intent,
-                                       final DatabaseTransaction transaction)
-            throws DatabaseException, SQLException {
-
-        // read the existing intent variables from the database
-        ResultSet readCurrentRs = transaction.getDatabaseCall().initialise("getIntentVariables", 2)
-                .add(aiid).add(intent.getIntentName()).executeQuery();
-
-        // put them into a set
-        HashMap<Integer, IntentVariable> currentSet = new HashMap<>();
-        while (readCurrentRs.next()) {
-            String uuidString = readCurrentRs.getString("dev_id");
-            UUID devOwnerUUID = UUID.fromString(uuidString);
-            IntentVariable old = new IntentVariable(
-                    readCurrentRs.getString("entity_name"),
-                    devOwnerUUID,
-                    readCurrentRs.getBoolean("required"),
-                    readCurrentRs.getInt("n_prompts"),
-                    readCurrentRs.getString("value"),
-                    readCurrentRs.getInt("id"),
-                    readCurrentRs.getBoolean("isPersistent"),
-                    readCurrentRs.getString("label"));
-            old.setLifetimeTurns(readCurrentRs.getInt("lifetime_turns"));
-            currentSet.put(old.getId(), old);
-        }
-
-        if (intent.getVariables() != null) {
-            // for every variable in the new data ...
-            for (IntentVariable newValue : intent.getVariables()) {
-                // mark it as done if there was already one using that entity
-                currentSet.remove(newValue.getId());
-                // and create or update it
-                intentVariableCreateOrUpdate(transaction, devid, aiid, intent, newValue);
-            }
-        }
-
-        // anything left over needs to be deleted
-        for (IntentVariable obsoleteVar : currentSet.values()) {
-            intentVariableDeleteOld(transaction, devid, aiid, intent, obsoleteVar);
-        }
-    }
-
-    /***
-     * Update an intent variable with new data and potential changes to prompts
-     * @param transaction
-     * @param devid
-     * @param aiid
-     * @param intent
-     * @param intentVariable
-     * @throws DatabaseException
-     * @throws SQLException
-     */
-    private void intentVariableCreateOrUpdate(final DatabaseTransaction transaction, final UUID devid,
-                                              final UUID aiid, final ApiIntent intent,
-                                              final IntentVariable intentVariable)
-            throws DatabaseException, SQLException {
-
-        // generate the call params
-        ResultSet updateVarRs = transaction.getDatabaseCall().initialise("addUpdateIntentVariable", 9)
-                .add(devid)
-                .add(aiid)
-                .add(intent.getIntentName())
-                .add(intentVariable.getEntityName())
-                .add(intentVariable.isRequired())
-                .add(intentVariable.getNumPrompts())
-                .add(intentVariable.getValue())
-                .add(intentVariable.getLabel())
-                .add(intentVariable.getLifetimeTurns())
-                .executeQuery();
-
-        // we are expecting some results; if not then something has gone very wrong
-        if (!updateVarRs.next()) {
-            throw new DatabaseException("unable to create/update intent variable");
-        }
-
-        // 1 is a create and 2 is an update (0 means that we failed)
-        if (updateVarRs.getInt("update") < 1) {
-            throw new DatabaseEntityException(String.format("failed to update intent variable \"%s\" "
-                            + " with entity name \"%s\"",
-                    (intentVariable.getLabel() == null) ? "(null label)" : intentVariable.getLabel(),
-                    (intentVariable.getEntityName() == null) ? "(null entity)" : intentVariable.getEntityName()));
-        }
-
-        // we need to take note of the ID to update prompts against
-        int varId = updateVarRs.getInt("affected_id");
-
-        // what prompts do we have now?
-        ResultSet readCurrentRs = transaction.getDatabaseCall().initialise("getIntentVariablePrompts", 2)
-                .add(aiid).add(varId).executeQuery();
-        // put them into a set
-        HashSet<String> currentSet = new HashSet<>();
-        while (readCurrentRs.next()) {
-            currentSet.add(readCurrentRs.getString("prompt"));
-        }
-
-        if (intentVariable.getPrompts() != null) {
-            // add any prompts that didn't exist before
-            for (String newValue : intentVariable.getPrompts()) {
-                if (!currentSet.remove(newValue)) {
-                    transaction.getDatabaseCall().initialise("addIntentVariablePrompt", 4)
-                            .add(devid).add(aiid).add(varId).add(newValue).executeUpdate();
-                }
-            }
-        }
-
-        // delete the prompts that we no longer need
-        for (String obsoleteValue : currentSet) {
-            transaction.getDatabaseCall().initialise("deleteIntentVariablePrompt", 4)
-                    .add(devid).add(aiid).add(varId).add(obsoleteValue).executeUpdate();
-        }
-    }
-
-    /***
-     * Delete an intent variable that is no longer referenced by an intent
-     * @param transaction
-     * @param devid
-     * @param aiid
-     * @param intent
-     * @param variable
-     * @throws DatabaseException
-     */
-    private void intentVariableDeleteOld(final DatabaseTransaction transaction, final UUID devid, final UUID aiid,
-                                         ApiIntent intent, IntentVariable variable) throws DatabaseException {
-        transaction.getDatabaseCall().initialise("deleteIntentVariable", 3)
-                .add(devid).add(aiid).add(variable.getId())
-                .executeUpdate();
     }
 
     @SuppressFBWarnings("DM_NEW_FOR_GETCLASS")

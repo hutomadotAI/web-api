@@ -3,18 +3,10 @@ package com.hutoma.api.logic;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.CsvIntentReader;
 import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.connectors.db.DatabaseAI;
-import com.hutoma.api.connectors.db.DatabaseEntitiesIntents;
-import com.hutoma.api.connectors.db.DatabaseIntegrityViolationException;
-import com.hutoma.api.connectors.db.DatabaseTransaction;
-import com.hutoma.api.containers.ApiAi;
-import com.hutoma.api.containers.ApiCsvImportResult;
-import com.hutoma.api.containers.ApiError;
-import com.hutoma.api.containers.ApiIntent;
-import com.hutoma.api.containers.ApiIntentList;
-import com.hutoma.api.containers.ApiResult;
+import com.hutoma.api.connectors.db.*;
+import com.hutoma.api.containers.*;
 import com.hutoma.api.containers.sub.IntentVariable;
-import com.hutoma.api.containers.sub.WebHook;
+import com.hutoma.api.containers.sub.UserInfo;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
 
@@ -47,6 +39,7 @@ public class IntentLogic {
     private final JsonSerializer jsonSerializer;
     private final Provider<DatabaseTransaction> databaseTransactionProvider;
     private final CsvIntentReader csvIntentReader;
+    private final DatabaseUser databaseUser;
 
     @Inject
     IntentLogic(final Config config,
@@ -56,7 +49,8 @@ public class IntentLogic {
                 final TrainingLogic trainingLogic,
                 final JsonSerializer jsonSerializer,
                 final Provider<DatabaseTransaction> transactionProvider,
-                final CsvIntentReader csvIntentReader) {
+                final CsvIntentReader csvIntentReader,
+                final DatabaseUser databaseUser) {
         this.config = config;
         this.logger = logger;
         this.databaseEntitiesIntents = databaseEntitiesIntents;
@@ -65,6 +59,7 @@ public class IntentLogic {
         this.jsonSerializer = jsonSerializer;
         this.databaseTransactionProvider = transactionProvider;
         this.csvIntentReader = csvIntentReader;
+        this.databaseUser = databaseUser;
     }
 
     public ApiResult getIntents(final UUID devid, final UUID aiid) {
@@ -102,8 +97,6 @@ public class IntentLogic {
                 this.logger.logUserTraceEvent(LOGFROM, "GetIntent - not found", devidString, logMap);
                 return ApiError.getNotFound("Intent not found");
             }
-            WebHook webHook = this.databaseEntitiesIntents.getWebHook(aiid, intentName);
-            intent.setWebHook(webHook);
 
             this.logger.logUserTraceEvent(LOGFROM, "GetIntent", devidString, logMap);
 
@@ -170,26 +163,6 @@ public class IntentLogic {
             }
             try (DatabaseTransaction transaction = this.databaseTransactionProvider.get()) {
                 this.databaseEntitiesIntents.writeIntent(devid, aiid, intent.getIntentName(), intent, transaction);
-                WebHook webHook = intent.getWebHook();
-                if (webHook != null) {
-                    if (this.databaseEntitiesIntents.getWebHook(aiid, intent.getIntentName()) != null) {
-                        if (!this.databaseAi.updateWebHook(aiid, intent.getIntentName(),
-                                webHook.getEndpoint(), webHook.isEnabled(), transaction)) {
-                            this.logger.logUserErrorEvent(LOGFROM, "Failed to update webhook",
-                                    devidString, logMap);
-                            return ApiError.getInternalServerError();
-                        }
-                        this.logger.logUserTraceEvent(LOGFROM, "UpdateWebHook", devidString, logMap);
-                    } else {
-                        if (!this.databaseAi.createWebHook(aiid, webHook.getIntentName(),
-                                webHook.getEndpoint(), webHook.isEnabled(), transaction)) {
-                            this.logger.logUserErrorEvent(LOGFROM, "Failed to create webhook",
-                                    devidString, logMap);
-                            return ApiError.getInternalServerError();
-                        }
-                        this.logger.logUserTraceEvent(LOGFROM, "WriteWebHook", devidString, logMap);
-                    }
-                }
                 transaction.commit();
             }
             this.trainingLogic.stopTraining(devid, aiid);
@@ -225,9 +198,6 @@ public class IntentLogic {
             if (!this.databaseEntitiesIntents.deleteIntent(devid, aiid, intentName)) {
                 this.logger.logUserTraceEvent(LOGFROM, "DeleteIntent - not found", devidString, logMap);
                 return ApiError.getNotFound();
-            }
-            if (this.databaseEntitiesIntents.getWebHook(aiid, intentName) != null) {
-                this.databaseEntitiesIntents.deleteWebHook(aiid, intentName);
             }
             this.trainingLogic.stopTraining(devid, aiid);
             this.logger.logUserTraceEvent(LOGFROM, "DeleteIntent", devidString, logMap);
@@ -277,6 +247,35 @@ public class IntentLogic {
                     String.format("Upload too large. Maximum %dKb", this.config.getMaxUploadSizeKb()));
         } catch (Exception ex) {
             this.logger.logUserExceptionEvent(LOGFROM, "bulkimportcsv", devId.toString(), ex);
+            return ApiError.getInternalServerError();
+        }
+    }
+
+    @Deprecated
+    public ApiResult convertIntentsToJson() {
+        try (DatabaseTransaction transaction = this.databaseTransactionProvider.get()) {
+            int intentCount = 0;
+            List<UserInfo> users = this.databaseUser.getAllUsers();
+            for (UserInfo userInfo: users) {
+                UUID devId = UUID.fromString(userInfo.getDevId());
+                List<ApiAi> ais = this.databaseAi.getAllAIs(devId, this.jsonSerializer);
+                for (ApiAi ai: ais) {
+                    UUID aiid = UUID.fromString(ai.getAiid());
+                    List<String> intentNames = this.databaseEntitiesIntents.getIntents(devId, aiid);
+                    for (String intentName: intentNames) {
+                        intentCount++;
+                        ApiIntent intent = this.databaseEntitiesIntents.getIntent_toDeprecate(
+                                aiid, intentName, transaction);
+                        this.databaseEntitiesIntents.writeIntent(
+                                devId, aiid, intent.getIntentName(), intent, transaction);
+                    }
+                }
+            }
+            transaction.commit();
+            return new ApiResult().setSuccessStatus(String.format("%d intents converted", intentCount));
+
+        } catch (DatabaseException ex) {
+            this.logger.logException(LOGFROM, ex);
             return ApiError.getInternalServerError();
         }
     }

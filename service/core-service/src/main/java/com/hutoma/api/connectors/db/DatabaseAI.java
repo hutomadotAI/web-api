@@ -464,6 +464,7 @@ public class DatabaseAI extends Database {
         }
     }
 
+    @Deprecated
     public WebHook getWebHook(final UUID aiid, final String intentName) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("getWebhook", 2).add(aiid).add(intentName);
@@ -483,6 +484,7 @@ public class DatabaseAI extends Database {
         }
     }
 
+    @Deprecated
     public boolean updateWebHook(final UUID aiid, final String intentName, final String endpoint, final boolean enabled,
                                  final DatabaseTransaction transaction)
             throws DatabaseException {
@@ -493,6 +495,7 @@ public class DatabaseAI extends Database {
         }
     }
 
+    @Deprecated
     public boolean deleteWebHook(final UUID aiid, final String intentName) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("deleteWebhook", 2).add(aiid).add(intentName);

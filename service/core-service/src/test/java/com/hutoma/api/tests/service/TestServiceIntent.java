@@ -3,6 +3,7 @@ package com.hutoma.api.tests.service;
 import com.hutoma.api.common.TestDataHelper;
 import com.hutoma.api.connectors.aiservices.AIServices;
 import com.hutoma.api.connectors.db.DatabaseException;
+import com.hutoma.api.connectors.db.DatabaseUser;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.sub.IntentVariable;
 import com.hutoma.api.containers.sub.WebHook;
@@ -115,6 +116,7 @@ public class TestServiceIntent extends ServiceTestBase {
 
         binder.bindFactory(new InstanceFactory<>(this.fakeMemoryIntentHandler)).to(IMemoryIntentHandler.class);
         binder.bindFactory(new InstanceFactory<>(this.fakeAiServices)).to(AIServices.class);
+        binder.bindFactory(new InstanceFactory<>(mock(DatabaseUser.class))).to(DatabaseUser.class);
         return binder;
     }
 

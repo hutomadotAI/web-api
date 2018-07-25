@@ -578,7 +578,7 @@ public class IntentProcessor {
         }
 
         // If the webhook returns a text response, overwrite the answer.
-        WebHook webHook = this.webHooks.getWebHookForIntent(currentIntent, chatInfo.getDevId());
+        WebHook webHook = intent.getWebHook();
         if (webHook != null && webHook.isEnabled()) {
             log.put("Webhook run", true);
 
