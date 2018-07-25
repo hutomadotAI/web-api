@@ -547,6 +547,9 @@ public class IntentProcessor {
     private String getRandomIntentResponse(final UUID aiid, final MemoryIntent memoryIntent, final ApiIntent intent) {
         if (intent != null) {
             List<String> responses = intent.getResponses();
+            if (responses == null || responses.isEmpty()) {
+                return "";
+            }
             String response = responses.get((int) (Math.random() * responses.size()));
             return response;
         }

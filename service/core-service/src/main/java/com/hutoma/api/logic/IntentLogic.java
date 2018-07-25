@@ -5,7 +5,9 @@ import com.hutoma.api.common.CsvIntentReader;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.connectors.db.*;
 import com.hutoma.api.containers.*;
+import com.hutoma.api.containers.sub.IntentConditionOperator;
 import com.hutoma.api.containers.sub.IntentVariable;
+import com.hutoma.api.containers.sub.IntentVariableCondition;
 import com.hutoma.api.containers.sub.UserInfo;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
@@ -14,8 +16,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -26,7 +31,7 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 
 /**
- * Created by David MG on 05/10/2016.
+ * Logic for handling intents creation/update/deletion
  */
 public class IntentLogic {
 
@@ -62,6 +67,12 @@ public class IntentLogic {
         this.databaseUser = databaseUser;
     }
 
+    /**
+     * Gets all the intents for a given bot.
+     * @param devid the developer id owner of the bot
+     * @param aiid  the ai id
+     * @return list of intents for the bot
+     */
     public ApiResult getIntents(final UUID devid, final UUID aiid) {
         final String devidString = devid.toString();
         try {
@@ -82,6 +93,13 @@ public class IntentLogic {
         }
     }
 
+    /**
+     * Gets a given intents.
+     * @param devid      the developer id owner of the bot
+     * @param aiid       the ai id
+     * @param intentName the intent name
+     * @return the intent details
+     */
     public ApiResult getIntent(final UUID devid, final UUID aiid, final String intentName) {
         final String devidString = devid.toString();
         try {
@@ -107,6 +125,13 @@ public class IntentLogic {
         }
     }
 
+    /**
+     * Writes an intent (creates/updates)
+     * @param devid  the developer id
+     * @param aiid   the ai id
+     * @param intent the intent to write
+     * @return the result of the operation
+     */
     public ApiResult writeIntent(final UUID devid, final UUID aiid, final ApiIntent intent) {
         String devidString = devid.toString();
         LogMap logMap = LogMap.map("AIID", aiid).put("IntentName", intent.getIntentName());
@@ -132,36 +157,50 @@ public class IntentLogic {
             final boolean created = this.databaseEntitiesIntents.getIntent(aiid, intent.getIntentName()) == null;
 
             // Check if there are any variables with duplicate or empty labels
-            Set<String> usedLabels = new HashSet<>();
-            List<String> duplicateLabels = new ArrayList<>();
-            List<IntentVariable> variables = intent.getVariables();
-            if (variables != null) {
-                Optional<IntentVariable> firstEmptyLabelVar = variables.stream().filter(
-                        x -> x.getLabel().isEmpty()).findFirst();
-                if (firstEmptyLabelVar.isPresent()) {
-                    this.logger.logUserErrorEvent(LOGFROM, "Unlabeled variable", devidString,
-                            LogMap.map("Variable", firstEmptyLabelVar.get().getEntityName()).put("AIID", aiid)
-                                    .put("IntentName", intent.getIntentName()));
-                    return ApiError.getBadRequest(
-                            String.format("Unlabeled variable: %s.", firstEmptyLabelVar.get().getEntityName()));
-                }
-                variables.forEach(x -> {
-                    if (usedLabels.contains(x.getLabel())) {
-                        duplicateLabels.add(x.getLabel());
-                    } else {
-                        usedLabels.add(x.getLabel());
-                    }
-                });
+            ApiResult labelsResult = checkForDuplicateOrEmptyLabels(devid, aiid, intent);
+            if (labelsResult.getStatus().getCode() != HttpURLConnection.HTTP_OK) {
+                return labelsResult;
             }
-            if (!duplicateLabels.isEmpty()) {
-                String dupLabelsString = String.join(", ", duplicateLabels);
-                this.logger.logUserErrorEvent(LOGFROM, "Duplicate labels", devidString,
-                        LogMap.map("DupLabels", dupLabelsString).put("AIID", aiid)
-                                .put("IntentName", intent.getIntentName()));
-                return ApiError.getBadRequest(
-                        String.format("Duplicate label%s: %s", dupLabelsString.isEmpty() ? "" : "s", dupLabelsString));
+
+            // Extract all the followup intents
+            HashSet<String> followupIntents = new LinkedHashSet<>();
+            if (intent.getIntentOutConditionals() != null) {
+                intent.getIntentOutConditionals().forEach(x -> followupIntents.add(x.getIntentName()));
             }
+
             try (DatabaseTransaction transaction = this.databaseTransactionProvider.get()) {
+
+                if (!followupIntents.isEmpty()) {
+                    String conditionVarName = String.format("%s_complete", intent.getIntentName());
+                    IntentVariableCondition condition = new IntentVariableCondition(
+                            conditionVarName, IntentConditionOperator.SET, "");
+
+                    boolean newIntentsCreated = false;
+                    // Need to create new ones if they don't exist yet
+                    for (String followupIntentName : followupIntents) {
+                        ApiIntent followupIntent = this.databaseEntitiesIntents.getIntent(
+                                aiid, followupIntentName, transaction);
+                        if (followupIntent == null) {
+                            ApiIntent newIntent = new ApiIntent(followupIntentName, "", "");
+                            // Now add a conditional on the execution of this new intent based on the parent one
+                            newIntent.setConditionsIn(Collections.singletonList(condition));
+                            this.databaseEntitiesIntents.writeIntent(devid, aiid, followupIntentName,
+                                    newIntent, transaction);
+                            newIntentsCreated = true;
+                        }
+                    }
+
+                    // Now if we've created new intents, we've added a new condition to them, so we need to
+                    // set up the variable on the parent intent
+                    if (newIntentsCreated) {
+                        if (intent.getContextOut() == null) {
+                            intent.setContextOut(new HashMap<>());
+                        }
+                        intent.getContextOut().put(conditionVarName, "");
+                    }
+                }
+
+                // Now proceed with writing the main intent
                 this.databaseEntitiesIntents.writeIntent(devid, aiid, intent.getIntentName(), intent, transaction);
                 transaction.commit();
             }
@@ -186,6 +225,13 @@ public class IntentLogic {
         }
     }
 
+    /**
+     * Deletes an intent.
+     * @param devid      the developer id
+     * @param aiid       the ai is
+     * @param intentName the intent name
+     * @return the result of the operation
+     */
     public ApiResult deleteIntent(final UUID devid, final UUID aiid, final String intentName) {
         String devidString = devid.toString();
         try {
@@ -208,6 +254,13 @@ public class IntentLogic {
         }
     }
 
+    /**
+     * Bulk import intents from a CSV file.
+     * @param devId               the developer id
+     * @param aiid                the ai id
+     * @param uploadedInputStream the stream for the file
+     * @return the result of the operation
+     */
     public ApiResult bulkImportFromCsv(final UUID devId,
                                        final UUID aiid,
                                        final InputStream uploadedInputStream) {
@@ -217,7 +270,7 @@ public class IntentLogic {
             ApiCsvImportResult results = this.csvIntentReader.parseIntents(fileContents);
             Set<String> intentNames = new LinkedHashSet<>();
 
-            for (ApiCsvImportResult.ImportResultSuccess imported: results.getImported()) {
+            for (ApiCsvImportResult.ImportResultSuccess imported : results.getImported()) {
                 if (intentNames.contains(imported.getIntentName())) {
                     return ApiError.getBadRequest(String.format("Duplicate intent name: %s", imported.getIntentName()));
                 }
@@ -225,7 +278,7 @@ public class IntentLogic {
             }
 
             try (DatabaseTransaction transaction = this.databaseTransactionProvider.get()) {
-                for (ApiCsvImportResult.ImportResultSuccess imported: results.getImported()) {
+                for (ApiCsvImportResult.ImportResultSuccess imported : results.getImported()) {
                     ApiIntent intent = imported.getIntent();
                     int retval = this.databaseEntitiesIntents.writeIntent(devId, aiid, intent.getIntentName(),
                             intent, transaction);
@@ -280,6 +333,14 @@ public class IntentLogic {
         }
     }
 
+    /**
+     * Gets the contents of the file from a stream taking into account a defined maximum upload size.
+     * @param maxUploadSize       the maximum size allowed for the file
+     * @param uploadedInputStream the input stream
+     * @return the file contents as a string
+     * @throws UploadTooLargeException when the file is too large (larger than maxUploadSize)
+     * @throws IOException             when an IO exception occurs
+     */
     private String getFile(final long maxUploadSize, final InputStream uploadedInputStream)
             throws UploadTooLargeException, IOException {
 
@@ -308,6 +369,46 @@ public class IntentLogic {
             }
         }
         return sb.toString();
+    }
+
+    /**
+     * Checks if there are any variables with duplicate or empty labels.
+     * @param devId  the developer id
+     * @param aiid   the ai id
+     * @param intent the intent
+     * @return the result
+     */
+    private ApiResult checkForDuplicateOrEmptyLabels(final UUID devId, final UUID aiid, final ApiIntent intent) {
+        Set<String> usedLabels = new HashSet<>();
+        List<String> duplicateLabels = new ArrayList<>();
+        List<IntentVariable> variables = intent.getVariables();
+        if (variables != null) {
+            Optional<IntentVariable> firstEmptyLabelVar = variables.stream().filter(
+                    x -> x.getLabel().isEmpty()).findFirst();
+            if (firstEmptyLabelVar.isPresent()) {
+                this.logger.logUserErrorEvent(LOGFROM, "Unlabeled variable", devId.toString(),
+                        LogMap.map("Variable", firstEmptyLabelVar.get().getEntityName()).put("AIID", aiid)
+                                .put("IntentName", intent.getIntentName()));
+                return ApiError.getBadRequest(
+                        String.format("Unlabeled variable: %s.", firstEmptyLabelVar.get().getEntityName()));
+            }
+            variables.forEach(x -> {
+                if (usedLabels.contains(x.getLabel())) {
+                    duplicateLabels.add(x.getLabel());
+                } else {
+                    usedLabels.add(x.getLabel());
+                }
+            });
+        }
+        if (!duplicateLabels.isEmpty()) {
+            String dupLabelsString = String.join(", ", duplicateLabels);
+            this.logger.logUserErrorEvent(LOGFROM, "Duplicate labels", devId.toString(),
+                    LogMap.map("DupLabels", dupLabelsString).put("AIID", aiid)
+                            .put("IntentName", intent.getIntentName()));
+            return ApiError.getBadRequest(
+                    String.format("Duplicate label%s: %s", dupLabelsString.isEmpty() ? "" : "s", dupLabelsString));
+        }
+        return new ApiResult().setSuccessStatus();
     }
 }
 
