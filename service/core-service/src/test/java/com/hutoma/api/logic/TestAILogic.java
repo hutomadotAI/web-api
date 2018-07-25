@@ -53,8 +53,8 @@ import static org.mockito.Matchers.anyDouble;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.eq;
 
 /**
  * Unit tests for the AI logic.
@@ -137,6 +137,15 @@ public class TestAILogic {
         TestDataHelper.mockDatabaseCreateAIInTrans(this.fakeDatabaseAi, UUID.randomUUID());
         ApiResult result = callDefaultCreateAI();
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testCreate_handoverMessageRequiredWhenThreshold() throws DatabaseException {
+        TestDataHelper.mockDatabaseCreateAIInTrans(this.fakeDatabaseAi, UUID.randomUUID());
+        ApiResult result = this.aiLogic.createAI(VALIDDEVID, "ainame","desc",false,1,0.3,1,
+                Collections.singletonList("default"),Locale.UK,"UTC",3,-1,null);
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
+        Assert.assertEquals("Must specify a handover message when specifying a handover threshold", result.getStatus().getInfo());
     }
 
     @Test

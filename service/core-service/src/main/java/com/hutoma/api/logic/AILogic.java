@@ -140,6 +140,10 @@ public class AILogic {
             throw new IllegalArgumentException("transaction");
         }
 
+        if (StringUtils.isEmpty(handoverMessage) && errorThresholdHandover >= 0) {
+            return ApiError.getBadRequest("Must specify a handover message when specifying a handover threshold");
+        }
+
         final String devIdString = devId.toString();
         try {
             String encodingKey = this.config.getEncodingKey();
