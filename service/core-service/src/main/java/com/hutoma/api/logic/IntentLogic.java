@@ -168,6 +168,11 @@ public class IntentLogic {
                 intent.getIntentOutConditionals().forEach(x -> followupIntents.add(x.getIntentName()));
             }
 
+            // Check if any followup intent is self - causing a circular reference
+            if (followupIntents.contains(intent.getIntentName())) {
+                return ApiError.getBadRequest("Circular reference detected on follow-up intent");
+            }
+
             try (DatabaseTransaction transaction = this.databaseTransactionProvider.get()) {
 
                 if (!followupIntents.isEmpty()) {

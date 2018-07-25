@@ -9,8 +9,7 @@ import com.hutoma.api.containers.ApiCsvImportResult;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.ApiIntentList;
 import com.hutoma.api.containers.ApiResult;
-import com.hutoma.api.containers.sub.IntentVariable;
-import com.hutoma.api.containers.sub.WebHook;
+import com.hutoma.api.containers.sub.*;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.validation.Validate;
 
@@ -19,6 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -260,6 +260,75 @@ public class TestIntentLogic {
     }
 
     @Test
+    public void testCreateIntent_autoCreateFollowUpIntents() throws DatabaseException {
+        final String followUpIntentName = "followUp";
+        final String mainIntentName = "main";
+        ApiIntent baseIntent = getIntent();
+        baseIntent.setIntentName(mainIntentName);
+        baseIntent.setIntentOutConditionals(Collections.singletonList(new IntentOutConditional(followUpIntentName, null)));
+
+        ApiResult result = this.intentLogic.writeIntent(DEVID_UUID, AIID, baseIntent);
+        Assert.assertEquals(HttpURLConnection.HTTP_CREATED, result.getStatus().getCode());
+        // Capture the arguments being passed to the db class to validate if we're writing the correct data
+        ArgumentCaptor<ApiIntent> intentArg = ArgumentCaptor.forClass(ApiIntent.class);
+        ArgumentCaptor<String> intentNameArg = ArgumentCaptor.forClass(String.class);
+        verify(this.fakeDatabaseEntitiesIntents, atLeastOnce()).writeIntent(any(), any(), intentNameArg.capture(), intentArg.capture(), any());
+        List<String> actualIntentNames = intentNameArg.getAllValues();
+        List<ApiIntent> actualIntents = intentArg.getAllValues();
+
+        // Check the followup intent is written to the db
+        Assert.assertEquals(followUpIntentName, actualIntentNames.get(0));
+        Assert.assertEquals(followUpIntentName, actualIntents.get(0).getIntentName());
+        // The followup intent should have a new condition that is gated on the main intent
+        Assert.assertEquals(1, actualIntents.get(0).getConditionsIn().size());
+        Assert.assertEquals(getFollowupIntentGatedVariable(mainIntentName), actualIntents.get(0).getConditionsIn().get(0).getVariable());
+        Assert.assertEquals(IntentConditionOperator.SET, actualIntents.get(0).getConditionsIn().get(0).getOperator());
+
+        // Then the main intent
+        Assert.assertEquals(mainIntentName, actualIntentNames.get(1));
+        Assert.assertEquals(mainIntentName, actualIntents.get(1).getIntentName());
+        Assert.assertEquals(baseIntent.getIntentOutConditionals(), actualIntents.get(1).getIntentOutConditionals());
+        Assert.assertTrue(actualIntents.get(1).getContextOut().containsKey(getFollowupIntentGatedVariable(mainIntentName)));
+    }
+
+    @Test
+    public void testCreateIntent_autoCreateFollowUpIntents_existingFollowupIntent() throws DatabaseException {
+        final String followUpIntentName = "followUp";
+        final String mainIntentName = "main";
+        ApiIntent baseIntent = getIntent();
+        baseIntent.setIntentName(mainIntentName);
+        baseIntent.setIntentOutConditionals(Collections.singletonList(new IntentOutConditional(followUpIntentName, null)));
+
+        // Pretend the the followup intent already exists - just needs to return non-null
+        when(this.fakeDatabaseEntitiesIntents.getIntent(any(), any(), any())).thenReturn(getIntent());
+
+        ApiResult result = this.intentLogic.writeIntent(DEVID_UUID, AIID, baseIntent);
+        Assert.assertEquals(HttpURLConnection.HTTP_CREATED, result.getStatus().getCode());
+        // Capture the arguments being passed to the db class to validate if we're writing the correct data
+        ArgumentCaptor<ApiIntent> intentArg = ArgumentCaptor.forClass(ApiIntent.class);
+        ArgumentCaptor<String> intentNameArg = ArgumentCaptor.forClass(String.class);
+        verify(this.fakeDatabaseEntitiesIntents, atLeastOnce()).writeIntent(any(), any(), intentNameArg.capture(), intentArg.capture(), any());
+        List<String> actualIntentNames = intentNameArg.getAllValues();
+        List<ApiIntent> actualIntents = intentArg.getAllValues();
+
+        Assert.assertEquals(1, actualIntentNames.size());
+        Assert.assertEquals(1, actualIntents.size());
+        Assert.assertEquals(mainIntentName, actualIntentNames.get(0));
+        Assert.assertEquals(mainIntentName, actualIntents.get(0).getIntentName());
+    }
+
+    @Test
+    public void testCreateIntent_autoCreateFollowUpIntents_followupSameNameAsMain() throws DatabaseException {
+        final String mainIntentName = "main";
+        ApiIntent baseIntent = getIntent();
+        baseIntent.setIntentName(mainIntentName);
+        // Force a circular reference
+        baseIntent.setIntentOutConditionals(Collections.singletonList(new IntentOutConditional(mainIntentName, null)));
+        ApiResult result = this.intentLogic.writeIntent(DEVID_UUID, AIID, baseIntent);
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
+    }
+
+    @Test
     public void testCsvBulkImport() {
         final int numIntents = 5;
         List<ApiIntent> intents = buildIntentList(numIntents);
@@ -378,5 +447,9 @@ public class TestIntentLogic {
     private InputStream createUpload(final String content) {
         InputStream stream = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
         return stream;
+    }
+
+    private String getFollowupIntentGatedVariable(final String mainIntentName) {
+        return String.format("%s_complete", mainIntentName);
     }
 }
