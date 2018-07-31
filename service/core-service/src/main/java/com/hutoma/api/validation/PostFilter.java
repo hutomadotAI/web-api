@@ -329,12 +329,6 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
             }
         }
 
-        if (intent.getUserSays() != null && !intent.getUserSays().isEmpty()
-                && (intent.getResponses() == null || intent.getResponses().isEmpty())) {
-            throw new ParameterValidationException("when specifying expressions then responses are required",
-                    INTENT_RESPONSES);
-        }
-
         HashSet<String> labelsInUse = new HashSet<>();
         // for each variable
         if (intent.getVariables() != null) {

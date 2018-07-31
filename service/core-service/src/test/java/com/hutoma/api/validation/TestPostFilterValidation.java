@@ -159,9 +159,10 @@ public class TestPostFilterValidation {
     }
 
     @Test
-    public void validateIntent_NoUserExpressions() throws ParameterValidationException {
+    public void validateIntent_NoUserExpressions_NoResponses() throws ParameterValidationException {
         ApiIntent intent = createIntent(null);
         intent.setUserSays(Collections.emptyList());
+        intent.setResponses(Collections.emptyList());
         this.postFilter.validateIntent(intent);
     }
 
@@ -191,14 +192,6 @@ public class TestPostFilterValidation {
     public void validateIntent_noUserSays_NoResponses() throws ParameterValidationException {
         ApiIntent intent = createIntent(null);
         intent.setUserSays(Collections.emptyList());
-        intent.setResponses(Collections.emptyList());
-        this.postFilter.validateIntent(intent);
-    }
-
-    @Test(expected = ParameterValidationException.class)
-    public void validateIntent_hasUserSays_noResponses() throws ParameterValidationException {
-        ApiIntent intent = createIntent(null);
-        intent.setUserSays(Collections.singletonList("userSays"));
         intent.setResponses(Collections.emptyList());
         this.postFilter.validateIntent(intent);
     }
