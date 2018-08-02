@@ -928,6 +928,53 @@ public class TestAILogic {
     }
 
     @Test
+    public void testCloneBot_cloneTemplate_templateOwned() throws DatabaseException {
+        final UUID generatedAiid = UUID.randomUUID();
+
+        ApiAi result = (ApiAi) testCloneBot_template(true, generatedAiid);
+
+        Assert.assertEquals(HttpURLConnection.HTTP_CREATED, result.getStatus().getCode());
+        Assert.assertEquals(generatedAiid.toString(), result.getAiid());
+    }
+
+    @Test
+    public void testCloneBot_cloneTemplate_templateNotOwned() throws DatabaseException {
+        final UUID generatedAiid = UUID.randomUUID();
+
+        ApiResult result = testCloneBot_template(false, generatedAiid);
+
+        Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
+    }
+
+    private ApiResult testCloneBot_template(final boolean owned, final UUID generatedAiid) throws DatabaseException {
+        final UUID botToCloneOwner = UUID.randomUUID();
+        final UUID clonerDevId = UUID.randomUUID();
+        final ApiAi baseAi = TestDataHelper.getSampleAI();
+        final AiBot originalBot = new AiBot(botToCloneOwner, UUID.fromString(baseAi.getAiid()), 12345, baseAi.getName(), baseAi.getDescription(),
+                "long description", "alert", "badge", BigDecimal.ZERO, "sample", "category", "license", DateTime.now(), "privacy",
+                "classif", "1.0", "videolink", AiBot.PublishingState.PUBLISHED, AiBot.PublishingType.TEMPLATE, "icon");
+
+        final ApiAi clonedAi = new ApiAi(baseAi);
+        clonedAi.setAiid(generatedAiid);
+        when(this.fakeTools.createNewRandomUUID()).thenReturn(generatedAiid);
+        when(this.fakeDatabaseMarketplace.getPurchasedBots(clonerDevId)).thenReturn(
+                owned ? Collections.singletonList(originalBot) : Collections.emptyList());
+
+        // For when we read the original AI for export
+        if (owned) {
+            when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(baseAi).thenReturn(clonedAi);
+        }
+        when(this.fakeDatabaseAi.getAI(any(), any(), any(), any())).thenReturn(clonedAi);
+        TestDataHelper.mockDatabaseCreateAIInTrans(this.fakeDatabaseAi, generatedAiid);
+        when(this.fakeDatabaseAi.updatePassthroughUrl(any(), any(), any(), any())).thenReturn(true);
+        when(this.fakeDatabaseAi.updateDefaultChatResponses(any(), any(), any(), any(), any())).thenReturn(true);
+
+        return this.aiLogic.cloneBot(clonerDevId, originalBot.getAiid(), baseAi.getName(), baseAi.getDescription(),
+                baseAi.getIsPrivate(), baseAi.getPersonality(), baseAi.getConfidence(), baseAi.getVoice(), baseAi.getLanguage(),
+                baseAi.getTimezone(), baseAi.getDefaultChatResponses(), baseAi.getPassthroughUrl());
+    }
+
+    @Test
     public void testCloneBot_errorExportingOrImporting() throws DatabaseException {
         when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(null);
         ApiResult result = this.aiLogic.cloneBot(DEVID_UUID, AIID, null, null, true, 1, 0.1, 0,

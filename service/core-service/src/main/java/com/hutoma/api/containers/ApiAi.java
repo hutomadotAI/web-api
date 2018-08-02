@@ -14,11 +14,12 @@ import org.joda.time.DateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 
 
 public class ApiAi extends ApiResult {
 
-    private final String aiid;
+    private String aiid;
     @SerializedName("client_token")
     private final String clientToken;
     @SerializedName("name")
@@ -279,6 +280,10 @@ public class ApiAi extends ApiResult {
 
     public void setHandoverMessage(final String handoverMessage) {
         this.handoverMessage = handoverMessage;
+    }
+
+    public void setAiid(final UUID aiid) {
+        this.aiid = aiid.toString();
     }
 
     private void populateExtendedStatus() {

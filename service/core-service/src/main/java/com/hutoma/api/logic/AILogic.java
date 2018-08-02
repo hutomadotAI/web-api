@@ -33,14 +33,7 @@ import io.jsonwebtoken.impl.compression.CompressionCodecs;
 import org.apache.commons.lang3.StringUtils;
 
 import java.net.HttpURLConnection;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Random;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Inject;
@@ -742,7 +735,8 @@ public class AILogic {
         return result;
     }
 
-    public ApiResult cloneBot(final UUID devId, final UUID aiidToClone,
+    public ApiResult cloneBot(final UUID devId,
+                              final UUID aiidToClone,
                               final String newName,
                               final String newDescription,
                               final boolean isPrivate,
@@ -753,7 +747,25 @@ public class AILogic {
                               final String newTimezone,
                               final List<String> defaultResponses,
                               final String passthroughUrl) {
-        ApiResult result = this.exportBotData(devId, aiidToClone);
+
+        UUID devIdBotToClone = devId;
+        // Check if the bot to clone is actually a purchased bot and a template, so we update the origin bot devId
+        try {
+            List<AiBot> purchasedBots = this.databaseMarketplace.getPurchasedBots(devId);
+            Optional<AiBot> optBot = purchasedBots.stream()
+                    .filter(x -> x.getAiid().equals(aiidToClone)
+                            && x.getPublishingType() == AiBot.PublishingType.TEMPLATE)
+                    .findFirst();
+            if (optBot.isPresent()) {
+                devIdBotToClone =  optBot.get().getDevId();
+            }
+        } catch (DatabaseException ex) {
+            this.logger.logUserExceptionEvent(LOGFROM, "Error obtaining purchased bots list",
+                    devId.toString(), ex);
+            return ApiError.getInternalServerError();
+        }
+        
+        ApiResult result = this.exportBotData(devIdBotToClone, aiidToClone);
         if (result.getStatus().getCode() != HttpURLConnection.HTTP_OK) {
             return result;
         }
@@ -761,7 +773,7 @@ public class AILogic {
         BotStructure botStructure = ((ApiBotStructure) result).getBotStructure();
         String originalName = botStructure.getName();
 
-        if (originalName.equalsIgnoreCase(newName)) {
+        if (devIdBotToClone.equals(devId) && originalName.equalsIgnoreCase(newName)) {
             // Name always has to be overridden as we don't support duplicate names
             botStructure.setName(botStructure.getName() + generateBotNameRandomSuffix());
         } else {
