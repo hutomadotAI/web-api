@@ -1,13 +1,7 @@
 package com.hutoma.api;
 
 import com.hutoma.api.access.RateLimitCheck;
-import com.hutoma.api.common.AccessLogger;
-import com.hutoma.api.common.ChatLogger;
-import com.hutoma.api.common.Config;
-import com.hutoma.api.common.CsvIntentReader;
-import com.hutoma.api.common.HTMLExtractor;
-import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.common.Tools;
+import com.hutoma.api.common.*;
 import com.hutoma.api.connectors.AiStrings;
 import com.hutoma.api.connectors.AnalyticsESConnector;
 import com.hutoma.api.connectors.EntityRecognizerService;
@@ -97,6 +91,7 @@ public class ServerBinder extends AbstractBinder {
         bind(DatabaseTransaction.class).to(DatabaseTransaction.class);
         bind(DatabaseCall.class).to(DatabaseCall.class);
         bind(TransactionalDatabaseCall.class).to(TransactionalDatabaseCall.class);
+        bind(DatabaseFeatures.class).to(DatabaseFeatures.class);
 
         // business logic
         bind(AdminLogic.class).to(AdminLogic.class);
@@ -127,6 +122,9 @@ public class ServerBinder extends AbstractBinder {
         bind(ContextVariableExtractor.class).to(ContextVariableExtractor.class);
         bind(ChatDefaultHandler.class).to(ChatDefaultHandler.class);
         bind(ChatConnectors.class).to(ChatConnectors.class);
+
+        // Feature toggler
+        bind(FeatureToggler.class).to(FeatureToggler.class).in(Singleton.class);
 
         // other
         bind(JsonSerializer.class).to(JsonSerializer.class);

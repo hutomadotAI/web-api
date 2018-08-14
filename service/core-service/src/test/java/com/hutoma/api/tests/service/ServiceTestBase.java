@@ -3,12 +3,7 @@ package com.hutoma.api.tests.service;
 import com.hutoma.api.access.AuthFilter;
 import com.hutoma.api.access.RateLimitCheck;
 import com.hutoma.api.access.Role;
-import com.hutoma.api.common.AccessLogger;
-import com.hutoma.api.common.Config;
-import com.hutoma.api.common.CsvIntentReader;
-import com.hutoma.api.common.HTMLExtractor;
-import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.common.Tools;
+import com.hutoma.api.common.*;
 import com.hutoma.api.connectors.AiStrings;
 import com.hutoma.api.connectors.BackendServerType;
 import com.hutoma.api.connectors.EntityRecognizerService;
@@ -120,6 +115,8 @@ public abstract class ServiceTestBase extends JerseyTest {
     FacebookConnector fakefacebookConnector;
     @Mock
     AiStrings fakeAiStrings;
+    @Mock
+    FeatureToggler fakeFeatureToggler;
 
     private static MultivaluedHashMap<String, Object> getDevIdAuthHeaders(final Role role, final UUID devId) {
         return new MultivaluedHashMap<String, Object>() {
@@ -204,6 +201,7 @@ public abstract class ServiceTestBase extends JerseyTest {
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakefacebookConnector))
                         .to(FacebookConnector.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeAiStrings)).to(AiStrings.class);
+                bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeFeatureToggler)).to(FeatureToggler.class);
 
                 // Bind all the internal dependencies to real classes
                 bind(JsonSerializer.class).to(JsonSerializer.class);

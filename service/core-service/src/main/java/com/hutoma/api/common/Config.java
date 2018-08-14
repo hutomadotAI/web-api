@@ -279,4 +279,8 @@ public class Config extends CommonConfig implements ILoggerConfig, IThreadConfig
     public int getMaxIntentResponses() {
         return Integer.parseInt(getConfigFromProperties("intent_max_responses", "100"));
     }
+
+    public int getFeatureToggleReadIntervalSec() {
+        return Integer.parseInt(getConfigFromProperties("feature_read_interval", "60"));
+    }
 }
