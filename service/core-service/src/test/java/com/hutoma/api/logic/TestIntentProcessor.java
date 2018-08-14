@@ -76,4 +76,78 @@ public class TestIntentProcessor {
         Assert.assertEquals(String.format(responseTemplate, memVar.getCurrentValue()), chatResult.getAnswer());
     }
 
+    @Test
+    public void testIntentProcessor_variableCleared()  throws ChatLogic.IntentException, WebHooks.WebHookException {
+        UUID chatId = UUID.randomUUID();
+        final String responseTemplate = "response %s";
+        final String label = "label1";
+        final ChatContext context = new ChatContext();
+        final String entityValue = "val1";
+        context.setValue(label, entityValue);
+        ChatState chatState = new ChatState(DateTime.now(),
+                null, null, UUID.randomUUID(), new HashMap<>(), 0.1d, ChatHandoverTarget.Ai,
+                getSampleAI(), context);
+        ChatRequestInfo chatInfo = new ChatRequestInfo(TestDataHelper.DEVID_UUID, TestDataHelper.AIID, chatId,
+                "question", null);
+        MemoryVariable memVar = new MemoryVariable(label, Collections.singletonList(entityValue), false, label);
+        memVar.setResetOnEntry(true);
+        memVar.setIsMandatory(true);
+        memVar.setPrompts(Collections.singletonList("prompt 1"));
+        MemoryIntent memoryIntent = new MemoryIntent("intent", TestDataHelper.AIID, chatId, Collections.singletonList(memVar),
+                true);
+        ApiIntent intent = new ApiIntent("name", "", "");
+        intent.setResponses(Collections.singletonList(""));
+        when(this.fakeIntentHandler.getIntent(any(), any())).thenReturn(intent);
+
+        ChatResult chatResult = new ChatResult("nothing to see here");
+        chatResult.setChatState(chatState);
+
+        doAnswer(invocation -> {
+            Object arg = invocation.getArgument(0);
+            ((ChatResult) arg).setAnswer(String.format(responseTemplate, memVar.getCurrentValue()));
+            return null;
+        }).when(this.fakeContextVariableExtractor).extractContextVariables(any());
+
+        boolean intentProcessed = this.intentProcessor.processIntent(chatInfo, TestDataHelper.AIID, memoryIntent, chatResult, LogMap.map("a", "b"));
+        Assert.assertTrue(intentProcessed);
+
+        Assert.assertEquals(String.format(responseTemplate, "null"), chatResult.getAnswer());
+    }
+
+    @Test
+    public void testIntentProcessor_variableNotCleared()  throws ChatLogic.IntentException, WebHooks.WebHookException {
+        UUID chatId = UUID.randomUUID();
+        final String responseTemplate = "response %s";
+        final String label = "label1";
+        final ChatContext context = new ChatContext();
+        final String entityValue = "val1";
+        context.setValue(label, entityValue);
+        ChatState chatState = new ChatState(DateTime.now(),
+                null, null, UUID.randomUUID(), new HashMap<>(), 0.1d, ChatHandoverTarget.Ai,
+                getSampleAI(), context);
+        ChatRequestInfo chatInfo = new ChatRequestInfo(TestDataHelper.DEVID_UUID, TestDataHelper.AIID, chatId,
+                "question", null);
+        MemoryVariable memVar = new MemoryVariable(label, Collections.singletonList(entityValue), false, label);
+        memVar.setIsMandatory(true);
+        memVar.setPrompts(Collections.singletonList("prompt 1"));
+        MemoryIntent memoryIntent = new MemoryIntent("intent", TestDataHelper.AIID, chatId, Collections.singletonList(memVar),
+                true);
+        ApiIntent intent = new ApiIntent("name", "", "");
+        intent.setResponses(Collections.singletonList(""));
+        when(this.fakeIntentHandler.getIntent(any(), any())).thenReturn(intent);
+
+        ChatResult chatResult = new ChatResult("nothing to see here");
+        chatResult.setChatState(chatState);
+
+        doAnswer(invocation -> {
+            Object arg = invocation.getArgument(0);
+            ((ChatResult) arg).setAnswer(String.format(responseTemplate, memVar.getCurrentValue()));
+            return null;
+        }).when(this.fakeContextVariableExtractor).extractContextVariables(any());
+
+        boolean intentProcessed = this.intentProcessor.processIntent(chatInfo, TestDataHelper.AIID, memoryIntent, chatResult, LogMap.map("a", "b"));
+
+        Assert.assertTrue(intentProcessed);
+        Assert.assertEquals(String.format(responseTemplate, entityValue), chatResult.getAnswer());
+    }
 }

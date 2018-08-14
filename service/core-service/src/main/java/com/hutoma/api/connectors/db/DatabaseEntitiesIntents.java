@@ -277,7 +277,8 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
                         varRs.getInt("n_prompts"),
                         varRs.getString("value"),
                         varRs.getBoolean("isPersistent"),
-                        varRs.getString("label"));
+                        varRs.getString("label"),
+                        varRs.getBoolean("clear_on_entry"));
 
                 // for each variable get all its prompts
                 ResultSet promptRs = transaction.getDatabaseCall().initialise("getIntentVariablePrompts", 2)

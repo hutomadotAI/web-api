@@ -188,7 +188,7 @@ public class TestChatLogicIntents extends TestChatBase {
 
         final String intentName = "intent1";
         MemoryVariable mv = new MemoryVariable("sys.any", null, true,
-                Arrays.asList("a", "b"), Collections.singletonList("prompt"), 1, 0, true, false, "label1");
+                Arrays.asList("a", "b"), Collections.singletonList("prompt"), 1, 0, true, false, "label1", false);
         MemoryIntent mi = new MemoryIntent(intentName, AIID, CHATID, Collections.singletonList(mv));
         setupFakeChat(0.7d, MemoryIntentHandler.META_INTENT_TAG + intentName, 0.0d, AIMLRESULT);
         when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), anyString(), any())).thenReturn(mi);
@@ -215,9 +215,9 @@ public class TestChatLogicIntents extends TestChatBase {
         final String labelSysAny1 = "sysany1";
         final String labelSysAny2 = "sysany2";
         MemoryVariable mv1 = new MemoryVariable("sys.any", null, true,
-                null, Collections.singletonList("prompt1"), 3, 0, true, false, labelSysAny1);
+                null, Collections.singletonList("prompt1"), 3, 0, true, false, labelSysAny1, false);
         MemoryVariable mv2 = new MemoryVariable("sys.any", null, true,
-                null, Collections.singletonList("prompt2"), 3, 0, true, false, labelSysAny2);
+                null, Collections.singletonList("prompt2"), 3, 0, true, false, labelSysAny2, false);
         MemoryIntent mi = new MemoryIntent(intentName, AIID, CHATID, Arrays.asList(mv1, mv2));
         setupFakeChat(0.7d, MemoryIntentHandler.META_INTENT_TAG + intentName, 0.0d, AIMLRESULT);
         when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), anyString(), any())).thenReturn(mi);
@@ -474,7 +474,8 @@ public class TestChatLogicIntents extends TestChatBase {
                 0,
                 false,
                 false,
-                "label1");
+                "label1",
+                false);
         MemoryVariable mv2 = new MemoryVariable(
                 "var2",
                 null,
@@ -485,7 +486,8 @@ public class TestChatLogicIntents extends TestChatBase {
                 0,
                 false,
                 false,
-                "label2");
+                "label2",
+                false);
         MemoryIntent mi = new MemoryIntent("intent", AIID, UUID.randomUUID(), Arrays.asList(mv1, mv2), false);
         when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), any(), any())).thenReturn(mi);
         when(this.fakeIntentHandler.getIntent(any(), anyString())).thenReturn(TestIntentLogic.getIntent());
@@ -518,11 +520,11 @@ public class TestChatLogicIntents extends TestChatBase {
         final String intentName = "intent1";
         final String sameEntityName = "sameEntityName";
         MemoryVariable mv1 = new MemoryVariable("entity1", null, true, Collections.singletonList("1"),
-                Collections.singletonList("prompt1"), 2, 0, false, false, "label1");
+                Collections.singletonList("prompt1"), 2, 0, false, false, "label1", false);
         MemoryVariable mv2 = new MemoryVariable(sameEntityName, null, true, Arrays.asList("a", "b"),
-                Collections.singletonList("prompt2"), 2, 0, false, false, "label2");
+                Collections.singletonList("prompt2"), 2, 0, false, false, "label2", false);
         MemoryVariable mv3 = new MemoryVariable(sameEntityName, null, true, Collections.singletonList("c"),
-                Collections.singletonList("prompt3"), 1, 0, false, false, "label3");
+                Collections.singletonList("prompt3"), 1, 0, false, false, "label3", false);
         MemoryIntent mi = new MemoryIntent(intentName, AIID, CHATID, Arrays.asList(mv1, mv2, mv3));
 
 
@@ -655,7 +657,7 @@ public class TestChatLogicIntents extends TestChatBase {
         ApiIntent intent = TestIntentLogic.getIntent();
         intent.setContextOut(ImmutableMap.of("aa", "bb"));
         MemoryVariable mv = new MemoryVariable("entity1", null, true, Collections.singletonList("1"),
-                Collections.singletonList("prompt1"), 2, 0, false, false, "label1");
+                Collections.singletonList("prompt1"), 2, 0, false, false, "label1", false);
         MemoryIntent mi = new MemoryIntent(intentName, AIID, CHATID, Collections.singletonList(mv));
         List<MemoryIntent> miList = Collections.singletonList(mi);
         setupFakeChat(0.7d, MemoryIntentHandler.META_INTENT_TAG + intentName, 0.0d, AIMLRESULT);

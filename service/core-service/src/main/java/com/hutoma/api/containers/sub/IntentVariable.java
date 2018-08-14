@@ -31,10 +31,13 @@ public class IntentVariable {
     private String label;
     @SerializedName("lifetime_turns")
     private int lifetimeTurns;
+    @SerializedName("clear_on_entry")
+    private boolean clearOnEntry;
 
 
     public IntentVariable(final String entityName, final UUID devOwner, final boolean required, final int numPrompts,
-                          final String value, final boolean persistent, final String label) {
+                          final String value, final boolean persistent, final String label, 
+                          final boolean clearOnEntry) {
         this.entityName = entityName;
         this.devOwner = devOwner;
         this.required = required;
@@ -43,11 +46,13 @@ public class IntentVariable {
         this.prompts = new ArrayList<>();
         this.persistent = persistent;
         this.label = label;
+        this.clearOnEntry = clearOnEntry;
     }
 
     public IntentVariable(final String entityName, final UUID devOwner, final boolean required, final int numPrompts,
-                          final String value, final int id, final boolean persistent, final String label) {
-        this(entityName, devOwner, required, numPrompts, value, persistent, label);
+                          final String value, final int id, final boolean persistent, final String label,
+                          final boolean clearOnEntry) {
+        this(entityName, devOwner, required, numPrompts, value, persistent, label, clearOnEntry);
         this.id = id;
     }
 
@@ -110,5 +115,13 @@ public class IntentVariable {
 
     public void setLifetimeTurns(final int lifetimeTurns) {
         this.lifetimeTurns = lifetimeTurns;
+    }
+
+    public boolean getClearOnEntry() { 
+        return this.clearOnEntry; 
+    }
+
+    public void setClearOnEntry(final boolean clearOnEntry) {
+        this.clearOnEntry = clearOnEntry; 
     }
 }

@@ -61,7 +61,7 @@ public class TestIntentLogic {
         return new ApiIntent(INTENTNAME, TOPICIN, TOPICOUT)
                 .addResponse("response").addUserSays("usersays")
                 .addVariable(new IntentVariable("entity", UUID.randomUUID(), true,
-                        3, "somevalue", false, "label").addPrompt("prompt"));
+                        3, "somevalue", false, "label", false).addPrompt("prompt"));
     }
 
     @Before

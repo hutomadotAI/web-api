@@ -25,6 +25,8 @@ public class MemoryVariable {
     private String label;
     @SerializedName("requested")
     private boolean requested;
+    @SerializedName("reset_on_entry")
+    private boolean resetOnEntry;
 
     // do not send these back to the user
     @SerializedName("entity_keys")
@@ -54,7 +56,7 @@ public class MemoryVariable {
     public MemoryVariable(final String name, final String currentValue, final boolean isMandatory,
                           final List<String> entityKeys, final List<String> prompts, final int timesToPrompt,
                           final int timesPrompted, final boolean isSystem, final boolean persistent,
-                          final String label) {
+                          final String label, final boolean resetOnEntry) {
         this(name, entityKeys);
         this.currentValue = currentValue;
         this.isMandatory = isMandatory;
@@ -64,6 +66,7 @@ public class MemoryVariable {
         this.persistent = persistent;
         this.isSystem = isSystem;
         this.label = label;
+        this.resetOnEntry = resetOnEntry;
     }
 
     private MemoryVariable(final MemoryVariable source) {
@@ -76,6 +79,7 @@ public class MemoryVariable {
         this.isSystem = source.isSystem;
         this.label = source.label;
         this.requested = source.requested;
+        this.resetOnEntry = source.resetOnEntry;
     }
 
     public boolean isRequested() {
@@ -170,7 +174,7 @@ public class MemoryVariable {
         return this.timesToPrompt;
     }
 
-    /*
+    /**
      * Gets whether the entity is persistent.
      * @return true if true, else false.
      */
@@ -178,12 +182,29 @@ public class MemoryVariable {
         return this.persistent;
     }
 
-    /*
+    /**
      * Sets whether the entity is persistent.
      * @param persistent Whether the entity should be persistent.
      */
     public void setIsPersistent(boolean persistent) {
         this.persistent = persistent;
+    }
+
+    /**
+     * Gets whether a persistent value for an entity is ignored when the intent is triggered.
+     * @return
+     */
+    public boolean getResetOnEntry() { 
+        return this.resetOnEntry; 
+    }
+
+
+    /**
+     * Sets whether an existing value for an entity is ignored when the intent is triggered.
+     * @param resetOnEntry Whether the entity should be reset.
+     */
+    public void setResetOnEntry(final boolean resetOnEntry) {
+        this.resetOnEntry = resetOnEntry; 
     }
 
     /**

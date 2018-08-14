@@ -377,6 +377,14 @@ public class IntentProcessor {
                     v -> chatResult.getChatState().getChatContext().setValue(v.getLabel(), v.getCurrentValue()));
         }
 
+        // Populate the entities from context.
+        for (MemoryVariable var : currentIntent.getVariables()) {
+            if (!var.getResetOnEntry() 
+                && chatResult.getChatState().getChatContext().isSet(var.getLabel())) {
+                var.setCurrentValue(chatResult.getChatState().getChatContext().getValue(var.getLabel()));
+            }
+        }
+
         // Check if there still are mandatory entities not currently fulfilled
         List<MemoryVariable> vars = currentIntent.getUnfulfilledVariables();
         log.put("Fulfilled", vars.isEmpty());

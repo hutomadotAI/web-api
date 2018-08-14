@@ -240,7 +240,8 @@ public class TestChatBase {
                 0,
                 false,
                 false,
-                "label");
+                "label",
+                false);
         MemoryIntent mi = new MemoryIntent(intentName, AIID, CHATID, Collections.singletonList(mv));
 
         when(this.fakeIntentHandler.getIntent(any(), anyString())).thenReturn(TestIntentLogic.getIntent());
@@ -265,7 +266,8 @@ public class TestChatBase {
                 0,
                 false,
                 false,
-                "label1");
+                "label1",
+                false);
         final String persistentTrigger = "persistentValue";
         final String persistentPrompt = "persistentPrompt";
         MemoryVariable persistentVariable = new MemoryVariable(
@@ -278,7 +280,8 @@ public class TestChatBase {
                 0,
                 false,
                 true,
-                "label2");
+                "label2",
+                false);
         List<MemoryVariable> variables = new ArrayList<>();
         variables.add(mv);
         variables.add(persistentVariable);

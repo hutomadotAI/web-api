@@ -126,7 +126,7 @@ public class TestPostFilterValidation {
         intent.addUserSays("valid question");
         intent.addResponse("valid response");
         intent.addVariable(new IntentVariable("*-=", UUID.randomUUID(), true, 3,
-                "valid value", false, ";'["));
+                "valid value", false, ";'[", false));
         intents.add(intent);
         botStructure.setIntents(intents);
         this.postFilter.validateBotStructure(botStructure, TestDataHelper.DEVID_UUID);
@@ -336,7 +336,7 @@ public class TestPostFilterValidation {
 
     private IntentVariable createIntentVariable(String entity_name, String label, int numPrompts, boolean required) {
         IntentVariable intentVariable = new IntentVariable(entity_name, TestDataHelper.DEVID_UUID,
-                required, numPrompts, "value", true, label);
+                required, numPrompts, "value", true, label, false);
         intentVariable.addPrompt("prompt");
         return intentVariable;
     }
@@ -362,7 +362,7 @@ public class TestPostFilterValidation {
         intent.addUserSays("valid question");
         intent.addResponse("valid response");
         intent.addVariable(new IntentVariable(entity.getEntityName(), entity.getDevOwner(), false, 3,
-                "valid value", false, label));
+                "valid value", false, label, false));
         intents.add(intent);
         BotStructure structure = new BotStructure("Valid Name", "Valid Description", intents,
                 "hello\nhi", entities, 1, true, 0, 0.5f,

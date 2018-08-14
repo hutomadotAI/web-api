@@ -46,7 +46,7 @@ public class TestBotStructureSerializer {
         final String webhookEndpoint = "http://endpoint";
         intent1.setWebHook(new WebHook(aiid, intentNames.get(0), webhookEndpoint, true));
         final IntentVariable intentVariable = new IntentVariable("entityname", DEVID_UUID, true, 1, "value",
-                false, "label");
+                false, "label", false);
         final ApiIntent intent2 = new ApiIntent(intentNames.get(1), "", "");
         intent2.addVariable(intentVariable);
         final AiBot linkedBot = new AiBot(DEVID_UUID, AIID, BOTID, "botname", "desc", "longdesc", "alertmsg", "badge", new BigDecimal(1),
