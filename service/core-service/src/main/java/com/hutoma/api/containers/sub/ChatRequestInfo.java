@@ -7,7 +7,7 @@ public class ChatRequestInfo {
     private final UUID devId;
     private final UUID aiid;
     private final UUID chatId;
-    private final String question;
+    private String question;
     private final Map<String, String> clientVariables;
     private ChatHandoverTarget handoverTarget;
 
@@ -26,6 +26,9 @@ public class ChatRequestInfo {
     public String getQuestion() {
         return question;
     }
+
+    public void setQuestion(final String q) {
+        this.question = q; }
 
     public Map<String, String> getClientVariables() {
         return clientVariables;

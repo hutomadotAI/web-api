@@ -113,6 +113,7 @@ public class ServerBinder extends AbstractBinder {
 
         // Chat workflow
         bind(ChatWorkflow.class).to(ChatWorkflow.class).to(Singleton.class);
+        bind(ChatEntityValueHandler.class).to(ChatEntityValueHandler.class);
         bind(ChatHandoverHandler.class).to(ChatHandoverHandler.class);
         bind(ChatPassthroughHandler.class).to(ChatPassthroughHandler.class);
         bind(ChatIntentHandler.class).to(ChatIntentHandler.class);

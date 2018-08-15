@@ -19,7 +19,8 @@ public class ChatWorkflow {
     private List<IChatHandler> handlers;
 
     @Inject
-    public ChatWorkflow(final ChatHandoverHandler handoverHandler,
+    public ChatWorkflow(final ChatEntityValueHandler entityHandler,
+                        final ChatHandoverHandler handoverHandler,
                         final ChatPassthroughHandler passthroughHandler,
                         final ChatIntentHandler intentHandler,
                         final ChatRequestTrigger requestBETrigger,
@@ -29,6 +30,7 @@ public class ChatWorkflow {
 
         // Handlers are executed based on its position in the list
         this.handlers = Arrays.asList(
+                entityHandler,
                 handoverHandler,
                 passthroughHandler,
                 intentHandler,
