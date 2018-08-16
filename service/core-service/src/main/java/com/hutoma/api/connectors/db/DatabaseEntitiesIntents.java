@@ -453,14 +453,30 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
      * @throws DatabaseException
      */
     public boolean deleteIntent(final UUID devid, final UUID aiid, final String intentName) throws DatabaseException {
-        try (DatabaseCall call = this.callProvider.get()) {
-            int rowCount = call.initialise("deleteIntent", 3)
-                    .add(devid)
-                    .add(aiid)
-                    .add(intentName)
-                    .executeUpdate();
-            return rowCount > 0;
+        try (DatabaseTransaction transaction = this.transactionProvider.get()) {
+            boolean retValue = deleteIntent(devid, aiid, intentName, transaction);
+            transaction.commit();
+            return retValue;
         }
+    }
+
+    /***
+     * Deletes an intent and all dependent objects by DB cascade delete
+     * @param devid
+     * @param aiid
+     * @param intentName
+     * @return whether the intent was successfully deleted or not
+     * @throws DatabaseException
+     */
+    public boolean deleteIntent(final UUID devid, final UUID aiid, final String intentName,
+                                final DatabaseTransaction transaction)
+            throws DatabaseException {
+        int rowCount = transaction.getDatabaseCall().initialise("deleteIntent", 3)
+                .add(devid)
+                .add(aiid)
+                .add(intentName)
+                .executeUpdate();
+        return rowCount > 0;
     }
 
     public MemoryIntent getMemoryIntent(final String intentName, final UUID aiid, UUID chatId)

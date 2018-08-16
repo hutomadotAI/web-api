@@ -182,22 +182,50 @@ public class DatabaseAI extends Database {
                             final JsonSerializer serializer)
             throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("updateAi", 13)
-                    .add(aiid)
-                    .add(description)
-                    .add(devId)
-                    .add(isPrivate)
-                    .add(language == null ? null : language.toLanguageTag())
-                    .add(timezoneString)
-                    .add(confidence)
-                    .add(personality)
-                    .add(voice)
-                    .add(serializer.serialize(defaultChatResponses))
-                    .add(errorThresholdHandover)
-                    .add(handoverResetTimeout)
-                    .add(handoverMessage);
-            return call.executeUpdate() > 0;
+            return updateAI(devId, aiid, description, isPrivate, language, timezoneString, confidence,
+                    personality, voice, defaultChatResponses, errorThresholdHandover, handoverResetTimeout,
+                    handoverMessage, serializer, call);
         }
+    }
+
+    public boolean updateAI(final UUID devId, final UUID aiid, final String description, final boolean isPrivate,
+                            final Locale language, final String timezoneString, final double confidence,
+                            final int personality, final int voice, final List<String> defaultChatResponses,
+                            final int errorThresholdHandover,
+                            final int handoverResetTimeout,
+                            final String handoverMessage,
+                            final JsonSerializer serializer,
+                            final DatabaseTransaction transaction)
+            throws DatabaseException {
+        return updateAI(devId, aiid, description, isPrivate, language, timezoneString, confidence,
+                personality, voice, defaultChatResponses, errorThresholdHandover, handoverResetTimeout,
+                handoverMessage, serializer, transaction.getDatabaseCall());
+    }
+
+    private boolean updateAI(final UUID devId, final UUID aiid, final String description, final boolean isPrivate,
+                             final Locale language, final String timezoneString, final double confidence,
+                             final int personality, final int voice, final List<String> defaultChatResponses,
+                             final int errorThresholdHandover,
+                             final int handoverResetTimeout,
+                             final String handoverMessage,
+                             final JsonSerializer serializer,
+                             final DatabaseCall call)
+            throws DatabaseException {
+        call.initialise("updateAi", 13)
+                .add(aiid)
+                .add(description)
+                .add(devId)
+                .add(isPrivate)
+                .add(language == null ? null : language.toLanguageTag())
+                .add(timezoneString)
+                .add(confidence)
+                .add(personality)
+                .add(voice)
+                .add(serializer.serialize(defaultChatResponses))
+                .add(errorThresholdHandover)
+                .add(handoverResetTimeout)
+                .add(handoverMessage);
+        return call.executeUpdate() > 0;
     }
 
     /***

@@ -46,6 +46,7 @@ public class TestServiceAi extends ServiceTestBase {
     private static final String BOT_PATH = BOT_BASEPATH + "/" + BOTID;
     private static final String BOT_CLONE_PATH = AI_BASEPATH + "/" + AIID + "/clone";
     private static final String IMPORT_BASEPATH = AI_BASEPATH + "/" + "import";
+    private static final String IMPORTINPLACE_BASEPATH = AI_PATH + "/" + "import";
 
     private static MultivaluedMap<String, String> getCreateAiRequestParams() {
         return new MultivaluedHashMap<String, String>() {{
@@ -327,6 +328,33 @@ public class TestServiceAi extends ServiceTestBase {
         ApiResult result = deserializeResponse(response, ApiResult.class);
         Assert.assertTrue(result.getStatus().getInfo().contains("duplicate intent name"));
         Assert.assertTrue(result.getStatus().getInfo().contains("intent1"));
+    }
+
+    @Test
+    public void testImportBotInPlace() throws DatabaseException {
+        final UUID newAiid = UUID.randomUUID();
+        when(this.fakeTools.createNewRandomUUID()).thenReturn(newAiid);
+        when(this.fakeDatabaseAi.createAI(any(), anyString(), anyString(), any(), anyBoolean(),
+                anyString(), anyObject(), anyObject(), anyDouble(), anyInt(),
+                anyInt(), any(), anyInt(), anyInt(), any(), any(), any())).thenReturn(newAiid);
+        when(this.fakeDatabaseAi.getAI(any(), any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
+        when(this.fakeDatabaseAi.updatePassthroughUrl(any(), any(), any(), any())).thenReturn(true);
+        when(this.fakeDatabaseAi.updateDefaultChatResponses(any(), any(), any(), any(), any())).thenReturn(true);
+        when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
+        final Response response = target(IMPORTINPLACE_BASEPATH)
+                .request()
+                .headers(defaultHeaders)
+                .post(Entity.json(getExportedBotJson()));
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
+    }
+
+    @Test
+    public void testImportBotInPlace_devId_invalid() {
+        final Response response = target(IMPORTINPLACE_BASEPATH)
+                .request()
+                .headers(noDevIdHeaders)
+                .post(Entity.json(getExportedBotJson()));
+        Assert.assertEquals(HttpURLConnection.HTTP_UNAUTHORIZED, response.getStatus());
     }
 
     @Override

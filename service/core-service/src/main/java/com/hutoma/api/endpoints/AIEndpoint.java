@@ -258,6 +258,21 @@ public class AIEndpoint {
         return result.getResponse(this.serializer).build();
     }
 
+    @Path("{aiid}/import")
+    @POST
+    @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
+    @ValidateParameters({APIParameter.DevID, APIParameter.AIID})
+    @ValidatePost({APIParameter.BotStructure})
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response importAIInPlace(
+            @Context ContainerRequestContext requestContext, BotStructure botStructure) {
+        ApiResult result = this.aiLogic.importBotInPlace(
+                ParameterFilter.getDevid(requestContext),
+                ParameterFilter.getAiid(requestContext),
+                botStructure);
+        return result.getResponse(this.serializer).build();
+    }
+
     @Path("{aiid}/clone")
     @POST
     @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})

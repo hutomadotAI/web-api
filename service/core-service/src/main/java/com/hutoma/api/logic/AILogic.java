@@ -128,7 +128,7 @@ public class AILogic {
             final int handoverResetTimeout,
             final String handoverMessage,
             final DatabaseTransaction transaction) {
-        
+
         if (transaction == null) {
             throw new IllegalArgumentException("transaction");
         }
@@ -674,6 +674,68 @@ public class AILogic {
         return ApiError.getInternalServerError();
     }
 
+    public ApiResult importBotInPlace(final UUID devId, final UUID aiid, final BotStructure botToImport) {
+        if (botToImport == null) {
+            return ApiError.getBadRequest();
+        }
+
+        ApiAi bot;
+        try (DatabaseTransaction transaction = this.transactionProvider.get()) {
+            bot = this.databaseAi.getAI(devId, aiid, this.jsonSerializer, transaction);
+            if (bot == null) {
+                this.logger.logUserTraceEvent(LOGFROM, "Import bot in-place - AIID not found", devId.toString());
+                return ApiError.getNotFound();
+            }
+
+            AiBot publishedBot = this.databaseMarketplace.getPublishedBotForAI(devId, aiid);
+            if (publishedBot != null) {
+                this.logger.logUserTraceEvent(LOGFROM,
+                        "Import bot in-place - trying to import over a published bot", devId.toString());
+                return ApiError.getBadRequest("Cannot overwrite a published bot");
+            }
+
+            Locale locale = getSafeLocaleFromBot(botToImport);
+            boolean hasLinkedSkills = botToImport.getLinkedSkills() != null && !botToImport.getLinkedSkills().isEmpty();
+
+            LogMap logMap = LogMap.map("AIID", aiid);
+
+            this.databaseAi.updateAI(devId, aiid, botToImport.getDescription(), botToImport.isPrivate(),
+                    locale, botToImport.getTimezone(), botToImport.getConfidence(),
+                    botToImport.getPersonality(), botToImport.getVoice(), botToImport.getDefaultResponses(),
+                    // BUG: 5659
+                    bot.getErrorThresholdHandover(),
+                    bot.getHandoverResetTimeoutSeconds(),
+                    bot.getHandoverMessage(),
+                    // ---
+                    this.jsonSerializer,
+                    transaction);
+
+            // Need to cleanup all existing intents
+            ApiIntentList intentList = this.databaseEntitiesIntents.getIntentsDetails(devId, aiid);
+            if (intentList != null) {
+                for (String intentName : intentList.getIntentNames()) {
+                    this.databaseEntitiesIntents.deleteIntent(devId, aiid, intentName, transaction);
+                }
+            }
+
+            setBotAdditionalProperties(devId, aiid, botToImport, hasLinkedSkills, aiid, transaction, logMap);
+
+            ApiAi createdBot = this.databaseAi.getAI(devId, aiid, this.jsonSerializer, transaction);
+
+            transaction.commit();
+
+            ApiResult result = uploadAndStartTraining(devId, aiid, createdBot, false);
+
+            logImport(devId, result, botToImport);
+
+            return result;
+
+        } catch (DatabaseException | BotImportException ex) {
+            this.logger.logUserExceptionEvent(LOGFROM, "Failed import the bot in-place", devId.toString(), ex);
+            return ApiError.getInternalServerError();
+        }
+    }
+
     public ApiResult importBot(final UUID devId, final BotStructure importedBot) {
         if (importedBot == null) {
             return ApiError.getBadRequest();
@@ -686,52 +748,8 @@ public class AILogic {
             return ApiError.getBadRequest(e.getMessage());
         }
 
-        UUID uuidAiid = UUID.fromString(createdBot.getAiid());
-        try {
-            String trainingMaterials = this.aiServices.getTrainingMaterialsCommon(devId, uuidAiid, this.jsonSerializer);
-            this.aiServices.uploadTraining(createdBot.getBackendStatus(), devId, uuidAiid, trainingMaterials);
-        } catch (Exception ex) {
-            this.logger.logUserExceptionEvent(LOGFROM, "BotImportTraining", devId.toString(), ex);
-            return ApiError.getInternalServerError();
-        }
-
-        // Bot successfully imported. Start training.
-        try {
-            this.aiServices.startTraining(createdBot.getBackendStatus(), devId, uuidAiid);
-        } catch (AIServices.AiServicesException | RuntimeException ex) {
-            this.logger.logUserExceptionEvent(LOGFROM, "ImportStartTraining", devId.toString(), ex);
-            return ApiError.getInternalServerError();
-        }
-
-        // load the new bot as a get
-        ApiResult result = getAI(devId, uuidAiid, "ImportBot-GetAI", true, null);
-
-        if (result.getStatus().getCode() == HttpURLConnection.HTTP_CREATED) {
-            // Log the import
-            ApiAi ai = (ApiAi) result;
-            this.logger.logUserInfoEvent(LOGFROM, "ImportBot", devId.toString(),
-                    LogMap.map("NewAIID", ai.getAiid())
-                            .put("Name", ai.getName() == null ? "" : ai.getName())
-                            .put("NumLinkedBots", ai.getLinkedBots() == null ? 0 : ai.getLinkedBots().size())
-                            .put("LinkedBots", ai.getLinkedBots() == null ? "" : ai.getLinkedBots().stream()
-                                    .map(Object::toString).collect(Collectors.joining(",")))
-                            .put("BackendStatus", ai.getBackendStatus())
-                            .put("DefaultChatResponses", ai.getDefaultChatResponses().stream()
-                                    .collect(Collectors.joining(",")))
-                            .put("TrainingFileSize", importedBot.getTrainingFile() == null
-                                    ? 0 : importedBot.getTrainingFile().length())
-                            .put("NumIntents", importedBot.getIntents() == null ? 0 : importedBot.getIntents().size())
-                            .put("NumEntities", importedBot.getEntities() == null
-                                    ? 0 : importedBot.getEntities().size())
-                            .put("Confidence", ai.getConfidence())
-                            .put("PassthroughUrl", ai.getPassthroughUrl() == null ? "" : ai.getPassthroughUrl())
-                            .put("Description", ai.getDescription() == null ? "" : ai.getDescription())
-                            .put("Language", importedBot.getLanguage() == null ? "" : importedBot.getLanguage())
-                            .put("Timezone", importedBot.getTimezone() == null ? "" : importedBot.getTimezone())
-                            .put("Personality", importedBot.getPersonality())
-                            .put("Voice", importedBot.getVoice())
-                            .put("Version", importedBot.getVersion()));
-        }
+        ApiResult result = uploadAndStartTraining(devId, UUID.fromString(createdBot.getAiid()), createdBot, true);
+        logImport(devId, result, importedBot);
         return result;
     }
 
@@ -757,14 +775,14 @@ public class AILogic {
                             && x.getPublishingType() == AiBot.PublishingType.TEMPLATE)
                     .findFirst();
             if (optBot.isPresent()) {
-                devIdBotToClone =  optBot.get().getDevId();
+                devIdBotToClone = optBot.get().getDevId();
             }
         } catch (DatabaseException ex) {
             this.logger.logUserExceptionEvent(LOGFROM, "Error obtaining purchased bots list",
                     devId.toString(), ex);
             return ApiError.getInternalServerError();
         }
-        
+
         ApiResult result = this.exportBotData(devIdBotToClone, aiidToClone);
         if (result.getStatus().getCode() != HttpURLConnection.HTTP_OK) {
             return result;
@@ -805,6 +823,57 @@ public class AILogic {
         return salt.toString();
     }
 
+    private ApiResult uploadAndStartTraining(final UUID devId, final UUID aiid, final ApiAi createdBot,
+                                             final boolean isCreate) {
+        try {
+            String trainingMaterials = this.aiServices.getTrainingMaterialsCommon(devId, aiid, this.jsonSerializer);
+            this.aiServices.uploadTraining(createdBot.getBackendStatus(), devId, aiid, trainingMaterials);
+        } catch (Exception ex) {
+            this.logger.logUserExceptionEvent(LOGFROM, "BotImportTraining", devId.toString(), ex);
+            return ApiError.getInternalServerError();
+        }
+
+        // Bot successfully imported. Start training.
+        try {
+            this.aiServices.startTraining(createdBot.getBackendStatus(), devId, aiid);
+        } catch (AIServices.AiServicesException | RuntimeException ex) {
+            this.logger.logUserExceptionEvent(LOGFROM, "ImportStartTraining", devId.toString(), ex);
+            return ApiError.getInternalServerError();
+        }
+
+        // load the new bot as a get
+        return getAI(devId, aiid, "ImportBot-GetAI", isCreate, null);
+    }
+
+    private void logImport(final UUID devId, final ApiResult result, final BotStructure importedBot) {
+        if (result.getStatus().getCode() == HttpURLConnection.HTTP_CREATED) {
+            // Log the import
+            ApiAi ai = (ApiAi) result;
+            this.logger.logUserInfoEvent(LOGFROM, "ImportBot", devId.toString(),
+                    LogMap.map("NewAIID", ai.getAiid())
+                            .put("Name", ai.getName() == null ? "" : ai.getName())
+                            .put("NumLinkedBots", ai.getLinkedBots() == null ? 0 : ai.getLinkedBots().size())
+                            .put("LinkedBots", ai.getLinkedBots() == null ? "" : ai.getLinkedBots().stream()
+                                    .map(Object::toString).collect(Collectors.joining(",")))
+                            .put("BackendStatus", ai.getBackendStatus())
+                            .put("DefaultChatResponses", ai.getDefaultChatResponses().stream()
+                                    .collect(Collectors.joining(",")))
+                            .put("TrainingFileSize", importedBot.getTrainingFile() == null
+                                    ? 0 : importedBot.getTrainingFile().length())
+                            .put("NumIntents", importedBot.getIntents() == null ? 0 : importedBot.getIntents().size())
+                            .put("NumEntities", importedBot.getEntities() == null
+                                    ? 0 : importedBot.getEntities().size())
+                            .put("Confidence", ai.getConfidence())
+                            .put("PassthroughUrl", ai.getPassthroughUrl() == null ? "" : ai.getPassthroughUrl())
+                            .put("Description", ai.getDescription() == null ? "" : ai.getDescription())
+                            .put("Language", importedBot.getLanguage() == null ? "" : importedBot.getLanguage())
+                            .put("Timezone", importedBot.getTimezone() == null ? "" : importedBot.getTimezone())
+                            .put("Personality", importedBot.getPersonality())
+                            .put("Voice", importedBot.getVoice())
+                            .put("Version", importedBot.getVersion()));
+        }
+    }
+
     private ApiResult getAI(final UUID devid, final UUID aiid, String logTag, boolean isCreate,
                             final DatabaseTransaction transaction) {
         final String devIdString = devid.toString();
@@ -834,13 +903,7 @@ public class AILogic {
     @VisibleForTesting
     ApiAi createImportedBot(final UUID devId, final BotStructure importedBot) throws BotImportException {
         // try to interpret the locale
-        Locale locale;
-        try {
-            locale = validate.validateLocale("locale", importedBot.getLanguage());
-        } catch (ParameterValidationException e) {
-            // if the local is missing or badly formatted then use en-US
-            locale = DEFAULT_LOCALE;
-        }
+        Locale locale = getSafeLocaleFromBot(importedBot);
 
         boolean hasLinkedSkills = importedBot.getLinkedSkills() != null && !importedBot.getLinkedSkills().isEmpty();
 
@@ -926,95 +989,9 @@ public class AILogic {
                 throw new BotImportException(IMPORT_GENERIC_ERROR);
             }
 
-            if (!this.databaseAi.updatePassthroughUrl(devId, aiid, importedBot.getPassthroughUrl(), transaction)) {
-                this.logger.logUserErrorEvent(LOGFROM, "ImportBot - update passthrough url", devId.toString(),
-                        logMap);
-                throw new BotImportException(IMPORT_GENERIC_ERROR);
-            }
+            setBotAdditionalProperties(devId, aiid, importedBot, hasLinkedSkills, UUID.fromString(bot.getAiid()),
+                    transaction, logMap);
 
-            List<String> defaultResponses =
-                    (importedBot.getDefaultResponses() == null || importedBot.getDefaultResponses().isEmpty())
-                            ? Collections.singletonList(ChatDefaultHandler.COMPLETELY_LOST_RESULT)
-                            : importedBot.getDefaultResponses();
-            if (!this.databaseAi.updateDefaultChatResponses(devId, aiid, defaultResponses,
-                    this.jsonSerializer, transaction)) {
-                this.logger.logUserErrorEvent(LOGFROM, "ImportBot - update default responses", devId.toString(),
-                        logMap);
-                throw new BotImportException(IMPORT_GENERIC_ERROR);
-            }
-
-            List<Entity> userEntities;
-            try {
-                // Add the entities that the user doesn't currently have.
-                userEntities = this.databaseEntitiesIntents.getEntities(devId);
-            } catch (DatabaseException ex) {
-                this.logger.logUserExceptionEvent(LOGFROM, "ImportBot - retrieving existing entities ai",
-                        devId.toString(), ex, logMap);
-                throw new BotImportException(IMPORT_GENERIC_ERROR);
-            }
-
-            if (importedBot.getEntities() != null && !importedBot.getEntities().isEmpty()) {
-                try {
-                    for (ApiEntity e : importedBot.getEntities().values()) {
-                        boolean hasEntity = false;
-                        for (Entity ue : userEntities) {
-                            if (ue.getName().equals(e.getEntityName())) {
-                                hasEntity = true;
-                                break;
-                            }
-                        }
-                        if (!hasEntity) {
-                            this.databaseEntitiesIntents.writeEntity(devId, e.getEntityName(), e, transaction);
-                        }
-                    }
-                } catch (DatabaseException ex) {
-                    this.logger.logUserExceptionEvent(LOGFROM, "ImportBot - create entities", devId.toString(),
-                            ex, logMap);
-                    throw new BotImportException(IMPORT_GENERIC_ERROR);
-                }
-            }
-
-            // Import intents.
-            if (importedBot.getIntents() != null && !importedBot.getIntents().isEmpty()) {
-                try {
-                    for (ApiIntent intent : importedBot.getIntents()) {
-                        UUID botAiid = UUID.fromString(bot.getAiid());
-                        this.databaseEntitiesIntents.writeIntent(devId, botAiid,
-                                intent.getIntentName(), intent, transaction);
-                        WebHook webHook = intent.getWebHook();
-                        if (webHook != null) {
-                            if (!this.databaseEntitiesIntents.createWebHook(botAiid, webHook.getIntentName(),
-                                    webHook.getEndpoint(), webHook.isEnabled(), transaction)) {
-                                this.logger.logUserErrorEvent(LOGFROM, "ImportBot - create webhook", devId.toString(),
-                                        logMap);
-                                throw new BotImportException(IMPORT_GENERIC_ERROR);
-                            }
-                        }
-                    }
-                } catch (DatabaseException ex) {
-                    this.logger.logUserExceptionEvent(LOGFROM, "ImportBot - write intents", devId.toString(),
-                            ex, logMap);
-                    throw new BotImportException(IMPORT_GENERIC_ERROR);
-                }
-            }
-
-            if (importedBot.getTrainingFile() != null) {
-                // Add the training file to the database
-                try {
-                    this.databaseAi.updateAiTrainingFile(aiid, importedBot.getTrainingFile(), transaction);
-                } catch (Exception ex) {
-                    this.logger.logUserExceptionEvent(LOGFROM, "ImportBot - add training file", devId.toString(),
-                            ex, logMap);
-                    throw new BotImportException(IMPORT_GENERIC_ERROR);
-                }
-            }
-
-            // Link skills
-            if (hasLinkedSkills) {
-                for (Integer linkedSkill : importedBot.getLinkedSkills()) {
-                    this.databaseAi.linkBotToAi(devId, aiid, linkedSkill, transaction);
-                }
-            }
 
             transaction.commit();
         } catch (DatabaseException ex) {
@@ -1024,6 +1001,116 @@ public class AILogic {
         }
 
         return bot;
+    }
+
+    private void setBotAdditionalProperties(final UUID devId,
+                                            final UUID aiid,
+                                            final BotStructure botToImport,
+                                            final boolean hasLinkedSkills,
+                                            final UUID newBotAiid,
+                                            final DatabaseTransaction transaction,
+                                            final LogMap logMap)
+            throws BotImportException, DatabaseException {
+
+        if (!this.databaseAi.updatePassthroughUrl(devId, aiid, botToImport.getPassthroughUrl(), transaction)) {
+            this.logger.logUserErrorEvent(LOGFROM, "ImportBot - update passthrough url", devId.toString(),
+                    logMap);
+            throw new BotImportException(IMPORT_GENERIC_ERROR);
+        }
+
+        List<String> defaultResponses =
+                (botToImport.getDefaultResponses() == null || botToImport.getDefaultResponses().isEmpty())
+                        ? Collections.singletonList(ChatDefaultHandler.COMPLETELY_LOST_RESULT)
+                        : botToImport.getDefaultResponses();
+        if (!this.databaseAi.updateDefaultChatResponses(devId, aiid, defaultResponses,
+                this.jsonSerializer, transaction)) {
+            this.logger.logUserErrorEvent(LOGFROM, "ImportBot - update default responses", devId.toString(),
+                    logMap);
+            throw new BotImportException(IMPORT_GENERIC_ERROR);
+        }
+
+        List<Entity> userEntities;
+        try {
+            // Add the entities that the user doesn't currently have.
+            userEntities = this.databaseEntitiesIntents.getEntities(devId);
+        } catch (DatabaseException ex) {
+            this.logger.logUserExceptionEvent(LOGFROM, "ImportBot - retrieving existing entities ai",
+                    devId.toString(), ex, logMap);
+            throw new BotImportException(IMPORT_GENERIC_ERROR);
+        }
+
+        if (botToImport.getEntities() != null && !botToImport.getEntities().isEmpty()) {
+            try {
+                for (ApiEntity e : botToImport.getEntities().values()) {
+                    boolean hasEntity = false;
+                    for (Entity ue : userEntities) {
+                        if (ue.getName().equals(e.getEntityName())) {
+                            hasEntity = true;
+                            break;
+                        }
+                    }
+                    if (!hasEntity) {
+                        this.databaseEntitiesIntents.writeEntity(devId, e.getEntityName(), e, transaction);
+                    }
+                }
+            } catch (DatabaseException ex) {
+                this.logger.logUserExceptionEvent(LOGFROM, "ImportBot - create entities", devId.toString(),
+                        ex, logMap);
+                throw new BotImportException(IMPORT_GENERIC_ERROR);
+            }
+        }
+
+        // Import intents.
+        if (botToImport.getIntents() != null && !botToImport.getIntents().isEmpty()) {
+            try {
+                for (ApiIntent intent : botToImport.getIntents()) {
+                    this.databaseEntitiesIntents.writeIntent(devId, newBotAiid,
+                            intent.getIntentName(), intent, transaction);
+                    WebHook webHook = intent.getWebHook();
+                    if (webHook != null) {
+                        if (!this.databaseEntitiesIntents.createWebHook(newBotAiid, webHook.getIntentName(),
+                                webHook.getEndpoint(), webHook.isEnabled(), transaction)) {
+                            this.logger.logUserErrorEvent(LOGFROM, "ImportBot - create webhook", devId.toString(),
+                                    logMap);
+                            throw new BotImportException(IMPORT_GENERIC_ERROR);
+                        }
+                    }
+                }
+            } catch (DatabaseException ex) {
+                this.logger.logUserExceptionEvent(LOGFROM, "ImportBot - write intents", devId.toString(),
+                        ex, logMap);
+                throw new BotImportException(IMPORT_GENERIC_ERROR);
+            }
+        }
+
+        if (botToImport.getTrainingFile() != null) {
+            // Add the training file to the database
+            try {
+                this.databaseAi.updateAiTrainingFile(aiid, botToImport.getTrainingFile(), transaction);
+            } catch (Exception ex) {
+                this.logger.logUserExceptionEvent(LOGFROM, "ImportBot - add training file", devId.toString(),
+                        ex, logMap);
+                throw new BotImportException(IMPORT_GENERIC_ERROR);
+            }
+        }
+
+        // Link skills
+        if (hasLinkedSkills) {
+            for (Integer linkedSkill : botToImport.getLinkedSkills()) {
+                this.databaseAi.linkBotToAi(devId, aiid, linkedSkill, transaction);
+            }
+        }
+    }
+
+    private Locale getSafeLocaleFromBot(final BotStructure bot) {
+        Locale locale;
+        try {
+            locale = validate.validateLocale("locale", bot.getLanguage());
+        } catch (ParameterValidationException e) {
+            // if the local is missing or badly formatted then use en-US
+            locale = DEFAULT_LOCALE;
+        }
+        return locale;
     }
 
     static class BotImportException extends Exception {

@@ -1285,6 +1285,78 @@ public class TestAILogic {
         this.aiLogic.createImportedBot(VALIDDEVID, botStructure);
     }
 
+    @Test
+    public void testCreateImportedBotInPlace() throws DatabaseException, ParameterValidationException {
+        setupFakeImport();
+        BotStructure botStructure = getBotstructure();
+        botStructure.setDescription("newndescription");
+        botStructure.setTimezone("newtimezone");
+        botStructure.setLanguage("ca-ES");
+        botStructure.setConfidence(0.999);
+        botStructure.setPersonality(1234);
+        botStructure.setVoice(4321);
+        List<String> defaultResponses = Collections.singletonList("newdefresponse");
+        botStructure.setDefaultResponses(defaultResponses);
+
+        when(this.fakeValidate.validateLocale(any(), any())).thenReturn(Locale.forLanguageTag("ca-ES"));
+
+        ApiAi result = (ApiAi) this.aiLogic.importBotInPlace(VALIDDEVID, AIID, botStructure);
+
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+        Assert.assertEquals(AIID.toString(), result.getAiid());
+        verify(this.fakeDatabaseAi).updateAI(
+                eq(VALIDDEVID), eq(AIID),
+                eq("newndescription"),
+                any(Boolean.class),
+                eq(Locale.forLanguageTag("ca-ES")),
+                eq("newtimezone"),
+                eq(0.999),
+                eq(1234),
+                eq(4321),
+                eq(defaultResponses),
+                any(Integer.class),
+                any(Integer.class),
+                any(String.class),
+                any(JsonSerializer.class),
+                any(DatabaseTransaction.class));
+    }
+
+    @Test
+    public void testCreateImportedBotInPlace_invalidOriginAiid() throws DatabaseException {
+        when(this.fakeDatabaseAi.getAI(any(), any(), any(), any())).thenReturn(null);
+        BotStructure botStructure = getBotstructure();
+        ApiResult result = this.aiLogic.importBotInPlace(VALIDDEVID, AIID, botStructure);
+        Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testCreateImportedBotInPlace_botAlreadyPublished() throws DatabaseException {
+        BotStructure botStructure = getBotstructure();
+        when(this.fakeDatabaseAi.getAI(any(), any(), any(), any())).thenReturn(getSampleAI());
+        when(this.fakeDatabaseMarketplace.getPublishedBotForAI(any(), any())).thenReturn(getAiBot(1, "published"));
+        ApiResult result = this.aiLogic.importBotInPlace(VALIDDEVID, AIID, botStructure);
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testCreateImportedBotInPlace_existingIntents_cleared() throws DatabaseException {
+        ApiAi existingAi = getSampleAI();
+        BotStructure botStructure = getBotstructure();
+        List<String> existingIntentNames = Arrays.asList("previntent1", "previntent2");
+        ApiIntentList existingIntents = new ApiIntentList(AIID, existingIntentNames);
+        when(this.fakeDatabaseAi.getAI(any(), any(), any(), any())).thenReturn(existingAi);
+        when(this.fakeDatabaseEntitiesIntents.getIntentsDetails(any(), any())).thenReturn(existingIntents);
+
+        this.aiLogic.importBotInPlace(VALIDDEVID, AIID, botStructure);
+
+        ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+        verify(this.fakeDatabaseEntitiesIntents, times(existingIntentNames.size()))
+                .deleteIntent(eq(VALIDDEVID), eq(AIID), captor.capture(), any());
+        Assert.assertEquals(existingIntentNames.size(), captor.getAllValues().size());
+        Assert.assertEquals(existingIntentNames.get(0), captor.getAllValues().get(0));
+        Assert.assertEquals(existingIntentNames.get(1), captor.getAllValues().get(1));
+    }
+
     private void setupFakeImport() throws DatabaseException {
         ApiAi ai = TestDataHelper.getSampleAI();
         UUID newAiid = UUID.fromString(ai.getAiid());
