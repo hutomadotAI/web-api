@@ -47,6 +47,7 @@ public class ChatEntityValueHandler implements IChatHandler {
                 requestInfo.getDevId(),
                 requestInfo.getAiid(),
                 "entity-value-replacement") == FeatureToggler.FeatureState.T1) {
+            logger.logInfo("ChatEntityValueHandler", "entity-value-replacement feature requested");
             ERMessage toSend = new ERMessage();
 
             try {
@@ -61,7 +62,11 @@ public class ChatEntityValueHandler implements IChatHandler {
                 }
 
                 toSend.conversation = requestInfo.getQuestion();
+                logger.logInfo("ChatEntityValueHandler",
+                        "Entities: " + serializer.serialize(toSend));
                 String conv = entityRecognizerService.findEntities(serializer.serialize(toSend));
+                logger.logInfo("ChatEntityValueHandler",
+                        "Entity Replacements: " + conv);
 
                 ERMessage found = (ERMessage) serializer.deserialize(conv, ERMessage.class);
 

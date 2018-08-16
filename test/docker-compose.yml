@@ -42,7 +42,7 @@ services:
 
   # Entity recognizer in minimal server (English) mode to limit RAM use
   api-entity:
-    image: eu.gcr.io/hutoma-backend/api/entity_recognizer:1.3.2-ci.11
+    image: eu.gcr.io/hutoma-backend/api/entity_recognizer:1.3.2-ci.12
     environment:
     - ERS_MINIMAL_SERVER=1
 
