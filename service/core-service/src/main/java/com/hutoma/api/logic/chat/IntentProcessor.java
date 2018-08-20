@@ -614,6 +614,11 @@ public class IntentProcessor {
                             LogMap.map("Intent", currentIntent.getName()).put("AIID", aiidForMemoryIntents));
                 }
             } catch (WebHooks.WebHookExternalException ex) {
+                // Log net exception details
+                LogMap logMap = ChatBaseException.getNetExceptionLogMap(chatInfo, webHook.getEndpoint(), ex);
+                this.logger.logUserTraceEvent(LOGFROM, "External exception in webhook",
+                        chatInfo.getDevId().toString(), logMap);
+
                 // Set the default response
                 response = new WebHookResponse(getRandomIntentResponse(chatInfo.getAiid(), currentIntent, intent));
                 String webHookErrorString = ex.getMessage();

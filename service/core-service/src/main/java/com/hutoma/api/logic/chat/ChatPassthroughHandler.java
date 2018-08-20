@@ -73,7 +73,13 @@ public class ChatPassthroughHandler implements IChatHandler {
                     chatResult.setWebHookResponse(response);
                 }
             } catch (WebHooks.WebHookExternalException callException) {
-                this.chatLogger.logChatError(LOGFROM, requestInfo.getDevId().toString(), callException, telemetryMap);
+                // Log net exception details
+                LogMap logMap = ChatBaseException.getNetExceptionLogMap(requestInfo, passthrough, callException);
+                this.logger.logUserTraceEvent(LOGFROM, "External exception in passthrough",
+                        devIdString, logMap);
+                // Log in the chatlogger
+                this.chatLogger.logUserWarnEvent(LOGFROM, String.format("External error in passthrough - %s",
+                        callException.getMessage()), requestInfo.getDevId().toString(), telemetryMap);
                 throw new ChatLogic.ChatFailedException(ApiError.getBadRequest());
             } catch (WebHooks.WebHookException webhookException) {
                 this.logger.logUserErrorEvent(LOGFROM,
