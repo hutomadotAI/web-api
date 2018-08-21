@@ -139,6 +139,36 @@ public class ChatEndpoint {
         return result.getResponse(this.serializer).build();
     }
 
+    @PUT
+    @Path("{aiid}/chat/triggerIntent")
+    @RateLimit(RateKey.Chat)
+    @Secured({Role.ROLE_CLIENTONLY, Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3,
+            Role.ROLE_PLAN_4})
+    @ValidateParameters({APIParameter.DevID, APIParameter.AIID, APIParameter.ChatID})
+    @StatusCodes({
+            @ResponseCode(code = HttpURLConnection.HTTP_OK, condition = "Succeeded."),
+            @ResponseCode(code = HttpURLConnection.HTTP_BAD_REQUEST, condition = "Invalid variables"),
+            @ResponseCode(code = HttpURLConnection.HTTP_INTERNAL_ERROR, condition = "Internal error")
+    })
+    @RequestHeaders({
+            @RequestHeader(name = "Authorization", description = "Developer token")
+    })
+    @ResourceMethodSignature(
+            queryParams = {
+                    @QueryParam("intentName"),
+                    @QueryParam("chatId")
+            }
+    )
+    public Response triggerIntent(
+            @Context ContainerRequestContext requestContext) {
+        ApiResult result = this.chatLogic.triggerIntent(
+                ParameterFilter.getAiid(requestContext),
+                ParameterFilter.getDevid(requestContext),
+                ParameterFilter.getChatID(requestContext),
+                ParameterFilter.getIntentName(requestContext));
+        return result.getResponse(this.serializer).build();
+    }
+
     @POST
     @Path("{aiid}/chat/reset")
     @RateLimit(RateKey.Chat)

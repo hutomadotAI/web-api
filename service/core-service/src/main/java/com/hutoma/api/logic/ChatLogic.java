@@ -8,14 +8,9 @@ import com.hutoma.api.connectors.ServerConnector;
 import com.hutoma.api.connectors.WebHooks;
 import com.hutoma.api.connectors.chat.AIChatServices;
 import com.hutoma.api.connectors.chat.ChatBackendConnector;
-import com.hutoma.api.containers.ApiChat;
-import com.hutoma.api.containers.ApiChatApiHandover;
-import com.hutoma.api.containers.ApiError;
-import com.hutoma.api.containers.ApiResult;
-import com.hutoma.api.containers.sub.ChatHandoverTarget;
-import com.hutoma.api.containers.sub.ChatRequestInfo;
-import com.hutoma.api.containers.sub.ChatResult;
-import com.hutoma.api.containers.sub.ChatState;
+import com.hutoma.api.connectors.db.DatabaseEntitiesIntents;
+import com.hutoma.api.containers.*;
+import com.hutoma.api.containers.sub.*;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
 import com.hutoma.api.logic.chat.ChatBaseException;
@@ -24,12 +19,7 @@ import com.hutoma.api.logic.chat.IChatHandler;
 import com.hutoma.api.memory.ChatStateHandler;
 import org.parboiled.common.StringUtils;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 
@@ -44,6 +34,7 @@ public class ChatLogic {
     private final AIChatServices chatServices;
     private final ChatLogger chatLogger;
     private final ChatStateHandler chatStateHandler;
+    private final DatabaseEntitiesIntents databaseEntitiesIntents;
     private final LogMap telemetryMap;
     private final ChatWorkflow chatWorkflow;
     private final Config config;
@@ -53,12 +44,14 @@ public class ChatLogic {
     @Inject
     public ChatLogic(final AIChatServices chatServices,
                      final ChatStateHandler chatStateHandler,
+                     final DatabaseEntitiesIntents databaseEntitiesIntents,
                      final Tools tools,
                      final ILogger logger,
                      final ChatLogger chatLogger,
                      final ChatWorkflow chatWorkflow,
                      final Config config) {
         this.chatStateHandler = chatStateHandler;
+        this.databaseEntitiesIntents = databaseEntitiesIntents;
         this.chatServices = chatServices;
         this.tools = tools;
         this.logger = logger;
@@ -332,6 +325,38 @@ public class ChatLogic {
             }
         } catch (Exception ex) {
             this.chatLogger.logUserExceptionEvent(LOGFROM, "setContextVariable", devId.toString(), ex);
+            return ApiError.getInternalServerError();
+        }
+    }
+
+    public ApiResult triggerIntent(final UUID aiid, final UUID devId, final String chatId, final String intentName) {
+        try {
+            UUID chatUuid = UUID.fromString(chatId);
+
+            if (!this.databaseEntitiesIntents.checkAIBelongsToDevId(devId, aiid)) {
+                return ApiError.getNotFound();
+            }
+            ApiIntent intent = this.databaseEntitiesIntents.getIntent(aiid, intentName);
+            if (intent != null) {
+                List<MemoryVariable> variables = new ArrayList<>();
+                for (IntentVariable intentVariable : intent.getVariables()) {
+                    variables.add(new MemoryVariable(intentVariable));
+                }
+                MemoryIntent memoryIntent = new MemoryIntent(intentName, aiid, chatUuid, variables, false);
+
+                this.chatState = this.chatStateHandler.getState(devId, aiid, chatUuid);
+                this.chatState.setInIntentLoop(true);
+                List<MemoryIntent> miList = new ArrayList<>();
+                miList.add(memoryIntent);
+                this.chatState.setCurrentIntents(miList);
+                this.chatStateHandler.saveState(devId, aiid, chatUuid, this.chatState);
+                return new ApiResult().setSuccessStatus();
+            } else {
+                return ApiError.getNotFound();
+            }
+
+        } catch (Exception ex) {
+            this.chatLogger.logUserExceptionEvent(LOGFROM, "triggerIntent", devId.toString(), ex);
             return ApiError.getInternalServerError();
         }
     }

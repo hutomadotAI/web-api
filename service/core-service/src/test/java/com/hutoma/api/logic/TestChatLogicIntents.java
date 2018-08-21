@@ -8,15 +8,7 @@ import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.ApiChat;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.ApiResult;
-import com.hutoma.api.containers.sub.ChatContext;
-import com.hutoma.api.containers.sub.ChatHandoverTarget;
-import com.hutoma.api.containers.sub.ChatResult;
-import com.hutoma.api.containers.sub.ChatState;
-import com.hutoma.api.containers.sub.IntentConditionOperator;
-import com.hutoma.api.containers.sub.IntentOutConditional;
-import com.hutoma.api.containers.sub.IntentVariableCondition;
-import com.hutoma.api.containers.sub.MemoryIntent;
-import com.hutoma.api.containers.sub.MemoryVariable;
+import com.hutoma.api.containers.sub.*;
 import com.hutoma.api.logic.chat.ChatDefaultHandler;
 import com.hutoma.api.logic.chat.ConditionEvaluator;
 import com.hutoma.api.memory.ChatStateHandler;
@@ -774,6 +766,49 @@ public class TestChatLogicIntents extends TestChatBase {
         // Check recursion message - last one points back to first one
         Assert.assertEquals("Recursion detected for intent intent0", result.getStatus().getInfo());
         verify(this.fakeIntentHandler, times(numIntents + 1)).getCurrentIntentsStateForChat(any());
+    }
+
+    @Test
+    public void testChat_triggerIntent_Success() throws DatabaseException {
+        when(this.fakeDatabaseEntitiesIntents.getIntent(any(), any())).thenReturn(new ApiIntent("intentName", null, null));
+        when(this.fakeDatabaseEntitiesIntents.checkAIBelongsToDevId(any(), any())).thenReturn(true);
+        ApiResult result = this.chatLogic.triggerIntent(AIID, DEVID_UUID, CHATID.toString(), "intentName");
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testChat_triggerIntent_IncorrectName() throws DatabaseException {
+        when(this.fakeDatabaseEntitiesIntents.getIntent(any(), any())).thenReturn(null);
+        when(this.fakeDatabaseEntitiesIntents.checkAIBelongsToDevId(any(), any())).thenReturn(true);
+        ApiResult result = this.chatLogic.triggerIntent(AIID, DEVID_UUID, CHATID.toString(), "intentName");
+        Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testChat_triggerIntent_IncorrectDevId() throws DatabaseException {
+        when(this.fakeDatabaseEntitiesIntents.getIntent(any(), any())).thenReturn(new ApiIntent("intentName", null, null));
+        when(this.fakeDatabaseEntitiesIntents.checkAIBelongsToDevId(any(), any())).thenReturn(false);
+        ApiResult result = this.chatLogic.triggerIntent(AIID, DEVID_UUID, CHATID.toString(), "intentName");
+        Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testChat_triggerIntent_promptsUser() throws DatabaseException, ChatStateHandler.ChatStateException {
+        ApiIntent intent = new ApiIntent("intentName", null, null);
+        intent.setResponses(Collections.singletonList("response"));
+        when(this.fakeDatabaseEntitiesIntents.checkAIBelongsToDevId(any(), any())).thenReturn(true);
+        when(this.fakeDatabaseEntitiesIntents.getIntent(any(), any())).thenReturn(intent);
+        when(this.fakeIntentHandler.getIntent(any(), any())).thenReturn(intent);
+        MemoryVariable mv = new MemoryVariable("entity1", null, true, Collections.singletonList("1"),
+                Collections.singletonList("prompt1"), 2, 0, false, false, "label1", false);
+        List<MemoryIntent> intentList = new ArrayList<>();
+        intentList.add(new MemoryIntent("intentName", AIID, CHATID, Collections.singletonList(mv)));
+        when(this.fakeIntentHandler.getCurrentIntentsStateForChat(any())).thenReturn(intentList);
+        ApiResult result = this.chatLogic.triggerIntent(AIID, DEVID_UUID, CHATID.toString(), "intentName");
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+
+        ApiResult response = this.chatLogic.chat(AIID, DEVID_UUID, "what?", CHATID.toString(), null);
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus().getCode());
     }
 
     private ChatResult testIntentConditionOut(final String intent1Name, final String intent2Name, final ConditionEvaluator.ResultType evaluationResult)

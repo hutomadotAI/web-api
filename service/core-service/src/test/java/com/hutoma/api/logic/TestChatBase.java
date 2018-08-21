@@ -13,6 +13,7 @@ import com.hutoma.api.connectors.WebHooks;
 import com.hutoma.api.connectors.chat.AIChatServices;
 import com.hutoma.api.connectors.chat.ChatBackendConnector;
 import com.hutoma.api.connectors.db.DatabaseAI;
+import com.hutoma.api.connectors.db.DatabaseEntitiesIntents;
 import com.hutoma.api.containers.ApiChat;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.AiMinP;
@@ -62,6 +63,7 @@ public class TestChatBase {
     IMemoryIntentHandler fakeIntentHandler;
     WebHooks fakeWebHooks;
     DatabaseAI fakeDatabaseAi;
+    DatabaseEntitiesIntents fakeDatabaseEntitiesIntents;
     ChatStateHandler fakeChatStateHandler;
     ChatLogic chatLogic;
     protected Config fakeConfig;
@@ -78,7 +80,6 @@ public class TestChatBase {
     ConditionEvaluator fakeConditionEvaluator;
     ContextVariableExtractor fakeContextVariableExtractor;
 
-
     @Before
     public void setup() {
         this.fakeConfig = mock(Config.class);
@@ -86,6 +87,7 @@ public class TestChatBase {
         this.fakeRecognizer = mock(IEntityRecognizer.class);
         this.fakeIntentHandler = mock(IMemoryIntentHandler.class);
         this.fakeDatabaseAi = mock(DatabaseAI.class);
+        this.fakeDatabaseEntitiesIntents = mock(DatabaseEntitiesIntents.class);
         this.fakeChatStateHandler = mock(ChatStateHandler.class);
         this.fakeConfig = mock(Config.class);
         this.fakeWebHooks = mock(WebHooks.class);
@@ -112,7 +114,7 @@ public class TestChatBase {
                         this.fakeRequestBETrigger, this.fakeEmbHandler,
                         this.fakeAimlHandler, this.fakeDefaultHandler));
 
-        this.chatLogic = new ChatLogic(this.fakeChatServices, this.fakeChatStateHandler, mock(Tools.class),
+        this.chatLogic = new ChatLogic(this.fakeChatServices, this.fakeChatStateHandler, this.fakeDatabaseEntitiesIntents, mock(Tools.class),
                 mock(ILogger.class), mock(ChatLogger.class), this.fakeChatWorkflow, this.fakeConfig);
 
         ChatState emptyState = ChatState.getEmpty();

@@ -2,6 +2,7 @@ package com.hutoma.api.containers.sub;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -67,6 +68,15 @@ public class MemoryVariable {
         this.isSystem = isSystem;
         this.label = label;
         this.resetOnEntry = resetOnEntry;
+    }
+
+    public MemoryVariable(final IntentVariable intentVariable) {
+        this.name = intentVariable.getEntityName();
+        this.entityKeys = new ArrayList<>();
+        this.label = intentVariable.getLabel();
+        this.isMandatory = intentVariable.isRequired();
+        this.prompts = intentVariable.getPrompts();
+        this.resetOnEntry = intentVariable.getClearOnEntry();
     }
 
     private MemoryVariable(final MemoryVariable source) {
