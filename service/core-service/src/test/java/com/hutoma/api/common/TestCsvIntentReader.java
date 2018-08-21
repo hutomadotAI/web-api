@@ -215,6 +215,31 @@ public class TestCsvIntentReader {
         Assert.assertEquals("r3", intent.getResponses().get(2));
     }
 
+    // Test for Bug#5681
+    @Test
+    public void testCsvReader_responses_doubleQuoted() {
+        CsvIntentReader csv = getReader();
+        ApiIntent intent = csv.parseLine("intent,\"aaa, bbb; ccc; ddd\",\"xxx, yyy;\"");
+        Assert.assertEquals(1, intent.getResponses().size());
+        Assert.assertEquals("xxx, yyy", intent.getResponses().get(0));
+        Assert.assertEquals(3, intent.getUserSays().size());
+        Assert.assertEquals("aaa, bbb", intent.getUserSays().get(0));
+        Assert.assertEquals("ccc", intent.getUserSays().get(1));
+        Assert.assertEquals("ddd", intent.getUserSays().get(2));
+    }
+
+    // Test for Bug#5681
+    @Test
+    public void testCsvReader_listInCell_trimmedSpaces() {
+        CsvIntentReader csv = getReader();
+        ApiIntent intent = csv.parseLine("intent, aaa; bbb; ; , xxx; ");
+        Assert.assertEquals(2, intent.getUserSays().size());
+        Assert.assertEquals("aaa", intent.getUserSays().get(0));
+        Assert.assertEquals("bbb", intent.getUserSays().get(1));
+        Assert.assertEquals(1, intent.getResponses().size());
+        Assert.assertEquals("xxx", intent.getResponses().get(0));
+    }
+
     private void testCsvReader_lineSeparator(final String lineSeparator) {
         final String line = "name, usersays, responses,";
         final int nLines = 3;

@@ -7,6 +7,7 @@ import com.hutoma.api.validation.Validate;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
@@ -99,6 +100,10 @@ public class CsvIntentReader {
             if (insideQuotes) {
                 startCollectChar = true;
                 if (ch == this.quote) {
+                    // remove the initial quote
+                    if (currentValue.charAt(0) == this.quote) {
+                        currentValue = currentValue.deleteCharAt(0);
+                    }
                     insideQuotes = false;
                     doubleQuotesInColumn = false;
                 } else {
@@ -147,9 +152,11 @@ public class CsvIntentReader {
     }
 
     private static List<String> getSeparatedStrings(final String str, final char separator) {
-        return Arrays.stream(str.split(String.format("%c", separator)))
+        List<String> list = Arrays.stream(str.trim().split(String.format("%c", separator)))
                 .map(String::trim)
                 .distinct()
                 .collect(Collectors.toList());
+        list.removeIf(x -> x == null || "".equals(x));
+        return list;
     }
 }
