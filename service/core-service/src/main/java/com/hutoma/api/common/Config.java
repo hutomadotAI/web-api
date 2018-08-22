@@ -123,11 +123,11 @@ public class Config extends CommonConfig implements ILoggerConfig, IThreadConfig
     }
 
     public double getRateLimit_Analytics_BurstRequests() {
-        return Double.parseDouble(getConfigFromProperties("ratelimit_analytics_burst", "4.0"));
+        return Double.parseDouble(getConfigFromProperties("ratelimit_analytics_burst", "2.0"));
     }
 
     public double getRateLimit_Analytics_Frequency() {
-        return Double.parseDouble(getConfigFromProperties("ratelimit_analytics_frequency", "5.0"));
+        return Double.parseDouble(getConfigFromProperties("ratelimit_analytics_frequency", "0.5"));
     }
 
     public List<String> getAutoPurchaseBotIds() {
