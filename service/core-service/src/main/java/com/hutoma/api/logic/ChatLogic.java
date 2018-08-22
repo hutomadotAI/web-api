@@ -90,6 +90,8 @@ public class ChatLogic {
             this.chatLogger.logChatError(LOGFROM, devIdString, ex, this.telemetryMap);
             return ApiError.getBadRequest(
                     "This bot is not ready to chat. It needs to train and/or be linked to other bots");
+        } catch (WebHooks.WebHookExternalException ex) {
+            return ApiError.getBadRequest("Error in external webhook call");
         } catch (WebHooks.WebHookInternalException ex) {
             this.logger.logUserExceptionEvent(LOGFROM, "Chat - webhook internal",
                     devIdString, ex, LogMap.map("AIID", aiid));
@@ -136,8 +138,7 @@ public class ChatLogic {
         } else {
             try {
                 chatId = UUID.fromString(chatIdString);
-            }
-            catch (IllegalArgumentException ex) {
+            } catch (IllegalArgumentException ex) {
                 throw new ChatFailedException(ApiError.getBadRequest("Chat ID invalid"));
             }
         }

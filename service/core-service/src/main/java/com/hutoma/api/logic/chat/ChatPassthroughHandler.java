@@ -40,7 +40,7 @@ public class ChatPassthroughHandler implements IChatHandler {
     public ChatResult doWork(final ChatRequestInfo requestInfo,
                              final ChatResult currentResult,
                              final LogMap telemetryMap)
-            throws ChatLogic.ChatFailedException {
+            throws ChatLogic.ChatFailedException, WebHooks.WebHookException {
 
         String passthrough = this.chatServices.getAIPassthroughUrl(requestInfo.getDevId(), requestInfo.getAiid());
 
@@ -80,7 +80,7 @@ public class ChatPassthroughHandler implements IChatHandler {
                 // Log in the chatlogger
                 this.chatLogger.logUserWarnEvent(LOGFROM, String.format("External error in passthrough - %s",
                         callException.getMessage()), requestInfo.getDevId().toString(), telemetryMap);
-                throw new ChatLogic.ChatFailedException(ApiError.getBadRequest());
+                throw callException;
             } catch (WebHooks.WebHookException webhookException) {
                 this.logger.logUserErrorEvent(LOGFROM,
                         "Error occurred executing WebHook for passthrough",
