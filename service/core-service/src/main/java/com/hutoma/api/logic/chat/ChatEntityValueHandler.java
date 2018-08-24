@@ -109,7 +109,7 @@ public class ChatEntityValueHandler implements IChatHandler {
         return false;
     }
 
-    private class ERMessage {
+    private static class ERMessage {
         private String conversation;
         private HashMap<String, List<String>> entities;
 
