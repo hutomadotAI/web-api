@@ -1357,6 +1357,48 @@ public class TestAILogic {
         Assert.assertEquals(existingIntentNames.get(1), captor.getAllValues().get(1));
     }
 
+    @Test
+    public void testCreateImportedBotInPlace_existingLinkedBots_cleared() throws DatabaseException {
+        setupFakeImport();
+        AiBot linkedBot1 = TestDataHelper.getAiBot(1, "linked1");
+        AiBot linkedBot2 = TestDataHelper.getAiBot(2, "linked2");
+        List<AiBot> linkedBots = Arrays.asList(linkedBot1, linkedBot2);
+        when(this.fakeDatabaseAi.getBotsLinkedToAi(any(), any(), any())).thenReturn(linkedBots);
+
+        this.aiLogic.importBotInPlace(VALIDDEVID, AIID, getBotstructure());
+        ArgumentCaptor<Integer> captor = ArgumentCaptor.forClass(Integer.class);
+        verify(this.fakeDatabaseAi, times(linkedBots.size())).unlinkBotFromAi(eq(VALIDDEVID), eq(AIID), captor.capture(), any());
+        Assert.assertEquals(linkedBot1.getBotId(), captor.getAllValues().get(0).intValue());
+        Assert.assertEquals(linkedBot2.getBotId(), captor.getAllValues().get(1).intValue());
+    }
+
+    @Test
+    public void testCreateImportedBotInPlace_existingLinkedBots_updated() throws DatabaseException {
+        setupFakeImport();
+        AiBot linkedBot1 = TestDataHelper.getAiBot(1, "to_unlink");
+        AiBot linkedBot2 = TestDataHelper.getAiBot(2, "to_link");
+
+        // Existing bot has linked skill 1 already
+        when(this.fakeDatabaseAi.getBotsLinkedToAi(any(), any(), any())).thenReturn(Collections.singletonList(linkedBot1));
+
+        // Bot to import has skill 2 only
+        BotStructure botToImport = getBotstructure();
+        botToImport.setLinkedSkills(Collections.singletonList(linkedBot2.getBotId()));
+
+        // So the resulting bot should only contain skill 2 (removing skill 1 and adding skill 2)
+        this.aiLogic.importBotInPlace(VALIDDEVID, AIID, botToImport);
+
+        // Confirm bot1 has been unlinked
+        ArgumentCaptor<Integer> captor = ArgumentCaptor.forClass(Integer.class);
+        verify(this.fakeDatabaseAi).unlinkBotFromAi(eq(VALIDDEVID), eq(AIID), captor.capture(), any());
+        Assert.assertEquals(linkedBot1.getBotId(), captor.getAllValues().get(0).intValue());
+
+        // Confirm bot2 has been linked
+        captor = ArgumentCaptor.forClass(Integer.class);
+        verify(this.fakeDatabaseAi).linkBotToAi(eq(VALIDDEVID), eq(AIID), captor.capture(), any());
+        Assert.assertEquals(linkedBot2.getBotId(), captor.getAllValues().get(0).intValue());
+    }
+
     private void setupFakeImport() throws DatabaseException {
         ApiAi ai = TestDataHelper.getSampleAI();
         UUID newAiid = UUID.fromString(ai.getAiid());

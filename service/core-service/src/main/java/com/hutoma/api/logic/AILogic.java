@@ -695,9 +695,6 @@ public class AILogic {
             }
 
             Locale locale = getSafeLocaleFromBot(botToImport);
-            boolean hasLinkedSkills = botToImport.getLinkedSkills() != null && !botToImport.getLinkedSkills().isEmpty();
-
-            LogMap logMap = LogMap.map("AIID", aiid);
 
             this.databaseAi.updateAI(devId, aiid, botToImport.getDescription(), botToImport.isPrivate(),
                     locale, botToImport.getTimezone(), botToImport.getConfidence(),
@@ -718,6 +715,14 @@ public class AILogic {
                 }
             }
 
+            // Need to cleanup all existing linked skills
+            for (AiBot linkedBot: this.databaseAi.getBotsLinkedToAi(devId, aiid, transaction)) {
+                this.databaseAi.unlinkBotFromAi(devId, aiid, linkedBot.getBotId(), transaction);
+            }
+
+            LogMap logMap = LogMap.map("AIID", aiid);
+            boolean hasLinkedSkills = botToImport.getLinkedSkills() != null
+                    && !botToImport.getLinkedSkills().isEmpty();
             setBotAdditionalProperties(devId, aiid, botToImport, hasLinkedSkills, aiid, transaction, logMap);
 
             ApiAi createdBot = this.databaseAi.getAI(devId, aiid, this.jsonSerializer, transaction);
