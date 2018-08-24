@@ -1,10 +1,7 @@
 package com.hutoma.api.logic;
 
 import com.google.common.collect.ImmutableMap;
-import com.hutoma.api.common.ChatLogger;
-import com.hutoma.api.common.Config;
-import com.hutoma.api.common.TestDataHelper;
-import com.hutoma.api.common.Tools;
+import com.hutoma.api.common.*;
 import com.hutoma.api.connectors.AiStrings;
 import com.hutoma.api.connectors.BackendServerType;
 import com.hutoma.api.connectors.NoServerAvailableException;
@@ -79,6 +76,7 @@ public class TestChatBase {
     IntentProcessor intentProcessor;
     ConditionEvaluator fakeConditionEvaluator;
     ContextVariableExtractor fakeContextVariableExtractor;
+    FeatureToggler fakeFeatureToggler;
 
     @Before
     public void setup() {
@@ -95,8 +93,9 @@ public class TestChatBase {
         this.fakeChatWorkflow = mock(ChatWorkflow.class);
         this.fakeConditionEvaluator = mock(ConditionEvaluator.class);
         this.fakeContextVariableExtractor = mock(ContextVariableExtractor.class);
+        this.fakeFeatureToggler = mock(FeatureToggler.class);
         this.intentProcessor = new IntentProcessor(this.fakeRecognizer, this.fakeIntentHandler, this.fakeWebHooks,
-                this.fakeConditionEvaluator, this.fakeContextVariableExtractor, mock(ILogger.class));
+                this.fakeConditionEvaluator, this.fakeContextVariableExtractor, mock(ILogger.class), this.fakeFeatureToggler);
 
         this.fakePassthroughHandler = new ChatPassthroughHandler(this.fakeChatServices, this.fakeWebHooks, mock(Tools.class),
                 mock(ChatLogger.class), mock(ILogger.class));

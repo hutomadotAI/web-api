@@ -1,17 +1,12 @@
 package com.hutoma.api.logic.chat;
 
 import com.google.common.base.Strings;
+import com.hutoma.api.common.FeatureToggler;
 import com.hutoma.api.common.Pair;
 import com.hutoma.api.connectors.WebHooks;
 import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.ApiIntent;
-import com.hutoma.api.containers.sub.ChatRequestInfo;
-import com.hutoma.api.containers.sub.ChatResult;
-import com.hutoma.api.containers.sub.IntentOutConditional;
-import com.hutoma.api.containers.sub.MemoryIntent;
-import com.hutoma.api.containers.sub.MemoryVariable;
-import com.hutoma.api.containers.sub.WebHook;
-import com.hutoma.api.containers.sub.WebHookResponse;
+import com.hutoma.api.containers.sub.*;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
 import com.hutoma.api.logic.ChatLogic;
@@ -43,6 +38,7 @@ public class IntentProcessor {
     private final ConditionEvaluator conditionEvaluator;
     private final ContextVariableExtractor contextVariableExtractor;
     private final ILogger logger;
+    private final FeatureToggler featureToggler;
 
     @Inject
     public IntentProcessor(final IEntityRecognizer entityRecognizer,
@@ -50,13 +46,15 @@ public class IntentProcessor {
                            final WebHooks webHooks,
                            final ConditionEvaluator conditionEvaluator,
                            final ContextVariableExtractor contextVariableExtractor,
-                           final ILogger logger) {
+                           final ILogger logger,
+                           final FeatureToggler featureToggler) {
         this.entityRecognizer = entityRecognizer;
         this.intentHandler = intentHandler;
         this.webHooks = webHooks;
         this.conditionEvaluator = conditionEvaluator;
         this.contextVariableExtractor = contextVariableExtractor;
         this.logger = logger;
+        this.featureToggler = featureToggler;
     }
 
     /**
@@ -382,6 +380,41 @@ public class IntentProcessor {
             if (!var.getResetOnEntry() 
                 && chatResult.getChatState().getChatContext().isSet(var.getLabel())) {
                 var.setCurrentValue(chatResult.getChatState().getChatContext().getValue(var.getLabel()));
+            }
+        }
+
+        if (featureToggler.getStateForAiid(
+                chatInfo.getDevId(),
+                chatInfo.getAiid(),
+                "entity-value-replacement") == FeatureToggler.FeatureState.T1) {
+            logger.logInfo("IntentProcessor", "Checking for entity value matching for intent "
+            + intent.getIntentName());
+
+            // We need to filter the relevant candidates and then count how many we have left
+            HashMap<String, List<String>> localCandidateMatches = new HashMap<>();
+            for (IntentVariable variable : intent.getVariables()) {
+                for (Map.Entry<String, List<String>> candidate :
+                        chatResult.getChatState().getCandidateValues().entrySet()) {
+                    if (candidate.getValue().contains(variable.getEntityName())) {
+                        // we need to consider this value
+                        if (localCandidateMatches.containsKey(candidate.getKey())) {
+                            localCandidateMatches.get(candidate.getKey()).add(variable.getEntityName());
+                        } else {
+                            List<String> newEntities = new ArrayList<String>();
+                            newEntities.add(variable.getEntityName());
+                            localCandidateMatches.put(candidate.getKey(), newEntities);
+                        }
+                    }
+                }
+            }
+
+            // If there are any candidateValues remaining with only one possible match, use that one
+            for (Map.Entry<String, List<String>> candidate : localCandidateMatches.entrySet()) {
+                if (candidate.getValue().size() == 1) {
+                    chatResult.getChatState().getEntityValues().put(candidate.getValue().get(0), candidate.getKey());
+                    logger.logInfo("IntentProcessor", "Added entity value "
+                    + candidate.getKey() + " from entity value matching");
+                }
             }
         }
 

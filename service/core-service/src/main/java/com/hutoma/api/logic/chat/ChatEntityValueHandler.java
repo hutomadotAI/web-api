@@ -6,11 +6,13 @@ import com.hutoma.api.connectors.EntityRecognizerService;
 import com.hutoma.api.connectors.db.DatabaseEntitiesIntents;
 import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.ApiEntity;
+import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.sub.ChatRequestInfo;
 import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
 import com.hutoma.api.containers.sub.*;
+import com.hutoma.api.logic.ChatLogic;
 
 import javax.inject.Inject;
 import java.util.*;
@@ -40,7 +42,7 @@ public class ChatEntityValueHandler implements IChatHandler {
     @Override
     public ChatResult doWork(final ChatRequestInfo requestInfo,
                              final ChatResult currentResult,
-                             final LogMap telemetryMap) {
+                             final LogMap telemetryMap) throws ChatLogic.ChatFailedException {
 
         // Check if this feature applies
         if (featureToggler.getStateForAiid(
@@ -62,27 +64,37 @@ public class ChatEntityValueHandler implements IChatHandler {
                 }
 
                 toSend.conversation = requestInfo.getQuestion();
-                logger.logInfo("ChatEntityValueHandler",
-                        "Entities: " + serializer.serialize(toSend));
-                String conv = entityRecognizerService.findEntities(serializer.serialize(toSend));
-                logger.logInfo("ChatEntityValueHandler",
-                        "Entity Replacements: " + conv);
-
-                ERMessage found = (ERMessage) serializer.deserialize(conv, ERMessage.class);
-
-                for (Map.Entry<String, List<String>> entry : found.entities.entrySet()) {
-                    // Assume only one value per entity for now
-                    String entityName = entry.getKey();
-                    String entityValue = entry.getValue().iterator().next();
-                    currentResult.getChatState().getEntityValues().put(entityName, entityValue);
+                logger.logUserTraceEvent("ChatEntityValueHandler",
+                        "Entities to serialize",
+                        requestInfo.getDevId().toString(),
+                        LogMap.map("entities", serializer.serialize(toSend)));
+                String jsonResponse = entityRecognizerService.findEntities(serializer.serialize(toSend));
+                // Just in case something odd has happened with the ER
+                if (jsonResponse == null) {
+                    throw new ChatLogic.ChatFailedException(ApiError.getInternalServerError(
+                            "Empty response returned from EntityRecognizer findentities"));
                 }
+                logger.logUserTraceEvent("ChatEntityValueHandler",
+                        "Entity matches from ER",
+                        requestInfo.getDevId().toString(),
+                        LogMap.map("entity replacements", jsonResponse));
 
-                // Update conversation text
-                requestInfo.setQuestion(found.conversation);
+                ERMessage candidateEntityValues = (ERMessage) serializer.deserialize(jsonResponse, ERMessage.class);
+
+                for (Map.Entry<String, List<String>> entry : candidateEntityValues.entities.entrySet()) {
+                    String entityValue = entry.getKey();
+                    List<String> entityNames = entry.getValue();
+
+                    // Store these in chat state to revisit later
+                    currentResult.getChatState().getCandidateValues().put(entityValue, entityNames);
+                }
 
             } catch (DatabaseException ex) {
                 // Log and continue
-                logger.logException("Problem loading entites", ex);
+                logger.logUserExceptionEvent("ChatEntityValueHandler",
+                        "Problem loading entities from database",
+                        requestInfo.getDevId().toString(),
+                        ex);
             }
             return currentResult;
         } else {

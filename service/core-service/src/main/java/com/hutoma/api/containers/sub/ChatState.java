@@ -6,11 +6,7 @@ import com.hutoma.api.containers.ApiAi;
 
 import org.joda.time.DateTime;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Chat state.
@@ -60,6 +56,9 @@ public class ChatState {
     // having to re-load this from DB multiple times)
     private transient ApiAi ai;
 
+    // Keep the potential entity values in memory for this loop
+    private transient Map<String, List<String>> candidateValues;
+
     public ChatState(final DateTime timestamp, final String topic, final String history, final UUID lockedAiid,
                      final HashMap<String, String> entityValues, final double confidenceThreshold,
                      final ChatHandoverTarget chatTarget, final ApiAi ai, final ChatContext chatContext) {
@@ -73,6 +72,7 @@ public class ChatState {
         this.ai = ai;
         this.chatContext = chatContext;
         this.currentIntents = new ArrayList<>();
+        this.candidateValues = new HashMap<>();
     }
 
     public static ChatState getEmpty() {
@@ -184,6 +184,10 @@ public class ChatState {
 
     public void setCurrentIntents(final List<MemoryIntent> currentIntents) {
         this.currentIntents = currentIntents;
+    }
+
+    public Map<String, List<String>> getCandidateValues() {
+        return this.candidateValues;
     }
 
     public void clearFromCurrentIntents(final List<MemoryIntent> intentsToRemove) {

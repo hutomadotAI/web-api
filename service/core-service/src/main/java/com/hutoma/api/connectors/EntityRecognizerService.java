@@ -94,6 +94,7 @@ public class EntityRecognizerService {
             }
         } catch (Exception ex) {
             this.logger.logException(LOGFROM, ex);
+            throw ex;
         } finally {
             if (response != null) {
                 response.close();
