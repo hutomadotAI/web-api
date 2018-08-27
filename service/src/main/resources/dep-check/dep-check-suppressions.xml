@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.1.xsd">
+
+    <suppress>
+        <notes><![CDATA[
+   File name: plexus-sec-dispatcher-1.4.jar
+   Known vulnerability: CVE-2018-12070
+   Reason: there are no updates beyond version 1.4
+   ]]></notes>
+        <sha1>43fde524e9b94c883727a9fddb8669181b890ea7</sha1>
+        <cve>CVE-2018-12070</cve>
+    </suppress>
+
+    <suppress>
+        <notes><![CDATA[
+   File name: mysql-connector-java-6.0.3.jar
+   Known vulnerabilities: CVE-2018-3056, CVE-2018-3078, CVE-2018-3079, CVE-2018-3054, CVE-2018-3077, CVE-2018-3075, CVE-2018-3073, CVE-2018-3080, CVE-2018-3067, CVE-2018-3065, CVE-2018-3064, CVE-2018-3081, CVE-2018-3060, CVE-2018-3082
+   Reason: any mysql connector lib version beyond this one will not work with our current db server version
+   ]]></notes>
+        <sha1>49506be68e2ab1b619d77dee24c2e55d399d371a</sha1>
+        <cpe>cpe:/a:oracle:mysql</cpe>
+    </suppress>
+
+
+    <!--
+    JCraft Jsch components
+   Known vulerabilities: CVE-2016-5725
+   Reason: even the latest version (0.0.9) has the vulnerability, so no point in forcing the version
+    -->
+    <suppress>
+        <notes><![CDATA[
+   File name: com.jcraft.*
+   ]]></notes>
+        <gav regex="true">^com\.jcraft:jsch\.*$</gav>
+        <cve>CVE-2016-5725</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+   File name: jsch.agentproxy.core-0.0.6.jar
+   ]]></notes>
+        <sha1>fb27d5a19479c7617c74aaca4f1d38063ac7a25e</sha1>
+        <cve>CVE-2016-5725</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file name: jsch.agentproxy.pageant-0.0.6.jar
+   ]]></notes>
+        <sha1>a4b88191bed87d3210d9666071b15b98e0447484</sha1>
+        <cve>CVE-2016-5725</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file name: jsch.agentproxy.jsch-0.0.6.jar
+   ]]></notes>
+        <sha1>aee40b481ad104a578584335b4859e49d4be4f7a</sha1>
+        <cve>CVE-2016-5725</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file name: jsch.agentproxy.sshagent-0.0.6.jar
+   ]]></notes>
+        <sha1>c552a54fece150f69350fa11b9c28d0e455bcf4b</sha1>
+        <cve>CVE-2016-5725</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file name: jsch.agentproxy.usocket-nc-0.0.6.jar
+   ]]></notes>
+        <sha1>01ae336deaeb39fd712f9134b24343094901c03a</sha1>
+        <cve>CVE-2016-5725</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file name: jsch.agentproxy.usocket-jna-0.0.6.jar
+   ]]></notes>
+        <sha1>e5e027a2d77296a89088820d5b3ffd2705f513f1</sha1>
+        <cve>CVE-2016-5725</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file name: jsch.agentproxy.connector-factory-0.0.6.jar
+   ]]></notes>
+        <sha1>250ab907c35a1777e70d54038086e84855d74aea</sha1>
+        <cve>CVE-2016-5725</cve>
+    </suppress>
+
+</suppressions>

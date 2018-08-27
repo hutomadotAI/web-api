@@ -1,7 +1,8 @@
 package com.hutoma.api.containers.facebook;
 
-import com.google.common.base.Strings;
 import com.google.gson.annotations.SerializedName;
+
+import org.apache.commons.lang.StringUtils;
 
 import java.util.List;
 
@@ -52,11 +53,11 @@ public class FacebookNotification {
         }
 
         public String getSender() {
-            return Strings.nullToEmpty(this.sender.id);
+            return StringUtils.defaultString(this.sender.id);
         }
 
         public String getRecipient() {
-            return Strings.nullToEmpty(this.recipient.id);
+            return StringUtils.defaultString(this.recipient.id);
         }
 
         public long getTimestamp() {
@@ -68,7 +69,7 @@ public class FacebookNotification {
         }
 
         public String getMessageText() {
-            return Strings.nullToEmpty(this.message.text);
+            return StringUtils.defaultString(this.message.text);
         }
 
         public boolean isQuickReply() {
@@ -94,21 +95,21 @@ public class FacebookNotification {
         }
 
         public String getPostbackPayload() {
-            return Strings.nullToEmpty(this.postback.payload);
+            return StringUtils.defaultString(this.postback.payload);
         }
 
         public String getPostbackTitle() {
-            return Strings.nullToEmpty(this.postback.title);
+            return StringUtils.defaultString(this.postback.title);
         }
 
         public String getPostbackReferral() {
             return (this.postback.referral == null) ? "" :
-                    Strings.nullToEmpty(this.postback.referral.referrer);
+                    StringUtils.defaultString(this.postback.referral.referrer);
         }
 
         public String getOptIn() {
             return (this.optIn == null) ? "" :
-                    Strings.nullToEmpty(this.optIn.dataRef);
+                    StringUtils.defaultString(this.optIn.dataRef);
         }
 
         /***

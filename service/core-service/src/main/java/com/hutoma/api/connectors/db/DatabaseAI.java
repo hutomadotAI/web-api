@@ -1,6 +1,5 @@
 package com.hutoma.api.connectors.db;
 
-import com.google.common.base.Strings;
 import com.google.gson.reflect.TypeToken;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Pair;
@@ -19,6 +18,7 @@ import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.containers.sub.WebHook;
 import com.hutoma.api.logging.ILogger;
 
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 
 import java.lang.reflect.Type;
@@ -699,7 +699,7 @@ public class DatabaseAI extends Database {
                         confidenceThreshold = ai.getConfidence();
                     }
                     String contextJson = rs.getString("context");
-                    ChatContext context = Strings.isNullOrEmpty(contextJson)
+                    ChatContext context = StringUtils.isEmpty(contextJson)
                             ? new ChatContext()
                             : (ChatContext) jsonSerializer.deserialize(contextJson, ChatContext.class);
                     ChatState chatState = new ChatState(
@@ -716,7 +716,7 @@ public class DatabaseAI extends Database {
                     String intentsJson = rs.getString("current_intents");
                     Type memoryIntentListType = new TypeToken<List<MemoryIntent>>() {
                     }.getType();
-                    List<MemoryIntent> currentIntents = Strings.isNullOrEmpty(intentsJson)
+                    List<MemoryIntent> currentIntents = StringUtils.isEmpty(intentsJson)
                             ? new ArrayList<>()
                             : jsonSerializer.deserializeList(intentsJson, memoryIntentListType);
                     chatState.setCurrentIntents(currentIntents);

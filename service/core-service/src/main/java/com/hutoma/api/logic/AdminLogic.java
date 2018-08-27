@@ -18,7 +18,7 @@ import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
 import io.jsonwebtoken.Claims;
 
-import org.apache.logging.log4j.util.Strings;
+import org.apache.commons.lang.StringUtils;
 
 import java.net.HttpURLConnection;
 import java.util.Arrays;
@@ -107,7 +107,7 @@ public class AdminLogic {
             }
             if (!hasErrors) {
                 this.logger.logUserTraceEvent(LOGFROM, String.format("Auto-purchased %d bots", autoPurchaseList.size()),
-                        devId.toString(), logMap.put("BotList", Strings.join(autoPurchaseList, ',')));
+                        devId.toString(), logMap.put("BotList", StringUtils.join(autoPurchaseList, ',')));
             }
         }
     }

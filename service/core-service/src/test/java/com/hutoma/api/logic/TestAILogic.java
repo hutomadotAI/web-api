@@ -1146,7 +1146,7 @@ public class TestAILogic {
     public void testCreateImportedBot_createAi_genericException() throws AILogic.BotImportException, DatabaseException {
         setupFakeImport();
         when(this.fakeDatabaseAi.createAI(any(), anyString(), anyString(), any(), anyBoolean(), anyString(),
-                any(), anyString(), anyDouble(), anyInt(), anyInt(), any(), anyInt(), anyInt(), any(), any(), any())).thenThrow(Exception.class);
+                any(), anyString(), anyDouble(), anyInt(), anyInt(), any(), anyInt(), anyInt(), any(), any(), any())).thenThrow(DatabaseException.class);
         BotStructure botStructure = getBotstructure();
         this.aiLogic.createImportedBot(VALIDDEVID, botStructure);
     }
@@ -1154,7 +1154,7 @@ public class TestAILogic {
     @Test(expected = AILogic.BotImportException.class)
     public void testCreateImportedBot_getAi_genericException() throws AILogic.BotImportException, DatabaseException {
         setupFakeImport();
-        when(this.fakeDatabaseAi.getAI(any(), any(), any(), any())).thenThrow(Exception.class);
+        when(this.fakeDatabaseAi.getAI(any(), any(), any(), any())).thenThrow(DatabaseException.class);
         BotStructure botStructure = getBotstructure();
         this.aiLogic.createImportedBot(VALIDDEVID, botStructure);
     }
@@ -1316,7 +1316,7 @@ public class TestAILogic {
                 eq(defaultResponses),
                 any(Integer.class),
                 any(Integer.class),
-                any(String.class),
+                any(),
                 any(JsonSerializer.class),
                 any(DatabaseTransaction.class));
     }

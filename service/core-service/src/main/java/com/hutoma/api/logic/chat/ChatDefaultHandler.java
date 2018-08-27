@@ -1,6 +1,5 @@
 package com.hutoma.api.logic.chat;
 
-import com.google.common.base.Strings;
 import com.hutoma.api.connectors.AiStrings;
 import com.hutoma.api.containers.sub.ChatHandoverTarget;
 import com.hutoma.api.containers.sub.ChatRequestInfo;
@@ -9,6 +8,7 @@ import com.hutoma.api.containers.sub.ChatState;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
 
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 
@@ -53,7 +53,7 @@ public class ChatDefaultHandler implements IChatHandler {
             if (state.getBadAnswersCount() >= state.getAi().getErrorThresholdHandover()) {
                 state.setChatTarget(ChatHandoverTarget.Other);
                 state.setBadAnswersCount(0);
-                if (!Strings.isNullOrEmpty(state.getAi().getHandoverMessage())) {
+                if (!StringUtils.isEmpty(state.getAi().getHandoverMessage())) {
                     currentResult.setAnswer(state.getAi().getHandoverMessage());
                 } else {
                     currentResult.setAnswer(null);

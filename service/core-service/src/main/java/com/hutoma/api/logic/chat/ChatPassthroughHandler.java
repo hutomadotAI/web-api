@@ -1,17 +1,18 @@
 package com.hutoma.api.logic.chat;
 
-import com.google.common.base.Strings;
 import com.hutoma.api.common.ChatLogger;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.WebHooks;
 import com.hutoma.api.connectors.chat.AIChatServices;
 import com.hutoma.api.containers.ApiError;
+import com.hutoma.api.containers.sub.ChatRequestInfo;
 import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.containers.sub.WebHookResponse;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
 import com.hutoma.api.logic.ChatLogic;
-import com.hutoma.api.containers.sub.ChatRequestInfo;
+
+import org.apache.commons.lang.StringUtils;
 
 import javax.inject.Inject;
 
@@ -44,7 +45,7 @@ public class ChatPassthroughHandler implements IChatHandler {
 
         String passthrough = this.chatServices.getAIPassthroughUrl(requestInfo.getDevId(), requestInfo.getAiid());
 
-        if (!Strings.isNullOrEmpty(passthrough)) {
+        if (!StringUtils.isEmpty(passthrough)) {
             this.hasPassthrough = true;
 
             final String devIdString = requestInfo.getDevId().toString();

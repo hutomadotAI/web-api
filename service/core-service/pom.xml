@@ -15,7 +15,7 @@
     <name>core-service</name>
 
     <properties>
-        <project.component.fasterxml-jackson.version>2.8.2</project.component.fasterxml-jackson.version>
+        <project.component.fasterxml-jackson.version>2.9.6</project.component.fasterxml-jackson.version>
     </properties>
 
 
@@ -48,6 +48,27 @@
                 </goals>
             </plugin>
             <plugin>
+                <groupId>org.owasp</groupId>
+                <artifactId>dependency-check-maven</artifactId>
+                <version>${project.component.dependency-check-maven.version}</version>
+                <configuration>
+                    <assemblyAnalyzerEnabled>false</assemblyAnalyzerEnabled>
+                    <!-- Skip artifacts not bundled in distribution (provided scope) -->
+                    <skipProvidedScope>true</skipProvidedScope>
+                    <cveValidForHours>${project.component.dependency-check-maven.cve-valid-for-hours}</cveValidForHours>
+                    <suppressionFiles>${project.parent.basedir}/src/main/resources/dep-check/dep-check-suppressions.xml</suppressionFiles>
+                    <failBuildOnCVSS>4</failBuildOnCVSS>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
                 <version>${project.component.maven-checkstyle.version}</version>
@@ -74,7 +95,6 @@
                             <includeTestResources>false</includeTestResources>
                             <logViolationsToConsole>true</logViolationsToConsole>
                             <violationSeverity>warning</violationSeverity>
-                            <failsOnError>true</failsOnError>
                         </configuration>
                     </execution>
                 </executions>
@@ -223,13 +243,12 @@
             <scope>compile</scope> <!-- with compile it's included in the packaging -->
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient -->
+        <!-- https://mvnrepository.com/artifact/org.glassfish.hk2/hk2-api -->
         <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>4.5.2</version>
+            <groupId>org.glassfish.hk2</groupId>
+            <artifactId>hk2-api</artifactId>
+            <version>${project.component.hk2.version}</version>
         </dependency>
-
 
         <dependency>
             <groupId>org.glassfish.jersey.containers</groupId>
@@ -265,19 +284,13 @@
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-            <version>2.4</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.jcraft</groupId>
-            <artifactId>jsch</artifactId>
-            <version>0.1.53</version>
+            <version>2.6</version>
         </dependency>
 
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt</artifactId>
-            <version>0.6.0</version>
+            <version>0.9.0</version>
         </dependency>
 
         <dependency>
@@ -348,17 +361,17 @@
         </dependency>
 
         <dependency>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-site-plugin</artifactId>
-            <version>3.5.1</version>
-            <type>maven-plugin</type>
-        </dependency>
-
-        <dependency>
             <groupId>org.glassfish.jersey.connectors</groupId>
             <artifactId>jersey-apache-connector</artifactId>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/com.jcraft/jsch -->
+        <!-- Forcing version due to CVE-2016-5725 -->
+        <dependency>
+            <groupId>com.jcraft</groupId>
+            <artifactId>jsch</artifactId>
+            <version>0.1.54</version>
+        </dependency>
 
         <!-- ********************************* Logging-related ****************************************** -->
 
@@ -381,24 +394,27 @@
 
         <!-- ********************************* Test-related ****************************************** -->
 
+        <!-- https://mvnrepository.com/artifact/org.owasp/dependency-check-maven -->
         <dependency>
-            <groupId>com.google.code.findbugs</groupId>
-            <artifactId>findbugs</artifactId>
-            <version>${project.component.findbugs.version}</version>
+            <groupId>org.owasp</groupId>
+            <artifactId>dependency-check-maven</artifactId>
+            <version>${project.component.dependency-check-maven.version}</version>
         </dependency>
         <dependency>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>findbugs-maven-plugin</artifactId>
             <version>${project.component.findbugs.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>xml-maven-plugin</artifactId>
             <version>1.0</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
             <version>${project.component.junit.version}</version>
             <type>jar</type>
             <scope>test</scope>
@@ -412,23 +428,27 @@
         <dependency>
             <groupId>org.glassfish.jersey.test-framework.providers</groupId>
             <artifactId>jersey-test-framework-provider-grizzly2</artifactId>
-            <version>2.24</version>
+            <version>${project.component.jersey-test-framework-provider-grizzly2.version}</version>
             <scope>test</scope>
         </dependency>
-
+        <!-- https://mvnrepository.com/artifact/org.glassfish.jersey.inject/jersey-hk2 -->
+        <dependency>
+            <groupId>org.glassfish.jersey.inject</groupId>
+            <artifactId>jersey-hk2</artifactId>
+            <version>${project.component.jersey.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
-            <!-- use 2.8.0 for Java 7 projects -->
-            <version>3.8.0</version>
+            <version>3.10.0</version>
             <scope>test</scope>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/commons-httpclient/commons-httpclient -->
+        <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient -->
         <dependency>
-            <groupId>commons-httpclient</groupId>
-            <artifactId>commons-httpclient</artifactId>
-            <version>3.1</version>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.5.5</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/com.puppycrawl.tools/checkstyle -->
@@ -436,6 +456,20 @@
             <groupId>com.puppycrawl.tools</groupId>
             <artifactId>checkstyle</artifactId>
             <version>${project.component.checkstyle.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>tools</artifactId>
+                    <groupId>com.sun</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-site-plugin</artifactId>
+            <version>${project.component.maven-site-plugin.version}</version>
+            <type>maven-plugin</type>
+            <scope>provided</scope>
         </dependency>
 
 
@@ -444,7 +478,8 @@
         <dependency>
             <groupId>com.webcohesion.enunciate</groupId>
             <artifactId>enunciate-maven-plugin</artifactId>
-            <version>2.9.1</version>
+            <version>${project.component.enunciate.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.maven.plugins</groupId>

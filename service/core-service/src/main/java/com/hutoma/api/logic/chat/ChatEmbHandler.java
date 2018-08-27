@@ -1,7 +1,6 @@
 package com.hutoma.api.logic.chat;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Strings;
 import com.hutoma.api.connectors.BackendServerType;
 import com.hutoma.api.connectors.ServerConnector;
 import com.hutoma.api.connectors.WebHooks;
@@ -12,6 +11,8 @@ import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
 import com.hutoma.api.logic.ChatLogic;
 import com.hutoma.api.memory.IMemoryIntentHandler;
+
+import org.apache.commons.lang.StringUtils;
 
 import java.util.Map;
 import java.util.UUID;
@@ -74,7 +75,7 @@ public class ChatEmbHandler extends ChatGenericBackend implements IChatHandler {
                     currentResult.setIntents(result.getIntents());
                     currentResult.setWebHookResponse(result.getWebhookResponse());
                     currentResult.setScore(result.getScore());
-                    if (!Strings.isNullOrEmpty(result.getPromptForIntentVariable())) {
+                    if (!StringUtils.isEmpty(result.getPromptForIntentVariable())) {
                         currentResult.setPromptForIntentVariable(result.getPromptForIntentVariable());
                     }
                 } else {

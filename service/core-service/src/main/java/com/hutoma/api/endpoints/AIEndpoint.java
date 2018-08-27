@@ -1,6 +1,5 @@
 package com.hutoma.api.endpoints;
 
-import com.google.common.base.Strings;
 import com.hutoma.api.access.RateKey;
 import com.hutoma.api.access.RateLimit;
 import com.hutoma.api.access.Role;
@@ -26,6 +25,8 @@ import com.webcohesion.enunciate.metadata.rs.RequestHeaders;
 import com.webcohesion.enunciate.metadata.rs.ResponseCode;
 import com.webcohesion.enunciate.metadata.rs.StatusCodes;
 import com.webcohesion.enunciate.metadata.rs.TypeHint;
+
+import org.apache.commons.lang.StringUtils;
 
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
@@ -298,7 +299,7 @@ public class AIEndpoint {
                 voice,
                 ParameterFilter.getLocale(requestContext),
                 ParameterFilter.getTimezone(requestContext),
-                Strings.isNullOrEmpty(defaultResponses)
+                StringUtils.isEmpty(defaultResponses)
                         ? new ArrayList<>()
                         : this.serializer.deserializeListAutoDetect(defaultResponses),
                 passthroughUrl);

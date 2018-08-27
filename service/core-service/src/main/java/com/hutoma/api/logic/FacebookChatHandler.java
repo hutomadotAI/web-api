@@ -1,6 +1,5 @@
 package com.hutoma.api.logic;
 
-import com.google.common.base.Strings;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.FacebookConnector;
@@ -19,6 +18,8 @@ import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
 import com.hutoma.api.validation.ParameterValidationException;
 import com.hutoma.api.validation.QueryFilter;
+
+import org.apache.commons.lang.StringUtils;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -138,7 +139,7 @@ public class FacebookChatHandler implements Callable {
             // the Facebook user who sent the message (we need to respond to this user)
             String messageOriginatorId = this.messaging.getSender();
 
-            if (Strings.isNullOrEmpty(userQuery)) {
+            if (StringUtils.isEmpty(userQuery)) {
                 this.logger.logDebug(LOGFROM, "facebook webhook with no usable payload", logMap);
                 return null;
             }
@@ -175,7 +176,7 @@ public class FacebookChatHandler implements Callable {
                     integrationRecord.getData(), FacebookIntegrationMetadata.class);
 
             // have we got a valid page token? bail if not
-            if ((metadata == null) || Strings.isNullOrEmpty(metadata.getPageToken())) {
+            if ((metadata == null) || StringUtils.isEmpty(metadata.getPageToken())) {
                 this.logger.logError(LOGFROM,
                         "bad facebook integration config. cannot get page token",
                         logMap);
@@ -407,7 +408,7 @@ public class FacebookChatHandler implements Callable {
                                        final List<FacebookResponseSegment> responseList, final String intentPrompted) {
 
         // is this an intent prompt?
-        if (Strings.isNullOrEmpty(intentPrompted)) {
+        if (StringUtils.isEmpty(intentPrompted)) {
             return false;
         }
         // load the memory variable

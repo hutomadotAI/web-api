@@ -12,7 +12,7 @@ import com.hutoma.api.containers.sub.ServerRegistration;
 import com.hutoma.api.logging.AiServiceStatusLogger;
 import com.hutoma.api.logging.LogMap;
 
-import org.apache.logging.log4j.util.Strings;
+import org.apache.commons.lang.StringUtils;
 import org.glassfish.jersey.message.internal.MediaTypes;
 import org.glassfish.jersey.server.ContainerRequest;
 
@@ -82,7 +82,7 @@ public class ControllerPostFilter extends ControllerParameterFilter implements C
                     .getResponse(this.serializer).build());
             this.logger.logException(LOGFROM, ex,
                     LogMap.map("Type", "Post")
-                            .put("Parameters", Strings.join(
+                            .put("Parameters", StringUtils.join(
                                     checkList.stream().map(ControllerParameter::toString).iterator(), ','))
                             .put("RequestLength", requestContext.getLength())
                             .put("Path", requestContext.getUriInfo().getPath()));

@@ -44,6 +44,27 @@
                 </goals>
             </plugin>
             <plugin>
+                <groupId>org.owasp</groupId>
+                <artifactId>dependency-check-maven</artifactId>
+                <version>${project.component.dependency-check-maven.version}</version>
+                <configuration>
+                    <assemblyAnalyzerEnabled>false</assemblyAnalyzerEnabled>
+                    <!-- Skip artifacts not bundled in distribution (provided scope) -->
+                    <skipProvidedScope>true</skipProvidedScope>
+                    <cveValidForHours>${project.component.dependency-check-maven.cve-valid-for-hours}</cveValidForHours>
+                    <suppressionFiles>${project.parent.basedir}/src/main/resources/dep-check/dep-check-suppressions.xml</suppressionFiles>
+                    <failBuildOnCVSS>4</failBuildOnCVSS>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
                 <version>${project.component.maven-checkstyle.version}</version>
@@ -52,6 +73,12 @@
                         <groupId>com.puppycrawl.tools</groupId>
                         <artifactId>checkstyle</artifactId>
                         <version>${project.component.checkstyle.version}</version>
+                        <exclusions>
+                            <exclusion>
+                                <artifactId>tools</artifactId>
+                                <groupId>com.sun</groupId>
+                            </exclusion>
+                        </exclusions>
                     </dependency>
                 </dependencies>
                 <executions>
@@ -67,11 +94,9 @@
                             <encoding>UTF-8</encoding>
                             <consoleOutput>true</consoleOutput>
                             <failsOnError>true</failsOnError>
-                            <linkXRef>false</linkXRef>
                             <includeTestResources>false</includeTestResources>
                             <logViolationsToConsole>true</logViolationsToConsole>
                             <violationSeverity>warning</violationSeverity>
-                            <failsOnError>true</failsOnError>
                         </configuration>
                     </execution>
                 </executions>
@@ -208,7 +233,7 @@
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi</artifactId>
-            <version>3.7</version>
+            <version>${project.component.apache-poi.version}</version>
         </dependency>
 
         <dependency>
@@ -222,8 +247,9 @@
         <dependency>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-site-plugin</artifactId>
-            <version>3.5.1</version>
+            <version>${project.component.maven-site-plugin.version}</version>
             <type>maven-plugin</type>
+            <scope>provided</scope>
         </dependency>
 
         <!-- ********************************* Logging-related ****************************************** -->
@@ -254,20 +280,21 @@
 
         <!-- ********************************* Test-related ****************************************** -->
 
+        <!-- https://mvnrepository.com/artifact/org.owasp/dependency-check-maven -->
         <dependency>
-            <groupId>com.google.code.findbugs</groupId>
-            <artifactId>findbugs</artifactId>
-            <version>${project.component.findbugs.version}</version>
+            <groupId>org.owasp</groupId>
+            <artifactId>dependency-check-maven</artifactId>
+            <version>${project.component.dependency-check-maven.version}</version>
         </dependency>
         <dependency>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>findbugs-maven-plugin</artifactId>
             <version>${project.component.findbugs.version}</version>
+            <scope>provided</scope>
         </dependency>
-
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
             <version>${project.component.junit.version}</version>
             <type>jar</type>
             <scope>test</scope>
@@ -281,8 +308,15 @@
         <dependency>
             <groupId>org.glassfish.jersey.test-framework.providers</groupId>
             <artifactId>jersey-test-framework-provider-grizzly2</artifactId>
-            <version>2.24</version>
+            <version>${project.component.jersey-test-framework-provider-grizzly2.version}</version>
             <scope>test</scope>
+        </dependency>
+        <!-- required for bringing the correct version of Guava for tests-->
+        <!-- https://mvnrepository.com/artifact/org.glassfish.jersey.bundles.repackaged/jersey-guava -->
+        <dependency>
+            <groupId>org.glassfish.jersey.bundles.repackaged</groupId>
+            <artifactId>jersey-guava</artifactId>
+            <version>2.25.1</version>
         </dependency>
 
         <!-- ********************************* Documentation ****************************************** -->
@@ -290,7 +324,9 @@
             <groupId>com.webcohesion.enunciate</groupId>
             <artifactId>enunciate-maven-plugin</artifactId>
             <version>${project.component.enunciate.version}</version>
+            <scope>provided</scope>
         </dependency>
+
 
     </dependencies>
 

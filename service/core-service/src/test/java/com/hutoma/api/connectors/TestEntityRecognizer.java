@@ -1,5 +1,8 @@
 package com.hutoma.api.connectors;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.connectors.aiservices.AIServices;
@@ -19,18 +22,16 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.net.URI;
 import java.net.ServerSocket;
+import java.net.URI;
 import java.util.List;
+
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * Created by pedrotei on 10/11/16.
@@ -47,22 +48,17 @@ public class TestEntityRecognizer {
             ENTITY_VALUE, ENTITY_CATEGORY, ENTITY_START, ENTITY_END);
 
     private static HttpServer httpServer;
-    private static int listeningPort;
     private static String localServer;
     private EntityRecognizerService erService;
     private Config fakeConfig;
 
     @BeforeClass
-    public static void initializeClass() {
+    public static void initializeClass() throws IOException {
         // Get an available listening port
-        try {
-            ServerSocket s = new ServerSocket(0);
-            listeningPort = s.getLocalPort();
-            s.close();
-        } catch (IOException ex) {
-            System.out.println(ex.getMessage());
-        }
+        ServerSocket s = new ServerSocket(0);
+        int listeningPort = s.getLocalPort();
         localServer = String.format("%s:%d", LOCAL_WEB_SERVER_ADDR, listeningPort);
+        s.close();
         final ResourceConfig rc = new ResourceConfig(TestServer.class);
         rc.register(MultiPartFeature.class);
         httpServer = GrizzlyHttpServerFactory.createHttpServer(URI.create(localServer), rc);

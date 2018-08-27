@@ -17,7 +17,7 @@ import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
 import com.hutoma.api.logic.chat.ChatDefaultHandler;
 
-import org.apache.logging.log4j.util.Strings;
+import org.apache.commons.lang.StringUtils;
 import org.glassfish.jersey.message.internal.MediaTypes;
 import org.glassfish.jersey.server.ContainerRequest;
 
@@ -148,7 +148,7 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
                     .getResponse(this.serializer).build());
             this.logger.logUserExceptionEvent(LOGFROM, "ParameterValidation", getDeveloperId(requestContext), ex,
                     LogMap.map("Type", "Post")
-                            .put("Parameters", Strings.join(
+                            .put("Parameters", StringUtils.join(
                                     checkList.stream().map(APIParameter::toString).iterator(), ','))
                             .put("RequestLength", requestContext.getLength())
                             .put("Path", requestContext.getUriInfo().getPath()));

@@ -1,7 +1,6 @@
 package com.hutoma.api.logic;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Strings;
 import com.hutoma.api.access.Role;
 import com.hutoma.api.common.BotStructureSerializer;
 import com.hutoma.api.common.Config;
@@ -971,7 +970,7 @@ public class AILogic {
                                 .put("Message", result.getStatus().getInfo()));
                 // The info from an error on CreateAI should already be customer-friendly, so just
                 // pass it back to the user if there is already one.
-                throw new BotImportException(Strings.isNullOrEmpty(result.getStatus().getInfo())
+                throw new BotImportException(org.apache.commons.lang.StringUtils.isEmpty(result.getStatus().getInfo())
                         ? IMPORT_GENERIC_ERROR
                         : result.getStatus().getInfo());
             }

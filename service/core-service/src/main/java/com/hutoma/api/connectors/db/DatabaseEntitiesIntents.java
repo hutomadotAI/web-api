@@ -1,15 +1,20 @@
 package com.hutoma.api.connectors.db;
 
-import com.google.common.base.Strings;
 import com.google.gson.reflect.TypeToken;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.containers.ApiEntity;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.ApiIntentList;
-import com.hutoma.api.containers.sub.*;
+import com.hutoma.api.containers.sub.Entity;
+import com.hutoma.api.containers.sub.IntentOutConditional;
+import com.hutoma.api.containers.sub.IntentVariable;
+import com.hutoma.api.containers.sub.IntentVariableCondition;
+import com.hutoma.api.containers.sub.MemoryIntent;
+import com.hutoma.api.containers.sub.MemoryVariable;
 import com.hutoma.api.logging.ILogger;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 
@@ -227,21 +232,21 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
             ApiIntent intent = new ApiIntent(rs.getString("name"), rs.getString("topic_in"), rs.getString("topic_out"));
             intent.setLastUpdated(new DateTime(rs.getTimestamp("last_updated")));
             String json = rs.getString("context_in");
-            if (!Strings.isNullOrEmpty(json)) {
+            if (!StringUtils.isEmpty(json)) {
                 intent.setContextIn(this.serializer.deserializeStringMap(json));
             }
             json = rs.getString("context_out");
-            if (!Strings.isNullOrEmpty(json)) {
+            if (!StringUtils.isEmpty(json)) {
                 intent.setContextOut(this.serializer.deserializeStringMap(json));
             }
             json = rs.getString("conditions_in");
-            if (!Strings.isNullOrEmpty(json)) {
+            if (!StringUtils.isEmpty(json)) {
                 intent.setConditionsIn(this.serializer.deserializeList(json,
                         new TypeToken<List<IntentVariableCondition>>() {
                         }.getType()));
             }
             json = rs.getString("transitions");
-            if (!Strings.isNullOrEmpty(json)) {
+            if (!StringUtils.isEmpty(json)) {
                 intent.setIntentOutConditionals(this.serializer.deserializeList(json,
                         new TypeToken<List<IntentOutConditional>>() {
                         }.getType()));

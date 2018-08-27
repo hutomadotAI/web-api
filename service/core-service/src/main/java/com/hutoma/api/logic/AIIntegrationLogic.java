@@ -1,10 +1,7 @@
 package com.hutoma.api.logic;
 
-import com.google.common.base.Strings;
 import com.hutoma.api.common.Config;
-import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.logging.LogMap;
 import com.hutoma.api.connectors.FacebookConnector;
 import com.hutoma.api.connectors.FacebookException;
 import com.hutoma.api.connectors.db.DatabaseException;
@@ -23,7 +20,10 @@ import com.hutoma.api.containers.facebook.FacebookToken;
 import com.hutoma.api.containers.sub.Integration;
 import com.hutoma.api.containers.sub.IntegrationRecord;
 import com.hutoma.api.containers.sub.IntegrationType;
+import com.hutoma.api.logging.ILogger;
+import com.hutoma.api.logging.LogMap;
 
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 
 import java.util.Arrays;
@@ -93,9 +93,10 @@ public class AIIntegrationLogic {
                         metadata = (metadata == null) ? new FacebookIntegrationMetadata() : metadata;
 
                         // set the fields we care about
-                        metadata.setPageGreeting(Strings.emptyToNull(facebookCustomisation.getPageGreeting()));
-                        metadata.setGetStartedPayload(Strings.emptyToNull(
-                                facebookCustomisation.getGetStartedPayload()));
+                        metadata.setPageGreeting(StringUtils.defaultIfEmpty(
+                                facebookCustomisation.getPageGreeting(), null));
+                        metadata.setGetStartedPayload(StringUtils.defaultIfEmpty(
+                                facebookCustomisation.getGetStartedPayload(), null));
 
                         // set the new data
                         record.setData(this.serializer.serialize(metadata));
@@ -124,8 +125,8 @@ public class AIIntegrationLogic {
                         record.getData(), FacebookIntegrationMetadata.class);
                 if (metadata != null) {
                     return new ApiFacebookCustomisation(
-                            Strings.nullToEmpty(metadata.getPageGreeting()),
-                            Strings.nullToEmpty(metadata.getGetStartedPayload())).setSuccessStatus();
+                            StringUtils.defaultString(metadata.getPageGreeting()),
+                            StringUtils.defaultString(metadata.getGetStartedPayload())).setSuccessStatus();
                 }
             }
         } catch (Exception e) {
@@ -164,7 +165,7 @@ public class AIIntegrationLogic {
                         record.getData(), FacebookIntegrationMetadata.class);
 
                 // do we have a token?
-                boolean tokenPresent = !Strings.isNullOrEmpty(metadata.getAccessToken());
+                boolean tokenPresent = !StringUtils.isEmpty(metadata.getAccessToken());
                 // is it expired?
                 boolean tokenValid = metadata.getAccessTokenExpiry().isAfter(DateTime.now());
 
@@ -183,8 +184,8 @@ public class AIIntegrationLogic {
 
                     // if we have no page token then get a list of available pages
                     // that the user can select
-                    if (Strings.isNullOrEmpty(record.getIntegrationResource())
-                            || Strings.isNullOrEmpty(metadata.getPageToken())) {
+                    if (StringUtils.isEmpty(record.getIntegrationResource())
+                            || StringUtils.isEmpty(metadata.getPageToken())) {
                         // get nodes and convert to an id->name map
                         Map<String, String> pages = getListOfUserPages(metadata).stream().collect(
                                 Collectors.toMap(FacebookNode::getId, FacebookNode::getName));
@@ -346,7 +347,7 @@ public class AIIntegrationLogic {
                 FacebookIntegrationMetadata metadata = (FacebookIntegrationMetadata) this.serializer.deserialize(
                         record.getData(), FacebookIntegrationMetadata.class);
 
-                if (!Strings.isNullOrEmpty(action)) {
+                if (!StringUtils.isEmpty(action)) {
                     switch (action) {
                         case "page":
                             return pageSelect(logMap, devid, aiid, record, metadata, pageId);
@@ -533,7 +534,7 @@ public class AIIntegrationLogic {
                                            final FacebookIntegrationMetadata metadata) {
         try {
             // if we have a token, use it to unsubscribe
-            if ((record != null) && (metadata != null) && !Strings.isNullOrEmpty(metadata.getPageToken())) {
+            if ((record != null) && (metadata != null) && !StringUtils.isEmpty(metadata.getPageToken())) {
                 this.facebookConnector.pageUnsubscribe(record.getIntegrationResource(), metadata.getPageToken());
                 logMap.add("unsubscribe", "succeeded");
             } else {

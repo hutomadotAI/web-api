@@ -1,6 +1,5 @@
 package com.hutoma.api.logic.chat;
 
-import com.google.common.base.Strings;
 import com.hutoma.api.common.FeatureToggler;
 import com.hutoma.api.common.Pair;
 import com.hutoma.api.connectors.WebHooks;
@@ -87,7 +86,7 @@ public class IntentProcessor {
 
         ApiIntent intent = this.intentHandler.getIntent(aiidForMemoryIntents, currentIntent.getName());
         if (!canExecuteIntent(intent, chatResult)) {
-            if (Strings.isNullOrEmpty(intent.getConditionsFallthroughMessage())) {
+            if (StringUtils.isEmpty(intent.getConditionsFallthroughMessage())) {
                 return false;
             } else {
                 chatResult.setScore(SCORE_INTENT_RECOGNIZED);
@@ -633,7 +632,7 @@ public class IntentProcessor {
                 chatResult.setWebHookResponse(response);
 
                 // log and set the text if there was any
-                if (!Strings.isNullOrEmpty(response.getText())) {
+                if (!StringUtils.isEmpty(response.getText())) {
                     // copy the text reply
                     chatResult.setAnswer(response.getText());
                     // and copy the whole response to include any rich content

@@ -1,6 +1,5 @@
 package com.hutoma.api.connectors.chat;
 
-import com.google.common.base.Strings;
 import com.google.gson.JsonParseException;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.JsonSerializer;
@@ -19,6 +18,7 @@ import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
 import com.hutoma.api.thread.TrackedThreadSubPool;
 
+import org.apache.commons.lang.StringUtils;
 import org.glassfish.jersey.client.JerseyClient;
 
 import java.net.HttpURLConnection;
@@ -94,7 +94,7 @@ public abstract class ChatBackendConnector {
         for (AiDevId ai : ais) {
             UUID aiid = ai.getAiid();
             ApiServerEndpointMulti.ServerEndpointResponse endpoint = endpointMap.get(aiid);
-            if ((endpoint == null) || (Strings.isNullOrEmpty(endpoint.getServerUrl()))) {
+            if ((endpoint == null) || (StringUtils.isEmpty(endpoint.getServerUrl()))) {
                 throw new NoServerAvailableException(String.format("No server available for %s for %s on %s",
                         aiid.toString(), RequestFor.Chat.toString(), this.getServerType().value()));
             }

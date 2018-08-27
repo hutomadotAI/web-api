@@ -13,22 +13,28 @@
 
         <argLine>-Xmx1024m</argLine>
 
-        <project.component.maven-compiler.version>3.6.2</project.component.maven-compiler.version>
+        <project.component.maven-compiler.version>3.7.0</project.component.maven-compiler.version>
 
         <!-- Component versions -->
         <project.component.java.version>1.8</project.component.java.version>
-        <project.component.jersey.version>2.25.1</project.component.jersey.version>
-        <project.component.google.gson.version>2.8.0</project.component.google.gson.version>
-        <project.component.joda-time.version>2.9.9</project.component.joda-time.version>
-        <project.component.log4j.version>2.7</project.component.log4j.version>
+        <project.component.jersey.version>2.27</project.component.jersey.version>
+        <project.component.hk2.version>2.5.0-b61</project.component.hk2.version>
+        <project.component.google.gson.version>2.8.5</project.component.google.gson.version>
+        <project.component.joda-time.version>2.10</project.component.joda-time.version>
+        <project.component.log4j.version>2.11.0</project.component.log4j.version>
+        <project.component.apache-poi.version>3.17</project.component.apache-poi.version>
         <!-- Test related component versions -->
-        <project.component.junit.version>4.12</project.component.junit.version>
+        <project.component.junit.version>5.2.0</project.component.junit.version>
         <project.component.checkstyle.version>8.8</project.component.checkstyle.version>
         <project.component.maven-checkstyle.version>3.0.0</project.component.maven-checkstyle.version>
-        <project.component.findbugs.version>3.0.1</project.component.findbugs.version>
-        <project.component.mockito.version>2.0.52-beta</project.component.mockito.version>
-        <project.component.surefire.version>2.20.1</project.component.surefire.version>
-        <project.component.jacoco.version>0.7.9</project.component.jacoco.version>
+        <project.component.maven-site-plugin.version>3.7.1</project.component.maven-site-plugin.version>
+        <project.component.findbugs.version>3.0.5</project.component.findbugs.version>
+        <project.component.mockito.version>2.19.0</project.component.mockito.version>
+        <project.component.surefire.version>2.22.0</project.component.surefire.version>
+        <project.component.jacoco.version>0.8.1</project.component.jacoco.version>
+        <project.component.jersey-test-framework-provider-grizzly2.version>2.27</project.component.jersey-test-framework-provider-grizzly2.version>
+        <project.component.dependency-check-maven.version>3.3.1</project.component.dependency-check-maven.version>
+        <project.component.dependency-check-maven.cve-valid-for-hours>36</project.component.dependency-check-maven.cve-valid-for-hours>
         <!-- Documentation related component versions -->
         <project.component.enunciate.version>2.11.1</project.component.enunciate.version>
     </properties>

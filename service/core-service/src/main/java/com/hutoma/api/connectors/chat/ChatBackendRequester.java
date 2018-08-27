@@ -1,6 +1,5 @@
 package com.hutoma.api.connectors.chat;
 
-import com.google.common.base.Strings;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Tools;
@@ -12,6 +11,7 @@ import com.hutoma.api.containers.ApiServerEndpointMulti;
 import com.hutoma.api.containers.sub.ChatState;
 import com.hutoma.api.containers.sub.ServerEndpointRequestMulti;
 
+import org.apache.commons.lang.StringUtils;
 import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.client.JerseyWebTarget;
 
@@ -108,7 +108,7 @@ public class ChatBackendRequester implements Callable<InvocationResult> {
                     // make sure that we got a valid endpoint back from the controller
                     serverEndpointResponse = endpointMap.get(ai.getAiid());
                     if ((serverEndpointResponse == null)
-                            || Strings.isNullOrEmpty(serverEndpointResponse.getServerIdentifier())) {
+                            || StringUtils.isEmpty(serverEndpointResponse.getServerIdentifier())) {
 
                         // if not, throw a descriptive exception
                         throw new NoServerAvailableException.ServiceTooBusyException(alreadyTried);
@@ -166,10 +166,10 @@ public class ChatBackendRequester implements Callable<InvocationResult> {
         Map<String, Object> queryParamsWithoutNulls = chatParamsThisAi.entrySet()
                 .stream()
                 .collect(Collectors.toMap(p -> p.getKey(),
-                        p -> Strings.nullToEmpty(p.getValue())));
+                        p -> StringUtils.defaultString(p.getValue())));
 
         // add the hashcode to the query string
-        queryParamsWithoutNulls.put(AI_HASH_PARAM, Strings.nullToEmpty(endpointResponse.getHash()));
+        queryParamsWithoutNulls.put(AI_HASH_PARAM, StringUtils.defaultString(endpointResponse.getHash()));
 
         // create template
         for (String param : queryParamsWithoutNulls.keySet()) {

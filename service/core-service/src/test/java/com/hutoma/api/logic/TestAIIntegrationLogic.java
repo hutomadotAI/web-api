@@ -282,14 +282,14 @@ public class TestAIIntegrationLogic {
     }
 
     @Test
-    public void testSetCustomisation_Set_OK() throws DatabaseException, FacebookException {
+    public void testSetCustomisation_Set_OK() throws FacebookException {
         this.integLogic.setFacebookCustomisation(TestDataHelper.DEVID_UUID, TestDataHelper.AIID,
                 new ApiFacebookCustomisation("greeting", "getstarted"));
         verify(this.fakeConnector, times(1)).setFacebookMessengerProfile(any(), any());
     }
 
     @Test
-    public void testSetCustomisation_Delete_OK() throws DatabaseException, FacebookException {
+    public void testSetCustomisation_Delete_OK() throws FacebookException {
         this.integLogic.setFacebookCustomisation(TestDataHelper.DEVID_UUID, TestDataHelper.AIID,
                 new ApiFacebookCustomisation(null, null));
         verify(this.fakeConnector, times(1)).setFacebookMessengerProfile(any(), any());

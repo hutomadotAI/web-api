@@ -250,7 +250,7 @@ public class TestChatLogic extends TestChatBase {
     @Test
     public void testChat_genericException() throws ChatBackendConnector.AiControllerException, ServerConnector.AiServicesException, NoServerAvailableException {
         setupFakeChat(0.0d, "", 0.0d, "");
-        doThrow(Exception.class)
+        doThrow(NoServerAvailableException.class)
                 .when(this.fakeChatServices).startChatRequests(any(), any(), any(), anyString(), any());
         ApiResult result = getChat(0.9f);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
@@ -468,7 +468,7 @@ public class TestChatLogic extends TestChatBase {
     @Test
     public void testChat_handedOver_getCurrentState_chatStateException_otherReason()
             throws ChatStateHandler.ChatStateException {
-        when(this.fakeChatStateHandler.getState(any(), any(), any())).thenThrow(Exception.class);
+        when(this.fakeChatStateHandler.getState(any(), any(), any())).thenThrow(ChatStateHandler.ChatStateException.class);
         ApiResult result = this.chatLogic.handOver(AIID, DEVID_UUID, CHATID.toString(), ChatHandoverTarget.Human);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
@@ -484,7 +484,7 @@ public class TestChatLogic extends TestChatBase {
     @Test
     public void testChat_handedOver_saveNewState_chatStateException_otherReason()
             throws ChatStateHandler.ChatStateException {
-        doThrow(Exception.class).when(this.fakeChatStateHandler).saveState(any(), any(), any(), any());
+        doThrow(ChatStateHandler.ChatStateException.class).when(this.fakeChatStateHandler).saveState(any(), any(), any(), any());
         ApiResult result = this.chatLogic.handOver(AIID, DEVID_UUID, CHATID.toString(), ChatHandoverTarget.Human);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
