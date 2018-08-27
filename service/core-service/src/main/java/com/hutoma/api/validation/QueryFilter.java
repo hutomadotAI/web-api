@@ -131,6 +131,14 @@ public class QueryFilter extends ParameterFilter implements ContainerRequestFilt
                 }
             }
 
+            if (checkList.contains(APIParameter.ExperimentFeatureName)) {
+                requestContext.setProperty(APIParameter.ExperimentFeatureName.toString(),
+                        validateFieldLength(50, EXPERIMENT_FEATURE_NAME,
+                                validateAlphaNumPlusDashes(
+                                        EXPERIMENT_FEATURE_NAME,
+                                        getFirst(queryParameters.get(EXPERIMENT_FEATURE_NAME)))));
+            }
+
             this.logger.logDebug(LOGFROM, "parameter validation passed");
 
         } catch (ParameterValidationException pve) {

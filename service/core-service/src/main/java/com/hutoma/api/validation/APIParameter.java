@@ -32,5 +32,7 @@ public enum APIParameter {
     ServerRegistration,
     ServerAffinity,
     FacebookNotification,
-    ContextVariables
+    ContextVariables,
+    // Other
+    ExperimentFeatureName
 }

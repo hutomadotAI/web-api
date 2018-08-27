@@ -45,6 +45,7 @@ public class ParameterFilter extends Validate {
     static final String PUBLISHING_TYPE = "publishing_type";
     static final String BOT_ID_LIST = "bot_list";
     static final String CHAT_HANDOVER_TARGET = "target";
+    static final String EXPERIMENT_FEATURE_NAME = "feature";
 
     private static final String DEVID_HEADER_KEY = "_developer_id";
 
@@ -150,6 +151,10 @@ public class ParameterFilter extends Validate {
 
     public static Map<String, String> getContextVariables(final ContainerRequestContext requestContext) {
         return (Map<String, String>) requestContext.getProperty(APIParameter.ContextVariables.toString());
+    }
+
+    public static String getExperimentFeatureName(final ContainerRequestContext requestContext) {
+        return (String) requestContext.getProperty(APIParameter.ExperimentFeatureName.toString());
     }
 
     /**
