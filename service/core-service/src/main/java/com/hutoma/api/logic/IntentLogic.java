@@ -309,35 +309,6 @@ public class IntentLogic {
         }
     }
 
-    @Deprecated
-    public ApiResult convertIntentsToJson() {
-        try (DatabaseTransaction transaction = this.databaseTransactionProvider.get()) {
-            int intentCount = 0;
-            List<UserInfo> users = this.databaseUser.getAllUsers();
-            for (UserInfo userInfo: users) {
-                UUID devId = UUID.fromString(userInfo.getDevId());
-                List<ApiAi> ais = this.databaseAi.getAllAIs(devId, this.jsonSerializer);
-                for (ApiAi ai: ais) {
-                    UUID aiid = UUID.fromString(ai.getAiid());
-                    List<String> intentNames = this.databaseEntitiesIntents.getIntents(devId, aiid);
-                    for (String intentName: intentNames) {
-                        intentCount++;
-                        ApiIntent intent = this.databaseEntitiesIntents.getIntent_toDeprecate(
-                                aiid, intentName, transaction);
-                        this.databaseEntitiesIntents.writeIntent(
-                                devId, aiid, intent.getIntentName(), intent, transaction);
-                    }
-                }
-            }
-            transaction.commit();
-            return new ApiResult().setSuccessStatus(String.format("%d intents converted", intentCount));
-
-        } catch (DatabaseException ex) {
-            this.logger.logException(LOGFROM, ex);
-            return ApiError.getInternalServerError();
-        }
-    }
-
     /**
      * Gets the contents of the file from a stream taking into account a defined maximum upload size.
      * @param maxUploadSize       the maximum size allowed for the file

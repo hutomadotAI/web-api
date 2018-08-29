@@ -38,8 +38,10 @@ public class MemoryIntentHandler implements IMemoryIntentHandler {
 
 
     @Inject
-    public MemoryIntentHandler(final JsonSerializer jsonSerializer, final DatabaseEntitiesIntents databaseIntents,
-                               final ILogger logger, final Database database) {
+    public MemoryIntentHandler(final JsonSerializer jsonSerializer,
+                               final DatabaseEntitiesIntents databaseIntents,
+                               final ILogger logger,
+                               final Database database) {
         this.logger = logger;
         this.databaseIntents = databaseIntents;
         this.database = database;

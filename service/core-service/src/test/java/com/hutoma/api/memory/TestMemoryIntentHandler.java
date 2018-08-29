@@ -129,20 +129,12 @@ public class TestMemoryIntentHandler {
         ApiEntity apiEntity = new ApiEntity(entityName, DEVID_UUID, Arrays.asList("a", "b"), false);
         apiIntent.addVariable(iv);
         when(this.fakeDatabaseEntities.getIntent(any(), anyString())).thenReturn(apiIntent);
-        when(this.fakeDatabaseEntities.getMemoryIntent(anyString(), any(), any())).thenReturn(null);
         when(this.fakeDatabaseEntities.getEntity(any(), anyString())).thenReturn(apiEntity);
         MemoryIntent mi = this.memoryIntentHandler.parseAiResponseForIntent(DEVID_UUID, AIID, CHATID, DEFAULT_INTENT, buildChatState());
         Assert.assertNotNull(mi.getVariables());
         Assert.assertEquals(1, mi.getVariables().size());
         Assert.assertEquals(entityName, mi.getVariables().get(0).getName());
         Assert.assertNull(mi.getVariables().get(0).getCurrentValue());
-    }
-
-    @Test(expected = ChatLogic.IntentException.class)
-    public void testLoadIntentForAiDBException() throws ChatLogic.IntentException, DatabaseException {
-        DatabaseException exception = new DatabaseException("test");
-        when(this.fakeDatabaseEntities.getMemoryIntent(anyString(), any(), any())).thenThrow(exception);
-        this.memoryIntentHandler.parseAiResponseForIntent(DEVID_UUID, AIID, CHATID, DEFAULT_INTENT, buildChatState());
     }
 
     @Test(expected = IllegalStateException.class)
@@ -208,13 +200,12 @@ public class TestMemoryIntentHandler {
     }
 
     private MemoryIntent setDummyMemoryIntent(final String response)
-            throws DatabaseException, ChatLogic.IntentException {
+            throws ChatLogic.IntentException {
         MemoryIntent mi = new MemoryIntent(INTENT_NAME, AIID, CHATID,
                 Collections.singletonList(new MemoryVariable("name", Arrays.asList("a", "b", "c"))));
         ChatState state = buildChatState();
         state.setCurrentIntents(Collections.singletonList(mi));
 
-        when(this.fakeDatabaseEntities.getMemoryIntent(any(), any(), any())).thenReturn(mi);
         return this.memoryIntentHandler.parseAiResponseForIntent(DEVID_UUID, AIID, CHATID, response, state);
     }
 

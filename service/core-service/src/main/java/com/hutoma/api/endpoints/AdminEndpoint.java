@@ -90,13 +90,4 @@ public class AdminEndpoint {
         ApiResult result = this.adminLogic.regenerateTokens(devId, dryrun);
         return result.getResponse(this.serializer).build();
     }
-
-    @PUT
-    @Path("convert_intents")
-    @Secured({Role.ROLE_ADMIN})
-    @Produces(MediaType.APPLICATION_JSON)
-    @Deprecated
-    public Response convertIntentsToJson() {
-        return this.intentLogic.convertIntentsToJson().getResponse(this.serializer).build();
-    }
 }

@@ -182,128 +182,6 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
         }
     }
 
-    /***
-     * Gets a fully populated intent object
-     * including intent, usersays, variables and prompts
-     * @param aiid the aiid that owns the intent
-     * @param intentName the intent name
-     * @return an intent
-     * @throws DatabaseException if things go wrong
-     */
-    @Deprecated
-    public ApiIntent getIntent_toDeprecate(final UUID aiid, final String intentName) throws DatabaseException {
-        try (DatabaseTransaction transaction = this.transactionProvider.get()) {
-            ApiIntent intent = getIntent_toDeprecate(aiid, intentName, transaction);
-            transaction.commit();
-            return intent;
-        }
-    }
-
-    /***
-     * Gets a fully populated intent object
-     * including intent, usersays, variables and prompts
-     * @param aiid the aiid that owns the intent
-     * @param intentName the intent name
-     * @param transaction the transaction it should be enrolled in
-     * @return an intent
-     * @throws DatabaseException if things go wrong
-     */
-    @Deprecated
-    public ApiIntent getIntent_toDeprecate(final UUID aiid,
-                                           final String intentName,
-                                           final DatabaseTransaction transaction)
-            throws DatabaseException {
-
-        if (transaction == null) {
-            throw new IllegalArgumentException("transaction");
-        }
-
-        try {
-            ResultSet rs = transaction.getDatabaseCall().initialise("getIntent_toDeprecate", 2)
-                    .add(aiid)
-                    .add(intentName)
-                    .executeQuery();
-            if (!rs.next()) {
-                // the intent was not found at all
-                return null;
-            }
-
-            // build the intent
-            ApiIntent intent = new ApiIntent(rs.getString("name"), rs.getString("topic_in"), rs.getString("topic_out"));
-            intent.setLastUpdated(new DateTime(rs.getTimestamp("last_updated")));
-            String json = rs.getString("context_in");
-            if (!StringUtils.isEmpty(json)) {
-                intent.setContextIn(this.serializer.deserializeStringMap(json));
-            }
-            json = rs.getString("context_out");
-            if (!StringUtils.isEmpty(json)) {
-                intent.setContextOut(this.serializer.deserializeStringMap(json));
-            }
-            json = rs.getString("conditions_in");
-            if (!StringUtils.isEmpty(json)) {
-                intent.setConditionsIn(this.serializer.deserializeList(json,
-                        new TypeToken<List<IntentVariableCondition>>() {
-                        }.getType()));
-            }
-            json = rs.getString("transitions");
-            if (!StringUtils.isEmpty(json)) {
-                intent.setIntentOutConditionals(this.serializer.deserializeList(json,
-                        new TypeToken<List<IntentOutConditional>>() {
-                        }.getType()));
-            }
-            intent.setConditionsFallthroughMessage(rs.getString("conditions_default_response"));
-            intent.setResetContextOnExit(rs.getBoolean("reset_context_on_exit"));
-
-            // get the user triggers
-            ResultSet saysRs = transaction.getDatabaseCall().initialise("getIntentUserSays", 2)
-                    .add(aiid).add(intentName).executeQuery();
-            while (saysRs.next()) {
-                intent.addUserSays(saysRs.getString("says"));
-            }
-
-            // get the list of responses
-            ResultSet intentResponseRs = transaction.getDatabaseCall().initialise("getIntentResponses", 2)
-                    .add(aiid).add(intentName).executeQuery();
-            while (intentResponseRs.next()) {
-                intent.addResponse(intentResponseRs.getString("response"));
-            }
-
-            // get each intent variable
-            ResultSet varRs = transaction.getDatabaseCall().initialise("getIntentVariables", 2)
-                    .add(aiid).add(intentName).executeQuery();
-            while (varRs.next()) {
-                int varID = varRs.getInt("id");
-                String uuidString = varRs.getString("dev_id");
-                UUID devOwnerUUID = UUID.fromString(uuidString);
-                IntentVariable variable = new IntentVariable(
-                        varRs.getString("entity_name"),
-                        devOwnerUUID,
-                        varRs.getBoolean("required"),
-                        varRs.getInt("n_prompts"),
-                        varRs.getString("value"),
-                        varRs.getBoolean("isPersistent"),
-                        varRs.getString("label"),
-                        varRs.getBoolean("clear_on_entry"));
-
-                // for each variable get all its prompts
-                ResultSet promptRs = transaction.getDatabaseCall().initialise("getIntentVariablePrompts", 2)
-                        .add(aiid).add(varID).executeQuery();
-                while (promptRs.next()) {
-                    variable.addPrompt(promptRs.getString("prompt"));
-                }
-
-                intent.addVariable(variable);
-            }
-
-            intent.setWebHook(this.getWebHook(aiid, intentName));
-
-            return intent;
-
-        } catch (SQLException sqle) {
-            throw new DatabaseException(sqle);
-        }
-    }
-
     /**
      * Writes (or updates) and entity
      * @param devid         the developer id
@@ -484,46 +362,11 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
         return rowCount > 0;
     }
 
-    public MemoryIntent getMemoryIntent(final String intentName, final UUID aiid, UUID chatId)
-            throws DatabaseException {
-        try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("getMemoryIntent", 3)
-                    .add(intentName).add(aiid).add(chatId);
-            ResultSet rs = call.executeQuery();
-            try {
-                if (rs.next()) {
-                    return loadMemoryIntent(rs, this.serializer);
-                }
-                return null;
-            } catch (SQLException sqle) {
-                throw new DatabaseException(sqle);
-            }
-        }
-    }
-
     public void resetIntentsStateForAi(final UUID devId, final UUID aiid) throws DatabaseException {
 
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("resetChatStatesForAi", 2).add(devId).add(aiid);
             call.executeUpdate();
-        }
-    }
-
-    @SuppressFBWarnings("DM_NEW_FOR_GETCLASS")
-    private static MemoryIntent loadMemoryIntent(final ResultSet rs, final JsonSerializer jsonSerializer)
-            throws DatabaseException {
-        try {
-            Type listType = new TypeToken<List<MemoryVariable>>() {
-            }.getClass();
-            List<MemoryVariable> variables = jsonSerializer.deserializeList(rs.getString("variables"),
-                    listType);
-            return new MemoryIntent(rs.getString("name"),
-                    UUID.fromString(rs.getString("aiid")),
-                    UUID.fromString(rs.getString("chatId")),
-                    variables,
-                    rs.getBoolean("isFulfilled"));
-        } catch (SQLException sqle) {
-            throw new DatabaseException(sqle);
         }
     }
 
