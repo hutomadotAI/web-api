@@ -18,13 +18,26 @@
    Reason: any mysql connector lib version beyond this one will not work with our current db server version
    ]]></notes>
         <sha1>49506be68e2ab1b619d77dee24c2e55d399d371a</sha1>
-        <cpe>cpe:/a:oracle:mysql</cpe>
+        <cve>CVE-2018-3056</cve>
+        <cve>CVE-2018-3078</cve>
+        <cve>CVE-2018-3079</cve>
+        <cve>CVE-2018-3054</cve>
+        <cve>CVE-2018-3077</cve>
+        <cve>CVE-2018-3075</cve>
+        <cve>CVE-2018-3073</cve>
+        <cve>CVE-2018-3080</cve>
+        <cve>CVE-2018-3067</cve>
+        <cve>CVE-2018-3065</cve>
+        <cve>CVE-2018-3064</cve>
+        <cve>CVE-2018-3081</cve>
+        <cve>CVE-2018-3060</cve>
+        <cve>CVE-2018-3082</cve>
     </suppress>
 
 
     <!--
     JCraft Jsch components
-   Known vulerabilities: CVE-2016-5725
+   Known vulnerabilities: CVE-2016-5725
    Reason: even the latest version (0.0.9) has the vulnerability, so no point in forcing the version
     -->
     <suppress>
