@@ -255,6 +255,11 @@ public class IntentProcessor {
             }
         }
 
+        // Handle the context variables before we clear intent
+        if (handledIntent) {
+            this.contextVariableExtractor.extractContextVariables(chatResult);
+        }
+
         // Clear fulfilled intents or intents which have exhausted their prompts, so they can be triggered again
         if (!intentsToClear.isEmpty()) {
             this.intentHandler.clearIntents(chatResult.getChatState(), intentsToClear);
@@ -265,9 +270,6 @@ public class IntentProcessor {
                 ? String.format("%s, %s", telemetryMap.get().get("IntentStream"), intent.getIntentName())
                 : intent.getIntentName());
 
-        if (handledIntent) {
-            this.contextVariableExtractor.extractContextVariables(chatResult);
-        }
 
         return handledIntent;
     }
