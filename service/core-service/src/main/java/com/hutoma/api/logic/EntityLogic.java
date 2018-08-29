@@ -131,11 +131,17 @@ public class EntityLogic {
                 return ApiError.getNotFound();
             }
 
-            if (!this.database.deleteEntity(devid, entityId.getAsInt())) {
+            List<UUID> referreingAis = this.database.getAisForEntity(devid, entityName);
+            if (!referreingAis.isEmpty()) {
                 this.logger.logUserTraceEvent(LOGFROM, "DeleteEntity - in use, not deleted", devidString, logMap);
-                return ApiError.getConflict("Entity is in use.");
+                return ApiError.getConflict(String.format("Entity is in use by %d bot%s", referreingAis.size(),
+                        referreingAis.size() != 1 ? "s" : ""));
             }
-            stopTrainingIfEntityInUse(devid, entityName);
+
+            if (!this.database.deleteEntity(devid, entityId.getAsInt())) {
+                this.logger.logUserTraceEvent(LOGFROM, "DeleteEntity - could not delete", devidString, logMap);
+                return ApiError.getInternalServerError();
+            }
             this.logger.logUserTraceEvent(LOGFROM, "DeleteEntity", devidString, logMap);
             return new ApiResult().setSuccessStatus();
         } catch (final Exception e) {

@@ -165,13 +165,12 @@ public class TestEntityLogic {
     }
 
     @Test
-    public void testDeleteEntity_entityInUse_triggersStopTraining() throws DatabaseException {
+    public void testDeleteEntity_entityInUse_doesNotDeleteEntity() throws DatabaseException {
         UUID aiid = UUID.randomUUID();
         when(this.fakeDatabase.getAisForEntity(DEVID_UUID, ENTITY_NAME)).thenReturn(Collections.singletonList(aiid));
         when(this.fakeDatabase.getEntityIdForDev(any(), anyString())).thenReturn(ENTITY_ID);
-        when(this.fakeDatabase.deleteEntity(any(), anyInt())).thenReturn(true);
         this.entityLogic.deleteEntity(DEVID_UUID, ENTITY_NAME);
-        verify(this.trainingLogic).stopTraining(DEVID_UUID, aiid);
+        verify(this.fakeDatabase, never()).deleteEntity(any(), anyInt());
     }
 
     @Test
@@ -179,6 +178,7 @@ public class TestEntityLogic {
         when(this.fakeDatabase.getAisForEntity(DEVID_UUID, ENTITY_NAME)).thenReturn(new ArrayList<>());
         when(this.fakeDatabase.getEntityIdForDev(any(), anyString())).thenReturn(ENTITY_ID);
         when(this.fakeDatabase.deleteEntity(any(), anyInt())).thenReturn(true);
+        when(this.fakeDatabase.getAisForEntity(any(), any())).thenReturn(Collections.emptyList());
         this.entityLogic.deleteEntity(DEVID_UUID, ENTITY_NAME);
         verify(this.trainingLogic, never()).stopTraining(any(), any());
     }
