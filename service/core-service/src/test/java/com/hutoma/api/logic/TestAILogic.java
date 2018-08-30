@@ -1,5 +1,6 @@
 package com.hutoma.api.logic;
 
+import com.google.common.collect.ImmutableMap;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Pair;
@@ -14,11 +15,7 @@ import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.connectors.db.DatabaseMarketplace;
 import com.hutoma.api.connectors.db.DatabaseTransaction;
 import com.hutoma.api.containers.*;
-import com.hutoma.api.containers.sub.AiBot;
-import com.hutoma.api.containers.sub.BotStructure;
-import com.hutoma.api.containers.sub.TrainingStatus;
-import com.hutoma.api.containers.sub.UITrainingState;
-import com.hutoma.api.containers.sub.WebHook;
+import com.hutoma.api.containers.sub.*;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.validation.ParameterValidationException;
 import com.hutoma.api.validation.Validate;
@@ -1167,6 +1164,30 @@ public class TestAILogic {
         this.aiLogic.createImportedBot(VALIDDEVID, botStructure);
     }
 
+    @Test
+    public void testCreateImportedBot_entities_differentSize() throws AILogic.BotImportException, DatabaseException {
+        final String entityName = "entity";
+        List<String> existingValues = Arrays.asList("value1", "value2", "value3");
+        List<String> newValues = Arrays.asList("value4", "value5");
+        BotStructure botToImport = setupImportEntityValueTests(entityName, existingValues, newValues);
+
+        expectedException.expect(AILogic.BotImportUserException.class);
+        expectedException.expectMessage("Entity entity already exists and has different number of values");
+        this.aiLogic.createImportedBot(VALIDDEVID, botToImport);
+    }
+
+    @Test
+    public void testCreateImportedBot_entities_differentValues() throws AILogic.BotImportException, DatabaseException {
+        final String entityName = "entity";
+        List<String> existingValues = Arrays.asList("value1", "value2");
+        List<String> newValues = Arrays.asList(existingValues.get(0), "value3");
+        BotStructure botToImport = setupImportEntityValueTests(entityName, existingValues, newValues);
+
+        expectedException.expect(AILogic.BotImportUserException.class);
+        expectedException.expectMessage("Entity entity already exists and has different set of values");
+        this.aiLogic.createImportedBot(VALIDDEVID, botToImport);
+    }
+
     @Test(expected = AILogic.BotImportException.class)
     public void testCreateImportedBot_writeEntities_dbException() throws AILogic.BotImportException, DatabaseException {
         setupFakeImport();
@@ -1517,6 +1538,23 @@ public class TestAILogic {
         when(this.fakeDatabaseAi.getAI(any(), any(), any(), any())).thenReturn(getSampleAI());
         when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(getSampleAI());
         return this.aiLogic.createAI(DEVID_UUID, "name", "description", true, 0, 0.0, 1, DEFAULT_CHAT_RESPONSES, null, "", -1, -1, "handover");
+    }
+
+    private BotStructure setupImportEntityValueTests(final String entityName,
+                                                     final List<String> existingValues,
+                                                     final List<String> newValues)
+            throws DatabaseException {
+        setupFakeImport();
+        ApiEntity newEntity = new ApiEntity(entityName, DEVID_UUID, newValues, false);
+        BotStructure botStructure = getBotstructure();
+        botStructure.setEntities(ImmutableMap.of(entityName, newEntity));
+
+        Entity existingEntitySimple = new Entity(entityName, false);
+        ApiEntity existingEntity = new ApiEntity(entityName, DEVID_UUID, existingValues, false);
+        when(this.fakeDatabaseEntitiesIntents.getEntities(any())).thenReturn(Collections.singletonList(existingEntitySimple));
+        when(this.fakeDatabaseEntitiesIntents.getEntity(any(), any())).thenReturn(existingEntity);
+
+        return botStructure;
     }
 }
 
