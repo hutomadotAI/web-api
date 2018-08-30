@@ -9,6 +9,7 @@ import com.hutoma.api.connectors.WebHooks;
 import com.hutoma.api.connectors.chat.ChatBackendConnector;
 import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.ApiChat;
+import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.ChatContext;
 import com.hutoma.api.containers.sub.ChatHandoverTarget;
@@ -54,6 +55,7 @@ public class TestServiceChat extends ServiceTestBase {
     private static final String CHAT_PATH = "/ai/" + AIID + "/chat";
     private static final String CHAT_HANDOVER = CHAT_PATH + "/target";
     private static final String CHAT_RESET = CHAT_PATH + "/reset";
+    private static final String TRIGGER_INTENT = CHAT_PATH + "/triggerIntent";
 
     @Mock
     private IMemoryIntentHandler fakeMemoryIntentHandler;
@@ -314,6 +316,30 @@ public class TestServiceChat extends ServiceTestBase {
         final Response response = target(CHAT_RESET)
                 .queryParam("chatId", "")
                 .request().headers(noDevIdHeaders).post(Entity.text(""));
+        Assert.assertEquals(HttpURLConnection.HTTP_UNAUTHORIZED, response.getStatus());
+    }
+
+    @Test
+    public void testChat_triggerIntent() throws DatabaseException {
+        when(this.fakeDatabaseEntitiesIntents.checkAIBelongsToDevId(any(), any())).thenReturn(true);
+
+        ApiIntent intent = new ApiIntent("intentName", null, null);
+        intent.setResponses(Collections.singletonList("response"));
+        when(this.fakeDatabaseEntitiesIntents.getIntent(any(), any())).thenReturn(intent);
+
+        final Response response = target(TRIGGER_INTENT)
+                .queryParam("chatId", "")
+                .queryParam("intent_name", "intent")
+                .request().headers(defaultHeaders).put(Entity.text(""));
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
+    }
+
+    @Test
+    public void testChat_triggerIntent_devId_invalid() {
+        final Response response = target(TRIGGER_INTENT)
+                .queryParam("chatId", "")
+                .queryParam("intent_name", "intent")
+                .request().headers(noDevIdHeaders).put(Entity.text(""));
         Assert.assertEquals(HttpURLConnection.HTTP_UNAUTHORIZED, response.getStatus());
     }
 
