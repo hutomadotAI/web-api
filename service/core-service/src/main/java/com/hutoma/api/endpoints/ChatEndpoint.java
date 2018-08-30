@@ -144,7 +144,7 @@ public class ChatEndpoint {
     @RateLimit(RateKey.Chat)
     @Secured({Role.ROLE_CLIENTONLY, Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3,
             Role.ROLE_PLAN_4})
-    @ValidateParameters({APIParameter.DevID, APIParameter.AIID, APIParameter.ChatID})
+    @ValidateParameters({APIParameter.DevID, APIParameter.AIID, APIParameter.ChatID, APIParameter.IntentName})
     @StatusCodes({
             @ResponseCode(code = HttpURLConnection.HTTP_OK, condition = "Succeeded."),
             @ResponseCode(code = HttpURLConnection.HTTP_BAD_REQUEST, condition = "Invalid variables"),
