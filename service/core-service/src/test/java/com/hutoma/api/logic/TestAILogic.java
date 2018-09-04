@@ -1127,7 +1127,7 @@ public class TestAILogic {
 
     @Test
     public void testCreateImportedBot_language_fallback()
-            throws AILogic.BotImportException, ParameterValidationException, DatabaseException{
+            throws AILogic.BotImportException, ParameterValidationException, DatabaseException {
         setupFakeImport();
         BotStructure botStructure = getBotstructure();
         botStructure.setLanguage("NOT A REAL LANGUAGE");
