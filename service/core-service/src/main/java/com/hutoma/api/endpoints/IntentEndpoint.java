@@ -16,7 +16,9 @@ import javax.inject.Inject;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Context;
@@ -63,12 +65,30 @@ public class IntentEndpoint {
     @ValidatePost({APIParameter.IntentJson})
     public Response postIntent(
             @Context final ContainerRequestContext requestContext) {
-        final ApiResult result = this.intentLogic.writeIntent(
+        final ApiResult result = this.intentLogic.createIntent(
                 ParameterFilter.getDevid(requestContext),
                 ParameterFilter.getAiid(requestContext),
                 ParameterFilter.getIntent(requestContext));
         return result.getResponse(this.serializer).build();
     }
+
+    @PUT
+    @Path("{aiid}/{intent_name}")
+    @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
+    @Produces(MediaType.APPLICATION_JSON)
+    @ValidateParameters({APIParameter.DevID, APIParameter.AIID})
+    @ValidatePost({APIParameter.IntentJson})
+    public Response updateIntent(
+            @PathParam("intent_name") String prevIntentName,
+            @Context final ContainerRequestContext requestContext) {
+        final ApiResult result = this.intentLogic.updateIntent(
+                ParameterFilter.getDevid(requestContext),
+                ParameterFilter.getAiid(requestContext),
+                ParameterFilter.getIntent(requestContext),
+                prevIntentName);
+        return result.getResponse(this.serializer).build();
+    }
+
 
     @DELETE
     @Path("{aiid}")

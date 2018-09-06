@@ -125,16 +125,22 @@ public class IntentLogic {
         }
     }
 
-    /**
-     * Writes an intent (creates/updates)
-     * @param devid  the developer id
-     * @param aiid   the ai id
-     * @param intent the intent to write
-     * @return the result of the operation
-     */
-    public ApiResult writeIntent(final UUID devid, final UUID aiid, final ApiIntent intent) {
+    public ApiResult createIntent(final UUID devid, final UUID aiid, final ApiIntent intent) {
+        return intentUpdateInternal(devid, aiid, intent, intent.getIntentName(),false);
+    }
+
+    public ApiResult updateIntent(final UUID devid, final UUID aiid, final ApiIntent intent,
+                                  final String prevIntentName) {
+        return intentUpdateInternal(devid, aiid, intent, prevIntentName,true);
+    }
+
+    private ApiResult intentUpdateInternal(final UUID devid,
+                                           final UUID aiid,
+                                           final ApiIntent intent,
+                                           final String prevIntentName,
+                                           final boolean update) {
         String devidString = devid.toString();
-        LogMap logMap = LogMap.map("AIID", aiid).put("IntentName", intent.getIntentName());
+        LogMap logMap = LogMap.map("AIID", aiid).put("IntentName", prevIntentName);
 
         try {
 
@@ -154,7 +160,15 @@ public class IntentLogic {
                 return ApiError.getBadRequest(AILogic.BOT_RO_MESSAGE);
             }
 
-            final boolean created = this.databaseEntitiesIntents.getIntent(aiid, intent.getIntentName()) == null;
+            ApiIntent prevIntent = this.databaseEntitiesIntents.getIntent(aiid, prevIntentName);
+            // If we're updating an intent but we can't find it in the db, fail fast
+            if (prevIntent == null && update) {
+                return ApiError.getBadRequest("Cannot update an intent that does not exist");
+            }
+            // If we're inserting a new intent but we already have one with the same name in the db, fail fast
+            if (prevIntent != null && !update) {
+                return ApiError.getBadRequest("An intent with the same name already exists");
+            }
 
             // Check if there are any variables with duplicate or empty labels
             ApiResult labelsResult = checkForDuplicateOrEmptyLabels(devid, aiid, intent);
@@ -211,11 +225,13 @@ public class IntentLogic {
             }
             this.trainingLogic.stopTraining(devid, aiid);
             this.logger.logUserTraceEvent(LOGFROM, "WriteIntent", devidString, logMap);
-            if (created) {
-                return new ApiResult().setCreatedStatus("Intent created.");
-            } else {
+
+            if (update) {
                 return new ApiResult().setSuccessStatus("Intent updated.");
+            } else {
+                return new ApiResult().setCreatedStatus("Intent created.");
             }
+
         } catch (DatabaseEntitiesIntents.DatabaseEntityException dmee) {
             this.logger.logUserTraceEvent(LOGFROM, "WriteIntent - entity duplicate or non existent", devidString,
                     logMap.put("Message", dmee.getMessage()));

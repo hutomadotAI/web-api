@@ -32,7 +32,47 @@ import static org.mockito.Mockito.when;
 public class TestServiceIntent extends ServiceTestBase {
 
     private static final String BASEPATH = "/intent/";
+    private static final String INTENT_AIID_PATH = BASEPATH + TestDataHelper.AIID.toString();
     private IMemoryIntentHandler fakeMemoryIntentHandler;
+
+    @Test
+    public void testCreateIntent_authorized() throws DatabaseException {
+        when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
+        final Response response = target(INTENT_AIID_PATH)
+                .request()
+                .headers(defaultHeaders)
+                .post(Entity.json(getIntentJson()));
+        Assert.assertEquals(HttpURLConnection.HTTP_CREATED, response.getStatus());
+    }
+
+    @Test
+    public void testCreateIntent_notAuthorized() {
+        final Response response = target(INTENT_AIID_PATH)
+                .request()
+                .headers(noDevIdHeaders)
+                .post(Entity.json(getIntentJson()));
+        Assert.assertEquals(HttpURLConnection.HTTP_UNAUTHORIZED, response.getStatus());
+    }
+
+    @Test
+    public void testUpdateIntent_authorized() throws DatabaseException {
+        when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
+        when(this.fakeDatabaseEntitiesIntents.getIntent(any(), anyString())).thenReturn(TestIntentLogic.getIntent());
+        final Response response = target(INTENT_AIID_PATH).path("myIntent")
+                .request()
+                .headers(defaultHeaders)
+                .put(Entity.json(getIntentJson()));
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
+    }
+
+    @Test
+    public void testUpdateIntent_notAuthorized() {
+        final Response response = target(INTENT_AIID_PATH).path("myIntent")
+                .request()
+                .headers(noDevIdHeaders)
+                .put(Entity.json(getIntentJson()));
+        Assert.assertEquals(HttpURLConnection.HTTP_UNAUTHORIZED, response.getStatus());
+    }
 
     @Test
     public void testSaveIntent() throws DatabaseException {
@@ -48,8 +88,7 @@ public class TestServiceIntent extends ServiceTestBase {
         intent.addVariable(new IntentVariable("entity", UUID.randomUUID(), true,
                 3, "somevalue", false, "label2", false)
                 .addPrompt(String.join("", Collections.nCopies(250, "A"))));
-        final Response response = sendRequest(BASEPATH + TestDataHelper.AIID.toString(),
-                this.serializeObject(intent));
+        final Response response = sendRequest(INTENT_AIID_PATH, this.serializeObject(intent));
         Assert.assertEquals(HttpURLConnection.HTTP_CREATED, response.getStatus());
     }
 
@@ -58,8 +97,7 @@ public class TestServiceIntent extends ServiceTestBase {
         ApiIntent intent = TestIntentLogic.getIntent();
         intent.setResponses(Collections.singletonList(
                 String.join("", Collections.nCopies(Validate.INTENT_RESPONSE_MAX_LENGTH + 1, "A"))));
-        final Response response = sendRequest(BASEPATH + TestDataHelper.AIID.toString(),
-                this.serializeObject(intent));
+        final Response response = sendRequest(INTENT_AIID_PATH, this.serializeObject(intent));
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.getStatus());
     }
 
@@ -68,8 +106,7 @@ public class TestServiceIntent extends ServiceTestBase {
         ApiIntent intent = TestIntentLogic.getIntent();
         intent.setUserSays(Collections.singletonList(
                 String.join("", Collections.nCopies(Validate.INTENT_USERSAYS_MAX_LENGTH + 1, "A"))));
-        final Response response = sendRequest(BASEPATH + TestDataHelper.AIID.toString(),
-                this.serializeObject(intent));
+        final Response response = sendRequest(INTENT_AIID_PATH, this.serializeObject(intent));
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.getStatus());
     }
 
@@ -79,8 +116,7 @@ public class TestServiceIntent extends ServiceTestBase {
         intent.addVariable(new IntentVariable("entity", UUID.randomUUID(), true,
                 3, "somevalue", false, "", false)
                 .addPrompt(String.join("", Collections.nCopies(Validate.INTENT_PROMPT_MAX_LENGTH + 1, "A"))));
-        final Response response = sendRequest(BASEPATH + TestDataHelper.AIID.toString(),
-                this.serializeObject(intent));
+        final Response response = sendRequest(INTENT_AIID_PATH, this.serializeObject(intent));
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.getStatus());
     }
 
@@ -89,8 +125,7 @@ public class TestServiceIntent extends ServiceTestBase {
         ApiIntent intent = TestIntentLogic.getIntent();
         intent.setWebHook(new WebHook(TestDataHelper.AIID, "name",
                 String.join("", Collections.nCopies(2048 + 1, "A")), true));
-        final Response response = sendRequest(BASEPATH + TestDataHelper.AIID.toString(),
-                this.serializeObject(intent));
+        final Response response = sendRequest(INTENT_AIID_PATH, this.serializeObject(intent));
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.getStatus());
     }
 
@@ -120,4 +155,10 @@ public class TestServiceIntent extends ServiceTestBase {
         return binder;
     }
 
+    private String getIntentJson() {
+        ApiIntent intent = TestIntentLogic.getIntent();
+        intent.setUserSays(Collections.singletonList("usersays"));
+        intent.setResponses(Collections.singletonList("response"));
+        return serializeObject(intent);
+    }
 }

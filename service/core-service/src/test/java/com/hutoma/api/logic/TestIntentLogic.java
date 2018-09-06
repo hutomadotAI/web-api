@@ -69,7 +69,7 @@ public class TestIntentLogic {
         this.fakeConfig = mock(Config.class);
         this.fakeDatabaseEntitiesIntents = mock(DatabaseEntitiesIntents.class);
         this.fakeDatabaseTransaction = mock(DatabaseTransaction.class);
-        this.fakeDatabaseTransactionProvider = mock (Provider.class);
+        this.fakeDatabaseTransactionProvider = mock(Provider.class);
         this.fakeDatabase = mock(DatabaseAI.class);
         this.fakeLogger = mock(ILogger.class);
         this.trainingLogic = mock(TrainingLogic.class);
@@ -168,16 +168,33 @@ public class TestIntentLogic {
     }
 
     @Test
-    public void testWriteIntent_Success(){
-        final ApiResult result = this.intentLogic.writeIntent(DEVID_UUID, AIID, getIntent());
+    public void testWriteIntent_Success() throws DatabaseException {
+        when(this.fakeDatabaseEntitiesIntents.getIntent(any(), anyString())).thenReturn(null);
+        final ApiResult result = this.intentLogic.createIntent(DEVID_UUID, AIID, getIntent());
         Assert.assertEquals(HttpURLConnection.HTTP_CREATED, result.getStatus().getCode());
     }
 
     @Test
-    public void testWriteIntent_Update_Success() throws DatabaseException {
+    public void testWriteIntent_AlreadyExisting() throws DatabaseException {
         when(this.fakeDatabaseEntitiesIntents.getIntent(any(), anyString())).thenReturn(getIntent());
-        final ApiResult result = this.intentLogic.writeIntent(DEVID_UUID, AIID, getIntent());
+        final ApiResult result = this.intentLogic.createIntent(DEVID_UUID, AIID, getIntent());
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testWriteIntent_Update_Success() throws DatabaseException {
+        ApiIntent intent = getIntent();
+        when(this.fakeDatabaseEntitiesIntents.getIntent(any(), anyString())).thenReturn(intent);
+        final ApiResult result = this.intentLogic.updateIntent(DEVID_UUID, AIID, intent, intent.getIntentName());
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testWriteIntent_Update_NonExisting() throws DatabaseException {
+        ApiIntent intent = getIntent();
+        when(this.fakeDatabaseEntitiesIntents.getIntent(any(), anyString())).thenReturn(null);
+        final ApiResult result = this.intentLogic.updateIntent(DEVID_UUID, AIID, intent, intent.getIntentName());
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
     }
 
     @Test
@@ -186,35 +203,35 @@ public class TestIntentLogic {
         ApiIntent intent = getIntent();
         intent.setWebHook(wh);
         when(this.fakeDatabase.createWebHook(any(), anyString(), anyString(), anyBoolean(), any())).thenReturn(true);
-        final ApiResult result = this.intentLogic.writeIntent(DEVID_UUID, AIID, intent);
+        final ApiResult result = this.intentLogic.createIntent(DEVID_UUID, AIID, intent);
         Assert.assertEquals(HttpURLConnection.HTTP_CREATED, result.getStatus().getCode());
     }
 
     @Test
     public void testWriteIntent_NonExistentEntity() throws DatabaseException {
         doThrow(DatabaseEntitiesIntents.DatabaseEntityException.class).when(this.fakeDatabaseEntitiesIntents).writeIntent(any(), any(), anyString(), any(), any());
-        final ApiResult result = this.intentLogic.writeIntent(DEVID_UUID, AIID, getIntent());
+        final ApiResult result = this.intentLogic.createIntent(DEVID_UUID, AIID, getIntent());
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
     }
 
     @Test
     public void testWriteIntent_DuplicateName() throws DatabaseException {
         doThrow(DatabaseIntegrityViolationException.class).when(this.fakeDatabaseEntitiesIntents).writeIntent(any(), any(), anyString(), any(), any());
-        final ApiResult result = this.intentLogic.writeIntent(DEVID_UUID, AIID, getIntent());
+        final ApiResult result = this.intentLogic.createIntent(DEVID_UUID, AIID, getIntent());
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
     }
 
     @Test
     public void testWriteIntent_API_readonly() throws DatabaseException {
         setupAiReadonlyMode(this.fakeDatabase);
-        final ApiResult result = this.intentLogic.writeIntent(DEVID_UUID, AIID, getIntent());
+        final ApiResult result = this.intentLogic.createIntent(DEVID_UUID, AIID, getIntent());
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
     }
 
     @Test
     public void testWriteIntent_InternalError() throws DatabaseException {
         doThrow(DatabaseException.class).when(this.fakeDatabaseEntitiesIntents).writeIntent(any(), any(), anyString(), any(), any());
-        final ApiResult result = this.intentLogic.writeIntent(DEVID_UUID, AIID, getIntent());
+        final ApiResult result = this.intentLogic.createIntent(DEVID_UUID, AIID, getIntent());
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
 
@@ -255,7 +272,7 @@ public class TestIntentLogic {
 
     @Test
     public void testUpdateIntent_triggersTrainingStop() {
-        this.intentLogic.writeIntent(DEVID_UUID, AIID, getIntent());
+        this.intentLogic.createIntent(DEVID_UUID, AIID, getIntent());
         verify(this.trainingLogic).stopTraining(any(), any());
     }
 
@@ -267,7 +284,7 @@ public class TestIntentLogic {
         baseIntent.setIntentName(mainIntentName);
         baseIntent.setIntentOutConditionals(Collections.singletonList(new IntentOutConditional(followUpIntentName, null)));
 
-        ApiResult result = this.intentLogic.writeIntent(DEVID_UUID, AIID, baseIntent);
+        ApiResult result = this.intentLogic.createIntent(DEVID_UUID, AIID, baseIntent);
         Assert.assertEquals(HttpURLConnection.HTTP_CREATED, result.getStatus().getCode());
         // Capture the arguments being passed to the db class to validate if we're writing the correct data
         ArgumentCaptor<ApiIntent> intentArg = ArgumentCaptor.forClass(ApiIntent.class);
@@ -302,7 +319,7 @@ public class TestIntentLogic {
         // Pretend the the followup intent already exists - just needs to return non-null
         when(this.fakeDatabaseEntitiesIntents.getIntent(any(), any(), any())).thenReturn(getIntent());
 
-        ApiResult result = this.intentLogic.writeIntent(DEVID_UUID, AIID, baseIntent);
+        ApiResult result = this.intentLogic.createIntent(DEVID_UUID, AIID, baseIntent);
         Assert.assertEquals(HttpURLConnection.HTTP_CREATED, result.getStatus().getCode());
         // Capture the arguments being passed to the db class to validate if we're writing the correct data
         ArgumentCaptor<ApiIntent> intentArg = ArgumentCaptor.forClass(ApiIntent.class);
@@ -324,7 +341,7 @@ public class TestIntentLogic {
         baseIntent.setIntentName(mainIntentName);
         // Force a circular reference
         baseIntent.setIntentOutConditionals(Collections.singletonList(new IntentOutConditional(mainIntentName, null)));
-        ApiResult result = this.intentLogic.writeIntent(DEVID_UUID, AIID, baseIntent);
+        ApiResult result = this.intentLogic.createIntent(DEVID_UUID, AIID, baseIntent);
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
     }
 
@@ -379,7 +396,7 @@ public class TestIntentLogic {
     public void testSaveIntent_entityValueLifetime_cannotBeCreatedWith0Turns() {
         ApiIntent intent = TestIntentLogic.getIntent();
         intent.getVariables().get(0).setLifetimeTurns(0);
-        this.intentLogic.writeIntent(DEVID_UUID, AIID, intent);
+        this.intentLogic.createIntent(DEVID_UUID, AIID, intent);
         // When it's attempted to be created with 0 turns we change it to -1 (no lifetime)
         Assert.assertEquals(-1, intent.getVariables().get(0).getLifetimeTurns());
     }
@@ -434,7 +451,7 @@ public class TestIntentLogic {
 
     private String generateIntentsCsv(final List<ApiIntent> intents) {
         StringBuilder sb = new StringBuilder();
-        for (ApiIntent intent: intents) {
+        for (ApiIntent intent : intents) {
             sb.append(intent.getIntentName()).append(",");
             sb.append(StringUtils.join(intent.getUserSays(), ";"));
             sb.append(",");
