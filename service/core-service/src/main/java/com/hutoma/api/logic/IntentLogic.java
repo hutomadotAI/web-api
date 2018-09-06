@@ -183,14 +183,14 @@ public class IntentLogic {
             }
 
             // Check if any followup intent is self - causing a circular reference
-            if (followupIntents.contains(intent.getIntentName())) {
+            if (followupIntents.contains(prevIntentName)) {
                 return ApiError.getBadRequest("Circular reference detected on follow-up intent");
             }
 
             try (DatabaseTransaction transaction = this.databaseTransactionProvider.get()) {
 
                 if (!followupIntents.isEmpty()) {
-                    String conditionVarName = String.format("%s_complete", intent.getIntentName());
+                    String conditionVarName = String.format("%s_complete", prevIntentName);
                     IntentVariableCondition condition = new IntentVariableCondition(
                             conditionVarName, IntentConditionOperator.SET, "");
 
@@ -220,7 +220,7 @@ public class IntentLogic {
                 }
 
                 // Now proceed with writing the main intent
-                this.databaseEntitiesIntents.writeIntent(devid, aiid, intent.getIntentName(), intent, transaction);
+                this.databaseEntitiesIntents.writeIntent(devid, aiid, prevIntentName, intent, transaction);
                 transaction.commit();
             }
             this.trainingLogic.stopTraining(devid, aiid);
