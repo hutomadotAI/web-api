@@ -958,7 +958,9 @@ public class AILogic {
                     importedBot.getVoice(),
                     locale,
                     importedBot.getTimezone(),
-                    importedBot.getDefaultResponses(),
+                    importedBot.getDefaultResponses() == null || importedBot.getDefaultResponses().isEmpty()
+                            ? Collections.singletonList(ChatDefaultHandler.COMPLETELY_LOST_RESULT)
+                            : importedBot.getDefaultResponses(),
                     // TODO: not adding handover-related stuff from linked bots since this will soon be changed
                     // so adding default configuration
                     -1,

@@ -16,10 +16,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 /**
  * JSON serializer.
@@ -103,7 +100,7 @@ public class JsonSerializer {
     public <T> List<T> deserializeListAutoDetect(final String content) throws JsonParseException {
         try {
             if (content == null) {
-                return null;
+                return Collections.emptyList();
             }
             Type listType = new TypeToken<List<T>>() {
             }.getType();
@@ -127,7 +124,7 @@ public class JsonSerializer {
     public <T> List<T> deserializeList(final String content, final Type listType) throws JsonParseException {
         try {
             if (content == null) {
-                return null;
+                return Collections.emptyList();
             }
             List<T> list = this.gson.fromJson(content, listType);
             if (list == null) {
