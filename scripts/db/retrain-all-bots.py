@@ -18,6 +18,18 @@ def get_bots(cursor):
     return bot_list
 
 
+def get_bots_recently_used(cursor, usage_filter_days):
+    print("Getting bots that are recently used")
+    bot_list = None
+    bots_sql = "SELECT distinct chatState.base_aiid AS aiid FROM chatState WHERE TIMESTAMPDIFF(DAY, chatState.timestamp, NOW()) < {};".format(
+        usage_filter_days)
+    cursor.execute(bots_sql)
+    bot_list_raw = cursor.fetchall()
+    bot_list = [entry[0] for entry in bot_list_raw]
+    print(bot_list)
+    return bot_list
+
+
 def get_published_bots(cursor):
     print("Getting published bots")
     bot_list = None
@@ -41,12 +53,9 @@ def set_publishing_status(cnx, cursor, aiid, value):
     cnx.commit()
 
 
-def retrain_bot(cnx, cursor, api_endpoint, aiid, dev_token, published_bots):
+def retrain_bot(cnx, cursor, api_endpoint, aiid, dev_token, published_bots,
+                recent_bots):
     print("- Processing bot {} -".format(aiid))
-    headers = {'Authorization': "Bearer {}".format(dev_token)}
-
-    training_url = "{}/ai/{}/training/update".format(api_endpoint, aiid)
-
     publishing_status = 0
     if aiid in published_bots:
         publishing_status = published_bots[aiid]
@@ -54,9 +63,15 @@ def retrain_bot(cnx, cursor, api_endpoint, aiid, dev_token, published_bots):
     if publishing_status > 0:
         print("Unsetting published status")
         set_publishing_status(cnx, cursor, aiid, 0)
+    else:
+        if aiid not in recent_bots:
+            print("This bot was not recently used - don't retrain it")
+            return
 
     success = False
     retries = 3
+    headers = {'Authorization': "Bearer {}".format(dev_token)}
+    training_url = "{}/ai/{}/training/update".format(api_endpoint, aiid)
 
     try:
         while not success and retries > 0:
@@ -97,7 +112,7 @@ def main(args, parser):
     """Main function"""
     # disable HTTPS warning
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-    
+
     api_raw = args.api
     if api_raw is None or len(api_raw) == 0:
         api_raw = os.environ.get('HUTOMA_API_CLI_URL')
@@ -128,8 +143,10 @@ def main(args, parser):
     try:
         bots = get_bots(cursor)
         published_bots = get_published_bots(cursor)
+        recent_bots = get_bots_recently_used(cursor, args.usage_filter_days)
         for ai, dev_token in bots:
-            retrain_bot(cnx, cursor, url, ai, dev_token, published_bots)
+            retrain_bot(cnx, cursor, url, ai, dev_token, published_bots,
+                        recent_bots)
     finally:
         cursor.close()
         cnx.close()
@@ -147,5 +164,11 @@ if __name__ == "__main__":
         '--api',
         help='API endpoint, e.g. https://api.hutoma.ai/v1, can be in ' +
         'HUTOMA_API_CLI_URL variable')
+    PARSER.add_argument(
+        '--usage_filter_days',
+        help='Filter bots to retrain, if bot not chatted to in last N days' +
+        'bot will be put into "undefined" state',
+        default=7,
+        type=int)
     ARGS = PARSER.parse_args()
     main(ARGS, PARSER)
