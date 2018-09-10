@@ -11,8 +11,7 @@ import mysql.connector
 def get_bots(cursor):
     print("Getting all bots and dev-tokens")
     bot_list = None
-    bots_sql = "SELECT ai.aiid, users.dev_token FROM ai " \
-               "INNER JOIN users ON ai.dev_id=users.dev_id AND ai.deleted='0'"
+    bots_sql = "SELECT ai.id, ai.aiid, users.dev_token FROM ai INNER JOIN users ON ai.dev_id=users.dev_id AND ai.deleted='0' ORDER BY ai.id DESC;"
     cursor.execute(bots_sql)
     bot_list = cursor.fetchall()
     return bot_list
@@ -128,7 +127,7 @@ def main(args, parser):
     try:
         bots = get_bots(cursor)
         published_bots = get_published_bots(cursor)
-        for ai, dev_token in bots:
+        for idx, ai, dev_token in bots:
             retrain_bot(cnx, cursor, url, ai, dev_token, published_bots)
     finally:
         cursor.close()
