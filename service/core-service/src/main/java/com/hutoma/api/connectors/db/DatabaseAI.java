@@ -9,13 +9,7 @@ import com.hutoma.api.containers.AiBotConfigDefinition;
 import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.ApiAiWithConfig;
 import com.hutoma.api.containers.ApiLinkedBotData;
-import com.hutoma.api.containers.sub.AiBot;
-import com.hutoma.api.containers.sub.AiMinP;
-import com.hutoma.api.containers.sub.ChatContext;
-import com.hutoma.api.containers.sub.ChatHandoverTarget;
-import com.hutoma.api.containers.sub.ChatState;
-import com.hutoma.api.containers.sub.MemoryIntent;
-import com.hutoma.api.containers.sub.WebHook;
+import com.hutoma.api.containers.sub.*;
 import com.hutoma.api.logging.ILogger;
 
 import org.apache.commons.lang.StringUtils;
@@ -238,7 +232,7 @@ public class DatabaseAI extends Database {
     public BackendStatus getAIStatusReadOnly(final UUID devId, final UUID aiid)
             throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
-            return DatabaseBackends.getBackendStatus(devId, aiid, call);
+            return DatabaseBackends.getBackendStatus(new AiIdentity(devId, aiid), call);
         } catch (SQLException sqle) {
             throw new DatabaseException(sqle);
         }
@@ -290,7 +284,8 @@ public class DatabaseAI extends Database {
 
         try {
             // load the statuses first
-            BackendStatus backendStatus = DatabaseBackends.getBackendStatus(devid, aiid, transaction.getDatabaseCall());
+            BackendStatus backendStatus = DatabaseBackends.getBackendStatus(new AiIdentity(devid, aiid),
+                    transaction.getDatabaseCall());
             // then load the AI
             ResultSet rs = transaction.getDatabaseCall().initialise("getAi", 2)
                     .add(devid)

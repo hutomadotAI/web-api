@@ -8,6 +8,7 @@ import com.hutoma.api.connectors.db.DatabaseAI;
 import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.AiBotConfigDefinition;
 import com.hutoma.api.containers.ApiAi;
+import com.hutoma.api.containers.ServiceIdentity;
 import com.hutoma.api.containers.sub.AiBot;
 import com.hutoma.api.containers.sub.AiStatus;
 import com.hutoma.api.containers.sub.TrainingStatus;
@@ -79,14 +80,17 @@ public class TestDataHelper {
 
     private static BackendStatus setBackendEngineStatus(final TrainingStatus status) {
         BackendStatus bs = new BackendStatus();
-        bs.setEngineStatus(new AiStatus(DEVID, AIID, status, BackendServerType.EMB, 0.0, 1.0, "hash", SESSIONID));
-        bs.setEngineStatus(new AiStatus(DEVID, AIID, status, BackendServerType.AIML, 0.0, 1.0, "hash", SESSIONID));
+        bs.setEngineStatus(new AiStatus(DEVID, AIID, status, BackendServerType.EMB, SupportedLanguage.EN, ServiceIdentity.DEFAULT_VERSION,
+                0.0, 1.0, "hash", SESSIONID));
+        bs.setEngineStatus(new AiStatus(DEVID, AIID, status, BackendServerType.AIML, SupportedLanguage.EN, ServiceIdentity.DEFAULT_VERSION,
+                0.0, 1.0, "hash", SESSIONID));
         return bs;
     }
 
     public static BackendStatus getBackendStatus(final TrainingStatus embStatus) {
         BackendStatus bs = new BackendStatus();
-        bs.setEngineStatus(new AiStatus(DEVID, AIID, embStatus, BackendServerType.EMB, 0.0, 1.0, "hash", SESSIONID));
+        bs.setEngineStatus(new AiStatus(DEVID, AIID, embStatus, BackendServerType.EMB, SupportedLanguage.EN, ServiceIdentity.DEFAULT_VERSION,
+                0.0, 1.0, "hash", SESSIONID));
         return bs;
     }
 

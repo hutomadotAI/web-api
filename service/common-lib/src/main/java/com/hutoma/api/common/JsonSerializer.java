@@ -176,6 +176,7 @@ public class JsonSerializer {
         GsonBuilder builder = new GsonBuilder()
                 .registerTypeAdapter(DateTime.class, new DateTimeSerializer())
                 .registerTypeAdapter(Locale.class, new LocaleTypeAdapter())
+                .registerTypeAdapter(SupportedLanguage.class, new SupportedLanguageAdapter())
                 .enableComplexMapKeySerialization();
         if (prettyPrinting) {
             builder.setPrettyPrinting();
@@ -224,6 +225,28 @@ public class JsonSerializer {
             }
             String localeString = reader.nextString();
             return Locale.forLanguageTag(localeString);
+        }
+    }
+
+    public static class SupportedLanguageAdapter extends  TypeAdapter<SupportedLanguage> {
+        @Override
+        public void write(JsonWriter writer, SupportedLanguage value) throws IOException {
+            if (value == null) {
+                writer.nullValue();
+                return;
+            }
+            String supportedLanguage = value.toString().toLowerCase();
+            writer.value(supportedLanguage);
+        }
+
+        @Override
+        public SupportedLanguage read(JsonReader reader) throws IOException {
+            if (reader.peek() == JsonToken.NULL) {
+                reader.nextNull();
+                return SupportedLanguage.EN;
+            }
+            String supportedLanguage = reader.nextString();
+            return SupportedLanguage.get(supportedLanguage);
         }
     }
 }

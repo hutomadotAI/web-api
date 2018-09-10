@@ -1,10 +1,13 @@
 package com.hutoma.api.connectors.db;
 
 import com.hutoma.api.common.Pair;
+import com.hutoma.api.common.SupportedLanguage;
 import com.hutoma.api.connectors.BackendEngineStatus;
 import com.hutoma.api.connectors.BackendServerType;
 import com.hutoma.api.connectors.BackendStatus;
 import com.hutoma.api.connectors.QueueAction;
+import com.hutoma.api.containers.ServiceIdentity;
+import com.hutoma.api.containers.sub.AiIdentity;
 import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.logging.ILogger;
 
@@ -20,8 +23,9 @@ import javax.inject.Provider;
 public class DatabaseBackends extends Database {
 
     @Inject
-    public DatabaseBackends(final ILogger logger, final Provider<DatabaseCall> callProvider,
-                      final Provider<DatabaseTransaction> transactionProvider) {
+    public DatabaseBackends(final ILogger logger,
+                            final Provider<DatabaseCall> callProvider,
+                            final Provider<DatabaseTransaction> transactionProvider) {
         super(logger, callProvider, transactionProvider);
     }
 
@@ -65,17 +69,18 @@ public class DatabaseBackends extends Database {
 
     /***
      * Calls the database to get the status of all back-end servers for the AI
-     * @param devId dev
-     * @param aiid ai
+     * @param aiIdentity ai
      * @param call a database call in transaction
      * @return BackendStatus
      * @throws DatabaseException
      * @throws SQLException
      */
-    static BackendStatus getBackendStatus(final UUID devId, final UUID aiid, final DatabaseCall call)
+    static BackendStatus getBackendStatus(final AiIdentity aiIdentity, final DatabaseCall call)
             throws DatabaseException, SQLException {
         ResultSet rs = call.initialise("getAiStatus", 2)
-                .add(aiid).add(devId).executeQuery();
+                .add(aiIdentity.getAiid())
+                .add(aiIdentity.getDevId())
+                .executeQuery();
 
         BackendStatus status = new BackendStatus();
         while (rs.next()) {
@@ -105,8 +110,7 @@ public class DatabaseBackends extends Database {
         HashMap<UUID, BackendStatus> statuses = new HashMap<>();
         while (rs.next()) {
             UUID aiid = UUID.fromString(rs.getString("aiid"));
-            Pair<BackendServerType, BackendEngineStatus> serverStatus =
-                    getBackendEngineStatus(rs);
+            Pair<BackendServerType, BackendEngineStatus> serverStatus = getBackendEngineStatus(rs);
             if (serverStatus != null) {
                 statuses.computeIfAbsent(aiid, x -> new BackendStatus())
                         .setEngineStatus(serverStatus.getA(), serverStatus.getB());

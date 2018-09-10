@@ -1,6 +1,7 @@
 package com.hutoma.api.containers.sub;
 
 import com.google.gson.annotations.SerializedName;
+import com.hutoma.api.common.SupportedLanguage;
 import com.hutoma.api.connectors.BackendServerType;
 
 import java.util.UUID;
@@ -22,6 +23,12 @@ public class AiStatus {
     @SerializedName("ai_engine")
     private final BackendServerType aiEngine;
 
+    @SerializedName("ai_engine_language")
+    private SupportedLanguage aiEngineLanguage;
+
+    @SerializedName("ai_engine_version")
+    private String aiEngineVersion;
+
     @SerializedName("training_progress")
     private final double trainingProgress;
 
@@ -36,14 +43,22 @@ public class AiStatus {
 
     private transient String serverIdentifier;
 
-    public AiStatus(final String devId, final UUID aiid, final TrainingStatus trainingStatus,
+    public AiStatus(final String devId,
+                    final UUID aiid,
+                    final TrainingStatus trainingStatus,
                     final BackendServerType aiEngine,
-                    final double trainingError, final double trainingProgress, final String aiHash,
+                    final SupportedLanguage aiEngineLanguage,
+                    final String aiEngineVersion,
+                    final double trainingError,
+                    final double trainingProgress,
+                    final String aiHash,
                     final UUID serverSessionID) {
         this.devId = devId;
         this.aiid = aiid.toString();
         this.trainingStatus = trainingStatus.value();
         this.aiEngine = aiEngine;
+        this.aiEngineLanguage = aiEngineLanguage;
+        this.aiEngineVersion = aiEngineVersion;
         this.trainingError = trainingError;
         this.trainingProgress = trainingProgress;
         this.aiHash = aiHash;
@@ -97,5 +112,21 @@ public class AiStatus {
 
     public void setServerIdentifier(final String serverIdentifier) {
         this.serverIdentifier = serverIdentifier;
+    }
+
+    public SupportedLanguage getAiEngineLanguage() {
+        return this.aiEngineLanguage;
+    }
+
+    public void setAiEngineLanguage(final SupportedLanguage language) {
+        this.aiEngineLanguage = language;
+    }
+
+    public String getAiEngineVersion() {
+        return this.aiEngineVersion;
+    }
+
+    public void setAiEngineVersion(final String version) {
+        this.aiEngineVersion = version;
     }
 }

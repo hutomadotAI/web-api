@@ -2,8 +2,10 @@ package com.hutoma.api.validation;
 
 import com.google.gson.JsonParseException;
 import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.common.SupportedLanguage;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.ApiError;
+import com.hutoma.api.containers.ServiceIdentity;
 import com.hutoma.api.containers.sub.AiStatus;
 import com.hutoma.api.containers.sub.ServerAffinity;
 import com.hutoma.api.containers.sub.ServerAiEntry;
@@ -106,6 +108,12 @@ public class ControllerPostFilter extends ControllerParameterFilter implements C
                 checkParameterNotNull(DEVID, aiStatus.getDevId());
                 checkParameterNotNull("training_status", aiStatus.getTrainingStatus());
                 checkParameterNotNull("ai_engine", aiStatus.getAiEngine());
+                if (aiStatus.getAiEngineLanguage() == null) {
+                    aiStatus.setAiEngineLanguage(SupportedLanguage.EN);
+                }
+                if (StringUtils.isEmpty(aiStatus.getAiEngineVersion())) {
+                    aiStatus.setAiEngineVersion(ServiceIdentity.DEFAULT_VERSION);
+                }
                 request.setProperty(ControllerParameter.AiStatusJson.toString(), aiStatus);
             }
 
@@ -120,6 +128,12 @@ public class ControllerPostFilter extends ControllerParameterFilter implements C
                     checkParameterNotNullInvalid("ai_id", entry.getAiid());
                     checkParameterNotNullInvalid("training_status", entry.getTrainingStatus());
                 }
+                if (serverRegistration.getLanguage() == null) {
+                    serverRegistration.setLanguage(SupportedLanguage.EN);
+                }
+                if (StringUtils.isEmpty(serverRegistration.getVersion())) {
+                    serverRegistration.setVersion(ServiceIdentity.DEFAULT_VERSION);
+                }
                 request.setProperty(ControllerParameter.ServerRegistration.toString(), serverRegistration);
             }
 
@@ -128,6 +142,12 @@ public class ControllerPostFilter extends ControllerParameterFilter implements C
                         this.serializer.deserialize(request.getEntityStream(), ServerAffinity.class);
                 checkParameterNotNull(SERVER_SESSION_ID, serverAffinity.getServerSessionID());
                 checkParameterNotNull(AI_LIST, serverAffinity.getAiList());
+                if (serverAffinity.getLanguage() == null) {
+                    serverAffinity.setLanguage(SupportedLanguage.EN);
+                }
+                if (StringUtils.isEmpty(serverAffinity.getVersion())) {
+                    serverAffinity.setVersion(ServiceIdentity.DEFAULT_VERSION);
+                }
                 request.setProperty(ControllerParameter.ServerAffinity.toString(), serverAffinity);
             }
 

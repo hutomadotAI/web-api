@@ -1,5 +1,6 @@
 package com.hutoma.api.connectors;
 
+import com.hutoma.api.containers.ServiceIdentity;
 import com.hutoma.api.containers.sub.AiStatus;
 
 import java.util.HashMap;
@@ -40,13 +41,13 @@ public class BackendStatus {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         boolean first = true;
-        for (Map.Entry<BackendServerType, BackendEngineStatus> entry: this.engines.entrySet()) {
+        for (Map.Entry<BackendServerType, BackendEngineStatus> entry : this.engines.entrySet()) {
             if (first) {
                 first = false;
             } else {
                 sb.append(", ");
             }
-            sb.append(entry.getKey().value())
+            sb.append(entry.getKey().toString())
                     .append("=[TrainingStatus:")
                     .append(entry.getValue().getTrainingStatus().value())
                     .append(", QueueAction:")

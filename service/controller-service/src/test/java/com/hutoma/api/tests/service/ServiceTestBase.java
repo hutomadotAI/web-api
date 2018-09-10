@@ -14,7 +14,7 @@ import com.hutoma.api.connectors.db.DatabaseConnectionPool;
 import com.hutoma.api.connectors.db.DatabaseTransaction;
 import com.hutoma.api.connectors.db.TransactionalDatabaseCall;
 import com.hutoma.api.controllers.ControllerAiml;
-import com.hutoma.api.controllers.ControllerEmb;
+import com.hutoma.api.controllers.ControllerGeneric;
 import com.hutoma.api.controllers.ControllerMap;
 import com.hutoma.api.logging.AiServiceStatusLogger;
 import com.hutoma.api.logging.ILogger;
@@ -39,14 +39,14 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.UUID;
+import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.Provider;
 
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -85,7 +85,9 @@ public abstract class ServiceTestBase extends JerseyTest {
     @Mock
     ControllerAiml fakeControllerAiml;
     @Mock
-    ControllerEmb fakeControllerEmb;
+    ControllerGeneric fakeController;
+    @Mock
+    private Provider<ControllerGeneric> fakeControllerProvider;
     private ControllerMap fakeControllerMap;
 
     static class InstanceFactory<T> implements Factory<T> {
@@ -123,7 +125,7 @@ public abstract class ServiceTestBase extends JerseyTest {
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeJerseyClient)).to(JerseyClient.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeTools)).to(Tools.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeControllerAiml)).to(ControllerAiml.class);
-                bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeControllerEmb)).to(ControllerEmb.class);
+                bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeController)).to(ControllerGeneric.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeLogger)).to(ILogger.class).in(Singleton.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeServicesStatusLogger)).to(AiServiceStatusLogger.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeControllerMap)).to(ControllerMap.class);
@@ -168,12 +170,14 @@ public abstract class ServiceTestBase extends JerseyTest {
         this.fakeTools = mock(Tools.class);
         this.fakeServicesStatusLogger = mock(AiServiceStatusLogger.class);
         this.fakeControllerAiml = mock(ControllerAiml.class);
-        this.fakeControllerEmb = mock(ControllerEmb.class);
-        this.fakeControllerMap = new ControllerMap(this.fakeControllerAiml, this.fakeControllerEmb);
+        this.fakeController = mock(ControllerGeneric.class);
+        this.fakeControllerMap = new ControllerMap(this.fakeControllerAiml, this.fakeControllerProvider,
+                mock(ILogger.class));
 
-        when(this.fakeControllerEmb.isActiveSession(eq(TestDataHelper.SESSIONID))).thenReturn(true);
-        when(this.fakeControllerEmb.getSessionServerIdentifier(eq(TestDataHelper.SESSIONID))).thenReturn("emb@fake");
-        when(this.fakeControllerEmb.isPrimaryMaster(eq(TestDataHelper.SESSIONID))).thenReturn(true);
+        when(this.fakeControllerProvider.get()).thenReturn(this.fakeController);
+        when(this.fakeController.isActiveSession(eq(TestDataHelper.SESSIONID))).thenReturn(true);
+        when(this.fakeController.getSessionServerIdentifier(eq(TestDataHelper.SESSIONID))).thenReturn("emb@fake");
+        when(this.fakeController.isPrimaryMaster(eq(TestDataHelper.SESSIONID))).thenReturn(true);
 
         ResourceConfig rc = new ResourceConfig(getClassUnderTest());
         AbstractBinder binder = this.getDefaultBindings();
@@ -201,7 +205,7 @@ public abstract class ServiceTestBase extends JerseyTest {
     }
 
 
-    @Provider
+    @javax.ws.rs.ext.Provider
     public static class DebugExceptionMapper implements ExtendedExceptionMapper<Throwable> {
 
         @Override

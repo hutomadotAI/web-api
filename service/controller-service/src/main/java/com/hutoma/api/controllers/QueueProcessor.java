@@ -8,6 +8,8 @@ import com.hutoma.api.connectors.QueueAction;
 import com.hutoma.api.connectors.ServerConnector;
 import com.hutoma.api.connectors.db.DatabaseAiStatusUpdates;
 import com.hutoma.api.connectors.db.DatabaseException;
+import com.hutoma.api.containers.ServiceIdentity;
+import com.hutoma.api.containers.sub.AiIdentity;
 import com.hutoma.api.containers.sub.ServerEndpointTrainingSlots;
 import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.logging.AiServiceStatusLogger;
@@ -53,7 +55,6 @@ public class QueueProcessor extends TimerTask {
     private final Timer timer;
     // the timestamp after which we can perform slot recovery
     private final long noSlotRecoveryBeforeTimestamp;
-    protected BackendServerType serverType;
     protected ControllerBase controller;
     // server rotation
     private AtomicInteger roundRobinIndex;
@@ -61,11 +62,14 @@ public class QueueProcessor extends TimerTask {
     // only used for logging
     private long lastRun = 0;
     private long lastKicked = 0;
+    protected ServiceIdentity serviceIdentity;
 
     @Inject
-    QueueProcessor(final ControllerConfig config, final DatabaseAiStatusUpdates database,
-                          final Provider<AIQueueServices> queueServicesProvider,
-                          final Tools tools, AiServiceStatusLogger logger) {
+    QueueProcessor(final ControllerConfig config,
+                   final DatabaseAiStatusUpdates database,
+                   final Provider<AIQueueServices> queueServicesProvider,
+                   final Tools tools,
+                   final AiServiceStatusLogger logger) {
         this.config = config;
         this.logger = logger;
         this.database = database;
@@ -80,15 +84,15 @@ public class QueueProcessor extends TimerTask {
                 + (config.getProcessQueueDelayRecoveryForFirstSeconds() * 1000);
     }
 
-    public void initialise(final ControllerBase controller, final BackendServerType serverType) {
-        this.serverType = serverType;
+    void initialise(final ControllerBase controller, final ServiceIdentity serviceIdentity) {
+        this.serviceIdentity = serviceIdentity;
         this.controller = controller;
-        this.logFrom = String.format("qproc-%s", serverType.value());
+        this.logFrom = String.format("qproc-%s", serviceIdentity.toString());
         // timer fires approx twice per second
         this.timer.schedule(this, 0, 500);
     }
 
-    public void stop() {
+    void stop() {
         this.timer.cancel();
     }
 
@@ -133,7 +137,8 @@ public class QueueProcessor extends TimerTask {
     }
 
     private void storeServerStats(final int serverCount,
-                                  final int totalTrainingCapacity, final int availableTrainingSlots,
+                                  final int totalTrainingCapacity,
+                                  final int availableTrainingSlots,
                                   final int totalChatCapacity) {
 
         // create a string that represents the controller state completely
@@ -150,7 +155,9 @@ public class QueueProcessor extends TimerTask {
         if (changes) {
             // log the new state
             LogMap logMap = LogMap.map("Op", "controllerstate")
-                    .put("Type", this.serverType.value())
+                    .put("Type", this.serviceIdentity.getServerType().value())
+                    .put("Language", this.serviceIdentity.getLanguage())
+                    .put("Version", this.serviceIdentity.getVersion())
                     .put("ServerCount", serverCount)
                     .put("TrainingCapacity", totalTrainingCapacity)
                     .put("TrainingSlotsAvailable", availableTrainingSlots)
@@ -159,7 +166,7 @@ public class QueueProcessor extends TimerTask {
 
             // try to update the database with this state
             try {
-                this.database.updateControllerState(this.serverType, serverCount,
+                this.database.updateControllerState(this.serviceIdentity, serverCount,
                         totalTrainingCapacity, availableTrainingSlots, totalChatCapacity);
             } catch (DatabaseException e) {
                 this.logger.logException(this.logFrom, e);
@@ -172,12 +179,12 @@ public class QueueProcessor extends TimerTask {
         // if there is no training capacity log errors regularly (for some servers)
         if (errorIfNoTrainingCapacity && (totalTrainingCapacity < 1)) {
             this.logger.logError(this.logFrom, String.format("%s has zero training %scapacity",
-                    this.serverType.value(), (totalChatCapacity < 1) ? "and chat " : ""));
+                    serviceIdentity.toString(), (totalChatCapacity < 1) ? "and chat " : ""));
         } else {
             // if there is no chat capacity then log errors regularly
             if (totalChatCapacity < 1) {
                 this.logger.logError(this.logFrom, String.format("%s has zero chat capacity",
-                        this.serverType.value()));
+                        serviceIdentity.toString()));
             }
         }
     }
@@ -231,7 +238,7 @@ public class QueueProcessor extends TimerTask {
                         String.format("REQUEUE delete that failed on backend %s with error %s",
                                 server.getServerIdentifier(), logMessage));
                 // requeue
-                this.database.queueUpdate(this.serverType, queued.getAiid(),
+                this.database.queueUpdate(this.serviceIdentity, queued.getAiid(),
                         true, this.config.getProcessQueueScheduleFutureCommand(), QueueAction.DELETE);
             } else {
                 // drop the delete command and ignore permanently
@@ -280,7 +287,7 @@ public class QueueProcessor extends TimerTask {
                         String.format("REQUEUE train task that failed on backend %s with error %s",
                                 server.getServerIdentifier(), logMessage));
                 // requeue the task now
-                this.database.queueUpdate(this.serverType, queued.getAiid(),
+                this.database.queueUpdate(this.serviceIdentity, queued.getAiid(),
                         true, this.config.getProcessQueueScheduleFutureCommand(), QueueAction.TRAIN);
             } else {
                 // don't requeue
@@ -288,7 +295,7 @@ public class QueueProcessor extends TimerTask {
                         String.format("DROP train-task that failed on backend %s with error %s",
                                 server.getServerIdentifier(), logMessage));
                 // and permanently flag the AI state as ERROR
-                this.database.updateAIStatus(this.serverType, queued.getAiid(), TrainingStatus.AI_ERROR,
+                this.database.updateAIStatus(this.serviceIdentity, queued.getAiid(), TrainingStatus.AI_ERROR,
                         server.getServerIdentifier(), 0.0, 0.0);
             }
         } catch (DatabaseException e1) {
@@ -313,34 +320,36 @@ public class QueueProcessor extends TimerTask {
             return;
         }
 
+        LogMap logMap = LogMap.map("Type", this.serviceIdentity.getServerType())
+                .put("Language", this.serviceIdentity.getLanguage())
+                .put("Version", this.serviceIdentity.getVersion());
         // create a log entry per server with (n>0) interrupted training slots
         slotList.stream().filter(ServerEndpointTrainingSlots::hasSlotsInterruptedTraining)
                 .forEach(server -> {
-                    LogMap logMap = LogMap.map("Op", "interruptedtraining")
-                            .put("type", this.serverType)
-                            .put("server", server.getEndpointIdentifier());
                     this.logger.logWarning(this.logFrom,
                             String.format("Found %d bots that stopped training unexpectedly on server %s",
-                                    server.getSlotsInterruptedTraining(), server.getEndpointIdentifier()), logMap);
+                                    server.getSlotsInterruptedTraining(), server.getEndpointIdentifier()),
+                            logMap.put("Op", "interruptedtraining")
+                                    .put("Server", server.getEndpointIdentifier()));
                 });
 
         // for all the bots that are in training limbo, requeue training and free up the slots
         try {
-            this.database.recoverInterruptedTraining(this.serverType, this.config.getProcessQueueInterruptedSeconds())
+            this.database.recoverInterruptedTraining(this.serviceIdentity,
+                    this.config.getProcessQueueInterruptedSeconds())
                     .forEach(interrupted -> {
                         // then create a single log line per bot that has been requeued
                         DateTime lastUpdated = interrupted.getUpdateTime();
                         Seconds since = Seconds.secondsBetween(
                                 lastUpdated, new DateTime(this.tools.getTimestamp()));
-                        LogMap logMap = LogMap.map("Op", "interruptedtraining")
-                                .put("type", this.serverType)
-                                .put("server", interrupted.getServerIdentifier())
-                                .put("aiid", interrupted.getAiid())
-                                .put("lastupdate", lastUpdated)
-                                .put("updategap", since.getSeconds());
                         this.logger.logWarning(this.logFrom, String.format(
                                 "After %d minutes without a training progress update, requeuing %s for training",
-                                since.getSeconds() / 60, interrupted.getAiid().toString()), logMap);
+                                since.getSeconds() / 60, interrupted.getAiid().toString()),
+                                logMap.put("Op", "interruptedtraining")
+                                        .put("Server", interrupted.getServerIdentifier())
+                                        .put("AIID", interrupted.getAiid())
+                                        .put("LastUpdate", lastUpdated)
+                                        .put("UpdateGap", since.getSeconds()));
                     });
         } catch (DatabaseException exception) {
             this.logger.logException(this.logFrom, exception);
@@ -351,7 +360,7 @@ public class QueueProcessor extends TimerTask {
      * If the queue processor was sleeping (long intervals)
      * then tell it to run soon
      */
-    public void kickQueueProcessor() {
+    void kickQueueProcessor() {
 
         long timeNow = this.tools.getTimestamp();
         this.lastKicked = timeNow;
@@ -371,13 +380,13 @@ public class QueueProcessor extends TimerTask {
      */
     protected void unqueueDelete(final BackendEngineStatus queued, final ServerTracker server) {
 
-        this.logger.logDebugQueueAction(this.logFrom, "delete", this.serverType,
+        this.logger.logDebugQueueAction(this.logFrom, "delete", this.serviceIdentity,
                 queued.getAiid(), queued.getDevId(), server.getServerIdentifier());
 
         // read the queue status of this ai
         BackendEngineStatus currentStatus = null;
         try {
-            currentStatus = this.database.getAiQueueStatus(this.serverType, queued.getAiid());
+            currentStatus = this.database.getAiQueueStatus(this.serviceIdentity, queued.getAiid());
         } catch (DatabaseException e) {
             this.logger.logException(this.logFrom, e);
         }
@@ -386,7 +395,7 @@ public class QueueProcessor extends TimerTask {
             // if we have a status then proceed to tell the backend
             // to delete this AI
             if (currentStatus != null) {
-                this.queueServicesProvider.get().deleteAIDirect(this.serverType,
+                this.queueServicesProvider.get().deleteAIDirect(this.serviceIdentity,
                         currentStatus.getDevId(), queued.getAiid(),
                         server.getServerUrl(), server.getServerIdentifier());
             } else {
@@ -394,7 +403,7 @@ public class QueueProcessor extends TimerTask {
             }
 
             // delete the status for this AI
-            this.database.deleteAiStatus(this.serverType, queued.getAiid());
+            this.database.deleteAiStatus(this.serviceIdentity, queued.getAiid());
 
         } catch (ServerConnector.AiServicesException e) {
             handleDeleteTaskFailure(queued, server, e);
@@ -411,13 +420,13 @@ public class QueueProcessor extends TimerTask {
      */
     protected void unqueueTrain(final BackendEngineStatus queued, final ServerTracker server) {
 
-        this.logger.logDebugQueueAction(this.logFrom, "train", this.serverType,
+        this.logger.logDebugQueueAction(this.logFrom, "train", this.serviceIdentity,
                 queued.getAiid(), queued.getDevId(), server.getServerIdentifier());
 
         // read the queue status of this ai
         BackendEngineStatus currentStatus = null;
         try {
-            currentStatus = this.database.getAiQueueStatus(this.serverType, queued.getAiid());
+            currentStatus = this.database.getAiQueueStatus(this.serviceIdentity, queued.getAiid());
         } catch (DatabaseException e) {
             this.logger.logException(this.logFrom, e);
         }
@@ -433,7 +442,7 @@ public class QueueProcessor extends TimerTask {
             // carefully set the AI status to indicate that the AI is training and the
             // slot is in use
             // when training actually starts the server will call us back to set status
-            this.database.updateAIStatus(this.serverType, queued.getAiid(),
+            this.database.updateAIStatus(this.serviceIdentity, queued.getAiid(),
                     TrainingStatus.AI_TRAINING, server.getServerIdentifier(),
                     currentStatus.getTrainingProgress(), currentStatus.getTrainingError());
 
@@ -441,8 +450,8 @@ public class QueueProcessor extends TimerTask {
             // before the the API is ready to receive it
 
             // tell the chosen server to start training
-            this.queueServicesProvider.get().startTrainingDirect(this.serverType,
-                    currentStatus.getDevId(), queued.getAiid(),
+            this.queueServicesProvider.get().startTrainingDirect(this.serviceIdentity,
+                    new AiIdentity(currentStatus.getDevId(), queued.getAiid()),
                     server.getServerUrl(), server.getServerIdentifier());
 
         } catch (ServerConnector.AiServicesException e) {
@@ -459,7 +468,7 @@ public class QueueProcessor extends TimerTask {
     protected void processQueue() throws DatabaseException {
 
         // get a summary of training slots from the database
-        List<ServerEndpointTrainingSlots> slotList = this.database.getQueueSlotCounts(this.serverType,
+        List<ServerEndpointTrainingSlots> slotList = this.database.getQueueSlotCounts(this.serviceIdentity,
                 this.config.getProcessQueueInterruptedSeconds());
 
         // if any training slots have timed out, requeue them
@@ -519,7 +528,7 @@ public class QueueProcessor extends TimerTask {
         ServerTracker chosenServer = serverMap.get(chosenSlot.getEndpointIdentifier());
 
         // take the next task off the queue
-        BackendEngineStatus queued = this.database.queueTakeNext(this.serverType);
+        BackendEngineStatus queued = this.database.queueTakeNext(this.serviceIdentity);
 
         // if there was a queued task then service the queue
         if (queued != null) {

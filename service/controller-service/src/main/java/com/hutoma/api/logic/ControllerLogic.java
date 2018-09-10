@@ -1,14 +1,11 @@
 package com.hutoma.api.logic;
 
+import com.hutoma.api.common.SupportedLanguage;
 import com.hutoma.api.connectors.BackendServerType;
 import com.hutoma.api.connectors.IServerEndpoint;
 import com.hutoma.api.connectors.NoServerAvailableException;
 import com.hutoma.api.connectors.ServerTrackerInfo;
-import com.hutoma.api.containers.ApiError;
-import com.hutoma.api.containers.ApiResult;
-import com.hutoma.api.containers.ApiServerEndpoint;
-import com.hutoma.api.containers.ApiServerEndpointMulti;
-import com.hutoma.api.containers.ApiServerTrackerInfoMap;
+import com.hutoma.api.containers.*;
 import com.hutoma.api.containers.sub.ServerEndpointRequestMulti;
 import com.hutoma.api.controllers.ControllerBase;
 import com.hutoma.api.controllers.ControllerMap;
@@ -30,11 +27,14 @@ public class ControllerLogic {
         this.controllerMap = controllerMap;
     }
 
-    public ApiResult getMap(final BackendServerType serverType) {
-        Map<String, ServerTracker> trackerMap = this.controllerMap.getControllerFor(serverType)
+    public ApiResult getMap(final BackendServerType serverType,
+                            final SupportedLanguage serverLanguage,
+                            final String serverVersion) {
+        Map<String, ServerTracker> trackerMap = this.controllerMap.getControllerFor(
+                new ServiceIdentity(serverType, serverLanguage, serverVersion))
                 .getVerifiedEndpointMap();
         Map<String, ServerTrackerInfo> trackerInfoMap = new HashMap<>();
-        for (Map.Entry<String, ServerTracker> entry: trackerMap.entrySet()) {
+        for (Map.Entry<String, ServerTracker> entry : trackerMap.entrySet()) {
             ServerTracker t = entry.getValue();
             ServerTrackerInfo info = new ServerTrackerInfo(t.getServerUrl(), t.getServerIdentifier(),
                     t.getChatCapacity(), t.getTrainingCapacity(), t.canTrain(), t.isEndpointVerified());
@@ -45,9 +45,12 @@ public class ControllerLogic {
     }
 
     public ApiResult getBackendTrainingEndpoint(final UUID aiid,
-                                                final BackendServerType serverType) {
+                                                final BackendServerType serverType,
+                                                final SupportedLanguage serverLanguage,
+                                                final String serverVersion) {
         try {
-            IServerEndpoint endpoint = this.controllerMap.getControllerFor(serverType)
+            IServerEndpoint endpoint = this.controllerMap.getControllerFor(
+                    new ServiceIdentity(serverType, serverLanguage, serverVersion))
                     .getUploadBackendEndpoint(aiid);
             return new ApiServerEndpoint(endpoint).setSuccessStatus();
         } catch (NoServerAvailableException ex) {
@@ -57,9 +60,12 @@ public class ControllerLogic {
         }
     }
 
-    public ApiResult kickQueue(final BackendServerType serverType) {
+    public ApiResult kickQueue(final BackendServerType serverType,
+                               final SupportedLanguage serverLanguage,
+                               final String serverVersion) {
         try {
-            this.controllerMap.getControllerFor(serverType).kickQueue();
+            this.controllerMap.getControllerFor(
+                    new ServiceIdentity(serverType, serverLanguage, serverVersion)).kickQueue();
             return new ApiResult().setSuccessStatus();
         } catch (Exception ex) {
             return ApiError.getInternalServerError();
@@ -67,16 +73,19 @@ public class ControllerLogic {
     }
 
     public ApiResult getBackendChatEndpointsMulti(final BackendServerType backendServerType,
+                                                  final SupportedLanguage backendServerLanguage,
+                                                  final String backendServerVersion,
                                                   final ServerEndpointRequestMulti serverEndpointRequestMulti) {
 
         // results
         List<ApiServerEndpointMulti.ServerEndpointResponse> results = new ArrayList<>();
 
         // get the controller
-        ControllerBase controller = controllerMap.getControllerFor(backendServerType);
+        ControllerBase controller = controllerMap.getControllerFor(
+                new ServiceIdentity(backendServerType, backendServerLanguage, backendServerVersion));
 
         // for every server requested (typically one main bot + one for every linked bot)
-        for (ServerEndpointRequestMulti.ServerEndpointRequest request:
+        for (ServerEndpointRequestMulti.ServerEndpointRequest request :
                 serverEndpointRequestMulti.getEndpointRequests()) {
             try {
                 // get the server to send the chat request to
