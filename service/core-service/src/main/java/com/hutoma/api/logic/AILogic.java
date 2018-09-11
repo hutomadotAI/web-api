@@ -963,9 +963,9 @@ public class AILogic {
                             : importedBot.getDefaultResponses(),
                     // TODO: not adding handover-related stuff from linked bots since this will soon be changed
                     // so adding default configuration
-                    -1,
-                    -1,
-                    null,
+                    importedBot.getErrorThresholdHandover(),
+                    importedBot.getHandoverResetTimeoutSeconds(),
+                    importedBot.getHandoverMessage(),
                     transaction);
 
             if (result.getStatus().getCode() != HttpURLConnection.HTTP_OK) {

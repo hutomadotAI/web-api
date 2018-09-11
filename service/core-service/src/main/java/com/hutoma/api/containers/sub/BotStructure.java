@@ -18,6 +18,8 @@ public class BotStructure {
 
     @SerializedName("name")
     private String name;
+    @SerializedName("client_token")
+    private String clientToken;
     @SerializedName("description")
     private String description;
     @SerializedName("isPrivate")
@@ -46,6 +48,12 @@ public class BotStructure {
     private String passthroughUrl;
     @SerializedName("linked_skills")
     private List<Integer> linkedSkills;
+    @SerializedName("handover_reset_timeout_seconds")
+    private int handoverResetTimeoutSeconds;
+    @SerializedName("error_threshold_handover")
+    private int errorThresholdHandover;
+    @SerializedName("handover_message")
+    private String handoverMessage;
 
     @VisibleForTesting
     BotStructure() {
@@ -55,8 +63,11 @@ public class BotStructure {
                         final String trainingFile, final Map<String, ApiEntity> entities, final int version,
                         final boolean isPrivate, final int personality, final double confidence, final int voice,
                         final String language, final String timezone, final List<String> defaultResponses,
-                        final String passthroughUrl, final List<Integer> linkedSkills) {
+                        final String passthroughUrl, final List<Integer> linkedSkills, final String clientToken,
+                        final int handoverResetTimeoutSeconds, final int errorThresholdHandover,
+                        final String handoverMessage) {
         this.name = name;
+        this.clientToken = clientToken;
         this.description = description;
         this.intents = intents;
         this.trainingFile = trainingFile;
@@ -71,6 +82,9 @@ public class BotStructure {
         this.defaultResponses = defaultResponses;
         this.passthroughUrl = passthroughUrl;
         this.linkedSkills = linkedSkills;
+        this.handoverResetTimeoutSeconds = handoverResetTimeoutSeconds;
+        this.errorThresholdHandover = errorThresholdHandover;
+        this.handoverMessage = handoverMessage;
     }
 
     /**
@@ -79,6 +93,7 @@ public class BotStructure {
      */
     public BotStructure(final BotStructure other) {
         this.name = other.name;
+        this.clientToken = other.clientToken;
         this.description = other.description;
         this.intents = other.intents;
         this.trainingFile = other.trainingFile;
@@ -93,10 +108,17 @@ public class BotStructure {
         this.defaultResponses = new ArrayList<>(other.defaultResponses);
         this.passthroughUrl = other.passthroughUrl;
         this.linkedSkills = new ArrayList<>(other.linkedSkills);
+        this.handoverResetTimeoutSeconds = other.handoverResetTimeoutSeconds;
+        this.errorThresholdHandover = other.errorThresholdHandover;
+        this.handoverMessage = other.handoverMessage;
     }
 
     public String getName() {
         return this.name;
+    }
+
+    public String getClientToken() {
+        return this.clientToken;
     }
 
     public String getDescription() {
@@ -155,8 +177,24 @@ public class BotStructure {
         return this.linkedSkills;
     }
 
+    public int getHandoverResetTimeoutSeconds() {
+        return this.handoverResetTimeoutSeconds;
+    }
+
+    public int getErrorThresholdHandover() {
+        return this.errorThresholdHandover;
+    }
+
+    public String getHandoverMessage() {
+        return this.handoverMessage;
+    }
+
     public void setName(final String name) {
         this.name = name;
+    }
+
+    public void setClientToken(final String clientToken) {
+        this.clientToken = clientToken;
     }
 
     public void setDescription(final String description) {
@@ -213,5 +251,17 @@ public class BotStructure {
 
     public void setLinkedSkills(final List<Integer> linkedSkills) {
         this.linkedSkills = linkedSkills;
+    }
+
+    public void setHandoverResetTimeoutSeconds(final int handoverResetTimeoutSeconds) {
+        this.handoverResetTimeoutSeconds = handoverResetTimeoutSeconds;
+    }
+
+    public void setErrorThresholdHandover(final int errorThresholdHandover) {
+        this.errorThresholdHandover = errorThresholdHandover;
+    }
+
+    public void setHandoverMessage(final String handoverMessage) {
+        this.handoverMessage = handoverMessage;
     }
 }
