@@ -212,10 +212,10 @@ public class TestTrainingLogic {
     }
 
     @Test
-    public void testTrain_Doc_UploadInvalidCharacters() {
-        InputStream stream = createUpload(BADTEXT);
+    public void testTrain_Doc_UploadUTF8() {
+        InputStream stream = createUpload("\u0048\u0065\u006C\u006C\u006F World");
         ApiResult result = this.logic.uploadFile(DEVID_UUID, AIID, TrainingLogic.TrainingType.DOCUMENT, UURL, stream, this.fakeContentDisposition);
-        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
     }
 
     @Test

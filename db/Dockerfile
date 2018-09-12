@@ -1,5 +1,8 @@
 FROM mysql:5.7.22
-LABEL "maintainer"  "Pedro Teixeira pedrotei@hutoma.com"
+LABEL maintainer  "Pedro Teixeira<pedrotei@hutoma.com>"
+
+# Configuration files
+COPY mysql.cnf /etc/mysql/conf.d/mysql.cnf
 
 # API DB
 COPY structure.sql /docker-entrypoint-initdb.d/0.sql

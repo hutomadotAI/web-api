@@ -175,10 +175,6 @@ public class TrainingLogic {
             this.logger.logUserTraceEvent(LOGFROM, "UploadFile - upload attempt was larger than maximum allowed",
                     devidString, logMap);
             return ApiError.getPayloadTooLarge();
-        } catch (InvalidCharacterException ex) {
-            this.logger.logUserTraceEvent(LOGFROM, "UploadFile - upload contained unencodable characters",
-                    devidString, logMap.put("Lines", StringUtils.join(ex.getLinesWithErrors(), "\n")));
-            return ApiError.getInvalidCharacters();
         } catch (Exception e) {
             this.logger.logUserExceptionEvent(LOGFROM, "UploadFile", devidString, e);
             return ApiError.getInternalServerError();
@@ -520,17 +516,14 @@ public class TrainingLogic {
      * @param uploadedInputStream
      * @return list of strings
      * @throws UploadTooLargeException
-     * @throws InvalidCharacterException
      * @throws IOException
      */
     private ArrayList<String> getFile(final long maxUploadSize, final InputStream uploadedInputStream)
-            throws UploadTooLargeException, InvalidCharacterException, IOException {
+            throws UploadTooLargeException, IOException {
 
         ArrayList<String> source = new ArrayList<>();
         long fileSize = 0;
 
-        List<String> encodingErrorLines = new ArrayList<>();
-        CharsetEncoder dbCharset = Charset.forName("windows-1252").newEncoder();
         try (BufferedReader reader =
                      new BufferedReader(new InputStreamReader(uploadedInputStream, StandardCharsets.UTF_8))) {
             String line;
@@ -544,15 +537,7 @@ public class TrainingLogic {
                 } else {
                     throw new UploadTooLargeException();
                 }
-                // Check the line can be encoded with the current DB encoding
-                if (!dbCharset.canEncode(line)) {
-                    encodingErrorLines.add(line);
-                }
             }
-        }
-        if (!encodingErrorLines.isEmpty()) {
-            throw new InvalidCharacterException(encodingErrorLines);
-
         }
         return source;
     }
