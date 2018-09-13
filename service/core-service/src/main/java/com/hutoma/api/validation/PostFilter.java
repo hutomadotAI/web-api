@@ -381,7 +381,7 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
      */
     private void validateEntity(ApiEntity entity) throws ParameterValidationException {
         validateEntityName(ENTITYNAME, entity.getEntityName());
-        validateOptionalObjectValues(ENTITYVALUE, entity.getEntityValueList());
+        validateUniqueList(ENTITYVALUE, entity.getEntityValueList());
     }
 
     /***

@@ -395,4 +395,24 @@ public class Validate extends ValidationBase {
             throws ParameterValidationException {
         return validatePatternUniqueList(alphaNumDashesSomePunctuationAndSpace, paramName, paramList);
     }
+
+    /***
+     * Validates a list of strings for unique entries
+     * @param paramName the name of the param, to use in the exception message
+     * @param paramList the list of param values
+     * @return list of unique parameters, or empty list if it was null or empty
+     * @throws ParameterValidationException
+     */
+    List<String> validateUniqueList(final String paramName, List<String> paramList)
+            throws ParameterValidationException {
+        LinkedHashSet<String> results = new LinkedHashSet<>();
+        if (null != paramList) {
+            for (String param : paramList) {
+                if (!results.add(param)) {
+                    throw new ParameterValidationException("duplicate items", paramName);
+                }
+            }
+        }
+        return new ArrayList<>(results);
+    }
 }
