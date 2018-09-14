@@ -7,14 +7,8 @@ import java.util.Optional;
 
 public enum BackendServerType {
 
-    @SerializedName("wnet")
-    WNET("wnet"),
-
     @SerializedName("aiml")
     AIML("aiml"),
-
-    @SerializedName("svm")
-    SVM("svm"),
 
     @SerializedName("emb")
     EMB("emb");

@@ -1,7 +1,9 @@
 package com.hutoma.api.controllers;
 
 import com.hutoma.api.common.ControllerConfig;
+import com.hutoma.api.common.SupportedLanguage;
 import com.hutoma.api.connectors.BackendServerType;
+import com.hutoma.api.containers.ServiceIdentity;
 import com.hutoma.api.logging.AiServiceStatusLogger;
 import com.hutoma.api.thread.ThreadSubPool;
 
@@ -11,20 +13,20 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 /**
- * Embeddings controller
+ * Generic backend controller
  */
-@Singleton
-public class ControllerEmb extends ControllerBase {
+public class ControllerGeneric extends ControllerBase {
 
     private final QueueProcessor queueProcessor;
 
     @Inject
-    ControllerEmb(final ControllerConfig config, final ThreadSubPool threadSubPool,
-                  final ServiceLocator serviceLocator, final AiServiceStatusLogger logger,
-                  final QueueProcessor queueProcessor) {
+    ControllerGeneric(final ControllerConfig config,
+                      final ThreadSubPool threadSubPool,
+                      final ServiceLocator serviceLocator,
+                      final AiServiceStatusLogger logger,
+                      final QueueProcessor queueProcessor) {
         super(config, threadSubPool, serviceLocator, logger);
         this.queueProcessor = queueProcessor;
-        this.queueProcessor.initialise(this, BackendServerType.EMB);
     }
 
     @Override
@@ -40,5 +42,10 @@ public class ControllerEmb extends ControllerBase {
     @Override
     public void terminateQueue() {
         this.queueProcessor.stop();
+    }
+
+    @Override
+    public void initialize(final ServiceIdentity serviceIdentity) {
+        this.queueProcessor.initialise(this, serviceIdentity);
     }
 }

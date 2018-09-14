@@ -9,6 +9,7 @@ import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.ApiServerAcknowledge;
+import com.hutoma.api.containers.ServiceIdentity;
 import com.hutoma.api.containers.sub.AiStatus;
 import com.hutoma.api.containers.sub.ServerAffinity;
 import com.hutoma.api.containers.sub.ServerAiEntry;
@@ -65,10 +66,12 @@ public class AIServicesLogic {
             }
 
             // figure out which controller this is for
-            ControllerBase controller = controllerMap.getControllerFor(status.getAiEngine());
+            ServiceIdentity serviceIdentity = new ServiceIdentity(status.getAiEngine(), status.getAiEngineLanguage(),
+                    status.getAiEngineVersion());
+            ControllerBase controller = controllerMap.getControllerFor(serviceIdentity);
             if (controller == null) {
                 this.serviceStatusLogger.logError(LOGFROM,
-                        "No registered controller for engine " + status.getAiEngine());
+                        String.format("No registered controller for engine %s", serviceIdentity.toString()));
                 return ApiError.getBadRequest("No registered controller for engine");
             }
 
@@ -118,7 +121,9 @@ public class AIServicesLogic {
     public ApiResult registerServer(final ServerRegistration registration) {
         UUID serverSessionID;
         try {
-            ControllerBase controller = controllerMap.getControllerFor(registration.getServerType());
+            ServiceIdentity serviceIdentity = new ServiceIdentity(registration.getServerType(),
+                    registration.getLanguage(), registration.getVersion());
+            ControllerBase controller = controllerMap.getControllerFor(serviceIdentity);
             if (controller != null) {
                 // create a session and make it active
                 serverSessionID = controller.registerServer(registration);
@@ -158,7 +163,8 @@ public class AIServicesLogic {
         List<UUID> aiList = serverAffinity.getAiList();
 
         try {
-            BackendServerType updated = controllerMap.updateAffinity(sid, aiList);
+            BackendServerType updated = controllerMap.updateAffinity(
+                    sid, serverAffinity.getLanguage(), serverAffinity.getVersion(), aiList);
             if (updated == null) {
                 return ApiError.getBadRequest("nonexistent session");
             }
@@ -182,9 +188,10 @@ public class AIServicesLogic {
             throws DatabaseException, StatusTransitionRejectedException, OriginatingServerRejectedException,
             StatusTransitionIgnoredException {
 
+        ServiceIdentity serviceIdentity = new ServiceIdentity(statusUpdate.getAiEngine(),
+                statusUpdate.getAiEngineLanguage(), statusUpdate.getAiEngineVersion());
         // load the status
-        BackendEngineStatus botStatus = this.database.getAiQueueStatus(statusUpdate.getAiEngine(),
-                statusUpdate.getAiid());
+        BackendEngineStatus botStatus = this.database.getAiQueueStatus(serviceIdentity, statusUpdate.getAiid());
         if ((botStatus == null) || botStatus.isDeleted()) {
             this.logger.logError(LOGFROM, String.format("received update %s for bot %s that no longer exists",
                     statusUpdate.getTrainingStatus().value(), statusUpdate.getAiid().toString()));
@@ -213,7 +220,7 @@ public class AIServicesLogic {
                                 TrainingStatus.AI_TRAINING,
                                 TrainingStatus.AI_TRAINING_QUEUED});
                 // so queue it again for another one
-                this.database.queueUpdate(statusUpdate.getAiEngine(), statusUpdate.getAiid(),
+                this.database.queueUpdate(serviceIdentity, statusUpdate.getAiid(),
                         true, 0, QueueAction.TRAIN);
                 break;
             case AI_UNDEFINED:
@@ -230,7 +237,7 @@ public class AIServicesLogic {
                         new TrainingStatus[]{
                                 TrainingStatus.AI_TRAINING,
                                 TrainingStatus.AI_TRAINING_QUEUED});
-                this.database.queueUpdate(statusUpdate.getAiEngine(), statusUpdate.getAiid(),
+                this.database.queueUpdate(serviceIdentity, statusUpdate.getAiid(),
                         false, 0, QueueAction.NONE);
                 break;
             case AI_TRAINING_STOPPED:
@@ -249,7 +256,7 @@ public class AIServicesLogic {
                         new TrainingStatus[]{
                                 TrainingStatus.AI_TRAINING,
                                 TrainingStatus.AI_TRAINING_QUEUED});
-                this.database.queueUpdate(statusUpdate.getAiEngine(), statusUpdate.getAiid(),
+                this.database.queueUpdate(serviceIdentity, statusUpdate.getAiid(),
                         false, 0, QueueAction.NONE);
                 break;
             case AI_READY_TO_TRAIN:
@@ -259,7 +266,7 @@ public class AIServicesLogic {
                     // update the status to reflect it's going to be QUEUED
                     statusUpdate.setTrainingStatus(TrainingStatus.AI_TRAINING_QUEUED);
                     // queue training
-                    this.database.queueUpdate(statusUpdate.getAiEngine(), statusUpdate.getAiid(),
+                    this.database.queueUpdate(serviceIdentity, statusUpdate.getAiid(),
                         true, 0, QueueAction.TRAIN);
                 }
                 break;
@@ -267,7 +274,7 @@ public class AIServicesLogic {
             // other states are always valid
             case AI_ERROR:            
             default:
-                this.database.queueUpdate(statusUpdate.getAiEngine(), statusUpdate.getAiid(),
+                this.database.queueUpdate(serviceIdentity, statusUpdate.getAiid(),
                         false, 0, QueueAction.NONE);
                 break;
         }

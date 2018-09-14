@@ -2,6 +2,7 @@ package com.hutoma.api.connectors;
 
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Tools;
+import com.hutoma.api.containers.sub.AiIdentity;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
 import com.hutoma.api.thread.TrackedThreadSubPool;
@@ -173,19 +174,21 @@ public class ServerConnector {
 
     /***
      * Assemble endpoint url to start or stop training
-     * @param devId
-     * @param aiid
+     * @param aiIdentity
      * @param endpoint
      * @param params
      * @return the map of endpoints and invocation results
      * @throws AiServicesException
      */
     protected HashMap<String, Callable<InvocationResult>> getTrainingCallableForEndpoint(
-            final UUID devId, final UUID aiid, final String endpoint, Map<String, String> params) {
+            final AiIdentity aiIdentity,
+            final String endpoint,
+            final Map<String, String> params) {
+
         HashMap<String, Callable<InvocationResult>> callables = new HashMap<>();
         JerseyWebTarget target = this.jerseyClient.target(endpoint)
-                .path(devId.toString())
-                .path(aiid.toString())
+                .path(aiIdentity.getDevId().toString())
+                .path(aiIdentity.getAiid().toString())
                 .property(CONNECT_TIMEOUT, (int) this.connectConfig.getBackendConnectCallTimeoutMs())
                 .property(READ_TIMEOUT, (int) this.connectConfig.getBackendTrainingCallTimeoutMs());
         for (Map.Entry<String, String> param : params.entrySet()) {
@@ -194,7 +197,7 @@ public class ServerConnector {
 
         final JerseyInvocation.Builder builder = target.request();
         callables.put(endpoint, () -> new InvocationResult(builder.post(null), endpoint,
-                0, 0, 1, aiid));
+                0, 0, 1, aiIdentity.getAiid()));
         return callables;
     }
 }

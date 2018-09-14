@@ -2,10 +2,12 @@ package com.hutoma.api.controllers;
 
 import com.hutoma.api.common.ControllerConfig;
 import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.common.SupportedLanguage;
 import com.hutoma.api.connectors.BackendServerType;
 import com.hutoma.api.connectors.NoServerAvailableException;
 import com.hutoma.api.connectors.db.DatabaseAiStatusUpdates;
 import com.hutoma.api.connectors.db.DatabaseException;
+import com.hutoma.api.containers.ServiceIdentity;
 import com.hutoma.api.containers.sub.ServerAiEntry;
 import com.hutoma.api.containers.sub.ServerRegistration;
 import com.hutoma.api.logging.AiServiceStatusLogger;
@@ -34,7 +36,6 @@ public class ControllerAiml extends ControllerBase {
                           final QueueProcessor queueProcessor) {
         super(config, threadSubPool, serviceLocator, logger);
         this.queueProcessor = queueProcessor;
-        this.queueProcessor.initialise(this, BackendServerType.AIML);
     }
 
     /***
@@ -81,6 +82,12 @@ public class ControllerAiml extends ControllerBase {
             throws NoServerAvailableException {
         throw new NoServerAvailableException(
                 String.format("no AIML server registered to service AIML aiid %s", aiid.toString()));
+    }
+
+    @Override
+    public void initialize(final ServiceIdentity serviceIdentity) {
+        this.queueProcessor.initialise(this,
+                new ServiceIdentity(BackendServerType.AIML, SupportedLanguage.EN, ServiceIdentity.DEFAULT_VERSION));
     }
 
     @Override

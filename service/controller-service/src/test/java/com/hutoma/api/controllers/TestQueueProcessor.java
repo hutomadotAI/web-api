@@ -1,14 +1,12 @@
 package com.hutoma.api.controllers;
 
-import com.hutoma.api.common.ControllerConfig;
-import com.hutoma.api.common.FakeTimerTools;
-import com.hutoma.api.common.Pair;
-import com.hutoma.api.common.Tools;
+import com.hutoma.api.common.*;
 import com.hutoma.api.connectors.BackendEngineStatus;
 import com.hutoma.api.connectors.BackendServerType;
 import com.hutoma.api.connectors.QueueAction;
 import com.hutoma.api.connectors.db.DatabaseAiStatusUpdates;
 import com.hutoma.api.connectors.db.DatabaseException;
+import com.hutoma.api.containers.ServiceIdentity;
 import com.hutoma.api.containers.sub.ServerEndpointTrainingSlots;
 import com.hutoma.api.logging.AiServiceStatusLogger;
 
@@ -139,7 +137,7 @@ public class TestQueueProcessor {
 
         this.qproc = new QueueProcessorTest(this.fakeConfig, this.fakeDatabase, fakeQueueServicesProvider,
                 this.fakeTools, mock(AiServiceStatusLogger.class));
-        this.qproc.initialise(this.fakeController, BackendServerType.EMB);
+        this.qproc.initialise(this.fakeController, new ServiceIdentity(BackendServerType.EMB, SupportedLanguage.EN, ServiceIdentity.DEFAULT_VERSION));
 
         this.fakeData = create(null, ENDPOINT1, 0, 1, 0, true);
 
@@ -186,9 +184,9 @@ public class TestQueueProcessor {
         }
 
         @Override
-        public void initialise(final ControllerBase controller, final BackendServerType serverType) {
+        public void initialise(final ControllerBase controller, final ServiceIdentity serviceIdentity) {
             this.controller = controller;
-            this.serverType = serverType;
+            this.serviceIdentity = serviceIdentity;
         }
 
         @Override

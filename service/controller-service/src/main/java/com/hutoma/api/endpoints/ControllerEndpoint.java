@@ -48,77 +48,82 @@ public class ControllerEndpoint {
 
     @GET
     @Path("{aiid}/training")
-    @ValidateControllerParameters({ControllerParameter.AIID, ControllerParameter.ServerType})
+    @ValidateControllerParameters({ControllerParameter.AIID, ControllerParameter.ServerType,
+            ControllerParameter.ServerLanguage, ControllerParameter.ServerVersion})
     @StatusCodes({
             @ResponseCode(code = HttpURLConnection.HTTP_OK, condition = "Succeeded."),
             @ResponseCode(code = HttpURLConnection.HTTP_INTERNAL_ERROR, condition = "Internal error")
     })
     @ResourceMethodSignature(
-            queryParams = {@QueryParam("for"), @QueryParam("serverType")},
+            queryParams = {@QueryParam("for"), @QueryParam("serverType"), @QueryParam("serverLanguage"),
+                    @QueryParam("serverVersion")},
             output = ApiServerEndpoint.class
     )
     @Produces(MediaType.APPLICATION_JSON)
     public Response getEndpoint(@Context ContainerRequestContext requestContext) {
         ApiResult result = this.controllerLogic.getBackendTrainingEndpoint(
                 ControllerParameterFilter.getAiid(requestContext),
-                ControllerParameterFilter.getBackendServerType(requestContext));
+                ControllerParameterFilter.getServiceIdentity(requestContext));
         return result.getResponse(serializer).build();
     }
 
     @POST
     @Path("chatEndpoints")
-    @ValidateControllerParameters({ControllerParameter.ServerType})
+    @ValidateControllerParameters({ControllerParameter.ServerType, ControllerParameter.ServerLanguage,
+            ControllerParameter.ServerVersion})
     @ValidateControllerPost({ControllerParameter.ServerEndpointMulti})
     @StatusCodes({
             @ResponseCode(code = HttpURLConnection.HTTP_OK, condition = "Succeeded."),
             @ResponseCode(code = HttpURLConnection.HTTP_INTERNAL_ERROR, condition = "Internal error")
     })
     @ResourceMethodSignature(
-            queryParams = {@QueryParam("serverType")},
+            queryParams = {@QueryParam("serverType"), @QueryParam("serverLanguage"), @QueryParam("serverVersion")},
             output = ApiServerEndpointMulti.class
     )
     @Produces(MediaType.APPLICATION_JSON)
     public Response getServerEndpointMulti(@Context ContainerRequestContext requestContext) {
         ApiResult result = this.controllerLogic.getBackendChatEndpointsMulti(
-                ControllerParameterFilter.getBackendServerType(requestContext),
+                ControllerParameterFilter.getServiceIdentity(requestContext),
                 ControllerParameterFilter.getServerEndpointRequestMulti(requestContext));
         return result.getResponse(serializer).build();
     }
 
     @GET
     @Path("endpointMap")
-    @ValidateControllerParameters({ControllerParameter.ServerType})
+    @ValidateControllerParameters({ControllerParameter.ServerType, ControllerParameter.ServerLanguage,
+            ControllerParameter.ServerVersion})
     @StatusCodes({
             @ResponseCode(code = HttpURLConnection.HTTP_OK, condition = "Succeeded."),
             @ResponseCode(code = HttpURLConnection.HTTP_INTERNAL_ERROR, condition = "Internal error")
     })
     @ResourceMethodSignature(
-            queryParams = {@QueryParam("serverType")},
+            queryParams = {@QueryParam("serverType"), @QueryParam("serverLanguage"), @QueryParam("serverVersion")},
             output = ApiServerTrackerInfoMap.class
     )
     @Produces(MediaType.APPLICATION_JSON)
     public Response getEndpointMap(@Context ContainerRequestContext requestContext) {
         ApiResult result = this.controllerLogic.getMap(
-                ControllerParameterFilter.getBackendServerType(requestContext)
+                ControllerParameterFilter.getServiceIdentity(requestContext)
         );
         return result.getResponse(serializer).build();
     }
 
     @POST
     @Path("queue")
-    @ValidateControllerParameters({ControllerParameter.ServerType})
+    @ValidateControllerParameters({ControllerParameter.ServerType, ControllerParameter.ServerLanguage,
+            ControllerParameter.ServerVersion})
     @StatusCodes({
             @ResponseCode(code = HttpURLConnection.HTTP_OK, condition = "Succeeded."),
             @ResponseCode(code = HttpURLConnection.HTTP_INTERNAL_ERROR, condition = "Internal error")
     })
     @ResourceMethodSignature(
-            queryParams = {@QueryParam("serverType")},
+            queryParams = {@QueryParam("serverType"), @QueryParam("serverLanguage"), @QueryParam("serverVersion")},
             output = ApiServerTrackerInfoMap.class
     )
     @Produces(MediaType.APPLICATION_JSON)
     public Response kickQueue(@Context ContainerRequestContext requestContext) {
         ApiResult result = this.controllerLogic.kickQueue(
-                ControllerParameterFilter.getBackendServerType(requestContext)
+                ControllerParameterFilter.getServiceIdentity(requestContext)
         );
         return result.getResponse(serializer).build();
     }

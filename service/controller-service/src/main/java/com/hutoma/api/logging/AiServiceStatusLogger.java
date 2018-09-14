@@ -1,6 +1,7 @@
 package com.hutoma.api.logging;
 
 import com.hutoma.api.connectors.BackendServerType;
+import com.hutoma.api.containers.ServiceIdentity;
 import com.hutoma.api.containers.sub.AiStatus;
 import com.hutoma.api.containers.sub.ServerAffinity;
 import com.hutoma.api.containers.sub.ServerAiEntry;
@@ -23,6 +24,8 @@ public class AiServiceStatusLogger extends CentralLogger {
     private static final String AICOUNT = "AiCount";
     private static final String AICOUNTUPDATED = "AiCountUpdated";
     private static final String SERVER = "Server";
+    private static final String ENGINELANGUAGE = "Language";
+    private static final String ENGINEVERSION = "Version";
     private static final String OPERATION = "Op";
 
     private static String logUuid(UUID uuid) {
@@ -89,16 +92,22 @@ public class AiServiceStatusLogger extends CentralLogger {
                 null, new LogMap(logParameters));
     }
 
-    public void logDebugQueueAction(String logFrom, String operation, BackendServerType serverType,
-                                    UUID aiid, UUID devid, String serverIdentifier) {
+    public void logDebugQueueAction(final String logFrom,
+                                    final String operation,
+                                    final ServiceIdentity serviceIdentity,
+                                    final UUID aiid,
+                                    final UUID devid,
+                                    final String serverIdentifier) {
         LogMap logMap = LogMap.map("Action", "Queue")
                 .put(OPERATION, operation)
-                .put(AIENGINE, serverType.value())
+                .put(AIENGINE, serviceIdentity.getServerType().value())
+                .put(ENGINELANGUAGE, serviceIdentity.getLanguage().toString())
+                .put(ENGINEVERSION, serviceIdentity.getVersion())
                 .put(DEVID, devid)
                 .put(AIID, aiid);
         this.logDebug(logFrom,
                 String.format("Processing %s %s ai %s on %s",
-                        serverType.value(), operation, logUuid(aiid), serverIdentifier),
+                        serviceIdentity.toString(), operation, logUuid(aiid), serverIdentifier),
                 logMap);
     }
 

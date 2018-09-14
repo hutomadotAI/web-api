@@ -8,6 +8,8 @@ import com.hutoma.api.connectors.InvocationResult;
 import com.hutoma.api.connectors.ServerConnector;
 import com.hutoma.api.connectors.db.DatabaseAiStatusUpdates;
 import com.hutoma.api.connectors.db.DatabaseException;
+import com.hutoma.api.containers.ServiceIdentity;
+import com.hutoma.api.containers.sub.AiIdentity;
 import com.hutoma.api.containers.sub.DevPlan;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
@@ -43,23 +45,30 @@ public class AIQueueServices extends ServerConnector {
     /***
      * Call from queued task to backend to delete an AI
      *
-     * @param serverType
+     * @param serviceIdentity
      * @param devId
      * @param aiid
      * @param endpoint
      * @param serverIdentifier
      * @throws AiServicesException
      */
-    public void deleteAIDirect(final BackendServerType serverType, final UUID devId, final UUID aiid,
-                               final String endpoint, final String serverIdentifier) throws AiServicesException {
+    public void deleteAIDirect(final ServiceIdentity serviceIdentity,
+                               final UUID devId,
+                               final UUID aiid,
+                               final String endpoint,
+                               final String serverIdentifier)
+            throws AiServicesException {
+
         HashMap<String, Callable<InvocationResult>> callables = new HashMap<>();
         final String devIdString = devId.toString();
         LogMap logMap = LogMap.map("Op", "delete")
-                .put("Type", serverType.value())
+                .put("Type", serviceIdentity.getServerType().value())
+                .put("Language", serviceIdentity.getLanguage().toString())
+                .put("Version", serviceIdentity.getVersion())
                 .put("Server", serverIdentifier)
                 .put("AIID", aiid);
         this.logger.logUserInfoEvent(LOGFROM,
-                String.format("Sending \"delete\" %s to %s", aiid.toString(), serverType.value()),
+                String.format("Sending \"delete\" %s to %s", aiid.toString(), serviceIdentity.toString()),
                 devIdString, logMap);
 
         callables.put(endpoint, () -> new InvocationResult(
@@ -78,33 +87,48 @@ public class AIQueueServices extends ServerConnector {
     /***
      * Call from queued task to backend to start training
      *
-     * @param serverType
-     * @param devId
-     * @param aiid
+     * @param serviceIdentity
+     * @param aiIdentity
      * @param serverUrl
      * @param serverIdentifier
      * @throws AiServicesException
      */
-    public void startTrainingDirect(final BackendServerType serverType,
-                                    final UUID devId, final UUID aiid,
+    public void startTrainingDirect(final ServiceIdentity serviceIdentity,
+                                    final AiIdentity aiIdentity,
                                     final String serverUrl, final String serverIdentifier) throws AiServicesException {
         // first get the devplan to load training parameters
         DevPlan devPlan;
+
+        // Should not happen, but just in case
+        if (serviceIdentity.getLanguage() != aiIdentity.getLanguage()
+                || !serviceIdentity.getVersion().equals(aiIdentity.getServerVersion())) {
+            throw new AiServicesException(String.format(
+                    "Mismatch in AI and Service: version %s(ai) %s(svc) language %s(ai) %s(svc)",
+                    aiIdentity.getServerVersion(),
+                    serviceIdentity.getVersion(),
+                    aiIdentity.getLanguage().toString(),
+                    serviceIdentity.getLanguage().toString()
+            ));
+        }
+
         try {
-            devPlan = this.databaseAiStatusUpdates.getDevPlan(devId);
+            devPlan = this.databaseAiStatusUpdates.getDevPlan(aiIdentity.getDevId());
         } catch (DatabaseException ex) {
-            throw new AiServicesException("Could not get plan for devId " + devId);
+            throw new AiServicesException("Could not get plan for devId " + aiIdentity.getDevId());
         }
 
         LogMap logMap = LogMap.map("Op", "train-start")
-                .put("Type", serverType.value())
+                .put("Type", serviceIdentity.getServerType().value())
+                .put("Language", serviceIdentity.getLanguage().toString())
+                .put("Version", serviceIdentity.getVersion())
                 .put("Server", serverIdentifier)
-                .put("AIID", aiid);
+                .put("AIID", aiIdentity.getAiid());
         this.logger.logUserInfoEvent(LOGFROM,
-                String.format("Sending \"start\" %s to %s", aiid.toString(), serverType.value()),
-                devId.toString(), logMap);
+                String.format("Sending \"start\" %s to %s", aiIdentity.getAiid().toString(),
+                        serviceIdentity.toString()), aiIdentity.getDevId().toString(), logMap);
 
-        HashMap<String, Callable<InvocationResult>> callables = getTrainingCallableForEndpoint(devId, aiid, serverUrl,
+        HashMap<String, Callable<InvocationResult>> callables = getTrainingCallableForEndpoint(
+                aiIdentity, serverUrl,
                 new HashMap<String, String>() {{
                     put(COMMAND_PARAM, "start");
                     put(TRAINING_TIME_ALLOWED_PARAM, Integer.toString(devPlan.getMaxTrainingMins()));

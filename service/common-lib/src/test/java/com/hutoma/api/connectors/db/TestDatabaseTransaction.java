@@ -5,12 +5,15 @@ import com.hutoma.api.logging.ILogger;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Matchers;
 import org.mockito.Mockito;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Arrays;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 
 /**
  * Created by David MG on 13/10/2016.
@@ -142,8 +145,8 @@ public class TestDatabaseTransaction {
 
     TransactionalDatabaseCall mockDBCall() throws DatabaseException {
         TransactionalDatabaseCall call = Mockito.mock(TransactionalDatabaseCall.class);
-        Mockito.when(call.setTransactionConnection(Matchers.any())).thenReturn(call);
-        Mockito.when(call.initialise(Matchers.anyString(), Matchers.anyInt())).thenReturn(call);
+        Mockito.when(call.setTransactionConnection(any())).thenReturn(call);
+        Mockito.when(call.initialise(anyString(), anyInt())).thenReturn(call);
         return call;
     }
 }

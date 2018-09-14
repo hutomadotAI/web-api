@@ -1,6 +1,7 @@
 package com.hutoma.api.connectors.aiservices;
 
 import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.common.SupportedLanguage;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.BackendEngineStatus;
 import com.hutoma.api.connectors.BackendServerType;
@@ -12,6 +13,8 @@ import com.hutoma.api.connectors.ServerConnector;
 import com.hutoma.api.connectors.ServerTrackerInfo;
 import com.hutoma.api.connectors.db.Database;
 import com.hutoma.api.connectors.db.DatabaseException;
+import com.hutoma.api.containers.ServiceIdentity;
+import com.hutoma.api.containers.sub.AiIdentity;
 import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
@@ -54,11 +57,14 @@ public class AiServicesQueue extends ServerConnector {
             throws DatabaseException {
         // get the current status
         BackendEngineStatus engineStatus = status.getEngineStatus(serverType);
+        ServiceIdentity serviceIdentity =
+                new ServiceIdentity(serverType, SupportedLanguage.EN, ServiceIdentity.DEFAULT_VERSION);
         // set the status to training_queued without changing the progress
-        this.database.updateAIStatus(serverType, aiid, TrainingStatus.AI_TRAINING_QUEUED, "",
+        this.database.updateAIStatus(serviceIdentity,
+                aiid, TrainingStatus.AI_TRAINING_QUEUED, "",
                 engineStatus.getTrainingProgress(), engineStatus.getTrainingError());
         // queue this AI for training
-        this.database.queueUpdate(serverType, aiid, true, 0, QueueAction.TRAIN);
+        this.database.queueUpdate(serviceIdentity, aiid, true, 0, QueueAction.TRAIN);
     }
 
     /***
@@ -123,7 +129,9 @@ public class AiServicesQueue extends ServerConnector {
                             break;
                     }
                     // copy the old fields but set new status
-                    this.database.updateAIStatus(serverType, aiid, newStatus,
+                    this.database.updateAIStatus(
+                            new ServiceIdentity(serverType, SupportedLanguage.EN, ServiceIdentity.DEFAULT_VERSION),
+                            aiid, newStatus,
                             status.getServerIdentifier(), status.getTrainingProgress(), status.getTrainingError());
                 }
             }
@@ -154,8 +162,9 @@ public class AiServicesQueue extends ServerConnector {
         // if we are training then stop immediately
         stopTrainingIfActive(backendStatus, serverType, controller, devid, aiid, true);
         // queue the action to delete, only run this some time in the future after the ai is fully stopped
-        this.database.queueUpdate(serverType, aiid,
-                true, 10, QueueAction.DELETE);
+        this.database.queueUpdate(
+                new ServiceIdentity(serverType, SupportedLanguage.EN, ServiceIdentity.DEFAULT_VERSION),
+                aiid, true, 10, QueueAction.DELETE);
     }
 
     /***
@@ -171,14 +180,16 @@ public class AiServicesQueue extends ServerConnector {
     void userActionUpload(final BackendStatus backendStatus, final BackendServerType serverType,
                           final ControllerConnector controller, final UUID devid, final UUID aiid)
             throws DatabaseException, AiServicesException {
+        ServiceIdentity serviceIdentity = new ServiceIdentity(serverType, SupportedLanguage.EN,
+                ServiceIdentity.DEFAULT_VERSION);
         // send a stop training command if necessary
         stopTrainingIfActive(backendStatus, serverType, controller, devid, aiid, false);
         // set the status to undefined while we upload.
         // when the back-end is ready it will call back to say ready_to_train
-        this.database.updateAIStatus(serverType, aiid,
+        this.database.updateAIStatus(serviceIdentity, aiid,
                 TrainingStatus.AI_UNDEFINED, "", 0.0, 9999.0);
         // clear the queue state
-        this.database.queueUpdate(serverType, aiid, false, 0, QueueAction.NONE);
+        this.database.queueUpdate(serviceIdentity, aiid, false, 0, QueueAction.NONE);
     }
 
     /***
@@ -204,9 +215,10 @@ public class AiServicesQueue extends ServerConnector {
                 devId.toString(), logMap);
 
         HashMap<String, Callable<InvocationResult>> callables =
-                getTrainingCallableForEndpoint(devId, aiid, serverEndpoint, new HashMap<String, String>() {{
-                    put(COMMAND_PARAM, "stop");
-                }});
+                getTrainingCallableForEndpoint(new AiIdentity(devId, aiid), serverEndpoint,
+                        new HashMap<String, String>() {{
+                            put(COMMAND_PARAM, "stop");
+                        }});
         executeAndWait(callables);
     }
 }

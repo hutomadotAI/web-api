@@ -7,6 +7,8 @@ public enum ControllerParameter {
     AIID,
     RequestFor,
     ServerType,
+    ServerLanguage,
+    ServerVersion,
     AiStatusJson,
     ServerRegistration,
     ServerAffinity,

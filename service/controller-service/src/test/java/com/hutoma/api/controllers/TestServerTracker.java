@@ -1,10 +1,8 @@
 package com.hutoma.api.controllers;
 
-import com.hutoma.api.common.ControllerConfig;
-import com.hutoma.api.common.FakeTimerTools;
-import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.common.Tools;
+import com.hutoma.api.common.*;
 import com.hutoma.api.connectors.BackendServerType;
+import com.hutoma.api.containers.ServiceIdentity;
 import com.hutoma.api.containers.sub.ServerRegistration;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.thread.ThreadSubPool;
@@ -36,7 +34,8 @@ public class TestServerTracker {
         this.testClass = new ServerTrackerUnderTest(this.fakeConfig, this.tools,
                 mock(JerseyClient.class), mock(JsonSerializer.class), mock(ILogger.class),
                 mock(ThreadSubPool.class));
-        this.testClass.trackServer(new ServerRegistration(BackendServerType.EMB, "url", 1, 1));
+        this.testClass.trackServer(new ServerRegistration(BackendServerType.EMB, "url", 1, 1,
+                SupportedLanguage.EN, ServiceIdentity.DEFAULT_VERSION));
     }
 
     @Test

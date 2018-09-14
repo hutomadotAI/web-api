@@ -132,7 +132,7 @@ public class TestChatLogicHandover  extends TestChatBase {
         ChatWorkflow chatWorkflow = mock(ChatWorkflow.class);
         ChatEmbHandler backendHandler = mock(ChatEmbHandler.class);
         try {
-            when(this.fakeChatServices.awaitBackend(BackendServerType.SVM)).thenReturn(
+            when(this.fakeChatServices.awaitBackend(BackendServerType.EMB)).thenReturn(
                     new HashMap<UUID, ChatResult>() {{put(UUID.fromString(initialState.getAi().getAiid()), chatResult);}});
         } catch (ChatBackendConnector.AiControllerException ex) {
             Assert.fail(ex.getMessage());

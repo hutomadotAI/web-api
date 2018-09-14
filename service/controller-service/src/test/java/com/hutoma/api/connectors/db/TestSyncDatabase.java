@@ -47,7 +47,7 @@ public class TestSyncDatabase {
     UUID devid1;
 
     @Before
-    public void setup() throws DatabaseException {
+    public void setup() {
         this.parameterList = new ArrayList<>();
         this.serializer = new JsonSerializer();
         this.tools = new FakeTimerTools();
@@ -62,8 +62,7 @@ public class TestSyncDatabase {
     @Test
     public void noAIs__noBackend_noChanges() throws Exception {
         DatabaseAiStatusUpdates database = fakeDatabaseCalls(Arrays.asList());
-        database.synchroniseDBStatuses(this.serializer, BackendServerType.EMB,
-                new HashMap<>(), new HashSet<UUID>());
+        database.synchroniseDBStatuses(BackendServerType.EMB, new HashMap<>(), new HashSet<UUID>());
         Assert.assertTrue(this.parameterList.isEmpty());
     }
 
@@ -75,8 +74,7 @@ public class TestSyncDatabase {
         List<FakeRecord> records = new ArrayList<>();
 
         DatabaseAiStatusUpdates database = fakeDatabaseCalls(records);
-        database.synchroniseDBStatuses(this.serializer, BackendServerType.EMB,
-                registration, new HashSet<UUID>());
+        database.synchroniseDBStatuses(BackendServerType.EMB, registration, new HashSet<UUID>());
         Assert.assertTrue(this.parameterList.isEmpty());
         verify(this.logger, times(1)).logDbSyncUnknownAi(any(), any(), any());
     }
@@ -91,7 +89,7 @@ public class TestSyncDatabase {
                 TrainingStatus.AI_TRAINING_COMPLETE);
 
         DatabaseAiStatusUpdates database = fakeDatabaseCalls(records);
-        database.synchroniseDBStatuses(this.serializer, BackendServerType.EMB,
+        database.synchroniseDBStatuses(BackendServerType.EMB,
                 registration, new HashSet<UUID>() {{
                     add(TestSyncDatabase.this.aiid1);
                 }});
@@ -109,7 +107,7 @@ public class TestSyncDatabase {
         List<FakeRecord> records = addDatabaseData(null, this.devid1, this.aiid1, null);
 
         DatabaseAiStatusUpdates database = fakeDatabaseCalls(records);
-        database.synchroniseDBStatuses(this.serializer, BackendServerType.EMB,
+        database.synchroniseDBStatuses(BackendServerType.EMB,
                 registration, new HashSet<UUID>());
         Assert.assertTrue(this.parameterList.isEmpty());
     }
@@ -122,7 +120,7 @@ public class TestSyncDatabase {
                 TrainingStatus.AI_UNDEFINED);
 
         DatabaseAiStatusUpdates database = fakeDatabaseCalls(records);
-        database.synchroniseDBStatuses(this.serializer, BackendServerType.EMB,
+        database.synchroniseDBStatuses(BackendServerType.EMB,
                 registration, new HashSet<UUID>());
         Assert.assertTrue(this.parameterList.isEmpty());
     }
@@ -136,7 +134,7 @@ public class TestSyncDatabase {
                 TrainingStatus.AI_TRAINING);
 
         DatabaseAiStatusUpdates database = fakeDatabaseCalls(records);
-        database.synchroniseDBStatuses(this.serializer, BackendServerType.EMB,
+        database.synchroniseDBStatuses(BackendServerType.EMB,
                 registration, new HashSet<UUID>());
         Assert.assertTrue(this.parameterList.isEmpty());
     }
@@ -150,7 +148,7 @@ public class TestSyncDatabase {
                 TrainingStatus.AI_TRAINING);
 
         DatabaseAiStatusUpdates database = fakeDatabaseCalls(records);
-        database.synchroniseDBStatuses(this.serializer, BackendServerType.EMB,
+        database.synchroniseDBStatuses(BackendServerType.EMB,
                 regData, new HashSet<>());
 
         Assert.assertEquals(1, this.parameterList.size());
@@ -174,8 +172,7 @@ public class TestSyncDatabase {
         addDatabaseData(records, this.devid1, aiid2, TrainingStatus.AI_TRAINING);
 
         DatabaseAiStatusUpdates database = fakeDatabaseCalls(records);
-        database.synchroniseDBStatuses(this.serializer, BackendServerType.EMB,
-                regData, new HashSet<>());
+        database.synchroniseDBStatuses(BackendServerType.EMB, regData, new HashSet<>());
 
         Assert.assertEquals(0, this.parameterList.size());
     }
@@ -195,8 +192,7 @@ public class TestSyncDatabase {
         addDatabaseData(records, devid2, aiid2, TrainingStatus.AI_TRAINING);
 
         DatabaseAiStatusUpdates database = fakeDatabaseCalls(records);
-        database.synchroniseDBStatuses(this.serializer, BackendServerType.EMB,
-                regData, new HashSet<UUID>());
+        database.synchroniseDBStatuses(BackendServerType.EMB, regData, new HashSet<UUID>());
 
         Assert.assertEquals(2, this.parameterList.size());
 
@@ -233,7 +229,7 @@ public class TestSyncDatabase {
     }
 
     private DatabaseAiStatusUpdates fakeDatabaseCalls(List<FakeRecord> records)
-            throws DatabaseException, SQLException {
+            throws DatabaseException {
         DatabaseTransaction transaction = mock(DatabaseTransaction.class);
         when(this.transactionProvider.get()).thenReturn(transaction);
         DatabaseCall databaseCall = mock(DatabaseCall.class);

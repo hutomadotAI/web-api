@@ -2,9 +2,11 @@ package com.hutoma.api.controllers;
 
 import com.hutoma.api.common.ControllerConfig;
 import com.hutoma.api.common.FakeTimerTools;
+import com.hutoma.api.common.SupportedLanguage;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.BackendServerType;
 import com.hutoma.api.connectors.NoServerAvailableException;
+import com.hutoma.api.containers.ServiceIdentity;
 import com.hutoma.api.containers.sub.ServerRegistration;
 import com.hutoma.api.logging.AiServiceStatusLogger;
 import com.hutoma.api.logging.ILogger;
@@ -409,7 +411,8 @@ public class TestServerMetadata {
     private ServerTracker makeServerTracker(int trainingCapacity, int chatCapacity) {
         ServerTracker server = new FakeServerTracker(this.config, this.tools, this.logger);
         UUID uuid = server.trackServer(new ServerRegistration(
-                BackendServerType.EMB, "url:" + tools.generateRandomHexString(4), trainingCapacity, chatCapacity));
+                BackendServerType.EMB, "url:" + tools.generateRandomHexString(4), trainingCapacity, chatCapacity,
+                SupportedLanguage.EN, ServiceIdentity.DEFAULT_VERSION));
         this.test.addNewSession(uuid, server);
         return server;
     }

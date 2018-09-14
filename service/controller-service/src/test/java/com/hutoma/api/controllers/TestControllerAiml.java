@@ -1,9 +1,11 @@
 package com.hutoma.api.controllers;
 
 import com.hutoma.api.common.ControllerConfig;
+import com.hutoma.api.common.SupportedLanguage;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.BackendServerType;
 import com.hutoma.api.connectors.NoServerAvailableException;
+import com.hutoma.api.containers.ServiceIdentity;
 import com.hutoma.api.containers.sub.ServerRegistration;
 import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.logging.AiServiceStatusLogger;
@@ -87,7 +89,8 @@ public class TestControllerAiml {
     private UUID registerServer(UUID aiid) {
         //ServerTracker server = new FakeServerTracker(this.config, this.tools, this.logger);
         ServerRegistration sr = new ServerRegistration(
-                BackendServerType.AIML, "url1", 1, 1);
+                BackendServerType.AIML, "url1", 1, 1,
+                SupportedLanguage.EN, ServiceIdentity.DEFAULT_VERSION);
         sr.addAI(aiid, TrainingStatus.AI_TRAINING_COMPLETE, "hash");
         return this.test.registerServer(sr);
     }

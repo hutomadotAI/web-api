@@ -2,6 +2,7 @@ package com.hutoma.api.connectors.db;
 
 import com.hutoma.api.connectors.BackendServerType;
 import com.hutoma.api.connectors.QueueAction;
+import com.hutoma.api.containers.ServiceIdentity;
 import com.hutoma.api.containers.sub.AiStatus;
 import com.hutoma.api.containers.sub.DevPlan;
 import com.hutoma.api.containers.sub.RateLimitStatus;
@@ -92,19 +93,27 @@ public class Database {
 
     public boolean updateAIStatus(final AiStatus status)
             throws DatabaseException {
-        return updateAIStatus(status.getAiEngine(), status.getAiid(), status.getTrainingStatus(),
-                status.getServerIdentifier(), status.getTrainingProgress(), status.getTrainingError());
+        return updateAIStatus(
+                new ServiceIdentity(status.getAiEngine(), status.getAiEngineLanguage(), status.getAiEngineVersion()),
+                status.getAiid(), status.getTrainingStatus(), status.getServerIdentifier(),
+                status.getTrainingProgress(), status.getTrainingError());
     }
 
-    public boolean updateAIStatus(BackendServerType serverType, UUID aiid, TrainingStatus trainingStatus,
-                                  String endpoint, double trainingProgress, double trainingError)
+    public boolean updateAIStatus(final ServiceIdentity serviceIdentity,
+                                  final UUID aiid,
+                                  final TrainingStatus trainingStatus,
+                                  final String endpoint,
+                                  final double trainingProgress,
+                                  final double trainingError)
             throws DatabaseException {
 
         // open a transaction since this is a read/modify/write operation and we need consistency
         try (DatabaseTransaction transaction = this.transactionProvider.get()) {
 
-            transaction.getDatabaseCall().initialise("updateAiStatus", 6)
-                    .add(serverType.value())
+            transaction.getDatabaseCall().initialise("updateAiStatus", 8)
+                    .add(serviceIdentity.getServerType().value())
+                    .add(serviceIdentity.getLanguage().toString())
+                    .add(serviceIdentity.getVersion())
                     .add(aiid)
                     .add(trainingStatus)
                     .add(endpoint)
@@ -123,20 +132,25 @@ public class Database {
 
     /***
      * Update the queue status for(servertype, aiid) without affecting AI status values
-     * @param serverType
+     * @param serviceIdentity
      * @param aiid
      * @param setQueued
      * @param queueOffsetSeconds
      * @param action
      * @throws DatabaseException
      */
-    public void queueUpdate(BackendServerType serverType, UUID aiid, boolean setQueued,
-                            int queueOffsetSeconds, QueueAction action) throws DatabaseException {
+    public void queueUpdate(final ServiceIdentity serviceIdentity,
+                            final UUID aiid,
+                            final boolean setQueued,
+                            final int queueOffsetSeconds,
+                            final QueueAction action) throws DatabaseException {
 
         try (DatabaseTransaction transaction = this.transactionProvider.get()) {
 
-            transaction.getDatabaseCall().initialise("queueUpdate", 5)
-                    .add(serverType.value())
+            transaction.getDatabaseCall().initialise("queueUpdate", 7)
+                    .add(serviceIdentity.getServerType().value())
+                    .add(serviceIdentity.getLanguage().toString())
+                    .add(serviceIdentity.getVersion())
                     .add(aiid)
                     .add(setQueued)
                     .add(queueOffsetSeconds)

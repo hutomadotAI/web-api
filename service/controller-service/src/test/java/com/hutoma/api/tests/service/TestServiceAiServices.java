@@ -1,10 +1,12 @@
 package com.hutoma.api.tests.service;
 
 import com.hutoma.api.common.ControllerConfig;
+import com.hutoma.api.common.SupportedLanguage;
 import com.hutoma.api.common.TestDataHelper;
 import com.hutoma.api.connectors.BackendEngineStatus;
 import com.hutoma.api.connectors.BackendServerType;
 import com.hutoma.api.connectors.db.DatabaseException;
+import com.hutoma.api.containers.ServiceIdentity;
 import com.hutoma.api.containers.sub.AiStatus;
 import com.hutoma.api.containers.sub.ServerAffinity;
 import com.hutoma.api.containers.sub.ServerRegistration;
@@ -80,7 +82,8 @@ public class TestServiceAiServices extends ServiceTestBase {
 
     @Test
     public void testServerRegister() {
-        ServerRegistration emb = new ServerRegistration(BackendServerType.EMB, "http://test:8000/server", 2, 2);
+        ServerRegistration emb = new ServerRegistration(BackendServerType.EMB, "http://test:8000/server", 2, 2,
+            SupportedLanguage.EN, ServiceIdentity.DEFAULT_VERSION);
         emb.addAI(ServiceTestBase.AIID, TrainingStatus.AI_TRAINING_COMPLETE, "hash");
         String json = this.serializeObject(emb);
         final Response response = sendRegistrationRequest(json);
@@ -89,7 +92,8 @@ public class TestServiceAiServices extends ServiceTestBase {
 
     @Test
     public void testServerRegister_nullAIID() {
-        ServerRegistration emb = new ServerRegistration(BackendServerType.EMB, "http://test:8000/server", 2, 2);
+        ServerRegistration emb = new ServerRegistration(BackendServerType.EMB, "http://test:8000/server", 2, 2,
+                SupportedLanguage.EN, ServiceIdentity.DEFAULT_VERSION);
         emb.addAI(null, TrainingStatus.AI_TRAINING_COMPLETE, "hash");
         String json = this.serializeObject(emb);
         final Response response = sendRegistrationRequest(json);
@@ -98,7 +102,8 @@ public class TestServiceAiServices extends ServiceTestBase {
 
     @Test
     public void testServerRegister_badAIID() {
-        ServerRegistration emb = new ServerRegistration(BackendServerType.EMB, "http://test:8000/server", 2, 2);
+        ServerRegistration emb = new ServerRegistration(BackendServerType.EMB, "http://test:8000/server", 2, 2,
+                SupportedLanguage.EN, ServiceIdentity.DEFAULT_VERSION);
         emb.addAI(ServiceTestBase.AIID, TrainingStatus.AI_TRAINING_COMPLETE, "hash");
         String json = this.serializeObject(emb).replace(ServiceTestBase.AIID.toString(), "be108d4e-9aed-4876-bxdc1-cfbf9ba1146a");
         final Response response = sendRegistrationRequest(json);
@@ -107,7 +112,8 @@ public class TestServiceAiServices extends ServiceTestBase {
 
     @Test
     public void testServerRegister_nullStatus() {
-        ServerRegistration emb = new ServerRegistration(BackendServerType.EMB, "http://test:8000/server", 2, 2);
+        ServerRegistration emb = new ServerRegistration(BackendServerType.EMB, "http://test:8000/server", 2, 2,
+                SupportedLanguage.EN, ServiceIdentity.DEFAULT_VERSION);
         emb.addAI(ServiceTestBase.AIID, null, "hash");
         String json = this.serializeObject(emb);
         final Response response = sendRegistrationRequest(json);
@@ -116,7 +122,8 @@ public class TestServiceAiServices extends ServiceTestBase {
 
     @Test
     public void testServerRegister_badStatus() {
-        ServerRegistration emb = new ServerRegistration(BackendServerType.EMB, "http://test:8000/server", 2, 2);
+        ServerRegistration emb = new ServerRegistration(BackendServerType.EMB, "http://test:8000/server", 2, 2,
+                SupportedLanguage.EN, ServiceIdentity.DEFAULT_VERSION);
         emb.addAI(ServiceTestBase.AIID, TrainingStatus.AI_TRAINING_COMPLETE, "hash");
         String json = this.serializeObject(emb).replace(TrainingStatus.AI_TRAINING_COMPLETE.value(), "wrong_string");
         final Response response = sendRegistrationRequest(json);
@@ -125,7 +132,8 @@ public class TestServiceAiServices extends ServiceTestBase {
 
     @Test
     public void testServerRegister_WrongServerType() {
-        ServerRegistration emb = new ServerRegistration(BackendServerType.EMB, "http://test:8000/server", 2, 2);
+        ServerRegistration emb = new ServerRegistration(BackendServerType.EMB, "http://test:8000/server", 2, 2,
+                SupportedLanguage.EN, ServiceIdentity.DEFAULT_VERSION);
         emb.addAI(ServiceTestBase.AIID, TrainingStatus.AI_TRAINING_COMPLETE, "hash");
         String json = this.serializeObject(emb).replace("emb", "other");
         final Response response = sendRegistrationRequest(json);
@@ -134,7 +142,7 @@ public class TestServiceAiServices extends ServiceTestBase {
 
     @Test
     public void testServerAffinity() {
-        when(this.fakeControllerEmb.updateAffinity(any(), any())).thenReturn(true);
+        when(this.fakeController.updateAffinity(any(), any())).thenReturn(true);
         ServerAffinity affinity = new ServerAffinity(ServiceTestBase.DEVID, Collections.singletonList(ServiceTestBase.AIID));
         String json = this.serializeObject(affinity);
         final Response response = sendAffinityRequest(json);
@@ -143,9 +151,9 @@ public class TestServiceAiServices extends ServiceTestBase {
 
     @Test
     public void testServerAffinity_BadSession() {
-        when(this.fakeControllerEmb.updateAffinity(any(), any())).thenReturn(false);
+        when(this.fakeController.updateAffinity(any(), any())).thenReturn(false);
         when(this.fakeControllerAiml.updateAffinity(any(), any())).thenReturn(false);
-        when(this.fakeControllerEmb.updateAffinity(any(), any())).thenReturn(false);
+        when(this.fakeController.updateAffinity(any(), any())).thenReturn(false);
         ServerAffinity affinity = new ServerAffinity(ServiceTestBase.DEVID, Collections.singletonList(ServiceTestBase.AIID));
         String json = this.serializeObject(affinity);
         final Response response = sendAffinityRequest(json);
@@ -158,35 +166,35 @@ public class TestServiceAiServices extends ServiceTestBase {
         when(this.fakeDatabaseStatusUpdates.getAiQueueStatus(any(), any())).thenReturn(
                 new BackendEngineStatus(TrainingStatus.AI_TRAINING_QUEUED, 0.0, 0.0));
         String statusJson = this.serializeObject(new AiStatus(ServiceTestBase.DEVID.toString(), ServiceTestBase.AIID,
-                TrainingStatus.AI_READY_TO_TRAIN, BackendServerType.EMB,
+                TrainingStatus.AI_READY_TO_TRAIN, BackendServerType.EMB, SupportedLanguage.EN, ServiceIdentity.DEFAULT_VERSION,
                 0.0, 0.0, "hash",
                 TestDataHelper.SESSIONID));
         final Response response = sendStatusUpdateRequest(statusJson);
-        verify(this.fakeControllerEmb, times(1)).setHashCodeFor(ServiceTestBase.AIID, "hash");
+        verify(this.fakeController, times(1)).setHashCodeFor(ServiceTestBase.AIID, "hash");
         verify(this.fakeControllerAiml, never()).setHashCodeFor(ServiceTestBase.AIID, "hash");
     }
 
     @Test
     public void testServerRegister_Hashcodes() {
-        when(this.fakeControllerEmb.isPrimaryMaster(any())).thenReturn(true);
+        when(this.fakeController.isPrimaryMaster(any())).thenReturn(true);
         ServerRegistration emb = new ServerRegistration(BackendServerType.EMB,
-                "http://test:8000/server", 2, 2);
+                "http://test:8000/server", 2, 2, SupportedLanguage.EN, ServiceIdentity.DEFAULT_VERSION);
         emb.addAI(ServiceTestBase.AIID, TrainingStatus.AI_TRAINING_COMPLETE, "hash");
         String json = this.serializeObject(emb);
         final Response response = sendRegistrationRequest(json);
-        verify(this.fakeControllerEmb, times(1)).setAllHashCodes(any());
+        verify(this.fakeController, times(1)).setAllHashCodes(any());
         verify(this.fakeControllerAiml, never()).setAllHashCodes(any());
     }
 
     @Test
     public void testServerRegister_Hashcodes_IgnoreNonMaster() {
-        when(this.fakeControllerEmb.isPrimaryMaster(any())).thenReturn(false);
+        when(this.fakeController.isPrimaryMaster(any())).thenReturn(false);
         ServerRegistration emb = new ServerRegistration(BackendServerType.EMB,
-                "http://test:8000/server", 2, 2);
+                "http://test:8000/server", 2, 2, SupportedLanguage.EN, ServiceIdentity.DEFAULT_VERSION);
         emb.addAI(ServiceTestBase.AIID, TrainingStatus.AI_TRAINING_COMPLETE, "hash");
         String json = this.serializeObject(emb);
         final Response response = sendRegistrationRequest(json);
-        verify(this.fakeControllerEmb, never()).setAllHashCodes(any());
+        verify(this.fakeController, never()).setAllHashCodes(any());
         verify(this.fakeControllerAiml, never()).setAllHashCodes(any());
     }
 
@@ -228,7 +236,7 @@ public class TestServiceAiServices extends ServiceTestBase {
 
     private String getCommonAiStatusJson() {
         return this.serializeObject(new AiStatus(ServiceTestBase.DEVID.toString(), ServiceTestBase.AIID,
-                TrainingStatus.AI_READY_TO_TRAIN, ServiceTestBase.AI_ENGINE,
+                TrainingStatus.AI_READY_TO_TRAIN, ServiceTestBase.AI_ENGINE, SupportedLanguage.EN, ServiceIdentity.DEFAULT_VERSION,
                 0.0, 0.0, "hash",
                 TestDataHelper.SESSIONID));
     }

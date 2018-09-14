@@ -1,6 +1,7 @@
 package com.hutoma.api.controllers;
 
 import com.hutoma.api.common.ControllerConfig;
+import com.hutoma.api.common.SupportedLanguage;
 import com.hutoma.api.common.TestDataHelper;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.BackendEngineStatus;
@@ -9,6 +10,7 @@ import com.hutoma.api.connectors.QueueAction;
 import com.hutoma.api.connectors.ServerConnector;
 import com.hutoma.api.connectors.db.DatabaseAiStatusUpdates;
 import com.hutoma.api.connectors.db.DatabaseException;
+import com.hutoma.api.containers.ServiceIdentity;
 import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.logging.AiServiceStatusLogger;
 
@@ -132,7 +134,7 @@ public class TestQueueProcessorCommand {
         when(this.fakeDatabase.getAiQueueStatus(any(), any())).thenReturn(this.status);
         this.qproc.unqueueTrain(this.status, this.fakeServerTracker);
         verify(this.fakeQueueServices, times(1))
-                .startTrainingDirect(any(), any(), any(), anyString(), anyString());
+                .startTrainingDirect(any(), any(), anyString(), anyString());
         verify(this.fakeDatabase, times(1)).updateAIStatus(
                 any(), any(), any(), anyString(), anyDouble(), anyDouble());
     }
@@ -144,7 +146,7 @@ public class TestQueueProcessorCommand {
         when(this.fakeDatabase.getAiQueueStatus(any(), any())).thenThrow(new DatabaseException("test"));
         this.qproc.unqueueTrain(this.status, this.fakeServerTracker);
         verify(this.fakeQueueServices, never())
-                .startTrainingDirect(any(), any(), any(), anyString(), anyString());
+                .startTrainingDirect(any(), any(), anyString(), anyString());
         verify(this.fakeDatabase, never()).updateAIStatus(
                 any(), any(), any(), anyString(), anyDouble(), anyDouble());
     }
@@ -156,7 +158,7 @@ public class TestQueueProcessorCommand {
         when(this.fakeDatabase.getAiQueueStatus(any(), any())).thenReturn(null);
         this.qproc.unqueueTrain(this.status, this.fakeServerTracker);
         verify(this.fakeQueueServices, never())
-                .startTrainingDirect(any(), any(), any(), anyString(), anyString());
+                .startTrainingDirect(any(), any(), anyString(), anyString());
         verify(this.fakeDatabase, never()).updateAIStatus(
                 any(), any(), any(), anyString(), anyDouble(), anyDouble());
     }
@@ -167,7 +169,7 @@ public class TestQueueProcessorCommand {
             DatabaseException, ServerConnector.AiServicesException {
         when(this.fakeDatabase.getAiQueueStatus(any(), any())).thenReturn(this.status);
         doThrow(ServerConnector.AiServicesException.class).when(this.fakeQueueServices)
-                .startTrainingDirect(any(), any(), any(), anyString(), anyString());
+                .startTrainingDirect(any(), any(), anyString(), anyString());
         this.qproc.unqueueTrain(this.status, this.fakeServerTracker);
         verify(this.fakeDatabase, times(1)).updateAIStatus(
                 any(), any(), any(), anyString(), anyDouble(), anyDouble());
@@ -183,7 +185,7 @@ public class TestQueueProcessorCommand {
         ServerConnector.AiServicesException servicesException = new ServerConnector.AiServicesException("fake");
         servicesException.addSuppressed(new ServerConnector.AiServicesException("test", 404));
         doThrow(servicesException).when(this.fakeQueueServices)
-                .startTrainingDirect(any(), any(), any(), anyString(), anyString());
+                .startTrainingDirect(any(), any(), anyString(), anyString());
         this.qproc.unqueueTrain(this.status, this.fakeServerTracker);
         verify(this.fakeDatabase, times(1)).updateAIStatus(
                 any(), any(), eq(TrainingStatus.AI_ERROR), anyString(), anyDouble(), anyDouble());
@@ -199,7 +201,7 @@ public class TestQueueProcessorCommand {
         ServerConnector.AiServicesException servicesException = new ServerConnector.AiServicesException("fake");
         servicesException.addSuppressed(new ServerConnector.AiServicesException("test", 500));
         doThrow(servicesException).when(this.fakeQueueServices)
-                .startTrainingDirect(any(), any(), any(), anyString(), anyString());
+                .startTrainingDirect(any(), any(), anyString(), anyString());
         this.qproc.unqueueTrain(this.status, this.fakeServerTracker);
         verify(this.fakeDatabase, times(1)).updateAIStatus(
                 any(), any(), any(), anyString(), anyDouble(), anyDouble());
@@ -213,7 +215,7 @@ public class TestQueueProcessorCommand {
             DatabaseException, ServerConnector.AiServicesException {
         when(this.fakeDatabase.getAiQueueStatus(any(), any())).thenReturn(this.status);
         doThrow(ServerConnector.AiServicesException.class).when(this.fakeQueueServices)
-                .startTrainingDirect(any(), any(), any(), anyString(), anyString());
+                .startTrainingDirect(any(), any(), anyString(), anyString());
         doThrow(DatabaseException.class).when(this.fakeDatabase)
                 .queueUpdate(any(), any(), anyBoolean(), anyInt(), any());
         this.qproc.unqueueTrain(this.status, this.fakeServerTracker);
@@ -233,7 +235,7 @@ public class TestQueueProcessorCommand {
         when(fakeQueueServicesProvider.get()).thenReturn(this.fakeQueueServices);
         this.qproc = new QueueProcessorCommandTest(this.fakeConfig, this.fakeDatabase,
                 fakeQueueServicesProvider, mock(Tools.class));
-        this.qproc.initialise(this.fakeController, BackendServerType.EMB);
+        this.qproc.initialise(this.fakeController, new ServiceIdentity(BackendServerType.EMB, SupportedLanguage.EN, ServiceIdentity.DEFAULT_VERSION));
 
         this.status = new BackendEngineStatus(
                 TestDataHelper.AIID,
@@ -255,9 +257,9 @@ public class TestQueueProcessorCommand {
 
         @Override
         public void initialise(final ControllerBase controller,
-                               final BackendServerType serverType) {
+                               final ServiceIdentity serviceIdentity) {
             this.controller = controller;
-            this.serverType = serverType;
+            this.serviceIdentity = serviceIdentity;
         }
 
         @Override

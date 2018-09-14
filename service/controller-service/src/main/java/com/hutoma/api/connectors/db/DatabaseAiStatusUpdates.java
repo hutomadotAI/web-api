@@ -5,6 +5,7 @@ import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.connectors.BackendEngineStatus;
 import com.hutoma.api.connectors.BackendServerType;
 import com.hutoma.api.connectors.QueueAction;
+import com.hutoma.api.containers.ServiceIdentity;
 import com.hutoma.api.containers.sub.ServerAiEntry;
 import com.hutoma.api.containers.sub.ServerEndpointTrainingSlots;
 import com.hutoma.api.containers.sub.TrainingStatus;
@@ -39,19 +40,22 @@ public class DatabaseAiStatusUpdates extends Database {
      * Gets a summary of training slot status
      * i.e. for each individual server endpoint a count of active used training slots
      * and a count of used training slots that have not been updated in a while
-     * @param serverType the server type
+     * @param serviceIdentity the server type
      * @param cutoffSeconds seconds that need to have passed for a training slot to be considered 'lapsed'
      * @return a list of endpoint training slots
      * @throws DatabaseException
      */
-    public List<ServerEndpointTrainingSlots> getQueueSlotCounts(
-            BackendServerType serverType, int cutoffSeconds) throws DatabaseException {
+    public List<ServerEndpointTrainingSlots> getQueueSlotCounts(final ServiceIdentity serviceIdentity,
+                                                                final int cutoffSeconds)
+            throws DatabaseException {
 
         List<ServerEndpointTrainingSlots> slots = new ArrayList<>();
         try (DatabaseTransaction transaction = this.transactionProvider.get()) {
 
-            ResultSet rs = transaction.getDatabaseCall().initialise("queueCountSlots", 3)
-                    .add(serverType.value())
+            ResultSet rs = transaction.getDatabaseCall().initialise("queueCountSlots", 5)
+                    .add(serviceIdentity.getServerType().value())
+                    .add(serviceIdentity.getLanguage().toString())
+                    .add(serviceIdentity.getVersion())
                     .add(TrainingStatus.AI_TRAINING.value())
                     .add(cutoffSeconds)
                     .executeQuery();
@@ -72,17 +76,19 @@ public class DatabaseAiStatusUpdates extends Database {
 
     /***
      * Takes the next queued item off the queue and returns it
-     * @param serverType the server type
+     * @param serviceIdentity the server type
      * @return the backend engine status, or null if there aren't any (or any supported)
      * @throws DatabaseException
      */
-    public BackendEngineStatus queueTakeNext(BackendServerType serverType) throws DatabaseException {
+    public BackendEngineStatus queueTakeNext(final ServiceIdentity serviceIdentity) throws DatabaseException {
 
         BackendEngineStatus backendEngineStatus = null;
         try (DatabaseTransaction transaction = this.transactionProvider.get()) {
 
-            ResultSet rs = transaction.getDatabaseCall().initialise("queueTakeNext", 1)
-                    .add(serverType.value())
+            ResultSet rs = transaction.getDatabaseCall().initialise("queueTakeNext", 3)
+                    .add(serviceIdentity.getServerType().value())
+                    .add(serviceIdentity.getLanguage().toString())
+                    .add(serviceIdentity.getVersion())
                     .executeQuery();
 
             if (rs.next()) {
@@ -99,18 +105,22 @@ public class DatabaseAiStatusUpdates extends Database {
     /***
      * Gets the full status of an item in the status table
      * Including its devid and whether the AI was deleted or not
-     * @param serverType the server type
+     * @param serviceIdentity the server type
      * @param aiid the AI id
      * @return the backend engine status or null if there aren't any (or any supported)
      * @throws DatabaseException
      */
-    public BackendEngineStatus getAiQueueStatus(BackendServerType serverType, UUID aiid) throws DatabaseException {
+    public BackendEngineStatus getAiQueueStatus(final ServiceIdentity serviceIdentity,
+                                                final UUID aiid)
+            throws DatabaseException {
 
         BackendEngineStatus backendEngineStatus = null;
         try (DatabaseTransaction transaction = this.transactionProvider.get()) {
 
-            ResultSet rs = transaction.getDatabaseCall().initialise("getAIQueueStatus", 2)
-                    .add(serverType.value())
+            ResultSet rs = transaction.getDatabaseCall().initialise("getAIQueueStatus", 4)
+                    .add(serviceIdentity.getServerType().value())
+                    .add(serviceIdentity.getLanguage().toString())
+                    .add(serviceIdentity.getVersion())
                     .add(aiid)
                     .executeQuery();
             if (rs.next()) {
@@ -135,19 +145,22 @@ public class DatabaseAiStatusUpdates extends Database {
      * Gets a list of AIs that were training but have lapsed
      * i.e. the server no longer seems to be training them but hasn't told us about it
      * Each bot is requeued so that the slot is effectively cleared
-     * @param serverType
+     * @param serviceIdentity
      * @param cutoffSeconds number of seconds with no updates after which the AI is considered lapsed
      * @return the list of backend ending status
      * @throws DatabaseException
      */
-    public List<BackendEngineStatus> recoverInterruptedTraining(
-            BackendServerType serverType, int cutoffSeconds) throws DatabaseException {
+    public List<BackendEngineStatus> recoverInterruptedTraining(final ServiceIdentity serviceIdentity,
+                                                                final int cutoffSeconds)
+            throws DatabaseException {
 
         List<BackendEngineStatus> slots = new ArrayList<>();
         try (DatabaseTransaction transaction = this.transactionProvider.get()) {
 
-            ResultSet rs = transaction.getDatabaseCall().initialise("getInterruptedTrainingList", 3)
-                    .add(serverType.value())
+            ResultSet rs = transaction.getDatabaseCall().initialise("getInterruptedTrainingList", 5)
+                    .add(serviceIdentity.getServerType().value())
+                    .add(serviceIdentity.getLanguage().toString())
+                    .add(serviceIdentity.getVersion())
                     .add(TrainingStatus.AI_TRAINING.value())
                     .add(cutoffSeconds)
                     .executeQuery();
@@ -157,8 +170,10 @@ public class DatabaseAiStatusUpdates extends Database {
                 if (lapsed != null) {
                     slots.add(lapsed);
 
-                    transaction.getDatabaseCall().initialise("queueRecover", 4)
-                            .add(serverType.value())
+                    transaction.getDatabaseCall().initialise("queueRecover", 6)
+                            .add(serviceIdentity.getServerType().value())
+                            .add(serviceIdentity.getLanguage().toString())
+                            .add(serviceIdentity.getVersion())
                             .add(lapsed.getAiid())
                             .add(QueueAction.TRAIN.value())
                             .add(TrainingStatus.AI_TRAINING_QUEUED.value())
@@ -173,10 +188,12 @@ public class DatabaseAiStatusUpdates extends Database {
         return slots;
     }
 
-    public void deleteAiStatus(BackendServerType serverType, UUID aiid) throws DatabaseException {
+    public void deleteAiStatus(final ServiceIdentity serviceIdentity, final UUID aiid) throws DatabaseException {
         try (DatabaseTransaction transaction = this.transactionProvider.get()) {
-            transaction.getDatabaseCall().initialise("deleteAIStatus", 2)
-                    .add(serverType.value())
+            transaction.getDatabaseCall().initialise("deleteAIStatus", 4)
+                    .add(serviceIdentity.getServerType().value())
+                    .add(serviceIdentity.getLanguage().toString())
+                    .add(serviceIdentity.getVersion())
                     .add(aiid)
                     .executeUpdate();
             // if all goes well, commit
@@ -188,14 +205,12 @@ public class DatabaseAiStatusUpdates extends Database {
      * Compares the AI list reported by a registering server to the one in our database
      * Logs any differences and changes the statuses in the database to reflect
      * what was sent by the backend server
-     * @param jsonSerializer
      * @param serverType which server are we dealing with?
      * @param serverReported aiid to entry map
      * @param excludeBots ignore any mention of bots on this list
      * @throws DatabaseException
      */
-    public void synchroniseDBStatuses(final JsonSerializer jsonSerializer,
-                                      final BackendServerType serverType,
+    public void synchroniseDBStatuses(final BackendServerType serverType,
                                       final Map<UUID, ServerAiEntry> serverReported,
                                       final Set<UUID> excludeBots)
             throws DatabaseException {
@@ -298,20 +313,24 @@ public class DatabaseAiStatusUpdates extends Database {
     /***
      * Log the controller state to the database
      * so that it can be picked up by monitoring tools
-     * @param serverType
+     * @param serviceIdentity
      * @param serverCount how many verified servers
      * @param totalTrainingCapacity how many total training slots
      * @param availableTrainingSlots how many slots are available for use
      * @param totalChatCapacity how many total chat slots
      * @throws DatabaseException
      */
-    public void updateControllerState(final BackendServerType serverType, final int serverCount,
-                                      final int totalTrainingCapacity, final int availableTrainingSlots,
-                                      final int totalChatCapacity) throws DatabaseException {
-
+    public void updateControllerState(final ServiceIdentity serviceIdentity,
+                                      final int serverCount,
+                                      final int totalTrainingCapacity,
+                                      final int availableTrainingSlots,
+                                      final int totalChatCapacity)
+            throws DatabaseException {
         try (DatabaseTransaction transaction = this.transactionProvider.get()) {
-            transaction.getDatabaseCall().initialise("updateControllerState", 5)
-                    .add(serverType.value())
+            transaction.getDatabaseCall().initialise("updateControllerState", 7)
+                    .add(serviceIdentity.getServerType().value())
+                    .add(serviceIdentity.getLanguage().toString())
+                    .add(serviceIdentity.getVersion())
                     .add(serverCount)
                     .add(totalTrainingCapacity)
                     .add(availableTrainingSlots)

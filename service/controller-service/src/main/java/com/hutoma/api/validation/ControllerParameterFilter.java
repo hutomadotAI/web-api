@@ -1,9 +1,11 @@
 package com.hutoma.api.validation;
 
 import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.common.SupportedLanguage;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.BackendServerType;
 import com.hutoma.api.connectors.RequestFor;
+import com.hutoma.api.containers.ServiceIdentity;
 import com.hutoma.api.containers.sub.AiStatus;
 import com.hutoma.api.containers.sub.ServerAffinity;
 import com.hutoma.api.containers.sub.ServerEndpointRequestMulti;
@@ -19,6 +21,8 @@ public class ControllerParameterFilter extends ValidationBase {
     static final String SERVER_URL = "server_url";
 
     static final String SERVER_TYPE = "server_type";
+    static final String SERVER_LANGUAGE = "server_language";
+    static final String SERVER_VERSION = "server_version";
     static final String AI_LIST = "ai_list";
     static final String SERVER_SESSION_ID = "server_session_id";
     static final String ENDPOINT_REQUEST_LIST = "endpoint_request_list";
@@ -57,6 +61,22 @@ public class ControllerParameterFilter extends ValidationBase {
 
     public static BackendServerType getBackendServerType(final ContainerRequestContext requestContext) {
         return (BackendServerType) requestContext.getProperty(ControllerParameter.ServerType.toString());
+    }
+
+    public static SupportedLanguage getBackendServerLanguage(final ContainerRequestContext requestContext) {
+        return (SupportedLanguage) requestContext.getProperty(ControllerParameter.ServerLanguage.toString());
+    }
+
+    public static String getBackendServerVersion(final ContainerRequestContext requestContext) {
+        return (String) requestContext.getProperty(ControllerParameter.ServerVersion.toString());
+    }
+
+    public static ServiceIdentity getServiceIdentity(final ContainerRequestContext requestContext) {
+        return new ServiceIdentity(
+                getBackendServerType(requestContext),
+                getBackendServerLanguage(requestContext),
+                getBackendServerVersion(requestContext)
+        );
     }
 
     public static ServerEndpointRequestMulti getServerEndpointRequestMulti(

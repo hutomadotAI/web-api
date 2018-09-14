@@ -1,11 +1,14 @@
 package com.hutoma.api.validation;
 
 import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.common.SupportedLanguage;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.BackendServerType;
 import com.hutoma.api.connectors.RequestFor;
+import com.hutoma.api.containers.ServiceIdentity;
 import com.hutoma.api.logging.AiServiceStatusLogger;
 import com.hutoma.api.logging.LogMap;
+import org.apache.commons.lang.StringUtils;
 
 import java.io.IOException;
 import java.lang.reflect.AnnotatedElement;
@@ -32,6 +35,8 @@ public class ControllerQueryFilter extends ControllerParameterFilter implements 
 
     private static final String REQUEST_FOR = "for";
     private static final String SERVER_TYPE = "serverType";
+    private static final String SERVER_LANGUAGE = "serverLanguage";
+    private static final String SERVER_VERSION = "serverVersion";
 
     @Context
     private ResourceInfo resourceInfo;
@@ -69,6 +74,16 @@ public class ControllerQueryFilter extends ControllerParameterFilter implements 
             if (checkList.contains(ControllerParameter.ServerType)) {
                 requestContext.setProperty(ControllerParameter.ServerType.toString(),
                         validateServerType(getFirst(queryParameters.get(SERVER_TYPE))));
+            }
+
+            if (checkList.contains(ControllerParameter.ServerLanguage)) {
+                requestContext.setProperty(ControllerParameter.ServerLanguage.toString(),
+                        validateLanguage(getFirst(queryParameters.get(SERVER_LANGUAGE))));
+            }
+
+            if (checkList.contains(ControllerParameter.ServerVersion)) {
+                requestContext.setProperty(ControllerParameter.ServerVersion.toString(),
+                        validateServerVersion(getFirst(queryParameters.get(SERVER_VERSION))));
             }
 
             this.logger.logDebug(LOGFROM, "parameter validation passed");
@@ -113,5 +128,27 @@ public class ControllerQueryFilter extends ControllerParameterFilter implements 
             return value.get();
         }
         throw new ParameterValidationException("Unknown server type", SERVER_TYPE);
+    }
+
+    private static SupportedLanguage validateLanguage(final String language) throws ParameterValidationException {
+        if (StringUtils.isEmpty(language)) {
+            return SupportedLanguage.EN;
+        }
+        Optional<SupportedLanguage> value = Arrays.stream(SupportedLanguage.values())
+                .filter(x -> x.toString().equalsIgnoreCase(language)).findFirst();
+        if (value.isPresent()) {
+            return value.get();
+        }
+        throw new ParameterValidationException("Unsupported language", SERVER_LANGUAGE);
+    }
+
+    private static String validateServerVersion(final String version) throws ParameterValidationException {
+        if (StringUtils.isEmpty(version)) {
+            return ServiceIdentity.DEFAULT_VERSION;
+        }
+        if (version.length() > 10) {
+            throw new ParameterValidationException("Unsupported length for server version", SERVER_VERSION);
+        }
+        return version;
     }
 }

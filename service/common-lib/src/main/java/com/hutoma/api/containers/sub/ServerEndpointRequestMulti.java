@@ -19,7 +19,7 @@ public class ServerEndpointRequestMulti {
         this.endpointRequests = new ArrayList<>();
     }
 
-    public void add(ServerEndpointRequest endpointRequest) {
+    public void add(final ServerEndpointRequest endpointRequest) {
         this.endpointRequests.add(endpointRequest);
     }
 
@@ -31,7 +31,8 @@ public class ServerEndpointRequestMulti {
         @SerializedName("already_tried")
         private final List<String> alreadyTried;
 
-        public ServerEndpointRequest(final UUID aiid, final List<String> alreadyTried) {
+        public ServerEndpointRequest(final UUID aiid,
+                                     final List<String> alreadyTried) {
             this.aiid = aiid;
             this.alreadyTried = alreadyTried;
         }
@@ -43,6 +44,7 @@ public class ServerEndpointRequestMulti {
         public List<String> getAlreadyTried() {
             return alreadyTried;
         }
+
     }
 
 }

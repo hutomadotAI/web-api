@@ -1,6 +1,7 @@
 package com.hutoma.api.controllers;
 
 import com.hutoma.api.common.ControllerConfig;
+import com.hutoma.api.containers.ServiceIdentity;
 import com.hutoma.api.containers.sub.ServerAiEntry;
 import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.logging.AiServiceStatusLogger;
@@ -110,5 +111,9 @@ public class TestController {
 
         @Override
         public void kickQueue() {}
+
+        @Override
+        public void initialize(final ServiceIdentity serviceIdentity) {
+        }
     }
 }

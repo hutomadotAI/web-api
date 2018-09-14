@@ -7,6 +7,7 @@ import com.hutoma.api.connectors.IServerEndpoint;
 import com.hutoma.api.connectors.NoServerAvailableException;
 import com.hutoma.api.connectors.db.DatabaseAiStatusUpdates;
 import com.hutoma.api.connectors.db.DatabaseException;
+import com.hutoma.api.containers.ServiceIdentity;
 import com.hutoma.api.containers.sub.ServerAiEntry;
 import com.hutoma.api.containers.sub.ServerRegistration;
 import com.hutoma.api.logging.AiServiceStatusLogger;
@@ -70,6 +71,8 @@ public abstract class ControllerBase extends ServerMetadata {
         return serverSessionID;
     }
 
+    public abstract void initialize(final ServiceIdentity serviceIdentity);
+
     public IServerEndpoint getUploadBackendEndpoint(UUID aiid)
             throws NoServerAvailableException {
         ServerTracker tracker = this.getServerForUpload(aiid);
@@ -110,7 +113,7 @@ public abstract class ControllerBase extends ServerMetadata {
                                       final JsonSerializer jsonSerializer,
                                       final BackendServerType serverType,
                                       final Map<UUID, ServerAiEntry> statusData) throws DatabaseException {
-        database.synchroniseDBStatuses(jsonSerializer, serverType, statusData, this.botExclusionList);
+        database.synchroniseDBStatuses(serverType, statusData, this.botExclusionList);
     }
 
     /***
