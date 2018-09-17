@@ -7,8 +7,8 @@ ALTER TABLE `ai_status`
   DROP PRIMARY KEY, ADD PRIMARY KEY(`server_type`,`server_language`,`server_version`,`aiid`);
 
 ALTER TABLE `controller_state`
-  ADD COLUMN `server_language` VARCHAR(3) NOT NULL DEFAULT `EN` AFTER `server_type`,
-  ADD COLUMN `server_version` VARCHAR(10) NOT NULL DEFAULT "default" AFTER `server_language`.
+  ADD COLUMN `server_language` VARCHAR(3) NOT NULL DEFAULT "EN" AFTER `server_type`,
+  ADD COLUMN `server_version` VARCHAR(10) NOT NULL DEFAULT "default" AFTER `server_language`,
   DROP PRIMARY KEY, ADD PRIMARY KEY(`server_type`,`server_language`,`server_version`);
 
 
