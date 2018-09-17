@@ -1182,6 +1182,24 @@ public class TestAILogic {
         this.aiLogic.createImportedBot(VALIDDEVID, botToImport);
     }
 
+    @Test
+    public void testCreateImportedBot_handover() throws AILogic.BotImportException, DatabaseException {
+        String handoverMessage = "handover_message";
+        setupFakeImport();
+        BotStructure botStructure = getBotstructure();
+        botStructure.setHandoverMessage("message");
+        this.aiLogic.createImportedBot(VALIDDEVID, botStructure);
+    }
+
+    @Test(expected = AILogic.BotImportException.class)
+    public void testCreateImportedBot_handoverTimeoutRequiresMessage () throws AILogic.BotImportException, DatabaseException {
+        setupFakeImport();
+        BotStructure botStructure = getBotstructure();
+        botStructure.setErrorThresholdHandover(1);
+        botStructure.setHandoverResetTimeoutSeconds(1);
+        this.aiLogic.createImportedBot(VALIDDEVID, botStructure);
+    }
+
     @Test(expected = AILogic.BotImportException.class)
     public void testCreateImportedBot_writeEntities_dbException() throws AILogic.BotImportException, DatabaseException {
         setupFakeImport();
@@ -1440,7 +1458,7 @@ public class TestAILogic {
         return new BotStructure("ImportedBot", "Desc", intents,
         "Q\nA", entities, 1, false, 1, 0.4f, 1, "EN-en", "UTC",
                 Collections.singletonList(TestDataHelper.DEFAULT_CHAT_RESPONSE),
-        null, Collections.emptyList());
+        null, Collections.emptyList(), "", -1, -1, null);
     }
 
     private List<AiBot> generateBotsWithIds(final List<Integer> idList) {

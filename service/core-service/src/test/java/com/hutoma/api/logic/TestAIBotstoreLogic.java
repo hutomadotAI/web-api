@@ -454,7 +454,7 @@ public class TestAIBotstoreLogic {
     private static BotStructure getBotStructure() {
         return new BotStructure("bot", "desc", Collections.emptyList(), "aaa\nbbb", new HashMap<>(),
                 1, false, 1, 1.0, 1, Locale.UK.toLanguageTag(), "UTC", Collections.singletonList("Dunno"), "",
-                Collections.emptyList());
+                Collections.emptyList(), "clientToken", -1, -1, "handoverMessage");
     }
 
     public static String getBotStructureTemplate() {

@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 
 public class BotStructureSerializer {
 
-    private static final int BOT_SCHEMA_VERSION = 1;
+    private static final int BOT_SCHEMA_VERSION = 2;
 
     public static BotStructure serialize(final UUID devId, final UUID aiid, final DatabaseAI database,
                                   final DatabaseEntitiesIntents databaseEntitiesIntents,
@@ -58,6 +58,7 @@ public class BotStructureSerializer {
         return new BotStructure(bot.getName(), bot.getDescription(), intents, trainingFile,
                 entityMap, BOT_SCHEMA_VERSION, bot.getIsPrivate(), bot.getPersonality(),
                 bot.getConfidence(), bot.getVoice(), bot.getLanguage().toLanguageTag(), bot.getTimezone(),
-                bot.getDefaultChatResponses(), bot.getPassthroughUrl(), bot.getLinkedBots());
+                bot.getDefaultChatResponses(), bot.getPassthroughUrl(), bot.getLinkedBots(), bot.getClient_token(),
+                bot.getHandoverResetTimeoutSeconds(), bot.getErrorThresholdHandover(), bot.getHandoverMessage());
     }
 }

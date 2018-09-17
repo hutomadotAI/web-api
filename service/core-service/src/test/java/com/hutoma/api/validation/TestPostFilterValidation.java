@@ -367,7 +367,7 @@ public class TestPostFilterValidation {
         BotStructure structure = new BotStructure("Valid Name", "Valid Description", intents,
                 "hello\nhi", entities, 1, true, 0, 0.5f,
                 1, "en-US", "Europe/London", Collections.singletonList("Dunno"), "",
-                Collections.emptyList());
+                Collections.emptyList(), "clientToken", -1, -1, "handoverMessage");
         return structure;
     }
 }
