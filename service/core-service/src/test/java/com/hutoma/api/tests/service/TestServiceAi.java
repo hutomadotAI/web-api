@@ -6,28 +6,24 @@ import com.hutoma.api.connectors.BackendServerType;
 import com.hutoma.api.connectors.BackendStatus;
 import com.hutoma.api.connectors.aiservices.AIServices;
 import com.hutoma.api.connectors.db.DatabaseException;
-import com.hutoma.api.containers.ApiAi;
-import com.hutoma.api.containers.ApiAiBotList;
-import com.hutoma.api.containers.ApiAiList;
-import com.hutoma.api.containers.ApiResult;
+import com.hutoma.api.containers.*;
 import com.hutoma.api.containers.sub.AiBot;
 import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.endpoints.AIEndpoint;
 import com.hutoma.api.logic.AIIntegrationLogic;
 import com.hutoma.api.logic.AILogic;
-
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.net.HttpURLConnection;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.UUID;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+import java.net.HttpURLConnection;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.UUID;
 
 import static com.hutoma.api.common.TestBotHelper.BOTID;
 import static com.hutoma.api.common.TestBotHelper.SAMPLEBOT;
@@ -47,6 +43,7 @@ public class TestServiceAi extends ServiceTestBase {
     private static final String BOT_CLONE_PATH = AI_BASEPATH + "/" + AIID + "/clone";
     private static final String IMPORT_BASEPATH = AI_BASEPATH + "/" + "import";
     private static final String IMPORTINPLACE_BASEPATH = AI_PATH + "/" + "import";
+    private static final String EXPORT_BASEPATH = AI_PATH + "/export";
 
     private static MultivaluedMap<String, String> getCreateAiRequestParams() {
         return new MultivaluedHashMap<String, String>() {{
@@ -332,19 +329,7 @@ public class TestServiceAi extends ServiceTestBase {
 
     @Test
     public void testImportBotInPlace() throws DatabaseException {
-        final UUID newAiid = UUID.randomUUID();
-        when(this.fakeTools.createNewRandomUUID()).thenReturn(newAiid);
-        when(this.fakeDatabaseAi.createAI(any(), anyString(), anyString(), any(), anyBoolean(),
-                anyString(), anyObject(), anyObject(), anyDouble(), anyInt(),
-                anyInt(), any(), anyInt(), anyInt(), any(), any(), any())).thenReturn(newAiid);
-        when(this.fakeDatabaseAi.getAI(any(), any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
-        when(this.fakeDatabaseAi.updatePassthroughUrl(any(), any(), any(), any())).thenReturn(true);
-        when(this.fakeDatabaseAi.updateDefaultChatResponses(any(), any(), any(), any(), any())).thenReturn(true);
-        when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
-        final Response response = target(IMPORTINPLACE_BASEPATH)
-                .request()
-                .headers(defaultHeaders)
-                .post(Entity.json(getExportedBotJson()));
+        Response response = testExport(getExportedBotJson());
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
     }
 
@@ -355,6 +340,30 @@ public class TestServiceAi extends ServiceTestBase {
                 .headers(noDevIdHeaders)
                 .post(Entity.json(getExportedBotJson()));
         Assert.assertEquals(HttpURLConnection.HTTP_UNAUTHORIZED, response.getStatus());
+    }
+
+    @Test
+    public void testImportBot_UTF8() throws DatabaseException {
+        final String description = "국민경제의 발전을 위한 중요정책의 수립에 관하여 대통령의 자문에 응하기 위하여 국민경제자문회의를 둘 수 있다";
+        ApiAi aiToReturn = TestDataHelper.getSampleAI();
+        aiToReturn.setDescription(description);
+        Response response = testExport(getExportedBotJson(description));
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
+    }
+
+    @Test
+    public void testExportBot_UTF8() throws DatabaseException {
+        final String description = "국민경제의 발전을 위한 중요정책의 수립에 관하여 대통령의 자문에 응하기 위하여 국민경제자문회의를 둘 수 있다";
+        ApiAi aiToReturn = TestDataHelper.getSampleAI();
+        aiToReturn.setDescription(description);
+        when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(aiToReturn);
+        final Response response = target(EXPORT_BASEPATH)
+                .request()
+                .headers(defaultHeaders)
+                .get();
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
+        ApiBotStructure botStructure = deserializeResponse(response, ApiBotStructure.class);
+        Assert.assertEquals(description, botStructure.getBotStructure().getDescription());
     }
 
     @Override
@@ -370,9 +379,31 @@ public class TestServiceAi extends ServiceTestBase {
         return binder;
     }
 
-    private String getExportedBotJson() {
-        return "{\"version\":1,\"name\":\"exported_bot\",\"description\":\"desc\",\"isPrivate\":false, \"personality\":0,"
-                + "\"confidence\":0.4000000059604645,\"voice\":1, \"language\":\"en-US\",\"timezone\":\"Europe\\/London\"}";
+    private Response testExport(final String payload) throws DatabaseException {
+        final UUID newAiid = UUID.randomUUID();
+        when(this.fakeTools.createNewRandomUUID()).thenReturn(newAiid);
+        when(this.fakeDatabaseAi.createAI(any(), anyString(), anyString(), any(), anyBoolean(),
+                anyString(), any(), any(), anyDouble(), anyInt(),
+                anyInt(), any(), anyInt(), anyInt(), any(), any(), any())).thenReturn(newAiid);
+        when(this.fakeDatabaseAi.getAI(any(), any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
+        when(this.fakeDatabaseAi.updatePassthroughUrl(any(), any(), any(), any())).thenReturn(true);
+        when(this.fakeDatabaseAi.updateDefaultChatResponses(any(), any(), any(), any(), any())).thenReturn(true);
+        when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
+        return target(IMPORTINPLACE_BASEPATH)
+                .request()
+                .headers(defaultHeaders)
+                .post(Entity.json(payload));
+    }
+
+
+    private static String getExportedBotJson() {
+        return getExportedBotJson("desc");
+    }
+
+    private static String getExportedBotJson(final String description) {
+        return String.format("{\"version\":1,\"name\":\"exported_bot\",\"description\":\"%s\",\"isPrivate\":false, \"personality\":0,"
+                        + "\"confidence\":0.4000000059604645,\"voice\":1, \"language\":\"en-US\",\"timezone\":\"Europe\\/London\"}",
+                description);
     }
 
     private ApiAi checkMaskedTrainingStatus(

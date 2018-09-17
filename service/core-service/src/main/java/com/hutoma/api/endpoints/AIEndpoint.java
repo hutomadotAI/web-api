@@ -5,14 +5,7 @@ import com.hutoma.api.access.RateLimit;
 import com.hutoma.api.access.Role;
 import com.hutoma.api.access.Secured;
 import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.containers.AiBotConfig;
-import com.hutoma.api.containers.AiBotConfigWithDefinition;
-import com.hutoma.api.containers.ApiAi;
-import com.hutoma.api.containers.ApiAiBotList;
-import com.hutoma.api.containers.ApiAiList;
-import com.hutoma.api.containers.ApiAiWithConfig;
-import com.hutoma.api.containers.ApiLinkedBotData;
-import com.hutoma.api.containers.ApiResult;
+import com.hutoma.api.containers.*;
 import com.hutoma.api.containers.sub.AiBot;
 import com.hutoma.api.containers.sub.BotStructure;
 import com.hutoma.api.logic.AILogic;
@@ -20,22 +13,17 @@ import com.hutoma.api.validation.APIParameter;
 import com.hutoma.api.validation.ParameterFilter;
 import com.hutoma.api.validation.ValidateParameters;
 import com.hutoma.api.validation.ValidatePost;
-import com.webcohesion.enunciate.metadata.rs.RequestHeader;
-import com.webcohesion.enunciate.metadata.rs.RequestHeaders;
-import com.webcohesion.enunciate.metadata.rs.ResponseCode;
-import com.webcohesion.enunciate.metadata.rs.StatusCodes;
-import com.webcohesion.enunciate.metadata.rs.TypeHint;
-
+import com.webcohesion.enunciate.metadata.rs.*;
 import org.apache.commons.lang.StringUtils;
 
-import java.net.HttpURLConnection;
-import java.util.ArrayList;
 import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.net.HttpURLConnection;
+import java.util.ArrayList;
 
 /**
  * AI endpoint for managing a user's bots
@@ -238,6 +226,7 @@ public class AIEndpoint {
     @GET
     @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
     @ValidateParameters({APIParameter.AIID})
+    @Produces(MediaType.APPLICATION_JSON)
     public Response exportAI(
             @Context ContainerRequestContext requestContext) {
         ApiResult result = this.aiLogic.exportBotData(
@@ -251,6 +240,7 @@ public class AIEndpoint {
     @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
     @ValidateParameters({APIParameter.DevID})
     @ValidatePost({APIParameter.BotStructure})
+    @Produces({MediaType.APPLICATION_JSON})
     @Consumes(MediaType.APPLICATION_JSON)
     public Response importAI(
             @Context ContainerRequestContext requestContext, BotStructure botStructure) {

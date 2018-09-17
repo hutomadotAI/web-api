@@ -8,7 +8,6 @@ import com.hutoma.api.containers.sub.AiBot;
 import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.containers.sub.UITrainingState;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-
 import org.joda.time.DateTime;
 
 import java.util.ArrayList;
@@ -284,6 +283,10 @@ public class ApiAi extends ApiResult {
 
     public void setAiid(final UUID aiid) {
         this.aiid = aiid.toString();
+    }
+
+    public void setDescription(final String description) {
+        this.description = description;
     }
 
     private void populateExtendedStatus() {
