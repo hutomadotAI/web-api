@@ -25,8 +25,6 @@ import javax.ws.rs.core.Response;
 
 import static com.hutoma.api.common.DeveloperInfoHelper.DEVINFO;
 import static com.hutoma.api.common.TestBotHelper.SAMPLEBOT;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.*;
 
 /**

@@ -3,16 +3,13 @@ package com.hutoma.api.connectors.chat;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Tools;
-import com.hutoma.api.connectors.BackendServerType;
-import com.hutoma.api.connectors.BackendStatus;
-import com.hutoma.api.connectors.IConnectConfig;
-import com.hutoma.api.connectors.NoServerAvailableException;
-import com.hutoma.api.connectors.ServerConnector;
+import com.hutoma.api.connectors.*;
 import com.hutoma.api.connectors.db.DatabaseAI;
 import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.AiDevId;
 import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.ApiError;
+import com.hutoma.api.containers.sub.AiIdentity;
 import com.hutoma.api.containers.sub.AiMinP;
 import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.containers.sub.ChatState;
@@ -20,19 +17,12 @@ import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
 import com.hutoma.api.logic.ChatLogic;
 import com.hutoma.api.thread.TrackedThreadSubPool;
-
 import org.glassfish.jersey.client.JerseyClient;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import javax.inject.Inject;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import javax.inject.Inject;
 
 
 /**
@@ -63,14 +53,15 @@ public class AIChatServices extends ServerConnector {
 
     /***
      * Creates n requests, one to each back-end server and starts them async
-     * @param devId
-     * @param aiid
+     * @param aiIdentity
      * @param chatId
      * @param question
      * @param chatState
      * @throws AiServicesException
      */
-    public void startChatRequests(final UUID devId, final UUID aiid, final UUID chatId, final String question,
+    public void startChatRequests(final AiIdentity aiIdentity,
+                                  final UUID chatId,
+                                  final String question,
                                   final ChatState chatState)
             throws AiServicesException, ChatBackendConnector.AiControllerException, NoServerAvailableException {
 
@@ -82,16 +73,16 @@ public class AIChatServices extends ServerConnector {
             put("chatId", chatId.toString());
             put("q", question);
         }};
-        List<AiMinP> ais = this.getAIsLinkedToAi(devId, aiid);
+        List<AiMinP> ais = this.getAIsLinkedToAi(aiIdentity.getDevId(), aiIdentity.getAiid());
         this.minPMap = ais.stream().collect(Collectors.toMap(AiMinP::getAiid, AiMinP::getMinP));
         // add self
-        this.minPMap.put(aiid, chatState.getConfidenceThreshold());
+        this.minPMap.put(aiIdentity.getAiid(), chatState.getConfidenceThreshold());
 
         // If this AI is linked to the AIML "bot" then we need to issue a chat request to the AIML backend as well
         boolean usedAimlBot = false;
         HashSet<UUID> aimlBotIdsSet = new HashSet<>(this.config.getAimlBotAiids());
 
-        List<AiDevId> aimlAis = new ArrayList<>();
+        List<AiIdentity> aimlAis = new ArrayList<>();
 
         // map all the linked AIs by aiid
         Map<UUID, AiDevId> map = ais.stream()
@@ -100,7 +91,7 @@ public class AIChatServices extends ServerConnector {
         // extract the AIs that are AIML based
         for (Map.Entry<UUID, AiDevId> entry : map.entrySet()) {
             if (aimlBotIdsSet.contains(entry.getKey())) {
-                aimlAis.add(new AiDevId(entry.getValue().getDevId(), entry.getValue().getAiid()));
+                aimlAis.add(new AiIdentity(entry.getValue().getDevId(), entry.getValue().getAiid()));
             }
         }
 
@@ -111,19 +102,19 @@ public class AIChatServices extends ServerConnector {
         }
 
         // remove any bots that are AIML from the list of linked list still to be processed
-        List<AiDevId> listAis = ais.stream()
+        List<AiIdentity> listAis = ais.stream()
                 .filter(ai -> !aimlBotIdsSet.contains(ai.getAiid()))
-                .map(x -> new AiDevId(x.getDevId(), x.getAiid())).collect(Collectors.toList());
+                .map(x -> new AiIdentity(x.getDevId(), x.getAiid())).collect(Collectors.toList());
 
         // find out which servers can chat with this AI
-        Set<BackendServerType> canChatWith = canChatWithAi(devId, aiid);
+        Set<BackendServerType> canChatWith = canChatWithAi(aiIdentity.getDevId(), aiIdentity.getAiid());
 
         // make copies of the AI lists
-        List<AiDevId> embAIs = new ArrayList<>(listAis);
+        List<AiIdentity> embAIs = new ArrayList<>(listAis);
 
         // add the AI to the list if the server can chat
         if (canChatWith.contains(BackendServerType.EMB)) {
-            embAIs.add(new AiDevId(devId, aiid));
+            embAIs.add(aiIdentity);
         }
 
         // If we're issuing a chat request but there are no AIs available to serve it, just fail
@@ -132,7 +123,7 @@ public class AIChatServices extends ServerConnector {
         }
 
         if (!embAIs.isEmpty()) {
-            chatConnectors.issueChatRequests(BackendServerType.EMB, parameters, embAIs, chatState);
+            this.chatConnectors.issueChatRequests(BackendServerType.EMB, parameters, embAIs, chatState);
         }
     }
 

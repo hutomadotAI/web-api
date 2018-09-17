@@ -1,20 +1,17 @@
 package com.hutoma.api.connectors.aiservices;
 
 import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.connectors.BackendServerType;
-import com.hutoma.api.connectors.BackendStatus;
-import com.hutoma.api.connectors.NoServerAvailableException;
-import com.hutoma.api.connectors.ServerConnector;
-import com.hutoma.api.connectors.ServerTrackerInfo;
+import com.hutoma.api.common.SupportedLanguage;
+import com.hutoma.api.connectors.*;
 import com.hutoma.api.connectors.db.DatabaseException;
+import com.hutoma.api.containers.sub.AiIdentity;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
 
+import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
-import javax.inject.Inject;
 
 public class BackendServicesConnectors {
 
@@ -23,42 +20,48 @@ public class BackendServicesConnectors {
 
     @Inject
     BackendServicesConnectors(final EmbServicesConnector embServicesConnector) {
-        connectors.add(new ConnectorItem(embServicesConnector, BackendServerType.EMB, false));
+        this.connectors.add(new ConnectorItem(embServicesConnector, BackendServerType.EMB, false));
     }
 
-    public void startTraining(final AiServicesQueue queueServices, final BackendStatus status,
-                              final UUID devId, final UUID aiid)
+    public void startTraining(final AiServicesQueue queueServices,
+                              final BackendStatus status,
+                              final AiIdentity aiIdentity)
             throws DatabaseException {
-        for (ConnectorItem connectorItem: connectors) {
-            queueServices.userActionStartTraining(status, connectorItem.serverType, devId, aiid);
-            connectorItem.connector.kickQueueProcessor();
+        for (ConnectorItem connectorItem: this.connectors) {
+            queueServices.userActionStartTraining(status, connectorItem.serverType,
+                    aiIdentity.getDevId(), aiIdentity.getAiid());
+            connectorItem.connector.kickQueueProcessor(aiIdentity.getLanguage(), aiIdentity.getServerVersion());
         }
     }
 
-    public void stopTraining(final AiServicesQueue queueServices, final BackendStatus backendStatus,
-                             final UUID devId, final UUID aiid)
+    public void stopTraining(final AiServicesQueue queueServices,
+                             final BackendStatus backendStatus,
+                             final AiIdentity aiIdentity)
             throws DatabaseException, ServerConnector.AiServicesException {
-        for (ConnectorItem connectorItem: connectors) {
+        for (ConnectorItem connectorItem: this.connectors) {
             queueServices.userActionStopTraining(backendStatus, connectorItem.serverType, connectorItem.connector,
-                    devId, aiid);
+                    aiIdentity);
         }
     }
 
-    public void deleteAi(final AiServicesQueue queueServices, final BackendStatus backendStatus,
-                         final UUID devId, final UUID aiid)
+    public void deleteAi(final AiServicesQueue queueServices,
+                         final BackendStatus backendStatus,
+                         final AiIdentity aiIdentity)
             throws DatabaseException, ServerConnector.AiServicesException {
-        for (ConnectorItem connectorItem: connectors) {
+        for (ConnectorItem connectorItem: this.connectors) {
             queueServices.userActionDelete(backendStatus, connectorItem.serverType, connectorItem.connector,
-                    devId, aiid);
-            connectorItem.connector.kickQueueProcessor();
+                    aiIdentity);
+            connectorItem.connector.kickQueueProcessor(aiIdentity.getLanguage(), aiIdentity.getServerVersion());
         }
     }
 
-    public List<String> getEndpointsForAllServerTypes(final JsonSerializer serializer) {
+    public List<String> getEndpointsForAllServerTypes(final SupportedLanguage language,
+                                                      final String serverVersion,
+                                                      final JsonSerializer serializer) {
         List<String> list = new ArrayList<>();
-        for (ConnectorItem connectorItem: connectors) {
+        for (ConnectorItem connectorItem: this.connectors) {
             Optional<ServerTrackerInfo> info = connectorItem.connector
-                    .getVerifiedEndpointMap(serializer)
+                    .getVerifiedEndpointMap(language, serverVersion, serializer)
                     .values()
                     .stream()
                     .findFirst();
@@ -67,22 +70,25 @@ public class BackendServicesConnectors {
         return list;
     }
 
-    public void uploadTraining(final AiServicesQueue queueServices, final BackendStatus backendStatus,
-                               final UUID devId, final UUID aiid)
+    public void uploadTraining(final AiServicesQueue queueServices,
+                               final BackendStatus backendStatus,
+                               final AiIdentity aiIdentity)
             throws DatabaseException, ServerConnector.AiServicesException {
-        for (ConnectorItem connectorItem: connectors) {
+        for (ConnectorItem connectorItem: this.connectors) {
             queueServices.userActionUpload(backendStatus, connectorItem.serverType, connectorItem.connector,
-                    devId, aiid);
+                    aiIdentity);
         }
     }
 
-    public List<String> getListOfPrimaryEndpoints(final UUID aiid, final JsonSerializer serializer,
+    public List<String> getListOfPrimaryEndpoints(final AiIdentity aiIdentity,
+                                                  final JsonSerializer serializer,
                                                   final ILogger logger)
             throws NoServerAvailableException {
         List<String> endpoints = new ArrayList<>();
-        for (ConnectorItem connectorItem: connectors) {
+        for (ConnectorItem connectorItem: this.connectors) {
             try {
-                endpoints.add(connectorItem.connector.getBackendTrainingEndpoint(aiid, serializer).getServerUrl());
+                endpoints.add(connectorItem.connector.getBackendTrainingEndpoint(aiIdentity, serializer)
+                        .getServerUrl());
             } catch (Exception ex) {
                 if (connectorItem.isShadow) {
                     // Ignore any exceptions when obtaining the endpoint for a shadow service

@@ -41,7 +41,6 @@ import java.util.UUID;
 import static com.hutoma.api.common.TestDataHelper.AIID;
 import static com.hutoma.api.common.TestDataHelper.DEVID_UUID;
 import static com.hutoma.api.common.TestDataHelper.getSampleAI;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
 
@@ -108,13 +107,16 @@ public class TestChatBase {
 
         when(fakeConfig.getEncodingKey()).thenReturn(TestDataHelper.VALID_ENCODING_KEY);
 
+        // Set feature toggles to Control
+        TestDataHelper.setFeatureToggleToControl(this.fakeFeatureToggler);
+
         when(this.fakeChatWorkflow.getHandlers()).thenReturn(
                 Arrays.asList(this.fakeHandoverHandler, this.fakePassthroughHandler, this.fakeChatIntenthHandler,
                         this.fakeRequestBETrigger, this.fakeEmbHandler,
                         this.fakeAimlHandler, this.fakeDefaultHandler));
 
         this.chatLogic = new ChatLogic(this.fakeChatServices, this.fakeChatStateHandler, this.fakeDatabaseEntitiesIntents, mock(Tools.class),
-                mock(ILogger.class), mock(ChatLogger.class), this.fakeChatWorkflow, this.fakeConfig);
+                mock(ILogger.class), mock(ChatLogger.class), this.fakeChatWorkflow, this.fakeConfig, this.fakeFeatureToggler);
 
         ChatState emptyState = ChatState.getEmpty();
         emptyState.setAi(getSampleAI());

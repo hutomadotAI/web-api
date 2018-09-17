@@ -5,6 +5,7 @@ import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.WebHooks;
 import com.hutoma.api.connectors.chat.AIChatServices;
 import com.hutoma.api.containers.ApiError;
+import com.hutoma.api.containers.sub.AiIdentity;
 import com.hutoma.api.containers.sub.ChatRequestInfo;
 import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.containers.sub.WebHookResponse;
@@ -51,7 +52,8 @@ public class ChatPassthroughHandler implements IChatHandler {
             final String devIdString = requestInfo.getDevId().toString();
 
             ChatResult chatResult = new ChatResult(requestInfo.getQuestion());
-            final ChatRequestInfo chatInfo = new ChatRequestInfo(requestInfo.getDevId(), requestInfo.getAiid(),
+            final ChatRequestInfo chatInfo = new ChatRequestInfo(
+                    new AiIdentity(requestInfo.getDevId(), requestInfo.getAiid()),
                     requestInfo.getChatId(), requestInfo.getQuestion(),
                     requestInfo.getClientVariables());
             final long startTime = this.tools.getTimestamp();

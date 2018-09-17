@@ -4,6 +4,7 @@ import com.hutoma.api.common.SupportedLanguage;
 import com.hutoma.api.containers.ServiceIdentity;
 import org.apache.commons.lang.StringUtils;
 
+import java.util.Locale;
 import java.util.UUID;
 
 public class AiIdentity {
@@ -17,9 +18,18 @@ public class AiIdentity {
     }
 
     public AiIdentity(final UUID devId, final UUID aiid, final SupportedLanguage language) {
+        this(devId, aiid, language, ServiceIdentity.DEFAULT_VERSION);
+    }
+
+    public AiIdentity(final UUID devId, final UUID aiid, final SupportedLanguage language, final String serverVersion) {
         this.devId = devId;
         this.aiid = aiid;
         this.language = language;
+        this.serverVersion = serverVersion;
+    }
+
+    public AiIdentity(final UUID devId, final UUID aiid, final Locale locale, final String serverVersion) {
+        this(devId, aiid, SupportedLanguage.get(locale), serverVersion);
     }
 
     public UUID getDevId() {
@@ -44,4 +54,5 @@ public class AiIdentity {
         }
         return this.serverVersion;
     }
+
 }

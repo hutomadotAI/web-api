@@ -2,6 +2,7 @@ package com.hutoma.api.logic;
 
 import com.hutoma.api.common.ChatLogger;
 import com.hutoma.api.common.Config;
+import com.hutoma.api.common.FeatureToggler;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.NoServerAvailableException;
 import com.hutoma.api.connectors.ServerConnector;
@@ -19,9 +20,9 @@ import com.hutoma.api.logic.chat.IChatHandler;
 import com.hutoma.api.memory.ChatStateHandler;
 import org.parboiled.common.StringUtils;
 
+import javax.inject.Inject;
 import java.util.*;
 import java.util.stream.Collectors;
-import javax.inject.Inject;
 
 /**
  * Chat logic.
@@ -39,6 +40,7 @@ public class ChatLogic {
     private final ChatWorkflow chatWorkflow;
     private final Config config;
     private ChatState chatState;
+    private final FeatureToggler featureToggler;
 
 
     @Inject
@@ -49,7 +51,8 @@ public class ChatLogic {
                      final ILogger logger,
                      final ChatLogger chatLogger,
                      final ChatWorkflow chatWorkflow,
-                     final Config config) {
+                     final Config config,
+                     final FeatureToggler featureToggler) {
         this.chatStateHandler = chatStateHandler;
         this.databaseEntitiesIntents = databaseEntitiesIntents;
         this.chatServices = chatServices;
@@ -58,6 +61,7 @@ public class ChatLogic {
         this.chatLogger = chatLogger;
         this.chatWorkflow = chatWorkflow;
         this.config = config;
+        this.featureToggler = featureToggler;
 
         this.telemetryMap = new LogMap((Map<String, Object>) null);
     }
@@ -143,12 +147,14 @@ public class ChatLogic {
             }
         }
 
-        ChatRequestInfo requestInfo = new ChatRequestInfo(devId, aiid, chatId, question, clientVariables);
+        this.chatState = this.chatStateHandler.getState(devId, aiid, chatId);
+        AiIdentity aiIdentity = new AiIdentity(devId, aiid, this.chatState.getAi().getLanguage(),
+                ServiceIdentity.DEFAULT_VERSION);
+        ChatRequestInfo requestInfo = new ChatRequestInfo(aiIdentity, chatId, question, clientVariables);
         ChatResult currentResult = new ChatResult(question);
         currentResult.setTimestamp(this.tools.getTimestamp());
         boolean chatAnswered = false;
 
-        this.chatState = this.chatStateHandler.getState(devId, aiid, chatId);
         currentResult.setChatState(this.chatState);
         currentResult.setChatId(chatId);
 
@@ -164,7 +170,7 @@ public class ChatLogic {
         this.telemetryMap.add("Q", question);
         this.telemetryMap.add("Chat target", this.chatState.getChatTarget().toString());
 
-        if (chatWorkflow.getHandlers().isEmpty()) {
+        if (this.chatWorkflow.getHandlers().isEmpty()) {
             this.logger.logError(LOGFROM, "No chat handlers defined");
             throw new ChatFailedException(ApiError.getInternalServerError());
         }

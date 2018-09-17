@@ -9,33 +9,23 @@ import com.hutoma.api.connectors.InvocationResult;
 import com.hutoma.api.connectors.NoServerAvailableException;
 import com.hutoma.api.connectors.RequestFor;
 import com.hutoma.api.connectors.aiservices.ControllerConnector;
-import com.hutoma.api.containers.AiDevId;
 import com.hutoma.api.containers.ApiServerEndpointMulti;
+import com.hutoma.api.containers.sub.AiIdentity;
 import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.containers.sub.ChatState;
 import com.hutoma.api.containers.sub.ServerEndpointRequestMulti;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
 import com.hutoma.api.thread.TrackedThreadSubPool;
-
 import org.apache.commons.lang.StringUtils;
 import org.glassfish.jersey.client.JerseyClient;
 
-import java.net.HttpURLConnection;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.ws.rs.core.Response;
+import java.net.HttpURLConnection;
+import java.util.*;
+import java.util.concurrent.*;
 
 /**
  * Base class for backend controllers.
@@ -74,24 +64,28 @@ public abstract class ChatBackendConnector {
     protected abstract BackendServerType getServerType();
 
     List<RequestInProgress> issueChatRequests(final Map<String, String> chatParams,
-                                                     final List<AiDevId> ais, ChatState chatState)
+                                              final List<AiIdentity> ais,
+                                              final ChatState chatState)
             throws NoServerAvailableException, AiControllerException {
         List<RequestCallable> callables = new ArrayList<>();
 
         // calculate the time at which we give up on all calls to backend servers
-        deadlineTimestamp = tools.getTimestamp() + config.getBackendCombinedRequestTimeoutMs();
+        this.deadlineTimestamp = this.tools.getTimestamp() + this.config.getBackendCombinedRequestTimeoutMs();
 
         ServerEndpointRequestMulti serverEndpointRequestMulti = new ServerEndpointRequestMulti();
-        ais.forEach(aiDevId -> {
+        ais.forEach(ai -> {
             serverEndpointRequestMulti.add(new ServerEndpointRequestMulti.ServerEndpointRequest(
-                    aiDevId.getAiid(), Collections.emptyList()));
+                    ai.getAiid(),
+                    ai.getLanguage(),
+                    ai.getServerVersion(),
+                    Collections.emptyList()));
         });
         Map<UUID, ApiServerEndpointMulti.ServerEndpointResponse> endpointMap = ais.isEmpty()
                 ? new HashMap<>()
-                : this.controllerConnector.getBackendChatEndpointMulti(serverEndpointRequestMulti, serializer);
+                : this.controllerConnector.getBackendChatEndpointMulti(serverEndpointRequestMulti, this.serializer);
 
         // check that there is an endpoint for each ai we need to call
-        for (AiDevId ai : ais) {
+        for (AiIdentity ai : ais) {
             UUID aiid = ai.getAiid();
             ApiServerEndpointMulti.ServerEndpointResponse endpoint = endpointMap.get(aiid);
             if ((endpoint == null) || (StringUtils.isEmpty(endpoint.getServerUrl()))) {
@@ -101,11 +95,11 @@ public abstract class ChatBackendConnector {
         }
 
         // generate the callables
-        for (AiDevId ai : ais) {
+        for (AiIdentity ai : ais) {
             UUID aiid = ai.getAiid();
             ApiServerEndpointMulti.ServerEndpointResponse endpoint = endpointMap.get(aiid);
-            ChatBackendRequester chatBackendRequester = requesterProvider.get()
-                    .initialise(this.controllerConnector, ai, endpoint, chatParams, chatState, deadlineTimestamp);
+            ChatBackendRequester chatBackendRequester = this.requesterProvider.get()
+                    .initialise(this.controllerConnector, ai, endpoint, chatParams, chatState, this.deadlineTimestamp);
             callables.add(new RequestCallable(chatBackendRequester, endpoint.getServerIdentifier()));
         }
 

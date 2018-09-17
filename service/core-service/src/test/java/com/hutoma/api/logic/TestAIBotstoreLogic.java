@@ -37,8 +37,6 @@ import javax.inject.Provider;
 
 import static com.hutoma.api.common.TestBotHelper.*;
 import static com.hutoma.api.common.TestDataHelper.DEVID_UUID;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.*;
 
 /**

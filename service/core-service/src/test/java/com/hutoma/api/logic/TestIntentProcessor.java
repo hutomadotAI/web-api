@@ -20,7 +20,6 @@ import org.junit.Test;
 import java.util.*;
 
 import static com.hutoma.api.common.TestDataHelper.getSampleAI;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
 public class TestIntentProcessor {
@@ -54,8 +53,7 @@ public class TestIntentProcessor {
         ChatState chatState = new ChatState(DateTime.now(),
                 null, null, UUID.randomUUID(), new HashMap<>(), 0.1d, ChatHandoverTarget.Ai,
                 getSampleAI(), new ChatContext());
-        ChatRequestInfo chatInfo = new ChatRequestInfo(TestDataHelper.DEVID_UUID, TestDataHelper.AIID, chatId,
-            "question", null);
+        ChatRequestInfo chatInfo = new ChatRequestInfo(TestDataHelper.AI_IDENTITY, chatId, "question", null);
         MemoryVariable memVar = new MemoryVariable(label, Collections.singletonList("val1"));
         memVar.setCurrentValue(memVar.getEntityKeys().get(0));
         MemoryIntent memoryIntent = new MemoryIntent("intent", TestDataHelper.AIID, chatId, Collections.singletonList(memVar),
@@ -90,8 +88,7 @@ public class TestIntentProcessor {
         ChatState chatState = new ChatState(DateTime.now(),
                 null, null, UUID.randomUUID(), new HashMap<>(), 0.1d, ChatHandoverTarget.Ai,
                 getSampleAI(), context);
-        ChatRequestInfo chatInfo = new ChatRequestInfo(TestDataHelper.DEVID_UUID, TestDataHelper.AIID, chatId,
-                "question", null);
+        ChatRequestInfo chatInfo = new ChatRequestInfo(TestDataHelper.AI_IDENTITY, chatId, "question", null);
         MemoryVariable memVar = new MemoryVariable(label, Collections.singletonList(entityValue), false, label);
         memVar.setResetOnEntry(true);
         memVar.setIsMandatory(true);
@@ -128,8 +125,7 @@ public class TestIntentProcessor {
         ChatState chatState = new ChatState(DateTime.now(),
                 null, null, UUID.randomUUID(), new HashMap<>(), 0.1d, ChatHandoverTarget.Ai,
                 getSampleAI(), context);
-        ChatRequestInfo chatInfo = new ChatRequestInfo(TestDataHelper.DEVID_UUID, TestDataHelper.AIID, chatId,
-                "question", null);
+        ChatRequestInfo chatInfo = new ChatRequestInfo(TestDataHelper.AI_IDENTITY, chatId, "question", null);
         MemoryVariable memVar = new MemoryVariable(label, Collections.singletonList(entityValue), false, label);
         memVar.setIsMandatory(true);
         memVar.setPrompts(Collections.singletonList("prompt 1"));

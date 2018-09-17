@@ -1,9 +1,6 @@
 package com.hutoma.api.connectors.aiservices;
 
-import com.hutoma.api.common.Config;
-import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.common.TestDataHelper;
-import com.hutoma.api.common.Tools;
+import com.hutoma.api.common.*;
 import com.hutoma.api.connectors.BackendServerType;
 import com.hutoma.api.connectors.IServerEndpoint;
 import com.hutoma.api.connectors.NoServerAvailableException;
@@ -15,6 +12,8 @@ import com.hutoma.api.connectors.db.DatabaseUser;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.ApiResult;
+import com.hutoma.api.containers.ServiceIdentity;
+import com.hutoma.api.containers.sub.AiIdentity;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logic.TestIntentLogic;
 import com.hutoma.api.memory.MemoryIntentHandler;
@@ -34,7 +33,7 @@ import java.util.UUID;
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.Response;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -46,6 +45,7 @@ public class TestAiServices {
     private static final UUID DEVID = UUID.fromString("780416b3-d8dd-4283-ace5-65cd5bc987cb");
     private static final UUID AIID = UUID.fromString("41c6e949-4733-42d8-bfcf-95192131137e");
     private static final String EMB_ENDPOINT = "http://emb/endpoint1";
+    private static final AiIdentity AI_IDENTITY = new AiIdentity(DEVID, AIID);
 
     private JsonSerializer fakeSerializer;
     private DatabaseAI fakeDatabaseAi;
@@ -85,7 +85,7 @@ public class TestAiServices {
         when(this.fakeConfig.getBackendTrainingCallTimeoutMs()).thenReturn(30000L);
         ThreadPool threadPool = new ThreadPool(this.fakeConfig, this.fakeLogger);
 
-        when(this.fakeControllerConnector.getBackendTrainingEndpoint(AIID, BackendServerType.EMB, fakeSerializer))
+        when(this.fakeControllerConnector.getBackendTrainingEndpoint(AI_IDENTITY, BackendServerType.EMB, fakeSerializer))
                 .thenReturn(TestDataHelper.getEndpointFor(EMB_ENDPOINT));
         when(this.fakeControllerConnector.getBackendTrainingEndpoint(null, BackendServerType.EMB, fakeSerializer))
                 .thenReturn(TestDataHelper.getEndpointFor(EMB_ENDPOINT));
@@ -121,7 +121,7 @@ public class TestAiServices {
         IServerEndpoint endpoint = getFakeServerEndpoint();
         when(this.fakeEmbServicesConnector.getBackendTrainingEndpoint(any(), any())).thenReturn(endpoint);
         when(builder.post(any())).thenReturn(Response.ok(new ApiResult().setSuccessStatus()).build());
-        this.aiServices.uploadTraining(null, DEVID, AIID, "training materials");
+        this.aiServices.uploadTraining(null, AI_IDENTITY, "training materials");
     }
 
     // Bug:2300
@@ -227,7 +227,7 @@ public class TestAiServices {
     private void fakeBackendServicesRegistered() {
         Map<String, ServerTrackerInfo> map = new HashMap<>();
         map.put("key", new ServerTrackerInfo("url", "ident", 1, 1, true, true));
-        when(this.fakeEmbServicesConnector.getVerifiedEndpointMap(any())).thenReturn(map);
+        when(this.fakeEmbServicesConnector.getVerifiedEndpointMap(any(), any(), any())).thenReturn(map);
     }
 
     private void testCommand_serverError(CheckedByConsumer<UUID, UUID> logicMethod, String verb)

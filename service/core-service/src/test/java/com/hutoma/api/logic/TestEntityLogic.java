@@ -23,8 +23,6 @@ import java.util.OptionalInt;
 import java.util.UUID;
 
 import static com.hutoma.api.common.TestDataHelper.DEVID_UUID;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 
 /**
@@ -190,14 +188,6 @@ public class TestEntityLogic {
         when(this.fakeDatabase.deleteEntity(any(), anyInt())).thenThrow(DatabaseException.class);
         this.entityLogic.deleteEntity(DEVID_UUID, ENTITY_NAME);
         verify(this.trainingLogic, never()).stopTraining(any(), any());
-    }
-
-    @Test
-    public void testWriteEntity_entityInUse_triggersStopTraining() throws DatabaseException {
-        UUID aiid = UUID.randomUUID();
-        when(this.fakeDatabase.getAisForEntity(DEVID_UUID, ENTITY_NAME)).thenReturn(Collections.singletonList(aiid));
-        this.entityLogic.writeEntity(DEVID_UUID, ENTITY_NAME, getEntity());
-        verify(this.trainingLogic).stopTraining(DEVID_UUID, aiid);
     }
 
     @Test

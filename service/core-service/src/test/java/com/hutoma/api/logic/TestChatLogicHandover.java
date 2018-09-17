@@ -28,7 +28,7 @@ import java.util.HashMap;
 import java.util.UUID;
 
 import static com.hutoma.api.common.TestDataHelper.*;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -148,6 +148,6 @@ public class TestChatLogicHandover  extends TestChatBase {
 
         when (this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(initialState);
         return new ChatLogic(this.fakeChatServices, this.fakeChatStateHandler, this.fakeDatabaseEntitiesIntents, tools,
-                mock(ILogger.class), mock(ChatLogger.class), chatWorkflow, this.fakeConfig);
+                mock(ILogger.class), mock(ChatLogger.class), chatWorkflow, this.fakeConfig, this.fakeFeatureToggler);
     }
 }

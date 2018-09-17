@@ -21,9 +21,10 @@ public class ApiResult {
     }
 
     public Response.ResponseBuilder getResponse(JsonSerializer serializer) {
-         return Response.status(this.status.getCode())
-                 .encoding(StandardCharsets.UTF_8.name())
-                 .entity(serializer.serialize(this));
+         return Response.status(
+                 this.status.getCode())
+                 .entity(serializer.serialize(this))
+                 .encoding(StandardCharsets.UTF_8.name());
     }
 
     public ApiResult setCreatedStatus() {

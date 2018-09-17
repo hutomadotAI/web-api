@@ -4,19 +4,22 @@ import java.util.Map;
 import java.util.UUID;
 
 public class ChatRequestInfo {
-    private final UUID devId;
-    private final UUID aiid;
+    private final AiIdentity aiIdentity;
     private final UUID chatId;
     private String question;
     private final Map<String, String> clientVariables;
     private ChatHandoverTarget handoverTarget;
 
     public UUID getDevId() {
-        return devId;
+        return this.aiIdentity.getDevId();
     }
 
     public UUID getAiid() {
-        return aiid;
+        return this.aiIdentity.getAiid();
+    }
+
+    public AiIdentity getAiIdentity() {
+        return this.aiIdentity;
     }
 
     public UUID getChatId() {
@@ -28,7 +31,8 @@ public class ChatRequestInfo {
     }
 
     public void setQuestion(final String q) {
-        this.question = q; }
+        this.question = q;
+    }
 
     public Map<String, String> getClientVariables() {
         return clientVariables;
@@ -38,18 +42,19 @@ public class ChatRequestInfo {
         return handoverTarget;
     }
 
-    public ChatRequestInfo(final UUID devId, final UUID aiid, final UUID chatId, final String question,
+    public ChatRequestInfo(final AiIdentity aiIdentity,
+                           final UUID chatId,
+                           final String question,
                            final Map<String, String> clientVariables) {
-        this.devId = devId;
-        this.aiid = aiid;
+        this.aiIdentity = aiIdentity;
         this.chatId = chatId;
         this.question = question;
         this.clientVariables = clientVariables;
 
     }
 
-    public ChatRequestInfo(final UUID devId, final UUID aiid, final UUID chatId, ChatHandoverTarget target) {
-        this(devId, aiid, chatId, null, null);
+    public ChatRequestInfo(final AiIdentity aiIdentity, final UUID chatId, ChatHandoverTarget target) {
+        this(aiIdentity, chatId, null, null);
         this.handoverTarget = target;
     }
 }

@@ -9,7 +9,7 @@ import org.junit.Test;
 import javax.ws.rs.core.Response;
 import java.net.HttpURLConnection;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 public class TestServiceExperiment extends ServiceTestBase {

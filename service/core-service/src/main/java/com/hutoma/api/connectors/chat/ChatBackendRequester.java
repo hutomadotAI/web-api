@@ -6,15 +6,16 @@ import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.InvocationResult;
 import com.hutoma.api.connectors.NoServerAvailableException;
 import com.hutoma.api.connectors.aiservices.ControllerConnector;
-import com.hutoma.api.containers.AiDevId;
 import com.hutoma.api.containers.ApiServerEndpointMulti;
+import com.hutoma.api.containers.sub.AiIdentity;
 import com.hutoma.api.containers.sub.ChatState;
 import com.hutoma.api.containers.sub.ServerEndpointRequestMulti;
-
 import org.apache.commons.lang.StringUtils;
 import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.client.JerseyWebTarget;
 
+import javax.inject.Inject;
+import javax.ws.rs.core.Response;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,8 +23,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
-import javax.inject.Inject;
-import javax.ws.rs.core.Response;
 
 import static org.glassfish.jersey.client.ClientProperties.CONNECT_TIMEOUT;
 import static org.glassfish.jersey.client.ClientProperties.READ_TIMEOUT;
@@ -38,7 +37,7 @@ public class ChatBackendRequester implements Callable<InvocationResult> {
     private final JsonSerializer serializer;
 
     private ControllerConnector controllerConnector;
-    private AiDevId ai;
+    private AiIdentity ai;
     private ApiServerEndpointMulti.ServerEndpointResponse currentEndpointResponse;
     private ChatState chatState;
     private Map<String, String> chatParams;
@@ -49,8 +48,10 @@ public class ChatBackendRequester implements Callable<InvocationResult> {
     private InvocationResult lastAttemptResult = null;
 
     @Inject
-    public ChatBackendRequester(final Tools tools, final JerseyClient jerseyClient,
-                                final Config config, final JsonSerializer serializer) {
+    public ChatBackendRequester(final Tools tools,
+                                final JerseyClient jerseyClient,
+                                final Config config,
+                                final JsonSerializer serializer) {
         this.tools = tools;
         this.jerseyClient = jerseyClient;
         this.config = config;
@@ -58,7 +59,7 @@ public class ChatBackendRequester implements Callable<InvocationResult> {
     }
 
     ChatBackendRequester initialise(final ControllerConnector controllerConnector,
-                                    final AiDevId ai,
+                                    final AiIdentity ai,
                                     final ApiServerEndpointMulti.ServerEndpointResponse serverEndpointResponse,
                                     final Map<String, String> chatParams,
                                     final ChatState chatState,
@@ -75,23 +76,23 @@ public class ChatBackendRequester implements Callable<InvocationResult> {
     @Override
     public InvocationResult call() throws Exception {
 
-        this.requesterStartTime = tools.getTimestamp();
+        this.requesterStartTime = this.tools.getTimestamp();
 
         // calculate time remaining but shave off a few milliseconds so that we
         // get a chance to return the last error in a series of errors rather
         // than just timing out on the last of a series of requests
         long timeRemaining = this.deadlineTimestamp - this.requesterStartTime - 10L;
 
-        ApiServerEndpointMulti.ServerEndpointResponse serverEndpointResponse = currentEndpointResponse;
+        ApiServerEndpointMulti.ServerEndpointResponse serverEndpointResponse = this.currentEndpointResponse;
         ArrayList<String> alreadyTried = new ArrayList<>();
         this.callAttempts = 0;
 
         boolean retry;
         do {
             retry = false;
-            lastAttemptResult = callBackend(serverEndpointResponse, timeRemaining, ++callAttempts);
-            if (lastAttemptResult != null) {
-                Response response = lastAttemptResult.getResponse();
+            this.lastAttemptResult = callBackend(serverEndpointResponse, timeRemaining, ++this.callAttempts);
+            if (this.lastAttemptResult != null) {
+                Response response = this.lastAttemptResult.getResponse();
                 if ((response != null) && (response.getStatus() == HttpURLConnection.HTTP_UNAVAILABLE)) {
 
                     // remember the servers we already tried
@@ -100,13 +101,14 @@ public class ChatBackendRequester implements Callable<InvocationResult> {
                     // call the controller again to get an endpoint
                     ServerEndpointRequestMulti serverEndpointRequestMulti = new ServerEndpointRequestMulti();
                     serverEndpointRequestMulti.add(new ServerEndpointRequestMulti.ServerEndpointRequest(
-                                ai.getAiid(), alreadyTried));
+                            this.ai.getAiid(), this.ai.getLanguage(), this.ai.getServerVersion(), alreadyTried));
                     Map<UUID, ApiServerEndpointMulti.ServerEndpointResponse> endpointMap =
                             this.controllerConnector.getBackendChatEndpointMulti(
-                                    serverEndpointRequestMulti, serializer);
+                                    serverEndpointRequestMulti,
+                                    this.serializer);
 
                     // make sure that we got a valid endpoint back from the controller
-                    serverEndpointResponse = endpointMap.get(ai.getAiid());
+                    serverEndpointResponse = endpointMap.get(this.ai.getAiid());
                     if ((serverEndpointResponse == null)
                             || StringUtils.isEmpty(serverEndpointResponse.getServerIdentifier())) {
 
@@ -115,30 +117,31 @@ public class ChatBackendRequester implements Callable<InvocationResult> {
                     }
 
                     // recalculate the amount of time we have left
-                    timeRemaining = this.deadlineTimestamp - tools.getTimestamp();
+                    timeRemaining = this.deadlineTimestamp - this.tools.getTimestamp();
                     if (timeRemaining > 0) {
                         retry = true;
                     }
                 }
             }
         } while (retry);
-        return lastAttemptResult;
+        return this.lastAttemptResult;
     }
 
     protected InvocationResult callBackend(final ApiServerEndpointMulti.ServerEndpointResponse endpointResponse,
-                                           final long timeRemaining, final int attemptNumber) {
+                                           final long timeRemaining,
+                                           final int attemptNumber) {
 
-        Map<String, String> chatParamsThisAi = new HashMap<>(chatParams);
-        if (ai.getAiid().equals(chatState.getLockedAiid())) {
-            chatParamsThisAi = new HashMap<>(chatParams);
-            chatParamsThisAi.put("history", chatState.getHistory());
-            chatParamsThisAi.put("topic", chatState.getTopic());
+        Map<String, String> chatParamsThisAi = new HashMap<>(this.chatParams);
+        if (this.ai.getAiid().equals(this.chatState.getLockedAiid())) {
+            chatParamsThisAi = new HashMap<>(this.chatParams);
+            chatParamsThisAi.put("history", this.chatState.getHistory());
+            chatParamsThisAi.put("topic", this.chatState.getTopic());
         }
 
         JerseyWebTarget target = this.jerseyClient
                 .target(endpointResponse.getServerUrl())
-                .path(ai.getDevId().toString())
-                .path(ai.getAiid().toString())
+                .path(this.ai.getDevId().toString())
+                .path(this.ai.getAiid().toString())
                 .path("chat");
 
         target = addTargetParameters(endpointResponse, chatParamsThisAi, target);
@@ -157,7 +160,7 @@ public class ChatBackendRequester implements Callable<InvocationResult> {
         long timeNow = this.tools.getTimestamp();
         return new InvocationResult(response, endpointResponse.getServerUrl(),
                 timeNow - startTime, timeNow - this.requesterStartTime,
-                attemptNumber, ai.getAiid());
+                attemptNumber, this.ai.getAiid());
     }
 
     protected JerseyWebTarget addTargetParameters(final ApiServerEndpointMulti.ServerEndpointResponse endpointResponse,

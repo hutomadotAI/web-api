@@ -6,8 +6,8 @@ import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.TestDataHelper;
 import com.hutoma.api.connectors.InvocationResult;
 import com.hutoma.api.connectors.aiservices.ControllerConnector;
-import com.hutoma.api.containers.AiDevId;
 import com.hutoma.api.containers.ApiServerEndpointMulti;
+import com.hutoma.api.containers.sub.AiIdentity;
 import com.hutoma.api.containers.sub.ChatState;
 
 import org.glassfish.jersey.client.JerseyClient;
@@ -23,7 +23,6 @@ import java.util.UUID;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.core.Response;
 
-import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.*;
 
 public class TestChatBackendRequester {
@@ -51,7 +50,7 @@ public class TestChatBackendRequester {
         when(fakeConfig.getBackendCombinedRequestTimeoutMs()).thenReturn(1000L);
         this.requester = new ChatBackendRequester(
                 fakeTimer, mock(JerseyClient.class), fakeConfig, fakeSerializer);
-        this.requester.initialise(fakeControllerConnector, new AiDevId(TestDataHelper.DEVID_UUID, TestDataHelper.AIID),
+        this.requester.initialise(fakeControllerConnector, new AiIdentity(TestDataHelper.DEVID_UUID, TestDataHelper.AIID),
                 makeServerEndpoint(), new HashMap<>(), mock(ChatState.class),
                 fakeTimer.getTimestamp() + 1000);
         when(fakeControllerConnector.getBackendChatEndpointMulti(any(), any())).thenReturn(makeServerResponse());

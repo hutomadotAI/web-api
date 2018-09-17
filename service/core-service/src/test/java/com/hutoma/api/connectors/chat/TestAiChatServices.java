@@ -31,8 +31,8 @@ import java.util.UUID;
 
 import static com.hutoma.api.common.TestBotHelper.SAMPLEBOT;
 import static com.hutoma.api.common.TestDataHelper.AIID;
+import static com.hutoma.api.common.TestDataHelper.AI_IDENTITY;
 import static com.hutoma.api.common.TestDataHelper.DEVID_UUID;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
 /**
@@ -143,7 +143,7 @@ public class TestAiChatServices {
         when(this.fakeDatabaseAi.getAIStatusReadOnly(any(), any())).thenReturn(beStatus);
         // No linked bots
         when(this.fakeDatabaseAi.getAisLinkedToAi(any(), any())).thenReturn(Collections.emptyList());
-        this.chatServices.startChatRequests(DEVID_UUID, AIID, CHATID, "question", chatState);
+        this.chatServices.startChatRequests(AI_IDENTITY, CHATID, "question", chatState);
         // MinP map should contain the value for the main ai
         Assert.assertTrue(this.chatServices.getMinPMap().containsKey(AIID));
         Assert.assertEquals(1, this.chatServices.getMinPMap().keySet().size());
@@ -163,7 +163,7 @@ public class TestAiChatServices {
         AiMinP bot2 = new AiMinP(DEVID_UUID, UUID.randomUUID(), 0.7);
         List<AiMinP> linkedBots = Arrays.asList(bot1, bot2);
         when(this.fakeDatabaseAi.getAisLinkedToAi(any(), any())).thenReturn(linkedBots);
-        this.chatServices.startChatRequests(DEVID_UUID, AIID, CHATID, "question", chatState);
+        this.chatServices.startChatRequests(AI_IDENTITY, CHATID, "question", chatState);
         // MinP map should contain the value for the main ai
         Assert.assertEquals(3, this.chatServices.getMinPMap().keySet().size());
         Assert.assertEquals(bot1.getMinP(), this.chatServices.getMinPMap().get(bot1.getAiid()), 0.00001);
@@ -181,6 +181,6 @@ public class TestAiChatServices {
         ChatState chatState = ChatState.getEmpty();
         chatState.setHistory("history");
         chatState.setTopic("topic");
-        this.chatServices.startChatRequests(DEVID_UUID, AIID, CHATID, "question", chatState);
+        this.chatServices.startChatRequests(AI_IDENTITY, CHATID, "question", chatState);
     }
 }

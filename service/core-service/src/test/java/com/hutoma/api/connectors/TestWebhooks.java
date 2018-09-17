@@ -6,12 +6,8 @@ import com.hutoma.api.connectors.db.DatabaseAI;
 import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.connectors.db.DatabaseMarketplace;
 import com.hutoma.api.containers.ApiIntent;
-import com.hutoma.api.containers.sub.ChatResult;
-import com.hutoma.api.containers.sub.MemoryIntent;
-import com.hutoma.api.containers.sub.WebHook;
-import com.hutoma.api.containers.sub.WebHookResponse;
+import com.hutoma.api.containers.sub.*;
 import com.hutoma.api.logging.ILogger;
-import com.hutoma.api.containers.sub.ChatRequestInfo;
 
 import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.client.JerseyInvocation;
@@ -25,8 +21,6 @@ import java.util.UUID;
 import javax.ws.rs.core.Response;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 
 /**
@@ -36,7 +30,7 @@ public class TestWebhooks {
     private static final UUID AIID = UUID.fromString("bd2700ff-279b-4bac-ad2f-85a5275ac073");
     private static final UUID CHATID = UUID.fromString("89da2d5f-3ce5-4749-adc3-1f2ff6073fea");
     private static final UUID DEVID = UUID.fromString("ef1593e6-503f-481c-a1fd-071a32c69271");
-    private static final ChatRequestInfo CHATINFO = new ChatRequestInfo(DEVID, AIID, CHATID, "hi", null);
+    private static final ChatRequestInfo CHATINFO = new ChatRequestInfo(new AiIdentity(DEVID, AIID), CHATID, "hi", null);
     private JsonSerializer serializer;
     private DatabaseAI fakeDatabase;
     private DatabaseMarketplace fakeDatabaseMarketplace;

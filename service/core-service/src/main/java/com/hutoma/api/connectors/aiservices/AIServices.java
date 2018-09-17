@@ -2,6 +2,7 @@ package com.hutoma.api.connectors.aiservices;
 
 import com.google.gson.annotations.SerializedName;
 import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.common.SupportedLanguage;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.BackendStatus;
 import com.hutoma.api.connectors.IConnectConfig;
@@ -13,6 +14,8 @@ import com.hutoma.api.connectors.db.DatabaseEntitiesIntents;
 import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.ApiIntent;
+import com.hutoma.api.containers.ServiceIdentity;
+import com.hutoma.api.containers.sub.AiIdentity;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
 import com.hutoma.api.memory.MemoryIntentHandler;
@@ -24,6 +27,7 @@ import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -48,10 +52,12 @@ public class AIServices extends ServerConnector {
 
     @Inject
     public AIServices(final DatabaseAI databaseAi,
-                      final DatabaseEntitiesIntents databaseEntitiesIntents, final ILogger logger,
+                      final DatabaseEntitiesIntents databaseEntitiesIntents,
+                      final ILogger logger,
                       final IConnectConfig connectConfig,
                       final JsonSerializer serializer,
-                      final Tools tools, final JerseyClient jerseyClient,
+                      final Tools tools,
+                      final JerseyClient jerseyClient,
                       final TrackedThreadSubPool threadSubPool,
                       final AiServicesQueue queueServices,
                       final BackendServicesConnectors connectors) {
@@ -65,14 +71,13 @@ public class AIServices extends ServerConnector {
     /***
      * Queue a command to start training
      * @param status
-     * @param devId
-     * @param aiid
+     * @param aiIdentity
      * @throws AiServicesException
      */
-    public void startTraining(final BackendStatus status, final UUID devId, final UUID aiid)
+    public void startTraining(final BackendStatus status, final AiIdentity aiIdentity)
             throws AiServicesException {
         try {
-            this.connectors.startTraining(this.queueServices, status, devId, aiid);
+            this.connectors.startTraining(this.queueServices, status, aiIdentity);
         } catch (DatabaseException e) {
             AiServicesException.throwWithSuppressed("failed to start training", e);
         }
@@ -81,14 +86,13 @@ public class AIServices extends ServerConnector {
     /***
      * Stop training (direct, not queued)
      * @param backendStatus
-     * @param devId
-     * @param aiid
+     * @param aiIdentity
      * @throws AiServicesException
      */
-    public void stopTraining(final BackendStatus backendStatus, final UUID devId, final UUID aiid)
+    public void stopTraining(final BackendStatus backendStatus, final AiIdentity aiIdentity)
             throws AiServicesException {
         try {
-            this.connectors.stopTraining(this.queueServices, backendStatus, devId, aiid);
+            this.connectors.stopTraining(this.queueServices, backendStatus, aiIdentity);
         } catch (DatabaseException e) {
             AiServicesException.throwWithSuppressed("failed to stop training", e);
         }
@@ -97,14 +101,13 @@ public class AIServices extends ServerConnector {
     /***
      * Delet an AI (stop training now and queue the delete for later)
      * @param backendStatus
-     * @param devId
-     * @param aiid
+     * @param aiIdentity
      * @throws AiServicesException
      */
-    public void deleteAI(final BackendStatus backendStatus, final UUID devId, final UUID aiid)
+    public void deleteAI(final BackendStatus backendStatus, final AiIdentity aiIdentity)
             throws AiServicesException {
         try {
-            this.connectors.deleteAi(this.queueServices, backendStatus, devId, aiid);
+            this.connectors.deleteAi(this.queueServices, backendStatus, aiIdentity);
         } catch (DatabaseException e) {
             AiServicesException.throwWithSuppressed("failed to delete ai", e);
         }
@@ -113,7 +116,7 @@ public class AIServices extends ServerConnector {
     public void deleteDev(final UUID devId) throws AiServicesException {
         this.logger.logDebug(LOGFROM, "Issuing \"delete DEV\" command to backends for dev " + devId);
         HashMap<String, Callable<InvocationResult>> callables = new HashMap<>();
-        for (String endpoint : this.getEndpointsForAllServerTypes()) {
+        for (String endpoint : this.getAllEndpointsForBroadcast()) {
             callables.put(endpoint, () -> new InvocationResult(
                     this.jerseyClient
                             .target(endpoint)
@@ -127,43 +130,45 @@ public class AIServices extends ServerConnector {
         executeAndWait(callables);
     }
 
-    private List<String> getEndpointsForAllServerTypes() {
-        return connectors.getEndpointsForAllServerTypes(this.serializer);
+    private List<String> getAllEndpointsForBroadcast() {
+        return connectors.getEndpointsForAllServerTypes(SupportedLanguage.EN, ServiceIdentity.DEFAULT_VERSION,
+                this.serializer);
     }
 
     /***
      * Upload training materials for an AI
      * @param backendStatus
-     * @param devId
-     * @param aiid
+     * @param aiIdentity
      * @param trainingMaterials
      * @throws AiServicesException
      */
-    public void uploadTraining(final BackendStatus backendStatus, final UUID devId, final UUID aiid,
+    public void uploadTraining(final BackendStatus backendStatus,
+                               final AiIdentity aiIdentity,
                                final String trainingMaterials)
             throws AiServicesException {
 
         // for each type of server, send a stop command (if needed),
         // set the status and the queue state
         try {
-            connectors.uploadTraining(this.queueServices, backendStatus, devId, aiid);
+            connectors.uploadTraining(this.queueServices, backendStatus, aiIdentity);
         } catch (DatabaseException e) {
             AiServicesException.throwWithSuppressed("failed to upload training materials", e);
         }
 
         // upload the file to each backend server (one of each kind)
         HashMap<String, Callable<InvocationResult>> callables = new HashMap<>();
-        this.logger.logDebug(LOGFROM, "Issuing \"upload training\" command to backends for AI " + aiid.toString());
-        for (String endpoint : this.getListOfPrimaryEndpoints(aiid)) {
+        this.logger.logDebug(LOGFROM, "Issuing \"upload training\" command to backends for AI "
+                + aiIdentity.getAiid().toString());
+        for (String endpoint : this.getListOfPrimaryEndpoints(aiIdentity)) {
 
             this.logger.logDebug(LOGFROM, "Sending training data to: " + endpoint);
             FormDataContentDisposition dispo = FormDataContentDisposition
                     .name("filename")
                     .fileName("training.txt")
-                    .size(trainingMaterials.getBytes(Charsets.UTF_8).length)
+                    .size(trainingMaterials.getBytes(StandardCharsets.UTF_8).length)
                     .build();
             FormDataBodyPart bodyPart = new FormDataBodyPart(dispo, trainingMaterials);
-            AiInfo info = new AiInfo(devId, aiid);
+            AiInfo info = new AiInfo(aiIdentity.getDevId(), aiIdentity.getAiid());
             FormDataMultiPart multipart = (FormDataMultiPart) new FormDataMultiPart()
                     .field("info", this.serializer.serialize(info), MediaType.APPLICATION_JSON_TYPE)
                     .bodyPart(bodyPart);
@@ -172,7 +177,7 @@ public class AIServices extends ServerConnector {
                             .target(endpoint)
                             .request()
                             .post(Entity.entity(multipart, multipart.getMediaType())),
-                    endpoint, 0, 0, 1, aiid));
+                    endpoint, 0, 0, 1, aiIdentity.getAiid()));
         }
         executeAndWait(callables);
     }
@@ -239,31 +244,30 @@ public class AIServices extends ServerConnector {
 
     /***
      * Stop the training if the AI was likely to have been training
-     * @param devId
-     * @param aiid
+     * @param aiIdentity
      * @throws DatabaseException
      */
-    public void stopTrainingIfNeeded(final UUID devId, final UUID aiid)
+    public void stopTrainingIfNeeded(final AiIdentity aiIdentity)
             throws DatabaseException {
         try {
-            ApiAi ai = this.databaseAi.getAI(devId, aiid, this.serializer);
+            ApiAi ai = this.databaseAi.getAI(aiIdentity.getDevId(), aiIdentity.getAiid(), this.serializer);
             if (ai != null) {
-                stopTraining(ai.getBackendStatus(), devId, aiid);
+                stopTraining(ai.getBackendStatus(), aiIdentity);
             }
         } catch (ServerConnector.AiServicesException ex) {
-            this.logger.logWarning(LOGFROM, "Could not stop training for ai " + aiid);
+            this.logger.logWarning(LOGFROM, "Could not stop training for ai " + aiIdentity.getAiid());
         }
     }
 
     /***
      * Get a list containing the primary endpoints (i.e. one of each backend type)
-     * @param aiid
+     * @param aiIdentity
      * @return list of primary endpoints
      * @throws AiServicesException
      */
-    private List<String> getListOfPrimaryEndpoints(final UUID aiid) throws AiServicesException {
+    private List<String> getListOfPrimaryEndpoints(final AiIdentity aiIdentity) throws AiServicesException {
         try {
-            return connectors.getListOfPrimaryEndpoints(aiid, this.serializer, this.logger);
+            return connectors.getListOfPrimaryEndpoints(aiIdentity, this.serializer, this.logger);
         } catch (NoServerAvailableException noServer) {
             AiServicesException.throwWithSuppressed(noServer.getMessage(), noServer);
         }

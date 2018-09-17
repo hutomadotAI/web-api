@@ -1,6 +1,7 @@
 package com.hutoma.api.logic;
 
 import com.hutoma.api.common.Config;
+import com.hutoma.api.common.FeatureToggler;
 import com.hutoma.api.common.HTMLExtractor;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.connectors.BackendServerType;
@@ -8,34 +9,22 @@ import com.hutoma.api.connectors.BackendStatus;
 import com.hutoma.api.connectors.aiservices.AIServices;
 import com.hutoma.api.connectors.db.DatabaseAI;
 import com.hutoma.api.connectors.db.DatabaseException;
-import com.hutoma.api.containers.ApiAi;
-import com.hutoma.api.containers.ApiError;
-import com.hutoma.api.containers.ApiResult;
-import com.hutoma.api.containers.ApiTrainingMaterials;
+import com.hutoma.api.containers.*;
+import com.hutoma.api.containers.sub.AiIdentity;
 import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
 import com.hutoma.api.memory.IMemoryIntentHandler;
 import com.hutoma.api.validation.Validate;
-
-import org.apache.commons.lang.CharEncoding;
-import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 
+import javax.inject.Inject;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.charset.Charset;
-import java.nio.charset.CharsetEncoder;
 import java.nio.charset.StandardCharsets;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-import javax.inject.Inject;
+import java.util.*;
 
 import static com.hutoma.api.containers.sub.ResultEvent.UPLOAD_MISSING_RESPONSE;
 import static com.hutoma.api.containers.sub.ResultEvent.UPLOAD_NO_CONTENT;
@@ -59,11 +48,17 @@ public class TrainingLogic {
     private final Validate validate;
     private final IMemoryIntentHandler memoryIntentHandler;
     private final JsonSerializer jsonSerializer;
+    private final FeatureToggler featureToggler;
 
     @Inject
-    public TrainingLogic(final Config config, final AIServices aiServices, final HTMLExtractor htmlExtractor,
-                         final DatabaseAI databaseAi, final ILogger logger,
-                         final Validate validate, final IMemoryIntentHandler memoryIntentHandler,
+    public TrainingLogic(final Config config,
+                         final AIServices aiServices,
+                         final HTMLExtractor htmlExtractor,
+                         final DatabaseAI databaseAi,
+                         final ILogger logger,
+                         final Validate validate,
+                         final IMemoryIntentHandler memoryIntentHandler,
+                         final FeatureToggler featureToggler,
                          final JsonSerializer jsonSerializer) {
         this.config = config;
         this.aiServices = aiServices;
@@ -72,6 +67,7 @@ public class TrainingLogic {
         this.logger = logger;
         this.validate = validate;
         this.memoryIntentHandler = memoryIntentHandler;
+        this.featureToggler = featureToggler;
         this.jsonSerializer = jsonSerializer;
     }
 
@@ -192,6 +188,7 @@ public class TrainingLogic {
      * Submit a training request to SQS only if the training file is avaialable or a previous
      * valid training session was stopped.
      * In all other cases we return an error
+     *
      * @param devid
      * @param aiid
      * @return
@@ -221,7 +218,7 @@ public class TrainingLogic {
         if (trainingStatus == TrainingStatus.AI_READY_TO_TRAIN
                 || trainingStatus == TrainingStatus.AI_TRAINING_STOPPED) {
             try {
-                this.aiServices.startTraining(ai.getBackendStatus(), devid, aiid);
+                this.aiServices.startTraining(ai.getBackendStatus(), getAiIdentity(devid, ai));
             } catch (AIServices.AiServicesException | RuntimeException ex) {
                 this.logger.logUserExceptionEvent(LOGFROM, "StartTraining", devidString, ex);
                 return ApiError.getInternalServerError();
@@ -249,16 +246,17 @@ public class TrainingLogic {
 
     /**
      * Send a stop msg to SQS only if a training session is currently ongoing
-     * @param devid
+     *
+     * @param devId
      * @param aiid
      * @return
      */
 
-    public ApiResult stopTraining(final UUID devid, final UUID aiid) {
-        final String devidString = devid.toString();
+    public ApiResult stopTraining(final UUID devId, UUID aiid) {
+        final String devidString = devId.toString();
         try {
             LogMap logMap = LogMap.map("AIID", aiid);
-            ApiAi ai = this.databaseAi.getAI(devid, aiid, this.jsonSerializer);
+            ApiAi ai = this.databaseAi.getAI(devId, aiid, this.jsonSerializer);
             if (ai == null) {
                 this.logger.logUserTraceEvent(LOGFROM, "StopTraining - AI not found", devidString, logMap);
                 return ApiError.getNotFound();
@@ -271,7 +269,7 @@ public class TrainingLogic {
             BackendStatus backendStatus = ai.getBackendStatus();
             TrainingStatus embStatus = backendStatus.getEngineStatus(BackendServerType.EMB).getTrainingStatus();
             if (embStatus == TrainingStatus.AI_TRAINING_QUEUED || embStatus == TrainingStatus.AI_TRAINING) {
-                this.aiServices.stopTraining(backendStatus, devid, aiid);
+                this.aiServices.stopTraining(backendStatus, getAiIdentity(devId, ai));
                 this.logger.logUserTraceEvent(LOGFROM, "StopTraining", devidString, logMap);
                 return new ApiResult().setSuccessStatus("Training session stopped.");
             } else {
@@ -288,6 +286,7 @@ public class TrainingLogic {
     /**
      * An update to an existing training session means we will have to delete any existing neural
      * network and start from scratch.
+     *
      * @param devid
      * @param aiid
      * @return
@@ -322,7 +321,8 @@ public class TrainingLogic {
                                     devidString, logMap);
                             return ApiError.getBadRequest("There is no training data.");
                         }
-                        this.aiServices.uploadTraining(ai.getBackendStatus(), devid, aiid, trainingMaterials);
+                        this.aiServices.uploadTraining(ai.getBackendStatus(), getAiIdentity(devid, ai),
+                                trainingMaterials);
                         // Delete all memory variables for this AI
                         this.memoryIntentHandler.resetIntentsStateForAi(devid, aiid);
                         this.logger.logUserTraceEvent(LOGFROM, "UpdateTraining", devidString, logMap);
@@ -345,6 +345,7 @@ public class TrainingLogic {
 
     /**
      * Gets the training materials for an AI.
+     *
      * @param devid
      * @param aiid
      * @return
@@ -369,6 +370,7 @@ public class TrainingLogic {
 
     /**
      * Adds context to conversational exchanges
+     *
      * @param training list of strings, one for each line of conversation
      * @return single string with processed training
      */
@@ -465,6 +467,7 @@ public class TrainingLogic {
 
     /**
      * Download from a web-resource, sanitize each line and rejoin string.
+     *
      * @param url web-resource
      * @return clean result
      * @throws Exception
@@ -490,6 +493,7 @@ public class TrainingLogic {
 
     /**
      * Remove the last conversation item.
+     *
      * @param conversation the conversation so far
      */
     private void removeLastConversationEntry(final List<String> conversation) {
@@ -512,6 +516,7 @@ public class TrainingLogic {
 
     /**
      * Reads from InputStream and returns a list of sanitised strings
+     *
      * @param maxUploadSize
      * @param uploadedInputStream
      * @return list of strings
@@ -546,7 +551,7 @@ public class TrainingLogic {
                                          final String trainingMaterials, final TrainingFileParsingResult result) {
         final String devidString = devid.toString();
         try {
-            this.aiServices.uploadTraining(ai.getBackendStatus(), devid, aiid, trainingMaterials);
+            this.aiServices.uploadTraining(ai.getBackendStatus(), getAiIdentity(devid, ai), trainingMaterials);
         } catch (AIServices.AiServicesException ex) {
             this.logger.logUserExceptionEvent(LOGFROM, "UploadTrainingFile", devidString, ex);
             return ApiError.getInternalServerError("Could not upload training data");
@@ -555,6 +560,11 @@ public class TrainingLogic {
         this.logger.logUserTraceEvent(LOGFROM, "UploadFile", devidString, LogMap.map("AIID", aiid));
         return new ApiResult().setSuccessStatus("Upload complete",
                 result.getEventCount() == 0 ? null : result.getEvents());
+    }
+
+    private AiIdentity getAiIdentity(final UUID devId, final ApiAi ai) {
+        UUID aiid = UUID.fromString(ai.getAiid());
+        return new AiIdentity(devId, aiid, ai.getLanguage(), ServiceIdentity.DEFAULT_VERSION);
     }
 
     public enum TrainingType {
@@ -569,6 +579,7 @@ public class TrainingLogic {
 
         /**
          * Obtains the enum value from the integer type
+         *
          * @param type the integer type
          * @return the enum value
          */

@@ -2,41 +2,29 @@ package com.hutoma.api.logic;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.hutoma.api.access.Role;
-import com.hutoma.api.common.BotStructureSerializer;
-import com.hutoma.api.common.Config;
-import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.common.Pair;
-import com.hutoma.api.common.Tools;
+import com.hutoma.api.common.*;
 import com.hutoma.api.connectors.ServerConnector;
 import com.hutoma.api.connectors.WebHooks;
 import com.hutoma.api.connectors.aiservices.AIServices;
-import com.hutoma.api.connectors.db.DatabaseAI;
-import com.hutoma.api.connectors.db.DatabaseEntitiesIntents;
-import com.hutoma.api.connectors.db.DatabaseException;
-import com.hutoma.api.connectors.db.DatabaseMarketplace;
-import com.hutoma.api.connectors.db.DatabaseTransaction;
+import com.hutoma.api.connectors.db.*;
 import com.hutoma.api.containers.*;
-import com.hutoma.api.containers.sub.AiBot;
-import com.hutoma.api.containers.sub.BotStructure;
-import com.hutoma.api.containers.sub.Entity;
-import com.hutoma.api.containers.sub.WebHook;
+import com.hutoma.api.containers.sub.*;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
 import com.hutoma.api.logic.chat.ChatDefaultHandler;
 import com.hutoma.api.validation.ParameterValidationException;
 import com.hutoma.api.validation.Validate;
+import io.jsonwebtoken.CompressionCodecs;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.impl.compression.CompressionCodecs;
-
 import org.apache.commons.lang3.StringUtils;
 
+import javax.inject.Inject;
+import javax.inject.Provider;
 import java.net.HttpURLConnection;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.inject.Inject;
-import javax.inject.Provider;
 
 
 /**
@@ -65,14 +53,21 @@ public class AILogic {
     private final Validate validate;
     private final Provider<DatabaseTransaction> transactionProvider;
     private Provider<AIIntegrationLogic> integrationLogicProvider;
+    private final FeatureToggler featureToggler;
 
     @Inject
-    public AILogic(final Config config, final JsonSerializer jsonSerializer, final DatabaseAI databaseAi,
+    public AILogic(final Config config,
+                   final JsonSerializer jsonSerializer,
+                   final DatabaseAI databaseAi,
                    final DatabaseEntitiesIntents databaseEntitiesIntents,
                    final DatabaseMarketplace databaseMarketplace,
-                   final AIServices aiServices, final ILogger logger, final Tools tools, final Validate validate,
+                   final AIServices aiServices,
+                   final ILogger logger,
+                   final Tools tools,
+                   final Validate validate,
                    final Provider<AIIntegrationLogic> integrationLogicProvider,
-                   final Provider<DatabaseTransaction> transactionProvider) {
+                   final Provider<DatabaseTransaction> transactionProvider,
+                   final FeatureToggler featureToggler) {
         this.config = config;
         this.jsonSerializer = jsonSerializer;
         this.databaseAi = databaseAi;
@@ -84,6 +79,7 @@ public class AILogic {
         this.validate = validate;
         this.integrationLogicProvider = integrationLogicProvider;
         this.transactionProvider = transactionProvider;
+        this.featureToggler = featureToggler;
     }
 
     public ApiResult createAI(
@@ -414,7 +410,7 @@ public class AILogic {
             this.integrationLogicProvider.get().deleteIntegrations(aiid, devid);
 
             try {
-                this.aiServices.deleteAI(ai.getBackendStatus(), devid, aiid);
+                this.aiServices.deleteAI(ai.getBackendStatus(), new AiIdentity(devid, aiid));
             } catch (ServerConnector.AiServicesException ex) {
                 if (Stream.of(ex.getSuppressed())
                         .filter(c -> c instanceof ServerConnector.AiServicesException)
@@ -728,7 +724,9 @@ public class AILogic {
 
             transaction.commit();
 
-            ApiResult result = uploadAndStartTraining(devId, aiid, createdBot, false);
+            AiIdentity aiIdentity = new AiIdentity(devId, aiid, createdBot.getLanguage(),
+                    ServiceIdentity.DEFAULT_VERSION);
+            ApiResult result = uploadAndStartTraining(aiIdentity, createdBot, false);
 
             logImport(devId, result, botToImport);
 
@@ -754,7 +752,9 @@ public class AILogic {
             return ApiError.getBadRequest(e.getMessage());
         }
 
-        ApiResult result = uploadAndStartTraining(devId, UUID.fromString(createdBot.getAiid()), createdBot, true);
+        AiIdentity aiIdentity = new AiIdentity(devId, UUID.fromString(createdBot.getAiid()),
+                createdBot.getLanguage(), ServiceIdentity.DEFAULT_VERSION);
+        ApiResult result = uploadAndStartTraining(aiIdentity, createdBot, true);
         logImport(devId, result, importedBot);
         return result;
     }
@@ -829,26 +829,29 @@ public class AILogic {
         return salt.toString();
     }
 
-    private ApiResult uploadAndStartTraining(final UUID devId, final UUID aiid, final ApiAi createdBot,
+    private ApiResult uploadAndStartTraining(final AiIdentity aiIdentity,
+                                             final ApiAi createdBot,
                                              final boolean isCreate) {
+        String devIdString = aiIdentity.getDevId().toString();
         try {
-            String trainingMaterials = this.aiServices.getTrainingMaterialsCommon(devId, aiid, this.jsonSerializer);
-            this.aiServices.uploadTraining(createdBot.getBackendStatus(), devId, aiid, trainingMaterials);
+            String trainingMaterials = this.aiServices.getTrainingMaterialsCommon(aiIdentity.getDevId(),
+                    aiIdentity.getDevId(), this.jsonSerializer);
+            this.aiServices.uploadTraining(createdBot.getBackendStatus(), aiIdentity, trainingMaterials);
         } catch (Exception ex) {
-            this.logger.logUserExceptionEvent(LOGFROM, "BotImportTraining", devId.toString(), ex);
+            this.logger.logUserExceptionEvent(LOGFROM, "BotImportTraining", devIdString, ex);
             return ApiError.getInternalServerError();
         }
 
         // Bot successfully imported. Start training.
         try {
-            this.aiServices.startTraining(createdBot.getBackendStatus(), devId, aiid);
+            this.aiServices.startTraining(createdBot.getBackendStatus(), aiIdentity);
         } catch (AIServices.AiServicesException | RuntimeException ex) {
-            this.logger.logUserExceptionEvent(LOGFROM, "ImportStartTraining", devId.toString(), ex);
+            this.logger.logUserExceptionEvent(LOGFROM, "ImportStartTraining", devIdString, ex);
             return ApiError.getInternalServerError();
         }
 
         // load the new bot as a get
-        return getAI(devId, aiid, "ImportBot-GetAI", isCreate, null);
+        return getAI(aiIdentity.getDevId(), aiIdentity.getAiid(), "ImportBot-GetAI", isCreate, null);
     }
 
     private void logImport(final UUID devId, final ApiResult result, final BotStructure importedBot) {
@@ -1155,7 +1158,7 @@ public class AILogic {
     private Locale getSafeLocaleFromBot(final BotStructure bot) {
         Locale locale;
         try {
-            locale = validate.validateLocale("locale", bot.getLanguage());
+            locale = this.validate.validateLocale("locale", bot.getLanguage());
         } catch (ParameterValidationException e) {
             // if the local is missing or badly formatted then use en-US
             locale = DEFAULT_LOCALE;

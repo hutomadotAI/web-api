@@ -28,8 +28,6 @@ import java.util.List;
 import java.util.UUID;
 
 import static com.hutoma.api.common.TestDataHelper.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.*;
 
 /**

@@ -10,6 +10,7 @@ import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.connectors.db.DatabaseUser;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiResult;
+import com.hutoma.api.containers.sub.AiIdentity;
 import com.hutoma.api.containers.sub.DevPlan;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.memory.MemoryIntentHandler;
@@ -45,7 +46,7 @@ import javax.ws.rs.core.Response;
 
 import static com.hutoma.api.connectors.aiservices.TestAiServices.getFakeServerEndpoint;
 import static com.hutoma.api.connectors.aiservices.TestAiServices.sysIndependent;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -56,6 +57,7 @@ public class TestAiServicesClient {
 
     private static final UUID DEVID = UUID.fromString("1a5c55e7-6492-4d08-8dfd-d167ac9f3330");
     private static final UUID AIID = UUID.fromString("41c6e949-4733-42d8-bfcf-95192131137e");
+    private static final AiIdentity AI_IDENTITY = new AiIdentity(DEVID, AIID);
     private static final String COMMAND_PARAM = "command";
     private static final String LOCAL_WEB_SERVER = "http://127.0.0.1:9190";
     private static final String LOCAL_ENDPOINT_PATH = "training";
@@ -120,17 +122,17 @@ public class TestAiServicesClient {
     @Test
     public void testStartTraining() throws AIServices.AiServicesException, DatabaseException {
         when(this.fakeDatabaseUser.getDevPlan(DEVID)).thenReturn(DEVPLAN);
-        this.aiServices.startTraining(null, DEVID, AIID);
+        this.aiServices.startTraining(null, AI_IDENTITY);
     }
 
     @Test
     public void testStopTraining() throws AIServices.AiServicesException {
-        this.aiServices.stopTraining(null, DEVID, AIID);
+        this.aiServices.stopTraining(null, AI_IDENTITY);
     }
 
     @Test
     public void testDeleteAi() throws AIServices.AiServicesException {
-        this.aiServices.deleteAI(null, DEVID, AIID);
+        this.aiServices.deleteAI(null, AI_IDENTITY);
     }
 
     @Test
@@ -147,7 +149,7 @@ public class TestAiServicesClient {
                 this.fakeLogger, this.fakeConfig, new JsonSerializer(),
                 this.fakeTools, JerseyClientBuilder.createClient(), new TrackedThreadSubPool(this.threadPool),
                 this.fakeQueueServices, this.fakeConnectors);
-        thisAiServices.uploadTraining(null, DEVID, AIID, TRAINING_MATERIALS);
+        thisAiServices.uploadTraining(null, AI_IDENTITY, TRAINING_MATERIALS);
     }
 
     @Path("/training")

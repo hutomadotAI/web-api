@@ -3,19 +3,14 @@ package com.hutoma.api.connectors.chat;
 import com.hutoma.api.connectors.BackendServerType;
 import com.hutoma.api.connectors.BackendStatus;
 import com.hutoma.api.connectors.NoServerAvailableException;
-import com.hutoma.api.containers.AiDevId;
+import com.hutoma.api.containers.sub.AiIdentity;
 import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.containers.sub.ChatState;
 import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.logging.ILogger;
 
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
 import javax.inject.Inject;
+import java.util.*;
 
 public class ChatConnectors {
 
@@ -25,14 +20,14 @@ public class ChatConnectors {
     @Inject
     ChatConnectors(final ChatAimlConnector backendAimlConnector,
                    final ChatEmbConnector backendEmbConnector) {
-        connectorMap.put(BackendServerType.AIML, new ChatConnectorItem(backendAimlConnector, false));
-        connectorMap.put(BackendServerType.EMB, new ChatConnectorItem(backendEmbConnector, false));
+        this.connectorMap.put(BackendServerType.AIML, new ChatConnectorItem(backendAimlConnector, false));
+        this.connectorMap.put(BackendServerType.EMB, new ChatConnectorItem(backendEmbConnector, false));
     }
 
     public Map<UUID, ChatResult> awaitBackend(final BackendServerType serverType, final int remainingTime,
                                               final ILogger logger)
             throws ChatBackendConnector.AiControllerException {
-        ChatConnectorItem item = connectorMap.get(serverType);
+        ChatConnectorItem item = this.connectorMap.get(serverType);
         if (item.connectorFutures != null) {
             try {
                 return item.backendConnector.waitForAll(item.connectorFutures,
@@ -51,7 +46,7 @@ public class ChatConnectors {
 
     public Set<BackendServerType> canChatWith(final BackendStatus backendStatus) {
         HashSet<BackendServerType> chatSet = new HashSet<>();
-        for (BackendServerType serverType: connectorMap.keySet()) {
+        for (BackendServerType serverType: this.connectorMap.keySet()) {
             TrainingStatus trainingStatus = backendStatus.getEngineStatus(serverType).getTrainingStatus();
             if (trainingStatus == TrainingStatus.AI_TRAINING_COMPLETE) {
                 chatSet.add(serverType);
@@ -60,15 +55,17 @@ public class ChatConnectors {
         return chatSet;
     }
 
-    public void issueChatRequests(final BackendServerType serverType, final Map<String, String> chatParams,
-                                  final List<AiDevId> ais, final ChatState chatState)
+    public void issueChatRequests(final BackendServerType serverType,
+                                  final Map<String, String> chatParams,
+                                  final List<AiIdentity> ais,
+                                  final ChatState chatState)
             throws NoServerAvailableException, ChatBackendConnector.AiControllerException {
-        ChatConnectorItem item = connectorMap.get(serverType);
+        ChatConnectorItem item = this.connectorMap.get(serverType);
         item.connectorFutures = item.backendConnector.issueChatRequests(chatParams, ais, chatState);
     }
 
     public void abandonCalls() {
-        for (ChatConnectorItem item: connectorMap.values()) {
+        for (ChatConnectorItem item: this.connectorMap.values()) {
             if (item.connectorFutures != null) {
                 item.connectorFutures.forEach(ChatBackendConnector.RequestInProgress::closeRequest);
             }

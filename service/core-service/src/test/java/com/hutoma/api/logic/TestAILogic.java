@@ -1,12 +1,7 @@
 package com.hutoma.api.logic;
 
 import com.google.common.collect.ImmutableMap;
-import com.hutoma.api.common.Config;
-import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.common.Pair;
-import com.hutoma.api.common.TestBotHelper;
-import com.hutoma.api.common.TestDataHelper;
-import com.hutoma.api.common.Tools;
+import com.hutoma.api.common.*;
 import com.hutoma.api.connectors.ServerConnector;
 import com.hutoma.api.connectors.aiservices.AIServices;
 import com.hutoma.api.connectors.db.DatabaseAI;
@@ -44,13 +39,6 @@ import javax.inject.Provider;
 import static com.hutoma.api.common.TestBotHelper.BOTID;
 import static com.hutoma.api.common.TestBotHelper.SAMPLEBOT;
 import static com.hutoma.api.common.TestDataHelper.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyDouble;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 
 /**
@@ -72,6 +60,8 @@ public class TestAILogic {
     private JsonSerializer fakeSerializer;
     private Validate fakeValidate;
     private DatabaseTransaction fakeTransaction;
+    private FeatureToggler fakeFeatureToggler;
+    private AIIntegrationLogic fakeIntegration;
 
     @Rule
     public final ExpectedException expectedException = ExpectedException.none();
@@ -91,15 +81,19 @@ public class TestAILogic {
         this.fakeAiIntegrationLogicProvider = mock(Provider.class);
         this.fakeDatabaseTransactionProvider = mock(Provider.class);
         this.fakeTransaction = mock(DatabaseTransaction.class);
+        this.fakeFeatureToggler = mock(FeatureToggler.class);
+        this.fakeIntegration = mock(AIIntegrationLogic.class);
 
-        when(this.fakeAiIntegrationLogicProvider.get()).thenReturn(mock(AIIntegrationLogic.class));
+        TestDataHelper.setFeatureToggleToControl(this.fakeFeatureToggler);
+
         when(this.fakeDatabaseTransactionProvider.get()).thenReturn(this.fakeTransaction);
-
+        when(this.fakeAiIntegrationLogicProvider.get()).thenReturn(this.fakeIntegration);
         when(this.fakeConfig.getMaxLinkedBotsPerAi()).thenReturn(5);
         when(this.fakeTools.createNewRandomUUID()).thenReturn(UUID.fromString("00000000-0000-0000-0000-000000000000"));
-        this.aiLogic = new AILogic(this.fakeConfig, this.fakeSerializer, this.fakeDatabaseAi, this.fakeDatabaseEntitiesIntents,
-                this.fakeDatabaseMarketplace, this.fakeAiServices, this.fakeLogger, this.fakeTools, this.fakeValidate, this.fakeAiIntegrationLogicProvider,
-                this.fakeDatabaseTransactionProvider);
+        this.aiLogic = new AILogic(this.fakeConfig, this.fakeSerializer, this.fakeDatabaseAi,
+                this.fakeDatabaseEntitiesIntents, this.fakeDatabaseMarketplace, this.fakeAiServices, this.fakeLogger,
+                this.fakeTools, this.fakeValidate, this.fakeAiIntegrationLogicProvider, this.fakeDatabaseTransactionProvider,
+                this.fakeFeatureToggler);
     }
 
     @Test
@@ -123,7 +117,7 @@ public class TestAILogic {
     @Test
     public void testCreate_DBFail_Error() throws DatabaseException {
         when(this.fakeDatabaseAi.createAI(any(), anyString(), anyString(), any(), anyBoolean(),
-                anyString(), anyObject(), anyObject(), anyDouble(), anyInt(),
+                anyString(), any(), any(), anyDouble(), anyInt(),
                 anyInt(), any(), anyInt(), anyInt(), anyString(), any())).thenThrow(DatabaseException.class);
         ApiResult result = callDefaultCreateAI();
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
@@ -271,7 +265,7 @@ public class TestAILogic {
         ApiResult result = this.aiLogic.deleteAI(VALIDDEVID, AIID);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
         // Make sure we request it to be deleted by the backends
-        verify(this.fakeAiServices).deleteAI(any(), any(), any());
+        verify(this.fakeAiServices).deleteAI(any(), any());
     }
 
     @Test
@@ -295,7 +289,7 @@ public class TestAILogic {
         ServerConnector.AiServicesException exSub = new ServerConnector.AiServicesException("sub", HttpURLConnection.HTTP_NOT_FOUND);
         exMain.addSuppressed(exSub);
         when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
-        doThrow(exMain).when(this.fakeAiServices).deleteAI(any(), any(), any());
+        doThrow(exMain).when(this.fakeAiServices).deleteAI(any(), any());
         ApiResult result = this.aiLogic.deleteAI(VALIDDEVID, AIID);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
     }
@@ -307,7 +301,7 @@ public class TestAILogic {
         ServerConnector.AiServicesException exSub = new ServerConnector.AiServicesException("sub", HttpURLConnection.HTTP_INTERNAL_ERROR);
         exMain.addSuppressed(exSub);
         when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
-        doThrow(exMain).when(this.fakeAiServices).deleteAI(any(), any(), any());
+        doThrow(exMain).when(this.fakeAiServices).deleteAI(any(), any());
         ApiResult result = this.aiLogic.deleteAI(VALIDDEVID, AIID);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
@@ -321,7 +315,7 @@ public class TestAILogic {
         ApiResult result = this.aiLogic.deleteAI(VALIDDEVID, AIID);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
         verify(this.fakeDatabaseAi).deleteAi(any(), any());
-        verify(this.fakeAiServices).deleteAI(any(), any(), any());
+        verify(this.fakeAiServices).deleteAI(any(), any());
     }
 
     @Test
@@ -331,7 +325,7 @@ public class TestAILogic {
         ApiResult result = this.aiLogic.deleteAI(VALIDDEVID, AIID);
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
         // Verify we don't actually request it to be deleted by the backends
-        verify(this.fakeAiServices, never()).deleteAI(any(), any(), any());
+        verify(this.fakeAiServices, never()).deleteAI(any(), any());
         verify(this.fakeDatabaseAi, never()).deleteAi(any(), any());
     }
 
@@ -418,7 +412,7 @@ public class TestAILogic {
         when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(TestDataHelper.getAi(TestDataHelper.getTrainingCompleted()));
         ApiResult result = this.aiLogic.linkBotToAI(DEVID_UUID, AIID, BOTID);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
-        verify(this.fakeAiServices, never()).stopTraining(null, DEVID_UUID, AIID);
+        verify(this.fakeAiServices, never()).stopTraining(null, AI_IDENTITY);
     }
 
     @Test
@@ -430,7 +424,7 @@ public class TestAILogic {
         when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(TestDataHelper.getAi(TestDataHelper.getTrainingInProgress()));
         ApiResult result = this.aiLogic.linkBotToAI(DEVID_UUID, AIID, BOTID);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
-        verify(this.fakeAiServices, never()).stopTrainingIfNeeded(DEVID_UUID, AIID);
+        verify(this.fakeAiServices, never()).stopTrainingIfNeeded(AI_IDENTITY);
     }
 
     @Test
@@ -479,7 +473,7 @@ public class TestAILogic {
         when(this.fakeDatabaseAi.getBotsLinkedToAi(any(), any())).thenReturn(Collections.emptyList());
         when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(TestDataHelper.getAi(TestDataHelper.getTrainingInProgress()));
         when(this.fakeDatabaseAi.linkBotToAi(any(), any(), anyInt(), any())).thenReturn(true);
-        doThrow(ServerConnector.AiServicesException.class).when(this.fakeAiServices).stopTraining(any(), any(), any());
+        doThrow(ServerConnector.AiServicesException.class).when(this.fakeAiServices).stopTraining(any(), any());
         ApiResult result = this.aiLogic.linkBotToAI(DEVID_UUID, AIID, BOTID);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
     }
@@ -565,7 +559,7 @@ public class TestAILogic {
         when(this.fakeDatabaseAi.unlinkBotFromAi(any(), any(), anyInt(), any())).thenReturn(true);
         ApiResult result = this.aiLogic.unlinkBotFromAI(DEVID_UUID, AIID, BOTID);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
-        verify(this.fakeAiServices, never()).stopTraining(null, DEVID_UUID, AIID);
+        verify(this.fakeAiServices, never()).stopTraining(null, AI_IDENTITY);
     }
 
     @Test
@@ -574,7 +568,7 @@ public class TestAILogic {
         when(this.fakeDatabaseAi.unlinkBotFromAi(any(), any(), anyInt(), any())).thenReturn(true);
         ApiResult result = this.aiLogic.unlinkBotFromAI(DEVID_UUID, AIID, BOTID);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
-        verify(this.fakeAiServices, never()).stopTrainingIfNeeded(DEVID_UUID, AIID);
+        verify(this.fakeAiServices, never()).stopTrainingIfNeeded(AI_IDENTITY);
     }
 
     @Test
@@ -612,7 +606,7 @@ public class TestAILogic {
             throws DatabaseException, ServerConnector.AiServicesException {
         when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(TestDataHelper.getAi(TestDataHelper.getTrainingInProgress()));
         when(this.fakeDatabaseAi.unlinkBotFromAi(any(), any(), anyInt(), any())).thenReturn(true);
-        doThrow(ServerConnector.AiServicesException.class).when(this.fakeAiServices).stopTraining(any(), any(), any());
+        doThrow(ServerConnector.AiServicesException.class).when(this.fakeAiServices).stopTraining(any(), any());
         ApiResult result = this.aiLogic.unlinkBotFromAI(DEVID_UUID, AIID, BOTID);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
     }

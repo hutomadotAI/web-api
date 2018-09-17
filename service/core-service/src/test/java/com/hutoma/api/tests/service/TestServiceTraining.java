@@ -28,7 +28,6 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.Response;
 
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
 /**

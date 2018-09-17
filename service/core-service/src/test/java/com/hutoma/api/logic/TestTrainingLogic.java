@@ -1,10 +1,6 @@
 package com.hutoma.api.logic;
 
-import com.hutoma.api.common.Config;
-import com.hutoma.api.common.HTMLExtractor;
-import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.common.TestDataHelper;
-import com.hutoma.api.common.Tools;
+import com.hutoma.api.common.*;
 import com.hutoma.api.connectors.BackendStatus;
 import com.hutoma.api.connectors.ServerConnector;
 import com.hutoma.api.connectors.aiservices.AIServices;
@@ -47,7 +43,7 @@ import java.util.UUID;
 import java.util.function.Supplier;
 
 import static com.hutoma.api.common.TestDataHelper.*;
-import static org.mockito.Matchers.anyString;
+import static com.hutoma.api.common.TestDataHelper.getAi;
 import static org.mockito.Mockito.*;
 
 /**
@@ -74,6 +70,7 @@ public class TestTrainingLogic {
     private TrainingLogic logic;
     private IMemoryIntentHandler fakeIntentHandler;
     private JsonSerializer fakeSerializer;
+    private FeatureToggler fakeFeatureToggler;
 
     @DataProvider
     public static Object[] updateTraining_successStates() {
@@ -140,25 +137,27 @@ public class TestTrainingLogic {
     public void setup() throws DatabaseException {
 
         this.fakeConfig = mock(Config.class);
-        when(this.fakeConfig.getEncodingKey()).thenReturn(TestDataHelper.VALID_ENCODING_KEY);
         this.fakeDatabaseAi = mock(DatabaseAI.class);
         this.fakeDatabaseEntitiesIntents = mock(DatabaseEntitiesIntents.class);
-        when(this.fakeDatabaseAi.updateAiTrainingFile(any(), anyString())).thenReturn(true);
         this.fakeAiServices = mock(AIServices.class);
         this.fakeTools = mock(Tools.class);
         this.fakeLogger = mock(ILogger.class);
-        when(this.fakeTools.createNewRandomUUID()).thenReturn(UUID.fromString("00000000-0000-0000-0000-000000000000"));
         this.fakeValidation = TestParameterValidation.getFakeValidation();
-        when(this.fakeValidation.filterControlAndCoalesceSpaces(anyString())).thenCallRealMethod();
         this.fakeExtractor = mock(HTMLExtractor.class);
         this.fakeContentDisposition = mock(FormDataContentDisposition.class);
         this.fakeIntentHandler = mock(IMemoryIntentHandler.class);
         this.fakeSerializer = mock(JsonSerializer.class);
+        this.fakeFeatureToggler = mock(FeatureToggler.class);
         this.logic = new TrainingLogic(this.fakeConfig, this.fakeAiServices, this.fakeExtractor, this.fakeDatabaseAi,
-                this.fakeLogger, this.fakeValidation, this.fakeIntentHandler, this.fakeSerializer);
+                this.fakeLogger, this.fakeValidation, this.fakeIntentHandler, this.fakeFeatureToggler, this.fakeSerializer);
 
+        when(this.fakeConfig.getEncodingKey()).thenReturn(TestDataHelper.VALID_ENCODING_KEY);
+        when(this.fakeTools.createNewRandomUUID()).thenReturn(UUID.fromString("00000000-0000-0000-0000-000000000000"));
+        when(this.fakeDatabaseAi.updateAiTrainingFile(any(), anyString())).thenReturn(true);
+        when(this.fakeValidation.filterControlAndCoalesceSpaces(anyString())).thenCallRealMethod();
         when(this.fakeConfig.getMaxUploadSizeKb()).thenReturn(4096);
-        when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(TestDataHelper.getAI());
+        when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(getSampleAI());
+        TestDataHelper.setFeatureToggleToControl(this.fakeFeatureToggler);
     }
 
     @Test
@@ -259,20 +258,20 @@ public class TestTrainingLogic {
     }
 
     @Test
-    public void testTrain_upload_invalidContentDisposition() throws HTMLExtractor.HtmlExtractionException {
+    public void testTrain_upload_invalidContentDisposition() {
         ApiResult result = this.logic.uploadFile(DEVID_UUID, AIID, TrainingLogic.TrainingType.TEXT, UURL, null, null);
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
     }
 
     @Test
-    public void testTrain_upload_AI_notFound() throws HTMLExtractor.HtmlExtractionException, DatabaseException {
+    public void testTrain_upload_AI_notFound() throws DatabaseException {
         when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(null);
         ApiResult result = this.logic.uploadFile(DEVID_UUID, AIID, TrainingLogic.TrainingType.TEXT, UURL, null, null);
         Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
     }
 
     @Test
-    public void testTrain_upload_AI_readonly() throws HTMLExtractor.HtmlExtractionException, DatabaseException {
+    public void testTrain_upload_AI_readonly() throws DatabaseException {
         setupAiReadonlyMode(this.fakeDatabaseAi);
         ApiResult result = this.logic.uploadFile(DEVID_UUID, AIID, TrainingLogic.TrainingType.TEXT, UURL, null, null);
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
@@ -415,7 +414,7 @@ public class TestTrainingLogic {
         when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(getAi(TrainingStatus.AI_TRAINING_COMPLETE, false));
         when(this.fakeDatabaseAi.getAiTrainingFile(any())).thenReturn(SOMETEXT);
         when(this.fakeAiServices.getTrainingMaterialsCommon(any(), any(), any())).thenReturn(SOMETEXT);
-        doThrow(ServerConnector.AiServicesException.class).when(this.fakeAiServices).uploadTraining(any(), any(), any(), anyString());
+        doThrow(ServerConnector.AiServicesException.class).when(this.fakeAiServices).uploadTraining(any(), any(), any());
         ApiResult result = this.logic.updateTraining(DEVID_UUID, AIID);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
@@ -540,7 +539,7 @@ public class TestTrainingLogic {
         when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(getAi(TrainingStatus.AI_TRAINING_COMPLETE, true));
         when(this.fakeAiServices.getTrainingMaterialsCommon(any(), any(), any())).thenReturn(SOMETEXT);
         when(this.fakeDatabaseAi.updateAiTrainingFile(any(), anyString())).thenReturn(true);
-        doThrow(ServerConnector.AiServicesException.class).when(this.fakeAiServices).uploadTraining(any(), any(), any(), anyString());
+        doThrow(ServerConnector.AiServicesException.class).when(this.fakeAiServices).uploadTraining(any(), any(), any());
         ApiResult result = this.logic.uploadFile(DEVID_UUID, AIID, TrainingLogic.TrainingType.TEXT, null, createUpload(SOMETEXT), this.fakeContentDisposition);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
@@ -598,7 +597,7 @@ public class TestTrainingLogic {
             Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
         } else {
             Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
-            verify(this.fakeAiServices).uploadTraining(any(), eq(DEVID_UUID), eq(AIID), eq(fileToUpload));
+            verify(this.fakeAiServices).uploadTraining(any(), refEq(AI_IDENTITY), eq(fileToUpload));
         }
     }
 
@@ -621,7 +620,7 @@ public class TestTrainingLogic {
         ApiResult result = this.logic.updateTraining(DEVID_UUID, AIID);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
 
-        verify(this.fakeAiServices).uploadTraining(any(), eq(DEVID_UUID), eq(AIID),
+        verify(this.fakeAiServices).uploadTraining(any(), refEq(AI_IDENTITY),
                 eq(getTrainingMaterials(fileToUpload, intentNames, userSaysIntent1, userSaysIntent2)));
     }
 
@@ -647,7 +646,7 @@ public class TestTrainingLogic {
         when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(null);
         ApiResult result = supplier.get();
         Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
-        verify(this.fakeAiServices, never()).startTraining(any(), any(), any());
+        verify(this.fakeAiServices, never()).startTraining(any(), any());
     }
 
     private void testTraining_AI_readonly(Supplier<ApiResult> supplier) throws DatabaseException,
@@ -655,8 +654,8 @@ public class TestTrainingLogic {
         setupAiReadonlyMode(this.fakeDatabaseAi);
         ApiResult result = supplier.get();
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
-        verify(this.fakeAiServices, never()).stopTraining(any(), any(), any());
-        verify(this.fakeAiServices, never()).startTraining(any(), any(), any());
+        verify(this.fakeAiServices, never()).stopTraining(any(), any());
+        verify(this.fakeAiServices, never()).startTraining(any(), any());
     }
 
     private void testTraining_dbException(Supplier<ApiResult> supplier, int expectedErrorCode)
@@ -664,7 +663,7 @@ public class TestTrainingLogic {
         when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenThrow(DatabaseException.class);
         ApiResult result = supplier.get();
         Assert.assertEquals(expectedErrorCode, result.getStatus().getCode());
-        verify(this.fakeAiServices, never()).startTraining(any(), any(), any());
+        verify(this.fakeAiServices, never()).startTraining(any(), any());
     }
 
     private void testTraining_dbException(Supplier<ApiResult> supplier) throws DatabaseException,
@@ -734,7 +733,7 @@ public class TestTrainingLogic {
     }
 
     private void makeAiServiceLogicFail(TrainingLogic.TrainingType trainingType) throws Exception {
-        doThrow(AIServices.AiServicesException.class).when(this.fakeAiServices).startTraining(any(), any(), any());
+        doThrow(AIServices.AiServicesException.class).when(this.fakeAiServices).startTraining(any(), any());
         InputStream stream = createUpload(SOMETEXT);
         ApiAi ai = new ApiAi(AIID.toString(), "", "ai", "", DateTime.now(), true, new BackendStatus(),
                 true,

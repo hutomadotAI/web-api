@@ -32,8 +32,6 @@ import java.util.List;
 import java.util.function.UnaryOperator;
 
 import static com.hutoma.api.common.TestDataHelper.DEVID_UUID;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 
 public class TestAIIntegrationLogic {

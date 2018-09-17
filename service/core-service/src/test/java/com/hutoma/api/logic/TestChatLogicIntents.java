@@ -29,8 +29,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static com.hutoma.api.common.TestDataHelper.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 
 public class TestChatLogicIntents extends TestChatBase {

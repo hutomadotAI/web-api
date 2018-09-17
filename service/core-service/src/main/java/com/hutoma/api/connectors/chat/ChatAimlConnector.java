@@ -5,10 +5,8 @@ import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.BackendServerType;
 import com.hutoma.api.connectors.aiservices.AimlServicesConnector;
-import com.hutoma.api.connectors.aiservices.ControllerConnector;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.thread.TrackedThreadSubPool;
-
 import org.glassfish.jersey.client.JerseyClient;
 
 import javax.inject.Inject;

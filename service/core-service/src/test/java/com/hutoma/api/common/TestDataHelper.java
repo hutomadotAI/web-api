@@ -10,6 +10,7 @@ import com.hutoma.api.containers.AiBotConfigDefinition;
 import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.ServiceIdentity;
 import com.hutoma.api.containers.sub.AiBot;
+import com.hutoma.api.containers.sub.AiIdentity;
 import com.hutoma.api.containers.sub.AiStatus;
 import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.logic.chat.ChatDefaultHandler;
@@ -26,7 +27,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
-import static org.mockito.Matchers.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 ;
@@ -37,8 +38,8 @@ import static org.mockito.Mockito.when;
 public class TestDataHelper {
     public static final UUID DEVID_UUID = UUID.fromString("113d39cb-7f43-40d7-8dee-17b25b205581");
     public static final String DEVID = DEVID_UUID.toString();
-
     public static final UUID AIID = UUID.fromString("41c6e949-4733-42d8-bfcf-95192131137e");
+    public static final AiIdentity AI_IDENTITY = new AiIdentity(DEVID_UUID, AIID);
     public static final UUID SESSIONID = UUID.fromString("e6a7d7b4-245a-44ad-8018-5c0516583713");
     public static final UUID ALT_SESSIONID = UUID.fromString("f29a1eed-6094-464a-b335-c0885a501750");
     public static final String DEFAULT_CHAT_RESPONSE = ChatDefaultHandler.COMPLETELY_LOST_RESULT;
@@ -121,12 +122,12 @@ public class TestDataHelper {
         when(fakeDatabase.getAI(any(), any(), any())).thenReturn(getSampleAI());
         when(fakeDatabase.getAI(any(), any(), any(), any())).thenReturn(getSampleAI());
         when(fakeDatabase.createAI(any(), anyString(), anyString(), any(), anyBoolean(),
-                anyString(), anyObject(), anyObject(), anyDouble(), anyInt(),
+                anyString(), any(), any(), anyDouble(), anyInt(),
                 anyInt(), any(), anyInt(), anyInt(), any(), any())).thenReturn(createdAiid);
     }
     public static void mockDatabaseCreateAIInTrans(final DatabaseAI fakeDatabase, final UUID createdAiid) throws DatabaseException {
         when(fakeDatabase.createAI(any(), anyString(), anyString(), any(), anyBoolean(),
-                anyString(), anyObject(), anyObject(), anyDouble(), anyInt(),
+                anyString(), any(), any(), anyDouble(), anyInt(),
                 anyInt(), any(), anyInt(), anyInt(), any(), any(), any())).thenReturn(createdAiid);
     }
 
@@ -146,5 +147,11 @@ public class TestDataHelper {
         when(jerseyWebTarget.request()).thenReturn(builder);
         when(jerseyWebTarget.resolveTemplates(any())).thenReturn(jerseyWebTarget);
         return builder;
+    }
+
+    public static void setFeatureToggleToControl(final FeatureToggler featureToggler) {
+        when(featureToggler.getStateForAiid(any(), any(), any())).thenReturn(FeatureToggler.FeatureState.C);
+        when(featureToggler.getStateforDev(any(), any())).thenReturn(FeatureToggler.FeatureState.C);
+        when(featureToggler.getState(any())).thenReturn(FeatureToggler.FeatureState.C);
     }
 }

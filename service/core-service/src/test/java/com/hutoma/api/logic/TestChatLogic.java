@@ -8,10 +8,8 @@ import com.hutoma.api.connectors.ServerConnector;
 import com.hutoma.api.connectors.WebHooks;
 import com.hutoma.api.connectors.chat.AIChatServices;
 import com.hutoma.api.connectors.chat.ChatBackendConnector;
-import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.ApiChat;
 import com.hutoma.api.containers.ApiError;
-import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.*;
 import com.hutoma.api.logging.LogMap;
@@ -31,8 +29,6 @@ import java.util.Map;
 import java.util.UUID;
 
 import static com.hutoma.api.common.TestDataHelper.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 
 public class TestChatLogic extends TestChatBase {
@@ -233,7 +229,7 @@ public class TestChatLogic extends TestChatBase {
     public void testChat_notReadyToChat() throws ChatBackendConnector.AiControllerException, ServerConnector.AiServicesException, NoServerAvailableException {
         setupFakeChat(0.0d, "", 0.0d, "");
         doThrow(AIChatServices.AiNotReadyToChat.class)
-                .when(this.fakeChatServices).startChatRequests(any(), any(), any(), anyString(), any());
+                .when(this.fakeChatServices).startChatRequests(any(), any(), any(), any());
         ApiResult result = getChat(0.9f);
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
     }
@@ -242,7 +238,7 @@ public class TestChatLogic extends TestChatBase {
     public void testChat_servicesException() throws ChatBackendConnector.AiControllerException, ServerConnector.AiServicesException, NoServerAvailableException {
         setupFakeChat(0.0d, "", 0.0d, "");
         doThrow(AIChatServices.AiServicesException.class)
-                .when(this.fakeChatServices).startChatRequests(any(), any(), any(), anyString(), any());
+                .when(this.fakeChatServices).startChatRequests(any(), any(), any(), any());
         ApiResult result = getChat(0.9f);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
@@ -251,7 +247,7 @@ public class TestChatLogic extends TestChatBase {
     public void testChat_genericException() throws ChatBackendConnector.AiControllerException, ServerConnector.AiServicesException, NoServerAvailableException {
         setupFakeChat(0.0d, "", 0.0d, "");
         doThrow(NoServerAvailableException.class)
-                .when(this.fakeChatServices).startChatRequests(any(), any(), any(), anyString(), any());
+                .when(this.fakeChatServices).startChatRequests(any(), any(), any(), any());
         ApiResult result = getChat(0.9f);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
@@ -410,7 +406,7 @@ public class TestChatLogic extends TestChatBase {
 
     @Test
     public void testChat_handedOver_fromPreviousState() throws ChatBackendConnector.AiControllerException, ChatStateHandler.ChatStateException {
-        final ChatState state = ChatState.getEmpty();
+        final ChatState state = getTestChatState();
         state.setChatTarget(ChatHandoverTarget.Human);
         when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(state);
         ApiChat result = (ApiChat) getChat(0.0);
@@ -426,7 +422,7 @@ public class TestChatLogic extends TestChatBase {
 
     @Test
     public void testChat_handedOver_toHuman() throws ChatStateHandler.ChatStateException {
-        final ChatState state = ChatState.getEmpty();
+        final ChatState state = getTestChatState();
         state.setChatTarget(ChatHandoverTarget.Ai);
         when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(state);
         ArgumentCaptor<ChatState> argument = ArgumentCaptor.forClass(ChatState.class);
@@ -438,7 +434,7 @@ public class TestChatLogic extends TestChatBase {
 
     @Test
     public void testChat_handedOver_toAi() throws ChatStateHandler.ChatStateException {
-        final ChatState state = ChatState.getEmpty();
+        final ChatState state = getTestChatState();
         state.setChatTarget(ChatHandoverTarget.Human);
         when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(state);
         ArgumentCaptor<ChatState> argument = ArgumentCaptor.forClass(ChatState.class);
@@ -450,7 +446,7 @@ public class TestChatLogic extends TestChatBase {
 
     @Test
     public void testChat_handedOver_sameTarget() throws ChatStateHandler.ChatStateException {
-        final ChatState state = ChatState.getEmpty();
+        final ChatState state = getTestChatState();
         state.setChatTarget(ChatHandoverTarget.Human);
         when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(state);
         ApiResult result = this.chatLogic.handOver(AIID, DEVID_UUID, CHATID.toString(), ChatHandoverTarget.Human);
@@ -557,7 +553,7 @@ public class TestChatLogic extends TestChatBase {
     @Test
     public void testChat_setContextVariable_EmptyMap()
             throws ChatStateHandler.ChatStateException {
-        Map<String, String> variables = new HashMap<String, String>();
+        Map<String, String> variables = new HashMap<>();
         ApiResult result = this.chatLogic.setContextVariable(AIID, DEVID_UUID, CHATID.toString(), variables);
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
         verify(this.fakeChatStateHandler, never()).saveState(any(), any(), any(), any());
@@ -586,6 +582,12 @@ public class TestChatLogic extends TestChatBase {
                 return complete;
             }
         };
+    }
+
+    private static ChatState getTestChatState() {
+        ChatState state = ChatState.getEmpty();
+        state.setAi(getSampleAI());
+        return state;
     }
 
     private ChatResult buildChatResult() {

@@ -3,9 +3,9 @@ package com.hutoma.api.common;
 import com.hutoma.api.access.InvalidRoleException;
 import com.hutoma.api.access.Role;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.CompressionCodecs;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.impl.compression.CompressionCodecs;
 
 import java.util.UUID;
 

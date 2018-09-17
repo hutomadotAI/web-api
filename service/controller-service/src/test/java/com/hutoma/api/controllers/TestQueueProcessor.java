@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import javax.inject.Provider;
 
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
 /**

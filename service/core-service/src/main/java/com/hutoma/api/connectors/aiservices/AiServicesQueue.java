@@ -36,10 +36,12 @@ public class AiServicesQueue extends ServerConnector {
     private final Database database;
 
     @Inject
-    public AiServicesQueue(final Database database, final ILogger logger,
+    public AiServicesQueue(final Database database,
+                           final ILogger logger,
                            final IConnectConfig connectConfig,
                            final JerseyClient jerseyClient,
-                           final JsonSerializer serializer, final Tools tools,
+                           final JsonSerializer serializer,
+                           final Tools tools,
                            final TrackedThreadSubPool threadSubPool) {
         super(logger, connectConfig, serializer, tools, jerseyClient, threadSubPool);
         this.database = database;
@@ -72,17 +74,17 @@ public class AiServicesQueue extends ServerConnector {
      * @param backendStatus
      * @param serverType
      * @param controller
-     * @param devid
-     * @param aiid
+     * @param aiIdentity
      * @throws DatabaseException
      * @throws ServerConnector.AiServicesException
      */
-    void userActionStopTraining(final BackendStatus backendStatus, final BackendServerType serverType,
+    void userActionStopTraining(final BackendStatus backendStatus,
+                                final BackendServerType serverType,
                                 final ControllerConnector controller,
-                                final UUID devid, final UUID aiid)
+                                final AiIdentity aiIdentity)
             throws DatabaseException, ServerConnector.AiServicesException {
         // stop training, and save "stopped" state in the dabatase
-        stopTrainingIfActive(backendStatus, serverType, controller, devid, aiid, true);
+        stopTrainingIfActive(backendStatus, serverType, controller, aiIdentity, true);
     }
 
     /***
@@ -90,20 +92,21 @@ public class AiServicesQueue extends ServerConnector {
      * @param backendStatus
      * @param serverType
      * @param controller
-     * @param devid
-     * @param aiid
+     * @param aiIdentity
      * @param setDbStatus whether to save the stop state in the database.
      *                    TRUE if this is a stop command, FALSE if it part of a different command e.g. a delete
      * @throws DatabaseException
      * @throws AiServicesException
      */
-    private void stopTrainingIfActive(final BackendStatus backendStatus, final BackendServerType serverType,
+    private void stopTrainingIfActive(final BackendStatus backendStatus,
+                                      final BackendServerType serverType,
                                       final ControllerConnector controller,
-                                      final UUID devid, final UUID aiid,
+                                      final AiIdentity aiIdentity,
                                       boolean setDbStatus) throws DatabaseException, AiServicesException {
 
         // get an endpoint map, i.e. a map from serverIdentifier to the actual servertracker object
-        Map<String, ServerTrackerInfo> map = controller.getVerifiedEndpointMap(serializer);
+        Map<String, ServerTrackerInfo> map = controller.getVerifiedEndpointMap(
+                SupportedLanguage.EN, ServiceIdentity.DEFAULT_VERSION, serializer);
         // get the status of the AI for the backend server we are dealing with
         BackendEngineStatus status = backendStatus.getEngineStatus(serverType);
 
@@ -130,8 +133,8 @@ public class AiServicesQueue extends ServerConnector {
                     }
                     // copy the old fields but set new status
                     this.database.updateAIStatus(
-                            new ServiceIdentity(serverType, SupportedLanguage.EN, ServiceIdentity.DEFAULT_VERSION),
-                            aiid, newStatus,
+                            new ServiceIdentity(serverType, aiIdentity.getLanguage(), aiIdentity.getServerVersion()),
+                            aiIdentity.getAiid(), newStatus,
                             status.getServerIdentifier(), status.getTrainingProgress(), status.getTrainingError());
                 }
             }
@@ -139,7 +142,7 @@ public class AiServicesQueue extends ServerConnector {
             // if we get here we know this is not null otherwise the AiServicesException is thrown, but
             // we need this check to appease the static tools
             if (tracker != null) {
-                this.stopTrainingDirect(serverType, devid, aiid,
+                this.stopTrainingDirect(serverType, aiIdentity,
                         tracker.getServerUrl(), tracker.getServerIdentifier());
             }
         }
@@ -150,21 +153,21 @@ public class AiServicesQueue extends ServerConnector {
      * @param backendStatus
      * @param serverType
      * @param controller
-     * @param devid
-     * @param aiid
+     * @param aiIdentity
      * @throws DatabaseException
      * @throws ServerConnector.AiServicesException
      */
-    void userActionDelete(final BackendStatus backendStatus, final BackendServerType serverType,
+    void userActionDelete(final BackendStatus backendStatus,
+                          final BackendServerType serverType,
                           final ControllerConnector controller,
-                          final UUID devid, final UUID aiid)
+                          final AiIdentity aiIdentity)
             throws DatabaseException, ServerConnector.AiServicesException {
         // if we are training then stop immediately
-        stopTrainingIfActive(backendStatus, serverType, controller, devid, aiid, true);
+        stopTrainingIfActive(backendStatus, serverType, controller, aiIdentity, true);
         // queue the action to delete, only run this some time in the future after the ai is fully stopped
         this.database.queueUpdate(
-                new ServiceIdentity(serverType, SupportedLanguage.EN, ServiceIdentity.DEFAULT_VERSION),
-                aiid, true, 10, QueueAction.DELETE);
+                new ServiceIdentity(serverType, aiIdentity.getLanguage(), aiIdentity.getServerVersion()),
+                aiIdentity.getAiid(), true, 10, QueueAction.DELETE);
     }
 
     /***
@@ -172,50 +175,52 @@ public class AiServicesQueue extends ServerConnector {
      * @param backendStatus
      * @param serverType
      * @param controller
-     * @param devid
-     * @param aiid
+     * @param aiIdentity
      * @throws DatabaseException
      * @throws AiServicesException
      */
-    void userActionUpload(final BackendStatus backendStatus, final BackendServerType serverType,
-                          final ControllerConnector controller, final UUID devid, final UUID aiid)
+    void userActionUpload(final BackendStatus backendStatus,
+                          final BackendServerType serverType,
+                          final ControllerConnector controller,
+                          final AiIdentity aiIdentity)
             throws DatabaseException, AiServicesException {
-        ServiceIdentity serviceIdentity = new ServiceIdentity(serverType, SupportedLanguage.EN,
-                ServiceIdentity.DEFAULT_VERSION);
+        ServiceIdentity serviceIdentity = new ServiceIdentity(serverType, aiIdentity.getLanguage(),
+                aiIdentity.getServerVersion());
         // send a stop training command if necessary
-        stopTrainingIfActive(backendStatus, serverType, controller, devid, aiid, false);
+        stopTrainingIfActive(backendStatus, serverType, controller, aiIdentity, false);
         // set the status to undefined while we upload.
         // when the back-end is ready it will call back to say ready_to_train
-        this.database.updateAIStatus(serviceIdentity, aiid,
+        this.database.updateAIStatus(serviceIdentity, aiIdentity.getAiid(),
                 TrainingStatus.AI_UNDEFINED, "", 0.0, 9999.0);
         // clear the queue state
-        this.database.queueUpdate(serviceIdentity, aiid, false, 0, QueueAction.NONE);
+        this.database.queueUpdate(serviceIdentity, aiIdentity.getAiid(), false, 0, QueueAction.NONE);
     }
 
     /***
      * Call from queued task to backend to stop training
      *
      * @param serverType
-     * @param devId
-     * @param aiid
+     * @param aiIdentity
      * @param serverEndpoint
      * @param serverIdentifier
      * @throws AiServicesException
      */
-    private void stopTrainingDirect(final BackendServerType serverType, final UUID devId, final UUID aiid,
-                                    final String serverEndpoint, final String serverIdentifier)
+    private void stopTrainingDirect(final BackendServerType serverType,
+                                    final AiIdentity aiIdentity,
+                                    final String serverEndpoint,
+                                    final String serverIdentifier)
             throws AiServicesException {
 
         LogMap logMap = LogMap.map("Op", "train-stop")
                 .put("Type", serverType.value())
                 .put("Server", serverIdentifier)
-                .put("AIID", aiid);
+                .put("AIID", aiIdentity.getAiid());
         this.logger.logUserInfoEvent(LOGFROM,
-                String.format("Sending \"stop\" %s to %s", aiid.toString(), serverType.value()),
-                devId.toString(), logMap);
+                String.format("Sending \"stop\" %s to %s", aiIdentity.getAiid().toString(), serverType.value()),
+                aiIdentity.getDevId().toString(), logMap);
 
         HashMap<String, Callable<InvocationResult>> callables =
-                getTrainingCallableForEndpoint(new AiIdentity(devId, aiid), serverEndpoint,
+                getTrainingCallableForEndpoint(aiIdentity, serverEndpoint,
                         new HashMap<String, String>() {{
                             put(COMMAND_PARAM, "stop");
                         }});

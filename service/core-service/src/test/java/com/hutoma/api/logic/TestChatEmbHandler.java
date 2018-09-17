@@ -1,5 +1,6 @@
 package com.hutoma.api.logic;
 
+import com.hutoma.api.common.FeatureToggler;
 import com.hutoma.api.common.TestDataHelper;
 import com.hutoma.api.connectors.BackendServerType;
 import com.hutoma.api.connectors.ServerConnector;
@@ -23,7 +24,7 @@ import java.util.UUID;
 
 import static com.hutoma.api.common.TestDataHelper.AIID;
 import static com.hutoma.api.common.TestDataHelper.getSampleAI;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -51,8 +52,7 @@ public class TestChatEmbHandler {
             ChatLogic.IntentException, WebHooks.WebHookException {
         final String responseTemplate = "response %s";
         final String variableValue = "myValue";
-        ChatRequestInfo chatInfo = new ChatRequestInfo(TestDataHelper.DEVID_UUID, TestDataHelper.AIID, UUID.randomUUID(),
-                "question", null);
+        ChatRequestInfo chatInfo = new ChatRequestInfo(TestDataHelper.AI_IDENTITY, UUID.randomUUID(), "question", null);
         ChatState chatState = new ChatState(DateTime.now(),
                 null, null, UUID.randomUUID(), new HashMap<>(), 0.1d, ChatHandoverTarget.Ai,
                 getSampleAI(), new ChatContext());

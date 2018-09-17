@@ -15,7 +15,7 @@ import java.util.UUID;
 
 import static com.hutoma.api.common.DeveloperInfoHelper.DEVINFO;
 import static com.hutoma.api.common.TestDataHelper.DEVID_UUID;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 

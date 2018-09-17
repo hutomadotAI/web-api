@@ -12,11 +12,10 @@ import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
 import com.hutoma.api.memory.IEntityRecognizer;
 
-import java.util.ArrayList;
+import javax.inject.Inject;
 import java.util.List;
 import java.util.OptionalInt;
 import java.util.UUID;
-import javax.inject.Inject;
 
 /**
  * Created by David MG on 05/10/2016.
@@ -78,7 +77,6 @@ public class EntityLogic {
                 return ApiError.getBadRequest("Cannot create an entity with a system prefix.");
             }
             final boolean created = this.database.getEntity(devid, entityName) == null;
-            stopTrainingIfEntityInUse(devid, entityName);
             this.database.writeEntity(devid, entityName, entity);
             this.logger.logUserTraceEvent(LOGFROM, "WriteEntity", devidString, logMap);
             if (created) {
@@ -109,7 +107,6 @@ public class EntityLogic {
             if (!exists) {
                 return ApiError.getBadRequest("Entity doesn't exist.");
             }
-            stopTrainingIfEntityInUse(devid, entityName);
 
             // Replace entity values.
             this.database.writeEntity(devid, entityName, entity);
@@ -147,24 +144,6 @@ public class EntityLogic {
         } catch (final Exception e) {
             this.logger.logUserExceptionEvent(LOGFROM, "DeleteEntity", devidString, e);
             return ApiError.getInternalServerError();
-        }
-    }
-
-    private List<UUID> getAisWithEntityInUse(final UUID devid, final String entityName) {
-        try {
-            return this.database.getAisForEntity(devid, entityName);
-        } catch (final Exception e) {
-            this.logger.logUserExceptionEvent(LOGFROM, "GetAisWithEntityInUse", devid.toString(), e);
-        }
-        return new ArrayList<>();
-    }
-
-    private void stopTrainingIfEntityInUse(final UUID devid, final String entityName) {
-        List<UUID> ais = getAisWithEntityInUse(devid, entityName);
-        if (!ais.isEmpty()) {
-            for (UUID ai : ais) {
-                this.trainingLogic.stopTraining(devid, ai);
-            }
         }
     }
 }

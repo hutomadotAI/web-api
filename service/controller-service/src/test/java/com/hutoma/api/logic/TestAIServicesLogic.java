@@ -76,7 +76,7 @@ public class TestAIServicesLogic {
                 TrainingStatus.AI_READY_TO_TRAIN, AI_ENGINE,SupportedLanguage.EN, ServiceIdentity.DEFAULT_VERSION,
                 0.0, 0.0, "hash",
                 TestDataHelper.SESSIONID);
-        when(this.fakeDatabase.updateAIStatus(anyObject())).thenReturn(true);
+        when(this.fakeDatabase.updateAIStatus(any())).thenReturn(true);
         ApiResult result = this.aiServicesLogic.updateAIStatus(status);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
     }
@@ -87,7 +87,7 @@ public class TestAIServicesLogic {
                 TrainingStatus.AI_TRAINING, AI_ENGINE, SupportedLanguage.EN, ServiceIdentity.DEFAULT_VERSION,
                 0.0, 0.0, "hash",
                 TestDataHelper.SESSIONID);
-        when(this.fakeDatabase.getAiQueueStatus(anyObject(), any())).thenReturn(null);
+        when(this.fakeDatabase.getAiQueueStatus(any(), any())).thenReturn(null);
         ApiResult result = this.aiServicesLogic.updateAIStatus(status);
         Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
     }
@@ -98,7 +98,7 @@ public class TestAIServicesLogic {
                 TrainingStatus.AI_TRAINING, AI_ENGINE, SupportedLanguage.EN, ServiceIdentity.DEFAULT_VERSION,
                 0.0, 0.0, "hash",
                 TestDataHelper.SESSIONID);
-        when(this.fakeDatabase.updateAIStatus(anyObject())).thenThrow(DatabaseException.class);
+        when(this.fakeDatabase.updateAIStatus(any())).thenThrow(DatabaseException.class);
         ApiResult result = this.aiServicesLogic.updateAIStatus(status);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
@@ -109,7 +109,7 @@ public class TestAIServicesLogic {
                 TrainingStatus.AI_READY_TO_TRAIN, AI_ENGINE, SupportedLanguage.EN, ServiceIdentity.DEFAULT_VERSION,
                 0.0, 0.0, "hash",
                 TestDataHelper.SESSIONID);
-        when(this.fakeDatabase.updateAIStatus(anyObject())).thenThrow(DatabaseException.class);
+        when(this.fakeDatabase.updateAIStatus(any())).thenThrow(DatabaseException.class);
         status.setTrainingError(Double.NaN);
         ApiResult result = this.aiServicesLogic.updateAIStatus(status);
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
@@ -121,7 +121,7 @@ public class TestAIServicesLogic {
                 TrainingStatus.AI_READY_TO_TRAIN, BackendServerType.EMB, SupportedLanguage.EN, ServiceIdentity.DEFAULT_VERSION,
                 0.0, 0.0, "hash",
                 TestDataHelper.SESSIONID);
-        when(this.fakeDatabase.updateAIStatus(anyObject())).thenReturn(true);
+        when(this.fakeDatabase.updateAIStatus(any())).thenReturn(true);
         ApiResult result = this.aiServicesLogic.updateAIStatus(status);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
         verify(this.fakeController, times(1)).setHashCodeFor(TestDataHelper.AIID, "hash");
@@ -133,7 +133,7 @@ public class TestAIServicesLogic {
                 TrainingStatus.AI_READY_TO_TRAIN, AI_ENGINE, SupportedLanguage.EN, ServiceIdentity.DEFAULT_VERSION,
                 0.0, 0.0, "hash",
                 UUID.randomUUID());
-        when(this.fakeDatabase.updateAIStatus(anyObject())).thenReturn(true);
+        when(this.fakeDatabase.updateAIStatus(any())).thenReturn(true);
         ApiResult result = this.aiServicesLogic.updateAIStatus(status);
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
     }

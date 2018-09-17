@@ -12,7 +12,9 @@ import org.junit.Test;
 import java.net.HttpURLConnection;
 import javax.ws.rs.core.Response;
 
-import static org.mockito.Matchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyDouble;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 public class TestServiceFilters extends ServiceTestBase {

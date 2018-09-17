@@ -31,7 +31,6 @@ import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Matchers;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,7 +39,6 @@ import java.util.List;
 import java.util.UUID;
 import javax.inject.Provider;
 
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
 public class TestFacebookChatHandler {
@@ -123,7 +121,7 @@ public class TestFacebookChatHandler {
         this.fakeChatLogicProvider = mock(Provider.class);
         this.fakeChatLogic = mock(ChatLogic.class);
         when(this.fakeChatLogicProvider.get()).thenReturn(this.fakeChatLogic);
-        when(this.fakeChatLogic.chatFacebook(Matchers.eq(TestDataHelper.AIID), any(), any(), any(), any()))
+        when(this.fakeChatLogic.chatFacebook(eq(TestDataHelper.AIID), any(), any(), any(), any()))
                 .thenAnswer(invocation -> this.chatResult);
 
         this.fakeQueryFilterProvider = mock(Provider.class);
@@ -183,9 +181,9 @@ public class TestFacebookChatHandler {
     public void testChat_OK() throws Exception {
         this.chatHandler.call();
         verify(this.fakeChatLogic, times(1)).chatFacebook(
-                Matchers.eq(TestDataHelper.AIID), any(), Matchers.eq(MESSAGE), anyString(), any());
+                eq(TestDataHelper.AIID), any(), eq(MESSAGE), anyString(), any());
         verify(this.fakeConnector, times(1)).sendFacebookMessage(
-                Matchers.eq(SENDER), Matchers.eq(PAGETOKEN),
+                eq(SENDER), eq(PAGETOKEN),
                 any());
     }
 
@@ -364,9 +362,9 @@ public class TestFacebookChatHandler {
         this.chatHandler.initialise(notification.getEntryList().get(0).getMessaging().get(0));
         this.chatHandler.call();
         verify(this.fakeChatLogic, times(1)).chatFacebook(
-                Matchers.eq(TestDataHelper.AIID), any(), Matchers.eq(POSTBACK), anyString(), any());
+                eq(TestDataHelper.AIID), any(), eq(POSTBACK), anyString(), any());
         verify(this.fakeConnector, times(1)).sendFacebookMessage(
-                Matchers.eq(SENDER), Matchers.eq(PAGETOKEN), any());
+                eq(SENDER), eq(PAGETOKEN), any());
     }
 
     @Test
@@ -376,9 +374,9 @@ public class TestFacebookChatHandler {
         this.chatHandler.initialise(notification.getEntryList().get(0).getMessaging().get(0));
         this.chatHandler.call();
         verify(this.fakeChatLogic, never()).chatFacebook(
-                Matchers.eq(TestDataHelper.AIID), any(), any(), anyString(), any());
+                eq(TestDataHelper.AIID), any(), any(), anyString(), any());
         verify(this.fakeConnector, never()).sendFacebookMessage(
-                Matchers.eq(SENDER), Matchers.eq(PAGETOKEN), any());
+                eq(SENDER), eq(PAGETOKEN), any());
     }
 
     @Test
@@ -388,35 +386,35 @@ public class TestFacebookChatHandler {
         this.chatHandler.initialise(notification.getEntryList().get(0).getMessaging().get(0));
         this.chatHandler.call();
         verify(this.fakeChatLogic, times(1)).chatFacebook(
-                Matchers.eq(TestDataHelper.AIID), any(), Matchers.eq(OPTIN), anyString(), any());
+                eq(TestDataHelper.AIID), any(), eq(OPTIN), anyString(), any());
         verify(this.fakeConnector, times(1)).sendFacebookMessage(
-                Matchers.eq(SENDER), Matchers.eq(PAGETOKEN), any());
+                eq(SENDER), eq(PAGETOKEN), any());
     }
 
     @Test
     public void testSenderActions_OK() throws Exception {
         this.chatHandler.call();
         verify(this.fakeConnector, times(1)).sendFacebookSenderAction(anyString(),
-                anyString(), Matchers.eq(FacebookConnector.SendMessage.SenderAction.typing_on));
+                anyString(), eq(FacebookConnector.SendMessage.SenderAction.typing_on));
         verify(this.fakeConnector, never()).sendFacebookSenderAction(anyString(),
-                anyString(), Matchers.eq(FacebookConnector.SendMessage.SenderAction.typing_off));
+                anyString(), eq(FacebookConnector.SendMessage.SenderAction.typing_off));
     }
 
     @Test
     // chat error still sends a message back to facebook so doesn't need typing_off
     public void testSenderActions_ChatError() throws Exception {
-        when(this.fakeChatLogic.chatFacebook(Matchers.eq(TestDataHelper.AIID), any(), any(), any(), any()))
+        when(this.fakeChatLogic.chatFacebook(eq(TestDataHelper.AIID), any(), any(), any(), any()))
                 .thenThrow(new ChatLogic.ChatFailedException(ApiError.getInternalServerError()));
         this.chatHandler.call();
         verify(this.fakeConnector, times(1)).sendFacebookSenderAction(anyString(),
-                anyString(), Matchers.eq(FacebookConnector.SendMessage.SenderAction.typing_on));
+                anyString(), eq(FacebookConnector.SendMessage.SenderAction.typing_on));
         verify(this.fakeConnector, never()).sendFacebookSenderAction(anyString(),
-                anyString(), Matchers.eq(FacebookConnector.SendMessage.SenderAction.typing_off));
+                anyString(), eq(FacebookConnector.SendMessage.SenderAction.typing_off));
     }
 
     @Test
     public void test_ChatError_NotReady() throws Exception {
-        when(this.fakeChatLogic.chatFacebook(Matchers.eq(TestDataHelper.AIID), any(), any(), any(), any()))
+        when(this.fakeChatLogic.chatFacebook(eq(TestDataHelper.AIID), any(), any(), any(), any()))
                 .thenThrow(new AIChatServices.AiNotReadyToChat("dummy exception"));
         this.chatHandler.call();
         verify(this.fakeConnector, times(1)).sendFacebookMessage(
@@ -425,7 +423,7 @@ public class TestFacebookChatHandler {
 
     @Test
     public void test_ChatError_ChatFailed() throws Exception {
-        when(this.fakeChatLogic.chatFacebook(Matchers.eq(TestDataHelper.AIID), any(), any(), any(), any()))
+        when(this.fakeChatLogic.chatFacebook(eq(TestDataHelper.AIID), any(), any(), any(), any()))
                 .thenThrow(new ChatLogic.ChatFailedException(ApiError.getInternalServerError()));
         this.chatHandler.call();
         verify(this.fakeConnector, times(1)).sendFacebookMessage(
@@ -438,9 +436,9 @@ public class TestFacebookChatHandler {
                 .when(this.fakeConnector).sendFacebookMessage(any(), any(), any());
         this.chatHandler.call();
         verify(this.fakeConnector, times(1)).sendFacebookSenderAction(anyString(),
-                anyString(), Matchers.eq(FacebookConnector.SendMessage.SenderAction.typing_on));
+                anyString(), eq(FacebookConnector.SendMessage.SenderAction.typing_on));
         verify(this.fakeConnector, times(1)).sendFacebookSenderAction(anyString(),
-                anyString(), Matchers.eq(FacebookConnector.SendMessage.SenderAction.typing_off));
+                anyString(), eq(FacebookConnector.SendMessage.SenderAction.typing_off));
     }
 
     @Test
@@ -546,7 +544,7 @@ public class TestFacebookChatHandler {
     private void verifyRequestIgnored() throws Exception {
         this.chatHandler.call();
         verify(this.fakeChatLogic, never()).chatFacebook(
-                Matchers.eq(TestDataHelper.AIID), any(), any(), anyString(), any());
+                eq(TestDataHelper.AIID), any(), any(), anyString(), any());
         verify(this.fakeConnector, never()).sendFacebookMessage(
                 any(), any(), any());
     }
