@@ -375,6 +375,12 @@ public class TestServiceAi extends ServiceTestBase {
                 + "\"confidence\":0.4000000059604645,\"voice\":1, \"language\":\"en-US\",\"timezone\":\"Europe\\/London\"}";
     }
 
+    private String getExportedBotJsonWithHandover() {
+        return "{\"version\":1,\"name\":\"exported_bot\",\"description\":\"desc\",\"isPrivate\":false, \"personality\":0,"
+                + "\"confidence\":0.4000000059604645,\"voice\":1, \"language\":\"en-US\",\"timezone\":\"Europe\\/London\","
+                + "\"handoverMessage\":\"message\"}";
+    }
+
     private ApiAi checkMaskedTrainingStatus(
             TrainingStatus trainingStatus, double trainingProgress) throws DatabaseException {
         BackendStatus status = new BackendStatus();

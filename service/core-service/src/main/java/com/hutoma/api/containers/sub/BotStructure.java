@@ -49,9 +49,9 @@ public class BotStructure {
     @SerializedName("linked_skills")
     private List<Integer> linkedSkills;
     @SerializedName("handover_reset_timeout_seconds")
-    private int handoverResetTimeoutSeconds;
+    private int handoverResetTimeoutSeconds = -1;
     @SerializedName("error_threshold_handover")
-    private int errorThresholdHandover;
+    private int errorThresholdHandover = -1;
     @SerializedName("handover_message")
     private String handoverMessage;
 

@@ -699,9 +699,9 @@ public class AILogic {
                     locale, botToImport.getTimezone(), botToImport.getConfidence(),
                     botToImport.getPersonality(), botToImport.getVoice(), botToImport.getDefaultResponses(),
                     // BUG: 5659
-                    bot.getErrorThresholdHandover(),
-                    bot.getHandoverResetTimeoutSeconds(),
-                    bot.getHandoverMessage(),
+                    botToImport.getErrorThresholdHandover(),
+                    botToImport.getHandoverResetTimeoutSeconds(),
+                    botToImport.getHandoverMessage(),
                     // ---
                     this.jsonSerializer,
                     transaction);
@@ -812,6 +812,11 @@ public class AILogic {
         botStructure.setTimezone(newTimezone);
         botStructure.setDefaultResponses(defaultResponses);
         botStructure.setPassthroughUrl(passthroughUrl);
+
+        // In this case we're not providing a handover message so we can leave it empty.
+        botStructure.setHandoverMessage("");
+        botStructure.setHandoverResetTimeoutSeconds(-1);
+        botStructure.setErrorThresholdHandover(-1);
 
         return this.importBot(devId, botStructure);
     }
