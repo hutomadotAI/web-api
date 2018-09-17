@@ -54,6 +54,12 @@ def apply_alterscripts(cnx, cursor, migration_level):
         migration_start = migration_level + 1
         migration_range = range(max(first_item, migration_start), last_item + 1)
         migrations = []
+        print("***********************************************")
+        print("Will apply migration scripts {} -> {}".format(migration_start, last_item))
+        user_input = input("Do you want to proceed (type 'yes' to continue)? ")
+        if user_input.strip().lower() != "yes":
+            print("* aborted by user *")
+            return
 
         for ii in migration_range:
             if ii in alterscript_included:
