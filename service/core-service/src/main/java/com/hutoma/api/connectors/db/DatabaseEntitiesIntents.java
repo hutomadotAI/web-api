@@ -41,9 +41,9 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
         this.serializer = serializer;
     }
 
-    public List<Entity> getEntities(final UUID devid) throws DatabaseException {
+    public List<Entity> getEntities(final UUID devid, boolean includeHidden) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("getEntities", 1).add(devid);
+            call.initialise("getEntities", 2).add(devid).add(includeHidden);
             final ResultSet rs = call.executeQuery();
             try {
                 List<Entity> entities = new ArrayList<>();

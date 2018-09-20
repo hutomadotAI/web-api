@@ -21,4 +21,6 @@ public class Entity {
     public String getName() {
         return this.name;
     }
+
+    public boolean isSystem() { return this.isSystem; }
 }
