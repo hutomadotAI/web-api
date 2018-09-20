@@ -54,7 +54,7 @@ public class ChatEntityValueHandler implements IChatHandler {
 
             try {
                 // Query DB for relevant entities and entity values
-                List<Entity> entities = this.dbEntities.getEntities(requestInfo.getDevId());
+                List<Entity> entities = this.dbEntities.getEntities(requestInfo.getDevId(), true);
                 for (Entity e : entities) {
                     ApiEntity entity = this.dbEntities.getEntity(requestInfo.getDevId(), e.getName());
                     if (!entity.isSystem()) {

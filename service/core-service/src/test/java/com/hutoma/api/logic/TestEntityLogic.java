@@ -49,14 +49,14 @@ public class TestEntityLogic {
 
     @Test
     public void testGetEntities_Success() throws DatabaseException {
-        when(this.fakeDatabase.getEntities(any())).thenReturn(getEntitiesList());
+        when(this.fakeDatabase.getEntities(any(), anyBoolean())).thenReturn(getEntitiesList());
         final ApiResult result = this.entityLogic.getEntities(DEVID_UUID);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
     }
 
     @Test
     public void testGetEntities_Success_Return() throws DatabaseException {
-        when(this.fakeDatabase.getEntities(any())).thenReturn(getEntitiesList());
+        when(this.fakeDatabase.getEntities(any(), anyBoolean())).thenReturn(getEntitiesList());
         final ApiResult result = this.entityLogic.getEntities(DEVID_UUID);
         Assert.assertEquals(1, ((ApiEntityList) result).getEntities().size());
         Assert.assertEquals(ENTITY_NAME, ((ApiEntityList) result).getEntities().get(0).getName());
@@ -64,7 +64,7 @@ public class TestEntityLogic {
 
     @Test
     public void testGetEntities_NotFound() throws DatabaseException {
-        when(this.fakeDatabase.getEntities(any())).thenReturn(new ArrayList<>());
+        when(this.fakeDatabase.getEntities(any(), anyBoolean())).thenReturn(new ArrayList<>());
         final ApiEntityList result = (ApiEntityList) this.entityLogic.getEntities(DEVID_UUID);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
         Assert.assertTrue(result.getEntities().isEmpty());
@@ -72,7 +72,7 @@ public class TestEntityLogic {
 
     @Test
     public void testGetEntities_Error() throws DatabaseException {
-        when(this.fakeDatabase.getEntities(any())).thenThrow(DatabaseException.class);
+        when(this.fakeDatabase.getEntities(any(), anyBoolean())).thenThrow(DatabaseException.class);
         final ApiResult result = this.entityLogic.getEntities(DEVID_UUID);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }

@@ -1153,7 +1153,7 @@ public class TestAILogic {
     @Test(expected = AILogic.BotImportException.class)
     public void testCreateImportedBot_entities_dbException() throws AILogic.BotImportException, DatabaseException {
         setupFakeImport();
-        when(this.fakeDatabaseEntitiesIntents.getEntities(any())).thenThrow(DatabaseException.class);
+        when(this.fakeDatabaseEntitiesIntents.getEntities(any(), anyBoolean())).thenThrow(DatabaseException.class);
         BotStructure botStructure = getBotstructure();
         this.aiLogic.createImportedBot(VALIDDEVID, botStructure);
     }
@@ -1563,7 +1563,7 @@ public class TestAILogic {
 
         Entity existingEntitySimple = new Entity(entityName, false);
         ApiEntity existingEntity = new ApiEntity(entityName, DEVID_UUID, existingValues, false);
-        when(this.fakeDatabaseEntitiesIntents.getEntities(any())).thenReturn(Collections.singletonList(existingEntitySimple));
+        when(this.fakeDatabaseEntitiesIntents.getEntities(any(), anyBoolean())).thenReturn(Collections.singletonList(existingEntitySimple));
         when(this.fakeDatabaseEntitiesIntents.getEntity(any(), any())).thenReturn(existingEntity);
 
         return botStructure;

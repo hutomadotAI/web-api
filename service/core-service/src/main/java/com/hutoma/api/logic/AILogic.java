@@ -1046,7 +1046,7 @@ public class AILogic {
         List<Entity> userEntities;
         try {
             // Add the entities that the user doesn't currently have.
-            userEntities = this.databaseEntitiesIntents.getEntities(devId);
+            userEntities = this.databaseEntitiesIntents.getEntities(devId, false);
         } catch (DatabaseException ex) {
             this.logger.logUserExceptionEvent(LOGFROM, "ImportBot - retrieving existing entities ai",
                     devId.toString(), ex, logMap);

@@ -40,7 +40,7 @@ public class EntityLogic {
     public ApiResult getEntities(final UUID devid) {
         final String devidString = devid.toString();
         try {
-            List<Entity> entityList = this.database.getEntities(devid);
+            List<Entity> entityList = this.database.getEntities(devid, true);
             this.logger.logUserTraceEvent(LOGFROM, "GetEntities", devidString,
                     LogMap.map("Num Entities", entityList.size()));
             return new ApiEntityList(entityList).setSuccessStatus();
