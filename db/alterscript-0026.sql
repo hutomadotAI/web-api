@@ -1,3 +1,4 @@
+USE hutoma;
 
 DROP PROCEDURE IF EXISTS `getAIsServerStatus`;
 
