@@ -884,6 +884,7 @@ public class TestAILogic {
         when(this.fakeTools.createNewRandomUUID()).thenReturn(generatedAiid);
         when(this.fakeDatabaseAi.updatePassthroughUrl(any(), any(), anyString(), any())).thenReturn(true);
         when(this.fakeDatabaseAi.updateDefaultChatResponses(any(), any(), any(), any(), any())).thenReturn(true);
+        when(this.fakeAiServices.getTrainingMaterialsCommon(any(), any(), any())).thenReturn("");
         TestDataHelper.mockDatabaseCreateAIInTrans(this.fakeDatabaseAi, generatedAiid);
 
         AILogic spyLogic = spy(this.aiLogic);
@@ -949,6 +950,7 @@ public class TestAILogic {
         TestDataHelper.mockDatabaseCreateAIInTrans(this.fakeDatabaseAi, generatedAiid);
         when(this.fakeDatabaseAi.updatePassthroughUrl(any(), any(), any(), any())).thenReturn(true);
         when(this.fakeDatabaseAi.updateDefaultChatResponses(any(), any(), any(), any(), any())).thenReturn(true);
+        when(this.fakeAiServices.getTrainingMaterialsCommon(any(), any(), any())).thenReturn("");
 
         return this.aiLogic.cloneBot(clonerDevId, originalBot.getAiid(), baseAi.getName(), baseAi.getDescription(),
                 baseAi.getIsPrivate(), baseAi.getPersonality(), baseAi.getConfidence(), baseAi.getVoice(), baseAi.getLanguage(),
@@ -1436,6 +1438,7 @@ public class TestAILogic {
         when(this.fakeDatabaseAi.updatePassthroughUrl(any(), any(), any(), any())).thenReturn(true);
         when(this.fakeDatabaseAi.updateDefaultChatResponses(any(), any(), any(), any(), any())).thenReturn(true);
         when(this.fakeDatabaseEntitiesIntents.createWebHook(any(), anyString(), anyString(), anyBoolean(), any())).thenReturn(true);
+        when(this.fakeAiServices.getTrainingMaterialsCommon(any(), any(), any())).thenReturn("");
     }
 
     private BotStructure getBotstructure() {

@@ -853,6 +853,11 @@ public class AILogic {
         try {
             String trainingMaterials = this.aiServices.getTrainingMaterialsCommon(aiIdentity.getDevId(),
                     aiIdentity.getAiid(), this.jsonSerializer);
+            if (trainingMaterials == null) {
+                this.logger.logUserErrorEvent(LOGFROM, "Could not obtain training materials", devIdString,
+                        LogMap.map("AIID", aiIdentity.getAiid()));
+                return ApiError.getInternalServerError();
+            }
             this.aiServices.uploadTraining(createdBot.getBackendStatus(), aiIdentity, trainingMaterials);
         } catch (Exception ex) {
             this.logger.logUserExceptionEvent(LOGFROM, "BotImportTraining", devIdString, ex);
