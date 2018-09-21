@@ -451,7 +451,8 @@ public class QueueProcessor extends TimerTask {
 
             // tell the chosen server to start training
             this.queueServicesProvider.get().startTrainingDirect(this.serviceIdentity,
-                    new AiIdentity(currentStatus.getDevId(), queued.getAiid()),
+                    new AiIdentity(currentStatus.getDevId(), queued.getAiid(),
+                            this.serviceIdentity.getLanguage(), this.serviceIdentity.getVersion()),
                     server.getServerUrl(), server.getServerIdentifier());
 
         } catch (ServerConnector.AiServicesException e) {

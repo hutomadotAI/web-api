@@ -218,7 +218,9 @@ public class TrainingLogic {
         if (trainingStatus == TrainingStatus.AI_READY_TO_TRAIN
                 || trainingStatus == TrainingStatus.AI_TRAINING_STOPPED) {
             try {
-                this.aiServices.startTraining(ai.getBackendStatus(), getAiIdentity(devid, ai));
+                this.aiServices.startTraining(ai.getBackendStatus(),
+                        new AiIdentity(devid, aiid, ai.getLanguage(),
+                                FeatureToggler.getServerVersionForAi(devid, aiid, featureToggler)));
             } catch (AIServices.AiServicesException | RuntimeException ex) {
                 this.logger.logUserExceptionEvent(LOGFROM, "StartTraining", devidString, ex);
                 return ApiError.getInternalServerError();
@@ -269,7 +271,9 @@ public class TrainingLogic {
             BackendStatus backendStatus = ai.getBackendStatus();
             TrainingStatus embStatus = backendStatus.getEngineStatus(BackendServerType.EMB).getTrainingStatus();
             if (embStatus == TrainingStatus.AI_TRAINING_QUEUED || embStatus == TrainingStatus.AI_TRAINING) {
-                this.aiServices.stopTraining(backendStatus, getAiIdentity(devId, ai));
+                this.aiServices.stopTraining(backendStatus,
+                        new AiIdentity(devId, aiid, ai.getLanguage(),
+                                FeatureToggler.getServerVersionForAi(devId, aiid, featureToggler)));
                 this.logger.logUserTraceEvent(LOGFROM, "StopTraining", devidString, logMap);
                 return new ApiResult().setSuccessStatus("Training session stopped.");
             } else {
@@ -321,7 +325,9 @@ public class TrainingLogic {
                                     devidString, logMap);
                             return ApiError.getBadRequest("There is no training data.");
                         }
-                        this.aiServices.uploadTraining(ai.getBackendStatus(), getAiIdentity(devid, ai),
+                        this.aiServices.uploadTraining(ai.getBackendStatus(),
+                                new AiIdentity(devid, aiid, ai.getLanguage(),
+                                        FeatureToggler.getServerVersionForAi(devid, aiid, this.featureToggler)),
                                 trainingMaterials);
                         // Delete all memory variables for this AI
                         this.memoryIntentHandler.resetIntentsStateForAi(devid, aiid);
@@ -551,7 +557,10 @@ public class TrainingLogic {
                                          final String trainingMaterials, final TrainingFileParsingResult result) {
         final String devidString = devid.toString();
         try {
-            this.aiServices.uploadTraining(ai.getBackendStatus(), getAiIdentity(devid, ai), trainingMaterials);
+            this.aiServices.uploadTraining(ai.getBackendStatus(),
+                    new AiIdentity(devid, aiid, ai.getLanguage(),
+                            FeatureToggler.getServerVersionForAi(devid, aiid, featureToggler)),
+                    trainingMaterials);
         } catch (AIServices.AiServicesException ex) {
             this.logger.logUserExceptionEvent(LOGFROM, "UploadTrainingFile", devidString, ex);
             return ApiError.getInternalServerError("Could not upload training data");
@@ -560,11 +569,6 @@ public class TrainingLogic {
         this.logger.logUserTraceEvent(LOGFROM, "UploadFile", devidString, LogMap.map("AIID", aiid));
         return new ApiResult().setSuccessStatus("Upload complete",
                 result.getEventCount() == 0 ? null : result.getEvents());
-    }
-
-    private AiIdentity getAiIdentity(final UUID devId, final ApiAi ai) {
-        UUID aiid = UUID.fromString(ai.getAiid());
-        return new AiIdentity(devId, aiid, ai.getLanguage(), ServiceIdentity.DEFAULT_VERSION);
     }
 
     public enum TrainingType {

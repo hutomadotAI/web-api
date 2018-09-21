@@ -1,39 +1,33 @@
 package com.hutoma.api.connectors.db;
 
 import com.google.gson.reflect.TypeToken;
+import com.hutoma.api.common.FeatureToggler;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Pair;
+import com.hutoma.api.common.SupportedLanguage;
 import com.hutoma.api.connectors.BackendStatus;
-import com.hutoma.api.containers.AiBotConfig;
-import com.hutoma.api.containers.AiBotConfigDefinition;
-import com.hutoma.api.containers.ApiAi;
-import com.hutoma.api.containers.ApiAiWithConfig;
-import com.hutoma.api.containers.ApiLinkedBotData;
+import com.hutoma.api.containers.*;
 import com.hutoma.api.containers.sub.*;
 import com.hutoma.api.logging.ILogger;
-
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 
+import javax.inject.Inject;
+import javax.inject.Provider;
 import java.lang.reflect.Type;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
-import javax.inject.Inject;
-import javax.inject.Provider;
 
 public class DatabaseAI extends Database {
 
-
     @Inject
-    public DatabaseAI(final ILogger logger, final Provider<DatabaseCall> callProvider,
-                      final Provider<DatabaseTransaction> transactionProvider) {
+    public DatabaseAI(final ILogger logger,
+                      final Provider<DatabaseCall> callProvider,
+                      final Provider<DatabaseTransaction> transactionProvider,
+                      final FeatureToggler featureToggler) {
         super(logger, callProvider, transactionProvider);
     }
 
@@ -224,15 +218,14 @@ public class DatabaseAI extends Database {
 
     /***
      * Combines the statuses of one AI and returns them as a BackendStatus object
-     * @param devId
-     * @param aiid
+     * @param aiIdentity
      * @return the backend status
      * @throws DatabaseException
      */
-    public BackendStatus getAIStatusReadOnly(final UUID devId, final UUID aiid)
+    public BackendStatus getAIStatusReadOnly(final AiIdentity aiIdentity)
             throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
-            return DatabaseBackends.getBackendStatus(new AiIdentity(devId, aiid), call);
+            return DatabaseBackends.getBackendStatus(aiIdentity, call);
         } catch (SQLException sqle) {
             throw new DatabaseException(sqle);
         }
@@ -244,10 +237,11 @@ public class DatabaseAI extends Database {
      * @return the list of AIs
      * @throws DatabaseException
      */
-    public List<ApiAi> getAllAIs(final UUID devid, final JsonSerializer serializer) throws DatabaseException {
+    public List<Pair<ApiAi, String>> getAllAIs(final UUID devid, final JsonSerializer serializer)
+            throws DatabaseException {
         try (DatabaseTransaction transaction = this.transactionProvider.get()) {
             // load a hashmap with all the dev's statuses
-            HashMap<UUID, BackendStatus> backendStatuses = DatabaseBackends.getAllAIsStatusHashMap(
+            Map<UUID, Map<String, BackendStatus>> backendStatuses = DatabaseBackends.getAllAIsStatusHashMap(
                     devid, transaction.getDatabaseCall());
 
             // load all the dev's AIs
@@ -255,17 +249,26 @@ public class DatabaseAI extends Database {
                     .initialise("getAIs", 1)
                     .add(devid)
                     .executeQuery();
-            final ArrayList<ApiAi> res = new ArrayList<>();
+            final ArrayList<Pair<ApiAi, String>> res = new ArrayList<>();
             try {
                 while (rs.next()) {
                     // combine status data with AI
                     UUID aiid = UUID.fromString(rs.getString("aiid"));
-                    ApiAi bot = getAiFromResultset(rs, backendStatuses.get(aiid), serializer);
                     List<AiBot> linkedBots = this.getBotsLinkedToAi(devid, aiid);
-                    if (!linkedBots.isEmpty()) {
-                        bot.setLinkedBots(linkedBots.stream().map(AiBot::getBotId).collect(Collectors.toList()));
+
+                    Map<String, BackendStatus> statuses = backendStatuses.get(aiid);
+                    // If this AI doesn't have a status yet, assign a default one
+                    if (statuses == null) {
+                        statuses = new HashMap<>();
+                        statuses.put(ServiceIdentity.DEFAULT_VERSION, new BackendStatus());
                     }
-                    res.add(bot);
+                    for (Map.Entry<String, BackendStatus> entry: statuses.entrySet()) {
+                        ApiAi bot = getAiFromResultset(rs, entry.getValue(), serializer);
+                        if (!linkedBots.isEmpty()) {
+                            bot.setLinkedBots(linkedBots.stream().map(AiBot::getBotId).collect(Collectors.toList()));
+                        }
+                        res.add(new Pair<>(bot, entry.getKey()));
+                    }
                 }
                 return res;
             } catch (final SQLException sqle) {
@@ -276,15 +279,17 @@ public class DatabaseAI extends Database {
         }
     }
 
-    public ApiAi getAI(final UUID devid, final UUID aiid, final JsonSerializer serializer,
-                       final DatabaseTransaction transaction) throws DatabaseException {
+    public ApiAi getAI(final UUID devid, final UUID aiid, final String serverVersion,
+                       final JsonSerializer serializer, final DatabaseTransaction transaction)
+            throws  DatabaseException {
         if (transaction == null) {
             throw new IllegalArgumentException("transaction");
         }
 
         try {
             // load the statuses first
-            BackendStatus backendStatus = DatabaseBackends.getBackendStatus(new AiIdentity(devid, aiid),
+            BackendStatus backendStatus = DatabaseBackends.getBackendStatus(new AiIdentity(devid, aiid,
+                            SupportedLanguage.EN, serverVersion),
                     transaction.getDatabaseCall());
             // then load the AI
             ResultSet rs = transaction.getDatabaseCall().initialise("getAi", 2)
@@ -314,6 +319,11 @@ public class DatabaseAI extends Database {
         }
     }
 
+    public ApiAi getAI(final UUID devid, final UUID aiid, final JsonSerializer serializer,
+                       final DatabaseTransaction transaction) throws DatabaseException {
+        return getAI(devid, aiid, ServiceIdentity.DEFAULT_VERSION, serializer, transaction);
+    }
+
     /***
      * Load data for an AI and populate its backend server statuses
      * @param devid
@@ -325,6 +335,15 @@ public class DatabaseAI extends Database {
             throws DatabaseException {
         try (DatabaseTransaction transaction = this.transactionProvider.get()) {
             ApiAi ai = getAI(devid, aiid, serializer, transaction);
+            transaction.commit();
+            return ai;
+        }
+    }
+
+    public ApiAi getAI(final UUID devid, final UUID aiid, final String serverVersion, final JsonSerializer serializer)
+            throws DatabaseException {
+        try (DatabaseTransaction transaction = this.transactionProvider.get()) {
+            ApiAi ai = getAI(devid, aiid, serverVersion, serializer, transaction);
             transaction.commit();
             return ai;
         }
@@ -672,16 +691,19 @@ public class DatabaseAI extends Database {
     }
 
     @SuppressWarnings("unchecked")
-    public ChatState getChatState(final UUID devId, final UUID aiid, final UUID chatId,
+    public ChatState getChatState(final UUID devId, final UUID aiid,
+                                  final String serverVersion, final UUID chatId,
                                   final JsonSerializer jsonSerializer)
             throws DatabaseException {
         try (DatabaseTransaction transaction = this.transactionProvider.get()) {
-            ApiAi ai = getAI(devId, aiid, jsonSerializer, transaction);
+            ApiAi ai = getAI(devId, aiid, serverVersion, jsonSerializer, transaction);
             if (ai == null) {
                 return null;
             }
             try (DatabaseCall call = transaction.getDatabaseCall()) {
-                call.initialise("getChatState", 2).add(devId).add(chatId);
+                call.initialise("getChatState", 2)
+                        .add(devId)
+                        .add(chatId);
                 ResultSet rs = call.executeQuery();
                 if (rs.next()) {
                     String lockedAiid = rs.getString("locked_aiid");

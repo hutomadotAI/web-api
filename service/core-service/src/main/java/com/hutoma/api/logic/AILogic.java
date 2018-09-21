@@ -237,8 +237,17 @@ public class AILogic {
     public ApiResult getAIs(final UUID devId) {
         final String devIdString = devId.toString();
         try {
-            List<ApiAi> aiList = this.databaseAi.getAllAIs(devId, this.jsonSerializer);
+            List<Pair<ApiAi, String>> aiListVersioned = this.databaseAi.getAllAIs(devId, this.jsonSerializer);
             this.logger.logUserTraceEvent(LOGFROM, "GetAIs", devIdString);
+            List<ApiAi> aiList = new ArrayList<>();
+            for (Pair<ApiAi, String> pair : aiListVersioned) {
+                ApiAi ai = pair.getA();
+                String version = pair.getB();
+                if (FeatureToggler.getServerVersionForAi(devId, UUID.fromString(ai.getAiid()), this.featureToggler)
+                        .equals(version)) {
+                    aiList.add(ai);
+                }
+            }
             return new ApiAiList(aiList).setSuccessStatus();
         } catch (Exception e) {
             this.logger.logUserExceptionEvent(LOGFROM, "GetAIs", devIdString, e);
@@ -292,8 +301,8 @@ public class AILogic {
 
     }
 
-    public ApiResult setAiBotConfig(final UUID devid, final UUID aiid, final int botId, AiBotConfig aiBotConfig) {
-        final String devIdString = devid.toString();
+    public ApiResult setAiBotConfig(final UUID devId, final UUID aiid, final int botId, AiBotConfig aiBotConfig) {
+        final String devIdString = devId.toString();
         LogMap logMap = LogMap.map("AIID", aiid);
 
         if (!aiBotConfig.isValid()) {
@@ -306,12 +315,12 @@ public class AILogic {
         }
 
         try {
-            if (!this.databaseAi.checkAIBelongsToDevId(devid, aiid)) {
+            if (!this.databaseAi.checkAIBelongsToDevId(devId, aiid)) {
                 this.logger.logUserTraceEvent(LOGFROM, "setAiConfig - AI not owned", devIdString, logMap);
                 return ApiError.getNotFound();
             }
 
-            ApiAi ai = this.databaseAi.getAI(devid, aiid, this.jsonSerializer);
+            ApiAi ai = this.databaseAi.getAI(devId, aiid, this.jsonSerializer);
             if (ai == null) {
                 this.logger.logUserTraceEvent(LOGFROM, "setAiConfig - AI not found", devIdString, logMap);
                 return ApiError.getNotFound();
@@ -321,10 +330,10 @@ public class AILogic {
                 return ApiError.getBadRequest(BOT_RO_MESSAGE);
             }
 
-            UUID linkedDevid = devid;
+            UUID linkedDevid = devId;
             UUID linkedAiid = aiid;
             if (botId != 0) {
-                Pair<UUID, UUID> linkedDevidAiid = this.databaseAi.getIsBotLinkedToAi(devid, aiid, botId);
+                Pair<UUID, UUID> linkedDevidAiid = this.databaseAi.getIsBotLinkedToAi(devId, aiid, botId);
                 if (linkedDevidAiid == null) {
                     return ApiError.getNotFound();
                 }
@@ -342,7 +351,7 @@ public class AILogic {
                         logMap.put("Message", configException.getMessage()));
                 return ApiError.getBadRequest(configException.getMessage());
             }
-            if (this.databaseAi.setAiBotConfig(devid, aiid, botId, aiBotConfig, this.jsonSerializer)) {
+            if (this.databaseAi.setAiBotConfig(devId, aiid, botId, aiBotConfig, this.jsonSerializer)) {
                 this.logger.logUserTraceEvent(LOGFROM, "setAiConfig", devIdString,
                         logMap.put("BotId", botId));
                 return new ApiResult().setSuccessStatus();
@@ -410,7 +419,8 @@ public class AILogic {
             this.integrationLogicProvider.get().deleteIntegrations(aiid, devid);
 
             try {
-                this.aiServices.deleteAI(ai.getBackendStatus(), new AiIdentity(devid, aiid));
+                this.aiServices.deleteAI(ai.getBackendStatus(), new AiIdentity(devid, aiid, ai.getLanguage(),
+                        FeatureToggler.getServerVersionForAi(devid, aiid, this.featureToggler)));
             } catch (ServerConnector.AiServicesException ex) {
                 if (Stream.of(ex.getSuppressed())
                         .filter(c -> c instanceof ServerConnector.AiServicesException)
@@ -464,7 +474,9 @@ public class AILogic {
         return this.linkBotToAI(devId, aiid, botId, null, false);
     }
 
-    private ApiResult linkBotToAI(final UUID devId, final UUID aiid, final int botId,
+    private ApiResult linkBotToAI(final UUID devId,
+                                  final UUID aiid,
+                                  final int botId,
                                   final DatabaseTransaction transaction, final boolean skipValidation) {
         final String devIdString = devId.toString();
         try {
@@ -723,7 +735,7 @@ public class AILogic {
             transaction.commit();
 
             AiIdentity aiIdentity = new AiIdentity(devId, aiid, createdBot.getLanguage(),
-                    ServiceIdentity.DEFAULT_VERSION);
+                    FeatureToggler.getServerVersionForAi(devId, aiid, this.featureToggler));
             ApiResult result = uploadAndStartTraining(aiIdentity, createdBot, false);
 
             logImport(devId, result, botToImport);
@@ -751,7 +763,9 @@ public class AILogic {
         }
 
         AiIdentity aiIdentity = new AiIdentity(devId, UUID.fromString(createdBot.getAiid()),
-                createdBot.getLanguage(), ServiceIdentity.DEFAULT_VERSION);
+                createdBot.getLanguage(),
+                FeatureToggler.getServerVersionForAi(devId, UUID.fromString(createdBot.getAiid()),
+                        this.featureToggler));
         ApiResult result = uploadAndStartTraining(aiIdentity, createdBot, true);
         logImport(devId, result, importedBot);
         return result;
@@ -838,7 +852,7 @@ public class AILogic {
         String devIdString = aiIdentity.getDevId().toString();
         try {
             String trainingMaterials = this.aiServices.getTrainingMaterialsCommon(aiIdentity.getDevId(),
-                    aiIdentity.getDevId(), this.jsonSerializer);
+                    aiIdentity.getAiid(), this.jsonSerializer);
             this.aiServices.uploadTraining(createdBot.getBackendStatus(), aiIdentity, trainingMaterials);
         } catch (Exception ex) {
             this.logger.logUserExceptionEvent(LOGFROM, "BotImportTraining", devIdString, ex);
@@ -891,9 +905,10 @@ public class AILogic {
         final String devIdString = devid.toString();
         try {
             LogMap logMap = LogMap.map("AIID", aiid);
+            String serverVersion = FeatureToggler.getServerVersionForAi(devid, aiid, this.featureToggler);
             ApiAi ai = transaction == null
-                    ? this.databaseAi.getAI(devid, aiid, this.jsonSerializer)
-                    : this.databaseAi.getAI(devid, aiid, this.jsonSerializer, transaction);
+                    ? this.databaseAi.getAI(devid, aiid, serverVersion, this.jsonSerializer)
+                    : this.databaseAi.getAI(devid, aiid, serverVersion, this.jsonSerializer, transaction);
             if (ai == null) {
                 this.logger.logUserTraceEvent(LOGFROM,
                         String.format("%s - not found", logTag), devIdString, logMap);

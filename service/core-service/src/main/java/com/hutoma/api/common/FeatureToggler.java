@@ -2,8 +2,8 @@ package com.hutoma.api.common;
 
 import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.connectors.db.DatabaseFeatures;
+import com.hutoma.api.containers.ServiceIdentity;
 import com.hutoma.api.logging.ILogger;
-import com.hutoma.api.logic.chat.ConditionEvaluator;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -71,6 +71,20 @@ public class FeatureToggler {
         }
         return FeatureState.C;
     }
+
+    //************************+**********
+    // Section for helpers for features
+    //***********************************
+
+
+    public static String getServerVersionForAi(final UUID devId,
+                                                               final UUID aiid,
+                                                               final FeatureToggler featureToggler) {
+        return featureToggler.getStateForAiid(devId, aiid, "test-server-version")
+                == FeatureToggler.FeatureState.T1 ? "test" : ServiceIdentity.DEFAULT_VERSION;
+    }
+
+    //************************+**********
 
     private void loadFeaturesFromStorage() {
         long thisEpoch = System.currentTimeMillis();

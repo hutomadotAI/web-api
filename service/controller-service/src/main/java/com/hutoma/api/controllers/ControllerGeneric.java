@@ -1,16 +1,12 @@
 package com.hutoma.api.controllers;
 
 import com.hutoma.api.common.ControllerConfig;
-import com.hutoma.api.common.SupportedLanguage;
-import com.hutoma.api.connectors.BackendServerType;
 import com.hutoma.api.containers.ServiceIdentity;
 import com.hutoma.api.logging.AiServiceStatusLogger;
 import com.hutoma.api.thread.ThreadSubPool;
-
 import org.glassfish.hk2.api.ServiceLocator;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Generic backend controller
@@ -18,6 +14,7 @@ import javax.inject.Singleton;
 public class ControllerGeneric extends ControllerBase {
 
     private final QueueProcessor queueProcessor;
+    private ServiceIdentity serviceIdentity; // Helpful for debugging
 
     @Inject
     ControllerGeneric(final ControllerConfig config,
@@ -46,6 +43,7 @@ public class ControllerGeneric extends ControllerBase {
 
     @Override
     public void initialize(final ServiceIdentity serviceIdentity) {
+        this.serviceIdentity = serviceIdentity;
         this.queueProcessor.initialise(this, serviceIdentity);
     }
 }

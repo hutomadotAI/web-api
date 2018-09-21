@@ -10,24 +10,20 @@ import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.ApiServerAcknowledge;
 import com.hutoma.api.containers.ServiceIdentity;
-import com.hutoma.api.containers.sub.AiStatus;
-import com.hutoma.api.containers.sub.ServerAffinity;
-import com.hutoma.api.containers.sub.ServerAiEntry;
-import com.hutoma.api.containers.sub.ServerRegistration;
-import com.hutoma.api.containers.sub.TrainingStatus;
+import com.hutoma.api.containers.sub.*;
 import com.hutoma.api.controllers.ControllerBase;
 import com.hutoma.api.controllers.ControllerMap;
 import com.hutoma.api.logging.AiServiceStatusLogger;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
 
+import javax.inject.Inject;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import javax.inject.Inject;
 
 /**
  * Created by David MG on 01/02/2017.
@@ -332,12 +328,15 @@ public class AIServicesLogic {
         }
     }
 
-    private void synchroniseStatuses(ControllerBase controller, ServerRegistration registration)
+    private void synchroniseStatuses(final ControllerBase controller,
+                                     final ServerRegistration registration)
             throws DatabaseException {
         Map<UUID, ServerAiEntry> result =
                 registration.getAiList().stream()
                         .collect(Collectors.toMap(ServerAiEntry::getAiid, Function.identity()));
-        controller.synchroniseDBStatuses(this.database, this.jsonSerializer, registration.getServerType(), result);
+        ServiceIdentity serviceIdentity = new ServiceIdentity(
+                registration.getServerType(), registration.getLanguage(), registration.getVersion());
+        controller.synchroniseDBStatuses(this.database, this.jsonSerializer, serviceIdentity, result);
     }
 
     public static class StatusTransitionRejectedException extends Exception {

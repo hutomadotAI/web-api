@@ -11,17 +11,16 @@ import com.hutoma.api.endpoints.UIEndpoint;
 import com.hutoma.api.logic.AIIntegrationLogic;
 import com.hutoma.api.logic.AILogic;
 import com.hutoma.api.logic.UILogic;
-
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mock;
 
+import javax.ws.rs.core.Response;
 import java.net.HttpURLConnection;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import javax.ws.rs.core.Response;
 
 import static com.hutoma.api.common.DeveloperInfoHelper.DEVINFO;
 import static com.hutoma.api.common.TestBotHelper.SAMPLEBOT;
@@ -89,7 +88,7 @@ public class TestServiceUI extends ServiceTestBase {
     @Test
     public void testGetAIPollStatus() throws DatabaseException {
         ApiAi ai = TestDataHelper.getAI();
-        when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(ai);
+        when(this.fakeDatabaseAi.getAI(any(), any(), anyString(), any())).thenReturn(ai);
         final Response response = target(UI_PATH_AIPOLL ).request().headers(defaultHeaders).get();
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
         ApiAi responseAi = deserializeResponse(response, ApiAi.class);

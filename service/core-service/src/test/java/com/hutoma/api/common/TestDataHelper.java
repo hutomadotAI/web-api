@@ -118,13 +118,6 @@ public class TestDataHelper {
         };
     }
 
-    public static void mockDatabaseCreateAI(final DatabaseAI fakeDatabase, final UUID createdAiid) throws DatabaseException {
-        when(fakeDatabase.getAI(any(), any(), any())).thenReturn(getSampleAI());
-        when(fakeDatabase.getAI(any(), any(), any(), any())).thenReturn(getSampleAI());
-        when(fakeDatabase.createAI(any(), anyString(), anyString(), any(), anyBoolean(),
-                anyString(), any(), any(), anyDouble(), anyInt(),
-                anyInt(), any(), anyInt(), anyInt(), any(), any())).thenReturn(createdAiid);
-    }
     public static void mockDatabaseCreateAIInTrans(final DatabaseAI fakeDatabase, final UUID createdAiid) throws DatabaseException {
         when(fakeDatabase.createAI(any(), anyString(), anyString(), any(), anyBoolean(),
                 anyString(), any(), any(), anyDouble(), anyInt(),

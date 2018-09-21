@@ -121,7 +121,7 @@ public class TestChatBase {
         ChatState emptyState = ChatState.getEmpty();
         emptyState.setAi(getSampleAI());
         try {
-            when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(emptyState);
+            when(this.fakeChatStateHandler.getState(any(), any(), any(), any())).thenReturn(emptyState);
             when(this.fakeAiStrings.getDefaultChatResponses(any(), any())).thenReturn(Collections.singletonList(TestDataHelper.DEFAULT_CHAT_RESPONSE));
             when(this.fakeAiStrings.getRandomDefaultChatResponse(any(), any())).thenReturn(TestDataHelper.DEFAULT_CHAT_RESPONSE);
         } catch (AiStrings.AiStringsException | ChatStateHandler.ChatStateException ex) {
