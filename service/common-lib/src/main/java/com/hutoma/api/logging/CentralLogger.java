@@ -212,7 +212,7 @@ public class CentralLogger implements ILogger {
     }
 
     private FluentLogger getFluentLogger() {
-        if (this.fluentLogger == null) {
+        if (this.fluentLogger == null && config.getFluentLoggingHost() != null) {
             this.fluentLogger = FluentLogger.getLogger(
                     this.getAppId(),
                     config.getFluentLoggingHost(),
@@ -380,16 +380,14 @@ public class CentralLogger implements ILogger {
         LOGGER.log(mapEventToLog4j.get(level), String.format("[%s] %s", tag, message));
 
         FluentLogger logger = getFluentLogger();
-        boolean wasLoggedToFluent = false;
         if (logger != null) {
-            wasLoggedToFluent = getFluentLogger().log(
+            boolean wasLoggedToFluent = getFluentLogger().log(
                     tag,
                     map,
                     timestamp);
-        }
-
-        if (!wasLoggedToFluent) {
-            LOGGER.log(Level.ERROR, "Could not log to fluent!");
+            if (!wasLoggedToFluent) {
+                LOGGER.log(Level.ERROR, "Could not log to fluent!");
+            }
         }
     }
 }
