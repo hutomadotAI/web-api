@@ -51,19 +51,20 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
         }
     }
 
-    public List<UUID> getAisForEntity(final UUID devid, final String entityName) throws DatabaseException {
+    public List<ApiIntent> getAllIntents(final UUID devid) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("getAIsForEntity", 2).add(devid).add(entityName);
-            final ResultSet rs = call.executeQuery();
-            try {
-                final ArrayList<UUID> ais = new ArrayList<>();
-                while (rs.next()) {
-                    ais.add(UUID.fromString(rs.getString("aiid")));
+            call.initialise("getAllIntentsForDev", 1).add(devid);
+            ResultSet rs = call.executeQuery();
+            List<ApiIntent> intents = new ArrayList<>();
+            while (rs.next()) {
+                ApiIntent intent = getIntentFromRecordset(rs);
+                if (intent != null) {
+                    intents.add(intent);
                 }
-                return ais;
-            } catch (final SQLException sqle) {
-                throw new DatabaseException(sqle);
             }
+            return intents;
+        } catch (SQLException sqle) {
+            throw new DatabaseException(sqle);
         }
     }
 
@@ -168,7 +169,7 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
                 return null;
             }
 
-            return (ApiIntent) this.serializer.deserialize(rs.getString("intent_json"), ApiIntent.class);
+            return getIntentFromRecordset(rs);
         } catch (SQLException sqle) {
             throw new DatabaseException(sqle);
         }
@@ -176,6 +177,7 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
 
     /**
      * Writes (or updates) and entity
+     *
      * @param devid         the developer id
      * @param entityOldName the entity's old name
      * @param entity        the entity's new name
@@ -191,6 +193,7 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
 
     /**
      * Writes (or updates) and entity
+     *
      * @param devid         the developer id
      * @param entityOldName the entity's old name
      * @param entity        the entity's new name
@@ -276,7 +279,7 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
      * @throws DatabaseException if something goes wrong
      */
     public int writeIntent(final UUID devid, final UUID aiid, final String intentName, final ApiIntent intent,
-                                       final DatabaseTransaction transaction)
+                           final DatabaseTransaction transaction)
             throws DatabaseException {
 
         if (transaction == null) {
@@ -370,5 +373,12 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
         DatabaseEntityException(String entity) {
             super(entity);
         }
+    }
+
+    private ApiIntent getIntentFromRecordset(final ResultSet rs) throws SQLException {
+        ApiIntent intent = (ApiIntent) this.serializer.deserialize(
+                rs.getString("intent_json"), ApiIntent.class);
+        intent.setAiid(UUID.fromString(rs.getString("aiid")));
+        return intent;
     }
 }

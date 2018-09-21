@@ -5,13 +5,9 @@ import com.hutoma.api.containers.sub.IntentOutConditional;
 import com.hutoma.api.containers.sub.IntentVariable;
 import com.hutoma.api.containers.sub.IntentVariableCondition;
 import com.hutoma.api.containers.sub.WebHook;
-
 import org.joda.time.DateTime;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * API Response for an Intent.
@@ -46,6 +42,8 @@ public class ApiIntent extends ApiResult {
     private boolean resetContextOnExit;
     @SerializedName("conditions_out")
     private List<IntentOutConditional> intentOutConditionals = new ArrayList<>();
+
+    private transient UUID aiid;
 
     /**
      * Ctor.
@@ -279,5 +277,13 @@ public class ApiIntent extends ApiResult {
      */
     public void setIntentOutConditionals(final List<IntentOutConditional> intentOutConditionals) {
         this.intentOutConditionals = intentOutConditionals;
+    }
+
+    public void setAiid(final UUID aiid) {
+        this.aiid = aiid;
+    }
+
+    public UUID getAiid() {
+        return this.aiid;
     }
 }
