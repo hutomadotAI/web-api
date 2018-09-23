@@ -10,15 +10,15 @@ import com.hutoma.api.containers.ServiceIdentity;
 import com.hutoma.api.containers.sub.AiIdentity;
 import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.logging.ILogger;
-
 import org.joda.time.DateTime;
 
+import javax.inject.Inject;
+import javax.inject.Provider;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
-import javax.inject.Inject;
-import javax.inject.Provider;
 
 public class DatabaseBackends extends Database {
 
@@ -35,7 +35,7 @@ public class DatabaseBackends extends Database {
      * @return a pair of (type, update)
      * @throws DatabaseException
      */
-    static Pair<BackendServerType, BackendEngineStatus> getBackendEngineStatus(ResultSet rs)
+    static Pair<ServiceIdentity, BackendEngineStatus> getBackendEngineStatus(final ResultSet rs)
             throws DatabaseException {
 
         try {
@@ -52,6 +52,8 @@ public class DatabaseBackends extends Database {
                 throw new DatabaseException("bad trainingstatus");
             }
             UUID aiid = UUID.fromString(rs.getString("aiid"));
+            SupportedLanguage language = SupportedLanguage.get(rs.getString("server_language"));
+            String serverVersion = rs.getString("server_version");
 
             // queue status
             QueueAction action = QueueAction.forValue(rs.getString("queue_action"));
@@ -61,7 +63,8 @@ public class DatabaseBackends extends Database {
 
             BackendEngineStatus status = new BackendEngineStatus(aiid, trainingStatus, trainingError,
                     trainingProgress, action, serverIdentifier, updateTime);
-            return new Pair<>(serverType, status);
+            ServiceIdentity serviceIdentity = new ServiceIdentity(serverType, language, serverVersion);
+            return new Pair<>(serviceIdentity, status);
         } catch (SQLException e) {
             throw new DatabaseException(e);
         }
@@ -86,9 +89,9 @@ public class DatabaseBackends extends Database {
 
         BackendStatus status = new BackendStatus();
         while (rs.next()) {
-            Pair<BackendServerType, BackendEngineStatus> update = getBackendEngineStatus(rs);
+            Pair<ServiceIdentity, BackendEngineStatus> update = getBackendEngineStatus(rs);
             if (update != null) {
-                status.setEngineStatus(update.getA(), update.getB());
+                status.setEngineStatus(update.getA().getServerType(), update.getB());
             }
         }
 
@@ -102,20 +105,26 @@ public class DatabaseBackends extends Database {
      * @return hashmap
      * @throws DatabaseException
      */
-    static HashMap<UUID, BackendStatus> getAllAIsStatusHashMap(
+    static Map<UUID, Map<String, BackendStatus>> getAllAIsStatusHashMap(
             final UUID devid,
             final DatabaseCall call) throws DatabaseException, SQLException {
         ResultSet rs = call.initialise("getAIsStatus", 1)
                 .add(devid)
                 .executeQuery();
 
-        HashMap<UUID, BackendStatus> statuses = new HashMap<>();
+        HashMap<UUID, Map<String, BackendStatus>> statuses = new HashMap<>();
         while (rs.next()) {
             UUID aiid = UUID.fromString(rs.getString("aiid"));
-            Pair<BackendServerType, BackendEngineStatus> serverStatus = getBackendEngineStatus(rs);
+            Pair<ServiceIdentity, BackendEngineStatus> serverStatus = getBackendEngineStatus(rs);
             if (serverStatus != null) {
-                statuses.computeIfAbsent(aiid, x -> new BackendStatus())
-                        .setEngineStatus(serverStatus.getA(), serverStatus.getB());
+                String version = serverStatus.getA().getVersion();
+
+                if (!statuses.containsKey(aiid)) {
+                    statuses.put(aiid, new HashMap<>());
+                }
+                BackendStatus status = new BackendStatus();
+                status.setEngineStatus(serverStatus.getA().getServerType(), serverStatus.getB());
+                statuses.get(aiid).put(version, status);
             }
         }
         return statuses;

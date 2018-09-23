@@ -205,6 +205,10 @@ public class ApiAi extends ApiResult {
         return this.backendStatus;
     }
 
+    public void setBackendStatus(final BackendStatus backendStatus) {
+        this.backendStatus = backendStatus;
+    }
+
     public String getPassthroughUrl() {
         return this.passthroughUrl;
     }

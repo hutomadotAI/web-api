@@ -235,7 +235,7 @@ public class Config extends CommonConfig implements ILoggerConfig, IThreadConfig
 
     @Override
     public String getFluentLoggingHost() {
-        return getConfigFromProperties("logging_fluent_host", "log-fluent");
+        return getConfigFromProperties("logging_fluent_host", null);
     }
 
     @Override

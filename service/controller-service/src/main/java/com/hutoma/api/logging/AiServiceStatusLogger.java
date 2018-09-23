@@ -66,13 +66,18 @@ public class AiServiceStatusLogger extends CentralLogger {
         this.logUserInfoEvent(logFrom, narrative, null, new LogMap(logParameters));
     }
 
-    public void logDbSyncComplete(final String logFrom, final BackendServerType serverType,
-                                  final int itemsDatabase, final int itemsServerReg, final int itemsChangedStatus) {
+    public void logDbSyncComplete(final String logFrom,
+                                  final ServiceIdentity serviceIdentity,
+                                  final int itemsDatabase,
+                                  final int itemsServerReg,
+                                  final int itemsChangedStatus) {
         LogParameters logParameters = new LogParameters("DbSyncStatus") {{
             this.put("AiCountDatabase", itemsDatabase);
             this.put("AiCountServer", itemsServerReg);
             this.put(AICOUNTUPDATED, itemsChangedStatus);
-            this.put(AIENGINE, serverType.value());
+            this.put(AIENGINE, serviceIdentity.getServerType().value());
+            this.put(ENGINELANGUAGE, serviceIdentity.getLanguage().toString());
+            this.put(ENGINEVERSION, serviceIdentity.getVersion());
         }};
         String narrative = String.format("%s server db-sync complete. %s items updated.",
                 logParameters.get(AIENGINE),
@@ -80,9 +85,13 @@ public class AiServiceStatusLogger extends CentralLogger {
         this.logUserInfoEvent(logFrom, narrative, null, new LogMap(logParameters));
     }
 
-    public void logDbSyncUnknownAi(String logFrom, BackendServerType serverType, ServerAiEntry aiEntry) {
+    public void logDbSyncUnknownAi(final String logFrom,
+                                   final ServiceIdentity serviceIdentity,
+                                   final ServerAiEntry aiEntry) {
         LogParameters logParameters = new LogParameters("DbSyncStatus") {{
-            this.put(AIENGINE, serverType.value());
+            this.put(AIENGINE, serviceIdentity.getServerType().value());
+            this.put(ENGINELANGUAGE, serviceIdentity.getLanguage().toString());
+            this.put(ENGINEVERSION, serviceIdentity.getVersion());
             this.put(AIID, aiEntry.getAiid());
             this.put("BackendStatus", aiEntry.getTrainingStatus().toString());
         }};

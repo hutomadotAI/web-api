@@ -147,9 +147,9 @@ public class ChatLogic {
             }
         }
 
-        this.chatState = this.chatStateHandler.getState(devId, aiid, chatId);
-        AiIdentity aiIdentity = new AiIdentity(devId, aiid, this.chatState.getAi().getLanguage(),
-                ServiceIdentity.DEFAULT_VERSION);
+        String serverVersion = FeatureToggler.getServerVersionForAi(devId, aiid, this.featureToggler);
+        this.chatState = this.chatStateHandler.getState(devId, aiid, serverVersion, chatId);
+        AiIdentity aiIdentity = new AiIdentity(devId, aiid, this.chatState.getAi().getLanguage(), serverVersion);
         ChatRequestInfo requestInfo = new ChatRequestInfo(aiIdentity, chatId, question, clientVariables);
         ChatResult currentResult = new ChatResult(question);
         currentResult.setTimestamp(this.tools.getTimestamp());
@@ -274,7 +274,9 @@ public class ChatLogic {
     public ApiResult resetChat(final UUID aiid, final UUID devId, final String chatId) {
         try {
             UUID chatUuid = UUID.fromString(chatId);
-            this.chatState = this.chatStateHandler.getState(devId, aiid, chatUuid);
+            this.chatState = this.chatStateHandler.getState(devId, aiid,
+                    FeatureToggler.getServerVersionForAi(devId, aiid, this.featureToggler),
+                    chatUuid);
             this.chatStateHandler.clear(devId, aiid, chatUuid, this.chatState);
             return new ApiResult().setSuccessStatus("Chat state cleared");
         } catch (ChatStateHandler.ChatStateException ex) {
@@ -283,11 +285,14 @@ public class ChatLogic {
         }
     }
 
-    public ApiResult handOver(final UUID aiid, final UUID devId, final String chatId, final ChatHandoverTarget target) {
+    public ApiResult handOver(final UUID aiid, final UUID devId,
+                              final String chatId, final ChatHandoverTarget target) {
         try {
             LogMap logMap = LogMap.map("AIID", aiid);
             UUID chatUuid = UUID.fromString(chatId);
-            this.chatState = this.chatStateHandler.getState(devId, aiid, chatUuid);
+            this.chatState = this.chatStateHandler.getState(devId, aiid,
+                    FeatureToggler.getServerVersionForAi(devId, aiid, this.featureToggler),
+                    chatUuid);
             ChatHandoverTarget initialTarget = this.chatState.getChatTarget();
             if (initialTarget == target) {
                 this.chatLogger.logUserWarnEvent(LOGFROM, "Handover already set to target", devId.toString(),
@@ -310,12 +315,16 @@ public class ChatLogic {
         }
     }
 
-    public ApiResult setContextVariable(
-            final UUID aiid, final UUID devId, final String chatId, Map<String, String> variables) {
+    public ApiResult setContextVariable(final UUID aiid,
+                                        final UUID devId,
+                                        final String chatId,
+                                        final Map<String, String> variables) {
         try {
             UUID chatUuid = UUID.fromString(chatId);
             if ((variables != null) && (!variables.isEmpty())) {
-                this.chatState = this.chatStateHandler.getState(devId, aiid, chatUuid);
+                this.chatState = this.chatStateHandler.getState(devId, aiid,
+                        FeatureToggler.getServerVersionForAi(devId, aiid, this.featureToggler),
+                        chatUuid);
                 for (Map.Entry<String, String> v : variables.entrySet()) {
                     if (StringUtils.isEmpty(v.getKey())
                             || (StringUtils.isEmpty(v.getValue()))) {
@@ -351,7 +360,9 @@ public class ChatLogic {
                 }
                 MemoryIntent memoryIntent = new MemoryIntent(intentName, aiid, chatUuid, variables, false);
 
-                this.chatState = this.chatStateHandler.getState(devId, aiid, chatUuid);
+                this.chatState = this.chatStateHandler.getState(devId, aiid,
+                        FeatureToggler.getServerVersionForAi(devId, aiid, this.featureToggler),
+                        chatUuid);
                 this.chatState.setInIntentLoop(true);
                 List<MemoryIntent> miList = new ArrayList<>();
                 miList.add(memoryIntent);

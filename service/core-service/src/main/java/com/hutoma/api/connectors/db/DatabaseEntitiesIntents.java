@@ -1,29 +1,20 @@
 package com.hutoma.api.connectors.db;
 
-import com.google.gson.reflect.TypeToken;
+import com.hutoma.api.common.FeatureToggler;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.containers.ApiEntity;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.ApiIntentList;
 import com.hutoma.api.containers.sub.Entity;
-import com.hutoma.api.containers.sub.IntentOutConditional;
-import com.hutoma.api.containers.sub.IntentVariable;
-import com.hutoma.api.containers.sub.IntentVariableCondition;
-import com.hutoma.api.containers.sub.MemoryIntent;
-import com.hutoma.api.containers.sub.MemoryVariable;
 import com.hutoma.api.logging.ILogger;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-
-import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 
-import java.lang.reflect.Type;
+import javax.inject.Inject;
+import javax.inject.Provider;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
-import javax.inject.Inject;
-import javax.inject.Provider;
 
 /**
  * Created by David MG on 20/10/2016.
@@ -36,8 +27,9 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
     public DatabaseEntitiesIntents(final ILogger logger,
                                    final Provider<DatabaseCall> callProvider,
                                    final Provider<DatabaseTransaction> transactionProvider,
-                                   final JsonSerializer serializer) {
-        super(logger, callProvider, transactionProvider);
+                                   final JsonSerializer serializer,
+                                   final FeatureToggler featureToggler) {
+        super(logger, callProvider, transactionProvider, featureToggler);
         this.serializer = serializer;
     }
 
@@ -59,19 +51,20 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
         }
     }
 
-    public List<UUID> getAisForEntity(final UUID devid, final String entityName) throws DatabaseException {
+    public List<ApiIntent> getAllIntents(final UUID devid) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("getAIsForEntity", 2).add(devid).add(entityName);
-            final ResultSet rs = call.executeQuery();
-            try {
-                final ArrayList<UUID> ais = new ArrayList<>();
-                while (rs.next()) {
-                    ais.add(UUID.fromString(rs.getString("aiid")));
+            call.initialise("getAllIntentsForDev", 1).add(devid);
+            ResultSet rs = call.executeQuery();
+            List<ApiIntent> intents = new ArrayList<>();
+            while (rs.next()) {
+                ApiIntent intent = getIntentFromRecordset(rs);
+                if (intent != null) {
+                    intents.add(intent);
                 }
-                return ais;
-            } catch (final SQLException sqle) {
-                throw new DatabaseException(sqle);
             }
+            return intents;
+        } catch (SQLException sqle) {
+            throw new DatabaseException(sqle);
         }
     }
 
@@ -176,7 +169,7 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
                 return null;
             }
 
-            return (ApiIntent) this.serializer.deserialize(rs.getString("intent_json"), ApiIntent.class);
+            return getIntentFromRecordset(rs);
         } catch (SQLException sqle) {
             throw new DatabaseException(sqle);
         }
@@ -184,6 +177,7 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
 
     /**
      * Writes (or updates) and entity
+     *
      * @param devid         the developer id
      * @param entityOldName the entity's old name
      * @param entity        the entity's new name
@@ -199,6 +193,7 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
 
     /**
      * Writes (or updates) and entity
+     *
      * @param devid         the developer id
      * @param entityOldName the entity's old name
      * @param entity        the entity's new name
@@ -284,7 +279,7 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
      * @throws DatabaseException if something goes wrong
      */
     public int writeIntent(final UUID devid, final UUID aiid, final String intentName, final ApiIntent intent,
-                                       final DatabaseTransaction transaction)
+                           final DatabaseTransaction transaction)
             throws DatabaseException {
 
         if (transaction == null) {
@@ -378,5 +373,12 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
         DatabaseEntityException(String entity) {
             super(entity);
         }
+    }
+
+    private ApiIntent getIntentFromRecordset(final ResultSet rs) throws SQLException {
+        ApiIntent intent = (ApiIntent) this.serializer.deserialize(
+                rs.getString("intent_json"), ApiIntent.class);
+        intent.setAiid(UUID.fromString(rs.getString("aiid")));
+        return intent;
     }
 }

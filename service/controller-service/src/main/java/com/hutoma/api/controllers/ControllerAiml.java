@@ -56,7 +56,8 @@ public class ControllerAiml extends ControllerBase {
 
     @Override
     public void synchroniseDBStatuses(final DatabaseAiStatusUpdates database,
-                                      final JsonSerializer jsonSerializer, final BackendServerType serverType,
+                                      final JsonSerializer jsonSerializer,
+                                      final ServiceIdentity serviceIdentity,
                                       final Map<UUID, ServerAiEntry> statusData)
             throws DatabaseException {
         // do nothing.

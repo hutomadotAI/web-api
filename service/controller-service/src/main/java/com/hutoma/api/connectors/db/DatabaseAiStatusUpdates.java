@@ -1,9 +1,7 @@
 package com.hutoma.api.connectors.db;
 
 import com.google.gson.JsonParseException;
-import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.connectors.BackendEngineStatus;
-import com.hutoma.api.connectors.BackendServerType;
 import com.hutoma.api.connectors.QueueAction;
 import com.hutoma.api.containers.ServiceIdentity;
 import com.hutoma.api.containers.sub.ServerAiEntry;
@@ -12,15 +10,11 @@ import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.logging.AiServiceStatusLogger;
 import com.hutoma.api.logging.LogMap;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
 import javax.inject.Inject;
 import javax.inject.Provider;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.*;
 
 public class DatabaseAiStatusUpdates extends Database {
 
@@ -205,12 +199,12 @@ public class DatabaseAiStatusUpdates extends Database {
      * Compares the AI list reported by a registering server to the one in our database
      * Logs any differences and changes the statuses in the database to reflect
      * what was sent by the backend server
-     * @param serverType which server are we dealing with?
+     * @param serviceIdentity which server are we dealing with?
      * @param serverReported aiid to entry map
      * @param excludeBots ignore any mention of bots on this list
      * @throws DatabaseException
      */
-    public void synchroniseDBStatuses(final BackendServerType serverType,
+    public void synchroniseDBStatuses(final ServiceIdentity serviceIdentity,
                                       final Map<UUID, ServerAiEntry> serverReported,
                                       final Set<UUID> excludeBots)
             throws DatabaseException {
@@ -225,8 +219,10 @@ public class DatabaseAiStatusUpdates extends Database {
         try (DatabaseTransaction transaction = this.transactionProvider.get()) {
 
             // read the status json for all the servers
-            ResultSet rs = transaction.getDatabaseCall().initialise("getAIsServerStatus", 1)
-                    .add(serverType.value())
+            ResultSet rs = transaction.getDatabaseCall().initialise("getAIsServerStatus", 3)
+                    .add(serviceIdentity.getServerType().value())
+                    .add(serviceIdentity.getLanguage().toString())
+                    .add(serviceIdentity.getVersion())
                     .executeQuery();
 
             while (rs.next()) {
@@ -262,8 +258,10 @@ public class DatabaseAiStatusUpdates extends Database {
                         if (serverEntry == null) {
                             TrainingStatus finalStatusInDb = statusInDb;
                             this.logger.logUserWarnEvent(LOGFROM, String.format("%s did not report ai %s",
-                                    serverType.toString(), aiid.toString()), null,
-                                    LogMap.map("AIEngine", serverType.toString())
+                                    serviceIdentity.toString(), aiid.toString()), null,
+                                    LogMap.map("AIEngine", serviceIdentity.getServerType().toString())
+                                            .put("Language", serviceIdentity.getLanguage().toString())
+                                            .put("Version", serviceIdentity.getVersion())
                                             .put("AIID", aiid.toString())
                                             .put("DEVID", devid.toString())
                                             .put("ApiStatus", finalStatusInDb.toString()));
@@ -276,7 +274,7 @@ public class DatabaseAiStatusUpdates extends Database {
 
                         // if the status is not what we are expecting
                         if (statusInDb != statusOnBackend) {
-                            if (syncMismatchedStatuses(serverType, transaction, rs,
+                            if (syncMismatchedStatuses(serviceIdentity, transaction, rs,
                                     aiid, devid, statusInDb, statusOnBackend)) {
                                 itemsChangedStatus++;
                             }
@@ -295,11 +293,11 @@ public class DatabaseAiStatusUpdates extends Database {
             // that we have no entry for in our database
             serverReported.values().forEach(remaining -> {
                 // log it
-                this.aiServicesLogger.logDbSyncUnknownAi(LOGFROM, serverType, remaining);
+                this.aiServicesLogger.logDbSyncUnknownAi(LOGFROM, serviceIdentity, remaining);
             });
 
             // log completion
-            this.aiServicesLogger.logDbSyncComplete(LOGFROM, serverType,
+            this.aiServicesLogger.logDbSyncComplete(LOGFROM, serviceIdentity,
                     itemsDatabase, itemsServerReg, itemsChangedStatus);
 
             // if all goes well, commit
@@ -342,7 +340,7 @@ public class DatabaseAiStatusUpdates extends Database {
 
     /***
      * Handle a mismatch in reported status and status in database
-     * @param serverType
+     * @param serviceIdentity
      * @param transaction
      * @param rs
      * @param aiid
@@ -353,16 +351,21 @@ public class DatabaseAiStatusUpdates extends Database {
      * @throws DatabaseException
      * @throws SQLException
      */
-    private boolean syncMismatchedStatuses(final BackendServerType serverType,
-                                           final DatabaseTransaction transaction, final ResultSet rs,
-                                           final UUID aiid, final UUID devid, final TrainingStatus statusInDb,
+    private boolean syncMismatchedStatuses(final ServiceIdentity serviceIdentity,
+                                           final DatabaseTransaction transaction,
+                                           final ResultSet rs,
+                                           final UUID aiid,
+                                           final UUID devid,
+                                           final TrainingStatus statusInDb,
                                            final TrainingStatus statusOnBackend)
             throws DatabaseException, SQLException {
 
         boolean itemChanged = false;
 
         // we are logging either way so create the logmap here
-        LogMap logmap = LogMap.map("AIEngine", serverType.toString())
+        LogMap logmap = LogMap.map("AIEngine", serviceIdentity.getServerType().toString())
+                .put("Language", serviceIdentity.getLanguage().toString())
+                .put("Version", serviceIdentity.getVersion())
                 .put("AIID", aiid.toString())
                 .put("DEVID", devid.toString())
                 .put("ApiStatus", statusInDb.toString())
@@ -388,13 +391,15 @@ public class DatabaseAiStatusUpdates extends Database {
             // log the difference
             this.logger.logUserWarnEvent(LOGFROM,
                     String.format("%s status mismatch. Updating from %s to %s for ai %s",
-                            serverType.value(), statusInDb.toString(),
+                            serviceIdentity.toString(), statusInDb.toString(),
                             statusOnBackend.toString(), aiid.toString()),
                     null, logmap);
 
             // keep everything but update the status
-            transaction.getDatabaseCall().initialise("updateAiStatus", 6)
-                    .add(serverType.value())
+            transaction.getDatabaseCall().initialise("updateAiStatus", 8)
+                    .add(serviceIdentity.getServerType().value())
+                    .add(serviceIdentity.getLanguage().toString())
+                    .add(serviceIdentity.getVersion())
                     .add(aiid)
                     .add(statusOnBackend.value())
                     .add(rs.getString("server_endpoint"))
@@ -405,8 +410,10 @@ public class DatabaseAiStatusUpdates extends Database {
             // if the back-end tells us that this should be queued then
             // as well as setting it to status=QUEUED we actually queue it for training
             if (statusOnBackend == TrainingStatus.AI_TRAINING_QUEUED) {
-                transaction.getDatabaseCall().initialise("queueUpdate", 5)
-                        .add(serverType.value())
+                transaction.getDatabaseCall().initialise("queueUpdate", 7)
+                        .add(serviceIdentity.getServerType().value())
+                        .add(serviceIdentity.getLanguage().toString())
+                        .add(serviceIdentity.getVersion())
                         .add(aiid)
                         .add(true)
                         .add(0)
@@ -417,7 +424,7 @@ public class DatabaseAiStatusUpdates extends Database {
         } else {
             this.logger.logUserWarnEvent(LOGFROM,
                     String.format("%s status mismatch. Ai is training so we are ignoring reported status %s for ai %s",
-                            serverType.value(),
+                            serviceIdentity.toString(),
                             statusOnBackend.toString(), aiid.toString()),
                     null, logmap);
         }

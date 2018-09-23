@@ -7,12 +7,11 @@ import com.hutoma.api.containers.sub.ChatState;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
 import com.hutoma.api.logic.chat.ChatBaseException;
-
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 
-import java.util.UUID;
 import javax.inject.Inject;
+import java.util.UUID;
 
 /**
  * Handler for chat state.
@@ -31,13 +30,14 @@ public class ChatStateHandler {
         this.jsonSerializer = jsonSerializer;
     }
 
-    public ChatState getState(final UUID devId, final UUID aiid, final UUID chatId) throws ChatStateException {
+    public ChatState getState(final UUID devId, final UUID aiid, final String serverVersion,
+                              final UUID chatId) throws ChatStateException {
         ChatState state = null;
         try {
             if (!this.databaseAi.checkAIBelongsToDevId(devId, aiid)) {
                 throw new ChatStateUserException("Unknown AI.");
             }
-            state = this.databaseAi.getChatState(devId, aiid, chatId, jsonSerializer);
+            state = this.databaseAi.getChatState(devId, aiid, serverVersion, chatId, jsonSerializer);
         } catch (ChatStateUserException ex) {
             this.logger.logUserExceptionEvent(LOGFROM, ex.getMessage(), devId.toString(), ex);
             throw ex;

@@ -72,7 +72,7 @@ public class TestAiChatServices {
     public void startChatRequests_noLinkedBots_aiIsTrained() throws ServerConnector.AiServicesException,
             ChatBackendConnector.AiControllerException, DatabaseException, NoServerAvailableException {
         when(this.chatServices.getAIsLinkedToAi(any(), any())).thenReturn(Collections.emptyList());
-        when(this.fakeDatabaseAi.getAIStatusReadOnly(any(), any())).thenReturn(TestDataHelper.getBackendStatus(
+        when(this.fakeDatabaseAi.getAIStatusReadOnly(any())).thenReturn(TestDataHelper.getBackendStatus(
                 TrainingStatus.AI_TRAINING_COMPLETE));
         this.issueStartChatRequests();
         verify(this.fakeRequestEmb).issueChatRequests(any(), any(), any());
@@ -83,7 +83,7 @@ public class TestAiChatServices {
     public void startChatRequests_noLinkedBots_aiIsNotTrained() throws ServerConnector.AiServicesException,
             ChatBackendConnector.AiControllerException, DatabaseException, NoServerAvailableException {
         when(this.chatServices.getAIsLinkedToAi(any(), any())).thenReturn(Collections.emptyList());
-        when(this.fakeDatabaseAi.getAIStatusReadOnly(any(), any())).thenReturn(TestDataHelper.getBackendStatus(
+        when(this.fakeDatabaseAi.getAIStatusReadOnly(any())).thenReturn(TestDataHelper.getBackendStatus(
                 TrainingStatus.AI_UNDEFINED));
         this.issueStartChatRequests();
     }
@@ -94,7 +94,7 @@ public class TestAiChatServices {
         when(this.fakeConfig.getAimlBotAiids()).thenReturn(Collections.singletonList(SAMPLEBOT.getAiid()));
         when(this.fakeDatabaseAi.getAisLinkedToAi(any(), any()))
                 .thenReturn(Collections.singletonList(new AiMinP(DEVID_UUID, SAMPLEBOT.getAiid(), 0.5)));
-        when(this.fakeDatabaseAi.getAIStatusReadOnly(any(), any())).thenReturn(TestDataHelper.getBackendStatus(
+        when(this.fakeDatabaseAi.getAIStatusReadOnly(any())).thenReturn(TestDataHelper.getBackendStatus(
                 TrainingStatus.AI_UNDEFINED));
         this.issueStartChatRequests();
         verify(this.fakeRequestEmb, never()).issueChatRequests(any(), any(), any());
@@ -107,7 +107,7 @@ public class TestAiChatServices {
         when(this.fakeConfig.getAimlBotAiids()).thenReturn(Collections.singletonList(AIML_BOT_AIID));
         when(this.fakeDatabaseAi.getAisLinkedToAi(any(), any())).thenReturn(
                 Collections.singletonList(new AiMinP(DEVID_UUID, AIML_BOT_AIID, 0.5)));
-        when(this.fakeDatabaseAi.getAIStatusReadOnly(any(), any())).thenReturn(TestDataHelper.getBackendStatus(
+        when(this.fakeDatabaseAi.getAIStatusReadOnly(any())).thenReturn(TestDataHelper.getBackendStatus(
                 TrainingStatus.AI_TRAINING_COMPLETE));
         this.issueStartChatRequests();
         verify(this.fakeRequestEmb).issueChatRequests(any(), any(), any());
@@ -116,22 +116,22 @@ public class TestAiChatServices {
 
     @Test
     public void canChatWithAi() throws DatabaseException {
-        when(this.fakeDatabaseAi.getAIStatusReadOnly(any(), any())).thenReturn(TestDataHelper.getBackendStatus(
+        when(this.fakeDatabaseAi.getAIStatusReadOnly(any())).thenReturn(TestDataHelper.getBackendStatus(
                 TrainingStatus.AI_TRAINING_COMPLETE));
-        Assert.assertTrue(this.chatServices.canChatWithAi(DEVID_UUID, AIID).contains(BackendServerType.EMB));
+        Assert.assertTrue(this.chatServices.canChatWithAi(AI_IDENTITY).contains(BackendServerType.EMB));
     }
 
     @Test
     public void canChatWithAi_CantChat() throws DatabaseException {
-        when(this.fakeDatabaseAi.getAIStatusReadOnly(any(), any())).thenReturn(TestDataHelper.getBackendStatus(
+        when(this.fakeDatabaseAi.getAIStatusReadOnly(any())).thenReturn(TestDataHelper.getBackendStatus(
                 TrainingStatus.AI_UNDEFINED));
-        Assert.assertFalse(this.chatServices.canChatWithAi(DEVID_UUID, AIID).contains(BackendServerType.EMB));
+        Assert.assertFalse(this.chatServices.canChatWithAi(AI_IDENTITY).contains(BackendServerType.EMB));
     }
 
     @Test
     public void canChatWithAi_DBException() throws DatabaseException {
-        when(this.fakeDatabaseAi.getAIStatusReadOnly(any(), any())).thenThrow(DatabaseException.class);
-        Assert.assertFalse(this.chatServices.canChatWithAi(DEVID_UUID, AIID).contains(BackendServerType.EMB));
+        when(this.fakeDatabaseAi.getAIStatusReadOnly(any())).thenThrow(DatabaseException.class);
+        Assert.assertFalse(this.chatServices.canChatWithAi(AI_IDENTITY).contains(BackendServerType.EMB));
     }
 
     @Test
@@ -140,7 +140,7 @@ public class TestAiChatServices {
         ChatState chatState = ChatState.getEmpty();
         BackendStatus beStatus = new BackendStatus();
         beStatus.setEngineStatus(BackendServerType.EMB, new BackendEngineStatus(TrainingStatus.AI_TRAINING_COMPLETE, 0.0, 1.0));
-        when(this.fakeDatabaseAi.getAIStatusReadOnly(any(), any())).thenReturn(beStatus);
+        when(this.fakeDatabaseAi.getAIStatusReadOnly(any())).thenReturn(beStatus);
         // No linked bots
         when(this.fakeDatabaseAi.getAisLinkedToAi(any(), any())).thenReturn(Collections.emptyList());
         this.chatServices.startChatRequests(AI_IDENTITY, CHATID, "question", chatState);
@@ -157,7 +157,7 @@ public class TestAiChatServices {
         chatState.setConfidenceThreshold(minP);
         BackendStatus beStatus = new BackendStatus();
         beStatus.setEngineStatus(BackendServerType.EMB, new BackendEngineStatus(TrainingStatus.AI_TRAINING_COMPLETE, 0.0, 1.0));
-        when(this.fakeDatabaseAi.getAIStatusReadOnly(any(), any())).thenReturn(beStatus);
+        when(this.fakeDatabaseAi.getAIStatusReadOnly(any())).thenReturn(beStatus);
 
         AiMinP bot1 = new AiMinP(DEVID_UUID, UUID.randomUUID(), 0.5);
         AiMinP bot2 = new AiMinP(DEVID_UUID, UUID.randomUUID(), 0.7);

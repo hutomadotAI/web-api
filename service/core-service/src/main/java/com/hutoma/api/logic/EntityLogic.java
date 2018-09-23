@@ -3,19 +3,15 @@ package com.hutoma.api.logic;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.connectors.db.DatabaseEntitiesIntents;
 import com.hutoma.api.connectors.db.DatabaseIntegrityViolationException;
-import com.hutoma.api.containers.ApiEntity;
-import com.hutoma.api.containers.ApiEntityList;
-import com.hutoma.api.containers.ApiError;
-import com.hutoma.api.containers.ApiResult;
+import com.hutoma.api.containers.*;
 import com.hutoma.api.containers.sub.Entity;
+import com.hutoma.api.containers.sub.IntentVariable;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
 import com.hutoma.api.memory.IEntityRecognizer;
 
 import javax.inject.Inject;
-import java.util.List;
-import java.util.OptionalInt;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Created by David MG on 05/10/2016.
@@ -29,7 +25,9 @@ public class EntityLogic {
     private final TrainingLogic trainingLogic;
 
     @Inject
-    public EntityLogic(final Config config, final ILogger logger, final DatabaseEntitiesIntents database,
+    public EntityLogic(final Config config,
+                       final ILogger logger,
+                       final DatabaseEntitiesIntents database,
                        final TrainingLogic trainingLogic) {
         this.config = config;
         this.logger = logger;
@@ -128,7 +126,19 @@ public class EntityLogic {
                 return ApiError.getNotFound();
             }
 
-            List<UUID> referreingAis = this.database.getAisForEntity(devid, entityName);
+            // Check if there are any AIs that use this entity
+            Set<String> referreingAis = new HashSet<>();
+            List<ApiIntent> allIntents = this.database.getAllIntents(devid);
+            for (ApiIntent intent: allIntents) {
+                if (intent.getVariables() != null && !intent.getVariables().isEmpty()) {
+                    for (IntentVariable variable : intent.getVariables()) {
+                        if (variable.getEntityName().equals(entityName)) {
+                            referreingAis.add(intent.getAiid().toString());
+                        }
+                    }
+                }
+            }
+
             if (!referreingAis.isEmpty()) {
                 this.logger.logUserTraceEvent(LOGFROM, "DeleteEntity - in use, not deleted", devidString, logMap);
                 return ApiError.getConflict(String.format("Entity is in use by %d bot%s", referreingAis.size(),

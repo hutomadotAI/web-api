@@ -2,7 +2,6 @@ package com.hutoma.api.controllers;
 
 import com.hutoma.api.common.ControllerConfig;
 import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.connectors.BackendServerType;
 import com.hutoma.api.connectors.IServerEndpoint;
 import com.hutoma.api.connectors.NoServerAvailableException;
 import com.hutoma.api.connectors.db.DatabaseAiStatusUpdates;
@@ -12,15 +11,9 @@ import com.hutoma.api.containers.sub.ServerAiEntry;
 import com.hutoma.api.containers.sub.ServerRegistration;
 import com.hutoma.api.logging.AiServiceStatusLogger;
 import com.hutoma.api.thread.ThreadSubPool;
-
 import org.glassfish.hk2.api.ServiceLocator;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 
 /***
@@ -105,15 +98,15 @@ public abstract class ControllerBase extends ServerMetadata {
      * to the database class to sync what is already in the DB
      * @param database need to pass an instance of the database because the controller is a singleton
      * @param jsonSerializer need to pass a serializer because the controller is a singleton
-     * @param serverType what server is this?
+     * @param serviceIdentity what server is this?
      * @param statusData mapped data that the backe nd server has reported
      * @throws DatabaseException
      */
     public void synchroniseDBStatuses(final DatabaseAiStatusUpdates database,
                                       final JsonSerializer jsonSerializer,
-                                      final BackendServerType serverType,
+                                      final ServiceIdentity serviceIdentity,
                                       final Map<UUID, ServerAiEntry> statusData) throws DatabaseException {
-        database.synchroniseDBStatuses(serverType, statusData, this.botExclusionList);
+        database.synchroniseDBStatuses(serviceIdentity, statusData, this.botExclusionList);
     }
 
     /***

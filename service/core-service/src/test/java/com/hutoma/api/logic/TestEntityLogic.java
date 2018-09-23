@@ -6,8 +6,10 @@ import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.connectors.db.DatabaseIntegrityViolationException;
 import com.hutoma.api.containers.ApiEntity;
 import com.hutoma.api.containers.ApiEntityList;
+import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.Entity;
+import com.hutoma.api.containers.sub.IntentVariable;
 import com.hutoma.api.logging.ILogger;
 
 import org.junit.Assert;
@@ -165,7 +167,9 @@ public class TestEntityLogic {
     @Test
     public void testDeleteEntity_entityInUse_doesNotDeleteEntity() throws DatabaseException {
         UUID aiid = UUID.randomUUID();
-        when(this.fakeDatabase.getAisForEntity(DEVID_UUID, ENTITY_NAME)).thenReturn(Collections.singletonList(aiid));
+        ApiIntent intent = TestIntentLogic.getIntent();
+        intent.getVariables().add(new IntentVariable(ENTITY_NAME, DEVID_UUID, true, 1, "value", false, "label", false));
+        when(this.fakeDatabase.getAllIntents(DEVID_UUID)).thenReturn(Collections.singletonList(intent));
         when(this.fakeDatabase.getEntityIdForDev(any(), anyString())).thenReturn(ENTITY_ID);
         this.entityLogic.deleteEntity(DEVID_UUID, ENTITY_NAME);
         verify(this.fakeDatabase, never()).deleteEntity(any(), anyInt());
@@ -173,17 +177,16 @@ public class TestEntityLogic {
 
     @Test
     public void testDeleteEntity_entityNotInUse_doesNotStopTraining() throws DatabaseException {
-        when(this.fakeDatabase.getAisForEntity(DEVID_UUID, ENTITY_NAME)).thenReturn(new ArrayList<>());
+        when(this.fakeDatabase.getAllIntents(DEVID_UUID)).thenReturn(Collections.emptyList());
         when(this.fakeDatabase.getEntityIdForDev(any(), anyString())).thenReturn(ENTITY_ID);
         when(this.fakeDatabase.deleteEntity(any(), anyInt())).thenReturn(true);
-        when(this.fakeDatabase.getAisForEntity(any(), any())).thenReturn(Collections.emptyList());
         this.entityLogic.deleteEntity(DEVID_UUID, ENTITY_NAME);
         verify(this.trainingLogic, never()).stopTraining(any(), any());
     }
 
     @Test
     public void testDeleteEntity_dbError_doesNotStopTraining() throws DatabaseException {
-        when(this.fakeDatabase.getAisForEntity(DEVID_UUID, ENTITY_NAME)).thenReturn(Collections.singletonList(UUID.randomUUID()));
+        when(this.fakeDatabase.getAllIntents(DEVID_UUID)).thenReturn(Collections.emptyList());
         when(this.fakeDatabase.getEntityIdForDev(any(), anyString())).thenReturn(ENTITY_ID);
         when(this.fakeDatabase.deleteEntity(any(), anyInt())).thenThrow(DatabaseException.class);
         this.entityLogic.deleteEntity(DEVID_UUID, ENTITY_NAME);
@@ -193,14 +196,14 @@ public class TestEntityLogic {
     @Test
     public void testWriteEntity_dbError_doesNotStopTraining() throws DatabaseException {
         UUID aiid = UUID.randomUUID();
-        when(this.fakeDatabase.getAisForEntity(any(), any())).thenThrow(DatabaseException.class);
+        when(this.fakeDatabase.getAllIntents(any())).thenThrow(DatabaseException.class);
         this.entityLogic.writeEntity(DEVID_UUID, ENTITY_NAME, getEntity());
         verify(this.trainingLogic, never()).stopTraining(any(), any());
     }
 
     @Test
     public void testWriteEntity_entityNotInUse_doesNotStopTraining() throws DatabaseException {
-        when(this.fakeDatabase.getAisForEntity(DEVID_UUID, ENTITY_NAME)).thenReturn(new ArrayList<>());
+        when(this.fakeDatabase.getAllIntents(DEVID_UUID)).thenReturn(Collections.emptyList());
         this.entityLogic.writeEntity(DEVID_UUID, ENTITY_NAME, getEntity());
         verify(this.trainingLogic, never()).stopTraining(any(), any());
     }

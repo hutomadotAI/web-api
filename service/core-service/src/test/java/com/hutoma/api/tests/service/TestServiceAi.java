@@ -1,5 +1,7 @@
 package com.hutoma.api.tests.service;
 
+import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.common.Pair;
 import com.hutoma.api.common.TestDataHelper;
 import com.hutoma.api.connectors.BackendEngineStatus;
 import com.hutoma.api.connectors.BackendServerType;
@@ -27,7 +29,7 @@ import java.util.UUID;
 
 import static com.hutoma.api.common.TestBotHelper.BOTID;
 import static com.hutoma.api.common.TestBotHelper.SAMPLEBOT;
-import static org.mockito.Matchers.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 /**
@@ -58,7 +60,7 @@ public class TestServiceAi extends ServiceTestBase {
     @Test
     public void testGetAIs() throws DatabaseException {
         ApiAi ai = TestDataHelper.getAI();
-        when(this.fakeDatabaseAi.getAllAIs(any(), any())).thenReturn(Collections.singletonList(ai));
+        when(this.fakeDatabaseAi.getAllAIs(any(), any())).thenReturn(Collections.singletonList(new Pair<>(ai, ServiceIdentity.DEFAULT_VERSION)));
         final Response response = target(AI_BASEPATH).request().headers(defaultHeaders).get();
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
         ApiAiList list = deserializeResponse(response, ApiAiList.class);
@@ -69,7 +71,7 @@ public class TestServiceAi extends ServiceTestBase {
     @Test
     public void testGetAI() throws DatabaseException {
         ApiAi ai = TestDataHelper.getAI();
-        when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(ai);
+        when(this.fakeDatabaseAi.getAI(any(), any(), anyString(), any())).thenReturn(ai);
         final Response response = target(AI_PATH).request().headers(defaultHeaders).get();
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
         ApiAi responseAi = deserializeResponse(response, ApiAi.class);
@@ -103,7 +105,7 @@ public class TestServiceAi extends ServiceTestBase {
         final UUID uuid = UUID.fromString("00000000-0000-0000-0000-000000000000");
         when(this.fakeTools.createNewRandomUUID()).thenReturn(uuid);
         TestDataHelper.mockDatabaseCreateAIInTrans(this.fakeDatabaseAi, uuid);
-        when(this.fakeDatabaseAi.getAI(any(), any(), any(), any())).thenReturn(TestDataHelper.getAI());
+        when(this.fakeDatabaseAi.getAI(any(), any(), any(JsonSerializer.class), any())).thenReturn(TestDataHelper.getAI());
         final Response response = target(AI_BASEPATH).request().headers(defaultHeaders).post(
                 Entity.form(getCreateAiRequestParams()));
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
@@ -221,10 +223,13 @@ public class TestServiceAi extends ServiceTestBase {
     public void testCloneBot() throws DatabaseException {
         final UUID aiid = UUID.randomUUID();
         when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
-        when(this.fakeDatabaseAi.getAI(any(), any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
+        when(this.fakeDatabaseAi.getAI(any(), any(), any(String.class), any())).thenReturn(TestDataHelper.getSampleAI());
+        when(this.fakeDatabaseAi.getAI(any(), any(), any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
+        when(this.fakeDatabaseAi.getAI(any(), any(), any(JsonSerializer.class), any())).thenReturn(TestDataHelper.getSampleAI());
         when(this.fakeTools.createNewRandomUUID()).thenReturn(aiid);
         when(this.fakeDatabaseAi.updatePassthroughUrl(any(), any(), anyString(), any())).thenReturn(true);
         when(this.fakeDatabaseAi.updateDefaultChatResponses(any(), any(), any(), any(), any())).thenReturn(true);
+        when(this.fakeAiServices.getTrainingMaterialsCommon(any(), any(), any())).thenReturn("");
         TestDataHelper.mockDatabaseCreateAIInTrans(this.fakeDatabaseAi, aiid);
         final Response response = target(BOT_CLONE_PATH)
                 .request()
@@ -278,12 +283,16 @@ public class TestServiceAi extends ServiceTestBase {
         final UUID newAiid = UUID.randomUUID();
         when(this.fakeTools.createNewRandomUUID()).thenReturn(newAiid);
         when(this.fakeDatabaseAi.createAI(any(), anyString(), anyString(), any(), anyBoolean(),
-                anyString(), anyObject(), anyObject(), anyDouble(), anyInt(),
+                anyString(), any(), any(), anyDouble(), anyInt(),
                 anyInt(), any(), anyInt(), anyInt(), any(), any(), any())).thenReturn(newAiid);
-        when(this.fakeDatabaseAi.getAI(any(), any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
+        when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
         when(this.fakeDatabaseAi.updatePassthroughUrl(any(), any(), any(), any())).thenReturn(true);
         when(this.fakeDatabaseAi.updateDefaultChatResponses(any(), any(), any(), any(), any())).thenReturn(true);
         when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
+        when(this.fakeDatabaseAi.getAI(any(), any(), any(String.class), any())).thenReturn(TestDataHelper.getSampleAI());
+        when(this.fakeDatabaseAi.getAI(any(), any(), any(JsonSerializer.class), any())).thenReturn(TestDataHelper.getSampleAI());
+        when(this.fakeDatabaseAi.getAI(any(), any(), any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
+        when(this.fakeAiServices.getTrainingMaterialsCommon(any(), any(), any())).thenReturn("");
         final Response response = target(IMPORT_BASEPATH)
                 .request()
                 .headers(defaultHeaders)
@@ -385,10 +394,12 @@ public class TestServiceAi extends ServiceTestBase {
         when(this.fakeDatabaseAi.createAI(any(), anyString(), anyString(), any(), anyBoolean(),
                 anyString(), any(), any(), anyDouble(), anyInt(),
                 anyInt(), any(), anyInt(), anyInt(), any(), any(), any())).thenReturn(newAiid);
-        when(this.fakeDatabaseAi.getAI(any(), any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
+        when(this.fakeDatabaseAi.getAI(any(), any(), any(JsonSerializer.class), any())).thenReturn(TestDataHelper.getSampleAI());
         when(this.fakeDatabaseAi.updatePassthroughUrl(any(), any(), any(), any())).thenReturn(true);
         when(this.fakeDatabaseAi.updateDefaultChatResponses(any(), any(), any(), any(), any())).thenReturn(true);
         when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
+        when(this.fakeDatabaseAi.getAI(any(), any(), anyString(), any())).thenReturn(TestDataHelper.getSampleAI());
+        when(this.fakeAiServices.getTrainingMaterialsCommon(any(), any(), any())).thenReturn("");
         return target(IMPORTINPLACE_BASEPATH)
                 .request()
                 .headers(defaultHeaders)
@@ -411,7 +422,7 @@ public class TestServiceAi extends ServiceTestBase {
         BackendStatus status = new BackendStatus();
         status.setEngineStatus(BackendServerType.EMB, new BackendEngineStatus(
                 trainingStatus, 0.0, trainingProgress));
-        when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(TestDataHelper.getAi(status));
+        when(this.fakeDatabaseAi.getAI(any(), any(), anyString(), any())).thenReturn(TestDataHelper.getAi(status));
         final Response response = target(AI_PATH).request().headers(defaultHeaders).get();
         return deserializeResponse(response, ApiAi.class);
     }

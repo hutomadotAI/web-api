@@ -10,20 +10,12 @@ import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.AiBot;
 import com.hutoma.api.containers.sub.AiSkillSummary;
-import com.hutoma.api.containers.ui.ApiAiDetails;
-import com.hutoma.api.containers.ui.ApiBotstoreCategoryItemList;
-import com.hutoma.api.containers.ui.ApiBotstoreItem;
-import com.hutoma.api.containers.ui.ApiBotstoreItemList;
-import com.hutoma.api.containers.ui.BotstoreItem;
+import com.hutoma.api.containers.ui.*;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 import javax.inject.Inject;
+import java.util.*;
 
 /**
  * Logic file to handle UI-specific requests.

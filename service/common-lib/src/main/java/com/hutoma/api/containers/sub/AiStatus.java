@@ -23,10 +23,10 @@ public class AiStatus {
     @SerializedName("ai_engine")
     private final BackendServerType aiEngine;
 
-    @SerializedName("ai_engine_language")
+    @SerializedName("language")
     private SupportedLanguage aiEngineLanguage;
 
-    @SerializedName("ai_engine_version")
+    @SerializedName("version")
     private String aiEngineVersion;
 
     @SerializedName("training_progress")

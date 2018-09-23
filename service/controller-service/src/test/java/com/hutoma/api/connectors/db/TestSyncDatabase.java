@@ -2,7 +2,9 @@ package com.hutoma.api.connectors.db;
 
 import com.hutoma.api.common.FakeTimerTools;
 import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.common.SupportedLanguage;
 import com.hutoma.api.connectors.BackendServerType;
+import com.hutoma.api.containers.ServiceIdentity;
 import com.hutoma.api.containers.sub.ServerAiEntry;
 import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.logging.AiServiceStatusLogger;
@@ -59,7 +61,7 @@ public class TestSyncDatabase {
     @Test
     public void noAIs__noBackend_noChanges() throws Exception {
         DatabaseAiStatusUpdates database = fakeDatabaseCalls(Arrays.asList());
-        database.synchroniseDBStatuses(BackendServerType.EMB, new HashMap<>(), new HashSet<UUID>());
+        database.synchroniseDBStatuses(getServiceIdentity(), new HashMap<>(), new HashSet<UUID>());
         Assert.assertTrue(this.parameterList.isEmpty());
     }
 
@@ -71,7 +73,7 @@ public class TestSyncDatabase {
         List<FakeRecord> records = new ArrayList<>();
 
         DatabaseAiStatusUpdates database = fakeDatabaseCalls(records);
-        database.synchroniseDBStatuses(BackendServerType.EMB, registration, new HashSet<UUID>());
+        database.synchroniseDBStatuses(getServiceIdentity(), registration, new HashSet<UUID>());
         Assert.assertTrue(this.parameterList.isEmpty());
         verify(this.logger, times(1)).logDbSyncUnknownAi(any(), any(), any());
     }
@@ -86,7 +88,7 @@ public class TestSyncDatabase {
                 TrainingStatus.AI_TRAINING_COMPLETE);
 
         DatabaseAiStatusUpdates database = fakeDatabaseCalls(records);
-        database.synchroniseDBStatuses(BackendServerType.EMB,
+        database.synchroniseDBStatuses(getServiceIdentity(),
                 registration, new HashSet<UUID>() {{
                     add(TestSyncDatabase.this.aiid1);
                 }});
@@ -104,7 +106,7 @@ public class TestSyncDatabase {
         List<FakeRecord> records = addDatabaseData(null, this.devid1, this.aiid1, null);
 
         DatabaseAiStatusUpdates database = fakeDatabaseCalls(records);
-        database.synchroniseDBStatuses(BackendServerType.EMB,
+        database.synchroniseDBStatuses(getServiceIdentity(),
                 registration, new HashSet<UUID>());
         Assert.assertTrue(this.parameterList.isEmpty());
     }
@@ -117,7 +119,7 @@ public class TestSyncDatabase {
                 TrainingStatus.AI_UNDEFINED);
 
         DatabaseAiStatusUpdates database = fakeDatabaseCalls(records);
-        database.synchroniseDBStatuses(BackendServerType.EMB,
+        database.synchroniseDBStatuses(getServiceIdentity(),
                 registration, new HashSet<UUID>());
         Assert.assertTrue(this.parameterList.isEmpty());
     }
@@ -131,7 +133,7 @@ public class TestSyncDatabase {
                 TrainingStatus.AI_TRAINING);
 
         DatabaseAiStatusUpdates database = fakeDatabaseCalls(records);
-        database.synchroniseDBStatuses(BackendServerType.EMB,
+        database.synchroniseDBStatuses(getServiceIdentity(),
                 registration, new HashSet<UUID>());
         Assert.assertTrue(this.parameterList.isEmpty());
     }
@@ -145,12 +147,12 @@ public class TestSyncDatabase {
                 TrainingStatus.AI_TRAINING);
 
         DatabaseAiStatusUpdates database = fakeDatabaseCalls(records);
-        database.synchroniseDBStatuses(BackendServerType.EMB,
+        database.synchroniseDBStatuses(getServiceIdentity(),
                 regData, new HashSet<>());
 
         Assert.assertEquals(1, this.parameterList.size());
-        Assert.assertEquals(this.aiid1.toString(), this.parameterList.get(0).getString("1"));
-        Assert.assertTrue(this.parameterList.get(0).getString("2").contains(
+        Assert.assertEquals(this.aiid1.toString(), this.parameterList.get(0).getString("3"));
+        Assert.assertTrue(this.parameterList.get(0).getString("4").contains(
                 TrainingStatus.AI_TRAINING_COMPLETE.value()));
     }
 
@@ -169,7 +171,7 @@ public class TestSyncDatabase {
         addDatabaseData(records, this.devid1, aiid2, TrainingStatus.AI_TRAINING);
 
         DatabaseAiStatusUpdates database = fakeDatabaseCalls(records);
-        database.synchroniseDBStatuses(BackendServerType.EMB, regData, new HashSet<>());
+        database.synchroniseDBStatuses(getServiceIdentity(), regData, new HashSet<>());
 
         Assert.assertEquals(0, this.parameterList.size());
     }
@@ -189,16 +191,16 @@ public class TestSyncDatabase {
         addDatabaseData(records, devid2, aiid2, TrainingStatus.AI_TRAINING);
 
         DatabaseAiStatusUpdates database = fakeDatabaseCalls(records);
-        database.synchroniseDBStatuses(BackendServerType.EMB, regData, new HashSet<UUID>());
+        database.synchroniseDBStatuses(getServiceIdentity(), regData, new HashSet<UUID>());
 
         Assert.assertEquals(2, this.parameterList.size());
 
-        Assert.assertEquals(this.aiid1.toString(), this.parameterList.get(0).getString("1"));
-        Assert.assertTrue(this.parameterList.get(0).getString("2").contains(
+        Assert.assertEquals(this.aiid1.toString(), this.parameterList.get(0).getString("3"));
+        Assert.assertTrue(this.parameterList.get(0).getString("4").contains(
                 TrainingStatus.AI_TRAINING_COMPLETE.value()));
 
-        Assert.assertEquals(aiid2.toString(), this.parameterList.get(1).getString("1"));
-        Assert.assertTrue(this.parameterList.get(1).getString("2").contains(
+        Assert.assertEquals(aiid2.toString(), this.parameterList.get(1).getString("3"));
+        Assert.assertTrue(this.parameterList.get(1).getString("4").contains(
                 TrainingStatus.AI_TRAINING_COMPLETE.value()));
 
     }
@@ -324,5 +326,9 @@ public class TestSyncDatabase {
             addString("training_error", "0.0");
             //addString("queue_time", "");
         }
+    }
+
+    private static ServiceIdentity getServiceIdentity() {
+        return new ServiceIdentity(BackendServerType.EMB, SupportedLanguage.EN, ServiceIdentity.DEFAULT_VERSION);
     }
 }

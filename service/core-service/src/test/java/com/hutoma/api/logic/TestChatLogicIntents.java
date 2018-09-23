@@ -277,7 +277,7 @@ public class TestChatLogicIntents extends TestChatBase {
         entityValues.put("persistent_var", "persistentValue");
         ChatState state = new ChatState(DateTime.now(), null, null, null, entityValues, 0.5d,
                 ChatHandoverTarget.Ai, getSampleAI(), new ChatContext());
-        when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(state);
+        when(this.fakeChatStateHandler.getState(any(), any(), any(), any())).thenReturn(state);
 
         // First question, triggers the intent but without the right entity value
         ApiResult result = getChat(0.5f, "nothing to see here.");
@@ -669,7 +669,7 @@ public class TestChatLogicIntents extends TestChatBase {
         ctx.setValue(varName, "value");
         ChatState state = new ChatState(DateTime.now(), null, null, null, null, 0.5d,
                 ChatHandoverTarget.Ai, getSampleAI(), ctx);
-        when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(state);
+        when(this.fakeChatStateHandler.getState(any(), any(), any(), any())).thenReturn(state);
         Assert.assertEquals(-1, ctx.getVariable(varName).getLifespanTurns());
         getChat(0.5f);
         Assert.assertNotNull(ctx.getValue(varName));
@@ -684,7 +684,7 @@ public class TestChatLogicIntents extends TestChatBase {
         ctx.setValue(varName, "value", 3);
         ChatState state = new ChatState(DateTime.now(), null, null, null, null, 0.5d,
                 ChatHandoverTarget.Ai, getSampleAI(), ctx);
-        when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(state);
+        when(this.fakeChatStateHandler.getState(any(), any(), any(), any())).thenReturn(state);
         // First turn
         getChat(0.5f);
         // lifetime should now be next 2 turns

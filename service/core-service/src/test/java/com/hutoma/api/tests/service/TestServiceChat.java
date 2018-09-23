@@ -11,12 +11,7 @@ import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.ApiChat;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.ApiResult;
-import com.hutoma.api.containers.sub.ChatContext;
-import com.hutoma.api.containers.sub.ChatHandoverTarget;
-import com.hutoma.api.containers.sub.ChatResult;
-import com.hutoma.api.containers.sub.ChatState;
-import com.hutoma.api.containers.sub.MemoryIntent;
-import com.hutoma.api.containers.sub.MemoryVariable;
+import com.hutoma.api.containers.sub.*;
 import com.hutoma.api.endpoints.ChatEndpoint;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logic.ChatLogic;
@@ -24,7 +19,6 @@ import com.hutoma.api.logic.chat.*;
 import com.hutoma.api.memory.ChatStateHandler;
 import com.hutoma.api.memory.IEntityRecognizer;
 import com.hutoma.api.memory.IMemoryIntentHandler;
-
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.joda.time.DateTime;
 import org.junit.Assert;
@@ -32,16 +26,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 
-import java.net.HttpURLConnection;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.Response;
+import java.net.HttpURLConnection;
+import java.util.*;
 
 import static com.hutoma.api.common.TestDataHelper.getSampleAI;
 import static org.mockito.ArgumentMatchers.any;
@@ -82,7 +72,7 @@ public class TestServiceChat extends ServiceTestBase {
         when(this.fakeTools.createNewRandomUUID()).thenReturn(UUID.randomUUID());
         ChatState emptyState = ChatState.getEmpty();
         emptyState.setAi(TestDataHelper.getSampleAI());
-        when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(emptyState);
+        when(this.fakeChatStateHandler.getState(any(), any(), any(), any())).thenReturn(emptyState);
 
         when(this.fakeChatWorkflow.getHandlers()).thenReturn(
                 Arrays.asList(this.fakePassthroughHandler, this.fakeChatIntenthHandler,
@@ -165,7 +155,7 @@ public class TestServiceChat extends ServiceTestBase {
     @Test
     public void testChat_chatStateUserException() throws ChatStateHandler.ChatStateException {
         UUID chatId = UUID.randomUUID();
-        when(this.fakeChatStateHandler.getState(any(), any(), any()))
+        when(this.fakeChatStateHandler.getState(any(), any(), any(), any()))
                 .thenThrow(ChatStateHandler.ChatStateUserException.class);
         final Response response = target(CHAT_PATH).queryParam("q", "question")
                 .queryParam("chatId", chatId.toString())
@@ -176,7 +166,7 @@ public class TestServiceChat extends ServiceTestBase {
     @Test
     public void testChat_chatStateException() throws ChatStateHandler.ChatStateException {
         UUID chatId = UUID.randomUUID();
-        when(this.fakeChatStateHandler.getState(any(), any(), any()))
+        when(this.fakeChatStateHandler.getState(any(), any(), any(), any()))
                 .thenThrow(ChatStateHandler.ChatStateException.class);
         final Response response = target(CHAT_PATH).queryParam("q", "question")
                 .queryParam("chatId", chatId.toString())
@@ -217,7 +207,7 @@ public class TestServiceChat extends ServiceTestBase {
         ChatState state = new ChatState(DateTime.now(), null, null, null, null, 0.5d,
                 ChatHandoverTarget.Ai, getSampleAI(), new ChatContext());
         state.setCurrentIntents(intents);
-        when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(state);
+        when(this.fakeChatStateHandler.getState(any(), any(), any(), any())).thenReturn(state);
 
         when(this.fakeMemoryIntentHandler.getCurrentIntentsStateForChat(any())).thenReturn(intents);
         when(this.fakeIntentProcessorLogic.processIntent(any(), any(), any(), any(), any())).thenReturn(true);
@@ -285,7 +275,7 @@ public class TestServiceChat extends ServiceTestBase {
 
         when(this.fakeMemoryIntentHandler.getCurrentIntentsStateForChat(any())).thenReturn(intents);
         when(this.fakeIntentProcessorLogic.processIntent(any(), any(), any(), any(), any())).thenReturn(true);
-        when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(state);
+        when(this.fakeChatStateHandler.getState(any(), any(), any(), any())).thenReturn(state);
         when(this.fakeTools.getTimestamp()).thenReturn(System.currentTimeMillis());
 
         final Response response = target(CHAT_PATH)

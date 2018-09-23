@@ -107,7 +107,7 @@ public class AIChatServices extends ServerConnector {
                 .map(x -> new AiIdentity(x.getDevId(), x.getAiid())).collect(Collectors.toList());
 
         // find out which servers can chat with this AI
-        Set<BackendServerType> canChatWith = canChatWithAi(aiIdentity.getDevId(), aiIdentity.getAiid());
+        Set<BackendServerType> canChatWith = canChatWithAi(aiIdentity);
 
         // make copies of the AI lists
         List<AiIdentity> embAIs = new ArrayList<>(listAis);
@@ -148,17 +148,16 @@ public class AIChatServices extends ServerConnector {
 
     /***
      * Determine whether the AI is in a state where the user can interact with it
-     * @param devId dev owner
-     * @param aiid id
+     * @param aiIdentity
      * @return a set of servers that can interact with the AI (empty set if none)
      */
-    Set<BackendServerType> canChatWithAi(final UUID devId, final UUID aiid) {
+    Set<BackendServerType> canChatWithAi(final AiIdentity aiIdentity) {
         // by default chat with nothing
         Set<BackendServerType> chatSet = new HashSet<>();
         BackendStatus backendStatus = null;
         try {
             // try to get the real status from the database
-            backendStatus = this.databaseAi.getAIStatusReadOnly(devId, aiid);
+            backendStatus = this.databaseAi.getAIStatusReadOnly(aiIdentity);
         } catch (DatabaseException ex) {
             // if it fails, log the error and keep the set null
             this.logger.logException(LOGFROM, ex);
