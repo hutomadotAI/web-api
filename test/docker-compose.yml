@@ -40,15 +40,27 @@ services:
     - API_CONNECTION_STRING=jdbc:mysql://api-db:3306/hutoma?user=hutoma_caller&password=>YR"khuN*.gF)V4#&zeroDateTimeBehavior=convertToNull&xdevapi.ssl-mode=DISABLED
     - JAVA_OPTS=-Xdebug -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005
 
+  version-migrator:
+    build:
+        context: ../workers/version_migrator
+    ports:
+    - 10005:9090
+    environment:
+    - MIGRATOR_DB_HOST=api-db
+    - MIGRATOR_DB_USER=hutoma_caller
+    - MIGRATOR_DB_PASSWORD=>YR"khuN*.gF)V4#
+    - MIGRATOR_API_URL=http://api-svc:8080/v1
+    - MIGRATOR_API_KEY=eyJhbGciOiJIUzI1NiIsImNhbGciOiJERUYifQ.eNqqVgry93FVsgJT8Y4uvp5-SjpKxaVJQKHElNzMPKVaAAAAAP__.e-INR1D-L_sokTh9sZ9cBnImWI0n6yXXpDCmat1ca_c
+
   # Entity recognizer in minimal server (English) mode to limit RAM use
   api-entity:
-    image: eu.gcr.io/hutoma-backend/api/entity_recognizer:1.3.2-ci.12
+    image: eu.gcr.io/hutoma-backend/api/entity_recognizer:1.3.3-ci.18
     environment:
     - ERS_MINIMAL_SERVER=1
 
   # Dummy chat core - "emb"
   ai-dummy-emb:
-    image: eu.gcr.io/hutoma-backend/backend/dummy:0.3.34
+    image: eu.gcr.io/hutoma-backend/backend/dummy:0.3.45
     volumes:
       - ./local_data/emb-training:/ai
     ports:
@@ -62,7 +74,7 @@ services:
 
   # Dummy chat core - "aiml"
   ai-dummy-aiml:
-    image: eu.gcr.io/hutoma-backend/backend/dummy:0.3.34
+    image: eu.gcr.io/hutoma-backend/backend/dummy:0.3.45
     volumes:
       - ./local_data/aiml-training:/ai
     environment:
@@ -71,3 +83,4 @@ services:
     - API_BACKEND_STATUS_ENDPOINT=http://api-ctrl:8080/v1
     - BACKEND_TYPE=aiml
     - TRAIN_TIME_SECONDS_PER_1000_QA=2.0
+

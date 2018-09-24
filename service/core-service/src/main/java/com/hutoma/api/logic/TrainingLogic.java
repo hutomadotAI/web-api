@@ -473,6 +473,26 @@ public class TrainingLogic {
         }
     }
 
+    public ApiResult getAiTrainingStatus(final UUID devId, final UUID aiid) {
+        LogMap logMap = LogMap.map("AIID", aiid);
+        try {
+
+            ApiAi ai = this.databaseAi.getAI(devId, aiid, this.jsonSerializer);
+            if (ai == null) {
+                this.logger.logUserInfoEvent(LOGFROM, "Ai status request for unknown aiid",
+                        devId.toString(), logMap);
+                return ApiError.getNotFound();
+            }
+            TrainingStatus trainingStatus = ai.getSummaryAiStatus();
+            ApiResult result = new ApiResult();
+            result.setSuccessStatus(trainingStatus.value());
+            return result;
+        } catch (Exception ex) {
+            this.logger.logUserExceptionEvent(LOGFROM, "GetTrainingFile", devId.toString(), ex, logMap);
+            return ApiError.getInternalServerError();
+        }
+    }
+
     private boolean isTopicMarker(final String line) {
         return line.startsWith(TrainingLogic.TOPIC_MARKER);
     }
