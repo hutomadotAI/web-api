@@ -161,6 +161,7 @@ public class ChatLogic {
         // Add telemetry for the request
         this.telemetryMap.add("DevId", devId);
         this.telemetryMap.add("AIID", aiid);
+        this.telemetryMap.add("ServerVersion", serverVersion);
         this.telemetryMap.add("Topic", this.chatState.getTopic());
         this.telemetryMap.add("History", this.chatState.getHistory());
         this.telemetryMap.add("ChatType", "Platform");

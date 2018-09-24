@@ -5,11 +5,7 @@ import com.hutoma.api.common.Config;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.SupportedLanguage;
 import com.hutoma.api.common.Tools;
-import com.hutoma.api.connectors.BackendServerType;
-import com.hutoma.api.connectors.IServerEndpoint;
-import com.hutoma.api.connectors.NoServerAvailableException;
-import com.hutoma.api.connectors.RequestFor;
-import com.hutoma.api.connectors.ServerTrackerInfo;
+import com.hutoma.api.connectors.*;
 import com.hutoma.api.connectors.chat.ChatBackendConnector;
 import com.hutoma.api.containers.ApiServerEndpoint;
 import com.hutoma.api.containers.ApiServerEndpointMulti;
@@ -19,20 +15,19 @@ import com.hutoma.api.containers.sub.AiIdentity;
 import com.hutoma.api.containers.sub.ServerEndpointRequestMulti;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
-
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.client.JerseyWebTarget;
 
+import javax.inject.Inject;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation;
+import javax.ws.rs.core.Response;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import javax.inject.Inject;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.core.Response;
 
 /**
  * Connector for the AI Backend Management Controller.
@@ -104,7 +99,7 @@ public abstract class ControllerConnector {
                 .put("RequestFor", RequestFor.Training.toString())
                 .put("ServerType", serverType.value())
                 .put("Language", aiIdentity.getLanguage())
-                .put("Version", aiIdentity.getServerVersion());
+                .put("ServerVersion", aiIdentity.getServerVersion());
         final long startTimestamp = this.tools.getTimestamp();
         try (Response response = getRequest(String.format("/%s/training", aiIdentity.getAiid().toString()),
                     getMapOfServiceIdentity(serviceIdentity))
@@ -190,7 +185,7 @@ public abstract class ControllerConnector {
                                                                   final JsonSerializer serializer) {
         LogMap logMap = LogMap.map("ServerType", serviceIdentity.getServerType().value())
                 .put("Language", serviceIdentity.getLanguage().toString())
-                .put("Version", serviceIdentity.getVersion());
+                .put("ServerVersion", serviceIdentity.getVersion());
         final long startTimestamp = this.tools.getTimestamp();
         try (Response response = getRequest("/endpointMap", getMapOfServiceIdentity(serviceIdentity))
                     .get()) {
@@ -237,7 +232,7 @@ public abstract class ControllerConnector {
     private void kickQueue(final ServiceIdentity serviceIdentity) {
         LogMap logMap = LogMap.map("ServerType", serviceIdentity.getServerType().value())
                 .put("Language", serviceIdentity.getLanguage().toString())
-                .put("Version", serviceIdentity.getVersion());
+                .put("ServerVersion", serviceIdentity.getVersion());
         final long startTimestamp = this.tools.getTimestamp();
         try (Response response = getRequest("/queue", getMapOfServiceIdentity(serviceIdentity))
                     .post(Entity.text(""))) {

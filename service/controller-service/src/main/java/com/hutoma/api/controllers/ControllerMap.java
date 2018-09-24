@@ -6,13 +6,13 @@ import com.hutoma.api.containers.ServiceIdentity;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
 
+import javax.inject.Inject;
+import javax.inject.Provider;
+import javax.inject.Singleton;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import javax.inject.Inject;
-import javax.inject.Provider;
-import javax.inject.Singleton;
 
 @Singleton
 public class ControllerMap {
@@ -86,7 +86,7 @@ public class ControllerMap {
                             serviceIdentity.getVersion()),
                     LogMap.map("Type", serviceIdentity.getServerType().value())
                             .put("Language", serviceIdentity.getLanguage().toString())
-                            .put("Version", serviceIdentity.getVersion()));
+                            .put("ServerVersion", serviceIdentity.getVersion()));
             this.controllerMap.put(serviceIdentity.hashCode(), controller);
             return controller;
         } else {

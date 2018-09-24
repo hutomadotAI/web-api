@@ -3,7 +3,6 @@ package com.hutoma.api.controllers;
 import com.hutoma.api.common.ControllerConfig;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.BackendEngineStatus;
-import com.hutoma.api.connectors.BackendServerType;
 import com.hutoma.api.connectors.QueueAction;
 import com.hutoma.api.connectors.ServerConnector;
 import com.hutoma.api.connectors.db.DatabaseAiStatusUpdates;
@@ -14,24 +13,19 @@ import com.hutoma.api.containers.sub.ServerEndpointTrainingSlots;
 import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.logging.AiServiceStatusLogger;
 import com.hutoma.api.logging.LogMap;
-
 import org.joda.time.DateTime;
 import org.joda.time.Seconds;
 
+import javax.inject.Inject;
+import javax.inject.Provider;
 import java.net.HttpURLConnection;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import javax.inject.Inject;
-import javax.inject.Provider;
 
 /***
  * Only one of these should exist for each queuing controller.
@@ -157,7 +151,7 @@ public class QueueProcessor extends TimerTask {
             LogMap logMap = LogMap.map("Op", "controllerstate")
                     .put("Type", this.serviceIdentity.getServerType().value())
                     .put("Language", this.serviceIdentity.getLanguage())
-                    .put("Version", this.serviceIdentity.getVersion())
+                    .put("ServerVersion", this.serviceIdentity.getVersion())
                     .put("ServerCount", serverCount)
                     .put("TrainingCapacity", totalTrainingCapacity)
                     .put("TrainingSlotsAvailable", availableTrainingSlots)
@@ -322,7 +316,7 @@ public class QueueProcessor extends TimerTask {
 
         LogMap logMap = LogMap.map("Type", this.serviceIdentity.getServerType())
                 .put("Language", this.serviceIdentity.getLanguage())
-                .put("Version", this.serviceIdentity.getVersion());
+                .put("ServerVersion", this.serviceIdentity.getVersion());
         // create a log entry per server with (n>0) interrupted training slots
         slotList.stream().filter(ServerEndpointTrainingSlots::hasSlotsInterruptedTraining)
                 .forEach(server -> {

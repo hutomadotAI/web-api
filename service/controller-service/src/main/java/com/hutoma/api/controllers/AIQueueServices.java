@@ -2,7 +2,6 @@ package com.hutoma.api.controllers;
 
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Tools;
-import com.hutoma.api.connectors.BackendServerType;
 import com.hutoma.api.connectors.IConnectConfig;
 import com.hutoma.api.connectors.InvocationResult;
 import com.hutoma.api.connectors.ServerConnector;
@@ -14,13 +13,12 @@ import com.hutoma.api.containers.sub.DevPlan;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
 import com.hutoma.api.thread.TrackedThreadSubPool;
-
 import org.glassfish.jersey.client.JerseyClient;
 
+import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.UUID;
 import java.util.concurrent.Callable;
-import javax.inject.Inject;
 
 import static org.glassfish.jersey.client.ClientProperties.CONNECT_TIMEOUT;
 import static org.glassfish.jersey.client.ClientProperties.READ_TIMEOUT;
@@ -64,7 +62,7 @@ public class AIQueueServices extends ServerConnector {
         LogMap logMap = LogMap.map("Op", "delete")
                 .put("Type", serviceIdentity.getServerType().value())
                 .put("Language", serviceIdentity.getLanguage().toString())
-                .put("Version", serviceIdentity.getVersion())
+                .put("ServerVersion", serviceIdentity.getVersion())
                 .put("Server", serverIdentifier)
                 .put("AIID", aiid);
         this.logger.logUserInfoEvent(LOGFROM,
@@ -120,7 +118,7 @@ public class AIQueueServices extends ServerConnector {
         LogMap logMap = LogMap.map("Op", "train-start")
                 .put("Type", serviceIdentity.getServerType().value())
                 .put("Language", serviceIdentity.getLanguage().toString())
-                .put("Version", serviceIdentity.getVersion())
+                .put("ServerVersion", serviceIdentity.getVersion())
                 .put("Server", serverIdentifier)
                 .put("AIID", aiIdentity.getAiid());
         this.logger.logUserInfoEvent(LOGFROM,

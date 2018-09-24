@@ -261,7 +261,7 @@ public class DatabaseAiStatusUpdates extends Database {
                                     serviceIdentity.toString(), aiid.toString()), null,
                                     LogMap.map("AIEngine", serviceIdentity.getServerType().toString())
                                             .put("Language", serviceIdentity.getLanguage().toString())
-                                            .put("Version", serviceIdentity.getVersion())
+                                            .put("ServerVersion", serviceIdentity.getVersion())
                                             .put("AIID", aiid.toString())
                                             .put("DEVID", devid.toString())
                                             .put("ApiStatus", finalStatusInDb.toString()));
@@ -365,7 +365,7 @@ public class DatabaseAiStatusUpdates extends Database {
         // we are logging either way so create the logmap here
         LogMap logmap = LogMap.map("AIEngine", serviceIdentity.getServerType().toString())
                 .put("Language", serviceIdentity.getLanguage().toString())
-                .put("Version", serviceIdentity.getVersion())
+                .put("ServerVersion", serviceIdentity.getVersion())
                 .put("AIID", aiid.toString())
                 .put("DEVID", devid.toString())
                 .put("ApiStatus", statusInDb.toString())
