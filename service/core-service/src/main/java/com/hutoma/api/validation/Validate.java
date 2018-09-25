@@ -28,7 +28,7 @@ public class Validate extends ValidationBase {
     public static final int INTENT_PROMPT_MAX_LENGTH = 5000;
 
     private static final Pattern alphaNumericDashes = Pattern.compile("^[a-zA-Z0-9_-]+$");
-    private static final Pattern entityNames = Pattern.compile("^[\\.a-zA-Z0-9_-]+$");
+    private static final Pattern entityNames = Pattern.compile("^(?![sS][yY][sS]\\.)[\\.a-zA-Z0-9_-]+$");
     private static final Pattern printableAscii =
             Pattern.compile("^[\\x20-\\x7E]+$");
     private static final Pattern printableAsciiNoAt =

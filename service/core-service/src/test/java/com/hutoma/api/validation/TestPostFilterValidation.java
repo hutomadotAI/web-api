@@ -315,6 +315,20 @@ public class TestPostFilterValidation {
         this.postFilter.validateIntent(intent);
     }
 
+    @Test(expected = ParameterValidationException.class)
+    public void validateEntity_disallowSys() throws ParameterValidationException {
+        BotStructure botStructure = generateValidV1BotStructure();
+        Map<String, ApiEntity> entities = botStructure.getEntities();
+
+        List<String> entityValues = new ArrayList<>();
+        entityValues.add("valid value");
+        entityValues.add("valid second value");
+        ApiEntity entity = new ApiEntity("sys.entity_name", UUID.randomUUID(), entityValues, false);
+        entities.put("label", entity);
+        botStructure.setEntities(entities);
+        this.postFilter.validateBotStructure(botStructure, TestDataHelper.DEVID_UUID);
+    }
+
     private static List<String> makeListRepeated(final String baseName, final int numCopies) {
         List<String> list = new ArrayList<>(numCopies);
         for (int i = 1; i <= numCopies; i++) {
