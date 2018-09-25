@@ -2,41 +2,29 @@ package com.hutoma.api.connectors.aiservices;
 
 import com.google.gson.annotations.SerializedName;
 import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.common.SupportedLanguage;
 import com.hutoma.api.common.Tools;
-import com.hutoma.api.connectors.BackendStatus;
-import com.hutoma.api.connectors.IConnectConfig;
-import com.hutoma.api.connectors.InvocationResult;
-import com.hutoma.api.connectors.NoServerAvailableException;
-import com.hutoma.api.connectors.ServerConnector;
+import com.hutoma.api.connectors.*;
 import com.hutoma.api.connectors.db.DatabaseAI;
 import com.hutoma.api.connectors.db.DatabaseEntitiesIntents;
 import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.ApiIntent;
-import com.hutoma.api.containers.ServiceIdentity;
 import com.hutoma.api.containers.sub.AiIdentity;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
 import com.hutoma.api.memory.MemoryIntentHandler;
 import com.hutoma.api.thread.TrackedThreadSubPool;
-
-import org.apache.commons.io.Charsets;
 import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Scanner;
-import java.util.UUID;
-import java.util.concurrent.Callable;
 import javax.inject.Inject;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.concurrent.Callable;
 
 import static org.glassfish.jersey.client.ClientProperties.CONNECT_TIMEOUT;
 import static org.glassfish.jersey.client.ClientProperties.READ_TIMEOUT;
@@ -131,8 +119,7 @@ public class AIServices extends ServerConnector {
     }
 
     private List<String> getAllEndpointsForBroadcast() {
-        return connectors.getEndpointsForAllServerTypes(SupportedLanguage.EN, ServiceIdentity.DEFAULT_VERSION,
-                this.serializer);
+        return connectors.getEndpointsForAllServerTypes(this.serializer);
     }
 
     /***
@@ -213,6 +200,7 @@ public class AIServices extends ServerConnector {
     /**
      * HACK! HACK!
      * Removes the intent expressions from a given training text
+     *
      * @param text the training text
      * @return the text with the intent expressions stripped out
      * <p>

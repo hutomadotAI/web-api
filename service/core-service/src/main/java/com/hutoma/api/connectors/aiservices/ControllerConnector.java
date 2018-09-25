@@ -25,6 +25,7 @@ import javax.ws.rs.client.Invocation;
 import javax.ws.rs.core.Response;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -68,7 +69,7 @@ public abstract class ControllerConnector {
     /**
      * Gets from the controller a training backend endpoint for a given AI.
      *
-     * @param aiIdentity       the AIID
+     * @param aiIdentity the AIID
      * @param serializer the json serialiser
      * @return the endpoint information
      * @throws NoServerAvailableException if there are no servers available to process this request
@@ -81,9 +82,9 @@ public abstract class ControllerConnector {
     /**
      * Gets from the controller a training backend endpoint for a given AI.
      *
-     * @param aiIdentity            the AIID
+     * @param aiIdentity the AIID
      * @param serverType the server type
-     * @param serializer      the json serialiser
+     * @param serializer the json serialiser
      * @return the endpoint information
      * @throws NoServerAvailableException if there are no servers available to process this request
      */
@@ -102,8 +103,8 @@ public abstract class ControllerConnector {
                 .put("ServerVersion", aiIdentity.getServerVersion());
         final long startTimestamp = this.tools.getTimestamp();
         try (Response response = getRequest(String.format("/%s/training", aiIdentity.getAiid().toString()),
-                    getMapOfServiceIdentity(serviceIdentity))
-                    .get()) {
+                getMapOfServiceIdentity(serviceIdentity))
+                .get()) {
             if (response.getStatus() == HttpURLConnection.HTTP_OK) {
                 response.bufferEntity();
                 ApiServerEndpoint result = (ApiServerEndpoint) serializer.deserialize(
@@ -149,7 +150,7 @@ public abstract class ControllerConnector {
         final long startTimestamp = this.tools.getTimestamp();
         try (Response response = getRequest("/chatEndpoints",
                 getMapOfServiceIdentity(buildServiceIdentityFromParams(language, serverVersion)))
-                    .post(Entity.json(serializer.serialize(multiRequest)))) {
+                .post(Entity.json(serializer.serialize(multiRequest)))) {
 
             if (response.getStatus() == HttpURLConnection.HTTP_OK) {
                 response.bufferEntity();
@@ -167,6 +168,30 @@ public abstract class ControllerConnector {
         } catch (Exception ex) {
             throw new ChatBackendConnector.AiControllerException(ex);
         }
+    }
+
+    /**
+     * Gets a map of the verified endpoints from all registered backends.
+     *
+     * @return the map
+     */
+    public Map<String, ServerTrackerInfo> getEndpointsForBroadcast(final JsonSerializer serializer) {
+
+        final long startTimestamp = this.tools.getTimestamp();
+        try (Response response = getRequest("/endpoints", Collections.emptyMap()).get()) {
+            if (response.getStatus() == HttpURLConnection.HTTP_OK) {
+                response.bufferEntity();
+                ApiServerTrackerInfoMap result = (ApiServerTrackerInfoMap) serializer.deserialize(
+                        (InputStream) response.getEntity(), ApiServerTrackerInfoMap.class);
+                this.logger.logPerf(LOGFROM, "GetEndpointsForBroadcast",
+                        LogMap.map("Duration", this.tools.getTimestamp() - startTimestamp));
+                return result.getMap();
+            }
+        } catch (Exception ex) {
+            this.logger.logException(LOGFROM, ex);
+        }
+
+        return new HashMap<>();
     }
 
     Map<String, ServerTrackerInfo> getVerifiedEndpointMap(final SupportedLanguage supportedLanguage,
@@ -188,7 +213,7 @@ public abstract class ControllerConnector {
                 .put("ServerVersion", serviceIdentity.getVersion());
         final long startTimestamp = this.tools.getTimestamp();
         try (Response response = getRequest("/endpointMap", getMapOfServiceIdentity(serviceIdentity))
-                    .get()) {
+                .get()) {
             if (response.getStatus() == HttpURLConnection.HTTP_OK) {
                 response.bufferEntity();
                 ApiServerTrackerInfoMap result = (ApiServerTrackerInfoMap) serializer.deserialize(
@@ -235,7 +260,7 @@ public abstract class ControllerConnector {
                 .put("ServerVersion", serviceIdentity.getVersion());
         final long startTimestamp = this.tools.getTimestamp();
         try (Response response = getRequest("/queue", getMapOfServiceIdentity(serviceIdentity))
-                    .post(Entity.text(""))) {
+                .post(Entity.text(""))) {
             if (response.getStatus() == HttpURLConnection.HTTP_OK) {
                 response.bufferEntity();
                 this.logger.logPerf(LOGFROM, "KickQueue",

@@ -24,14 +24,7 @@ public class ControllerLogic {
     public ApiResult getMap(final ServiceIdentity serviceIdentity) {
         Map<String, ServerTracker> trackerMap = this.controllerMap.getControllerFor(serviceIdentity)
                 .getVerifiedEndpointMap();
-        Map<String, ServerTrackerInfo> trackerInfoMap = new HashMap<>();
-        for (Map.Entry<String, ServerTracker> entry : trackerMap.entrySet()) {
-            ServerTracker t = entry.getValue();
-            ServerTrackerInfo info = new ServerTrackerInfo(t.getServerUrl(), t.getServerIdentifier(),
-                    t.getChatCapacity(), t.getTrainingCapacity(), t.canTrain(), t.isEndpointVerified());
-            trackerInfoMap.put(entry.getKey(), info);
-        }
-
+        Map<String, ServerTrackerInfo> trackerInfoMap = getTrackerInfoFromMap(trackerMap);
         return new ApiServerTrackerInfoMap(trackerInfoMap).setSuccessStatus();
     }
 
@@ -64,7 +57,7 @@ public class ControllerLogic {
         List<ApiServerEndpointMulti.ServerEndpointResponse> results = new ArrayList<>();
 
         // get the controller
-        ControllerBase controller = controllerMap.getControllerFor(serviceIdentity);
+        ControllerBase controller = this.controllerMap.getControllerFor(serviceIdentity);
 
         // for every server requested (typically one main bot + one for every linked bot)
         for (ServerEndpointRequestMulti.ServerEndpointRequest request :
@@ -92,4 +85,26 @@ public class ControllerLogic {
         return new ApiServerEndpointMulti(results).setSuccessStatus();
     }
 
+    public ApiResult getAllEndpoints() {
+        Map<String, ServerTrackerInfo> trackerInfoMap = new HashMap<>();
+        // We need to send a delete request for every controller we have currently registered
+        Collection<ControllerBase> controllers = this.controllerMap.getAllDynamicControllers();
+        for (ControllerBase controller : controllers) {
+            Map<String, ServerTrackerInfo> info = getTrackerInfoFromMap(controller.getVerifiedEndpointMap());
+            info.forEach(trackerInfoMap::put);
+        }
+
+        return new ApiServerTrackerInfoMap(trackerInfoMap).setSuccessStatus();
+    }
+
+    private static Map<String, ServerTrackerInfo> getTrackerInfoFromMap(final Map<String, ServerTracker> trackerMap) {
+        Map<String, ServerTrackerInfo> trackerInfoMap = new HashMap<>();
+        for (Map.Entry<String, ServerTracker> entry : trackerMap.entrySet()) {
+            ServerTracker t = entry.getValue();
+            ServerTrackerInfo info = new ServerTrackerInfo(t.getServerUrl(), t.getServerIdentifier(),
+                    t.getChatCapacity(), t.getTrainingCapacity(), t.canTrain(), t.isEndpointVerified());
+            trackerInfoMap.put(entry.getKey(), info);
+        }
+        return trackerInfoMap;
+    }
 }

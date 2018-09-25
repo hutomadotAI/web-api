@@ -9,10 +9,7 @@ import com.hutoma.api.logging.LogMap;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Singleton
 public class ControllerMap {
@@ -60,6 +57,10 @@ public class ControllerMap {
         for (ControllerBase controller : controllerMap.values()) {
             controller.terminateQueue();
         }
+    }
+
+    public Collection<ControllerBase> getAllDynamicControllers() {
+        return controllerMap.values();
     }
 
 

@@ -14,17 +14,13 @@ import com.webcohesion.enunciate.metadata.rs.ResourceMethodSignature;
 import com.webcohesion.enunciate.metadata.rs.ResponseCode;
 import com.webcohesion.enunciate.metadata.rs.StatusCodes;
 
-import java.net.HttpURLConnection;
 import javax.inject.Inject;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.net.HttpURLConnection;
 
 
 /**
@@ -125,6 +121,21 @@ public class ControllerEndpoint {
         ApiResult result = this.controllerLogic.kickQueue(
                 ControllerParameterFilter.getServiceIdentity(requestContext)
         );
+        return result.getResponse(serializer).build();
+    }
+
+    @GET
+    @Path("endpoints")
+    @StatusCodes({
+            @ResponseCode(code = HttpURLConnection.HTTP_OK, condition = "Succeeded."),
+            @ResponseCode(code = HttpURLConnection.HTTP_INTERNAL_ERROR, condition = "Internal error")
+    })
+    @ResourceMethodSignature(
+            output = ApiServerTrackerInfoMap.class
+    )
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getAllEndpoints(@Context ContainerRequestContext requestContext) {
+        ApiResult result = this.controllerLogic.getAllEndpoints();
         return result.getResponse(serializer).build();
     }
 }

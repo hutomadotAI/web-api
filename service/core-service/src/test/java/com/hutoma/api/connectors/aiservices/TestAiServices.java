@@ -1,6 +1,9 @@
 package com.hutoma.api.connectors.aiservices;
 
-import com.hutoma.api.common.*;
+import com.hutoma.api.common.Config;
+import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.common.TestDataHelper;
+import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.BackendServerType;
 import com.hutoma.api.connectors.IServerEndpoint;
 import com.hutoma.api.connectors.NoServerAvailableException;
@@ -12,26 +15,24 @@ import com.hutoma.api.connectors.db.DatabaseUser;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.ApiResult;
-import com.hutoma.api.containers.ServiceIdentity;
 import com.hutoma.api.containers.sub.AiIdentity;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logic.TestIntentLogic;
 import com.hutoma.api.memory.MemoryIntentHandler;
 import com.hutoma.api.thread.ThreadPool;
 import com.hutoma.api.thread.TrackedThreadSubPool;
-
 import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.client.JerseyInvocation;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import javax.ws.rs.HttpMethod;
+import javax.ws.rs.core.Response;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.core.Response;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -228,6 +229,7 @@ public class TestAiServices {
         Map<String, ServerTrackerInfo> map = new HashMap<>();
         map.put("key", new ServerTrackerInfo("url", "ident", 1, 1, true, true));
         when(this.fakeEmbServicesConnector.getVerifiedEndpointMap(any(), any(), any())).thenReturn(map);
+        when(this.fakeEmbServicesConnector.getEndpointsForBroadcast(any())).thenReturn(map);
     }
 
     private void testCommand_serverError(CheckedByConsumer<UUID, UUID> logicMethod, String verb)
