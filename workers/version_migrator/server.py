@@ -38,7 +38,7 @@ handlers:
     level: INFO
     log_path: /tmp/hu_log
     log_tag: VERSION_MIGRATOR
-    es_log_index: version_migrator_v1
+    es_log_index: version-migrator-v1
     multi_process: False
 """
 

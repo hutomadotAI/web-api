@@ -1,0 +1,20 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[[source]]
+url = "https://pypi.hutoma.ai/simple"
+verify_ssl = false
+name = "hu_pypi"
+
+[packages]
+
+[dev-packages]
+flake8 = {version="*", index="pypi"}
+yapf = {version="*", index="pypi"}
+hu_build = {version="*", index="hu_pypi"}
+pytest = {version="*", index="pypi"}
+
+[requires]
+python_version = "3.6"
