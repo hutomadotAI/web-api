@@ -1,15 +1,13 @@
 package com.hutoma.api.connectors.chat;
 
-import com.hutoma.api.common.Config;
-import com.hutoma.api.common.FakeTimerTools;
-import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.common.TestDataHelper;
+import com.hutoma.api.common.*;
 import com.hutoma.api.connectors.InvocationResult;
 import com.hutoma.api.connectors.aiservices.ControllerConnector;
 import com.hutoma.api.containers.ApiServerEndpointMulti;
 import com.hutoma.api.containers.sub.AiIdentity;
 import com.hutoma.api.containers.sub.ChatState;
 
+import com.hutoma.api.logging.ILogger;
 import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.client.JerseyWebTarget;
 import org.junit.Assert;
@@ -49,7 +47,11 @@ public class TestChatBackendRequester {
         this.fakeControllerConnector = mock(ControllerConnector.class);
         when(fakeConfig.getBackendCombinedRequestTimeoutMs()).thenReturn(1000L);
         this.requester = new ChatBackendRequester(
-                fakeTimer, mock(JerseyClient.class), fakeConfig, fakeSerializer);
+                fakeTimer, mock(JerseyClient.class),
+                fakeConfig,
+                fakeSerializer,
+                mock(FeatureToggler.class),
+                mock(ILogger.class));
         this.requester.initialise(fakeControllerConnector, new AiIdentity(TestDataHelper.DEVID_UUID, TestDataHelper.AIID),
                 makeServerEndpoint(), new HashMap<>(), mock(ChatState.class),
                 fakeTimer.getTimestamp() + 1000);

@@ -10,17 +10,17 @@ import com.hutoma.api.containers.ApiServerEndpointMulti;
 import com.hutoma.api.containers.sub.AiIdentity;
 import com.hutoma.api.containers.sub.ChatState;
 import com.hutoma.api.containers.sub.ServerEndpointRequestMulti;
+import com.hutoma.api.logging.ILogger;
 import org.apache.commons.lang.StringUtils;
 import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.client.JerseyWebTarget;
+import com.hutoma.api.common.FeatureToggler;
 
 import javax.inject.Inject;
+import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
 import java.net.HttpURLConnection;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
@@ -35,6 +35,8 @@ public class ChatBackendRequester implements Callable<InvocationResult> {
     private final JerseyClient jerseyClient;
     private final Config config;
     private final JsonSerializer serializer;
+    private final FeatureToggler featureToggler;
+    private final ILogger logger;
 
     private ControllerConnector controllerConnector;
     private AiIdentity ai;
@@ -51,11 +53,15 @@ public class ChatBackendRequester implements Callable<InvocationResult> {
     public ChatBackendRequester(final Tools tools,
                                 final JerseyClient jerseyClient,
                                 final Config config,
-                                final JsonSerializer serializer) {
+                                final JsonSerializer serializer,
+                                final FeatureToggler featureToggler,
+                                final ILogger logger) {
         this.tools = tools;
         this.jerseyClient = jerseyClient;
         this.config = config;
         this.serializer = serializer;
+        this.featureToggler = featureToggler;
+        this.logger = logger;
     }
 
     ChatBackendRequester initialise(final ControllerConnector controllerConnector,
@@ -138,19 +144,51 @@ public class ChatBackendRequester implements Callable<InvocationResult> {
             chatParamsThisAi.put("topic", this.chatState.getTopic());
         }
 
-        JerseyWebTarget target = this.jerseyClient
-                .target(endpointResponse.getServerUrl())
-                .path(this.ai.getDevId().toString())
-                .path(this.ai.getAiid().toString())
-                .path("chat");
-
-        target = addTargetParameters(endpointResponse, chatParamsThisAi, target);
-
+        JerseyWebTarget target;
         long startTime = this.tools.getTimestamp();
-        Response response = target.request()
-                .property(CONNECT_TIMEOUT, (int) this.config.getBackendConnectCallTimeoutMs())
-                .property(READ_TIMEOUT, (int) timeRemaining)
-                .get();
+        Response response;
+
+        if (featureToggler.getStateForAiid(
+                this.ai.getDevId(),
+                this.ai.getAiid(),
+                "entity-value-replacement") == FeatureToggler.FeatureState.T1) {
+            logger.logUserTraceEvent("ChatBackendRequester",
+                    "entity-value-replacement feature requested",
+                    this.ai.getDevId().toString());
+            // Construct payload
+            EntityPayload body = new EntityPayload();
+            body.conversation = chatParamsThisAi.get("q");
+            body.entities = this.chatState.getCandidateValues();
+            String bodyJson = serializer.serialize(body);
+
+            logger.logUserTraceEvent("ChatBackendRequester",
+                    "sending: " + bodyJson,
+                    this.ai.getDevId().toString());
+
+            target = this.jerseyClient
+                    .target(endpointResponse.getServerUrl())
+                    .path(this.ai.getDevId().toString())
+                    .path(this.ai.getAiid().toString())
+                    .path("chat_v2");
+
+            response = target.request()
+                    .property(CONNECT_TIMEOUT, (int) this.config.getBackendConnectCallTimeoutMs())
+                    .property(READ_TIMEOUT, (int) timeRemaining)
+                    .post(Entity.json(bodyJson));
+        } else {
+            target = this.jerseyClient
+                    .target(endpointResponse.getServerUrl())
+                    .path(this.ai.getDevId().toString())
+                    .path(this.ai.getAiid().toString())
+                    .path("chat");
+
+            target = addTargetParameters(endpointResponse, chatParamsThisAi, target);
+
+            response = target.request()
+                    .property(CONNECT_TIMEOUT, (int) this.config.getBackendConnectCallTimeoutMs())
+                    .property(READ_TIMEOUT, (int) timeRemaining)
+                    .get();
+        }
 
         // whatever the response, buffer it and close the underlying structure
         if (response != null) {
@@ -182,5 +220,14 @@ public class ChatBackendRequester implements Callable<InvocationResult> {
         // encode parameters into template
         target = target.resolveTemplates(queryParamsWithoutNulls);
         return target;
+    }
+
+    private static class EntityPayload {
+        private String conversation;
+        private Map<String, List<String>> entities;
+
+        EntityPayload() {
+            entities = new HashMap<String, List<String>>();
+        }
     }
 }
