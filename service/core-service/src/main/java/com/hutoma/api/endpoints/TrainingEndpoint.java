@@ -145,7 +145,8 @@ public class TrainingEndpoint {
     public Response trainingUpdate(@Context ContainerRequestContext requestContext) {
         ApiResult result = this.trainingLogic.updateTraining(
                 ParameterFilter.getDevid(requestContext),
-                ParameterFilter.getAiid(requestContext));
+                ParameterFilter.getAiid(requestContext),
+                false);
         return result.getResponse(this.serializer).build();
     }
 

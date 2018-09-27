@@ -99,7 +99,7 @@ public class AdminEndpoint {
             @PathParam("devid") String devId,
             @PathParam("aiid") String aiid) {
         ApiResult result = this.trainingLogic.updateTraining(
-                UUID.fromString(devId), UUID.fromString(aiid));
+                UUID.fromString(devId), UUID.fromString(aiid), true);
         return result.getResponse(this.serializer).build();
     }
 

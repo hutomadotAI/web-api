@@ -375,7 +375,7 @@ public class TestTrainingLogic {
 
     @Test
     public void testStopTraining_AI_readonly() throws DatabaseException, AIServices.AiServicesException {
-        testTraining_AI_readonly(() -> this.logic.stopTraining(DEVID_UUID, AIID));
+        testTraining_AI_readonly_fails(() -> this.logic.stopTraining(DEVID_UUID, AIID));
     }
 
     @Test
@@ -396,17 +396,26 @@ public class TestTrainingLogic {
 
     @Test
     public void testUpdateTraining_invalidAi() throws DatabaseException, AIServices.AiServicesException {
-        testTraining_invalidAi(() -> this.logic.updateTraining(DEVID_UUID, AIID));
+        testTraining_invalidAi(() -> this.logic.updateTraining(DEVID_UUID, AIID, false));
     }
 
     @Test
-    public void testUpdateTraining_AI_readonly() throws DatabaseException, AIServices.AiServicesException {
-        testTraining_AI_readonly(() -> this.logic.updateTraining(DEVID_UUID, AIID));
+    public void testUpdateTraining_AI_readonly_disallowed() throws DatabaseException, AIServices.AiServicesException {
+        testTraining_AI_readonly_fails(() -> this.logic.updateTraining(DEVID_UUID, AIID, false));
+    }
+
+    @Test
+    public void testUpdateTraining_AI_readonly_allowed() throws DatabaseException, AIServices.AiServicesException {
+        setupAiReadonlyMode(this.fakeDatabaseAi);
+        when(this.fakeAiServices.getTrainingMaterialsCommon(any(), any(), any())).thenReturn("Q1\nA1");
+        ApiResult result = this.logic.updateTraining(DEVID_UUID, AIID, true);
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+        verify(this.fakeAiServices, times(1)).uploadTraining(any(), any(), any());
     }
 
     @Test
     public void testUpdateTraining_dbException() throws DatabaseException, AIServices.AiServicesException {
-        testTraining_dbException(() -> this.logic.updateTraining(DEVID_UUID, AIID));
+        testTraining_dbException(() -> this.logic.updateTraining(DEVID_UUID, AIID, false));
     }
 
     @Test
@@ -415,7 +424,7 @@ public class TestTrainingLogic {
         when(this.fakeDatabaseAi.getAiTrainingFile(any())).thenReturn(SOMETEXT);
         when(this.fakeAiServices.getTrainingMaterialsCommon(any(), any(), any())).thenReturn(SOMETEXT);
         doThrow(ServerConnector.AiServicesException.class).when(this.fakeAiServices).uploadTraining(any(), any(), any());
-        ApiResult result = this.logic.updateTraining(DEVID_UUID, AIID);
+        ApiResult result = this.logic.updateTraining(DEVID_UUID, AIID, false);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
 
@@ -592,7 +601,7 @@ public class TestTrainingLogic {
         when(this.fakeDatabaseAi.getAiTrainingFile(any())).thenReturn(fileToUpload);
         when(this.fakeDatabaseEntitiesIntents.getIntents(DEVID_UUID, AIID)).thenReturn(Collections.emptyList());
         when(this.fakeAiServices.getTrainingMaterialsCommon(any(), any(), any())).thenReturn(fileToUpload);
-        ApiResult result = this.logic.updateTraining(DEVID_UUID, AIID);
+        ApiResult result = this.logic.updateTraining(DEVID_UUID, AIID, false);
         if (fileToUpload == null) {
             Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
         } else {
@@ -617,7 +626,7 @@ public class TestTrainingLogic {
         when(this.fakeDatabaseAi.getAiTrainingFile(any())).thenReturn(fileToUpload);
         when(this.fakeDatabaseEntitiesIntents.getIntents(DEVID_UUID, AIID)).thenReturn(intentNames);
         when(this.fakeAiServices.getTrainingMaterialsCommon(any(), any(), any())).thenReturn(getTrainingMaterials(fileToUpload, intentNames, userSaysIntent1, userSaysIntent2));
-        ApiResult result = this.logic.updateTraining(DEVID_UUID, AIID);
+        ApiResult result = this.logic.updateTraining(DEVID_UUID, AIID, false);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
 
         verify(this.fakeAiServices).uploadTraining(any(), refEq(AI_IDENTITY),
@@ -649,7 +658,7 @@ public class TestTrainingLogic {
         verify(this.fakeAiServices, never()).startTraining(any(), any());
     }
 
-    private void testTraining_AI_readonly(Supplier<ApiResult> supplier) throws DatabaseException,
+    private void testTraining_AI_readonly_fails(Supplier<ApiResult> supplier) throws DatabaseException,
             AIServices.AiServicesException {
         setupAiReadonlyMode(this.fakeDatabaseAi);
         ApiResult result = supplier.get();
@@ -676,7 +685,7 @@ public class TestTrainingLogic {
         when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(getAi(initialState, false));
         when(this.fakeDatabaseAi.getAiTrainingFile(any())).thenReturn("Q1\nA1");
         when(this.fakeAiServices.getTrainingMaterialsCommon(any(), any(), any())).thenReturn("Q1\nA1");
-        ApiResult result = this.logic.updateTraining(DEVID_UUID, AIID);
+        ApiResult result = this.logic.updateTraining(DEVID_UUID, AIID, false);
         Assert.assertEquals(expectedCode, result.getStatus().getCode());
     }
 

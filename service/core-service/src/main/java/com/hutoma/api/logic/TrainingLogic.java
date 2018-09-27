@@ -300,7 +300,8 @@ public class TrainingLogic {
      * @param aiid
      * @return
      */
-    public ApiResult updateTraining(final UUID devid, final UUID aiid) {
+    public ApiResult updateTraining(final UUID devid, final UUID aiid,
+                                    final boolean allowRetrainReadonlyBot) {
         final String devidString = devid.toString();
         String serverVersion = FeatureToggler.getServerVersionForAi(devid, aiid, this.featureToggler);
         LogMap logMap = LogMap.map("AIID", aiid).put("ServerVersion", serverVersion);
@@ -311,7 +312,7 @@ public class TrainingLogic {
                 this.logger.logUserTraceEvent(LOGFROM, "UpdateTraining - AI not found", devidString, logMap);
                 return ApiError.getNotFound();
             }
-            if (ai.isReadOnly()) {
+            if (!allowRetrainReadonlyBot && ai.isReadOnly()) {
                 this.logger.logUserTraceEvent(LOGFROM, "UpdateTraining - Bot is RO", devidString, logMap);
                 return ApiError.getBadRequest(AILogic.BOT_RO_MESSAGE);
             }
