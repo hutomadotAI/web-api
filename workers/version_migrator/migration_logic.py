@@ -1,7 +1,7 @@
 import asyncio
 import datetime
 import logging
-import enum
+
 from pathlib import Path
 
 import aiohttp
@@ -24,41 +24,6 @@ class LogicError(Exception):
 
 class ApiError(Exception):
     pass
-
-
-class RetrainResult(enum.Enum):
-    PENDING = enum.auto()
-    TRAINING = enum.auto()
-    COMPLETE = enum.auto()
-
-
-class RetrainBotEntry:
-    def __init__(self, iid, ai_id, dev_id, is_published, is_priority=False):
-        self.iid = iid
-        self.ai_id = ai_id
-        self.dev_id = dev_id
-        self.is_published = is_published
-        self.is_priority = is_priority
-        self.result = RetrainResult.PENDING
-
-    def __eq__(self, other):
-        # ID is enough to ensure we are referring to same object
-        return self.iid == other.iid
-
-    def __lt__(self, other):
-        # To sort into priority, deal with publishing first
-        if self.is_published != other.is_published:
-            return self.is_published > other.is_published
-        # then Priority
-        if self.is_priority != other.is_priority:
-            return self.is_priority > other.is_priority
-        # then reverse iid
-        return self.iid > other.iid
-
-    def __repr__(self):
-        s = "RetrainBotEntry(iid={}, ai_id='{}', dev_id='{}', is_published={}, is_priority={})"\
-            .format(self.iid, self.ai_id, self.dev_id, self.is_published, self.is_priority)
-        return s
 
 
 class VersionMigratorLogic:
@@ -120,8 +85,8 @@ class VersionMigratorLogic:
             bots = []
             for iid, ai_id, dev_id, publishing_state in results:
                 is_published = publishing_state == 2
-                retrain_entry = RetrainBotEntry(iid, ai_id, dev_id,
-                                                is_published)
+                retrain_entry = state.RetrainBotEntry(iid, ai_id, dev_id,
+                                                      is_published)
                 if retrain_entry.dev_id in priority_dev_ids:
                     retrain_entry.is_priority = True
                 bots.append(retrain_entry)
@@ -144,7 +109,17 @@ class VersionMigratorLogic:
 
         except Exception:
             self.migration_state.reset()
+            self.migration_task = None
             raise
+
+    async def retrain_cancel(self):
+        if self.migration_state.status == state.Status.INACTIVE:
+            self.logger.info(
+                "Cancel received in INACTIVE state, doing nothing")
+            return
+
+        if self.migration_task is not None:
+            self.migration_task.cancel()
 
     def _call_stored_procedure(self, cursor, sp_name, *args):
         cnx = mysql.connector.connect(**self.db_config)
@@ -175,35 +150,60 @@ class VersionMigratorLogic:
                 migration_time = datetime.datetime.utcnow(
                 ) - self.migration_state.start_time
                 await self._api_wait_for_training(session, bots_in_training, 0)
+                report = self.migration_state.report()
+                completed_bots = report["summary"]["completed"]
+                errored_bots = report["summary"]["errored"]
                 self.logger.info(
-                    "[METRIC][MIGRATION.RETRAIN_ALL.COMPLETED] Migration complete: took %s",
+                    "[METRIC][MIGRATION.RETRAIN_ALL.COMPLETED] Migration complete: took %s, "
+                    + "completed %d, errored %d",
                     migration_time,
-                    extra={"migration_time": migration_time})
+                    completed_bots,
+                    errored_bots,
+                    extra={
+                        "migration_time": migration_time,
+                        "completed": completed_bots,
+                        "errored": errored_bots
+                    })
+        except asyncio.CancelledError:
+            self.logger.warning(
+                "[METRIC][MIGRATION.RETRAIN_ALL.CANCELLED] Retraining cancelled"
+            )
+            self.migration_state.status = state.Status.CANCELLED
+            await self.migration_state.save(self.state_file)
         except Exception:
             self.logger.exception(
-                "[METRIC][MIGRATION.RETRAIN_ALL.ERROR] Error in _retrain_worker")
-            self.migration_state.reset()
+                "[METRIC][MIGRATION.RETRAIN_ALL.ERROR] Error in _retrain_worker"
+            )
+            self.migration_state.status = state.Status.ERRORED
             await self.migration_state.save(self.state_file)
             raise
+        finally:
+            self.migration_task = None
 
     async def _process_bot(self, session, bots_in_training, bot):
         self.logger.info("Processing {}".format(bot))
-        if bot.result is RetrainResult.COMPLETE:
+        if bot.result is state.RetrainResult.COMPLETE:
             self.logger.info("Bot %s already trained", bot.ai_id)
-        elif bot.result is RetrainResult.TRAINING:
+        elif bot.result is state.RetrainResult.ERROR:
+            self.logger.info("Bot %s already errored", bot.ai_id)
+        elif bot.result is state.RetrainResult.TRAINING:
             await self._api_status(session, bot)
             # recheck status as it might have changed
-            if bot.result is RetrainResult.TRAINING:
+            if bot.result is state.RetrainResult.TRAINING:
                 bots_in_training.append((bot, None))
                 self.logger.info("Bot %s is training", bot.ai_id)
-            elif bot.result is RetrainResult.COMPLETE:
+            elif bot.result is state.RetrainResult.COMPLETE:
                 self.logger.info("Bot %s was training, but since completed",
                                  bot.ai_id)
+            elif bot.result is state.RetrainResult.ERROR:
+                self.logger.info("Bot %s was training, but since errored",
+                                 bot.ai_id)
 
-        elif bot.result is RetrainResult.PENDING:
+        elif bot.result is state.RetrainResult.PENDING:
+            bot.result = state.RetrainResult.TRAINING
             await self._api_retrain(session, bot)
-            bots_in_training.append((bot, datetime.datetime.utcnow()))
-            bot.result = RetrainResult.TRAINING
+            if bot.result is state.RetrainResult.TRAINING:
+                bots_in_training.append((bot, datetime.datetime.utcnow()))
 
         await self.migration_state.save(self.state_file)
         await self._api_wait_for_training(session, bots_in_training,
@@ -218,12 +218,14 @@ class VersionMigratorLogic:
                 bot = entry[0]
                 start_time = entry[1]
                 await self._api_status(session, bot)
-                if bot.result is RetrainResult.COMPLETE:
+                if bot.result is state.RetrainResult.COMPLETE:
                     bots_in_training.remove(entry)
                     if start_time:
-                        training_duration = datetime.datetime.utcnow() - start_time
+                        training_duration = datetime.datetime.utcnow(
+                        ) - start_time
                     else:
                         training_duration = None
+                    bot.training_duration = training_duration
                     self.logger.info(
                         "[METRIC][MIGRATION.BOT.COMPLETED] Training complete for %s, took %s",
                         bot.ai_id, training_duration)
@@ -233,14 +235,16 @@ class VersionMigratorLogic:
                                                 bot.ai_id)
         self.logger.info("Sending retrain command for %s", bot.ai_id)
         headers = {'Authorization': "Bearer {}".format(self.api_key)}
-        try:
-            async with session.post(url, headers=headers) as resp:
-                if resp.status != 200:
-                    raise ApiError("POST to {} failed with code {}".format(
-                        url, resp.status))
+        async with session.post(url, headers=headers) as resp:
+            if resp.status == 200:
                 self.logger.debug("POST to %s successful", url)
-        except ApiError:
-            raise
+            else:
+                bot.error_message = "Retrained returned {}".format(resp.status)
+                bot.error_detail = await resp.text()
+                bot.result = state.RetrainResult.ERROR
+                self.logger.warning(
+                    "Retraining command to %s failed with code %d", url,
+                    resp.status)
 
     async def _api_status(self, session, bot):
         url = "{}/admin/migration/{}/{}".format(self.api_url, bot.dev_id,
@@ -256,6 +260,9 @@ class VersionMigratorLogic:
                 self.logger.debug("GET to %s successful, status is %d", url,
                                   status)
                 if status == "ai_training_complete":
-                    bot.result = RetrainResult.COMPLETE
+                    bot.result = state.RetrainResult.COMPLETE
+                elif status == "ai_error":
+                    bot.result = state.RetrainResult.ERROR
+                    bot.error_message = "Bot training error status"
         except ApiError:
             raise

@@ -64,6 +64,11 @@ class VersionMigratorHttp:
         resp = web.Response()
         return resp
 
+    async def http_retrain_cancel(self, req: web.Request):
+        await self.version_migrator_logic.retrain_cancel()
+        resp = web.Response()
+        return resp
+
     async def http_status(self, req: web.Request):
         status = await self.version_migrator_logic.get_status()
         resp = web.web_response.json_response(status)
@@ -119,6 +124,9 @@ def startup(parser, args):
     app.on_startup.append(version_migrator_http.on_startup)
     app.router.add_get(
         "/health", ExceptionWrappedCaller(version_migrator_http.http_health))
+    app.router.add_post(
+        "/retrain_cancel",
+        ExceptionWrappedCaller(version_migrator_http.http_retrain_cancel))
     app.router.add_post(
         "/retrain_all",
         ExceptionWrappedCaller(version_migrator_http.http_retrain_all))
