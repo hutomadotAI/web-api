@@ -27,7 +27,7 @@ public class JsonSerializer {
     private final boolean enablePrettyPrinting;
 
     public JsonSerializer() {
-        this(true);
+        this(false);
     }
 
     public JsonSerializer(final boolean prettyPrinting) {

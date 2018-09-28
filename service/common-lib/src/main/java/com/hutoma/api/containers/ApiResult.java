@@ -4,7 +4,6 @@ import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.containers.sub.Status;
 
 import javax.ws.rs.core.Response;
-import java.nio.charset.StandardCharsets;
 
 /**
  * API result base class
@@ -24,7 +23,7 @@ public class ApiResult {
          return Response.status(
                  this.status.getCode())
                  .entity(serializer.serialize(this))
-                 .encoding(StandardCharsets.UTF_8.name());
+                 .header("Content-Type", "application/json; charset=utf-8");
     }
 
     public ApiResult setCreatedStatus() {
