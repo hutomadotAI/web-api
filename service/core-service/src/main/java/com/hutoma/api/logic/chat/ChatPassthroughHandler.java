@@ -1,6 +1,7 @@
 package com.hutoma.api.logic.chat;
 
 import com.hutoma.api.common.ChatLogger;
+import com.hutoma.api.common.FeatureToggler;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.WebHooks;
 import com.hutoma.api.connectors.chat.AIChatServices;
@@ -16,6 +17,8 @@ import com.hutoma.api.logic.ChatLogic;
 import org.apache.commons.lang.StringUtils;
 
 import javax.inject.Inject;
+import javax.ws.rs.core.Feature;
+import java.util.UUID;
 
 public class ChatPassthroughHandler implements IChatHandler {
 
@@ -26,16 +29,19 @@ public class ChatPassthroughHandler implements IChatHandler {
     private final ChatLogger chatLogger;
     private final ILogger logger;
     private final Tools tools;
+    private final FeatureToggler featureToggler;
     private boolean hasPassthrough;
 
     @Inject
     public ChatPassthroughHandler(final AIChatServices chatServices, final WebHooks webhooks, final Tools tools,
-                                  final ChatLogger chatLogger, final ILogger logger) {
+                                  final ChatLogger chatLogger, final ILogger logger,
+                                  final FeatureToggler featureToggler) {
         this.chatServices = chatServices;
         this.webHooks = webhooks;
         this.tools = tools;
         this.chatLogger = chatLogger;
         this.logger = logger;
+        this.featureToggler = featureToggler;
     }
 
     @Override
@@ -47,9 +53,30 @@ public class ChatPassthroughHandler implements IChatHandler {
         String passthrough = this.chatServices.getAIPassthroughUrl(requestInfo.getDevId(), requestInfo.getAiid());
 
         if (!StringUtils.isEmpty(passthrough)) {
+            // Add telemetry for the request
+            final UUID devId = requestInfo.getDevId();
+            final String devIdString = devId.toString();
+            telemetryMap.add("DevId", devIdString);
+            telemetryMap.add("AIID", requestInfo.getAiid());
+            telemetryMap.add("ChatId", requestInfo.getChatId());
+            telemetryMap.add("Q", requestInfo.getQuestion());
+            telemetryMap.add("PassthroughUrl", passthrough);
+            telemetryMap.add("ChatType", "Passthrough");
+
+            if (this.featureToggler.getStateforDev(devId, "enable-passthrough-url") != FeatureToggler.FeatureState.T1) {
+                this.logger.logUserErrorEvent(LOGFROM,
+                        "Passthrough call not allowed for this user",
+                        devIdString,
+                        LogMap.map("AIID", requestInfo.getAiid())
+                                .put("PassthroughUrl", passthrough));
+                this.chatLogger.logUserErrorEvent(LOGFROM, "Passthrough call not allowed for this user", devIdString,
+                        telemetryMap);
+                throw new ChatLogic.ChatFailedException(ApiError.getBadRequest(
+                        "Passthrough call disallowed for this developer account"));
+            }
             this.hasPassthrough = true;
 
-            final String devIdString = requestInfo.getDevId().toString();
+
 
             ChatResult chatResult = new ChatResult(requestInfo.getQuestion());
             final ChatRequestInfo chatInfo = new ChatRequestInfo(
@@ -58,13 +85,6 @@ public class ChatPassthroughHandler implements IChatHandler {
                     requestInfo.getClientVariables());
             final long startTime = this.tools.getTimestamp();
 
-            // Add telemetry for the request
-            telemetryMap.add("DevId", devIdString);
-            telemetryMap.add("AIID", requestInfo.getAiid());
-            telemetryMap.add("ChatId", requestInfo.getChatId());
-            telemetryMap.add("Q", requestInfo.getQuestion());
-            telemetryMap.add("PassthroughUrl", passthrough);
-            telemetryMap.add("ChatType", "Passthrough");
 
             try {
                 WebHookResponse response = this.webHooks.executePassthroughWebhook(passthrough, chatResult, chatInfo);
@@ -91,7 +111,7 @@ public class ChatPassthroughHandler implements IChatHandler {
                         LogMap.map("AIID", requestInfo.getAiid())
                                 .put("PassthroughUrl", passthrough)
                                 .put("Error", webhookException.getMessage()));
-                this.chatLogger.logChatError(LOGFROM, requestInfo.getDevId().toString(),
+                this.chatLogger.logChatError(LOGFROM, devIdString,
                         webhookException, telemetryMap);
                 throw new ChatLogic.ChatFailedException(ApiError.getInternalServerError());
             }

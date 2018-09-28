@@ -939,6 +939,14 @@ public class AILogic {
 
         boolean hasLinkedSkills = importedBot.getLinkedSkills() != null && !importedBot.getLinkedSkills().isEmpty();
 
+        if (org.apache.commons.lang.StringUtils.isNotBlank(importedBot.getPassthroughUrl())
+                && this.featureToggler.getStateforDev(devId,
+                "enable-passthrough-url") != FeatureToggler.FeatureState.T1) {
+            this.logger.logUserErrorEvent(LOGFROM, "ImportBot - passthrough URL is not enabled for this DevId.",
+                    devId.toString(), null);
+            throw new BotImportException("This bot uses passthrough URL, but this is not available for this DevId.");
+        }
+
         try {
             if (hasLinkedSkills) {
                 // validate that the user owns all linked skills otherwise bail out

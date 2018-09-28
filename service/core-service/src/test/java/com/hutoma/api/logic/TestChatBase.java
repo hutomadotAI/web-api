@@ -97,7 +97,7 @@ public class TestChatBase {
                 this.fakeConditionEvaluator, this.fakeContextVariableExtractor, mock(ILogger.class), this.fakeFeatureToggler);
 
         this.fakePassthroughHandler = new ChatPassthroughHandler(this.fakeChatServices, this.fakeWebHooks, mock(Tools.class),
-                mock(ChatLogger.class), mock(ILogger.class));
+                mock(ChatLogger.class), mock(ILogger.class), this.fakeFeatureToggler);
         this.fakeHandoverHandler = new ChatHandoverHandler(mock(Tools.class));
         this.fakeChatIntenthHandler = new ChatIntentHandler(this.fakeIntentHandler, this.intentProcessor);
         this.fakeRequestBETrigger = new ChatRequestTrigger(this.fakeChatServices);

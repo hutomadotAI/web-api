@@ -848,9 +848,7 @@ public class TestAILogic {
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
 
-    @Test
-    public void testCloneBot() throws DatabaseException {
-        final ApiAi baseAi = TestDataHelper.getSampleAI();
+    private Pair<ApiAi, ApiResult> cloneBotCommon(final ApiAi baseAi, final String passthroughUrl) throws DatabaseException {
         final AiBot originalBot = new AiBot(DEVID_UUID, UUID.fromString(baseAi.getAiid()), 12345, baseAi.getName(), baseAi.getDescription(),
                 "long description", "alert", "badge", BigDecimal.ZERO, "sample", "category", "license", DateTime.now(), "privacy",
                 "classif", "1.0", "videolink", AiBot.PublishingState.NOT_PUBLISHED, AiBot.PublishingType.SKILL, "icon");
@@ -865,7 +863,7 @@ public class TestAILogic {
         final Locale newLanguage = Locale.ITALY;
         final String newTimezone = "Europe/Dublin";
         final List<String> newDefaultResponses = Collections.singletonList("New default response");
-        final String newPassthroughUrl = "passthrough url";
+        final String newPassthroughUrl = passthroughUrl;
 
         ApiAi importedAi = new ApiAi(generatedAiid.toString(), "token", newName, newDescription, DateTime.now(),
                 newIsPrivate, baseAi.getBackendStatus(), baseAi.trainingFileUploaded(), newPersonality,
@@ -888,23 +886,67 @@ public class TestAILogic {
         TestDataHelper.mockDatabaseCreateAIInTrans(this.fakeDatabaseAi, generatedAiid);
 
         AILogic spyLogic = spy(this.aiLogic);
-        ApiAi cloned = (ApiAi) spyLogic.cloneBot(originalBot.getDevId(), originalBot.getAiid(),
+        ApiResult cloned = spyLogic.cloneBot(originalBot.getDevId(), originalBot.getAiid(),
                 newName, newDescription, newIsPrivate, newPersonality, newConfidence, newVoice, newLanguage,
                 newTimezone, newDefaultResponses, newPassthroughUrl);
 
-        ArgumentCaptor<BotStructure> argument = ArgumentCaptor.forClass(BotStructure.class);
-        verify(spyLogic).importBot(any(), argument.capture());
+        return new Pair<>(importedAi, cloned);
+    }
+
+    @Test
+    public void testCloneBot_no_passthrough() throws DatabaseException {
+        final ApiAi baseAi = TestDataHelper.getSampleAI();
+
+        Pair<ApiAi, ApiResult> aiPair = this.cloneBotCommon(baseAi, "");
+
+        ApiAi importedAi = aiPair.getA();
+        ApiAi cloned = (ApiAi) aiPair.getB();
 
         Assert.assertNotEquals(baseAi.getAiid(), cloned.getAiid());
-        Assert.assertEquals(newName, argument.getValue().getName());
-        Assert.assertEquals(newDescription, argument.getValue().getDescription());
-        Assert.assertEquals(newTimezone, argument.getValue().getTimezone());
-        Assert.assertEquals(newLanguage.toLanguageTag(), argument.getValue().getLanguage());
-        Assert.assertEquals(newVoice, argument.getValue().getVoice());
-        Assert.assertEquals(newPersonality, argument.getValue().getPersonality());
+        Assert.assertEquals(importedAi.getName(), cloned.getName());
+        Assert.assertEquals(importedAi.getDescription(), cloned.getDescription());
+        Assert.assertEquals(importedAi.getTimezone(), cloned.getTimezone());
+        Assert.assertEquals(importedAi.getLanguage(), cloned.getLanguage());
+        Assert.assertEquals(importedAi.getVoice(), cloned.getVoice());
+        Assert.assertEquals(importedAi.getPersonality(), cloned.getPersonality());
 
-        Assert.assertEquals(newPassthroughUrl, cloned.getPassthroughUrl());
-        Assert.assertEquals(newDefaultResponses, cloned.getDefaultChatResponses());
+        Assert.assertEquals(importedAi.getPassthroughUrl(), cloned.getPassthroughUrl());
+        Assert.assertEquals(importedAi.getDefaultChatResponses(), cloned.getDefaultChatResponses());
+    }
+
+    @Test
+    public void testCloneBot_passthrough_rejected() throws DatabaseException {
+        final ApiAi baseAi = TestDataHelper.getSampleAI();
+
+
+        Pair<ApiAi, ApiResult> aiPair = this.cloneBotCommon(baseAi, "some_passthrough_url");
+
+        ApiError error = (ApiError) aiPair.getB();
+
+        Assert.assertEquals(error.getStatus().getCode(), 400);
+    }
+
+    @Test
+    public void testCloneBot_passthrough_allowed_if_feature_toggled() throws DatabaseException {
+
+        final ApiAi baseAi = TestDataHelper.getSampleAI();
+        when(this.fakeFeatureToggler.getStateforDev(any(), eq("enable-passthrough-url"))).thenReturn(FeatureToggler.FeatureState.T1);
+
+        Pair<ApiAi, ApiResult> aiPair = this.cloneBotCommon(baseAi, "some_passthrough_url");
+
+        ApiAi importedAi = aiPair.getA();
+        ApiAi cloned = (ApiAi) aiPair.getB();
+
+        Assert.assertNotEquals(baseAi.getAiid(), cloned.getAiid());
+        Assert.assertEquals(importedAi.getName(), cloned.getName());
+        Assert.assertEquals(importedAi.getDescription(), cloned.getDescription());
+        Assert.assertEquals(importedAi.getTimezone(), cloned.getTimezone());
+        Assert.assertEquals(importedAi.getLanguage(), cloned.getLanguage());
+        Assert.assertEquals(importedAi.getVoice(), cloned.getVoice());
+        Assert.assertEquals(importedAi.getPersonality(), cloned.getPersonality());
+
+        Assert.assertEquals(importedAi.getPassthroughUrl(), cloned.getPassthroughUrl());
+        Assert.assertEquals(importedAi.getDefaultChatResponses(), cloned.getDefaultChatResponses());
     }
 
     @Test
@@ -1307,6 +1349,25 @@ public class TestAILogic {
         BotStructure botStructure = getBotstructure();
         expectedException.expect(AILogic.BotImportException.class);
         expectedException.expectMessage("A bot with that name already exists");
+        this.aiLogic.createImportedBot(VALIDDEVID, botStructure);
+    }
+
+    @Test
+    public void testCreateImportedBot_fail_with_passthrough() throws DatabaseException, AILogic.BotImportException {
+        setupFakeImport();
+        BotStructure botStructure = getBotstructure();
+        botStructure.setPassthroughUrl("passthrough_url");
+        expectedException.expect(AILogic.BotImportException.class);
+        expectedException.expectMessage("This bot uses passthrough URL, but this is not available for this DevId.");
+        this.aiLogic.createImportedBot(VALIDDEVID, botStructure);
+    }
+
+    @Test
+    public void testCreateImportedBot_pass_with_passthrough_toggle() throws DatabaseException, AILogic.BotImportException {
+        setupFakeImport();
+        BotStructure botStructure = getBotstructure();
+        botStructure.setPassthroughUrl("passthrough_url");
+        when(this.fakeFeatureToggler.getStateforDev(any(), eq("enable-passthrough-url"))).thenReturn(FeatureToggler.FeatureState.T1);
         this.aiLogic.createImportedBot(VALIDDEVID, botStructure);
     }
 

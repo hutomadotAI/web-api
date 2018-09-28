@@ -1,6 +1,7 @@
 package com.hutoma.api.logic;
 
 import com.google.common.collect.ImmutableMap;
+import com.hutoma.api.common.FeatureToggler;
 import com.hutoma.api.common.TestDataHelper;
 import com.hutoma.api.connectors.BackendServerType;
 import com.hutoma.api.connectors.NoServerAvailableException;
@@ -156,10 +157,31 @@ public class TestChatLogic extends TestChatBase {
      * @throws RequestBase.AiControllerException.
      */
     @Test
-    public void testChat_botPassthrough() throws ChatBackendConnector.AiControllerException, WebHooks.WebHookException,
+    public void testChat_botPassthrough_disallowed() throws ChatBackendConnector.AiControllerException, WebHooks.WebHookException,
             ChatLogic.ChatFailedException {
         String passthroughResponse = "different message.";
         WebHookResponse response = new WebHookResponse(passthroughResponse);
+
+        when(this.fakeChatServices.getAIPassthroughUrl(any(), any())).thenReturn("http://localhost:80");
+        when(this.fakeWebHooks.executePassthroughWebhook(any(), any(), any())).thenReturn(response);
+
+        setupFakeChat(0.7d, SEMANTICRESULT, 0.5d, AIMLRESULT);
+        ApiResult result = getChat(0.2f);
+
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
+        Assert.assertEquals("Passthrough call disallowed for this developer account", result.getStatus().getInfo());
+    }
+
+    /*
+     * Tests for correct passthrough on bots that provide a valid url.
+     * @throws RequestBase.AiControllerException.
+     */
+    @Test
+    public void testChat_botPassthrough_allowed_toggle() throws ChatBackendConnector.AiControllerException, WebHooks.WebHookException,
+            ChatLogic.ChatFailedException {
+        String passthroughResponse = "different message.";
+        WebHookResponse response = new WebHookResponse(passthroughResponse);
+        when(this.fakeFeatureToggler.getStateforDev(any(), eq("enable-passthrough-url"))).thenReturn(FeatureToggler.FeatureState.T1);
 
         when(this.fakeChatServices.getAIPassthroughUrl(any(), any())).thenReturn("http://localhost:80");
         when(this.fakeWebHooks.executePassthroughWebhook(any(), any(), any())).thenReturn(response);

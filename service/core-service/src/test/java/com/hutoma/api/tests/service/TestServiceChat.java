@@ -2,6 +2,7 @@ package com.hutoma.api.tests.service;
 
 import com.google.common.collect.ImmutableMap;
 import com.hutoma.api.common.ChatLogger;
+import com.hutoma.api.common.FeatureToggler;
 import com.hutoma.api.common.TestDataHelper;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.BackendServerType;
@@ -353,9 +354,10 @@ public class TestServiceChat extends ServiceTestBase {
         this.fakeRecognizer = mock(IEntityRecognizer.class);
         this.fakeChatWorkflow = mock(ChatWorkflow.class);
         this.fakeIntentProcessorLogic = mock(IntentProcessor.class);
+        this.fakeFeatureToggler = mock(FeatureToggler.class);
 
         this.fakePassthroughHandler = new ChatPassthroughHandler(this.fakeAiChatServices, this.fakeWebHooks, mock(Tools.class),
-                mock(ChatLogger.class), mock(ILogger.class));
+                mock(ChatLogger.class), mock(ILogger.class), this.fakeFeatureToggler);
         this.fakeChatIntenthHandler = new ChatIntentHandler(this.fakeMemoryIntentHandler, this.fakeIntentProcessorLogic);
         this.fakeRequestBETrigger = new ChatRequestTrigger(this.fakeAiChatServices);
         this.fakeEmbHandler = new ChatEmbHandler(this.fakeMemoryIntentHandler, this.fakeIntentProcessorLogic,
