@@ -16,10 +16,7 @@ import com.hutoma.api.containers.sub.RateLimitStatus;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logic.FacebookChatHandler;
 import com.hutoma.api.logic.chat.ChatDefaultHandler;
-import com.hutoma.api.thread.IThreadConfig;
-import com.hutoma.api.thread.ThreadPool;
-import com.hutoma.api.thread.ThreadSubPool;
-import com.hutoma.api.thread.TrackedThreadSubPool;
+import com.hutoma.api.thread.*;
 import com.hutoma.api.validation.PostFilter;
 import com.hutoma.api.validation.QueryFilter;
 import com.hutoma.api.validation.Validate;
@@ -213,8 +210,8 @@ public abstract class ServiceTestBase extends JerseyTest {
                 bind(AIChatServices.class).to(AIChatServices.class);
                 bind(JerseyClient.class).to(JerseyClient.class);
                 bind(ThreadPool.class).to(ThreadPool.class);
-                bind(ThreadSubPool.class).to(ThreadSubPool.class);
-                bind(TrackedThreadSubPool.class).to(TrackedThreadSubPool.class);
+                bind(ThreadSubPool.class).to(IThreadSubPool.class);
+                bind(TrackedThreadSubPool.class).to(ITrackedThreadSubPool.class);
                 bind(FacebookChatHandler.class).to(FacebookChatHandler.class);
                 bind(CsvIntentReader.class).to(CsvIntentReader.class);
                 // Bind a mock of HttpServletRequest

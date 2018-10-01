@@ -8,7 +8,7 @@ import javax.inject.Inject;
 /***
  * Create a dynamic sub-pool of threads out of the big queue
  */
-public class TrackedThreadSubPool extends ThreadSubPool implements AutoCloseable {
+public class TrackedThreadSubPool extends ThreadSubPool implements AutoCloseable, ITrackedThreadSubPool {
 
     // a list of threads that we have opened
     private final ConcurrentLinkedQueue<Future> threads;
@@ -47,6 +47,7 @@ public class TrackedThreadSubPool extends ThreadSubPool implements AutoCloseable
      * Cancels all tasks immediately
      * If they were running then they get interrupted.
      */
+    @Override
     public final void cancelAll() {
         Future future = this.threads.poll();
         while (future != null) {

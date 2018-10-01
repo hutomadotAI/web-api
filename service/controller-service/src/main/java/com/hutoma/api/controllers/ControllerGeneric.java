@@ -3,7 +3,7 @@ package com.hutoma.api.controllers;
 import com.hutoma.api.common.ControllerConfig;
 import com.hutoma.api.containers.ServiceIdentity;
 import com.hutoma.api.logging.AiServiceStatusLogger;
-import com.hutoma.api.thread.ThreadSubPool;
+import com.hutoma.api.thread.IThreadSubPool;
 import org.glassfish.hk2.api.ServiceLocator;
 
 import javax.inject.Inject;
@@ -18,7 +18,7 @@ public class ControllerGeneric extends ControllerBase {
 
     @Inject
     ControllerGeneric(final ControllerConfig config,
-                      final ThreadSubPool threadSubPool,
+                      final IThreadSubPool threadSubPool,
                       final ServiceLocator serviceLocator,
                       final AiServiceStatusLogger logger,
                       final QueueProcessor queueProcessor) {

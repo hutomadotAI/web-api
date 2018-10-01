@@ -255,7 +255,7 @@ public class QueueProcessor extends TimerTask {
                                         final ServerConnector.AiServicesException exception) {
 
         // queue flag
-        boolean requeueThis = true;
+        boolean requeueThis = !exception.getPermanentError();
         String logMessage;
         // get the first error with a non-zero result code
         ServerConnector.AiServicesException httpError = findFirstSuppressedHttpError(exception);

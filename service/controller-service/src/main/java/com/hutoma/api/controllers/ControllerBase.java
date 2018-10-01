@@ -10,7 +10,7 @@ import com.hutoma.api.containers.ServiceIdentity;
 import com.hutoma.api.containers.sub.ServerAiEntry;
 import com.hutoma.api.containers.sub.ServerRegistration;
 import com.hutoma.api.logging.AiServiceStatusLogger;
-import com.hutoma.api.thread.ThreadSubPool;
+import com.hutoma.api.thread.IThreadSubPool;
 import org.glassfish.hk2.api.ServiceLocator;
 
 import java.util.*;
@@ -24,13 +24,13 @@ public abstract class ControllerBase extends ServerMetadata {
 
     private static final String LOGFROM = "controller";
     private final HashMap<UUID, String> aiHashCodes;
-    private ThreadSubPool threadSubPool;
+    private IThreadSubPool threadSubPool;
     private ServiceLocator serviceLocator;
     private HashSet<UUID> botExclusionList;
     ControllerConfig config;
 
     public ControllerBase(final ControllerConfig config,
-                          final ThreadSubPool threadSubPool,
+                          final IThreadSubPool threadSubPool,
                           final ServiceLocator serviceLocator,
                           final AiServiceStatusLogger logger) {
         super(logger);

@@ -5,7 +5,7 @@ import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.sub.AiIdentity;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
-import com.hutoma.api.thread.TrackedThreadSubPool;
+import com.hutoma.api.thread.ITrackedThreadSubPool;
 
 import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.client.JerseyInvocation;
@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -40,14 +39,14 @@ public class ServerConnector {
     protected final JerseyClient jerseyClient;
     protected final ILogger logger;
     protected final Tools tools;
-    protected final TrackedThreadSubPool threadSubPool;
+    protected final ITrackedThreadSubPool threadSubPool;
     protected final IConnectConfig connectConfig;
 
     @Inject
     public ServerConnector(final ILogger logger, IConnectConfig connectConfig,
                            final JsonSerializer serializer,
                            final Tools tools, final JerseyClient jerseyClient,
-                           final TrackedThreadSubPool threadSubPool) {
+                           final ITrackedThreadSubPool threadSubPool) {
         this.logger = logger;
         this.serializer = serializer;
         this.tools = tools;
@@ -63,24 +62,36 @@ public class ServerConnector {
 
     public static class AiServicesException extends Exception {
         private int responseStatus = 0;
+        private boolean permanentError = false;
 
-        public AiServicesException(String message) {
+        public AiServicesException(final String message) {
             super(message);
         }
 
-        public AiServicesException(String message, int responseStatus) {
+        public AiServicesException(final String message, final int responseStatus) {
             this(message);
             this.responseStatus = responseStatus;
         }
 
-        public static void throwWithSuppressed(String message, Exception suppressed) throws AiServicesException {
+
+        public static AiServicesException createPermanentError(String message) {
+            AiServicesException ex = new AiServicesException(message);
+            ex.permanentError = true;
+            return ex;
+        }
+
+        public static AiServicesException createWithSuppressed(String message, Exception suppressed) {
             AiServicesException ex = new AiServicesException(message);
             ex.addSuppressed(suppressed);
-            throw ex;
+            return ex;
         }
 
         public int getResponseStatus() {
             return this.responseStatus;
+        }
+
+        public boolean getPermanentError() {
+            return this.permanentError;
         }
     }
 

@@ -11,6 +11,7 @@ import com.hutoma.api.connectors.aiservices.EmbServicesConnector;
 import com.hutoma.api.connectors.db.DatabaseAI;
 import com.hutoma.api.connectors.db.DatabaseUser;
 import com.hutoma.api.logging.ILogger;
+import com.hutoma.api.thread.ITrackedThreadSubPool;
 import com.hutoma.api.thread.TrackedThreadSubPool;
 
 import org.glassfish.jersey.client.JerseyClient;
@@ -33,7 +34,7 @@ public class TestChatBackendConnector {
     private ChatEmbConnectorUnderTest connector;
     private JerseyClient fakeJerseyClient;
     private Tools fakeTools;
-    private TrackedThreadSubPool fakeTrackedThreadPool;
+    private ITrackedThreadSubPool fakeTrackedThreadPool;
     private EmbServicesConnector fakeEmbServicesConnector;
     private JerseyInvocation.Builder fakeJerseyBuilder;
     private JerseyWebTarget fakeTarget;
@@ -63,9 +64,9 @@ public class TestChatBackendConnector {
     public static class ChatEmbConnectorUnderTest extends ChatEmbConnector {
 
         ChatEmbConnectorUnderTest(final JerseyClient jerseyClient, final Tools tools, final Config config,
-                                         final TrackedThreadSubPool threadSubPool, final ILogger logger,
-                                         final JsonSerializer serializer,
-                                         final EmbServicesConnector controllerConnector) {
+                                  final ITrackedThreadSubPool threadSubPool, final ILogger logger,
+                                  final JsonSerializer serializer,
+                                  final EmbServicesConnector controllerConnector) {
             super(jerseyClient, tools, config, threadSubPool, logger, serializer, controllerConnector,
                     mock(Provider.class));
         }

@@ -18,7 +18,7 @@ import com.hutoma.api.containers.sub.AiIdentity;
 import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
-import com.hutoma.api.thread.TrackedThreadSubPool;
+import com.hutoma.api.thread.ITrackedThreadSubPool;
 
 import org.glassfish.jersey.client.JerseyClient;
 
@@ -42,7 +42,7 @@ public class AiServicesQueue extends ServerConnector {
                            final JerseyClient jerseyClient,
                            final JsonSerializer serializer,
                            final Tools tools,
-                           final TrackedThreadSubPool threadSubPool) {
+                           final ITrackedThreadSubPool threadSubPool) {
         super(logger, connectConfig, serializer, tools, jerseyClient, threadSubPool);
         this.database = database;
     }

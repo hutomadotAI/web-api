@@ -16,7 +16,7 @@ import com.hutoma.api.containers.sub.ChatState;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
 import com.hutoma.api.logic.ChatLogic;
-import com.hutoma.api.thread.TrackedThreadSubPool;
+import com.hutoma.api.thread.ITrackedThreadSubPool;
 import org.glassfish.jersey.client.JerseyClient;
 
 import javax.inject.Inject;
@@ -43,7 +43,7 @@ public class AIChatServices extends ServerConnector {
                           final IConnectConfig connectConfig,
                           final JsonSerializer serializer,
                           final Tools tools, final Config config, final JerseyClient jerseyClient,
-                          final TrackedThreadSubPool threadSubPool,
+                          final ITrackedThreadSubPool threadSubPool,
                           final ChatConnectors chatConnectors) {
         super(logger, connectConfig, serializer, tools, jerseyClient, threadSubPool);
         this.config = config;

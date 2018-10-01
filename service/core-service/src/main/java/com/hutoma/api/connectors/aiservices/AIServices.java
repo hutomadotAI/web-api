@@ -13,7 +13,7 @@ import com.hutoma.api.containers.sub.AiIdentity;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
 import com.hutoma.api.memory.MemoryIntentHandler;
-import com.hutoma.api.thread.TrackedThreadSubPool;
+import com.hutoma.api.thread.ITrackedThreadSubPool;
 import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
@@ -46,7 +46,7 @@ public class AIServices extends ServerConnector {
                       final JsonSerializer serializer,
                       final Tools tools,
                       final JerseyClient jerseyClient,
-                      final TrackedThreadSubPool threadSubPool,
+                      final ITrackedThreadSubPool threadSubPool,
                       final AiServicesQueue queueServices,
                       final BackendServicesConnectors connectors) {
         super(logger, connectConfig, serializer, tools, jerseyClient, threadSubPool);
@@ -67,7 +67,7 @@ public class AIServices extends ServerConnector {
         try {
             this.connectors.startTraining(this.queueServices, status, aiIdentity);
         } catch (DatabaseException e) {
-            AiServicesException.throwWithSuppressed("failed to start training", e);
+            throw AiServicesException.createWithSuppressed("failed to start training", e);
         }
     }
 
@@ -82,7 +82,7 @@ public class AIServices extends ServerConnector {
         try {
             this.connectors.stopTraining(this.queueServices, backendStatus, aiIdentity);
         } catch (DatabaseException e) {
-            AiServicesException.throwWithSuppressed("failed to stop training", e);
+            throw AiServicesException.createWithSuppressed("failed to stop training", e);
         }
     }
 
@@ -97,7 +97,7 @@ public class AIServices extends ServerConnector {
         try {
             this.connectors.deleteAi(this.queueServices, backendStatus, aiIdentity);
         } catch (DatabaseException e) {
-            AiServicesException.throwWithSuppressed("failed to delete ai", e);
+            throw AiServicesException.createWithSuppressed("failed to delete ai", e);
         }
     }
 
@@ -139,7 +139,7 @@ public class AIServices extends ServerConnector {
         try {
             connectors.uploadTraining(this.queueServices, backendStatus, aiIdentity);
         } catch (DatabaseException e) {
-            AiServicesException.throwWithSuppressed("failed to upload training materials", e);
+            throw AiServicesException.createWithSuppressed("failed to upload training materials", e);
         }
 
         // upload the file to each backend server (one of each kind)
@@ -257,9 +257,8 @@ public class AIServices extends ServerConnector {
         try {
             return connectors.getListOfPrimaryEndpoints(aiIdentity, this.serializer, this.logger);
         } catch (NoServerAvailableException noServer) {
-            AiServicesException.throwWithSuppressed(noServer.getMessage(), noServer);
+            throw AiServicesException.createWithSuppressed(noServer.getMessage(), noServer);
         }
-        return new ArrayList<>(); // this will never happen because the throwsWithSuppressed always throws
     }
 
     public static class AiInfo {

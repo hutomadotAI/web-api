@@ -18,10 +18,7 @@ import com.hutoma.api.controllers.ControllerGeneric;
 import com.hutoma.api.controllers.ControllerMap;
 import com.hutoma.api.logging.AiServiceStatusLogger;
 import com.hutoma.api.logging.ILogger;
-import com.hutoma.api.thread.IThreadConfig;
-import com.hutoma.api.thread.ThreadPool;
-import com.hutoma.api.thread.ThreadSubPool;
-import com.hutoma.api.thread.TrackedThreadSubPool;
+import com.hutoma.api.thread.*;
 import com.hutoma.api.validation.ControllerPostFilter;
 import com.hutoma.api.validation.ControllerQueryFilter;
 
@@ -135,8 +132,8 @@ public abstract class ServiceTestBase extends JerseyTest {
                 bind(HTMLExtractor.class).to(HTMLExtractor.class);
                 bind(JerseyClient.class).to(JerseyClient.class);
                 bind(ThreadPool.class).to(ThreadPool.class);
-                bind(ThreadSubPool.class).to(ThreadSubPool.class);
-                bind(TrackedThreadSubPool.class).to(TrackedThreadSubPool.class);
+                bind(ThreadSubPool.class).to(IThreadSubPool.class);
+                bind(TrackedThreadSubPool.class).to(ITrackedThreadSubPool.class);
                 // Bind a mock of HttpServletRequest
                 bind(mock(HttpServletRequest.class)).to(HttpServletRequest.class);
 

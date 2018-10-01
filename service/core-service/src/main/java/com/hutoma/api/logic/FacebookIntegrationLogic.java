@@ -5,7 +5,7 @@ import com.hutoma.api.common.Config;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.logging.LogMap;
-import com.hutoma.api.thread.ThreadSubPool;
+import com.hutoma.api.thread.IThreadSubPool;
 import com.hutoma.api.containers.facebook.FacebookNotification;
 
 import java.net.HttpURLConnection;
@@ -20,12 +20,12 @@ public class FacebookIntegrationLogic {
     private final ILogger logger;
     private final Config config;
     private final JsonSerializer serializer;
-    private final ThreadSubPool threadSubPool;
+    private final IThreadSubPool threadSubPool;
     private Provider<FacebookChatHandler> chatHandlerProvider;
 
     @Inject
     public FacebookIntegrationLogic(final ILogger logger, final Config config,
-                                    final JsonSerializer serializer, ThreadSubPool threadSubPool,
+                                    final JsonSerializer serializer, IThreadSubPool threadSubPool,
                                     Provider<FacebookChatHandler> chatHandlerProvider) {
         this.logger = logger;
         this.config = config;

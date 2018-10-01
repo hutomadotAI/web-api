@@ -47,7 +47,7 @@ public class TestThreadPool {
     @Test
     public void runOne() throws ExecutionException, InterruptedException {
         this.pool = getPool(1024, 100);
-        TrackedThreadSubPool subPool = new TrackedThreadSubPool(this.pool);
+        ITrackedThreadSubPool subPool = new TrackedThreadSubPool(this.pool);
         makeTasksAndAwait(subPool, 50, 1);
         Assert.assertEquals(1, this.pool.getPoolSize());
     }
@@ -55,7 +55,7 @@ public class TestThreadPool {
     @Test
     public void runMany() throws ExecutionException, InterruptedException {
         this.pool = getPool(1024, 100);
-        TrackedThreadSubPool subPool = new TrackedThreadSubPool(this.pool);
+        ITrackedThreadSubPool subPool = new TrackedThreadSubPool(this.pool);
         makeTasksAndAwait(subPool, 50, 10);
         Assert.assertEquals(10, this.pool.getPoolSize());
     }
@@ -63,7 +63,7 @@ public class TestThreadPool {
     @Test
     public void runManyEnd() throws ExecutionException, InterruptedException {
         this.pool = getPool(1024, 0);
-        TrackedThreadSubPool subPool = new TrackedThreadSubPool(this.pool);
+        ITrackedThreadSubPool subPool = new TrackedThreadSubPool(this.pool);
         makeTasksAndAwait(subPool, 2, 32);
         Thread.sleep(50);
         Assert.assertEquals(16, this.pool.getPoolSize());
@@ -72,7 +72,7 @@ public class TestThreadPool {
     @Test
     public void runManyCancel() throws ExecutionException, InterruptedException {
         this.pool = getPool(1024, 0);
-        TrackedThreadSubPool subPool = new TrackedThreadSubPool(this.pool);
+        ITrackedThreadSubPool subPool = new TrackedThreadSubPool(this.pool);
         List<Future> tasks = makeTasks(subPool, 200, 32);
         subPool.cancelAll();
         int cancelled = waitForTermination(tasks);
@@ -99,7 +99,7 @@ public class TestThreadPool {
         }
     }
 
-    private void makeTasksAndAwait(final TrackedThreadSubPool subPool, final int taskDurationMs, final int howManyTasks) throws InterruptedException, ExecutionException {
+    private void makeTasksAndAwait(final ITrackedThreadSubPool subPool, final int taskDurationMs, final int howManyTasks) throws InterruptedException, ExecutionException {
         waitForTermination(makeTasks(subPool, taskDurationMs, howManyTasks));
     }
 
@@ -115,7 +115,7 @@ public class TestThreadPool {
         return exceptions;
     }
 
-    private ArrayList<Future> makeTasks(final TrackedThreadSubPool subPool, final int taskDurationMs, final int howManyTasks) throws InterruptedException, ExecutionException {
+    private ArrayList<Future> makeTasks(final ITrackedThreadSubPool subPool, final int taskDurationMs, final int howManyTasks) throws InterruptedException, ExecutionException {
         ArrayList<Future> futures = new ArrayList<>();
         for (int i = 0; i < howManyTasks; i++) {
             TestThread thread = new TestThread(taskDurationMs);

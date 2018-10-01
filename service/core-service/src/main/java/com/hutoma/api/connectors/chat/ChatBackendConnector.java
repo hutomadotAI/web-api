@@ -16,7 +16,7 @@ import com.hutoma.api.containers.sub.ChatState;
 import com.hutoma.api.containers.sub.ServerEndpointRequestMulti;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
-import com.hutoma.api.thread.TrackedThreadSubPool;
+import com.hutoma.api.thread.ITrackedThreadSubPool;
 import org.apache.commons.lang.StringUtils;
 import org.glassfish.jersey.client.JerseyClient;
 
@@ -39,7 +39,7 @@ public abstract class ChatBackendConnector {
     protected final Config config;
     protected final ILogger logger;
     protected final JsonSerializer serializer;
-    private final TrackedThreadSubPool threadSubPool;
+    private final ITrackedThreadSubPool threadSubPool;
     private final ControllerConnector controllerConnector;
     private final Provider<ChatBackendRequester> requesterProvider;
 
@@ -47,7 +47,7 @@ public abstract class ChatBackendConnector {
 
     @Inject
     public ChatBackendConnector(final JerseyClient jerseyClient, final Tools tools, final Config config,
-                                final TrackedThreadSubPool threadSubPool,
+                                final ITrackedThreadSubPool threadSubPool,
                                 final ILogger logger, final JsonSerializer serializer,
                                 final ControllerConnector controllerConnector,
                                 final Provider<ChatBackendRequester> requesterProvider) {

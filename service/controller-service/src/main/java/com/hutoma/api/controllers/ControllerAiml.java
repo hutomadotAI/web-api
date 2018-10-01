@@ -11,7 +11,7 @@ import com.hutoma.api.containers.ServiceIdentity;
 import com.hutoma.api.containers.sub.ServerAiEntry;
 import com.hutoma.api.containers.sub.ServerRegistration;
 import com.hutoma.api.logging.AiServiceStatusLogger;
-import com.hutoma.api.thread.ThreadSubPool;
+import com.hutoma.api.thread.IThreadSubPool;
 
 import org.glassfish.hk2.api.ServiceLocator;
 
@@ -31,7 +31,7 @@ public class ControllerAiml extends ControllerBase {
     private final QueueProcessor queueProcessor;
 
     @Inject
-    public ControllerAiml(final ControllerConfig config, final ThreadSubPool threadSubPool,
+    public ControllerAiml(final ControllerConfig config, final IThreadSubPool threadSubPool,
                           final ServiceLocator serviceLocator, final AiServiceStatusLogger logger,
                           final QueueProcessor queueProcessor) {
         super(config, threadSubPool, serviceLocator, logger);

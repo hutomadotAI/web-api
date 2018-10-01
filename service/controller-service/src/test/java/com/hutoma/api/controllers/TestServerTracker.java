@@ -5,6 +5,7 @@ import com.hutoma.api.connectors.BackendServerType;
 import com.hutoma.api.containers.ServiceIdentity;
 import com.hutoma.api.containers.sub.ServerRegistration;
 import com.hutoma.api.logging.ILogger;
+import com.hutoma.api.thread.IThreadSubPool;
 import com.hutoma.api.thread.ThreadSubPool;
 
 import org.glassfish.jersey.client.JerseyClient;
@@ -70,7 +71,7 @@ public class TestServerTracker {
 
         public ServerTrackerUnderTest(final ControllerConfig config, final Tools tools, final JerseyClient jerseyClient,
                                       final JsonSerializer jsonSerializer, final ILogger logger,
-                                      final ThreadSubPool threadSubPool) {
+                                      final IThreadSubPool threadSubPool) {
             super(config, tools, jerseyClient, jsonSerializer, logger, threadSubPool);
         }
 

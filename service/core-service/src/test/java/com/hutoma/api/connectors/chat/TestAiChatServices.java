@@ -17,6 +17,7 @@ import com.hutoma.api.containers.sub.ChatState;
 import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logic.ChatLogic;
+import com.hutoma.api.thread.ITrackedThreadSubPool;
 import com.hutoma.api.thread.TrackedThreadSubPool;
 
 import org.glassfish.jersey.client.JerseyClient;
@@ -48,7 +49,7 @@ public class TestAiChatServices {
     private ChatEmbConnector fakeRequestEmb;
     private Config fakeConfig;
     private AIChatServices chatServices;
-    private TrackedThreadSubPool threadSubPool;
+    private ITrackedThreadSubPool threadSubPool;
     private ChatConnectors fakeChatConnectors;
 
 

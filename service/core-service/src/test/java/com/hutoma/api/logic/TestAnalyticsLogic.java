@@ -58,7 +58,7 @@ public class TestAnalyticsLogic {
 
     @Test
     public void testAnalytics_getDateFrom_null_usesDefault() {
-        final DateTime expected = DateTime.now().minusDays(AnalyticsLogic.DEFAULT_DATE_FROM);
+        final DateTime expected = DateTime.now(DateTimeZone.UTC).minusDays(AnalyticsLogic.DEFAULT_DATE_FROM);
         DateTime dt = AnalyticsLogic.getDateFrom("");
         Assert.assertEquals(expected.getDayOfYear(), dt.getDayOfYear());
         dt = AnalyticsLogic.getDateFrom(null);

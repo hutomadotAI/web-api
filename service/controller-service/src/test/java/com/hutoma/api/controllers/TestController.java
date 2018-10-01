@@ -6,6 +6,7 @@ import com.hutoma.api.containers.sub.ServerAiEntry;
 import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.logging.AiServiceStatusLogger;
 import com.hutoma.api.thread.IThreadConfig;
+import com.hutoma.api.thread.ITrackedThreadSubPool;
 import com.hutoma.api.thread.ThreadPool;
 import com.hutoma.api.thread.TrackedThreadSubPool;
 
@@ -32,7 +33,7 @@ public class TestController {
     ControllerConfig config;
     IThreadConfig fakeThreadConfig;
     ThreadPool threadPool;
-    TrackedThreadSubPool subPool;
+    ITrackedThreadSubPool subPool;
 
     ControllerUnderTest controllerUnderTest;
 
@@ -94,7 +95,7 @@ public class TestController {
 
     public static class ControllerUnderTest extends ControllerBase {
 
-        public ControllerUnderTest(ControllerConfig config, final TrackedThreadSubPool threadSubPool,
+        public ControllerUnderTest(ControllerConfig config, final ITrackedThreadSubPool threadSubPool,
                                    final AiServiceStatusLogger logger) {
             super(config, threadSubPool, null, logger);
         }

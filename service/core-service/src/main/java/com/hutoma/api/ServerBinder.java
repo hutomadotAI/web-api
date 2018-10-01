@@ -30,10 +30,7 @@ import com.hutoma.api.memory.ExternalEntityRecognizer;
 import com.hutoma.api.memory.IEntityRecognizer;
 import com.hutoma.api.memory.IMemoryIntentHandler;
 import com.hutoma.api.memory.MemoryIntentHandler;
-import com.hutoma.api.thread.IThreadConfig;
-import com.hutoma.api.thread.ThreadPool;
-import com.hutoma.api.thread.ThreadSubPool;
-import com.hutoma.api.thread.TrackedThreadSubPool;
+import com.hutoma.api.thread.*;
 import com.hutoma.api.validation.QueryFilter;
 import com.hutoma.api.validation.Validate;
 
@@ -70,8 +67,8 @@ public class ServerBinder extends AbstractBinder {
                 .to(IConnectConfig.class).in(Singleton.class);
         bind(DatabaseConnectionPool.class).to(DatabaseConnectionPool.class).in(Singleton.class);
         bind(ThreadPool.class).to(ThreadPool.class).in(Singleton.class);
-        bind(ThreadSubPool.class).to(ThreadSubPool.class);
-        bind(TrackedThreadSubPool.class).to(TrackedThreadSubPool.class);
+        bind(ThreadSubPool.class).to(IThreadSubPool.class);
+        bind(TrackedThreadSubPool.class).to(ITrackedThreadSubPool.class);
         bind(QueryFilter.class).to(QueryFilter.class);
 
         // logging

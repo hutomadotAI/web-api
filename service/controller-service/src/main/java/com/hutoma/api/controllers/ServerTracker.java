@@ -9,7 +9,7 @@ import com.hutoma.api.containers.sub.ServerRegistration;
 import com.hutoma.api.logging.CentralLogger;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
-import com.hutoma.api.thread.ThreadSubPool;
+import com.hutoma.api.thread.IThreadSubPool;
 
 import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.client.JerseyInvocation;
@@ -39,7 +39,7 @@ public class ServerTracker implements Callable, IServerEndpoint {
     private final JerseyClient jerseyClient;
     private final JsonSerializer jsonSerializer;
     private final ILogger logger;
-    private final ThreadSubPool threadSubPool;
+    private final IThreadSubPool threadSubPool;
     private long lastValidHeartbeat = 0;
     private long lastHeartbeatAttempt = 0;
     private String serverIdentity = "(uninitialised)";
@@ -53,7 +53,7 @@ public class ServerTracker implements Callable, IServerEndpoint {
     public ServerTracker(final ControllerConfig config, final Tools tools,
                          final JerseyClient jerseyClient,
                          final JsonSerializer jsonSerializer, final ILogger logger,
-                         final ThreadSubPool threadSubPool) {
+                         final IThreadSubPool threadSubPool) {
         this.config = config;
         this.tools = tools;
         this.jsonSerializer = jsonSerializer;

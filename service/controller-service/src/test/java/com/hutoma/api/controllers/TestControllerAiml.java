@@ -10,6 +10,7 @@ import com.hutoma.api.containers.sub.ServerRegistration;
 import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.logging.AiServiceStatusLogger;
 import com.hutoma.api.logging.ILogger;
+import com.hutoma.api.thread.IThreadSubPool;
 import com.hutoma.api.thread.ThreadSubPool;
 
 import org.glassfish.jersey.client.JerseyClient;
@@ -30,14 +31,14 @@ public class TestControllerAiml {
     private ControllerConfig config;
     private Tools tools;
     private ControllerAiml test;
-    private ThreadSubPool fakeThreadSubPool;
+    private IThreadSubPool fakeIThreadSubPool;
 
     @Before
     public void setUp() {
         this.tools = mock(Tools.class);
         this.config = mock(ControllerConfig.class);
-        this.fakeThreadSubPool = mock(ThreadSubPool.class);
-        this.test = new ControllerAiml(TestControllerAiml.this.config, this.fakeThreadSubPool, null,
+        this.fakeIThreadSubPool = mock(ThreadSubPool.class);
+        this.test = new ControllerAiml(TestControllerAiml.this.config, this.fakeIThreadSubPool, null,
                 mock(AiServiceStatusLogger.class), mock(QueueProcessor.class)) {
             @Override
             protected ServerTracker createNewServerTracker() {

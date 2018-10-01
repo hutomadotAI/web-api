@@ -9,7 +9,7 @@ import javax.inject.Inject;
  * A proxy for the singleton main threadpool that does
  * not allow the caller to shutdown the pool or anything like that
  */
-public class ThreadSubPool {
+public class ThreadSubPool implements IThreadSubPool {
 
     // copy of executor service from the big pool
     private final ExecutorService executorService;
@@ -24,6 +24,7 @@ public class ThreadSubPool {
      * @param runnable runnable task
      * @return a future
      */
+    @Override
     public Future submit(Runnable runnable) {
         return this.executorService.submit(runnable);
     }
@@ -33,6 +34,7 @@ public class ThreadSubPool {
      * @param callable callable task
      * @return a future
      */
+    @Override
     public Future submit(Callable callable) {
         return this.executorService.submit(callable);
     }

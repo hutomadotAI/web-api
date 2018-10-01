@@ -12,7 +12,7 @@ import com.hutoma.api.containers.sub.AiIdentity;
 import com.hutoma.api.containers.sub.DevPlan;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
-import com.hutoma.api.thread.TrackedThreadSubPool;
+import com.hutoma.api.thread.ITrackedThreadSubPool;
 import org.glassfish.jersey.client.JerseyClient;
 
 import javax.inject.Inject;
@@ -35,7 +35,7 @@ public class AIQueueServices extends ServerConnector {
     public AIQueueServices(final DatabaseAiStatusUpdates databaseAiStatusUpdates, final ILogger logger,
                            final IConnectConfig connectConfig,
                            final JsonSerializer serializer, final Tools tools,
-                           final JerseyClient jerseyClient, final TrackedThreadSubPool threadSubPool) {
+                           final JerseyClient jerseyClient, final ITrackedThreadSubPool threadSubPool) {
         super(logger, connectConfig, serializer, tools, jerseyClient, threadSubPool);
         this.databaseAiStatusUpdates = databaseAiStatusUpdates;
     }
@@ -113,6 +113,10 @@ public class AIQueueServices extends ServerConnector {
             devPlan = this.databaseAiStatusUpdates.getDevPlan(aiIdentity.getDevId());
         } catch (DatabaseException ex) {
             throw new AiServicesException("Could not get plan for devId " + aiIdentity.getDevId());
+        }
+
+        if (devPlan == null) {
+            throw AiServicesException.createPermanentError("Non-existent dev plan for devId " + aiIdentity.getDevId());
         }
 
         LogMap logMap = LogMap.map("Op", "train-start")
