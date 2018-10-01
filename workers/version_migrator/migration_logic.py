@@ -146,11 +146,12 @@ class VersionMigratorLogic:
 
                 for bot in self.migration_state.bots:
                     await self._process_bot(session, bots_in_training, bot)
+                await self._api_wait_for_training(session, bots_in_training, 0)
+
                 self.migration_state.status = state.Status.INACTIVE
                 await self.migration_state.save(self.state_file)
                 migration_time = datetime.datetime.utcnow(
                 ) - self.migration_state.start_time
-                await self._api_wait_for_training(session, bots_in_training, 0)
                 report = self.migration_state.report()
                 completed_bots = report["summary"]["completed"]
                 errored_bots = report["summary"]["errored"]
