@@ -70,9 +70,10 @@ class VersionMigratorLogic:
             return self.migration_state.report()
 
     async def start_retrain_all(self):
-        if (self.migration_state.status != state.Status.INACTIVE):
+        if (self.migration_state.status == state.Status.RUNNING or
+                self.migration_state.status == state.Status.INITIALIZING):
             raise LogicError("Can't retrain in state {}".format(
-                self.migration_state.status.value))
+                self.migration_state.status.name))
 
         self.migration_state.reset()
         self.migration_state.status = state.Status.INITIALIZING
@@ -211,14 +212,20 @@ class VersionMigratorLogic:
 
     async def _api_wait_for_training(self, session, bots_in_training,
                                      max_count):
+        last_log = datetime.datetime.utcnow()
         while len(bots_in_training) > max_count:
+            if ((datetime.datetime.utcnow() - last_log).total_seconds() > 20.0):
+                bot_ids = [bot[0].ai_id for bot in bots_in_training]
+                self.logger.info("Waiting for bots %s to complete", bot_ids)
+                last_log = datetime.datetime.utcnow()
             await asyncio.sleep(1)
             bots_in_training_copy = bots_in_training.copy()
             for entry in bots_in_training_copy:
                 bot = entry[0]
                 start_time = entry[1]
                 await self._api_status(session, bot)
-                if bot.result is state.RetrainResult.COMPLETE:
+                if (bot.result is state.RetrainResult.COMPLETE or
+                        bot.result is state.RetrainResult.ERROR):
                     bots_in_training.remove(entry)
                     if start_time:
                         training_duration = datetime.datetime.utcnow(
@@ -227,8 +234,8 @@ class VersionMigratorLogic:
                         training_duration = None
                     bot.training_duration = training_duration
                     self.logger.info(
-                        "[METRIC][MIGRATION.BOT.COMPLETED] Training complete for %s, took %s",
-                        bot.ai_id, training_duration)
+                        "[METRIC][MIGRATION.BOT.%s] Training complete for %s, took %s",
+                        bot.result.name, bot.ai_id, training_duration)
 
     async def _api_retrain(self, session, bot):
         url = "{}/admin/migration/{}/{}".format(self.api_url, bot.dev_id,
@@ -250,19 +257,17 @@ class VersionMigratorLogic:
         url = "{}/admin/migration/{}/{}".format(self.api_url, bot.dev_id,
                                                 bot.ai_id)
         headers = {'Authorization': "Bearer {}".format(self.api_key)}
-        try:
-            async with session.get(url, headers=headers) as resp:
-                if resp.status != 200:
-                    raise ApiError("GET to {} failed with code {}".format(
-                        url, resp.status))
+        async with session.get(url, headers=headers) as resp:
+            if resp.status == 200:
                 resp_json = await resp.json()
                 status = resp_json["status"]["info"]
-                self.logger.debug("GET to %s successful, status is %d", url,
-                                  status)
+                self.logger.debug("GET to %s successful", url)
                 if status == "ai_training_complete":
                     bot.result = state.RetrainResult.COMPLETE
                 elif status == "ai_error":
                     bot.result = state.RetrainResult.ERROR
                     bot.error_message = "Bot training error status"
-        except ApiError:
-            raise
+            else:
+                self.logger.warning(
+                    "API status command to %s failed with code %d", url,
+                    resp.status)
