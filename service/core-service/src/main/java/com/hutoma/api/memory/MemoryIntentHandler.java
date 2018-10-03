@@ -14,12 +14,12 @@ import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
 import com.hutoma.api.logic.ChatLogic;
 
+import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.inject.Inject;
 
 /**
  * Memory Intent Handler.
@@ -124,19 +124,27 @@ public class MemoryIntentHandler implements IMemoryIntentHandler {
             // intent configuration
             for (IntentVariable intentVar : apiIntent.getVariables()) {
                 ApiEntity apiEntity = this.databaseIntents.getEntity(devId, intentVar.getEntityName());
-                MemoryVariable variable = new MemoryVariable(
-                        intentVar.getEntityName(),
-                        null,
-                        intentVar.isRequired(),
-                        apiEntity.getEntityValueList(),
-                        intentVar.getPrompts(),
-                        intentVar.getNumPrompts(),
-                        0,
-                        apiEntity.isSystem(),
-                        intentVar.isPersistent(),
-                        intentVar.getLabel(),
-                        intentVar.getClearOnEntry());
-                variables.add(variable);
+                if (apiEntity == null) {
+                    // Should not happen, but in case a rogue entity was able to squeeze through the cracks,
+                    // make sure we log it and move on
+                    this.logger.logUserWarnEvent(LOGFROM, "Not able to retrieve entity", devId.toString(),
+                            LogMap.map("AIID", aiid).put("Entity", intentVar.getEntityName())
+                                    .put("Intent", intentName));
+                } else {
+                    MemoryVariable variable = new MemoryVariable(
+                            intentVar.getEntityName(),
+                            null,
+                            intentVar.isRequired(),
+                            apiEntity.getEntityValueList(),
+                            intentVar.getPrompts(),
+                            intentVar.getNumPrompts(),
+                            0,
+                            apiEntity.isSystem(),
+                            intentVar.isPersistent(),
+                            intentVar.getLabel(),
+                            intentVar.getClearOnEntry());
+                    variables.add(variable);
+                }
             }
             return new MemoryIntent(intentName, aiid, chatId, variables, false);
         }

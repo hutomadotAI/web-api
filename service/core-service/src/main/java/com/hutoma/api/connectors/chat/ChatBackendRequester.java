@@ -1,6 +1,7 @@
 package com.hutoma.api.connectors.chat;
 
 import com.hutoma.api.common.Config;
+import com.hutoma.api.common.FeatureToggler;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.InvocationResult;
@@ -14,7 +15,6 @@ import com.hutoma.api.logging.ILogger;
 import org.apache.commons.lang.StringUtils;
 import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.client.JerseyWebTarget;
-import com.hutoma.api.common.FeatureToggler;
 
 import javax.inject.Inject;
 import javax.ws.rs.client.Entity;
@@ -171,7 +171,15 @@ public class ChatBackendRequester implements Callable<InvocationResult> {
                     .path(this.ai.getAiid().toString())
                     .path("chat_v2");
 
-            response = target.request()
+            // ChatId is required for AIML so sessions can be distinguished
+            if (chatParamsThisAi.containsKey("chatId")) {
+                String chatId = chatParamsThisAi.get("chatId");
+                if (StringUtils.isNotEmpty(chatId)) {
+                    target = target.queryParam("chatId", chatId);
+                }
+            }
+            response = target
+                    .request()
                     .property(CONNECT_TIMEOUT, (int) this.config.getBackendConnectCallTimeoutMs())
                     .property(READ_TIMEOUT, (int) timeRemaining)
                     .post(Entity.json(bodyJson));
@@ -202,7 +210,7 @@ public class ChatBackendRequester implements Callable<InvocationResult> {
     }
 
     protected JerseyWebTarget addTargetParameters(final ApiServerEndpointMulti.ServerEndpointResponse endpointResponse,
-                                                final Map<String, String> chatParamsThisAi, JerseyWebTarget target) {
+                                                  final Map<String, String> chatParamsThisAi, JerseyWebTarget target) {
         // make a copy of the params list but ensure that we have empty strings in the place of nulls
         Map<String, Object> queryParamsWithoutNulls = chatParamsThisAi.entrySet()
                 .stream()
