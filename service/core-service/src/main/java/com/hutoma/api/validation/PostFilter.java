@@ -335,7 +335,7 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
             for (IntentVariable variable : intent.getVariables()) {
                 // validate the name
                 validateFieldLength(250, ENTITYNAME, variable.getEntityName());
-                validateEntityName(ENTITYNAME, variable.getEntityName());
+                validateIntentEntityName(ENTITYNAME, variable.getEntityName());
 
                 // the list of prompts
                 List<String> prompts = validateFieldLengthsInList(INTENT_PROMPT_MAX_LENGTH, INTENT_PROMPTLIST,

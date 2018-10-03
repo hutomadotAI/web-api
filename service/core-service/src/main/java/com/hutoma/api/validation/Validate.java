@@ -29,6 +29,7 @@ public class Validate extends ValidationBase {
 
     private static final Pattern alphaNumericDashes = Pattern.compile("^[a-zA-Z0-9_-]+$");
     private static final Pattern entityNames = Pattern.compile("^(?![sS][yY][sS]\\.)[\\.a-zA-Z0-9_-]+$");
+    private static final Pattern intentEntityNames = Pattern.compile("[\\.a-zA-Z0-9_-]+$");
     private static final Pattern printableAscii =
             Pattern.compile("^[\\x20-\\x7E]+$");
     private static final Pattern printableAsciiNoAt =
@@ -354,6 +355,10 @@ public class Validate extends ValidationBase {
 
     String validateEntityName(final String paramName, final String param) throws ParameterValidationException {
         return validatePattern(entityNames, paramName, param);
+    }
+
+    String validateIntentEntityName(final String paramName, final String param) throws ParameterValidationException {
+        return validatePattern(intentEntityNames, paramName, param);
     }
 
     String validateRequiredSanitized(final String paramName, final String param) throws ParameterValidationException {
