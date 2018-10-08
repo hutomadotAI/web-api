@@ -8,27 +8,18 @@ import com.hutoma.api.containers.*;
 import com.hutoma.api.containers.sub.IntentConditionOperator;
 import com.hutoma.api.containers.sub.IntentVariable;
 import com.hutoma.api.containers.sub.IntentVariableCondition;
-import com.hutoma.api.containers.sub.UserInfo;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
 
+import javax.inject.Inject;
+import javax.inject.Provider;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import javax.inject.Inject;
-import javax.inject.Provider;
+import java.util.*;
 
 /**
  * Logic for handling intents creation/update/deletion
@@ -69,6 +60,7 @@ public class IntentLogic {
 
     /**
      * Gets all the intents for a given bot.
+     *
      * @param devid the developer id owner of the bot
      * @param aiid  the ai id
      * @return list of intents for the bot
@@ -95,6 +87,7 @@ public class IntentLogic {
 
     /**
      * Gets a given intents.
+     *
      * @param devid      the developer id owner of the bot
      * @param aiid       the ai id
      * @param intentName the intent name
@@ -126,12 +119,12 @@ public class IntentLogic {
     }
 
     public ApiResult createIntent(final UUID devid, final UUID aiid, final ApiIntent intent) {
-        return intentUpdateInternal(devid, aiid, intent, intent.getIntentName(),false);
+        return intentUpdateInternal(devid, aiid, intent, intent.getIntentName(), false);
     }
 
     public ApiResult updateIntent(final UUID devid, final UUID aiid, final ApiIntent intent,
                                   final String prevIntentName) {
-        return intentUpdateInternal(devid, aiid, intent, prevIntentName,true);
+        return intentUpdateInternal(devid, aiid, intent, prevIntentName, true);
     }
 
     private ApiResult intentUpdateInternal(final UUID devid,
@@ -177,7 +170,7 @@ public class IntentLogic {
             }
 
             // Extract all the followup intents
-            HashSet<String> followupIntents = new LinkedHashSet<>();
+            Set<String> followupIntents = new LinkedHashSet<>();
             if (intent.getIntentOutConditionals() != null) {
                 intent.getIntentOutConditionals().forEach(x -> followupIntents.add(x.getIntentName()));
             }
@@ -192,7 +185,7 @@ public class IntentLogic {
                 if (!followupIntents.isEmpty()) {
                     String conditionVarName = String.format("%s_complete", prevIntentName);
                     IntentVariableCondition condition = new IntentVariableCondition(
-                            conditionVarName, IntentConditionOperator.SET, "");
+                            conditionVarName, IntentConditionOperator.EQUALS, "yes");
 
                     boolean newIntentsCreated = false;
                     // Need to create new ones if they don't exist yet
@@ -215,7 +208,7 @@ public class IntentLogic {
                         if (intent.getContextOut() == null) {
                             intent.setContextOut(new HashMap<>());
                         }
-                        intent.getContextOut().put(conditionVarName, "");
+                        intent.getContextOut().put(condition.getVariable(), condition.getValue());
                     }
                 }
 
@@ -248,6 +241,7 @@ public class IntentLogic {
 
     /**
      * Deletes an intent.
+     *
      * @param devid      the developer id
      * @param aiid       the ai is
      * @param intentName the intent name
@@ -277,6 +271,7 @@ public class IntentLogic {
 
     /**
      * Bulk import intents from a CSV file.
+     *
      * @param devId               the developer id
      * @param aiid                the ai id
      * @param uploadedInputStream the stream for the file
@@ -327,6 +322,7 @@ public class IntentLogic {
 
     /**
      * Gets the contents of the file from a stream taking into account a defined maximum upload size.
+     *
      * @param maxUploadSize       the maximum size allowed for the file
      * @param uploadedInputStream the input stream
      * @return the file contents as a string
@@ -365,6 +361,7 @@ public class IntentLogic {
 
     /**
      * Checks if there are any variables with duplicate or empty labels.
+     *
      * @param devId  the developer id
      * @param aiid   the ai id
      * @param intent the intent

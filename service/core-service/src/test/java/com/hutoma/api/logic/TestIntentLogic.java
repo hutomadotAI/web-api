@@ -9,10 +9,12 @@ import com.hutoma.api.containers.ApiCsvImportResult;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.ApiIntentList;
 import com.hutoma.api.containers.ApiResult;
-import com.hutoma.api.containers.sub.*;
+import com.hutoma.api.containers.sub.IntentConditionOperator;
+import com.hutoma.api.containers.sub.IntentOutConditional;
+import com.hutoma.api.containers.sub.IntentVariable;
+import com.hutoma.api.containers.sub.WebHook;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.validation.Validate;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
@@ -20,18 +22,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
+import javax.inject.Provider;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
-import javax.inject.Provider;
 
 import static com.hutoma.api.common.TestDataHelper.*;
 import static org.mockito.Mockito.*;
@@ -297,7 +294,8 @@ public class TestIntentLogic {
         // The followup intent should have a new condition that is gated on the main intent
         Assert.assertEquals(1, actualIntents.get(0).getConditionsIn().size());
         Assert.assertEquals(getFollowupIntentGatedVariable(mainIntentName), actualIntents.get(0).getConditionsIn().get(0).getVariable());
-        Assert.assertEquals(IntentConditionOperator.SET, actualIntents.get(0).getConditionsIn().get(0).getOperator());
+        Assert.assertEquals(IntentConditionOperator.EQUALS, actualIntents.get(0).getConditionsIn().get(0).getOperator());
+        Assert.assertEquals("yes", actualIntents.get(0).getConditionsIn().get(0).getValue());
 
         // Then the main intent
         Assert.assertEquals(mainIntentName, actualIntentNames.get(1));
