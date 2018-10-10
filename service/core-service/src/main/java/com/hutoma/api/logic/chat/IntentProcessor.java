@@ -370,17 +370,21 @@ public class IntentProcessor {
                 MemoryVariable memoryVariable = (MemoryVariable) entity;
                 chatResult.getChatState().setEntityValue(memoryVariable.getName(), memoryVariable.getCurrentValue());
             }
-
+        
             // Update context
             currentIntent.getVariables().forEach(
                     v -> chatResult.getChatState().getChatContext().setValue(v.getLabel(), v.getCurrentValue()));
         }
 
-        // Populate the entities from context.
+        // Populate the entities from context, or delete from context if appropriate
+        ChatContext ctx = chatResult.getChatState().getChatContext();
         for (MemoryVariable var : currentIntent.getVariables()) {
-            if (!var.getResetOnEntry() 
-                && chatResult.getChatState().getChatContext().isSet(var.getLabel())) {
-                var.setCurrentValue(chatResult.getChatState().getChatContext().getValue(var.getLabel()));
+            if (ctx.isSet(var.getLabel())) {
+                if (var.getResetOnEntry()) {
+                    ctx.clearVariable(var.getLabel());
+                } else {
+                    var.setCurrentValue(ctx.getValue(var.getLabel()));
+                }
             }
         }
 

@@ -63,6 +63,13 @@ public class ChatContext {
     }
 
     /**
+     * Clear specific variable
+     */
+    public void clearVariable(final String variable) {
+        this.variables.remove(variable);
+    }
+
+    /**
      * Returns all the variables as a string map.
      * Note that insertion order is not preserved.
      * @return the string map

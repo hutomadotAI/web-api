@@ -111,6 +111,8 @@ public class TestIntentProcessor {
         boolean intentProcessed = this.intentProcessor.processIntent(chatInfo, TestDataHelper.AIID, memoryIntent, chatResult, LogMap.map("a", "b"));
         Assert.assertTrue(intentProcessed);
 
+        Assert.assertFalse(context.isSet(label));
+
         Assert.assertEquals(String.format(responseTemplate, "null"), chatResult.getAnswer());
     }
 
