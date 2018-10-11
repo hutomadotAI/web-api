@@ -159,6 +159,20 @@ public class IntentProcessor {
                         // clear the intent whenever a mandatory variable is not set within
                         // the allowed number of prompts
                         intentsToClear.add(currentIntent);
+
+                        if (featureToggler.getStateForAiid(
+                                chatInfo.getDevId(),
+                                chatInfo.getAiid(),
+                                "followup-intent-failure") == FeatureToggler.FeatureState.T1) {
+                            logger.logInfo("IntentProcessor", "Following up on failure of intent "
+                                    + intent.getIntentName());
+                            if (!intent.getIntentOutConditionals().isEmpty()) {
+                                // We want to assume it has fulfilled it's purpose if we have additional logic.
+                                notifyIntentFulfilled(
+                                        chatResult, currentIntent, chatInfo.getAiid(), intent, telemetryMap);
+                                handledIntent = true;
+                            }
+                        }
                     } else {
                         promptForVariable(mv, chatResult, intentLog);
                         handledIntent = true;
@@ -398,7 +412,8 @@ public class IntentProcessor {
                 chatInfo.getDevId(),
                 chatInfo.getAiid(),
                 "entity-value-replacement") == FeatureToggler.FeatureState.T1) {
-            logger.logInfo("IntentProcessor", "Checking for entity value matching for intent "
+            logger.logInfo("IntentProcessor",
+                    "Checking for entity value matching for intent "
             + intent.getIntentName());
 
             // We need to filter the relevant candidates and then count how many we have left

@@ -293,6 +293,39 @@ public class TestServiceChat extends ServiceTestBase {
     }
 
     @Test
+    public void testChat_failedIntentFallsBack() throws ChatStateHandler.ChatStateException, WebHooks.WebHookException,
+            ChatLogic.IntentException {
+        final String var1Name = "var1";
+        final String var1Value = "value1";
+        final String var2Name = "var2";
+        final String var2Value = "value2";
+        UUID chatId = UUID.randomUUID();
+        ChatContext context = new ChatContext();
+        context.setValue(var1Name, var1Value);
+        context.setValue(var2Name, var2Value);
+
+        MemoryIntent mi = new MemoryIntent("intent1", AIID, chatId, Collections.emptyList(), false);
+        List<MemoryIntent> intents = Collections.singletonList(mi);
+
+        ChatState state = new ChatState(DateTime.now(), null, null, null, null, 0.5d,
+                ChatHandoverTarget.Ai, getSampleAI(), context);
+        state.setCurrentIntents(intents);
+
+        when(this.fakeMemoryIntentHandler.getCurrentIntentsStateForChat(any())).thenReturn(intents);
+        //when(this.fakeIntentProcessorLogic.processIntent(any(), any(), any(), any(), any())).thenReturn(true);
+        when(this.fakeChatStateHandler.getState(any(), any(), any(), any())).thenReturn(state);
+        when(this.fakeTools.getTimestamp()).thenReturn(System.currentTimeMillis());
+
+        final Response response = target(CHAT_PATH)
+                .queryParam("q", "blablabla")
+                .queryParam("chatId", "")
+                .request().headers(defaultHeaders).get();
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
+        ApiChat apiChat = deserializeResponse(response, ApiChat.class);
+        Assert.assertTrue(true);
+    }
+
+    @Test
     public void testChat_resetChat() {
         final Response response = target(CHAT_RESET)
                 .queryParam("chatId", "")

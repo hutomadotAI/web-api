@@ -169,8 +169,8 @@ public class MemoryVariable {
     }
 
     /**
-     * Sets how many times to prompt.
-     * @param timesPrompted how many times to prompt
+     * Sets how many times it has been prompted.
+     * @param timesPrompted how many times it has been prompted.
      */
     public void setTimesPrompted(int timesPrompted) {
         this.timesPrompted = timesPrompted;
@@ -182,6 +182,14 @@ public class MemoryVariable {
      */
     public int getTimesToPrompt() {
         return this.timesToPrompt;
+    }
+
+    /***
+     * Sets how many times to prompt.
+     * @param timesToPrompt how many times to prompt.
+     */
+    public void setTimesToPrompt(int timesToPrompt) {
+        this.timesToPrompt = timesToPrompt;
     }
 
     /**
