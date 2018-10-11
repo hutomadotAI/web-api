@@ -347,6 +347,17 @@ public class IntentProcessor {
             // At this stage we're guaranteed to have variables with different entity types
             // Attempt to retrieve entities from the question
             entities = this.entityRecognizer.retrieveEntities(chatInfo.getQuestion(), memoryVariables);
+
+            // Also if we can process entities and variables, we can
+            // delete variable from context if clear on entry is set
+            ChatContext ctx = chatResult.getChatState().getChatContext();
+            for (MemoryVariable var : currentIntent.getVariables()) {
+                if (ctx.isSet(var.getLabel())) {
+                    if (var.getResetOnEntry()) {
+                        ctx.clearVariable(var.getLabel());
+                    }
+                }
+            }
         }
 
         if (entities != null && !entities.isEmpty()) {
@@ -376,15 +387,10 @@ public class IntentProcessor {
                     v -> chatResult.getChatState().getChatContext().setValue(v.getLabel(), v.getCurrentValue()));
         }
 
-        // Populate the entities from context, or delete from context if appropriate
-        ChatContext ctx = chatResult.getChatState().getChatContext();
+        // Populate the entities from context
         for (MemoryVariable var : currentIntent.getVariables()) {
-            if (ctx.isSet(var.getLabel())) {
-                if (var.getResetOnEntry()) {
-                    ctx.clearVariable(var.getLabel());
-                } else {
-                    var.setCurrentValue(ctx.getValue(var.getLabel()));
-                }
+            if (chatResult.getChatState().getChatContext().isSet(var.getLabel())) {
+                var.setCurrentValue(chatResult.getChatState().getChatContext().getValue(var.getLabel()));
             }
         }
 
