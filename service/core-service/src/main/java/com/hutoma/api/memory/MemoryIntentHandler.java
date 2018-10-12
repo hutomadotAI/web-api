@@ -93,6 +93,8 @@ public class MemoryIntentHandler implements IMemoryIntentHandler {
     @Override
     public void clearIntents(final ChatState state, final List<MemoryIntent> intentsToRemove) {
         state.getCurrentIntents().removeAll(intentsToRemove);
+        // Make sure all entity values are cleared as well to prevent any intents from auto-fulfilling later
+        state.getEntityValues().clear();
     }
 
     private MemoryIntent loadIntentForAi(final UUID devId, final UUID aiid, final UUID chatId,

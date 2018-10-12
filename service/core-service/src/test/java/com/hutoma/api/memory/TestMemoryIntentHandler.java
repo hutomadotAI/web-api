@@ -7,30 +7,19 @@ import com.hutoma.api.connectors.db.DatabaseEntitiesIntents;
 import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.ApiEntity;
 import com.hutoma.api.containers.ApiIntent;
-import com.hutoma.api.containers.sub.ChatContext;
-import com.hutoma.api.containers.sub.ChatHandoverTarget;
-import com.hutoma.api.containers.sub.ChatState;
-import com.hutoma.api.containers.sub.IntentVariable;
-import com.hutoma.api.containers.sub.MemoryIntent;
-import com.hutoma.api.containers.sub.MemoryVariable;
+import com.hutoma.api.containers.sub.*;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logic.ChatLogic;
 import com.tngtech.java.junit.dataprovider.DataProvider;
 import com.tngtech.java.junit.dataprovider.DataProviderRunner;
 import com.tngtech.java.junit.dataprovider.UseDataProvider;
-
 import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static com.hutoma.api.common.TestDataHelper.getSampleAI;
 import static org.mockito.Mockito.*;
@@ -167,6 +156,18 @@ public class TestMemoryIntentHandler {
         Assert.assertEquals(true, mi.isFulfilled());
         mi.setIsFulfilled(false);
         Assert.assertEquals(false, mi.isFulfilled());
+    }
+
+    @Test
+    public void testMemoryIntentClearIntents_deleteIntentAndEntityValues() {
+        MemoryVariable var = new MemoryVariable("entity1", Collections.singletonList("value"));
+        MemoryIntent mi = new MemoryIntent(INTENT_NAME, AIID, CHATID, Collections.singletonList(var));
+        ChatState state = buildChatState();
+        state.getCurrentIntents().add(mi);
+        state.setEntityValue(mi.getName(), mi.getVariables().get(0).getCurrentValue());
+        this.memoryIntentHandler.clearIntents(state, Collections.singletonList(mi));
+        Assert.assertTrue(state.getCurrentIntents().isEmpty());
+        Assert.assertTrue(state.getEntityValues().isEmpty());
     }
 
     @Test
