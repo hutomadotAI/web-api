@@ -224,6 +224,11 @@ public class IntentProcessor {
         if (currentIntent.isFulfilled()) {
             chatResult.getChatState().getCurrentIntents().remove(currentIntent);
 
+            // Handle the context variables before we clear intent
+            if (handledIntent) {
+                this.contextVariableExtractor.extractContextVariables(chatResult);
+            }
+
             if (intent.getResetContextOnExit()) {
                 chatResult.getChatState().getChatContext().clear();
                 intentLog.put("ResetOnExit", intent.getResetContextOnExit());
@@ -267,11 +272,6 @@ public class IntentProcessor {
             if (!intentsToClear.contains(currentIntent)) {
                 chatResult.getChatState().updateMemoryIntent(currentIntent);
             }
-        }
-
-        // Handle the context variables before we clear intent
-        if (handledIntent) {
-            this.contextVariableExtractor.extractContextVariables(chatResult);
         }
 
         // Clear fulfilled intents or intents which have exhausted their prompts, so they can be triggered again
