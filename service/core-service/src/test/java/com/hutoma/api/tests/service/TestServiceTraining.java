@@ -1,5 +1,6 @@
 package com.hutoma.api.tests.service;
 
+import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.TestDataHelper;
 import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.ApiIntent;
@@ -73,7 +74,7 @@ public class TestServiceTraining extends ServiceTestBase {
 
     @Test
     public void testTrainingStart() throws DatabaseException {
-        when(this.fakeDatabaseAi.getAIWithStatus(any(), any(), any(), any())).thenReturn(
+        when(this.fakeDatabaseAi.getAIWithStatus(any(), any(), any(JsonSerializer.class))).thenReturn(
                 TestDataHelper.getAi(TrainingStatus.AI_TRAINING_STOPPED, false));
         final Response response = testTraining("start", defaultHeaders);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
@@ -87,7 +88,7 @@ public class TestServiceTraining extends ServiceTestBase {
 
     @Test
     public void testTrainingStop() throws DatabaseException {
-        when(this.fakeDatabaseAi.getAIWithStatus(any(), any(), any(), any())).thenReturn(
+        when(this.fakeDatabaseAi.getAIWithStatus(any(), any(), any(JsonSerializer.class))).thenReturn(
                 TestDataHelper.getAi(TrainingStatus.AI_TRAINING, false));
         final Response response = testTraining("stop", defaultHeaders);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
@@ -101,7 +102,7 @@ public class TestServiceTraining extends ServiceTestBase {
 
     @Test
     public void testTrainingUpdate() throws DatabaseException {
-        when(this.fakeDatabaseAi.getAIWithStatus(any(), any(), any(), any())).thenReturn(
+        when(this.fakeDatabaseAi.getAIWithStatus(any(), any(), any(JsonSerializer.class))).thenReturn(
                 TestDataHelper.getAi(TrainingStatus.AI_TRAINING, false));
         when(this.fakeDatabaseAi.getAiTrainingFile(any())).thenReturn("Q1\nA1");
         final Response response = testTraining("update", defaultHeaders);
@@ -145,7 +146,7 @@ public class TestServiceTraining extends ServiceTestBase {
 
     @Test
     public void testTrainingUpdate_intentOnly() throws DatabaseException, IOException {
-        when(this.fakeDatabaseAi.getAIWithStatus(any(), any(), any(), any())).thenReturn(
+        when(this.fakeDatabaseAi.getAIWithStatus(any(), any(), any(JsonSerializer.class))).thenReturn(
                 TestDataHelper.getAi(TrainingStatus.AI_TRAINING, false));
         when(this.fakeDatabaseAi.getAiTrainingFile(any())).thenReturn(null);
         ApiIntent intent = new ApiIntent("intent1", "", "");

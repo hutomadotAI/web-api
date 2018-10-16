@@ -353,20 +353,80 @@ public class DatabaseAI extends Database {
 
     /***
      * Load data for an AI and populate its backend server statuses
-     * @param devid
-     * @param aiid
-     * @param serverVersion
+     * @param aiIdentity
      * @param serializer
      * @return an ai, or null if it was not found
      * @throws DatabaseException
      */
-    public ApiAi getAIWithStatus(final UUID devid,
-                                 final UUID aiid,
-                                 final String serverVersion,
+    public ApiAi getAIWithStatus(final AiIdentity aiIdentity,
                                  final JsonSerializer serializer)
             throws DatabaseException {
         try (DatabaseTransaction transaction = this.transactionProvider.get()) {
-            ApiAi ai = getAIWithStatus(devid, aiid, serverVersion, serializer, transaction);
+            ApiAi ai = getAIWithStatus(aiIdentity, serializer, transaction);
+            transaction.commit();
+            return ai;
+        }
+    }
+
+    /***
+     * Load data for an AI and populate its backend server statuses
+     * @param aiIdentity
+     * @param serializer
+     * @param transaction
+     * @return an ai, or null if it was not found
+     * @throws DatabaseException
+     */
+    public ApiAi getAIWithStatus(final AiIdentity aiIdentity,
+                                 final JsonSerializer serializer,
+                                 final DatabaseTransaction transaction)
+            throws DatabaseException {
+        if (transaction == null) {
+            throw new IllegalArgumentException("transaction");
+        }
+
+        try {
+            // load the statuses first
+            BackendStatus backendStatus = DatabaseBackends.getBackendStatus(aiIdentity,
+                    transaction.getDatabaseCall());
+
+            ApiAi ai = getAI(aiIdentity.getDevId(), aiIdentity.getAiid(), serializer, transaction);
+            if (ai != null && backendStatus != null) {
+                ai.setBackendStatus(backendStatus);
+            }
+            return ai;
+        } catch (SQLException ex) {
+            throw new DatabaseException(ex);
+        }
+    }
+
+    public ApiAi getAIWithStatus(final UUID devId,
+                                 final UUID aiid,
+                                 final JsonSerializer serializer,
+                                 final DatabaseTransaction transaction) throws DatabaseException {
+        if (transaction == null) {
+            throw new IllegalArgumentException("transaction");
+        }
+        try {
+            ApiAi ai = getAI(devId, aiid, serializer, transaction);
+            if (ai != null) {
+                AiIdentity identity = new AiIdentity(devId, aiid, ai.getLanguage(), ai.getEngineVersion());
+                BackendStatus backendStatus = DatabaseBackends.getBackendStatus(identity,
+                        transaction.getDatabaseCall());
+                if (backendStatus != null) {
+                    ai.setBackendStatus(backendStatus);
+                }
+            }
+            return ai;
+        } catch (SQLException ex) {
+            throw new DatabaseException(ex);
+        }
+    }
+
+    public ApiAi getAIWithStatus(final UUID devId,
+                                 final UUID aiid,
+                                 final JsonSerializer serializer) throws DatabaseException {
+        try (DatabaseTransaction transaction = this.transactionProvider.get()) {
+            ApiAi ai = getAIWithStatus(devId, aiid, serializer, transaction);
             transaction.commit();
             return ai;
         }
@@ -886,6 +946,7 @@ public class DatabaseAI extends Database {
         ai.setErrorThresholdHandover(rs.getInt("error_threshold_handover"));
         ai.setHandoverResetTimeoutSeconds(rs.getInt("handover_reset_timeout"));
         ai.setHandoverMessage(rs.getString("handover_message"));
+        ai.setEngineVersion(rs.getString("engine_version"));
         return ai;
     }
 

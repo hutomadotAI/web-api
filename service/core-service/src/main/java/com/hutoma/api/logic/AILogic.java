@@ -243,8 +243,7 @@ public class AILogic {
             for (Pair<ApiAi, String> pair : aiListVersioned) {
                 ApiAi ai = pair.getA();
                 String version = pair.getB();
-                if (FeatureToggler.getServerVersionForAi(devId, UUID.fromString(ai.getAiid()), this.featureToggler)
-                        .equals(version)) {
+                if (ai.getEngineVersion().equals(version)) {
                     aiList.add(ai);
                 }
             }
@@ -420,7 +419,7 @@ public class AILogic {
 
             try {
                 this.aiServices.deleteAI(ai.getBackendStatus(), new AiIdentity(devid, aiid, ai.getLanguage(),
-                        FeatureToggler.getServerVersionForAi(devid, aiid, this.featureToggler)));
+                        ai.getEngineVersion()));
             } catch (ServerConnector.AiServicesException ex) {
                 if (Stream.of(ex.getSuppressed())
                         .filter(c -> c instanceof ServerConnector.AiServicesException)
@@ -735,7 +734,7 @@ public class AILogic {
             transaction.commit();
 
             AiIdentity aiIdentity = new AiIdentity(devId, aiid, createdBot.getLanguage(),
-                    FeatureToggler.getServerVersionForAi(devId, aiid, this.featureToggler));
+                    createdBot.getEngineVersion());
             ApiResult result = uploadAndStartTraining(aiIdentity, createdBot, false);
 
             logImport(devId, result, botToImport);
@@ -763,9 +762,7 @@ public class AILogic {
         }
 
         AiIdentity aiIdentity = new AiIdentity(devId, UUID.fromString(createdBot.getAiid()),
-                createdBot.getLanguage(),
-                FeatureToggler.getServerVersionForAi(devId, UUID.fromString(createdBot.getAiid()),
-                        this.featureToggler));
+                createdBot.getLanguage(), createdBot.getEngineVersion());
         ApiResult result = uploadAndStartTraining(aiIdentity, createdBot, true);
         logImport(devId, result, importedBot);
         return result;
@@ -910,10 +907,9 @@ public class AILogic {
         final String devIdString = devid.toString();
         try {
             LogMap logMap = LogMap.map("AIID", aiid);
-            String serverVersion = FeatureToggler.getServerVersionForAi(devid, aiid, this.featureToggler);
             ApiAi ai = transaction == null
-                    ? this.databaseAi.getAIWithStatus(devid, aiid, serverVersion, this.jsonSerializer)
-                    : this.databaseAi.getAIWithStatus(devid, aiid, serverVersion, this.jsonSerializer, transaction);
+                    ? this.databaseAi.getAIWithStatus(devid, aiid, this.jsonSerializer)
+                    : this.databaseAi.getAIWithStatus(devid, aiid, this.jsonSerializer, transaction);
             if (ai == null) {
                 this.logger.logUserTraceEvent(LOGFROM,
                         String.format("%s - not found", logTag), devIdString, logMap);

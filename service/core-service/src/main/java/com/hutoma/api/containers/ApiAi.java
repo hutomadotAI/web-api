@@ -75,6 +75,8 @@ public class ApiAi extends ApiResult {
     private int errorThresholdHandover;
     @SerializedName("handover_message")
     private String handoverMessage;
+    @SerializedName("engine_version")
+    private String engineVersion;
 
 
     // transient because this should never be serialized along with the ApiAi object
@@ -113,6 +115,7 @@ public class ApiAi extends ApiResult {
         this.botConfigDefinition = botConfigDefinition;
 
         this.setBackendStatus(backendStatus);
+        this.setEngineVersion(ServiceIdentity.DEFAULT_VERSION);
     }
 
     public ApiAi(final ApiAi other) {
@@ -132,6 +135,7 @@ public class ApiAi extends ApiResult {
         this.defaultChatResponses = other.defaultChatResponses;
         this.passthroughUrl = other.passthroughUrl;
         this.botConfigDefinition = other.botConfigDefinition;
+        this.engineVersion = other.engineVersion;
 
         this.setBackendStatus(other.backendStatus);
     }
@@ -292,6 +296,14 @@ public class ApiAi extends ApiResult {
 
     public void setDescription(final String description) {
         this.description = description;
+    }
+
+    public void setEngineVersion(final String engineVersion) {
+        this.engineVersion = engineVersion;
+    }
+
+    public String getEngineVersion() {
+        return this.engineVersion;
     }
 
     private void populateExtendedStatus() {

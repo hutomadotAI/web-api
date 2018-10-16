@@ -30,8 +30,10 @@ public class ChatStateHandler {
         this.jsonSerializer = jsonSerializer;
     }
 
-    public ChatState getState(final UUID devId, final UUID aiid, final String serverVersion,
-                              final UUID chatId) throws ChatStateException {
+    public ChatState getState(final UUID devId,
+                              final UUID aiid,
+                              final UUID chatId)
+            throws ChatStateException {
         ChatState state = null;
         try {
             if (!this.databaseAi.checkAIBelongsToDevId(devId, aiid)) {

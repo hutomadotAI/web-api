@@ -62,7 +62,7 @@ public class AIQueueServices extends ServerConnector {
         LogMap logMap = LogMap.map("Op", "delete")
                 .put("Type", serviceIdentity.getServerType().value())
                 .put("Language", serviceIdentity.getLanguage().toString())
-                .put("ServerVersion", serviceIdentity.getVersion())
+                .put("EngineVersion", serviceIdentity.getVersion())
                 .put("Server", serverIdentifier)
                 .put("AIID", aiid);
         this.logger.logUserInfoEvent(LOGFROM,
@@ -122,7 +122,7 @@ public class AIQueueServices extends ServerConnector {
         LogMap logMap = LogMap.map("Op", "train-start")
                 .put("Type", serviceIdentity.getServerType().value())
                 .put("Language", serviceIdentity.getLanguage().toString())
-                .put("ServerVersion", serviceIdentity.getVersion())
+                .put("EngineVersion", serviceIdentity.getVersion())
                 .put("Server", serverIdentifier)
                 .put("AIID", aiIdentity.getAiid());
         this.logger.logUserInfoEvent(LOGFROM,

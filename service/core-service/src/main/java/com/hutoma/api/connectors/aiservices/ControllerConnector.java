@@ -100,7 +100,7 @@ public abstract class ControllerConnector {
                 .put("RequestFor", RequestFor.Training.toString())
                 .put("ServerType", serverType.value())
                 .put("Language", aiIdentity.getLanguage())
-                .put("ServerVersion", aiIdentity.getServerVersion());
+                .put("EngineVersion", aiIdentity.getServerVersion());
         final long startTimestamp = this.tools.getTimestamp();
         try (Response response = getRequest(String.format("/%s/training", aiIdentity.getAiid().toString()),
                 getMapOfServiceIdentity(serviceIdentity))
@@ -210,7 +210,7 @@ public abstract class ControllerConnector {
                                                                   final JsonSerializer serializer) {
         LogMap logMap = LogMap.map("ServerType", serviceIdentity.getServerType().value())
                 .put("Language", serviceIdentity.getLanguage().toString())
-                .put("ServerVersion", serviceIdentity.getVersion());
+                .put("EngineVersion", serviceIdentity.getVersion());
         final long startTimestamp = this.tools.getTimestamp();
         try (Response response = getRequest("/endpointMap", getMapOfServiceIdentity(serviceIdentity))
                 .get()) {
@@ -257,7 +257,7 @@ public abstract class ControllerConnector {
     private void kickQueue(final ServiceIdentity serviceIdentity) {
         LogMap logMap = LogMap.map("ServerType", serviceIdentity.getServerType().value())
                 .put("Language", serviceIdentity.getLanguage().toString())
-                .put("ServerVersion", serviceIdentity.getVersion());
+                .put("EngineVersion", serviceIdentity.getVersion());
         final long startTimestamp = this.tools.getTimestamp();
         try (Response response = getRequest("/queue", getMapOfServiceIdentity(serviceIdentity))
                 .post(Entity.text(""))) {

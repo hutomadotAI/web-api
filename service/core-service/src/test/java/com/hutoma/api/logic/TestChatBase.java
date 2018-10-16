@@ -2,45 +2,27 @@ package com.hutoma.api.logic;
 
 import com.google.common.collect.ImmutableMap;
 import com.hutoma.api.common.*;
-import com.hutoma.api.connectors.AiStrings;
-import com.hutoma.api.connectors.BackendServerType;
-import com.hutoma.api.connectors.NoServerAvailableException;
-import com.hutoma.api.connectors.ServerConnector;
-import com.hutoma.api.connectors.WebHooks;
+import com.hutoma.api.connectors.*;
 import com.hutoma.api.connectors.chat.AIChatServices;
 import com.hutoma.api.connectors.chat.ChatBackendConnector;
 import com.hutoma.api.connectors.db.DatabaseAI;
 import com.hutoma.api.connectors.db.DatabaseEntitiesIntents;
 import com.hutoma.api.containers.ApiChat;
 import com.hutoma.api.containers.ApiResult;
-import com.hutoma.api.containers.sub.AiMinP;
-import com.hutoma.api.containers.sub.ChatResult;
-import com.hutoma.api.containers.sub.ChatState;
-import com.hutoma.api.containers.sub.MemoryIntent;
-import com.hutoma.api.containers.sub.MemoryVariable;
-import com.hutoma.api.containers.sub.WebHook;
+import com.hutoma.api.containers.sub.*;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logic.chat.*;
 import com.hutoma.api.memory.ChatStateHandler;
 import com.hutoma.api.memory.IEntityRecognizer;
 import com.hutoma.api.memory.IMemoryIntentHandler;
 import com.hutoma.api.memory.MemoryIntentHandler;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.mockito.ArgumentCaptor;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
-import static com.hutoma.api.common.TestDataHelper.AIID;
-import static com.hutoma.api.common.TestDataHelper.DEVID_UUID;
-import static com.hutoma.api.common.TestDataHelper.getSampleAI;
+import static com.hutoma.api.common.TestDataHelper.*;
 import static org.mockito.Mockito.*;
 
 
@@ -121,7 +103,7 @@ public class TestChatBase {
         ChatState emptyState = ChatState.getEmpty();
         emptyState.setAi(getSampleAI());
         try {
-            when(this.fakeChatStateHandler.getState(any(), any(), any(), any())).thenReturn(emptyState);
+            when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(emptyState);
             when(this.fakeAiStrings.getDefaultChatResponses(any(), any())).thenReturn(Collections.singletonList(TestDataHelper.DEFAULT_CHAT_RESPONSE));
             when(this.fakeAiStrings.getRandomDefaultChatResponse(any(), any())).thenReturn(TestDataHelper.DEFAULT_CHAT_RESPONSE);
         } catch (AiStrings.AiStringsException | ChatStateHandler.ChatStateException ex) {

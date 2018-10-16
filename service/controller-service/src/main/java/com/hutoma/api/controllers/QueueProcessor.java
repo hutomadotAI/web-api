@@ -151,7 +151,7 @@ public class QueueProcessor extends TimerTask {
             LogMap logMap = LogMap.map("Op", "controllerstate")
                     .put("Type", this.serviceIdentity.getServerType().value())
                     .put("Language", this.serviceIdentity.getLanguage())
-                    .put("ServerVersion", this.serviceIdentity.getVersion())
+                    .put("EngineVersion", this.serviceIdentity.getVersion())
                     .put("ServerCount", serverCount)
                     .put("TrainingCapacity", totalTrainingCapacity)
                     .put("TrainingSlotsAvailable", availableTrainingSlots)
@@ -316,7 +316,7 @@ public class QueueProcessor extends TimerTask {
 
         LogMap logMap = LogMap.map("Type", this.serviceIdentity.getServerType())
                 .put("Language", this.serviceIdentity.getLanguage())
-                .put("ServerVersion", this.serviceIdentity.getVersion());
+                .put("EngineVersion", this.serviceIdentity.getVersion());
         // create a log entry per server with (n>0) interrupted training slots
         slotList.stream().filter(ServerEndpointTrainingSlots::hasSlotsInterruptedTraining)
                 .forEach(server -> {

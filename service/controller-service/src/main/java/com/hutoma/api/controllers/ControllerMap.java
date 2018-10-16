@@ -87,7 +87,7 @@ public class ControllerMap {
                             serviceIdentity.getVersion()),
                     LogMap.map("Type", serviceIdentity.getServerType().value())
                             .put("Language", serviceIdentity.getLanguage().toString())
-                            .put("ServerVersion", serviceIdentity.getVersion()));
+                            .put("EngineVersion", serviceIdentity.getVersion()));
             this.controllerMap.put(serviceIdentity.hashCode(), controller);
             return controller;
         } else {

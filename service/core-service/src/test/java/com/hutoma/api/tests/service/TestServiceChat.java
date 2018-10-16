@@ -73,7 +73,7 @@ public class TestServiceChat extends ServiceTestBase {
         when(this.fakeTools.createNewRandomUUID()).thenReturn(UUID.randomUUID());
         ChatState emptyState = ChatState.getEmpty();
         emptyState.setAi(TestDataHelper.getSampleAI());
-        when(this.fakeChatStateHandler.getState(any(), any(), any(), any())).thenReturn(emptyState);
+        when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(emptyState);
 
         when(this.fakeChatWorkflow.getHandlers()).thenReturn(
                 Arrays.asList(this.fakePassthroughHandler, this.fakeChatIntenthHandler,
@@ -156,7 +156,7 @@ public class TestServiceChat extends ServiceTestBase {
     @Test
     public void testChat_chatStateUserException() throws ChatStateHandler.ChatStateException {
         UUID chatId = UUID.randomUUID();
-        when(this.fakeChatStateHandler.getState(any(), any(), any(), any()))
+        when(this.fakeChatStateHandler.getState(any(), any(), any()))
                 .thenThrow(ChatStateHandler.ChatStateUserException.class);
         final Response response = target(CHAT_PATH).queryParam("q", "question")
                 .queryParam("chatId", chatId.toString())
@@ -167,7 +167,7 @@ public class TestServiceChat extends ServiceTestBase {
     @Test
     public void testChat_chatStateException() throws ChatStateHandler.ChatStateException {
         UUID chatId = UUID.randomUUID();
-        when(this.fakeChatStateHandler.getState(any(), any(), any(), any()))
+        when(this.fakeChatStateHandler.getState(any(), any(), any()))
                 .thenThrow(ChatStateHandler.ChatStateException.class);
         final Response response = target(CHAT_PATH).queryParam("q", "question")
                 .queryParam("chatId", chatId.toString())
@@ -208,7 +208,7 @@ public class TestServiceChat extends ServiceTestBase {
         ChatState state = new ChatState(DateTime.now(), null, null, null, null, 0.5d,
                 ChatHandoverTarget.Ai, getSampleAI(), new ChatContext());
         state.setCurrentIntents(intents);
-        when(this.fakeChatStateHandler.getState(any(), any(), any(), any())).thenReturn(state);
+        when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(state);
 
         when(this.fakeMemoryIntentHandler.getCurrentIntentsStateForChat(any())).thenReturn(intents);
         when(this.fakeIntentProcessorLogic.processIntent(any(), any(), any(), any(), any())).thenReturn(true);
@@ -276,7 +276,7 @@ public class TestServiceChat extends ServiceTestBase {
 
         when(this.fakeMemoryIntentHandler.getCurrentIntentsStateForChat(any())).thenReturn(intents);
         when(this.fakeIntentProcessorLogic.processIntent(any(), any(), any(), any(), any())).thenReturn(true);
-        when(this.fakeChatStateHandler.getState(any(), any(), any(), any())).thenReturn(state);
+        when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(state);
         when(this.fakeTools.getTimestamp()).thenReturn(System.currentTimeMillis());
 
         final Response response = target(CHAT_PATH)
@@ -293,8 +293,7 @@ public class TestServiceChat extends ServiceTestBase {
     }
 
     @Test
-    public void testChat_failedIntentFallsBack() throws ChatStateHandler.ChatStateException, WebHooks.WebHookException,
-            ChatLogic.IntentException {
+    public void testChat_failedIntentFallsBack() throws ChatStateHandler.ChatStateException {
         final String var1Name = "var1";
         final String var1Value = "value1";
         final String var2Name = "var2";
@@ -313,7 +312,7 @@ public class TestServiceChat extends ServiceTestBase {
 
         when(this.fakeMemoryIntentHandler.getCurrentIntentsStateForChat(any())).thenReturn(intents);
         //when(this.fakeIntentProcessorLogic.processIntent(any(), any(), any(), any(), any())).thenReturn(true);
-        when(this.fakeChatStateHandler.getState(any(), any(), any(), any())).thenReturn(state);
+        when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(state);
         when(this.fakeTools.getTimestamp()).thenReturn(System.currentTimeMillis());
 
         final Response response = target(CHAT_PATH)

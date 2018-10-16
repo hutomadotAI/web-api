@@ -27,8 +27,7 @@ public class BackendServicesConnectors {
                               final AiIdentity aiIdentity)
             throws DatabaseException {
         for (ConnectorItem connectorItem : this.connectors) {
-            queueServices.userActionStartTraining(status, connectorItem.serverType,
-                    aiIdentity.getDevId(), aiIdentity.getAiid());
+            queueServices.userActionStartTraining(status, connectorItem.serverType, aiIdentity);
             connectorItem.connector.kickQueueProcessor(aiIdentity.getLanguage(), aiIdentity.getServerVersion());
         }
     }

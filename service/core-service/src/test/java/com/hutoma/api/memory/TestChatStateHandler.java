@@ -3,7 +3,6 @@ package com.hutoma.api.memory;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.connectors.db.DatabaseAI;
 import com.hutoma.api.connectors.db.DatabaseException;
-import com.hutoma.api.containers.ServiceIdentity;
 import com.hutoma.api.containers.sub.ChatContext;
 import com.hutoma.api.containers.sub.ChatHandoverTarget;
 import com.hutoma.api.containers.sub.ChatState;
@@ -49,7 +48,7 @@ public class TestChatStateHandler {
         ChatState chatState = getTestChatState();
         when(this.fakeDatabaseAi.checkAIBelongsToDevId(any(), any())).thenReturn(true);
         when(this.fakeDatabaseAi.getChatState(any(), any(), any(), any())).thenReturn(chatState);
-        ChatState result = this.chatStateHandler.getState(DEVID_UUID, AIID, ServiceIdentity.DEFAULT_VERSION, UUID.randomUUID());
+        ChatState result = this.chatStateHandler.getState(DEVID_UUID, AIID, UUID.randomUUID());
         assertChatStateEquals(chatState, result);
     }
 
@@ -57,7 +56,7 @@ public class TestChatStateHandler {
     public void testChatStateHandler_getState_dbException() throws DatabaseException, ChatStateHandler.ChatStateException {
         when(this.fakeDatabaseAi.checkAIBelongsToDevId(any(), any())).thenReturn(true);
         when(this.fakeDatabaseAi.getChatState(any(), any(), any(), any())).thenThrow(DatabaseException.class);
-        ChatState result = this.chatStateHandler.getState(DEVID_UUID, AIID, ServiceIdentity.DEFAULT_VERSION, UUID.randomUUID());
+        ChatState result = this.chatStateHandler.getState(DEVID_UUID, AIID, UUID.randomUUID());
         assertChatStateEquals(ChatState.getEmpty(), result);
         verify(this.fakeLogger).logUserExceptionEvent(anyString(), any(), anyString(), any());
     }
@@ -65,7 +64,7 @@ public class TestChatStateHandler {
     @Test(expected = ChatStateHandler.ChatStateUserException.class)
     public void testChatStateHandler_getState_aiidNotOwned() throws DatabaseException, ChatStateHandler.ChatStateException {
         when(this.fakeDatabaseAi.checkAIBelongsToDevId(any(), any())).thenReturn(false);
-        this.chatStateHandler.getState(DEVID_UUID, AIID, ServiceIdentity.DEFAULT_VERSION, UUID.randomUUID());
+        this.chatStateHandler.getState(DEVID_UUID, AIID, UUID.randomUUID());
     }
 
     @Test

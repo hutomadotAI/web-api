@@ -59,7 +59,7 @@ public class TestDataHelper {
     public static void setupAiReadonlyMode(final DatabaseAI fakeDatabase) throws DatabaseException {
         ApiAi ai = new ApiAi(TestDataHelper.getSampleAI());
         ai.setReadOnly(true);
-        when(fakeDatabase.getAIWithStatus(any(), any(), any(), any())).thenReturn(ai);
+        when(fakeDatabase.getAIWithStatus(any(), any(), any(JsonSerializer.class))).thenReturn(ai);
         when(fakeDatabase.getAI(any(), any(), any())).thenReturn(ai);
     }
 

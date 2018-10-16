@@ -409,7 +409,7 @@ public class TestTrainingLogic {
 
     @Test
     public void testUpdateTraining_failedUploading() throws DatabaseException, AIServices.AiServicesException {
-        when(this.fakeDatabaseAi.getAIWithStatus(any(), any(), any(), any())).thenReturn(getAi(TrainingStatus.AI_TRAINING_COMPLETE, false));
+        when(this.fakeDatabaseAi.getAIWithStatus(any(), any(), any(JsonSerializer.class))).thenReturn(getAi(TrainingStatus.AI_TRAINING_COMPLETE, false));
         when(this.fakeDatabaseAi.getAiTrainingFile(any())).thenReturn(SOMETEXT);
         when(this.fakeAiServices.getTrainingMaterialsCommon(any(), any(), any())).thenReturn(SOMETEXT);
         doThrow(ServerConnector.AiServicesException.class).when(this.fakeAiServices).uploadTraining(any(), any(), any());
@@ -586,7 +586,7 @@ public class TestTrainingLogic {
 
     private void verifyUpdateTraining_noIntents(final String fileToUpload)
             throws DatabaseException, AIServices.AiServicesException {
-        when(this.fakeDatabaseAi.getAIWithStatus(any(), any(), any(), any())).thenReturn(getAi(TrainingStatus.AI_TRAINING_COMPLETE, false));
+        when(this.fakeDatabaseAi.getAIWithStatus(any(), any(), any(JsonSerializer.class))).thenReturn(getAi(TrainingStatus.AI_TRAINING_COMPLETE, false));
         when(this.fakeDatabaseAi.getAiTrainingFile(any())).thenReturn(fileToUpload);
         when(this.fakeDatabaseEntitiesIntents.getIntents(DEVID_UUID, AIID)).thenReturn(Collections.emptyList());
         when(this.fakeAiServices.getTrainingMaterialsCommon(any(), any(), any())).thenReturn(fileToUpload);
@@ -611,7 +611,7 @@ public class TestTrainingLogic {
 
         when(this.fakeDatabaseEntitiesIntents.getIntent(AIID, intentNames.get(0))).thenReturn(intent1);
         when(this.fakeDatabaseEntitiesIntents.getIntent(AIID, intentNames.get(1))).thenReturn(intent2);
-        when(this.fakeDatabaseAi.getAIWithStatus(any(), any(), any(), any())).thenReturn(getAi(TrainingStatus.AI_TRAINING_COMPLETE, false));
+        when(this.fakeDatabaseAi.getAIWithStatus(any(), any(), any(JsonSerializer.class))).thenReturn(getAi(TrainingStatus.AI_TRAINING_COMPLETE, false));
         when(this.fakeDatabaseAi.getAiTrainingFile(any())).thenReturn(fileToUpload);
         when(this.fakeDatabaseEntitiesIntents.getIntents(DEVID_UUID, AIID)).thenReturn(intentNames);
         when(this.fakeAiServices.getTrainingMaterialsCommon(any(), any(), any())).thenReturn(getTrainingMaterials(fileToUpload, intentNames, userSaysIntent1, userSaysIntent2));
@@ -658,7 +658,7 @@ public class TestTrainingLogic {
 
     private void testTraining_dbException(Supplier<ApiResult> supplier, int expectedErrorCode)
             throws DatabaseException, AIServices.AiServicesException {
-        when(this.fakeDatabaseAi.getAIWithStatus(any(), any(), any(), any())).thenThrow(DatabaseException.class);
+        when(this.fakeDatabaseAi.getAIWithStatus(any(), any(), any(JsonSerializer.class))).thenThrow(DatabaseException.class);
         ApiResult result = supplier.get();
         Assert.assertEquals(expectedErrorCode, result.getStatus().getCode());
         verify(this.fakeAiServices, never()).startTraining(any(), any());
@@ -671,7 +671,7 @@ public class TestTrainingLogic {
 
     private void testUpdateTraining_initialStates_common(TrainingStatus initialState, int expectedCode)
             throws DatabaseException {
-        when(this.fakeDatabaseAi.getAIWithStatus(any(), any(), any(), any())).thenReturn(getAi(initialState, false));
+        when(this.fakeDatabaseAi.getAIWithStatus(any(), any(), any(JsonSerializer.class))).thenReturn(getAi(initialState, false));
         when(this.fakeDatabaseAi.getAiTrainingFile(any())).thenReturn("Q1\nA1");
         when(this.fakeAiServices.getTrainingMaterialsCommon(any(), any(), any())).thenReturn("Q1\nA1");
         ApiResult result = this.logic.updateTraining(DEVID_UUID, AIID, false);
@@ -680,7 +680,7 @@ public class TestTrainingLogic {
 
     private void testStartTrainingCommon(final TrainingStatus trainingStatus, final int expectedStatus)
             throws DatabaseException {
-        when(this.fakeDatabaseAi.getAIWithStatus(any(), any(), any(), any())).thenReturn(getAi(trainingStatus, false));
+        when(this.fakeDatabaseAi.getAIWithStatus(any(), any(), any(JsonSerializer.class))).thenReturn(getAi(trainingStatus, false));
         InputStream stream = createUpload(SOMETEXT);
         this.logic.uploadFile(DEVID_UUID, AIID, TrainingLogic.TrainingType.TEXT, UURL, stream, this.fakeContentDisposition);
         ApiResult result = this.logic.startTraining(DEVID_UUID, AIID);
@@ -688,7 +688,7 @@ public class TestTrainingLogic {
     }
 
     private void testStopTrainingCommon(final TrainingStatus status, final int expectedCode) throws DatabaseException {
-        when(this.fakeDatabaseAi.getAIWithStatus(any(), any(), any(), any())).thenReturn(getAi(status, false));
+        when(this.fakeDatabaseAi.getAIWithStatus(any(), any(), any(JsonSerializer.class))).thenReturn(getAi(status, false));
         InputStream stream = createUpload(SOMETEXT);
         this.logic.uploadFile(DEVID_UUID, AIID, TrainingLogic.TrainingType.TEXT, UURL, stream, this.fakeContentDisposition);
         ApiResult result = this.logic.stopTraining(DEVID_UUID, AIID);
@@ -741,11 +741,11 @@ public class TestTrainingLogic {
                 return TrainingStatus.AI_READY_TO_TRAIN;
             }
         };
-        when(this.fakeDatabaseAi.getAIWithStatus(any(), any(), any(), any())).thenReturn(ai);
+        when(this.fakeDatabaseAi.getAIWithStatus(any(), any(), any(JsonSerializer.class))).thenReturn(ai);
         when(this.fakeExtractor.getTextFromUrl(anyString())).thenReturn(SOMETEXT);
-        ApiResult result = this.logic.uploadFile(DEVID_UUID, AIID, trainingType, UURL, stream, this.fakeContentDisposition);
+        this.logic.uploadFile(DEVID_UUID, AIID, trainingType, UURL, stream, this.fakeContentDisposition);
 
-        result = this.logic.startTraining(DEVID_UUID, AIID);
+        ApiResult result = this.logic.startTraining(DEVID_UUID, AIID);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
 }

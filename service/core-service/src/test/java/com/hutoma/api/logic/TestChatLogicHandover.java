@@ -17,7 +17,6 @@ import com.hutoma.api.logic.chat.ChatEmbHandler;
 import com.hutoma.api.logic.chat.ChatHandoverHandler;
 import com.hutoma.api.logic.chat.ChatWorkflow;
 import com.hutoma.api.memory.ChatStateHandler;
-
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.junit.Assert;
@@ -32,7 +31,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class TestChatLogicHandover  extends TestChatBase {
+public class TestChatLogicHandover extends TestChatBase {
 
     private static final String RANDOM_QUESTION = "Random question";
     private static final String HANDOVER_MESSAGE = "handover";
@@ -97,7 +96,6 @@ public class TestChatLogicHandover  extends TestChatBase {
     }
 
 
-
     private ChatLogic getLogicWithState(final int errorThresholdHandover, final int currBadAnswerCount)
             throws ChatStateHandler.ChatStateException {
         return getLogicWithState(errorThresholdHandover, currBadAnswerCount, null,
@@ -133,7 +131,9 @@ public class TestChatLogicHandover  extends TestChatBase {
         ChatEmbHandler backendHandler = mock(ChatEmbHandler.class);
         try {
             when(this.fakeChatServices.awaitBackend(BackendServerType.EMB)).thenReturn(
-                    new HashMap<UUID, ChatResult>() {{put(UUID.fromString(initialState.getAi().getAiid()), chatResult);}});
+                    new HashMap<UUID, ChatResult>() {{
+                        put(UUID.fromString(initialState.getAi().getAiid()), chatResult);
+                    }});
         } catch (ChatBackendConnector.AiControllerException ex) {
             Assert.fail(ex.getMessage());
         }
@@ -146,7 +146,7 @@ public class TestChatLogicHandover  extends TestChatBase {
         when(chatWorkflow.getHandlers()).thenReturn(
                 Arrays.asList(handoverHandler, backendHandler, defaultHandler));
 
-        when (this.fakeChatStateHandler.getState(any(), any(), any(), any())).thenReturn(initialState);
+        when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(initialState);
         return new ChatLogic(this.fakeChatServices, this.fakeChatStateHandler, this.fakeDatabaseEntitiesIntents, tools,
                 mock(ILogger.class), mock(ChatLogger.class), chatWorkflow, this.fakeConfig, this.fakeFeatureToggler);
     }

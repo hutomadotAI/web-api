@@ -1,7 +1,6 @@
 package com.hutoma.api.connectors.aiservices;
 
 import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.common.SupportedLanguage;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.*;
 import com.hutoma.api.connectors.db.Database;
@@ -17,7 +16,6 @@ import org.glassfish.jersey.client.JerseyClient;
 import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.Callable;
 
 public class AiServicesQueue extends ServerConnector {
@@ -43,22 +41,23 @@ public class AiServicesQueue extends ServerConnector {
      * QUeue a command to start training
      * @param status
      * @param serverType
-     * @param devid
-     * @param aiid
+     * @param aiIdentity
      * @throws DatabaseException
      */
-    void userActionStartTraining(BackendStatus status, BackendServerType serverType, UUID devid, UUID aiid)
+    void userActionStartTraining(final BackendStatus status,
+                                 final BackendServerType serverType,
+                                 final AiIdentity aiIdentity)
             throws DatabaseException {
         // get the current status
         BackendEngineStatus engineStatus = status.getEngineStatus(serverType);
         ServiceIdentity serviceIdentity =
-                new ServiceIdentity(serverType, SupportedLanguage.EN, ServiceIdentity.DEFAULT_VERSION);
+                new ServiceIdentity(serverType, aiIdentity.getLanguage(), aiIdentity.getServerVersion());
         // set the status to training_queued without changing the progress
         this.database.updateAIStatus(serviceIdentity,
-                aiid, TrainingStatus.AI_TRAINING_QUEUED, "",
+                aiIdentity.getAiid(), TrainingStatus.AI_TRAINING_QUEUED, "",
                 engineStatus.getTrainingProgress(), engineStatus.getTrainingError());
         // queue this AI for training
-        this.database.queueUpdate(serviceIdentity, aiid, true, 0, QueueAction.TRAIN);
+        this.database.queueUpdate(serviceIdentity, aiIdentity.getAiid(), true, 0, QueueAction.TRAIN);
     }
 
     /***

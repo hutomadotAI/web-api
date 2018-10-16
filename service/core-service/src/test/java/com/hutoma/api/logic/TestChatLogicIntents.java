@@ -13,19 +13,13 @@ import com.hutoma.api.logic.chat.ChatDefaultHandler;
 import com.hutoma.api.logic.chat.ConditionEvaluator;
 import com.hutoma.api.memory.ChatStateHandler;
 import com.hutoma.api.memory.MemoryIntentHandler;
-
 import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.stubbing.OngoingStubbing;
 
 import java.net.HttpURLConnection;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.hutoma.api.common.TestDataHelper.*;
@@ -277,7 +271,7 @@ public class TestChatLogicIntents extends TestChatBase {
         entityValues.put("persistent_var", "persistentValue");
         ChatState state = new ChatState(DateTime.now(), null, null, null, entityValues, 0.5d,
                 ChatHandoverTarget.Ai, getSampleAI(), new ChatContext());
-        when(this.fakeChatStateHandler.getState(any(), any(), any(), any())).thenReturn(state);
+        when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(state);
 
         // First question, triggers the intent but without the right entity value
         ApiResult result = getChat(0.5f, "nothing to see here.");
@@ -669,7 +663,7 @@ public class TestChatLogicIntents extends TestChatBase {
         ctx.setValue(varName, "value");
         ChatState state = new ChatState(DateTime.now(), null, null, null, null, 0.5d,
                 ChatHandoverTarget.Ai, getSampleAI(), ctx);
-        when(this.fakeChatStateHandler.getState(any(), any(), any(), any())).thenReturn(state);
+        when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(state);
         Assert.assertEquals(-1, ctx.getVariable(varName).getLifespanTurns());
         getChat(0.5f);
         Assert.assertNotNull(ctx.getValue(varName));
@@ -684,7 +678,7 @@ public class TestChatLogicIntents extends TestChatBase {
         ctx.setValue(varName, "value", 3);
         ChatState state = new ChatState(DateTime.now(), null, null, null, null, 0.5d,
                 ChatHandoverTarget.Ai, getSampleAI(), ctx);
-        when(this.fakeChatStateHandler.getState(any(), any(), any(), any())).thenReturn(state);
+        when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(state);
         // First turn
         getChat(0.5f);
         // lifetime should now be next 2 turns

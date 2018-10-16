@@ -1,5 +1,6 @@
 package com.hutoma.api.tests.service;
 
+import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.TestDataHelper;
 import com.hutoma.api.connectors.aiservices.AIServices;
 import com.hutoma.api.connectors.db.DatabaseException;
@@ -88,7 +89,7 @@ public class TestServiceUI extends ServiceTestBase {
     @Test
     public void testGetAIPollStatus() throws DatabaseException {
         ApiAi ai = TestDataHelper.getAI();
-        when(this.fakeDatabaseAi.getAIWithStatus(any(), any(), anyString(), any())).thenReturn(ai);
+        when(this.fakeDatabaseAi.getAIWithStatus(any(), any(), any(JsonSerializer.class))).thenReturn(ai);
         final Response response = target(UI_PATH_AIPOLL).request().headers(defaultHeaders).get();
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
         ApiAi responseAi = deserializeResponse(response, ApiAi.class);
