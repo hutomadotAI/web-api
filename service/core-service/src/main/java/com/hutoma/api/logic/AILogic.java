@@ -208,21 +208,20 @@ public class AILogic {
                         devIdString, logMap);
                 return ApiError.getBadRequest(BOT_RO_MESSAGE);
             }
-            if (!this.databaseAi.updateAI(
-                    devId,
-                    aiid,
-                    description,
-                    isPrivate,
-                    language,
-                    timezone,
-                    confidence,
-                    personality,
-                    voice,
-                    defaultChatResponses,
-                    errorThresholdHandover,
-                    handoverResetTimeout,
-                    handoverMessage,
-                    this.jsonSerializer)) {
+            // Make the changes to the updateable fields
+            ai.setDescription(description);
+            ai.setPrivate(isPrivate);
+            ai.setLanguage(language);
+            ai.setTimezone(timezone);
+            ai.setConfidence(confidence);
+            ai.setPersonality(personality);
+            ai.setVoice(voice);
+            ai.setDefaultChatResponses(defaultChatResponses);
+            ai.setErrorThresholdHandover(errorThresholdHandover);
+            ai.setHandoverResetTimeoutSeconds(handoverResetTimeout);
+            ai.setHandoverMessage(handoverMessage);
+
+            if (!this.databaseAi.updateAI(devId, ai, this.jsonSerializer)) {
                 this.logger.logUserErrorEvent(LOGFROM, "UpdateAI - db fail updating ai", devIdString, logMap);
                 return ApiError.getInternalServerError();
             }
@@ -255,11 +254,18 @@ public class AILogic {
     }
 
     public ApiResult getSingleAI(final UUID devid, final UUID aiid) {
-        return getSingleAI(devid, aiid, null);
+        return getSingleAI(devid, aiid, null, null);
     }
 
-    private ApiResult getSingleAI(final UUID devid, final UUID aiid, final DatabaseTransaction transaction) {
-        return getAI(devid, aiid, "GetSingleAI", false, transaction);
+    ApiResult getSingleAI(final UUID devid, final UUID aiid, final String engineVersion) {
+        return getSingleAI(devid, aiid, engineVersion, null);
+    }
+
+    private ApiResult getSingleAI(final UUID devid,
+                                  final UUID aiid,
+                                  final String engineVersion,
+                                  final DatabaseTransaction transaction) {
+        return getAI(devid, aiid, engineVersion, "GetSingleAI", false, transaction);
     }
 
     public ApiResult setAiBotConfigDescription(final UUID devid, final UUID aiid,
@@ -702,14 +708,19 @@ public class AILogic {
 
             Locale locale = getSafeLocaleFromBot(botToImport);
 
-            this.databaseAi.updateAI(devId, aiid, botToImport.getDescription(), botToImport.isPrivate(),
-                    locale, botToImport.getTimezone(), botToImport.getConfidence(),
-                    botToImport.getPersonality(), botToImport.getVoice(), botToImport.getDefaultResponses(),
-                    botToImport.getErrorThresholdHandover(),
-                    botToImport.getHandoverResetTimeoutSeconds(),
-                    botToImport.getHandoverMessage(),
-                    this.jsonSerializer,
-                    transaction);
+            // Make the changes
+            bot.setDescription(botToImport.getDescription());
+            bot.setPrivate(botToImport.isPrivate());
+            bot.setLanguage(locale);
+            bot.setTimezone(botToImport.getTimezone());
+            bot.setConfidence(botToImport.getConfidence());
+            bot.setPersonality(botToImport.getPersonality());
+            bot.setVoice(botToImport.getVoice());
+            bot.setDefaultChatResponses(botToImport.getDefaultResponses());
+            bot.setErrorThresholdHandover(botToImport.getErrorThresholdHandover());
+            bot.setHandoverMessage(botToImport.getHandoverMessage());
+
+            this.databaseAi.updateAI(devId, bot, this.jsonSerializer, transaction);
 
             // Need to cleanup all existing intents
             ApiIntentList intentList = this.databaseEntitiesIntents.getIntentsDetails(devId, aiid);
@@ -830,6 +841,24 @@ public class AILogic {
         return this.importBot(devId, botStructure);
     }
 
+    public ApiResult changeAiEngineVersion(final UUID devId, final UUID aiid, final String newEngineVersion) {
+        LogMap logMap = LogMap.map("AIID", aiid);
+        final String devIdString = devId.toString();
+        try {
+            ApiAi ai = this.databaseAi.getAI(devId, aiid, this.jsonSerializer);
+            if (ai == null) {
+                this.logger.logUserTraceEvent(LOGFROM, "ChangeAiEngineVersion - AI not found", devIdString, logMap);
+                return ApiError.getNotFound();
+            }
+            ai.setEngineVersion(newEngineVersion);
+            this.databaseAi.updateAI(devId, ai, this.jsonSerializer);
+            return new ApiAi(ai).setSuccessStatus();
+        } catch (Exception ex) {
+            this.logger.logUserExceptionEvent(LOGFROM, "ChangeAiEngineVersion", devIdString, ex);
+            return ApiError.getInternalServerError();
+        }
+    }
+
     static String generateBotNameRandomSuffix() {
         final String saltChars = "abcdefghijklmnopqrstuvwxyz1234567890";
         final int suffixLength = 6;
@@ -870,7 +899,8 @@ public class AILogic {
         }
 
         // load the new bot as a get
-        return getAI(aiIdentity.getDevId(), aiIdentity.getAiid(), "ImportBot-GetAI", isCreate, null);
+        return getAI(aiIdentity.getDevId(), aiIdentity.getAiid(), aiIdentity.getServerVersion(),
+                "ImportBot-GetAI", isCreate, null);
     }
 
     private void logImport(final UUID devId, final ApiResult result, final BotStructure importedBot) {
@@ -902,14 +932,28 @@ public class AILogic {
         }
     }
 
-    private ApiResult getAI(final UUID devid, final UUID aiid, String logTag, boolean isCreate,
+    private ApiResult getAI(final UUID devid,
+                            final UUID aiid,
+                            final String engineVersion,
+                            final String logTag,
+                            boolean isCreate,
                             final DatabaseTransaction transaction) {
         final String devIdString = devid.toString();
         try {
             LogMap logMap = LogMap.map("AIID", aiid);
-            ApiAi ai = transaction == null
-                    ? this.databaseAi.getAIWithStatus(devid, aiid, this.jsonSerializer)
-                    : this.databaseAi.getAIWithStatus(devid, aiid, this.jsonSerializer, transaction);
+            ApiAi ai;
+
+            if (StringUtils.isEmpty(engineVersion)) {
+                ai = transaction == null
+                        ? this.databaseAi.getAIWithStatus(devid, aiid, this.jsonSerializer)
+                        : this.databaseAi.getAIWithStatus(devid, aiid, this.jsonSerializer, transaction);
+            } else {
+                ai = transaction == null
+                        ? this.databaseAi.getAIWithStatusForEngineVersion(devid, aiid,
+                        engineVersion, this.jsonSerializer)
+                        : this.databaseAi.getAIWithStatusForEngineVersion(devid, aiid,
+                        engineVersion, this.jsonSerializer, transaction);
+            }
             if (ai == null) {
                 this.logger.logUserTraceEvent(LOGFROM,
                         String.format("%s - not found", logTag), devIdString, logMap);
@@ -1020,7 +1064,7 @@ public class AILogic {
             LogMap logMap = LogMap.map("AIID", aiid);
 
             try {
-                bot = (ApiAi) this.getSingleAI(devId, aiid, transaction);
+                bot = (ApiAi) this.getSingleAI(devId, aiid, bot.getEngineVersion(), transaction);
             } catch (Exception e) {
                 this.logger.logUserExceptionEvent(LOGFROM, "ImportBot - retrieve ai", devId.toString(),
                         e, logMap);

@@ -4,15 +4,15 @@ import com.hutoma.api.access.Role;
 import com.hutoma.api.access.Secured;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.containers.ApiResult;
+import com.hutoma.api.logic.AILogic;
 import com.hutoma.api.logic.AdminLogic;
-import com.hutoma.api.logic.IntentLogic;
 import com.hutoma.api.logic.TrainingLogic;
 
-import java.util.UUID;
 import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.UUID;
 
 /**
  * Administrative endpoint.
@@ -24,14 +24,17 @@ public class AdminEndpoint {
     private final AdminLogic adminLogic;
     private final JsonSerializer serializer;
     private final TrainingLogic trainingLogic;
+    private final AILogic aiLogic;
 
     @Inject
     public AdminEndpoint(final AdminLogic adminLogic,
                          final TrainingLogic trainingLogic,
+                         final AILogic aiLogic,
                          final JsonSerializer serializer) {
         this.adminLogic = adminLogic;
         this.trainingLogic = trainingLogic;
         this.serializer = serializer;
+        this.aiLogic = aiLogic;
     }
 
     //curl -X POST -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsImNhbGciOiJERUYifQ.eNqqVgry93FVsgJT8Y4uvp5-SjpKxaVJQKHElNzMPKVaAAAAAP__.e-INR1D-L_sokTh9sZ9cBnImWI0n6yXXpDCmat1ca_c" http://localhost:8080/api/admin?id=test&role=ROLE_CLIENTONLY
@@ -97,9 +100,10 @@ public class AdminEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     public Response migrationRetrainBot(
             @PathParam("devid") String devId,
-            @PathParam("aiid") String aiid) {
+            @PathParam("aiid") String aiid,
+            @QueryParam("engine_version") String engineVersion) {
         ApiResult result = this.trainingLogic.updateTraining(
-                UUID.fromString(devId), UUID.fromString(aiid), true);
+                UUID.fromString(devId), UUID.fromString(aiid), engineVersion, true);
         return result.getResponse(this.serializer).build();
     }
 
@@ -109,9 +113,23 @@ public class AdminEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     public Response migrationBotStatus(
             @PathParam("devid") String devId,
-            @PathParam("aiid") String aiid) {
+            @PathParam("aiid") String aiid,
+            @QueryParam("engine_version") String engineVersion) {
         ApiResult result = this.trainingLogic.getAiTrainingStatus(
-                UUID.fromString(devId), UUID.fromString(aiid));
+                UUID.fromString(devId), UUID.fromString(aiid), engineVersion);
+        return result.getResponse(this.serializer).build();
+    }
+
+    @PUT
+    @Path("migration/{devid}/{aiid}/version")
+    @Secured({Role.ROLE_ADMIN})
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response migrationBotChangeVersion(
+            @PathParam("devid") String devId,
+            @PathParam("aiid") String aiid,
+            @QueryParam("engine_version") String engineVersion) {
+        ApiResult result = this.aiLogic.changeAiEngineVersion(
+                UUID.fromString(devId), UUID.fromString(aiid), engineVersion);
         return result.getResponse(this.serializer).build();
     }
 }

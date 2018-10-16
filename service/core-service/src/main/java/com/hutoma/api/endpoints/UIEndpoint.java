@@ -123,6 +123,7 @@ public class UIEndpoint {
     /**
      * Get the detail for a single bot the user owns
      * but using a different ratelimit key
+     *
      * @param requestContext
      * @return
      */

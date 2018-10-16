@@ -3,7 +3,6 @@ package com.hutoma.api.connectors.db;
 import com.google.gson.reflect.TypeToken;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Pair;
-import com.hutoma.api.common.SupportedLanguage;
 import com.hutoma.api.connectors.BackendStatus;
 import com.hutoma.api.containers.*;
 import com.hutoma.api.containers.sub.*;
@@ -182,58 +181,41 @@ public class DatabaseAI extends Database {
         }
     }
 
-    public boolean updateAI(final UUID devId, final UUID aiid, final String description, final boolean isPrivate,
-                            final Locale language, final String timezoneString, final double confidence,
-                            final int personality, final int voice, final List<String> defaultChatResponses,
-                            final int errorThresholdHandover,
-                            final int handoverResetTimeout,
-                            final String handoverMessage,
-                            final JsonSerializer serializer)
+    public boolean updateAI(final UUID devId, final ApiAi ai, final JsonSerializer serializer)
             throws DatabaseException {
+
         try (DatabaseCall call = this.callProvider.get()) {
-            return updateAI(devId, aiid, description, isPrivate, language, timezoneString, confidence,
-                    personality, voice, defaultChatResponses, errorThresholdHandover, handoverResetTimeout,
-                    handoverMessage, serializer, call);
+            return updateAI(devId, ai, serializer, call);
         }
     }
 
-    public boolean updateAI(final UUID devId, final UUID aiid, final String description, final boolean isPrivate,
-                            final Locale language, final String timezoneString, final double confidence,
-                            final int personality, final int voice, final List<String> defaultChatResponses,
-                            final int errorThresholdHandover,
-                            final int handoverResetTimeout,
-                            final String handoverMessage,
+    public boolean updateAI(final UUID devId,
+                            final ApiAi ai,
                             final JsonSerializer serializer,
                             final DatabaseTransaction transaction)
             throws DatabaseException {
-        return updateAI(devId, aiid, description, isPrivate, language, timezoneString, confidence,
-                personality, voice, defaultChatResponses, errorThresholdHandover, handoverResetTimeout,
-                handoverMessage, serializer, transaction.getDatabaseCall());
+
+        return updateAI(devId, ai, serializer, transaction.getDatabaseCall());
     }
 
-    private boolean updateAI(final UUID devId, final UUID aiid, final String description, final boolean isPrivate,
-                             final Locale language, final String timezoneString, final double confidence,
-                             final int personality, final int voice, final List<String> defaultChatResponses,
-                             final int errorThresholdHandover,
-                             final int handoverResetTimeout,
-                             final String handoverMessage,
-                             final JsonSerializer serializer,
-                             final DatabaseCall call)
+    private boolean updateAI(final UUID devId, final ApiAi ai, final JsonSerializer serializer, final DatabaseCall call)
             throws DatabaseException {
-        call.initialise("updateAi", 13)
-                .add(aiid)
-                .add(description)
+
+        call.initialise("updateAi", 14)
+                .add(ai.getAiid())
+                .add(ai.getDescription())
                 .add(devId)
-                .add(isPrivate)
-                .add(language == null ? null : language.toLanguageTag())
-                .add(timezoneString)
-                .add(confidence)
-                .add(personality)
-                .add(voice)
-                .add(serializer.serialize(defaultChatResponses))
-                .add(errorThresholdHandover)
-                .add(handoverResetTimeout)
-                .add(handoverMessage);
+                .add(ai.getIsPrivate())
+                .add(ai.getLanguage() == null ? null : ai.getLanguage().toLanguageTag())
+                .add(ai.getTimezone())
+                .add(ai.getConfidence())
+                .add(ai.getPersonality())
+                .add(ai.getVoice())
+                .add(serializer.serialize(ai.getDefaultChatResponses()))
+                .add(ai.getErrorThresholdHandover())
+                .add(ai.getHandoverResetTimeoutSeconds())
+                .add(ai.getHandoverMessage())
+                .add(ai.getEngineVersion());
         return call.executeUpdate() > 0;
     }
 
@@ -403,64 +385,45 @@ public class DatabaseAI extends Database {
                                  final UUID aiid,
                                  final JsonSerializer serializer,
                                  final DatabaseTransaction transaction) throws DatabaseException {
-        if (transaction == null) {
-            throw new IllegalArgumentException("transaction");
-        }
-        try {
-            ApiAi ai = getAI(devId, aiid, serializer, transaction);
-            if (ai != null) {
-                AiIdentity identity = new AiIdentity(devId, aiid, ai.getLanguage(), ai.getEngineVersion());
-                BackendStatus backendStatus = DatabaseBackends.getBackendStatus(identity,
-                        transaction.getDatabaseCall());
-                if (backendStatus != null) {
-                    ai.setBackendStatus(backendStatus);
-                }
-            }
-            return ai;
-        } catch (SQLException ex) {
-            throw new DatabaseException(ex);
-        }
+        return getAIWithStatusForEngineVersion(devId, aiid, null, serializer, transaction);
     }
 
     public ApiAi getAIWithStatus(final UUID devId,
                                  final UUID aiid,
                                  final JsonSerializer serializer) throws DatabaseException {
+        return getAIWithStatusForEngineVersion(devId, aiid, null, serializer);
+    }
+
+    public ApiAi getAIWithStatusForEngineVersion(final UUID devId,
+                                                 final UUID aiid,
+                                                 final String overridenEngineVersion,
+                                                 final JsonSerializer serializer) throws DatabaseException {
         try (DatabaseTransaction transaction = this.transactionProvider.get()) {
-            ApiAi ai = getAIWithStatus(devId, aiid, serializer, transaction);
+            ApiAi ai = getAIWithStatusForEngineVersion(devId, aiid, overridenEngineVersion, serializer, transaction);
             transaction.commit();
             return ai;
         }
     }
 
-    /***
-     * Load data for an AI and populate its backend server statuses
-     * @param devid
-     * @param aiid
-     * @param serverVersion
-     * @param serializer
-     * @param transaction
-     * @return an ai, or null if it was not found
-     * @throws DatabaseException
-     */
-    public ApiAi getAIWithStatus(final UUID devid,
-                                 final UUID aiid,
-                                 final String serverVersion,
-                                 final JsonSerializer serializer,
-                                 final DatabaseTransaction transaction)
-            throws DatabaseException {
+    public ApiAi getAIWithStatusForEngineVersion(final UUID devId,
+                                                 final UUID aiid,
+                                                 final String overridenEngineVersion,
+                                                 final JsonSerializer serializer,
+                                                 final DatabaseTransaction transaction) throws DatabaseException {
         if (transaction == null) {
             throw new IllegalArgumentException("transaction");
         }
-
         try {
-            // load the statuses first
-            BackendStatus backendStatus = DatabaseBackends.getBackendStatus(new AiIdentity(devid, aiid,
-                            SupportedLanguage.EN, serverVersion),
-                    transaction.getDatabaseCall());
-
-            ApiAi ai = getAI(devid, aiid, serializer, transaction);
-            if (backendStatus != null) {
-                ai.setBackendStatus(backendStatus);
+            ApiAi ai = getAI(devId, aiid, serializer, transaction);
+            String engineVersion = StringUtils.isEmpty(overridenEngineVersion)
+                    ? ai.getEngineVersion() : overridenEngineVersion;
+            if (ai != null) {
+                AiIdentity identity = new AiIdentity(devId, aiid, ai.getLanguage(), engineVersion);
+                BackendStatus backendStatus = DatabaseBackends.getBackendStatus(identity,
+                        transaction.getDatabaseCall());
+                if (backendStatus != null) {
+                    ai.setBackendStatus(backendStatus);
+                }
             }
             return ai;
         } catch (SQLException ex) {

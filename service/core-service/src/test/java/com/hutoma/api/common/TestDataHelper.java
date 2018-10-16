@@ -6,6 +6,7 @@ import com.hutoma.api.connectors.BackendStatus;
 import com.hutoma.api.connectors.IServerEndpoint;
 import com.hutoma.api.connectors.db.DatabaseAI;
 import com.hutoma.api.connectors.db.DatabaseException;
+import com.hutoma.api.connectors.db.DatabaseTransaction;
 import com.hutoma.api.containers.AiBotConfigDefinition;
 import com.hutoma.api.containers.ApiAi;
 import com.hutoma.api.containers.ServiceIdentity;
@@ -59,8 +60,9 @@ public class TestDataHelper {
     public static void setupAiReadonlyMode(final DatabaseAI fakeDatabase) throws DatabaseException {
         ApiAi ai = new ApiAi(TestDataHelper.getSampleAI());
         ai.setReadOnly(true);
-        when(fakeDatabase.getAIWithStatus(any(), any(), any(JsonSerializer.class))).thenReturn(ai);
-        when(fakeDatabase.getAI(any(), any(), any())).thenReturn(ai);
+        when(fakeDatabase.getAI(any(UUID.class), any(UUID.class), any(JsonSerializer.class))).thenReturn(ai);
+        when(fakeDatabase.getAIWithStatus(any(UUID.class), any(UUID.class), any(JsonSerializer.class), any(DatabaseTransaction.class))).thenReturn(ai);
+        when(fakeDatabase.getAIWithStatus(any(UUID.class), any(UUID.class), any(JsonSerializer.class))).thenReturn(ai);
     }
 
     public static ApiAi getAi(TrainingStatus status, boolean isPrivate) {

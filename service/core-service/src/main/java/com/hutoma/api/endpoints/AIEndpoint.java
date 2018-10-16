@@ -43,6 +43,7 @@ public class AIEndpoint {
 
     /**
      * Create a new bot
+     *
      * @param requestContext
      * @param isPrivate
      * @param personality
@@ -83,6 +84,7 @@ public class AIEndpoint {
 
     /**
      * Update existing bot
+     *
      * @param requestContext
      * @param isPrivate
      * @param personality
@@ -123,6 +125,7 @@ public class AIEndpoint {
 
     /**
      * Set the AI config
+     *
      * @param requestContext
      * @return
      */
@@ -151,6 +154,7 @@ public class AIEndpoint {
 
     /**
      * Regenerate a webhook secret for a bot
+     *
      * @param requestContext
      * @return
      */
@@ -170,6 +174,7 @@ public class AIEndpoint {
 
     /**
      * Get all the bots for a given user
+     *
      * @param requestContext
      * @return
      */
@@ -187,6 +192,7 @@ public class AIEndpoint {
 
     /**
      * Get the detail for a single bot the user owns
+     *
      * @param requestContext
      * @return
      */
@@ -206,6 +212,7 @@ public class AIEndpoint {
 
     /**
      * Delete a bot
+     *
      * @param requestContext
      * @return
      */
@@ -298,6 +305,7 @@ public class AIEndpoint {
 
     /**
      * Get the skills that a given bot is linked to
+     *
      * @param requestContext
      * @return
      */
@@ -326,6 +334,7 @@ public class AIEndpoint {
 
     /**
      * Updates the list of the bots the AI is linked to
+     *
      * @param requestContext the request context
      * @return the response
      */
@@ -355,6 +364,7 @@ public class AIEndpoint {
 
     /**
      * Get the data for the linked bot, including configuration
+     *
      * @param requestContext
      * @param botId
      * @return
@@ -387,6 +397,7 @@ public class AIEndpoint {
 
     /**
      * Set the AI config for a linked bot.
+     *
      * @param requestContext
      * @return
      */
@@ -417,6 +428,7 @@ public class AIEndpoint {
 
     /**
      * Link this AIID to a bot in the store
+     *
      * @param requestContext
      * @param botId
      * @return
@@ -451,6 +463,7 @@ public class AIEndpoint {
 
     /**
      * Unlink this AIID from a bot in the store
+     *
      * @param requestContext
      * @param botId
      * @return
@@ -484,6 +497,7 @@ public class AIEndpoint {
 
     /**
      * Get the botstore view of this bot, if it is published
+     *
      * @param requestContext
      * @return
      */

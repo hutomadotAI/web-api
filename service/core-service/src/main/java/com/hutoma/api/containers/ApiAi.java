@@ -230,20 +230,40 @@ public class ApiAi extends ApiResult {
         return this.isPrivate;
     }
 
+    public void setPrivate(final boolean isPrivate) {
+        this.isPrivate = isPrivate;
+    }
+
     public int getPersonality() {
         return this.personality;
+    }
+
+    public void setPersonality(final int personality) {
+        this.personality = personality;
     }
 
     public int getVoice() {
         return this.voice;
     }
 
+    public void setVoice(final int voice) {
+        this.voice = voice;
+    }
+
     public Locale getLanguage() {
         return this.language;
     }
 
+    public void setLanguage(final Locale language) {
+        this.language = language;
+    }
+
     public String getTimezone() {
         return this.timezone;
+    }
+
+    public void setTimezone(final String timezone) {
+        this.timezone = timezone;
     }
 
     public boolean trainingFileUploaded() {

@@ -19,6 +19,7 @@ import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
 import com.hutoma.api.memory.IMemoryIntentHandler;
 import com.hutoma.api.validation.Validate;
+import org.apache.commons.lang.StringUtils;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 
 import javax.inject.Inject;
@@ -300,20 +301,44 @@ public class TrainingLogic {
      *
      * @param devid
      * @param aiid
+     * @param allowRetrainReadonlyBot
      * @return
      */
-    public ApiResult updateTraining(final UUID devid, final UUID aiid,
+    public ApiResult updateTraining(final UUID devid,
+                                    final UUID aiid,
+                                    final boolean allowRetrainReadonlyBot) {
+        return updateTraining(devid, aiid, null, allowRetrainReadonlyBot);
+    }
+
+    /**
+     * An update to an existing training session means we will have to delete any existing neural
+     * network and start from scratch.
+     *
+     * @param devid
+     * @param aiid
+     * @param overridenEngineVersion
+     * @param allowRetrainReadonlyBot
+     * @return
+     */
+    public ApiResult updateTraining(final UUID devid,
+                                    final UUID aiid,
+                                    final String overridenEngineVersion,
                                     final boolean allowRetrainReadonlyBot) {
         final String devidString = devid.toString();
         LogMap logMap = LogMap.map("AIID", aiid);
         try {
 
-            ApiAi ai = this.databaseAi.getAIWithStatus(devid, aiid, this.jsonSerializer);
+            ApiAi ai = StringUtils.isEmpty(overridenEngineVersion)
+                    ? this.databaseAi.getAIWithStatus(devid, aiid, this.jsonSerializer)
+                    : this.databaseAi.getAIWithStatusForEngineVersion(devid, aiid, overridenEngineVersion,
+                    this.jsonSerializer);
             if (ai == null) {
                 this.logger.logUserTraceEvent(LOGFROM, "UpdateTraining - AI not found", devidString, logMap);
                 return ApiError.getNotFound();
             }
-            logMap.add("EngineVersion", ai.getEngineVersion());
+            String engineVersion = StringUtils.isEmpty(overridenEngineVersion)
+                    ? ai.getEngineVersion() : overridenEngineVersion;
+            logMap.add("EngineVersion", engineVersion);
             if (!allowRetrainReadonlyBot && ai.isReadOnly()) {
                 this.logger.logUserTraceEvent(LOGFROM, "UpdateTraining - Bot is RO", devidString, logMap);
                 return ApiError.getBadRequest(AILogic.BOT_RO_MESSAGE);
@@ -336,7 +361,7 @@ public class TrainingLogic {
                             return ApiError.getBadRequest("There is no training data.");
                         }
                         this.aiServices.uploadTraining(ai.getBackendStatus(),
-                                new AiIdentity(devid, aiid, ai.getLanguage(), ai.getEngineVersion()),
+                                new AiIdentity(devid, aiid, ai.getLanguage(), engineVersion),
                                 trainingMaterials);
                         // Delete all memory variables for this AI
                         this.memoryIntentHandler.resetIntentsStateForAi(devid, aiid);
@@ -476,10 +501,10 @@ public class TrainingLogic {
         }
     }
 
-    public ApiResult getAiTrainingStatus(final UUID devId, final UUID aiid) {
+    public ApiResult getAiTrainingStatus(final UUID devId, final UUID aiid, final String engineVersion) {
         LogMap logMap = LogMap.map("AIID", aiid);
         try {
-            ApiAi ai = this.databaseAi.getAIWithStatus(devId, aiid, this.jsonSerializer);
+            ApiAi ai = this.databaseAi.getAIWithStatusForEngineVersion(devId, aiid, engineVersion, this.jsonSerializer);
             if (ai == null) {
                 this.logger.logUserInfoEvent(LOGFROM, "Ai status request for unknown aiid",
                         devId.toString(), logMap);
