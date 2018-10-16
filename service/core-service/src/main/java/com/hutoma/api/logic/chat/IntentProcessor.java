@@ -11,17 +11,10 @@ import com.hutoma.api.logging.LogMap;
 import com.hutoma.api.logic.ChatLogic;
 import com.hutoma.api.memory.IEntityRecognizer;
 import com.hutoma.api.memory.IMemoryIntentHandler;
-
 import org.apache.commons.lang.StringUtils;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
 import javax.inject.Inject;
+import java.util.*;
 
 /**
  * Handled all the intent processing logic.
@@ -58,6 +51,7 @@ public class IntentProcessor {
 
     /**
      * Processes a given intent.
+     *
      * @param chatInfo             the chat request info
      * @param aiidForMemoryIntents the aiid for memory intents
      * @param currentIntent        the intent to process
@@ -241,7 +235,7 @@ public class IntentProcessor {
             // Check if there are any conditions out
             if (!intent.getIntentOutConditionals().isEmpty()) {
 
-                for (IntentOutConditional outConditional: intent.getIntentOutConditionals()) {
+                for (IntentOutConditional outConditional : intent.getIntentOutConditionals()) {
                     this.conditionEvaluator.setConditions(outConditional.getConditions());
                     ConditionEvaluator.Results results = this.conditionEvaluator.evaluate(
                             chatResult.getChatState().getChatContext());
@@ -290,6 +284,7 @@ public class IntentProcessor {
 
     /**
      * Checks whether an intent can be executed based on the conditions associated with it.
+     *
      * @param intent     the intent
      * @param chatResult the current chat result
      * @return whether the intent can be executed or not
@@ -328,6 +323,7 @@ public class IntentProcessor {
 
     /**
      * Processes the intent's variables.
+     *
      * @param chatInfo             the chat request information
      * @param aiidForMemoryIntents AI id for the intent being processed
      * @param currentIntent        intent being processed
@@ -395,10 +391,15 @@ public class IntentProcessor {
                 MemoryVariable memoryVariable = (MemoryVariable) entity;
                 chatResult.getChatState().setEntityValue(memoryVariable.getName(), memoryVariable.getCurrentValue());
             }
-        
+
             // Update context
+            Map<String, Integer> lifetimeMap = new HashMap<>(); // maps entity label to lifetime
+            intent.getVariables().forEach(x -> lifetimeMap.put(x.getLabel(), x.getLifetimeTurns()));
+            // Add the variablest to the context, including the lifetime
             currentIntent.getVariables().forEach(
-                    v -> chatResult.getChatState().getChatContext().setValue(v.getLabel(), v.getCurrentValue()));
+                    v -> chatResult.getChatState().getChatContext().setValue(
+                            v.getLabel(), v.getCurrentValue(),
+                            lifetimeMap.getOrDefault(v.getLabel(), -1)));
         }
 
         // Populate the entities from context
@@ -414,7 +415,7 @@ public class IntentProcessor {
                 "entity-value-replacement") == FeatureToggler.FeatureState.T1) {
             logger.logInfo("IntentProcessor",
                     "Checking for entity value matching for intent "
-            + intent.getIntentName());
+                            + intent.getIntentName());
 
             // We need to filter the relevant candidates and then count how many we have left
             HashMap<String, List<String>> localCandidateMatches = new HashMap<>();
@@ -439,7 +440,7 @@ public class IntentProcessor {
                 if (candidate.getValue().size() == 1) {
                     chatResult.getChatState().getEntityValues().put(candidate.getValue().get(0), candidate.getKey());
                     logger.logInfo("IntentProcessor", "Added entity value "
-                    + candidate.getKey() + " from entity value matching");
+                            + candidate.getKey() + " from entity value matching");
                 }
             }
         }
@@ -509,6 +510,7 @@ public class IntentProcessor {
 
     /**
      * Gets the next variable to prompt, if any.
+     *
      * @param currentIntent the current intent being processed
      * @return the memory variable (or null if no variable to prompt)
      */
@@ -531,6 +533,7 @@ public class IntentProcessor {
 
     /**
      * Gets the next variable to prompt for from the variables list.
+     *
      * @param variables the variables list
      * @return the variable to prompt for next
      */
@@ -565,6 +568,7 @@ public class IntentProcessor {
 
     /**
      * Updates the chat result to prompt the user with a variable.
+     *
      * @param variable   the variable to prompt for
      * @param chatResult the current chat result
      * @param log        the log structure
@@ -589,6 +593,7 @@ public class IntentProcessor {
 
     /**
      * Notifies that the intent has beel fulfilled.
+     *
      * @param chatResult   the current chat result
      * @param memoryIntent the memory intent
      * @param aiid         the AI id
@@ -606,6 +611,7 @@ public class IntentProcessor {
 
     /**
      * Gets a random response form the list of intent responses.
+     *
      * @param aiid         the AI id
      * @param memoryIntent the memory intent
      * @param intent       the intent
@@ -625,6 +631,7 @@ public class IntentProcessor {
 
     /**
      * Check whether there's a webhook to execute, and call it.
+     *
      * @param chatInfo             the chat request info
      * @param aiidForMemoryIntents the AI id for the intent in flight
      * @param currentIntent        the intent in flight
