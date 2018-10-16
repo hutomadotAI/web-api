@@ -218,14 +218,14 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
             // put them into a set
             HashSet<String> currentValues = new HashSet<>();
             while (valuesRs.next()) {
-                currentValues.add(valuesRs.getString("value"));
+                currentValues.add(valuesRs.getString("value").toLowerCase());
             }
 
             if (entity.getEntityValueList() != null) {
                 // for each new entity value, check if it was already there
                 for (String entityValue : entity.getEntityValueList()) {
                     // if it was then remove it, otherwise it is new - add it
-                    if (!currentValues.remove(entityValue)) {
+                    if (!currentValues.remove(entityValue.toLowerCase())) {
                         transaction.getDatabaseCall().initialise("addEntityValue", 3)
                                 .add(devid).add(entity.getEntityName()).add(entityValue).executeUpdate();
                     }
