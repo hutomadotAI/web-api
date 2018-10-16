@@ -912,8 +912,8 @@ public class AILogic {
             LogMap logMap = LogMap.map("AIID", aiid);
             String serverVersion = FeatureToggler.getServerVersionForAi(devid, aiid, this.featureToggler);
             ApiAi ai = transaction == null
-                    ? this.databaseAi.getAI(devid, aiid, serverVersion, this.jsonSerializer)
-                    : this.databaseAi.getAI(devid, aiid, serverVersion, this.jsonSerializer, transaction);
+                    ? this.databaseAi.getAIWithStatus(devid, aiid, serverVersion, this.jsonSerializer)
+                    : this.databaseAi.getAIWithStatus(devid, aiid, serverVersion, this.jsonSerializer, transaction);
             if (ai == null) {
                 this.logger.logUserTraceEvent(LOGFROM,
                         String.format("%s - not found", logTag), devIdString, logMap);

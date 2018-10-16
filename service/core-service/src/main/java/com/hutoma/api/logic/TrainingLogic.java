@@ -9,7 +9,10 @@ import com.hutoma.api.connectors.BackendStatus;
 import com.hutoma.api.connectors.aiservices.AIServices;
 import com.hutoma.api.connectors.db.DatabaseAI;
 import com.hutoma.api.connectors.db.DatabaseException;
-import com.hutoma.api.containers.*;
+import com.hutoma.api.containers.ApiAi;
+import com.hutoma.api.containers.ApiError;
+import com.hutoma.api.containers.ApiResult;
+import com.hutoma.api.containers.ApiTrainingMaterials;
 import com.hutoma.api.containers.sub.AiIdentity;
 import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.logging.ILogger;
@@ -200,10 +203,11 @@ public class TrainingLogic {
     public ApiResult startTraining(final UUID devid, final UUID aiid) {
 
         ApiAi ai;
-        LogMap logMap = LogMap.map("AIID", aiid);
+        String serverVersion = FeatureToggler.getServerVersionForAi(devid, aiid, featureToggler);
+        LogMap logMap = LogMap.map("AIID", aiid).put("ServerVersion", serverVersion);
         final String devidString = devid.toString();
         try {
-            ai = this.databaseAi.getAI(devid, aiid, this.jsonSerializer);
+            ai = this.databaseAi.getAIWithStatus(devid, aiid, serverVersion, this.jsonSerializer);
         } catch (DatabaseException ex) {
             this.logger.logUserExceptionEvent(LOGFROM, "StartTraining", devidString, ex);
             return ApiError.getInternalServerError();
@@ -218,8 +222,6 @@ public class TrainingLogic {
         }
 
         TrainingStatus trainingStatus = ai.getSummaryAiStatus();
-        String serverVersion = FeatureToggler.getServerVersionForAi(devid, aiid, featureToggler);
-        logMap.add("ServerVersion", serverVersion);
         logMap.add("Start from state", trainingStatus.name());
         if (trainingStatus == TrainingStatus.AI_READY_TO_TRAIN
                 || trainingStatus == TrainingStatus.AI_TRAINING_STOPPED) {
@@ -264,7 +266,7 @@ public class TrainingLogic {
         String serverVersion = FeatureToggler.getServerVersionForAi(devId, aiid, featureToggler);
         LogMap logMap = LogMap.map("AIID", aiid).put("ServerVersion", serverVersion);
         try {
-            ApiAi ai = this.databaseAi.getAI(devId, aiid, this.jsonSerializer);
+            ApiAi ai = this.databaseAi.getAIWithStatus(devId, aiid, serverVersion, this.jsonSerializer);
             if (ai == null) {
                 this.logger.logUserTraceEvent(LOGFROM, "StopTraining - AI not found", devidString, logMap);
                 return ApiError.getNotFound();
@@ -307,7 +309,7 @@ public class TrainingLogic {
         LogMap logMap = LogMap.map("AIID", aiid).put("ServerVersion", serverVersion);
         try {
 
-            ApiAi ai = this.databaseAi.getAI(devid, aiid, this.jsonSerializer);
+            ApiAi ai = this.databaseAi.getAIWithStatus(devid, aiid, serverVersion, this.jsonSerializer);
             if (ai == null) {
                 this.logger.logUserTraceEvent(LOGFROM, "UpdateTraining - AI not found", devidString, logMap);
                 return ApiError.getNotFound();
@@ -475,10 +477,11 @@ public class TrainingLogic {
     }
 
     public ApiResult getAiTrainingStatus(final UUID devId, final UUID aiid) {
-        LogMap logMap = LogMap.map("AIID", aiid);
+        String serverVersion = FeatureToggler.getServerVersionForAi(devId, aiid, featureToggler);
+        LogMap logMap = LogMap.map("AIID", aiid).put("ServerVersion", serverVersion);
         try {
 
-            ApiAi ai = this.databaseAi.getAI(devId, aiid, this.jsonSerializer);
+            ApiAi ai = this.databaseAi.getAIWithStatus(devId, aiid, serverVersion, this.jsonSerializer);
             if (ai == null) {
                 this.logger.logUserInfoEvent(LOGFROM, "Ai status request for unknown aiid",
                         devId.toString(), logMap);

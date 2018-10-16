@@ -3,29 +3,20 @@ package com.hutoma.api.logic;
 import com.hutoma.api.common.BotStructureSerializer;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.connectors.db.DatabaseAI;
-import com.hutoma.api.connectors.db.DatabaseEntitiesIntents;
-import com.hutoma.api.connectors.db.DatabaseException;
-import com.hutoma.api.connectors.db.DatabaseMarketplace;
-import com.hutoma.api.connectors.db.DatabaseTransaction;
-import com.hutoma.api.containers.ApiAi;
-import com.hutoma.api.containers.ApiAiBot;
-import com.hutoma.api.containers.ApiAiBotList;
-import com.hutoma.api.containers.ApiBotStructure;
-import com.hutoma.api.containers.ApiError;
-import com.hutoma.api.containers.ApiResult;
-import com.hutoma.api.containers.ApiString;
+import com.hutoma.api.connectors.db.*;
+import com.hutoma.api.containers.*;
 import com.hutoma.api.containers.sub.AiBot;
 import com.hutoma.api.containers.sub.BotStructure;
 import com.hutoma.api.containers.sub.DeveloperInfo;
 import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
-
 import org.apache.commons.io.FilenameUtils;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.joda.time.DateTime;
 
+import javax.inject.Inject;
+import javax.inject.Provider;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -33,14 +24,7 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.util.Arrays;
-import java.util.EnumSet;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-import javax.inject.Inject;
-import javax.inject.Provider;
+import java.util.*;
 
 import static java.nio.file.attribute.PosixFilePermission.*;
 
@@ -61,10 +45,10 @@ public class AIBotStoreLogic {
     private final Provider<DatabaseTransaction> databaseTransactionProvider;
 
     @Inject
-    public AIBotStoreLogic(final DatabaseAI database, final DatabaseEntitiesIntents databaseEntitiesIntents,
-                           final DatabaseMarketplace databaseMarketplace,
-                           final Provider<DatabaseTransaction> databaseTransactionProvider,
-                           final ILogger logger, final Config config, final JsonSerializer jsonSerializer) {
+    AIBotStoreLogic(final DatabaseAI database, final DatabaseEntitiesIntents databaseEntitiesIntents,
+                    final DatabaseMarketplace databaseMarketplace,
+                    final Provider<DatabaseTransaction> databaseTransactionProvider,
+                    final ILogger logger, final Config config, final JsonSerializer jsonSerializer) {
         this.database = database;
         this.databaseEntitiesIntents = databaseEntitiesIntents;
         this.databaseMarketplace = databaseMarketplace;

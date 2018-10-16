@@ -3,7 +3,10 @@ package com.hutoma.api.logic;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.CsvIntentReader;
 import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.connectors.db.*;
+import com.hutoma.api.connectors.db.DatabaseAI;
+import com.hutoma.api.connectors.db.DatabaseEntitiesIntents;
+import com.hutoma.api.connectors.db.DatabaseIntegrityViolationException;
+import com.hutoma.api.connectors.db.DatabaseTransaction;
 import com.hutoma.api.containers.*;
 import com.hutoma.api.containers.sub.IntentConditionOperator;
 import com.hutoma.api.containers.sub.IntentVariable;
@@ -35,7 +38,6 @@ public class IntentLogic {
     private final JsonSerializer jsonSerializer;
     private final Provider<DatabaseTransaction> databaseTransactionProvider;
     private final CsvIntentReader csvIntentReader;
-    private final DatabaseUser databaseUser;
 
     @Inject
     IntentLogic(final Config config,
@@ -45,8 +47,7 @@ public class IntentLogic {
                 final TrainingLogic trainingLogic,
                 final JsonSerializer jsonSerializer,
                 final Provider<DatabaseTransaction> transactionProvider,
-                final CsvIntentReader csvIntentReader,
-                final DatabaseUser databaseUser) {
+                final CsvIntentReader csvIntentReader) {
         this.config = config;
         this.logger = logger;
         this.databaseEntitiesIntents = databaseEntitiesIntents;
@@ -55,7 +56,6 @@ public class IntentLogic {
         this.jsonSerializer = jsonSerializer;
         this.databaseTransactionProvider = transactionProvider;
         this.csvIntentReader = csvIntentReader;
-        this.databaseUser = databaseUser;
     }
 
     /**

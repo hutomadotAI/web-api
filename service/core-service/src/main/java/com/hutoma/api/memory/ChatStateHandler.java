@@ -37,7 +37,7 @@ public class ChatStateHandler {
             if (!this.databaseAi.checkAIBelongsToDevId(devId, aiid)) {
                 throw new ChatStateUserException("Unknown AI.");
             }
-            state = this.databaseAi.getChatState(devId, aiid, serverVersion, chatId, jsonSerializer);
+            state = this.databaseAi.getChatState(devId, aiid, chatId, jsonSerializer);
         } catch (ChatStateUserException ex) {
             this.logger.logUserExceptionEvent(LOGFROM, ex.getMessage(), devId.toString(), ex);
             throw ex;

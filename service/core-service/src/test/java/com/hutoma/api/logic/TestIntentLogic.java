@@ -71,7 +71,7 @@ public class TestIntentLogic {
         this.fakeCsvIntentReader = mock(CsvIntentReader.class);
         this.intentLogic = new IntentLogic(this.fakeConfig, this.fakeLogger, this.fakeDatabaseEntitiesIntents,
                 this.fakeDatabase, this.trainingLogic, mock(JsonSerializer.class), this.fakeDatabaseTransactionProvider,
-                this.fakeCsvIntentReader, mock(DatabaseUser.class));
+                this.fakeCsvIntentReader);
 
         when(this.fakeConfig.getMaxUploadSizeKb()).thenReturn(1000);
         when(this.fakeDatabaseTransactionProvider.get()).thenReturn(this.fakeDatabaseTransaction);

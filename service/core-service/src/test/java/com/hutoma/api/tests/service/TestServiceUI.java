@@ -88,8 +88,8 @@ public class TestServiceUI extends ServiceTestBase {
     @Test
     public void testGetAIPollStatus() throws DatabaseException {
         ApiAi ai = TestDataHelper.getAI();
-        when(this.fakeDatabaseAi.getAI(any(), any(), anyString(), any())).thenReturn(ai);
-        final Response response = target(UI_PATH_AIPOLL ).request().headers(defaultHeaders).get();
+        when(this.fakeDatabaseAi.getAIWithStatus(any(), any(), anyString(), any())).thenReturn(ai);
+        final Response response = target(UI_PATH_AIPOLL).request().headers(defaultHeaders).get();
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
         ApiAi responseAi = deserializeResponse(response, ApiAi.class);
         Assert.assertEquals(ai.getAiid(), responseAi.getAiid());

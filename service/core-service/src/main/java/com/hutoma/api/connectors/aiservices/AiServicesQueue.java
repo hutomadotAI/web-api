@@ -3,14 +3,7 @@ package com.hutoma.api.connectors.aiservices;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.SupportedLanguage;
 import com.hutoma.api.common.Tools;
-import com.hutoma.api.connectors.BackendEngineStatus;
-import com.hutoma.api.connectors.BackendServerType;
-import com.hutoma.api.connectors.BackendStatus;
-import com.hutoma.api.connectors.IConnectConfig;
-import com.hutoma.api.connectors.InvocationResult;
-import com.hutoma.api.connectors.QueueAction;
-import com.hutoma.api.connectors.ServerConnector;
-import com.hutoma.api.connectors.ServerTrackerInfo;
+import com.hutoma.api.connectors.*;
 import com.hutoma.api.connectors.db.Database;
 import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.ServiceIdentity;
@@ -19,14 +12,13 @@ import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
 import com.hutoma.api.thread.ITrackedThreadSubPool;
-
 import org.glassfish.jersey.client.JerseyClient;
 
+import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Callable;
-import javax.inject.Inject;
 
 public class AiServicesQueue extends ServerConnector {
 
@@ -106,7 +98,7 @@ public class AiServicesQueue extends ServerConnector {
 
         // get an endpoint map, i.e. a map from serverIdentifier to the actual servertracker object
         Map<String, ServerTrackerInfo> map = controller.getVerifiedEndpointMap(
-                SupportedLanguage.EN, ServiceIdentity.DEFAULT_VERSION, serializer);
+                aiIdentity.getLanguage(), ServiceIdentity.DEFAULT_VERSION, serializer);
         // get the status of the AI for the backend server we are dealing with
         BackendEngineStatus status = backendStatus.getEngineStatus(serverType);
 

@@ -71,7 +71,7 @@ public class TestServiceAi extends ServiceTestBase {
     @Test
     public void testGetAI() throws DatabaseException {
         ApiAi ai = TestDataHelper.getAI();
-        when(this.fakeDatabaseAi.getAI(any(), any(), anyString(), any())).thenReturn(ai);
+        when(this.fakeDatabaseAi.getAIWithStatus(any(), any(), anyString(), any())).thenReturn(ai);
         final Response response = target(AI_PATH).request().headers(defaultHeaders).get();
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
         ApiAi responseAi = deserializeResponse(response, ApiAi.class);
@@ -223,8 +223,8 @@ public class TestServiceAi extends ServiceTestBase {
     public void testCloneBot() throws DatabaseException {
         final UUID aiid = UUID.randomUUID();
         when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
-        when(this.fakeDatabaseAi.getAI(any(), any(), any(String.class), any())).thenReturn(TestDataHelper.getSampleAI());
-        when(this.fakeDatabaseAi.getAI(any(), any(), any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
+        when(this.fakeDatabaseAi.getAIWithStatus(any(), any(), any(String.class), any())).thenReturn(TestDataHelper.getSampleAI());
+        when(this.fakeDatabaseAi.getAIWithStatus(any(), any(), any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
         when(this.fakeDatabaseAi.getAI(any(), any(), any(JsonSerializer.class), any())).thenReturn(TestDataHelper.getSampleAI());
         when(this.fakeTools.createNewRandomUUID()).thenReturn(aiid);
         when(this.fakeDatabaseAi.updatePassthroughUrl(any(), any(), anyString(), any())).thenReturn(true);
@@ -289,9 +289,9 @@ public class TestServiceAi extends ServiceTestBase {
         when(this.fakeDatabaseAi.updatePassthroughUrl(any(), any(), any(), any())).thenReturn(true);
         when(this.fakeDatabaseAi.updateDefaultChatResponses(any(), any(), any(), any(), any())).thenReturn(true);
         when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
-        when(this.fakeDatabaseAi.getAI(any(), any(), any(String.class), any())).thenReturn(TestDataHelper.getSampleAI());
+        when(this.fakeDatabaseAi.getAIWithStatus(any(), any(), any(String.class), any())).thenReturn(TestDataHelper.getSampleAI());
         when(this.fakeDatabaseAi.getAI(any(), any(), any(JsonSerializer.class), any())).thenReturn(TestDataHelper.getSampleAI());
-        when(this.fakeDatabaseAi.getAI(any(), any(), any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
+        when(this.fakeDatabaseAi.getAIWithStatus(any(), any(), any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
         when(this.fakeAiServices.getTrainingMaterialsCommon(any(), any(), any())).thenReturn("");
         final Response response = target(IMPORT_BASEPATH)
                 .request()
@@ -398,7 +398,7 @@ public class TestServiceAi extends ServiceTestBase {
         when(this.fakeDatabaseAi.updatePassthroughUrl(any(), any(), any(), any())).thenReturn(true);
         when(this.fakeDatabaseAi.updateDefaultChatResponses(any(), any(), any(), any(), any())).thenReturn(true);
         when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
-        when(this.fakeDatabaseAi.getAI(any(), any(), anyString(), any())).thenReturn(TestDataHelper.getSampleAI());
+        when(this.fakeDatabaseAi.getAIWithStatus(any(), any(), anyString(), any())).thenReturn(TestDataHelper.getSampleAI());
         when(this.fakeAiServices.getTrainingMaterialsCommon(any(), any(), any())).thenReturn("");
         return target(IMPORTINPLACE_BASEPATH)
                 .request()
@@ -422,7 +422,7 @@ public class TestServiceAi extends ServiceTestBase {
         BackendStatus status = new BackendStatus();
         status.setEngineStatus(BackendServerType.EMB, new BackendEngineStatus(
                 trainingStatus, 0.0, trainingProgress));
-        when(this.fakeDatabaseAi.getAI(any(), any(), anyString(), any())).thenReturn(TestDataHelper.getAi(status));
+        when(this.fakeDatabaseAi.getAIWithStatus(any(), any(), anyString(), any())).thenReturn(TestDataHelper.getAi(status));
         final Response response = target(AI_PATH).request().headers(defaultHeaders).get();
         return deserializeResponse(response, ApiAi.class);
     }

@@ -14,7 +14,6 @@ import com.hutoma.api.containers.sub.AiIdentity;
 import com.hutoma.api.containers.sub.AiStatus;
 import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.logic.chat.ChatDefaultHandler;
-
 import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.client.JerseyInvocation;
 import org.glassfish.jersey.client.JerseyWebTarget;
@@ -60,6 +59,7 @@ public class TestDataHelper {
     public static void setupAiReadonlyMode(final DatabaseAI fakeDatabase) throws DatabaseException {
         ApiAi ai = new ApiAi(TestDataHelper.getSampleAI());
         ai.setReadOnly(true);
+        when(fakeDatabase.getAIWithStatus(any(), any(), any(), any())).thenReturn(ai);
         when(fakeDatabase.getAI(any(), any(), any())).thenReturn(ai);
     }
 

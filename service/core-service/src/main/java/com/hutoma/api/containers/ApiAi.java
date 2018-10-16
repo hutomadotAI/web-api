@@ -101,7 +101,6 @@ public class ApiAi extends ApiResult {
         this.description = description;
         this.createdOn = createdOn;
         this.isPrivate = isPrivate;
-        this.backendStatus = backendStatus;
         this.personality = personality;
         this.confidence = confidence;
         this.voice = voice;
@@ -112,7 +111,8 @@ public class ApiAi extends ApiResult {
         this.defaultChatResponses = defaultChatResponses;
         this.passthroughUrl = passthroughUrl;
         this.botConfigDefinition = botConfigDefinition;
-        populateExtendedStatus();
+
+        this.setBackendStatus(backendStatus);
     }
 
     public ApiAi(final ApiAi other) {
@@ -122,7 +122,6 @@ public class ApiAi extends ApiResult {
         this.description = other.description;
         this.createdOn = other.createdOn;
         this.isPrivate = other.isPrivate;
-        this.backendStatus = other.backendStatus;
         this.personality = other.personality;
         this.confidence = other.confidence;
         this.voice = other.voice;
@@ -133,7 +132,8 @@ public class ApiAi extends ApiResult {
         this.defaultChatResponses = other.defaultChatResponses;
         this.passthroughUrl = other.passthroughUrl;
         this.botConfigDefinition = other.botConfigDefinition;
-        populateExtendedStatus();
+
+        this.setBackendStatus(other.backendStatus);
     }
 
     /***
@@ -207,6 +207,7 @@ public class ApiAi extends ApiResult {
 
     public void setBackendStatus(final BackendStatus backendStatus) {
         this.backendStatus = backendStatus;
+        populateExtendedStatus();
     }
 
     public String getPassthroughUrl() {
@@ -318,7 +319,7 @@ public class ApiAi extends ApiResult {
         // if the bot has been requeued, i.e. training started but paused for any reason
         // then we hide the pause by reporting this bot as "training..."
         if (this.summaryStatusReal == TrainingStatus.AI_TRAINING_QUEUED) {
-            this.summaryStatusPublic     = TrainingStatus.AI_TRAINING;
+            this.summaryStatusPublic = TrainingStatus.AI_TRAINING;
         }
 
         this.uiTrainingState = new UITrainingState(

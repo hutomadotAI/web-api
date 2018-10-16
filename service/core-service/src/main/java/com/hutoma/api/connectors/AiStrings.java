@@ -4,10 +4,10 @@ import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.connectors.db.DatabaseAI;
 import com.hutoma.api.containers.ApiAi;
 
+import javax.inject.Inject;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
-import javax.inject.Inject;
 
 /**
  * Manages AI related strings.
@@ -19,7 +19,7 @@ public class AiStrings {
     private final Random randomGenerator;
 
     @Inject
-    public AiStrings(final DatabaseAI database, final JsonSerializer serializer) {
+    AiStrings(final DatabaseAI database, final JsonSerializer serializer) {
         this.database = database;
         this.serializer = serializer;
         randomGenerator = new Random();
@@ -44,11 +44,11 @@ public class AiStrings {
     }
 
     public static class AiStringsException extends Exception {
-        public AiStringsException(final String message) {
+        AiStringsException(final String message) {
             super(message);
         }
 
-        public AiStringsException(final Exception ex) {
+        AiStringsException(final Exception ex) {
             super(ex);
         }
     }

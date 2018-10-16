@@ -17,14 +17,13 @@ import com.hutoma.api.containers.sub.UserInfo;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
 import io.jsonwebtoken.Claims;
-
 import org.apache.commons.lang.StringUtils;
 
+import javax.inject.Inject;
 import java.net.HttpURLConnection;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
-import javax.inject.Inject;
 
 /**
  * Created by mauriziocibelli on 27/04/16.
@@ -43,8 +42,12 @@ public class AdminLogic {
     private static final List<Role> SUPPORTED_ROLES = Arrays.asList(Role.ROLE_FREE);
 
     @Inject
-    AdminLogic(final Config config, final JsonSerializer jsonSerializer, final DatabaseUser database,
-                      final ILogger logger, final AIServices aiServices, final AIBotStoreLogic botStoreLogic) {
+    AdminLogic(final Config config,
+               final JsonSerializer jsonSerializer,
+               final DatabaseUser database,
+               final ILogger logger,
+               final AIServices aiServices,
+               final AIBotStoreLogic botStoreLogic) {
         this.config = config;
         this.jsonSerializer = jsonSerializer;
         this.database = database;
@@ -53,9 +56,8 @@ public class AdminLogic {
         this.botStoreLogic = botStoreLogic;
     }
 
-    public ApiResult createDev(
-            final String securityRole,
-            final int planId) {
+    public ApiResult createDev(final String securityRole,
+                               final int planId) {
         try {
             // Limit the creation of the user to ROLE_FREE only, at least for now
             if (SUPPORTED_ROLES.stream().noneMatch(x -> x.name().equals(securityRole))) {
@@ -162,8 +164,8 @@ public class AdminLogic {
                     UserInfo user = this.database.getUserFromDevId(uuidDevId);
                     boolean updated = regenerateDevTokenIfNeeded(user, encodingKey, dryrun);
                     ApiResult result = updated
-                        ? new ApiResult().setCreatedStatus()
-                        : new ApiResult().setSuccessStatus();
+                            ? new ApiResult().setCreatedStatus()
+                            : new ApiResult().setSuccessStatus();
                     this.logger.logUserInfoEvent(LOGFROM, "RegenerateTokens-single", ADMIN_DEVID_LOG,
                             LogMap.map("DevId", devId)
                                     .put("Updated", updated)
@@ -178,7 +180,7 @@ public class AdminLogic {
             } else {
                 List<UserInfo> users = this.database.getAllUsers();
                 ApiTokenRegenResult result = new ApiTokenRegenResult();
-                for (UserInfo user: users) {
+                for (UserInfo user : users) {
                     try {
                         boolean updated = regenerateDevTokenIfNeeded(user, encodingKey, dryrun);
                         if (updated) {
@@ -192,9 +194,9 @@ public class AdminLogic {
                 }
                 this.logger.logUserInfoEvent(LOGFROM, "RegenerateTokens-multiple", ADMIN_DEVID_LOG,
                         LogMap.map("NumUpdated", result.getUpdated().size())
-                            .put("NumSkipped", result.getSkipped().size())
-                            .put("NumErrors", result.getErrors().size())
-                            .put("Dry run", dryrun));
+                                .put("NumSkipped", result.getSkipped().size())
+                                .put("NumErrors", result.getErrors().size())
+                                .put("Dry run", dryrun));
                 return result.setSuccessStatus();
             }
         } catch (Exception ex) {

@@ -1,6 +1,5 @@
 package com.hutoma.api.connectors.db;
 
-import com.hutoma.api.common.FeatureToggler;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.containers.ApiEntity;
 import com.hutoma.api.containers.ApiIntent;
@@ -27,9 +26,8 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
     public DatabaseEntitiesIntents(final ILogger logger,
                                    final Provider<DatabaseCall> callProvider,
                                    final Provider<DatabaseTransaction> transactionProvider,
-                                   final JsonSerializer serializer,
-                                   final FeatureToggler featureToggler) {
-        super(logger, callProvider, transactionProvider, featureToggler);
+                                   final JsonSerializer serializer) {
+        super(logger, callProvider, transactionProvider);
         this.serializer = serializer;
     }
 

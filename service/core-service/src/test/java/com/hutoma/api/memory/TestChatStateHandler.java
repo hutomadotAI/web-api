@@ -9,7 +9,6 @@ import com.hutoma.api.containers.sub.ChatHandoverTarget;
 import com.hutoma.api.containers.sub.ChatState;
 import com.hutoma.api.containers.sub.MemoryIntent;
 import com.hutoma.api.logging.ILogger;
-
 import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Before;
@@ -49,7 +48,7 @@ public class TestChatStateHandler {
     public void testChatStateHandler_getState() throws DatabaseException, ChatStateHandler.ChatStateException {
         ChatState chatState = getTestChatState();
         when(this.fakeDatabaseAi.checkAIBelongsToDevId(any(), any())).thenReturn(true);
-        when(this.fakeDatabaseAi.getChatState(any(), any(), any(), any(), any())).thenReturn(chatState);
+        when(this.fakeDatabaseAi.getChatState(any(), any(), any(), any())).thenReturn(chatState);
         ChatState result = this.chatStateHandler.getState(DEVID_UUID, AIID, ServiceIdentity.DEFAULT_VERSION, UUID.randomUUID());
         assertChatStateEquals(chatState, result);
     }
@@ -57,7 +56,7 @@ public class TestChatStateHandler {
     @Test
     public void testChatStateHandler_getState_dbException() throws DatabaseException, ChatStateHandler.ChatStateException {
         when(this.fakeDatabaseAi.checkAIBelongsToDevId(any(), any())).thenReturn(true);
-        when(this.fakeDatabaseAi.getChatState(any(), any(), any(), any(), any())).thenThrow(DatabaseException.class);
+        when(this.fakeDatabaseAi.getChatState(any(), any(), any(), any())).thenThrow(DatabaseException.class);
         ChatState result = this.chatStateHandler.getState(DEVID_UUID, AIID, ServiceIdentity.DEFAULT_VERSION, UUID.randomUUID());
         assertChatStateEquals(ChatState.getEmpty(), result);
         verify(this.fakeLogger).logUserExceptionEvent(anyString(), any(), anyString(), any());
