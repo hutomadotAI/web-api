@@ -6,6 +6,9 @@ import java.util.Locale;
 public enum SupportedLanguage {
     EN,
     ES,
+    PT,
+    FR,
+    NL,
     // CA (catalan) -> falls back to ES
     ;
 
