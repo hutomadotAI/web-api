@@ -16,13 +16,10 @@ import com.hutoma.api.containers.sub.WebHook;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
 import com.hutoma.api.logic.chat.ChatDefaultHandler;
-
 import org.apache.commons.lang.StringUtils;
 import org.glassfish.jersey.message.internal.MediaTypes;
 import org.glassfish.jersey.server.ContainerRequest;
 
-import java.lang.reflect.AnnotatedElement;
-import java.util.*;
 import javax.annotation.Priority;
 import javax.inject.Inject;
 import javax.ws.rs.Priorities;
@@ -34,6 +31,8 @@ import javax.ws.rs.core.Form;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.Provider;
+import java.lang.reflect.AnnotatedElement;
+import java.util.*;
 
 @ValidatePost
 @Provider
@@ -409,8 +408,14 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
             validateFieldLength(250, AIDESC, botStructure.getDescription());
             validateTimezoneString(TIMEZONE, botStructure.getTimezone());
             if (botStructure.getEntities() != null) {
+                // Prevent any entities from having the system prefix of flag
                 for (ApiEntity entity : botStructure.getEntities().values()) {
                     this.validateEntity(entity);
+                    if (entity.isSystem()) {
+                        throw new ParameterValidationException(String.format(
+                                "cannot import entity as system: %s",
+                                entity.getEntityName()), ENTITYNAME);
+                    }
                 }
             }
             if (botStructure.getIntents() != null) {

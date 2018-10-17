@@ -15,6 +15,7 @@ import com.hutoma.api.containers.sub.TrainingStatus;
 import com.hutoma.api.endpoints.AIEndpoint;
 import com.hutoma.api.logic.AIIntegrationLogic;
 import com.hutoma.api.logic.AILogic;
+import org.apache.commons.lang.StringUtils;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.junit.Assert;
 import org.junit.Test;
@@ -350,8 +351,32 @@ public class TestServiceAi extends ServiceTestBase {
 
     @Test
     public void testImportBotInPlace() throws DatabaseException {
-        Response response = testExport(getExportedBotJson());
+        Response response = testImportInPlace(getExportedBotJson());
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
+    }
+
+    @Test
+    public void testImportBotInPlace_preventUseOfSysEntities_name() throws DatabaseException {
+        String json = getExportedBotJson("desc",
+                "\"sys.number\": {\n" +
+                        "      \"entity_name\": \"sys.number\",\n" +
+                        "      \"entity_values\": [],\n" +
+                        "      \"dev_owner\": \"89384311-0696-4493-8c86-0389bc47eb45\",\n" +
+                        "      \"system\": false}");
+        Response response = testImportInPlace(json);
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.getStatus());
+    }
+
+    @Test
+    public void testImportBotInPlace_preventUseOfSysEntities_flag() throws DatabaseException {
+        String json = getExportedBotJson("desc",
+                "\"sysnumber\": {\n" +
+                        "      \"entity_name\": \"sysnumber\",\n" +
+                        "      \"entity_values\": [],\n" +
+                        "      \"dev_owner\": \"89384311-0696-4493-8c86-0389bc47eb45\",\n" +
+                        "      \"system\": true}");
+        Response response = testImportInPlace(json);
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.getStatus());
     }
 
     @Test
@@ -368,7 +393,7 @@ public class TestServiceAi extends ServiceTestBase {
         final String description = "국민경제의 발전을 위한 중요정책의 수립에 관하여 대통령의 자문에 응하기 위하여 국민경제자문회의를 둘 수 있다";
         ApiAi aiToReturn = TestDataHelper.getSampleAI();
         aiToReturn.setDescription(description);
-        Response response = testExport(getExportedBotJson(description));
+        Response response = testImportInPlace(getExportedBotJson(description));
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
     }
 
@@ -400,7 +425,14 @@ public class TestServiceAi extends ServiceTestBase {
         return binder;
     }
 
-    private Response testExport(final String payload) throws DatabaseException {
+    private Response testImportInPlace(final String payload) throws DatabaseException {
+        setupTestForImportingBot();
+        // Need to use a Jersey client with Gson Jersey registered to suppor serialization of complex bot structure
+        return getGsonJerseyClient(IMPORTINPLACE_BASEPATH)
+                .post(Entity.json(payload));
+    }
+
+    private void setupTestForImportingBot() throws DatabaseException {
         final UUID newAiid = UUID.randomUUID();
         when(this.fakeTools.createNewRandomUUID()).thenReturn(newAiid);
         when(this.fakeDatabaseAi.createAI(any(), anyString(), anyString(), any(), anyBoolean(),
@@ -418,10 +450,6 @@ public class TestServiceAi extends ServiceTestBase {
         when(this.fakeDatabaseAi.updatePassthroughUrl(any(), any(), any(), any())).thenReturn(true);
         when(this.fakeDatabaseAi.updateDefaultChatResponses(any(), any(), any(), any(), any())).thenReturn(true);
         when(this.fakeAiServices.getTrainingMaterialsCommon(any(), any(), any())).thenReturn("");
-        return target(IMPORTINPLACE_BASEPATH)
-                .request()
-                .headers(defaultHeaders)
-                .post(Entity.json(payload));
     }
 
 
@@ -430,9 +458,56 @@ public class TestServiceAi extends ServiceTestBase {
     }
 
     private static String getExportedBotJson(final String description) {
-        return String.format("{\"version\":1,\"name\":\"exported_bot\",\"description\":\"%s\",\"isPrivate\":false, \"personality\":0,"
-                        + "\"confidence\":0.4000000059604645,\"voice\":1, \"language\":\"en-US\",\"timezone\":\"Europe\\/London\"}",
-                description);
+        return getExportedBotJson(description, "");
+    }
+
+    private static String getExportedBotJson(final String description, final String entities) {
+        return String.format("{\"version\":1,\"name\":\"exported_bot\",\"description\":\"%s\",\"isPrivate\":false, \"personality\":0," +
+                        "\"confidence\":0.4000000059604645,\"voice\":1, \"language\":\"en-US\",\"timezone\":\"Europe\\/London\", " +
+                        "\"intents\": [\n" +
+                        "    {\n" +
+                        "      \"variables\": [\n" +
+                        "        {\n" +
+                        "          \"entity_name\": \"myplaces\",\n" +
+                        "          \"required\": true,\n" +
+                        "          \"n_prompts\": 3,\n" +
+                        "          \"id\": 0,\n" +
+                        "          \"persistent\": false,\n" +
+                        "          \"prompts\": [\n" +
+                        "            \"which place?\"\n" +
+                        "          ],\n" +
+                        "          \"label\": \"myplace\",\n" +
+                        "          \"lifetime_turns\": -1,\n" +
+                        "          \"clear_on_entry\": true\n" +
+                        "        }\n" +
+                        "      ],\n" +
+                        "      \"intent_name\": \"intent1\",\n" +
+                        "      \"responses\": [\n" +
+                        "        \"travelled to $myplace\"\n" +
+                        "      ],\n" +
+                        "      \"user_says\": [\n" +
+                        "        \"travel to @{myplaces}@\"\n" +
+                        "      ],\n" +
+                        "      \"last_updated\": \"2018-10-12T10:26:26.994Z\",\n" +
+                        "      \"context_in\": {},\n" +
+                        "      \"context_out\": {},\n" +
+                        "      \"conditions_in\": [],\n" +
+                        "      \"conditions_default_response\": \"\",\n" +
+                        "      \"reset_context_on_exit\": false,\n" +
+                        "      \"conditions_out\": []\n" +
+                        "    }\n" +
+                        "  ]," +
+                        "  \"entities\": {\n" +
+                        "    \"myplaces\": {\n" +
+                        "      \"entity_name\": \"myplaces\",\n" +
+                        "      \"entity_values\": [],\n" +
+                        "      \"dev_owner\": \"89384311-0696-4493-8c86-0389bc47eb45\",\n" +
+                        "      \"system\": false}" +
+                        "      %s" +  // <-- entity injection
+                        "   }" +
+                        "}",
+                description,
+                StringUtils.isEmpty(entities) ? "" : ("," + entities));
     }
 
     private ApiAi checkMaskedTrainingStatus(

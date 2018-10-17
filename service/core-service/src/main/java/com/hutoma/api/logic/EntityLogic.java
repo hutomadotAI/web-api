@@ -74,6 +74,11 @@ public class EntityLogic {
                         devidString, logMap);
                 return ApiError.getBadRequest("Cannot create an entity with a system prefix.");
             }
+            if (entity.isSystem()) {
+                this.logger.logUserTraceEvent(LOGFROM, "WriteEntity - attempt create a custom entity as system",
+                        devidString, logMap);
+                return ApiError.getBadRequest("Cannot create system entities.");
+            }
             final boolean created = this.database.getEntity(devid, entityName) == null;
             this.database.writeEntity(devid, entityName, entity);
             this.logger.logUserTraceEvent(LOGFROM, "WriteEntity", devidString, logMap);
@@ -129,7 +134,7 @@ public class EntityLogic {
             // Check if there are any AIs that use this entity
             Set<String> referreingAis = new HashSet<>();
             List<ApiIntent> allIntents = this.database.getAllIntents(devid);
-            for (ApiIntent intent: allIntents) {
+            for (ApiIntent intent : allIntents) {
                 if (intent.getVariables() != null && !intent.getVariables().isEmpty()) {
                     for (IntentVariable variable : intent.getVariables()) {
                         if (variable.getEntityName().equals(entityName)) {

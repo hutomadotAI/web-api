@@ -21,8 +21,8 @@ public class BotStructureSerializer {
     private static final int BOT_SCHEMA_VERSION = 2;
 
     public static BotStructure serialize(final UUID devId, final UUID aiid, final DatabaseAI database,
-                                  final DatabaseEntitiesIntents databaseEntitiesIntents,
-                                  final JsonSerializer jsonSerializer)
+                                         final DatabaseEntitiesIntents databaseEntitiesIntents,
+                                         final JsonSerializer jsonSerializer)
             throws DatabaseException {
 
         // Get the bot.
@@ -47,7 +47,10 @@ public class BotStructureSerializer {
             for (IntentVariable intentVariable : apiIntent.getVariables()) {
                 String entityName = intentVariable.getEntityName();
                 if (!entityMap.containsKey(entityName)) {
-                    entityMap.put(entityName, databaseEntitiesIntents.getEntity(devId, entityName));
+                    ApiEntity entity = databaseEntitiesIntents.getEntity(devId, entityName);
+                    if (entity != null && !entity.isSystem()) {
+                        entityMap.put(entityName, entity);
+                    }
                 }
             }
         }

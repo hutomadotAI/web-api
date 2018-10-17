@@ -4,11 +4,7 @@ import com.hutoma.api.access.AuthFilter;
 import com.hutoma.api.access.RateLimitCheck;
 import com.hutoma.api.access.Role;
 import com.hutoma.api.common.*;
-import com.hutoma.api.connectors.AiStrings;
-import com.hutoma.api.connectors.BackendServerType;
-import com.hutoma.api.connectors.EntityRecognizerService;
-import com.hutoma.api.connectors.FacebookConnector;
-import com.hutoma.api.connectors.WebHooks;
+import com.hutoma.api.connectors.*;
 import com.hutoma.api.connectors.aiservices.AIServices;
 import com.hutoma.api.connectors.chat.AIChatServices;
 import com.hutoma.api.connectors.db.*;
@@ -23,7 +19,6 @@ import com.hutoma.api.validation.Validate;
 import io.jsonwebtoken.CompressionCodecs;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-
 import org.glassfish.grizzly.utils.Exceptions;
 import org.glassfish.hk2.api.Factory;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
@@ -37,25 +32,23 @@ import org.glassfish.jersey.test.TestProperties;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.io.InputStream;
-import java.util.Collections;
-import java.util.UUID;
-import java.util.logging.ConsoleHandler;
-import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.LogManager;
-import java.util.logging.Logger;
 import javax.inject.Singleton;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Invocation;
 import javax.ws.rs.core.Application;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
+import java.io.InputStream;
+import java.util.Collections;
+import java.util.UUID;
+import java.util.logging.*;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyDouble;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -253,6 +246,16 @@ public abstract class ServiceTestBase extends JerseyTest {
         return serializer.serialize(obj);
     }
 
+    protected Invocation.Builder getGsonJerseyClient(final String path) {
+        Client client = ClientBuilder.newClient().register(JerseyGsonProvider.class);
+        MultivaluedHashMap<String, Object> headers = getDevIdAuthHeaders(Role.ROLE_PLAN_1, DEVID);
+
+        String url = target().getUri() + (path.startsWith("/") ? path.substring(1) : path);
+        return client.target(url)
+                .request()
+                .header(HttpHeaders.AUTHORIZATION, headers.get("Authorization").get(0));
+    }
+
     protected abstract Class<?> getClassUnderTest();
 
     protected AbstractBinder addAdditionalBindings(AbstractBinder binder) {
@@ -332,6 +335,9 @@ public abstract class ServiceTestBase extends JerseyTest {
 
         // Register the multipart handler for supporting uploads
         rc.register(MultiPartFeature.class);
+
+        // Register the Jersey Gson provider (similarly to what the Core service does)
+        rc.register(JerseyGsonProvider.class);
 
         // Log request and response payload to make debugging easier on errors
         enable(TestProperties.LOG_TRAFFIC);

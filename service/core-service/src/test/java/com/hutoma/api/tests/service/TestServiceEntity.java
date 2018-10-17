@@ -4,7 +4,8 @@ import com.hutoma.api.common.TestDataHelper;
 import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.ApiEntity;
 import com.hutoma.api.endpoints.EntityEndpoint;
-import com.hutoma.api.logic.*;
+import com.hutoma.api.logic.EntityLogic;
+import com.hutoma.api.logic.TrainingLogic;
 import com.hutoma.api.memory.IMemoryIntentHandler;
 import edu.emory.mathcs.backport.java.util.Arrays;
 import edu.emory.mathcs.backport.java.util.Collections;
@@ -55,8 +56,31 @@ public class TestServiceEntity extends ServiceTestBase {
                 .queryParam(ENTITY_NAME_PARAM, ENTITY_NAME)
                 .request()
                 .headers(defaultHeaders)
-                .post(Entity.json(getEntityJson(new String[]{"보라", "Λορεμ", "լոռեմ", "Лорем", "غينيا " })));
+                .post(Entity.json(getEntityJson(new String[]{"보라", "Λορεμ", "լոռեմ", "Лорем", "غينيا "})));
         Assert.assertEquals(HttpURLConnection.HTTP_CREATED, response.getStatus());
+    }
+
+    @Test
+    public void testCreateUpdateEntity_doesNotAcceptSystemEntities_nameStartsWithSys() {
+        ApiEntity entity = new ApiEntity("sys.systementity", DEVID,
+                Collections.singletonList("value1"), false);
+        testCreateUpdateEntity_sysEntity(entity);
+    }
+
+    @Test
+    public void testCreateUpdateEntity_doesNotAcceptSystemEntities_nameDoesNitStartsWithSys() {
+        ApiEntity entity = new ApiEntity("systementity", DEVID,
+                Collections.singletonList("value1"), true);
+        testCreateUpdateEntity_sysEntity(entity);
+    }
+
+    private void testCreateUpdateEntity_sysEntity(final ApiEntity entity) {
+        final Response response = target(BASEPATH)
+                .queryParam(ENTITY_NAME_PARAM, entity.getEntityName())
+                .request()
+                .headers(defaultHeaders)
+                .post(Entity.json(serializeObject(entity)));
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.getStatus());
     }
 
     @Override
