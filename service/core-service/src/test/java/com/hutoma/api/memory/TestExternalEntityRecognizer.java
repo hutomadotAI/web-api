@@ -1,5 +1,6 @@
 package com.hutoma.api.memory;
 
+import com.hutoma.api.common.SupportedLanguage;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.common.Pair;
 import com.hutoma.api.connectors.EntityRecognizerService;
@@ -44,13 +45,13 @@ public class TestExternalEntityRecognizer {
 
     @Test
     public void testExternal_recognizeOneEntity() {
-        when(this.fakeService.getEntities(any())).thenReturn(Collections.emptyList());
+        when(this.fakeService.getEntities(any(), any())).thenReturn(Collections.emptyList());
         TestSimpleEntityRecognizer.recognizeOneEntity(this.recognizer);
     }
 
     @Test
     public void testExternal_recognizeMultipleEntities() {
-        when(this.fakeService.getEntities(any())).thenReturn(Collections.emptyList());
+        when(this.fakeService.getEntities(any(), any())).thenReturn(Collections.emptyList());
         TestSimpleEntityRecognizer.recognizeMultipleEntities(this.recognizer);
     }
 
@@ -69,12 +70,13 @@ public class TestExternalEntityRecognizer {
         }};
 
 
-        when(this.fakeService.getEntities(any())).thenReturn(systemEntities);
+        when(this.fakeService.getEntities(any(), any())).thenReturn(systemEntities);
 
         List<Pair<String, String>> r = this.recognizer.retrieveEntities(
                 String.format("CustomEntities %s and %s and SystemEntities %s and %s",
                         varValues[1], varValues[0],
                         systemEntities.get(0).getValue(), systemEntities.get(0).getValue()),
+                SupportedLanguage.EN,
                 l);
         Assert.assertEquals(4, r.size());
         // Note - the order is currently defined by the order on the MemoryVariable list,
@@ -115,9 +117,9 @@ public class TestExternalEntityRecognizer {
         List<RecognizedEntity> systemEntities = new ArrayList<RecognizedEntity>() {{
             this.add(new RecognizedEntity("sys.number", Integer.toString(number + 1)));
         }};
-        when(this.fakeService.getEntities(any())).thenReturn(systemEntities);
+        when(this.fakeService.getEntities(any(), any())).thenReturn(systemEntities);
         List<Pair<String, String>> r = this.recognizer.retrieveEntities(
-                String.format("string with number %d", number), Collections.emptyList());
+                String.format("string with number %d", number), SupportedLanguage.EN, Collections.emptyList());
         Assert.assertEquals(1, r.size());
         Assert.assertEquals("sys.number", r.get(0).getA());
         Assert.assertEquals(number, Integer.parseInt(r.get(0).getB()));

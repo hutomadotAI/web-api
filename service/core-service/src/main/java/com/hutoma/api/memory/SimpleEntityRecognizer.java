@@ -1,5 +1,6 @@
 package com.hutoma.api.memory;
 
+import com.hutoma.api.common.SupportedLanguage;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.common.Pair;
 import com.hutoma.api.containers.sub.MemoryVariable;
@@ -23,6 +24,7 @@ public class SimpleEntityRecognizer implements IEntityRecognizer {
 
     /**
      * Ctor.
+     * 
      * @param logger the logger
      */
     @Inject
@@ -33,20 +35,22 @@ public class SimpleEntityRecognizer implements IEntityRecognizer {
     /**
      * {@inheritDoc}
      */
-    public List<Pair<String, String>> retrieveEntities(final String chatLine, final List<MemoryVariable> entities) {
+    public List<Pair<String, String>> retrieveEntities(final String chatLine, final SupportedLanguage language,
+            final List<MemoryVariable> entities) {
         final List<Pair<String, String>> vars = regexFindEntities(chatLine, entities);
         this.logger.logDebug(LOGFROM, String.format("Found %d entities", vars.size()));
         return vars;
     }
 
     /**
-     * Finds entities based on regex - looks for the presence of the same word (case insensitive).
+     * Finds entities based on regex - looks for the presence of the same word (case
+     * insensitive).
+     * 
      * @param chatLine the text to search in
      * @param entities the list of entities to search for
      * @return the list of pairs of entities and values found
      */
-    static List<Pair<String, String>> regexFindEntities(final String chatLine,
-                                                               final List<MemoryVariable> entities) {
+    static List<Pair<String, String>> regexFindEntities(final String chatLine, final List<MemoryVariable> entities) {
         final List<Pair<String, String>> vars = new ArrayList<>();
         final String lowercaseResponse = chatLine.toLowerCase();
         for (MemoryVariable v : entities) {

@@ -1,6 +1,7 @@
 package com.hutoma.api.memory;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.hutoma.api.common.SupportedLanguage;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.common.Pair;
 import com.hutoma.api.connectors.EntityRecognizerService;
@@ -15,8 +16,8 @@ import java.util.Scanner;
 import javax.inject.Inject;
 
 /**
- * External entity recognizer.
- * Currently this uses the SimpleER for determining custom entities, and an external one for system entities.
+ * External entity recognizer. Currently this uses the SimpleER for determining
+ * custom entities, and an external one for system entities.
  */
 public class ExternalEntityRecognizer implements IEntityRecognizer {
 
@@ -36,16 +37,16 @@ public class ExternalEntityRecognizer implements IEntityRecognizer {
     }
 
     @Override
-    public List<Pair<String, String>> retrieveEntities(final String chatLine,
-                                                       final List<MemoryVariable> customEntities) {
+    public List<Pair<String, String>> retrieveEntities(final String chatLine, final SupportedLanguage language,
+            final List<MemoryVariable> customEntities) {
         List<Pair<String, String>> result = new ArrayList<>();
         // Call the simple regex entity recognizer for custom entities
         result.addAll(SimpleEntityRecognizer.regexFindEntities(chatLine, customEntities));
 
         // Call the external entity recognizer for system entities
 
-        List<RecognizedEntity> systemEntities = this.service.getEntities(chatLine);
-        for (RecognizedEntity re: systemEntities) {
+        List<RecognizedEntity> systemEntities = this.service.getEntities(chatLine, language);
+        for (RecognizedEntity re : systemEntities) {
             if (!re.getCategory().equalsIgnoreCase(NUMBER_ENTITY_NAME)) {
                 result.add(new Pair<>(re.getCategory(), re.getValue()));
             }

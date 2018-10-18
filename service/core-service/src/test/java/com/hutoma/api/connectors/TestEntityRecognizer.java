@@ -5,6 +5,7 @@ import static org.mockito.Mockito.when;
 
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.common.SupportedLanguage;
 import com.hutoma.api.connectors.aiservices.AIServices;
 import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.sub.RecognizedEntity;
@@ -79,7 +80,7 @@ public class TestEntityRecognizer {
 
     @Test
     public void testCallEntityRecognizer() throws AIServices.AiServicesException, DatabaseException {
-        List<RecognizedEntity> entities = this.erService.getEntities("anything not null");
+        List<RecognizedEntity> entities = this.erService.getEntities("anything not null", SupportedLanguage.EN);
         Assert.assertEquals(1, entities.size());
         Assert.assertEquals(ENTITY_CATEGORY, entities.get(0).getCategory());
         Assert.assertEquals(ENTITY_VALUE, entities.get(0).getValue());
@@ -89,8 +90,22 @@ public class TestEntityRecognizer {
 
     @Test
     public void testCallEntityRecognizer_serverError() throws AIServices.AiServicesException, DatabaseException {
-        List<RecognizedEntity> entities = this.erService.getEntities(null);
+        List<RecognizedEntity> entities = this.erService.getEntities(null, SupportedLanguage.EN);
         Assert.assertEquals(0, entities.size());
+    }
+
+    @Test
+    public void testFindErsUrlForLanguage_same() throws AIServices.AiServicesException, DatabaseException {
+        String baseUrl = "https://example.com/test_path";
+        String url = this.erService.findErsUrlForLanguage(baseUrl, SupportedLanguage.EN);
+        Assert.assertEquals(baseUrl, url);
+    }
+
+    @Test
+    public void testFindErsUrlForLanguage_replace_lang() throws AIServices.AiServicesException, DatabaseException {
+        String baseUrl = "https://example-[lang].com/test_path";
+        String url = this.erService.findErsUrlForLanguage(baseUrl, SupportedLanguage.FR);
+        Assert.assertEquals("https://example-fr.com/test_path", url);
     }
 
     @Path("/")

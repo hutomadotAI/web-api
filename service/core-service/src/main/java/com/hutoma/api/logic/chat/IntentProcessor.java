@@ -137,6 +137,7 @@ public class IntentProcessor {
 
                 // Attempt to retrieve entities from the question
                 List<Pair<String, String>> entities = this.entityRecognizer.retrieveEntities(chatInfo.getQuestion(),
+                        chatInfo.getAiIdentity().getLanguage(),
                         currentIntent.getVariables());
                 // Did the recognizer find something for this entity?
                 Optional<Pair<String, String>> entityValue = entities.stream()
@@ -356,7 +357,8 @@ public class IntentProcessor {
                 && !chatResult.getChatState().isInIntentLoop()) { // we cannot infer variables in nested intents
             // At this stage we're guaranteed to have variables with different entity types
             // Attempt to retrieve entities from the question
-            entities = this.entityRecognizer.retrieveEntities(chatInfo.getQuestion(), memoryVariables);
+            entities = this.entityRecognizer.retrieveEntities(chatInfo.getQuestion(),
+                chatInfo.getAiIdentity().getLanguage(), memoryVariables);
 
             // Also if we can process entities and variables, we can
             // delete variable from context if clear on entry is set

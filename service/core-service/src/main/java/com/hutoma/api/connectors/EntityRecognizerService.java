@@ -1,6 +1,7 @@
 package com.hutoma.api.connectors;
 
 import com.hutoma.api.common.Config;
+import com.hutoma.api.common.SupportedLanguage;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.logging.LogMap;
@@ -45,10 +46,11 @@ public class EntityRecognizerService {
      * @param question the question
      * @return the list of recognized entities
      */
-    public List<RecognizedEntity> getEntities(final String question) {
+    public List<RecognizedEntity> getEntities(final String question, final SupportedLanguage language) {
         Response response = null;
         try {
-            response = this.jerseyClient.target(this.entityRecognizerUrl)
+            String ersUrl = findErsUrlForLanguage(this.entityRecognizerUrl, language);
+            response = this.jerseyClient.target(ersUrl)
                     .queryParam("q", question)
                     .request()
                     .get();
@@ -56,8 +58,8 @@ public class EntityRecognizerService {
             String json = response.readEntity(String.class);
             if (response.getStatus() != HttpURLConnection.HTTP_OK) {
                 this.logger.logError(LOGFROM,
-                        "Error connecting to entity recognizer at " + this.entityRecognizerUrl,
-                        LogMap.map("server", this.entityRecognizerUrl)
+                        "Error connecting to entity recognizer at " + ersUrl,
+                        LogMap.map("server", ersUrl)
                                 .put("Status", Integer.toString(response.getStatus())));
             } else {
                 List<RecognizedEntity> list = RecognizedEntity.deserialize(json, this.serializer);
@@ -75,19 +77,20 @@ public class EntityRecognizerService {
         return new ArrayList<>();
     }
 
-    public String findEntities(final String question) {
+    public String findEntities(final String question, final SupportedLanguage language) {
         Response response = null;
         String json = null;
         try {
-            response = this.jerseyClient.target(this.findEntityUrl)
+            String ersUrl = findErsUrlForLanguage(this.findEntityUrl, language);
+            response = this.jerseyClient.target(ersUrl)
                     .request(MediaType.APPLICATION_JSON_TYPE)
                     .post(javax.ws.rs.client.Entity.entity(question, MediaType.APPLICATION_JSON));
             response.bufferEntity();
             json = response.readEntity(String.class);
             if (response.getStatus() != HttpURLConnection.HTTP_OK) {
                 this.logger.logError(LOGFROM,
-                        "Error connecting to entity recognizer at " + this.findEntityUrl,
-                        LogMap.map("server", this.entityRecognizerUrl)
+                        "Error connecting to entity recognizer at " + ersUrl,
+                        LogMap.map("server", ersUrl)
                                 .put("Status", Integer.toString(response.getStatus())));
             } else {
                 return json;
@@ -102,6 +105,11 @@ public class EntityRecognizerService {
         }
 
         return json;
+    }
+
+    public String findErsUrlForLanguage(final String baseUrl, final SupportedLanguage language) {
+        String ersUrl = baseUrl.replace("[lang]", language.toString().toLowerCase());
+        return ersUrl;
     }
 }
 

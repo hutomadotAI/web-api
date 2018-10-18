@@ -43,11 +43,11 @@ public class ChatEntityValueHandler implements IChatHandler {
     public ChatResult doWork(final ChatRequestInfo requestInfo,
                              final ChatResult currentResult,
                              final LogMap telemetryMap) throws ChatLogic.ChatFailedException {
-
+        AiIdentity aiIdentity = requestInfo.getAiIdentity();
         // Check if this feature applies
         if (featureToggler.getStateForAiid(
-                requestInfo.getDevId(),
-                requestInfo.getAiid(),
+                aiIdentity.getDevId(),
+                aiIdentity.getAiid(),
                 "entity-value-replacement") == FeatureToggler.FeatureState.T1) {
             logger.logInfo("ChatEntityValueHandler", "entity-value-replacement feature requested");
             ERMessage toSend = new ERMessage();
@@ -68,7 +68,8 @@ public class ChatEntityValueHandler implements IChatHandler {
                         "Entities to serialize",
                         requestInfo.getDevId().toString(),
                         LogMap.map("entities", serializer.serialize(toSend)));
-                String jsonResponse = entityRecognizerService.findEntities(serializer.serialize(toSend));
+                String jsonResponse = entityRecognizerService.findEntities(serializer.serialize(toSend),
+                        aiIdentity.getLanguage());
                 // Just in case something odd has happened with the ER
                 if (jsonResponse == null) {
                     throw new ChatLogic.ChatFailedException(ApiError.getInternalServerError(
