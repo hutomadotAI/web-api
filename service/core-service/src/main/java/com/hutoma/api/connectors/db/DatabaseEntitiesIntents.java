@@ -125,6 +125,19 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
         }
     }
 
+    public int getEntityValuesCountForDevExcludingEntity(final UUID devId, final String entityName)
+            throws DatabaseException {
+        try (DatabaseCall call = this.callProvider.get()) {
+            call.initialise("getEntityValuesCountForDevExcludingEntity", 2)
+                    .add(devId)
+                    .add(entityName);
+            ResultSet rs = call.executeQuery();
+            return rs.getInt("COUNT");
+        } catch (final SQLException sqle) {
+            throw new DatabaseException(sqle);
+        }
+    }
+
     /***
      * Gets a fully populated intent object
      * including intent, usersays, variables and prompts

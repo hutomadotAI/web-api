@@ -315,6 +315,9 @@ public abstract class ServiceTestBase extends JerseyTest {
         when(this.fakeConfig.getMaxIntentResponses()).thenReturn(10);
         when(this.fakeConfig.getMaxIntentUserSays()).thenReturn(10);
 
+        when(this.fakeConfig.getMaxEntityValuesPerEntity()).thenReturn(100);
+        when(this.fakeConfig.getMaxTotalEntityValues()).thenReturn(200);
+
         try {
             when(this.fakeAiStrings.getDefaultChatResponses(any(), any()))
                     .thenReturn(Collections.singletonList(ChatDefaultHandler.COMPLETELY_LOST_RESULT));

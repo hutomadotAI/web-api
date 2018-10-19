@@ -11,18 +11,12 @@ import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.Entity;
 import com.hutoma.api.containers.sub.IntentVariable;
 import com.hutoma.api.logging.ILogger;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.net.HttpURLConnection;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.OptionalInt;
-import java.util.UUID;
+import java.util.*;
 
 import static com.hutoma.api.common.TestDataHelper.DEVID_UUID;
 import static org.mockito.Mockito.*;
@@ -47,6 +41,9 @@ public class TestEntityLogic {
         this.fakeLogger = mock(ILogger.class);
         this.trainingLogic = mock(TrainingLogic.class);
         this.entityLogic = new EntityLogic(this.fakeConfig, this.fakeLogger, this.fakeDatabase, this.trainingLogic);
+
+        when(this.fakeConfig.getMaxTotalEntityValues()).thenReturn(1000);
+        when(this.fakeConfig.getMaxEntityValuesPerEntity()).thenReturn(500);
     }
 
     @Test
@@ -114,7 +111,7 @@ public class TestEntityLogic {
     }
 
     @Test
-    public void testWriteEntity_Success() throws DatabaseException {
+    public void testWriteEntity_Success() {
         final ApiResult result = this.entityLogic.writeEntity(DEVID_UUID, ENTITY_NAME, new ApiEntity(ENTITY_NAME, DEVID_UUID));
         Assert.assertEquals(HttpURLConnection.HTTP_CREATED, result.getStatus().getCode());
     }
@@ -228,6 +225,34 @@ public class TestEntityLogic {
         doThrow(DatabaseException.class).when(this.fakeDatabase).writeEntity(any(), anyString(), any());
         final ApiResult result = this.entityLogic.replaceEntity(DEVID_UUID, ENTITY_NAME, new ApiEntity(ENTITY_NAME, DEVID_UUID));
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testEntityMax_exceedsEntityMaxValues() {
+        final int maxValuesPerEntity = 5;
+        when(this.fakeConfig.getMaxEntityValuesPerEntity()).thenReturn(maxValuesPerEntity);
+        final ApiEntity entity = getEntityWithNValues(maxValuesPerEntity + 1);
+        final ApiResult result = this.entityLogic.writeEntity(DEVID_UUID, entity.getEntityName(), entity);
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testEntityMax_exceedsEntityMaxDevValues() throws DatabaseException {
+        final int maxValuesPerDev = 5;
+        when(this.fakeConfig.getMaxTotalEntityValues()).thenReturn(maxValuesPerDev);
+        when(this.fakeDatabase.getEntityValuesCountForDevExcludingEntity(any(), any())).thenReturn(maxValuesPerDev);
+        // We're already at the limit, so adding one should not be possible
+        final ApiEntity entity = getEntityWithNValues(1);
+        final ApiResult result = this.entityLogic.writeEntity(DEVID_UUID, entity.getEntityName(), entity);
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
+    }
+
+    private ApiEntity getEntityWithNValues(final int numValues) {
+        List<String> values = new ArrayList<>();
+        for (int i = 1; i <= numValues; i++) {
+            values.add("value" + i);
+        }
+        return new ApiEntity("entity1", DEVID_UUID, values, false);
     }
 
 

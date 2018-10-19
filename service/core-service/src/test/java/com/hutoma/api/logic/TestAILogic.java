@@ -76,6 +76,8 @@ public class TestAILogic {
         when(this.fakeDatabaseTransactionProvider.get()).thenReturn(this.fakeTransaction);
         when(this.fakeAiIntegrationLogicProvider.get()).thenReturn(this.fakeIntegration);
         when(this.fakeConfig.getMaxLinkedBotsPerAi()).thenReturn(5);
+        when(this.fakeConfig.getMaxTotalEntityValues()).thenReturn(200);
+        when(this.fakeConfig.getMaxEntityValuesPerEntity()).thenReturn(100);
         when(this.fakeTools.createNewRandomUUID()).thenReturn(UUID.fromString("00000000-0000-0000-0000-000000000000"));
         this.aiLogic = new AILogic(this.fakeConfig, this.fakeSerializer, this.fakeDatabaseAi,
                 this.fakeDatabaseEntitiesIntents, this.fakeDatabaseMarketplace, this.fakeAiServices, this.fakeLogger,
@@ -1484,6 +1486,35 @@ public class TestAILogic {
         Assert.assertEquals(linkedBot2.getBotId(), captor.getAllValues().get(0).intValue());
     }
 
+    @Test
+    public void testImportBot_exceedsMaxValuesPerEntity() {
+        BotStructure botStructure = getBotstructure();
+        final int maxValues = 2;
+        when(this.fakeConfig.getMaxEntityValuesPerEntity()).thenReturn(maxValues);
+        List<String> valuesList = botStructure.getEntities().get("ent1").getEntityValueList();
+        for (int i = valuesList.size(); i <= maxValues; i++) {
+            valuesList.add("new_value" + i);
+        }
+        ApiResult result = this.aiLogic.importBot(VALIDDEVID, botStructure);
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testImportBot_exceedsMaxEntityValuesPerDev() throws DatabaseException {
+        BotStructure botStructure = getBotstructure();
+        final int maxValues = 2;
+        when(this.fakeConfig.getMaxTotalEntityValues()).thenReturn(maxValues);
+        List<String> valuesList = new ArrayList<>();
+        for (int i = 0; i < maxValues; i++) {
+            valuesList.add("new_value" + i);
+        }
+        ApiEntity entity = new ApiEntity("newEntity", DEVID_UUID, valuesList, false);
+        botStructure.getEntities().put(entity.getEntityName(), entity);
+        when(this.fakeDatabaseEntitiesIntents.getEntityValuesCountForDevExcludingEntity(any(), any())).thenReturn(maxValues - 1);
+        ApiResult result = this.aiLogic.importBot(VALIDDEVID, botStructure);
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
+    }
+
     private void setupFakeImport() throws DatabaseException {
         ApiAi ai = TestDataHelper.getSampleAI();
         UUID newAiid = UUID.fromString(ai.getAiid());
@@ -1507,7 +1538,9 @@ public class TestAILogic {
 
     private BotStructure getBotstructure() {
         Map<String, ApiEntity> entities = new HashMap<>();
-        entities.put("ent1", new ApiEntity("ent1", VALIDDEVID));
+        List<String> valueList = new ArrayList<>();
+        valueList.add("value1");
+        entities.put("ent1", new ApiEntity("ent1", VALIDDEVID, valueList, false));
         List<ApiIntent> intents = new ArrayList<>();
         final String intentName = "intent1";
         ApiIntent intent = new ApiIntent(intentName, "in", "out");

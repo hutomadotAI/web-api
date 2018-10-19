@@ -1173,7 +1173,31 @@ public class AILogic {
                             break;
                         }
                     }
-                    if (!hasEntity) {
+                    if (!hasEntity && e.getEntityValueList() != null) {
+                        if (e.getEntityValueList().size() > this.config.getMaxEntityValuesPerEntity()) {
+                            this.logger.logUserTraceEvent(LOGFROM, "ImportBot - exceeded values per entity",
+                                    devId.toString(),
+                                    logMap.put("Max", this.config.getMaxEntityValuesPerEntity())
+                                            .put("ValuesOnEntity", e.getEntityValueList().size()));
+                            throw new BotImportException(String.format(
+                                    "Entity %s has %d values and exceeds maximum of %d",
+                                    e.getEntityName(), e.getEntityValueList().size(),
+                                    this.config.getMaxEntityValuesPerEntity()));
+                        }
+                        int expectedValuesCount =
+                                this.databaseEntitiesIntents.getEntityValuesCountForDevExcludingEntity(
+                                        devId, e.getEntityName())
+                                        + e.getEntityValueList().size();
+                        if (expectedValuesCount > this.config.getMaxTotalEntityValues()) {
+                            this.logger.logUserTraceEvent(LOGFROM, "ImportBot - exceeded values per dev",
+                                    devId.toString(),
+                                    logMap.put("Max", this.config.getMaxEntityValuesPerEntity())
+                                            .put("ValuesOnEntity", e.getEntityValueList().size()));
+                            throw new BotImportException(String.format(
+                                    "Entity %s has %d values and exceeds account maximum of %d",
+                                    e.getEntityName(), e.getEntityValueList().size(),
+                                    this.config.getMaxTotalEntityValues()));
+                        }
                         this.databaseEntitiesIntents.writeEntity(devId, e.getEntityName(), e, transaction);
                     }
                 }

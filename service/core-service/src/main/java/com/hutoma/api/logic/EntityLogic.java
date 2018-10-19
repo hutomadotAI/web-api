@@ -74,11 +74,36 @@ public class EntityLogic {
                         devidString, logMap);
                 return ApiError.getBadRequest("Cannot create an entity with a system prefix.");
             }
+
             if (entity.isSystem()) {
                 this.logger.logUserTraceEvent(LOGFROM, "WriteEntity - attempt create a custom entity as system",
                         devidString, logMap);
                 return ApiError.getBadRequest("Cannot create system entities.");
             }
+
+            if (entity.getEntityValueList() != null
+                    && entity.getEntityValueList().size() > this.config.getMaxEntityValuesPerEntity()) {
+                this.logger.logUserTraceEvent(LOGFROM, "WriteEntity - exceeded max entity values per entity",
+                        devidString, logMap.put("Max", this.config.getMaxTotalEntityValues())
+                                .put("ValuesOnEntity", entity.getEntityValueList().size()));
+                return ApiError.getBadRequest(String.format(
+                        "Exceeds maximum number of values per entity - Max: %d, this entity: %d",
+                        this.config.getMaxEntityValuesPerEntity(), entity.getEntityValueList().size()));
+            }
+
+            int expectedTotalEntityValuesCount =
+                    this.database.getEntityValuesCountForDevExcludingEntity(devid, entityName)
+                            + (entity.getEntityValueList() == null ? 0 : entity.getEntityValueList().size());
+
+            if (expectedTotalEntityValuesCount > this.config.getMaxTotalEntityValues()) {
+                this.logger.logUserTraceEvent(LOGFROM, "WriteEntity - exceeded max entity values per dev",
+                        devidString, logMap.put("Max", this.config.getMaxEntityValuesPerEntity())
+                                .put("ValuesOnEntity", expectedTotalEntityValuesCount));
+                return ApiError.getBadRequest(String.format(
+                        "Exceeds maximum number of values per account - Max: %d, with this entity: %d",
+                        this.config.getMaxTotalEntityValues(), expectedTotalEntityValuesCount));
+            }
+
             final boolean created = this.database.getEntity(devid, entityName) == null;
             this.database.writeEntity(devid, entityName, entity);
             this.logger.logUserTraceEvent(LOGFROM, "WriteEntity", devidString, logMap);
@@ -101,7 +126,7 @@ public class EntityLogic {
         final String devidString = devid.toString();
         LogMap logMap = LogMap.map("Entity", entityName);
         try {
-            if (entityName.startsWith(IEntityRecognizer.SYSTEM_ENTITY_PREFIX)) {
+            if (entityName.startsWith(IEntityRecognizer.SYSTEM_ENTITY_PREFIX) || entity.isSystem()) {
                 this.logger.logUserTraceEvent(LOGFROM, "ReplaceEntity - attempted to replace a system entity.",
                         devidString, logMap);
                 return ApiError.getBadRequest("Cannot replace a system entity.");

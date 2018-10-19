@@ -6,10 +6,10 @@ import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.ILoggerConfig;
 import com.hutoma.api.thread.IThreadConfig;
 
-import java.util.Collections;
-import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Created by David MG on 02/08/2016.
@@ -34,7 +34,6 @@ public class Config extends CommonConfig implements ILoggerConfig, IThreadConfig
     protected String getEnvPrefix() {
         return "API_";
     }
-
 
 
     public String getEncodingKey() {
@@ -89,7 +88,7 @@ public class Config extends CommonConfig implements ILoggerConfig, IThreadConfig
     public double getRateLimit_PollStatus_Frequency() {
         return Double.parseDouble(getConfigFromProperties("ratelimit_pollstatus_frequency", "0.2"));
     }
-    
+
     /***
      * Allow the load testing user ROLE_TEST to burst at 20000 chat requests
      * @return
@@ -227,6 +226,7 @@ public class Config extends CommonConfig implements ILoggerConfig, IThreadConfig
 
     /**
      * The botstore icon storage path. This will typically be a NFS mount point.
+     *
      * @return the botstore icon storage path
      */
     public String getBotIconStoragePath() {
@@ -286,5 +286,13 @@ public class Config extends CommonConfig implements ILoggerConfig, IThreadConfig
 
     public int getFeatureToggleReadIntervalSec() {
         return Integer.parseInt(getConfigFromProperties("feature_read_interval", "60"));
+    }
+
+    public int getMaxTotalEntityValues() {
+        return Integer.parseInt(getConfigFromProperties("max_entity_values_total", "20000"));
+    }
+
+    public int getMaxEntityValuesPerEntity() {
+        return Integer.parseInt(getConfigFromProperties("max_entity_values_entity", "10000"));
     }
 }

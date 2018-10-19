@@ -7,15 +7,18 @@ import com.hutoma.api.connectors.db.DatabaseEntitiesIntents;
 import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.ApiEntity;
 import com.hutoma.api.containers.ApiError;
+import com.hutoma.api.containers.sub.AiIdentity;
 import com.hutoma.api.containers.sub.ChatRequestInfo;
 import com.hutoma.api.containers.sub.ChatResult;
+import com.hutoma.api.containers.sub.Entity;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
-import com.hutoma.api.containers.sub.*;
 import com.hutoma.api.logic.ChatLogic;
 
 import javax.inject.Inject;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class ChatEntityValueHandler implements IChatHandler {
 
@@ -80,14 +83,25 @@ public class ChatEntityValueHandler implements IChatHandler {
                         requestInfo.getDevId().toString(),
                         LogMap.map("entity replacements", jsonResponse));
 
-                ERMessage candidateEntityValues = (ERMessage) serializer.deserialize(jsonResponse, ERMessage.class);
+                ERMessage candidateEntityValues = null;
+                try {
+                    candidateEntityValues = (ERMessage) serializer.deserialize(jsonResponse, ERMessage.class);
+                } catch (Exception ex) {
+                    logger.logUserExceptionEvent("ChatEntityValueHandler",
+                            "Problem deserializing the response from ER",
+                            requestInfo.getDevId().toString(),
+                            ex,
+                            LogMap.map("Response", jsonResponse));
+                }
 
-                for (Map.Entry<String, List<String>> entry : candidateEntityValues.entities.entrySet()) {
-                    String entityValue = entry.getKey();
-                    List<String> entityNames = entry.getValue();
+                if (candidateEntityValues != null) {
+                    for (Map.Entry<String, List<String>> entry : candidateEntityValues.entities.entrySet()) {
+                        String entityValue = entry.getKey();
+                        List<String> entityNames = entry.getValue();
 
-                    // Store these in chat state to revisit later
-                    currentResult.getChatState().getCandidateValues().put(entityValue, entityNames);
+                        // Store these in chat state to revisit later
+                        currentResult.getChatState().getCandidateValues().put(entityValue, entityNames);
+                    }
                 }
 
             } catch (DatabaseException ex) {
