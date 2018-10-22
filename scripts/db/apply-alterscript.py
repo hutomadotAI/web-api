@@ -116,7 +116,8 @@ def main(args):
     'port': args.port,
     'database': 'hutoma',
     'raise_on_warnings': False,
-    'buffered': True
+    'buffered': True,
+    'collation': 'utf8mb4_unicode_520_ci'
     }
 
     cnx = mysql.connector.connect(**config)
