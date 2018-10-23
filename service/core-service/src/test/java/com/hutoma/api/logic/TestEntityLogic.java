@@ -9,6 +9,7 @@ import com.hutoma.api.containers.ApiEntityList;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.Entity;
+import com.hutoma.api.containers.sub.EntityValueType;
 import com.hutoma.api.containers.sub.IntentVariable;
 import com.hutoma.api.logging.ILogger;
 import org.junit.Assert;
@@ -252,20 +253,20 @@ public class TestEntityLogic {
         for (int i = 1; i <= numValues; i++) {
             values.add("value" + i);
         }
-        return new ApiEntity("entity1", DEVID_UUID, values, false);
+        return new ApiEntity("entity1", DEVID_UUID, values, false, EntityValueType.LIST);
     }
 
 
     private List<Entity> getEntitiesList() {
-        return Collections.singletonList(new Entity(ENTITY_NAME, false));
+        return Collections.singletonList(new Entity(ENTITY_NAME, false, EntityValueType.LIST));
     }
 
     private ApiEntity getEntity() {
-        return new ApiEntity(ENTITY_NAME, DEVID_UUID, Arrays.asList("oneval", "twoval"), false);
+        return new ApiEntity(ENTITY_NAME, DEVID_UUID, Arrays.asList("oneval", "twoval"), false, EntityValueType.LIST);
     }
 
     private ApiEntity getEntityEmpty() {
-        return new ApiEntity(ENTITY_NAME, DEVID_UUID, Arrays.asList(new String[]{}), false);
+        return new ApiEntity(ENTITY_NAME, DEVID_UUID, Arrays.asList(new String[]{}), false, EntityValueType.LIST);
     }
 
 

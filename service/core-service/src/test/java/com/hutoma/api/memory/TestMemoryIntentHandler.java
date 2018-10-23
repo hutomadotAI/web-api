@@ -115,7 +115,7 @@ public class TestMemoryIntentHandler {
         final String entityName = "entity1";
         ApiIntent apiIntent = new ApiIntent(INTENT_NAME, "in", "out");
         IntentVariable iv = new IntentVariable(entityName, DEVID_UUID, true, 1, null, false, "", false);
-        ApiEntity apiEntity = new ApiEntity(entityName, DEVID_UUID, Arrays.asList("a", "b"), false);
+        ApiEntity apiEntity = new ApiEntity(entityName, DEVID_UUID, Arrays.asList("a", "b"), false, EntityValueType.LIST);
         apiIntent.addVariable(iv);
         when(this.fakeDatabaseEntities.getIntent(any(), anyString())).thenReturn(apiIntent);
         when(this.fakeDatabaseEntities.getEntity(any(), anyString())).thenReturn(apiEntity);

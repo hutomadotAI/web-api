@@ -1508,7 +1508,7 @@ public class TestAILogic {
         for (int i = 0; i < maxValues; i++) {
             valuesList.add("new_value" + i);
         }
-        ApiEntity entity = new ApiEntity("newEntity", DEVID_UUID, valuesList, false);
+        ApiEntity entity = new ApiEntity("newEntity", DEVID_UUID, valuesList, false, EntityValueType.LIST);
         botStructure.getEntities().put(entity.getEntityName(), entity);
         when(this.fakeDatabaseEntitiesIntents.getEntityValuesCountForDevExcludingEntity(any(), any())).thenReturn(maxValues - 1);
         ApiResult result = this.aiLogic.importBot(VALIDDEVID, botStructure);
@@ -1540,7 +1540,7 @@ public class TestAILogic {
         Map<String, ApiEntity> entities = new HashMap<>();
         List<String> valueList = new ArrayList<>();
         valueList.add("value1");
-        entities.put("ent1", new ApiEntity("ent1", VALIDDEVID, valueList, false));
+        entities.put("ent1", new ApiEntity("ent1", VALIDDEVID, valueList, false, EntityValueType.LIST));
         List<ApiIntent> intents = new ArrayList<>();
         final String intentName = "intent1";
         ApiIntent intent = new ApiIntent(intentName, "in", "out");
@@ -1649,12 +1649,12 @@ public class TestAILogic {
                                                      final List<String> newValues)
             throws DatabaseException {
         setupFakeImport();
-        ApiEntity newEntity = new ApiEntity(entityName, DEVID_UUID, newValues, false);
+        ApiEntity newEntity = new ApiEntity(entityName, DEVID_UUID, newValues, false, EntityValueType.LIST);
         BotStructure botStructure = getBotstructure();
         botStructure.setEntities(ImmutableMap.of(entityName, newEntity));
 
-        Entity existingEntitySimple = new Entity(entityName, false);
-        ApiEntity existingEntity = new ApiEntity(entityName, DEVID_UUID, existingValues, false);
+        Entity existingEntitySimple = new Entity(entityName, false, EntityValueType.LIST);
+        ApiEntity existingEntity = new ApiEntity(entityName, DEVID_UUID, existingValues, false, EntityValueType.LIST);
         when(this.fakeDatabaseEntitiesIntents.getEntities(any())).thenReturn(Collections.singletonList(existingEntitySimple));
         when(this.fakeDatabaseEntitiesIntents.getEntity(any(), any())).thenReturn(existingEntity);
 

@@ -7,20 +7,14 @@ import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.ApiEntity;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.sub.BotStructure;
+import com.hutoma.api.containers.sub.EntityValueType;
 import com.hutoma.api.containers.sub.IntentVariable;
 import com.hutoma.api.logging.ILogger;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -113,7 +107,7 @@ public class TestPostFilterValidation {
         Map<String, ApiEntity> entities = botStructure.getEntities();
         List<String> entityValues = new ArrayList<>();
         entityValues.add("_+[[*invalid");
-        entities.put("invalid", new ApiEntity("_=]InvalidName", UUID.randomUUID(), entityValues, false));
+        entities.put("invalid", new ApiEntity("_=]InvalidName", UUID.randomUUID(), entityValues, false, EntityValueType.LIST));
         botStructure.setEntities(entities);
         this.postFilter.validateBotStructure(botStructure, TestDataHelper.DEVID_UUID);
     }
@@ -323,10 +317,33 @@ public class TestPostFilterValidation {
         List<String> entityValues = new ArrayList<>();
         entityValues.add("valid value");
         entityValues.add("valid second value");
-        ApiEntity entity = new ApiEntity("sys.entity_name", UUID.randomUUID(), entityValues, false);
+        ApiEntity entity = new ApiEntity("sys.entity_name", UUID.randomUUID(), entityValues, false, EntityValueType.LIST);
         entities.put("label", entity);
         botStructure.setEntities(entities);
         this.postFilter.validateBotStructure(botStructure, TestDataHelper.DEVID_UUID);
+    }
+
+    @Test
+    public void validateEntity_noEntityValueType_defaultsToList() throws ParameterValidationException {
+        ApiEntity entity = new ApiEntity("entity", TestDataHelper.DEVID_UUID, Collections.emptyList(), false, null);
+        this.postFilter.validateEntity(entity);
+        Assert.assertEquals(EntityValueType.LIST, entity.getEntityValueType());
+    }
+
+    @Test(expected = ParameterValidationException.class)
+    public void validateEntity_preventSysEntityValueType() throws ParameterValidationException {
+        ApiEntity entity = new ApiEntity("entity", TestDataHelper.DEVID_UUID, Collections.emptyList(), false, EntityValueType.SYS);
+        this.postFilter.validateEntity(entity);
+    }
+
+    @Test
+    public void validateEntity_allowsRegex() throws ParameterValidationException {
+        final String regexExpression = "^([a-z0-9_\\.-]+)@([\\da-z\\.-]+)\\.([a-z\\.]{2,6})$";
+        ApiEntity entity = new ApiEntity("entity", TestDataHelper.DEVID_UUID,
+                Collections.singletonList(regexExpression), false, EntityValueType.REGEX);
+        this.postFilter.validateEntity(entity);
+        Assert.assertEquals(EntityValueType.REGEX, entity.getEntityValueType());
+        Assert.assertEquals(regexExpression, entity.getEntityValueList().get(0));
     }
 
     private static List<String> makeListRepeated(final String baseName, final int numCopies) {
@@ -369,7 +386,7 @@ public class TestPostFilterValidation {
         List<String> entityValues = new ArrayList<>();
         entityValues.add("valid value");
         entityValues.add("valid second value");
-        ApiEntity entity = new ApiEntity("entity_name", UUID.randomUUID(), entityValues, false);
+        ApiEntity entity = new ApiEntity("entity_name", UUID.randomUUID(), entityValues, false, EntityValueType.LIST);
         entities.put(label, entity);
         List<ApiIntent> intents = new ArrayList<>();
         ApiIntent intent = new ApiIntent("intent_name", "topicIn", "topicOut");

@@ -12,12 +12,12 @@ import com.hutoma.api.containers.sub.AiBot;
 import com.hutoma.api.containers.sub.ChatHandoverTarget;
 import com.hutoma.api.logging.ILogger;
 
+import javax.inject.Inject;
+import javax.ws.rs.container.ContainerRequestContext;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
-import javax.inject.Inject;
-import javax.ws.rs.container.ContainerRequestContext;
 
 public class ParameterFilter extends Validate {
 
@@ -33,6 +33,7 @@ public class ParameterFilter extends Validate {
     static final String ENTITYNAME = "entity_name";
     static final String INTENTNAME = "intent_name";
     static final String ENTITYVALUE = "entity_value";
+    static final String ENTITY_VALUETYPE = "value_type";
     static final String INTENT_PROMPTLIST = "intent_prompts";
     static final String INTENT_USERSAYS = "intent_usersays";
     static final String INTENT_RESPONSES = "intent_responses";
@@ -159,6 +160,7 @@ public class ParameterFilter extends Validate {
 
     /**
      * Gets the developer id (if any) from the headers in the request context.
+     *
      * @param requestContext the request context
      * @return the developer id for the request (if any)
      */

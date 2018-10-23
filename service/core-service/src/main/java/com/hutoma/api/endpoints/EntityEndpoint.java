@@ -50,7 +50,7 @@ public class EntityEndpoint {
     @POST
     @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
     @Produces(MediaType.APPLICATION_JSON)
-    @ValidateParameters({APIParameter.DevID, APIParameter.EntityName})
+    @ValidateParameters({APIParameter.DevID, APIParameter.EntityName, APIParameter.EntityJson})
     @ValidatePost({APIParameter.EntityJson})
     public Response postEntity(
             @Context final ContainerRequestContext requestContext) {
@@ -76,7 +76,7 @@ public class EntityEndpoint {
     @PUT
     @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
     @Produces(MediaType.APPLICATION_JSON)
-    @ValidateParameters({APIParameter.DevID, APIParameter.EntityName})
+    @ValidateParameters({APIParameter.DevID, APIParameter.EntityName, APIParameter.EntityJson})
     @ValidatePost({APIParameter.EntityJson})
     public Response putEntity(
             @Context final ContainerRequestContext requestContext) {

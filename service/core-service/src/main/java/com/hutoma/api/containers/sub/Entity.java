@@ -13,9 +13,13 @@ public class Entity {
     @SerializedName("is_system")
     private final boolean isSystem;
 
-    public Entity(final String name, final boolean isSystem) {
+    @SerializedName("value_type")
+    private final EntityValueType valueType;
+
+    public Entity(final String name, final boolean isSystem, final EntityValueType valueType) {
         this.name = name;
         this.isSystem = isSystem;
+        this.valueType = valueType;
     }
 
     public String getName() {

@@ -3,6 +3,7 @@ package com.hutoma.api.tests.service;
 import com.hutoma.api.common.TestDataHelper;
 import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.ApiEntity;
+import com.hutoma.api.containers.sub.EntityValueType;
 import com.hutoma.api.endpoints.EntityEndpoint;
 import com.hutoma.api.logic.EntityLogic;
 import com.hutoma.api.logic.TrainingLogic;
@@ -63,14 +64,14 @@ public class TestServiceEntity extends ServiceTestBase {
     @Test
     public void testCreateUpdateEntity_doesNotAcceptSystemEntities_nameStartsWithSys() {
         ApiEntity entity = new ApiEntity("sys.systementity", DEVID,
-                Collections.singletonList("value1"), false);
+                Collections.singletonList("value1"), false, EntityValueType.LIST);
         testCreateUpdateEntity_sysEntity(entity);
     }
 
     @Test
     public void testCreateUpdateEntity_doesNotAcceptSystemEntities_nameDoesNitStartsWithSys() {
         ApiEntity entity = new ApiEntity("systementity", DEVID,
-                Collections.singletonList("value1"), true);
+                Collections.singletonList("value1"), true, EntityValueType.LIST);
         testCreateUpdateEntity_sysEntity(entity);
     }
 
@@ -104,7 +105,8 @@ public class TestServiceEntity extends ServiceTestBase {
 
     private String getEntityJson(final String[] values) {
         ApiEntity entity = new ApiEntity(ENTITY_NAME, DEVID,
-                values == null ? Collections.emptyList() : new ArrayList<String>(Arrays.asList(values)), false);
+                values == null ? Collections.emptyList() : new ArrayList<String>(Arrays.asList(values)), false,
+                EntityValueType.LIST);
         return serializeObject(entity);
     }
 }

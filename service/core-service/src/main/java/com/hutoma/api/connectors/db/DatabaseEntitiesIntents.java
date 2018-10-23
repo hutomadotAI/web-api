@@ -5,6 +5,7 @@ import com.hutoma.api.containers.ApiEntity;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.ApiIntentList;
 import com.hutoma.api.containers.sub.Entity;
+import com.hutoma.api.containers.sub.EntityValueType;
 import com.hutoma.api.logging.ILogger;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -38,9 +39,11 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
             try {
                 List<Entity> entities = new ArrayList<>();
                 while (rs.next()) {
-                    entities.add(new Entity(
+                    Entity entity = new Entity(
                             rs.getString("name"),
-                            rs.getBoolean("isSystem")));
+                            rs.getBoolean("isSystem"),
+                            EntityValueType.fromString(rs.getString("value_type")));
+                    entities.add(entity);
                 }
                 return entities;
             } catch (final SQLException sqle) {
@@ -74,6 +77,7 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
                         .add(devid).add(entityName).executeQuery();
                 if (rs.next()) {
                     boolean isSystem = rs.getBoolean("isSystem");
+                    EntityValueType valueType = EntityValueType.fromString(rs.getString("value_type"));
                     final ArrayList<String> entityValues = new ArrayList<>();
                     // only custom entities have values as system entities are handled externally
                     if (!isSystem) {
@@ -83,7 +87,7 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
                             entityValues.add(valuesRs.getString("value"));
                         }
                     }
-                    result = new ApiEntity(entityName, devid, entityValues, isSystem);
+                    result = new ApiEntity(entityName, devid, entityValues, isSystem, valueType);
                 }
                 transaction.commit();
                 return result;
@@ -132,7 +136,10 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
                     .add(devId)
                     .add(entityName);
             ResultSet rs = call.executeQuery();
-            return rs.getInt("COUNT");
+            if (rs.next()) {
+                return rs.getInt("COUNT");
+            }
+            return 0;
         } catch (final SQLException sqle) {
             throw new DatabaseException(sqle);
         }
@@ -219,8 +226,12 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
         }
         try {
             // add or update the entity
-            transaction.getDatabaseCall().initialise("addUpdateEntity", 3)
-                    .add(devid).add(entityOldName).add(entity.getEntityName()).executeUpdate();
+            transaction.getDatabaseCall().initialise("addUpdateEntity", 4)
+                    .add(devid)
+                    .add(entityOldName)
+                    .add(entity.getEntityName())
+                    .add(entity.getEntityValueType().name())
+                    .executeUpdate();
 
             // read the entity's values
             ResultSet valuesRs = transaction.getDatabaseCall().initialise("getEntityValues", 2)
@@ -271,7 +282,7 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
         }
     }
 
-    public boolean deleteEntity(UUID devid, int entityId) throws DatabaseException {
+    public boolean deleteEntity(final UUID devid, final int entityId) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             int rowCount = call.initialise("deleteEntity", 2).add(devid).add(entityId).executeUpdate();
             return rowCount > 0;

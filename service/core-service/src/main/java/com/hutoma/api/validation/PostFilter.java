@@ -11,6 +11,7 @@ import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.facebook.FacebookConnect;
 import com.hutoma.api.containers.facebook.FacebookNotification;
 import com.hutoma.api.containers.sub.BotStructure;
+import com.hutoma.api.containers.sub.EntityValueType;
 import com.hutoma.api.containers.sub.IntentVariable;
 import com.hutoma.api.containers.sub.WebHook;
 import com.hutoma.api.logging.ILogger;
@@ -378,9 +379,15 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
      * @param entity The Entity.
      * @throws ParameterValidationException
      */
-    private void validateEntity(ApiEntity entity) throws ParameterValidationException {
+    void validateEntity(final ApiEntity entity) throws ParameterValidationException {
         validateEntityName(ENTITYNAME, entity.getEntityName());
         validateUniqueList(ENTITYVALUE, entity.getEntityValueList());
+        if (entity.getEntityValueType() == null) {
+            entity.setEntityValueType(EntityValueType.LIST);
+        }
+        if (entity.getEntityValueType() == EntityValueType.SYS) {
+            throw new ParameterValidationException(ENTITY_VALUETYPE, "Cannot create entity with system typed values");
+        }
     }
 
     /***
@@ -408,7 +415,7 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
             validateFieldLength(250, AIDESC, botStructure.getDescription());
             validateTimezoneString(TIMEZONE, botStructure.getTimezone());
             if (botStructure.getEntities() != null) {
-                // Prevent any entities from having the system prefix of flag
+                // Prevent any entities from having the system prefix flag
                 for (ApiEntity entity : botStructure.getEntities().values()) {
                     this.validateEntity(entity);
                     if (entity.isSystem()) {
