@@ -1,7 +1,7 @@
 USE hutoma;
 
 ALTER TABLE `entity` 
-	ADD COLUMN `value_type` VARCHAR(10) NOT NULL DEFAULT "LIST");
+	ADD COLUMN `value_type` VARCHAR(10) NOT NULL DEFAULT "LIST";
 
 UPDATE `entity` SET `value_type`="SYS" WHERE isSystem=1;
 
