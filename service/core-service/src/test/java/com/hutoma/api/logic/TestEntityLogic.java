@@ -1,6 +1,8 @@
 package com.hutoma.api.logic;
 
 import com.hutoma.api.common.Config;
+import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.connectors.EntityRecognizerService;
 import com.hutoma.api.connectors.db.DatabaseEntitiesIntents;
 import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.connectors.db.DatabaseIntegrityViolationException;
@@ -34,17 +36,27 @@ public class TestEntityLogic {
     private EntityLogic entityLogic;
     private ILogger fakeLogger;
     private TrainingLogic trainingLogic;
+    private EntityRecognizerService entityRecognizerService;
+    private JsonSerializer jsonSerializer;
 
     @Before
-    public void setup() {
+    public void setup() throws EntityRecognizerService.EntityRecognizerException {
         this.fakeConfig = mock(Config.class);
         this.fakeDatabase = mock(DatabaseEntitiesIntents.class);
         this.fakeLogger = mock(ILogger.class);
         this.trainingLogic = mock(TrainingLogic.class);
-        this.entityLogic = new EntityLogic(this.fakeConfig, this.fakeLogger, this.fakeDatabase, this.trainingLogic);
+        this.entityRecognizerService = mock(EntityRecognizerService.class);
+        this.jsonSerializer = mock(JsonSerializer.class);
+        this.entityLogic = new EntityLogic(this.fakeConfig,
+                this.fakeLogger,
+                this.fakeDatabase,
+                this.trainingLogic,
+                this.entityRecognizerService,
+                this.jsonSerializer);
 
         when(this.fakeConfig.getMaxTotalEntityValues()).thenReturn(1000);
         when(this.fakeConfig.getMaxEntityValuesPerEntity()).thenReturn(500);
+        when(this.entityRecognizerService.findEntities(any(), any())).thenReturn("fake response");
     }
 
     @Test

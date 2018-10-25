@@ -77,7 +77,8 @@ public class EntityRecognizerService {
         return new ArrayList<>();
     }
 
-    public String findEntities(final String question, final SupportedLanguage language) {
+    public String findEntities(final String question, final SupportedLanguage language)
+            throws EntityRecognizerException {
         Response response = null;
         String json = null;
         try {
@@ -87,6 +88,18 @@ public class EntityRecognizerService {
                     .post(javax.ws.rs.client.Entity.entity(question, MediaType.APPLICATION_JSON));
             response.bufferEntity();
             json = response.readEntity(String.class);
+            if (response.getStatus() == HttpURLConnection.HTTP_BAD_REQUEST) {
+                if (response.getStatusInfo().getReasonPhrase() == "Invalid regex found") {
+                    this.logger.logInfo(LOGFROM,
+                            "Invalid regex supplied ",
+                            LogMap.map("server", ersUrl)
+                                    .put("Status", Integer.toString(response.getStatus())));
+                    throw new EntityRecognizerException(EntityRecognizerException.EntityRecognizerError.INVALID_REGEX);
+                }
+
+                // Otherwise, flag it as an unknown reason
+                throw new EntityRecognizerException(EntityRecognizerException.EntityRecognizerError.UNKNOWN);
+            }
             if (response.getStatus() != HttpURLConnection.HTTP_OK) {
                 this.logger.logError(LOGFROM,
                         "Error connecting to entity recognizer at " + ersUrl,
@@ -95,6 +108,8 @@ public class EntityRecognizerService {
             } else {
                 return json;
             }
+        } catch (EntityRecognizerException ex) {
+            throw ex;
         } catch (Exception ex) {
             this.logger.logException(LOGFROM, ex);
             throw ex;
@@ -110,6 +125,27 @@ public class EntityRecognizerService {
     public String findErsUrlForLanguage(final String baseUrl, final SupportedLanguage language) {
         String ersUrl = baseUrl.replace("[lang]", language.toString().toLowerCase());
         return ersUrl;
+    }
+
+    public static class EntityRecognizerException extends Exception {
+        public enum EntityRecognizerError {
+            UNKNOWN,
+            INVALID_REGEX
+        }
+
+        private EntityRecognizerError reason;
+
+        public EntityRecognizerException() {
+            this.reason = EntityRecognizerError.UNKNOWN;
+        }
+
+        public EntityRecognizerException(EntityRecognizerError reason) {
+            this.reason = reason;
+        }
+
+        public EntityRecognizerError getReason() {
+            return this.reason;
+        }
     }
 }
 

@@ -1,14 +1,19 @@
 package com.hutoma.api.logic;
 
 import com.hutoma.api.common.Config;
+import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.common.SupportedLanguage;
+import com.hutoma.api.connectors.EntityRecognizerService;
 import com.hutoma.api.connectors.db.DatabaseEntitiesIntents;
 import com.hutoma.api.connectors.db.DatabaseIntegrityViolationException;
 import com.hutoma.api.containers.*;
 import com.hutoma.api.containers.sub.Entity;
+import com.hutoma.api.containers.sub.EntityValueType;
 import com.hutoma.api.containers.sub.IntentVariable;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
 import com.hutoma.api.memory.IEntityRecognizer;
+import com.hutoma.api.logic.chat.EntityRecognizerMessage;
 
 import javax.inject.Inject;
 import java.util.*;
@@ -23,16 +28,22 @@ public class EntityLogic {
     private final ILogger logger;
     private final DatabaseEntitiesIntents database;
     private final TrainingLogic trainingLogic;
+    private final EntityRecognizerService entityRecognizerService;
+    private final JsonSerializer jsonSerializer;
 
     @Inject
     public EntityLogic(final Config config,
                        final ILogger logger,
                        final DatabaseEntitiesIntents database,
-                       final TrainingLogic trainingLogic) {
+                       final TrainingLogic trainingLogic,
+                       final EntityRecognizerService entityRecognizerService,
+                       final JsonSerializer jsonSerializer) {
         this.config = config;
         this.logger = logger;
         this.database = database;
         this.trainingLogic = trainingLogic;
+        this.entityRecognizerService = entityRecognizerService;
+        this.jsonSerializer = jsonSerializer;
     }
 
     public ApiResult getEntities(final UUID devid) {
@@ -102,6 +113,36 @@ public class EntityLogic {
                 return ApiError.getBadRequest(String.format(
                         "Exceeds maximum number of values per account - Max: %d, with this entity: %d",
                         this.config.getMaxTotalEntityValues(), expectedTotalEntityValuesCount));
+            }
+
+            // Finally, validate the regex if this is a regex entity
+            if (entity.getEntityValueType() == EntityValueType.REGEX) {
+                EntityRecognizerMessage testMessage = new EntityRecognizerMessage();
+                testMessage.setConversation("test conversation");
+                testMessage.getRegexEntities().put(entity.getEntityName(), entity.getEntityValueList().get(0));
+
+                // see if this can be executed
+                try {
+                    entityRecognizerService.findEntities(jsonSerializer.serialize(testMessage),
+                            SupportedLanguage.EN);
+                } catch (EntityRecognizerService.EntityRecognizerException ex) {
+                    if (ex.getReason()
+                            == EntityRecognizerService.EntityRecognizerException.EntityRecognizerError.INVALID_REGEX) {
+                        logger.logUserTraceEvent(LOGFROM, "Test run of regex entity failed",
+                                devidString);
+                        return ApiError.getBadRequest("Invalid regex string found in entity");
+                    }
+                    // Something else unexpected
+                    logger.logUserExceptionEvent(LOGFROM,
+                            "Test run of regex entity failed - unknown reason",
+                            devidString, ex);
+                    return ApiError.getInternalServerError();
+                } catch (Exception ex) {
+                    // In this case its a system error
+                    logger.logUserExceptionEvent(LOGFROM, "Test run of regex entity failed",
+                            devidString, ex);
+                    return ApiError.getInternalServerError();
+                }
             }
 
             final boolean created = this.database.getEntity(devid, entityName) == null;
