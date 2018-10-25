@@ -243,22 +243,21 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
                 currentValues.add(valuesRs.getString("value").toLowerCase());
             }
 
-            if (entity.getEntityValueList() != null) {
-                // for each new entity value, check if it was already there
-                for (String entityValue : entity.getEntityValueList()) {
-                    // if it was then remove it, otherwise it is new - add it
-                    if (!currentValues.remove(entityValue.toLowerCase())) {
-                        transaction.getDatabaseCall().initialise("addEntityValue", 3)
-                                .add(devid).add(entity.getEntityName()).add(entityValue).executeUpdate();
-                    }
-                }
-            }
-
-            // anything left over is an old obsolete value - delete it
+            // Delete all the old entity values.
             for (String obsoleteEntityValue : currentValues) {
                 transaction.getDatabaseCall().initialise("deleteEntityValue", 3)
                         .add(devid).add(entity.getEntityName()).add(obsoleteEntityValue).executeUpdate();
             }
+
+            // Add all the new entity values.
+            if (entity.getEntityValueList() != null) {
+                for (String entityValue : entity.getEntityValueList()) {
+                        transaction.getDatabaseCall().initialise("addEntityValue", 3)
+                                .add(devid).add(entity.getEntityName()).add(entityValue).executeUpdate();
+                    }
+            }
+
+
 
         } catch (SQLException e) {
             throw new DatabaseException(e);
