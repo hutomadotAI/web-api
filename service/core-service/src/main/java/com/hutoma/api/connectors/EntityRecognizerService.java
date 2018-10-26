@@ -89,7 +89,7 @@ public class EntityRecognizerService {
             response.bufferEntity();
             json = response.readEntity(String.class);
             if (response.getStatus() == HttpURLConnection.HTTP_BAD_REQUEST) {
-                if (response.getStatusInfo().getReasonPhrase() == "Invalid regex found") {
+                if (response.getStatusInfo().getReasonPhrase().equals("Invalid regex found")) {
                     this.logger.logInfo(LOGFROM,
                             "Invalid regex supplied ",
                             LogMap.map("server", ersUrl)

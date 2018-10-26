@@ -420,27 +420,35 @@ public class IntentProcessor {
                             + intent.getIntentName());
 
             // We need to filter the relevant candidates and then count how many we have left
-            HashMap<String, List<String>> localCandidateMatches = new HashMap<>();
+            HashMap<String, List<String>> localEntityCandidateMatches = new HashMap<>();
+            // Keep a mapping of entity names to entity labels for this intent, for later
+            HashMap<String, String> localEntityNameLabelMap = new HashMap<>();
             for (IntentVariable variable : intent.getVariables()) {
                 for (Map.Entry<String, List<String>> candidate :
                         chatResult.getChatState().getCandidateValues().entrySet()) {
                     if (candidate.getValue().contains(variable.getEntityName())) {
                         // we need to consider this value
-                        if (localCandidateMatches.containsKey(candidate.getKey())) {
-                            localCandidateMatches.get(candidate.getKey()).add(variable.getEntityName());
+                        if (localEntityCandidateMatches.containsKey(candidate.getKey())) {
+                            localEntityCandidateMatches.get(candidate.getKey()).add(variable.getEntityName());
                         } else {
                             List<String> newEntities = new ArrayList<String>();
                             newEntities.add(variable.getEntityName());
-                            localCandidateMatches.put(candidate.getKey(), newEntities);
+                            localEntityCandidateMatches.put(candidate.getKey(), newEntities);
                         }
+                        localEntityNameLabelMap.put(variable.getEntityName(), variable.getLabel());
                     }
                 }
             }
 
             // If there are any candidateValues remaining with only one possible match, use that one
-            for (Map.Entry<String, List<String>> candidate : localCandidateMatches.entrySet()) {
+            for (Map.Entry<String, List<String>> candidate : localEntityCandidateMatches.entrySet()) {
                 if (candidate.getValue().size() == 1) {
+                    // Update the entity list
                     chatResult.getChatState().getEntityValues().put(candidate.getValue().get(0), candidate.getKey());
+                    // Also need to update the entity labels in chatContext, but that is indexed on entity-label
+                    chatResult.getChatState().getChatContext().setValue(localEntityNameLabelMap.get(
+                            candidate.getValue().get(0)),
+                            candidate.getKey());
                     logger.logInfo("IntentProcessor", "Added entity value "
                             + candidate.getKey() + " from entity value matching");
                 }
