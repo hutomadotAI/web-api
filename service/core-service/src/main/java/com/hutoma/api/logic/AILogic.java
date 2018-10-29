@@ -1198,6 +1198,9 @@ public class AILogic {
                                     e.getEntityName(), e.getEntityValueList().size(),
                                     this.config.getMaxTotalEntityValues()));
                         }
+                        if (e.getEntityValueType() == null) {
+                            e.setEntityValueType(EntityValueType.LIST);
+                        }
                         this.databaseEntitiesIntents.writeEntity(devId, e.getEntityName(), e, transaction);
                     }
                 }

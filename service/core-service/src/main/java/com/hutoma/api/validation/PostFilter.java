@@ -418,7 +418,11 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
                 // Prevent any entities from having the system prefix flag
                 for (ApiEntity entity : botStructure.getEntities().values()) {
                     this.validateEntity(entity);
-                    if (entity.isSystem()) {
+                    // Support legacy entities which didn't have a type
+                    if (entity.getEntityValueType() == null) {
+                        entity.setEntityValueType(EntityValueType.LIST);
+                    }
+                    if (entity.isSystem() || entity.getEntityValueType() == EntityValueType.SYS) {
                         throw new ParameterValidationException(String.format(
                                 "cannot import entity as system: %s",
                                 entity.getEntityName()), ENTITYNAME);
