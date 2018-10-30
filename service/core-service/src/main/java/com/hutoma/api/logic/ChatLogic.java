@@ -325,7 +325,8 @@ public class ChatLogic {
                             || (StringUtils.isEmpty(v.getValue()))) {
                         return ApiError.getBadRequest("Invalid variable");
                     } else {
-                        this.chatState.getChatContext().setValue(v.getKey(), v.getValue());
+                        this.chatState.getChatContext().setValue(v.getKey(), v.getValue(),
+                                ChatContext.ChatVariableValue.DEFAULT_LIFESPAN_TURNS);
                     }
                 }
                 this.chatStateHandler.saveState(devId, aiid, chatUuid, this.chatState);

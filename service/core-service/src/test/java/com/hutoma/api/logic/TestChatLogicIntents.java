@@ -660,7 +660,7 @@ public class TestChatLogicIntents extends TestChatBase {
     public void testChat_intent_variableLifetime_defaults() throws ChatStateHandler.ChatStateException {
         final String varName = "var";
         ChatContext ctx = new ChatContext();
-        ctx.setValue(varName, "value");
+        ctx.setValue(varName, "value", ChatContext.ChatVariableValue.DEFAULT_LIFESPAN_TURNS);
         ChatState state = new ChatState(DateTime.now(), null, null, null, null, 0.5d,
                 ChatHandoverTarget.Ai, getSampleAI(), ctx);
         when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(state);

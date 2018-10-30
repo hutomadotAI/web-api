@@ -18,33 +18,23 @@ public class ChatContext {
     /**
      * Sets a value for a variable.
      * Note that setting a variable to a null value will effectively remove it.
-     * @param variable the variable name
-     * @param value    the value for the variable
-     */
-    public void setValue(final String variable, final String value) {
-        if (value == null) {
-            this.variables.remove(variable);
-        } else {
-            this.variables.put(variable, new ChatVariableValue(value));
-        }
-    }
-
-    /**
-     * Sets a value for a variable.
-     * Note that setting a variable to a null value will effectively remove it.
+     *
      * @param variable     the variable name
      * @param value        the value for the variable
      * @param turnLifetime the number of turns after which this variable will be deleted
      */
     public void setValue(final String variable, final String value, final int turnLifetime) {
-        setValue(variable, value);
-        if (this.variables.containsKey(variable)) {
+        if (value == null) {
+            this.variables.remove(variable);
+        } else {
+            this.variables.put(variable, new ChatVariableValue(value));
             this.variables.get(variable).setLifespanTurns(turnLifetime);
         }
     }
 
     /**
      * Gets a variable's value.
+     *
      * @param variable the variable's name
      * @return the variable's value, or null if there is no variable with that name
      */
@@ -72,6 +62,7 @@ public class ChatContext {
     /**
      * Returns all the variables as a string map.
      * Note that insertion order is not preserved.
+     *
      * @return the string map
      */
     public Map<String, String> getVariablesAsStringMap() {
@@ -82,6 +73,7 @@ public class ChatContext {
 
     /**
      * Checks whether a variable is set (has any value) or not.
+     *
      * @param variable the variable's name
      * @return whether it's set or not
      */
@@ -116,6 +108,9 @@ public class ChatContext {
      * Currently this just holds string value, but allows future extensibility.
      */
     public static class ChatVariableValue {
+
+        public static final int DEFAULT_LIFESPAN_TURNS = -1;
+
         @SerializedName("value")
         private String value;
         @SerializedName("lifespan_turns")
@@ -123,7 +118,7 @@ public class ChatContext {
 
         ChatVariableValue(final String value) {
             this.value = value;
-            this.lifespanTurns = -1;
+            this.lifespanTurns = DEFAULT_LIFESPAN_TURNS;
         }
 
         public void setValue(final String value) {

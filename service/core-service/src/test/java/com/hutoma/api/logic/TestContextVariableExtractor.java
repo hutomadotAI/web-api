@@ -1,30 +1,21 @@
 package com.hutoma.api.logic;
 
 import com.google.common.collect.ImmutableMap;
-import com.hutoma.api.connectors.BackendServerType;
-import com.hutoma.api.connectors.chat.ChatBackendConnector;
-import com.hutoma.api.containers.ApiChat;
-import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.ChatContext;
 import com.hutoma.api.containers.sub.ChatHandoverTarget;
 import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.containers.sub.ChatState;
-import com.hutoma.api.logging.ILogger;
-import com.hutoma.api.logic.chat.ChatEmbHandler;
 import com.hutoma.api.logic.chat.ContextVariableExtractor;
 import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.net.HttpURLConnection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
 import static com.hutoma.api.common.TestDataHelper.getSampleAI;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 public class TestContextVariableExtractor extends TestChatBase {
 
@@ -53,7 +44,7 @@ public class TestContextVariableExtractor extends TestChatBase {
      */
     @Test
     public void test_Replacement_No_Context_Map() {
-         ChatResult result = getChatResultWithVars("hello $name", null);
+        ChatResult result = getChatResultWithVars("hello $name", null);
 
         this.contextVariableExtractor.extractContextVariables(result);
 
@@ -104,7 +95,7 @@ public class TestContextVariableExtractor extends TestChatBase {
         ChatContext ctx = new ChatContext();
         if (vars != null) {
             for (Map.Entry<String, String> entry : vars.entrySet()) {
-                ctx.setValue(entry.getKey(), entry.getValue());
+                ctx.setValue(entry.getKey(), entry.getValue(), ChatContext.ChatVariableValue.DEFAULT_LIFESPAN_TURNS);
             }
         }
         result.setChatState(new ChatState(DateTime.now(), null, null, UUID.randomUUID(), new HashMap<>(), 0.5d,

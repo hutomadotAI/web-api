@@ -4,7 +4,6 @@ import com.hutoma.api.containers.sub.ChatContext;
 import com.hutoma.api.containers.sub.IntentConditionOperator;
 import com.hutoma.api.containers.sub.IntentVariableCondition;
 import com.hutoma.api.logic.chat.ConditionEvaluator;
-
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -299,14 +298,14 @@ public class TestConditionEvaluator {
         Assert.assertTrue(ev.evaluate(buildContext("var1", "90", "var2", "true", "var3", "any_value_really")).failed());
     }
 
-    private ChatContext buildContext(final String ... values) {
+    private ChatContext buildContext(final String... values) {
         if (values.length % 2 != 0) {
             throw new IllegalArgumentException("values need to be in pairs of key, value");
         }
 
         ChatContext ctx = new ChatContext();
         for (int i = 0; i < values.length; i = i + 2) {
-            ctx.setValue(values[i], values[i+1]);
+            ctx.setValue(values[i], values[i + 1], ChatContext.ChatVariableValue.DEFAULT_LIFESPAN_TURNS);
         }
         return ctx;
     }

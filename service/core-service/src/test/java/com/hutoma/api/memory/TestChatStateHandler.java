@@ -99,7 +99,7 @@ public class TestChatStateHandler {
         ChatState state = ChatState.getEmpty();
         MemoryIntent intent = new MemoryIntent("intent", AIID, chatId, Collections.emptyList());
         state.setCurrentIntents(Collections.singletonList(intent));
-        state.getChatContext().setValue("var1", "val1");
+        state.getChatContext().setValue("var1", "val1", ChatContext.ChatVariableValue.DEFAULT_LIFESPAN_TURNS);
         state.setBadAnswersCount(10);
         state.setChatTarget(ChatHandoverTarget.Human);
         state.setHistory("history");

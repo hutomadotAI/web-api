@@ -264,8 +264,8 @@ public class TestServiceChat extends ServiceTestBase {
         final String var2Value = "value2";
         UUID chatId = UUID.randomUUID();
         ChatContext context = new ChatContext();
-        context.setValue(var1Name, var1Value);
-        context.setValue(var2Name, var2Value);
+        context.setValue(var1Name, var1Value, ChatContext.ChatVariableValue.DEFAULT_LIFESPAN_TURNS);
+        context.setValue(var2Name, var2Value, ChatContext.ChatVariableValue.DEFAULT_LIFESPAN_TURNS);
 
         MemoryIntent mi = new MemoryIntent("intent1", AIID, chatId, Collections.emptyList(), false);
         List<MemoryIntent> intents = Collections.singletonList(mi);
@@ -300,8 +300,8 @@ public class TestServiceChat extends ServiceTestBase {
         final String var2Value = "value2";
         UUID chatId = UUID.randomUUID();
         ChatContext context = new ChatContext();
-        context.setValue(var1Name, var1Value);
-        context.setValue(var2Name, var2Value);
+        context.setValue(var1Name, var1Value, ChatContext.ChatVariableValue.DEFAULT_LIFESPAN_TURNS);
+        context.setValue(var2Name, var2Value, ChatContext.ChatVariableValue.DEFAULT_LIFESPAN_TURNS);
 
         MemoryIntent mi = new MemoryIntent("intent1", AIID, chatId, Collections.emptyList(), false);
         List<MemoryIntent> intents = Collections.singletonList(mi);

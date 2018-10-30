@@ -43,8 +43,8 @@ public class TestIntentProcessor {
         this.fakeContextVariableExtractor = mock(ContextVariableExtractor.class);
         this.fakeFeatureToggler = mock(FeatureToggler.class);
         this.intentProcessor = new IntentProcessor(this.fakeEntityRecognizer,
-            this.fakeIntentHandler, this.fakeWebHooks, this.fakeConditionalEvaluator, this.fakeContextVariableExtractor,
-            mock(ILogger.class), this.fakeFeatureToggler);
+                this.fakeIntentHandler, this.fakeWebHooks, this.fakeConditionalEvaluator, this.fakeContextVariableExtractor,
+                mock(ILogger.class), this.fakeFeatureToggler);
     }
 
     @Test
@@ -59,7 +59,7 @@ public class TestIntentProcessor {
         MemoryVariable memVar = new MemoryVariable(label, Collections.singletonList("val1"));
         memVar.setCurrentValue(memVar.getEntityKeys().get(0));
         MemoryIntent memoryIntent = new MemoryIntent("intent", TestDataHelper.AIID, chatId, Collections.singletonList(memVar),
-            true);
+                true);
         ApiIntent intent = new ApiIntent("name", "", "");
         intent.setResponses(Collections.singletonList(""));
         when(this.fakeIntentHandler.getIntent(any(), any())).thenReturn(intent);
@@ -234,13 +234,13 @@ public class TestIntentProcessor {
     }
 
     @Test
-    public void testIntentProcessor_variableCleared()  throws ChatLogic.IntentException, WebHooks.WebHookException {
+    public void testIntentProcessor_variableCleared() throws ChatLogic.IntentException, WebHooks.WebHookException {
         UUID chatId = UUID.randomUUID();
         final String responseTemplate = "response %s";
         final String label = "label1";
         final ChatContext context = new ChatContext();
         final String entityValue = "val1";
-        context.setValue(label, entityValue);
+        context.setValue(label, entityValue, ChatContext.ChatVariableValue.DEFAULT_LIFESPAN_TURNS);
         ChatState chatState = new ChatState(DateTime.now(),
                 null, null, UUID.randomUUID(), new HashMap<>(), 0.1d, ChatHandoverTarget.Ai,
                 getSampleAI(), context);
@@ -273,13 +273,13 @@ public class TestIntentProcessor {
     }
 
     @Test
-    public void testIntentProcessor_variableNotCleared()  throws ChatLogic.IntentException, WebHooks.WebHookException {
+    public void testIntentProcessor_variableNotCleared() throws ChatLogic.IntentException, WebHooks.WebHookException {
         UUID chatId = UUID.randomUUID();
         final String responseTemplate = "response %s";
         final String label = "label1";
         final ChatContext context = new ChatContext();
         final String entityValue = "val1";
-        context.setValue(label, entityValue);
+        context.setValue(label, entityValue, ChatContext.ChatVariableValue.DEFAULT_LIFESPAN_TURNS);
         ChatState chatState = new ChatState(DateTime.now(),
                 null, null, UUID.randomUUID(), new HashMap<>(), 0.1d, ChatHandoverTarget.Ai,
                 getSampleAI(), context);
