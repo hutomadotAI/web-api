@@ -442,6 +442,16 @@ public class IntentProcessor {
                 }
             }
 
+            // dump the candidate matches in the log
+            logger.logUserTraceEvent("IntentProcessor",
+                    "Found localEntityCandidateMatches",
+                    chatInfo.getDevId().toString(),
+                    LogMap.map("AIID", chatResult.getAiid())
+                            .put("DevId", chatInfo.getDevId())
+                            .put("ChatId", chatResult.getChatId())
+                            .put("Intent", intent.getIntentName())
+                            .put("candidate", localEntityCandidateMatches));
+
             ChatState chatState = chatResult.getChatState();
             // If there are any candidateValues remaining with only one possible match, use that one
             for (Map.Entry<String, List<String>> candidate : localEntityCandidateMatches.entrySet()) {
