@@ -158,7 +158,7 @@ public class TestIntentProcessor {
 
         List<Pair<String, String>> entities = new ArrayList<>();
         entities.add(new Pair<String, String>("none", "none"));
-        when(this.fakeEntityRecognizer.retrieveEntities(any(), any(), any())).thenReturn(entities);
+        when(this.fakeEntityRecognizer.retrieveEntities(any(), any())).thenReturn(entities);
 
         intent.setIntentOutConditionals(outConditionals);
         when(this.fakeIntentHandler.getIntent(any(), any())).thenReturn(intent);
@@ -210,7 +210,7 @@ public class TestIntentProcessor {
 
         List<Pair<String, String>> entities = new ArrayList<>();
         entities.add(new Pair<String, String>("label1", "label1"));
-        when(this.fakeEntityRecognizer.retrieveEntities(any(), any(), any())).thenReturn(entities);
+        when(this.fakeEntityRecognizer.retrieveEntities(any(), any())).thenReturn(entities);
         when(this.fakeFeatureToggler.getStateForAiid(any(), any(), any())).thenReturn(FeatureToggler.FeatureState.T1);
 
         intent.setIntentOutConditionals(outConditionals);
