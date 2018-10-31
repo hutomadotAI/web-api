@@ -1,6 +1,7 @@
 package com.hutoma.api.memory;
 
 import com.hutoma.api.common.SupportedLanguage;
+import com.hutoma.api.containers.sub.ChatRequestInfo;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.common.Pair;
 import com.hutoma.api.containers.sub.MemoryVariable;
@@ -35,8 +36,9 @@ public class SimpleEntityRecognizer implements IEntityRecognizer {
     /**
      * {@inheritDoc}
      */
-    public List<Pair<String, String>> retrieveEntities(final String chatLine, final SupportedLanguage language,
-            final List<MemoryVariable> entities) {
+    public List<Pair<String, String>> retrieveEntities(final ChatRequestInfo chatInfo,
+                                                       final List<MemoryVariable> entities) {
+        final String chatLine = chatInfo.getQuestion();
         final List<Pair<String, String>> vars = regexFindEntities(chatLine, entities);
         this.logger.logDebug(LOGFROM, String.format("Found %d entities", vars.size()));
         return vars;
