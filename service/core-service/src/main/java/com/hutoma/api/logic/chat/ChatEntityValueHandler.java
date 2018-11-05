@@ -53,6 +53,7 @@ public class ChatEntityValueHandler implements IChatHandler {
 
         LogMap logMap = LogMap.map("AIID", aiIdentity.getAiid().toString())
                 .put("DevID", aiIdentity.getDevId().toString())
+                .put("ChatId", currentResult.getChatId().toString())
                 .put("Language", aiIdentity.getLanguage())
                 .put("Version", aiIdentity.getServerVersion());
 
