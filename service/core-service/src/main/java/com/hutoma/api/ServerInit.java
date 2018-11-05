@@ -4,7 +4,6 @@ import com.hutoma.api.common.Config;
 import com.hutoma.api.connectors.db.DatabaseConnectionPool;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
-
 import org.fluentd.logger.FluentLogger;
 import org.glassfish.hk2.api.ServiceLocator;
 import org.glassfish.jersey.server.model.Invocable;
@@ -28,13 +27,14 @@ public class ServerInit implements ApplicationEventListener {
 
     /**
      * Application event handler.
+     *
      * @param applicationEvent the application event
      */
     @Override
     public void onEvent(final ApplicationEvent applicationEvent) {
         switch (applicationEvent.getType()) {
             case INITIALIZATION_FINISHED:
-                initialise(applicationEvent);
+                initialise();
                 break;
             case DESTROY_FINISHED:
                 FluentLogger.flushAll();
@@ -50,6 +50,7 @@ public class ServerInit implements ApplicationEventListener {
 
     /**
      * Request handler for intercepting all requests performed.
+     *
      * @param requestEvent the request event
      * @return the request event listener
      */
@@ -57,21 +58,24 @@ public class ServerInit implements ApplicationEventListener {
     public RequestEventListener onRequest(final RequestEvent requestEvent) {
         return new RequestEventListener() {
             private long startTime;
+            private long startNanoTime;
 
             @Override
             public void onEvent(final RequestEvent requestEvent) {
                 switch (requestEvent.getType()) {
                     case RESOURCE_METHOD_START:
                         this.startTime = System.currentTimeMillis();
+                        this.startNanoTime = System.nanoTime();
                         break;
                     case FINISHED:
                         // Only log if we have a method to handle it
                         if (requestEvent.getUriInfo().getMatchedResourceMethod() != null) {
                             final long finishTime = System.currentTimeMillis();
+                            final long durationNano = System.nanoTime() - this.startNanoTime;
                             Invocable invocable = requestEvent.getUriInfo().getMatchedResourceMethod().getInvocable();
                             LogMap logMap = LogMap.map("Start", this.startTime)
                                     .put("Finish", finishTime)
-                                    .put("Duration", finishTime - this.startTime)
+                                    .put("Duration", durationNano / 1000000.0)
                                     .put("Success", requestEvent.isSuccess())
                                     .put("Class", invocable.getDefinitionMethod().getDeclaringClass().getSimpleName())
                                     .put("Method", invocable.getDefinitionMethod().getName());
@@ -85,7 +89,7 @@ public class ServerInit implements ApplicationEventListener {
         };
     }
 
-    private void initialise(final ApplicationEvent applicationEvent) {
+    private void initialise() {
         this.logger = this.serviceLocator.getService(ILogger.class);
         Config config = this.serviceLocator.getService(Config.class);
         try {
