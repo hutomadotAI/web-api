@@ -732,6 +732,26 @@ public class IntentProcessor {
                         response.getFacebookNode().getContentType().name());
             }
 
+            // Now set the chat context variables based on the ones returned by the webhook
+            ChatContext ctx = chatResult.getChatState().getChatContext();
+            if (response.getChatContext() != null) {
+                for (Map.Entry<String, String> entry : response.getChatContext().getVariablesAsStringMap().entrySet()) {
+                    String varName = entry.getKey();
+                    if (ctx.isSet(varName)) {
+                        // If we get a null variable, this then needs to be cleared
+                        if (entry.getValue() == null) {
+                            ctx.clearVariable(varName);
+                        } else {
+                            // Update value
+                            ctx.setValue(varName, entry.getValue(), ctx.getVariable(varName).getLifespanTurns());
+                        }
+                    } else if (entry.getValue() != null) {
+                        // add a new value
+                        ctx.setValue(varName, entry.getValue(), ChatContext.ChatVariableValue.DEFAULT_LIFESPAN_TURNS);
+                    }
+                }
+            }
+
         } else {
             log.put("Webhook run", false);
         }

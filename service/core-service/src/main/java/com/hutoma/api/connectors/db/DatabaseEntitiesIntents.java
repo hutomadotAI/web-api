@@ -34,7 +34,7 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
 
     public List<Entity> getEntities(final UUID devid) throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("getEntities", 1).add(devid);
+            call.initialise("getEntities", 2).add(devid).add("");
             final ResultSet rs = call.executeQuery();
             try {
                 List<Entity> entities = new ArrayList<>();
@@ -73,16 +73,16 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
         try (DatabaseTransaction transaction = this.transactionProvider.get()) {
             try {
                 ApiEntity result = null;
-                ResultSet rs = transaction.getDatabaseCall().initialise("getEntityDetails", 2)
-                        .add(devid).add(entityName).executeQuery();
+                ResultSet rs = transaction.getDatabaseCall().initialise("getEntityDetails", 3)
+                        .add(devid).add(entityName).add("").executeQuery();
                 if (rs.next()) {
                     boolean isSystem = rs.getBoolean("isSystem");
                     EntityValueType valueType = EntityValueType.fromString(rs.getString("value_type"));
                     final ArrayList<String> entityValues = new ArrayList<>();
                     // only custom entities have values as system entities are handled externally
                     if (!isSystem) {
-                        ResultSet valuesRs = transaction.getDatabaseCall().initialise("getEntityValues", 2)
-                                .add(devid).add(entityName).executeQuery();
+                        ResultSet valuesRs = transaction.getDatabaseCall().initialise("getEntityValues", 3)
+                                .add(devid).add(entityName).add("").executeQuery();
                         while (valuesRs.next()) {
                             entityValues.add(valuesRs.getString("value"));
                         }
@@ -132,9 +132,10 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
     public int getEntityValuesCountForDevExcludingEntity(final UUID devId, final String entityName)
             throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("getEntityValuesCountForDevExcludingEntity", 2)
+            call.initialise("getEntityValuesCountForDevExcludingEntity", 3)
                     .add(devId)
-                    .add(entityName);
+                    .add(entityName)
+                    .add("");
             ResultSet rs = call.executeQuery();
             if (rs.next()) {
                 return rs.getInt("COUNT");
@@ -226,16 +227,17 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
         }
         try {
             // add or update the entity
-            transaction.getDatabaseCall().initialise("addUpdateEntity", 4)
+            transaction.getDatabaseCall().initialise("addUpdateEntity", 5)
                     .add(devid)
                     .add(entityOldName)
                     .add(entity.getEntityName())
                     .add(entity.getEntityValueType().name())
+                    .add("")
                     .executeUpdate();
 
             // read the entity's values
-            ResultSet valuesRs = transaction.getDatabaseCall().initialise("getEntityValues", 2)
-                    .add(devid).add(entity.getEntityName()).executeQuery();
+            ResultSet valuesRs = transaction.getDatabaseCall().initialise("getEntityValues", 3)
+                    .add(devid).add(entity.getEntityName()).add("").executeQuery();
 
             // put them into a set
             HashSet<String> currentValues = new HashSet<>();
@@ -245,15 +247,15 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
 
             // Delete all the old entity values.
             for (String obsoleteEntityValue : currentValues) {
-                transaction.getDatabaseCall().initialise("deleteEntityValue", 3)
-                        .add(devid).add(entity.getEntityName()).add(obsoleteEntityValue).executeUpdate();
+                transaction.getDatabaseCall().initialise("deleteEntityValue", 4)
+                        .add(devid).add(entity.getEntityName()).add(obsoleteEntityValue).add("").executeUpdate();
             }
 
             // Add all the new entity values.
             if (entity.getEntityValueList() != null) {
                 for (String entityValue : entity.getEntityValueList()) {
-                        transaction.getDatabaseCall().initialise("addEntityValue", 3)
-                                .add(devid).add(entity.getEntityName()).add(entityValue).executeUpdate();
+                        transaction.getDatabaseCall().initialise("addEntityValue", 4)
+                                .add(devid).add(entity.getEntityName()).add(entityValue).add("").executeUpdate();
                     }
             }
 
@@ -268,7 +270,7 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
         try (DatabaseCall call = this.callProvider.get()) {
             ResultSet rs;
             try {
-                call.initialise("getEntityIdForDev", 2).add(devid).add(entityName);
+                call.initialise("getEntityIdForDev", 3).add(devid).add(entityName).add("");
                 rs = call.executeQuery();
                 OptionalInt entityId = OptionalInt.empty();
                 if (rs.next()) {

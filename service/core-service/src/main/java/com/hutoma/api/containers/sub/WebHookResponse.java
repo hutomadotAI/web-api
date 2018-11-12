@@ -14,7 +14,10 @@ public class WebHookResponse {
     @SerializedName("facebook")
     private FacebookMessageNode facebookNode;
 
-    public WebHookResponse(String text) {
+    @SerializedName("context")
+    private ChatContext chatContext;
+
+    public WebHookResponse(final String text) {
         this.text = text;
     }
 
@@ -28,5 +31,13 @@ public class WebHookResponse {
 
     public void setFacebookNode(final FacebookMessageNode facebookNode) {
         this.facebookNode = facebookNode;
+    }
+
+    public void setChatContext(final ChatContext chatContext) {
+        this.chatContext = chatContext;
+    }
+
+    public ChatContext getChatContext() {
+        return this.chatContext;
     }
 }

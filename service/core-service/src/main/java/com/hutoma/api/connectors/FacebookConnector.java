@@ -3,29 +3,20 @@ package com.hutoma.api.connectors;
 import com.google.gson.JsonParseException;
 import com.google.gson.annotations.SerializedName;
 import com.hutoma.api.common.Config;
-import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.containers.facebook.FacebookConnect;
-import com.hutoma.api.containers.facebook.FacebookMachineID;
-import com.hutoma.api.containers.facebook.FacebookMessageNode;
-import com.hutoma.api.containers.facebook.FacebookMessengerProfile;
-import com.hutoma.api.containers.facebook.FacebookNode;
-import com.hutoma.api.containers.facebook.FacebookNodeList;
-import com.hutoma.api.containers.facebook.FacebookQuickReply;
-import com.hutoma.api.containers.facebook.FacebookResponseSegment;
-import com.hutoma.api.containers.facebook.FacebookToken;
-
+import com.hutoma.api.containers.facebook.*;
+import com.hutoma.api.logging.ILogger;
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.client.JerseyInvocation;
 import org.glassfish.jersey.client.JerseyWebTarget;
 
-import java.net.HttpURLConnection;
-import java.util.List;
-import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
+import java.net.HttpURLConnection;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.glassfish.jersey.client.ClientProperties.CONNECT_TIMEOUT;
 import static org.glassfish.jersey.client.ClientProperties.READ_TIMEOUT;
@@ -158,7 +149,7 @@ public class FacebookConnector {
         JerseyWebTarget target = getGraphApiTarget()
                 .path("me")
                 .path("accounts")
-                .queryParam("fields", "id,name,perms,access_token")
+                .queryParam("fields", "id,name,access_token")
                 .queryParam("access_token", accessToken);
         String body = webCall(target, RequestMethod.GET, this.config.getFacebookGraphAPITimeout());
         return (FacebookNodeList) this.jsonSerializer.deserialize(body, FacebookNodeList.class);
@@ -282,6 +273,7 @@ public class FacebookConnector {
         JerseyWebTarget target = getGraphApiTarget()
                 .path(pageId)
                 .path("subscribed_apps")
+                .queryParam("subscribed_fields", "messages,messaging_optins,messaging_postbacks")
                 .queryParam("access_token", pageAccessToken);
         webCall(target, requestMethod, this.config.getFacebookGraphAPITimeout());
     }
@@ -293,7 +285,7 @@ public class FacebookConnector {
     private JerseyWebTarget getGraphApiTarget() {
         return this.jerseyClient
                 .target("https://graph.facebook.com")
-                .path("v2.9");
+                .path("v3.2");
     }
 
     /***
