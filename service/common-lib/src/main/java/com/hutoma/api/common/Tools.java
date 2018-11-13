@@ -9,11 +9,7 @@ import java.security.SecureRandom;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Created by David MG on 02/08/2016.
@@ -54,7 +50,7 @@ public class Tools {
                 ByteBuffer bb = ByteBuffer.wrap(new byte[16]);
                 bb.putLong(uuid.getMostSignificantBits());
                 bb.putLong(uuid.getLeastSignificantBits());
-                MessageDigest shaDigest = MessageDigest.getInstance("SHA-1");
+                MessageDigest shaDigest = MessageDigest.getInstance("SHA-256");
                 byte[] resultArray = shaDigest.digest(bb.array());
                 result = Hex.encodeHexString(resultArray);
             } catch (NoSuchAlgorithmException ex) {

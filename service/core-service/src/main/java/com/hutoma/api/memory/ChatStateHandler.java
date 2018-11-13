@@ -1,6 +1,7 @@
 package com.hutoma.api.memory;
 
 import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.db.DatabaseAI;
 import com.hutoma.api.containers.sub.ChatHandoverTarget;
 import com.hutoma.api.containers.sub.ChatState;
@@ -22,12 +23,17 @@ public class ChatStateHandler {
     private final DatabaseAI databaseAi;
     private final ILogger logger;
     private final JsonSerializer jsonSerializer;
+    private final Tools tools;
 
     @Inject
-    ChatStateHandler(final DatabaseAI databaseAi, final ILogger logger, final JsonSerializer jsonSerializer) {
+    ChatStateHandler(final DatabaseAI databaseAi,
+                     final ILogger logger,
+                     final JsonSerializer jsonSerializer,
+                     final Tools tools) {
         this.databaseAi = databaseAi;
         this.logger = logger;
         this.jsonSerializer = jsonSerializer;
+        this.tools = tools;
     }
 
     public ChatState getState(final UUID devId,
@@ -46,7 +52,28 @@ public class ChatStateHandler {
         } catch (Exception ex) {
             this.logger.logUserExceptionEvent(LOGFROM, ex.getMessage(), devId.toString(), ex);
         }
-        return state == null ? ChatState.getEmpty() : state;
+        if (state == null) {
+            state = ChatState.getEmpty();
+        }
+        if (state.getHashedChatId() == null) {
+            state.setHashedChatId(Tools.getHashedDigestFromUuid(chatId));
+        }
+
+        return state;
+    }
+
+    public ChatState getState(final String chatIdHash) throws ChatStateException {
+        ChatState state = null;
+        try {
+            state = this.databaseAi.getChatStateFromHash(chatIdHash, jsonSerializer);
+            if (state != null) {
+                // remove any expired webhook sessions
+                state.getWebhookSessions().removeIf(w -> w.getExpiryTimestamp() >= System.currentTimeMillis());
+            }
+        } catch (Exception ex) {
+            this.logger.logException(LOGFROM, ex);
+        }
+        return state;
     }
 
     public void saveState(final UUID devId, final UUID aiid, final UUID chatId, final ChatState chatState)

@@ -3,7 +3,6 @@ package com.hutoma.api.containers.sub;
 import com.google.gson.annotations.SerializedName;
 import com.hutoma.api.connectors.chat.AIChatServices;
 import com.hutoma.api.containers.ApiAi;
-
 import org.joda.time.DateTime;
 
 import java.util.*;
@@ -48,6 +47,10 @@ public class ChatState {
     private boolean restartChatWorkflow;
     @SerializedName("in_intent_loop")
     private boolean inIntentLoop;
+    @SerializedName("webhook_sessions")
+    private List<WebHookSession> webhookSessions = new ArrayList<>();
+    @SerializedName("integration_data")
+    private IntegrationData integrationData;
 
     // ChatServices service
     private transient AIChatServices aiChatServices;
@@ -55,6 +58,12 @@ public class ChatState {
     // We want to carry this structure around for convenience for the handlers (and avoid
     // having to re-load this from DB multiple times)
     private transient ApiAi ai;
+
+    // Store the DevId for operations where this is not provided explicitly
+    private transient UUID devId;
+
+    private transient UUID chatId;
+    private transient String hashedChatId;
 
     // Keep the potential entity values in memory for this loop
     private transient Map<String, List<String>> candidateValues;
@@ -225,5 +234,45 @@ public class ChatState {
 
     public void setInIntentLoop(final boolean inIntentLoop) {
         this.inIntentLoop = inIntentLoop;
+    }
+
+    public List<WebHookSession> getWebhookSessions() {
+        return this.webhookSessions;
+    }
+
+    public void setWebhookSessions(final List<WebHookSession> webhookSessions) {
+        this.webhookSessions = webhookSessions;
+    }
+
+    public void setIntegrationData(final IntegrationData integrationData) {
+        this.integrationData = integrationData;
+    }
+
+    public IntegrationData getIntegrationData() {
+        return this.integrationData;
+    }
+
+    public UUID getDevId() {
+        return this.devId;
+    }
+
+    public void setDevId(final UUID devId) {
+        this.devId = devId;
+    }
+
+    public String getHashedChatId() {
+        return this.hashedChatId;
+    }
+
+    public void setChatId(final UUID chatId) {
+        this.chatId = chatId;
+    }
+
+    public UUID getChatId() {
+        return this.chatId;
+    }
+
+    public void setHashedChatId(final String hashedChatId) {
+        this.hashedChatId = hashedChatId;
     }
 }

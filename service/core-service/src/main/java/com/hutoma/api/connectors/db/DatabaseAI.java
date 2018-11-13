@@ -772,6 +772,28 @@ public class DatabaseAI extends Database {
         }
     }
 
+    public ChatState getChatStateFromHash(final String chatIdHash,
+                                          final JsonSerializer jsonSerializer)
+            throws DatabaseException {
+        try (DatabaseTransaction transaction = this.transactionProvider.get()) {
+            try (DatabaseCall call = transaction.getDatabaseCall()) {
+                call.initialise("getChatStateFromHash", 1)
+                        .add(chatIdHash);
+                ResultSet rs = call.executeQuery();
+                if (rs.next()) {
+                    UUID devId = UUID.fromString(rs.getString("dev_id"));
+                    UUID aiid = UUID.fromString(rs.getString("base_aiid"));
+                    ApiAi ai = this.getAI(devId, aiid, jsonSerializer, transaction);
+                    return getChatStateFromResultset(rs, devId, ai, jsonSerializer);
+                } else {
+                    return null;
+                }
+            }
+        } catch (Throwable ex) {
+            throw new DatabaseException(ex);
+        }
+    }
+
     @SuppressWarnings("unchecked")
     public ChatState getChatState(final UUID devId,
                                   final UUID aiid,
@@ -789,46 +811,10 @@ public class DatabaseAI extends Database {
                         .add(chatId);
                 ResultSet rs = call.executeQuery();
                 if (rs.next()) {
-                    String lockedAiid = rs.getString("locked_aiid");
-                    String entitiesJson = rs.getString("entity_values");
-                    HashMap<String, String> entities = (entitiesJson == null)
-                            ? new HashMap<>()
-                            : (HashMap<String, String>) jsonSerializer.deserialize(entitiesJson, HashMap.class);
-                    double confidenceThreshold = rs.getDouble("confidence_threshold");
-                    if (rs.wasNull()) {
-                        confidenceThreshold = ai.getConfidence();
-                    }
-                    String contextJson = rs.getString("context");
-                    ChatContext context = StringUtils.isEmpty(contextJson)
-                            ? new ChatContext()
-                            : (ChatContext) jsonSerializer.deserialize(contextJson, ChatContext.class);
-                    ChatState chatState = new ChatState(
-                            new DateTime(rs.getTimestamp("timestamp")),
-                            rs.getString("topic"),
-                            rs.getString("history"),
-                            lockedAiid != null ? UUID.fromString(lockedAiid) : null,
-                            entities,
-                            confidenceThreshold,
-                            ChatHandoverTarget.fromInt(rs.getInt("chat_target")),
-                            ai,
-                            context
-                    );
-                    String intentsJson = rs.getString("current_intents");
-                    Type memoryIntentListType = new TypeToken<List<MemoryIntent>>() {
-                    }.getType();
-                    List<MemoryIntent> currentIntents = StringUtils.isEmpty(intentsJson)
-                            ? new ArrayList<>()
-                            : jsonSerializer.deserializeList(intentsJson, memoryIntentListType);
-                    chatState.setCurrentIntents(currentIntents);
-                    chatState.setBadAnswersCount(rs.getInt("bad_answers_count"));
-                    Timestamp resetTimestamp = rs.getTimestamp("handover_reset");
-                    chatState.setHandoverResetTime(resetTimestamp == null ? null : new DateTime(resetTimestamp));
-                    return chatState;
+                    return getChatStateFromResultset(rs, devId, ai, jsonSerializer);
+                } else {
+                    return getEmptyChatState(devId, ai);
                 }
-                ChatState chatState = ChatState.getEmpty();
-                chatState.setAi(ai);
-                chatState.setConfidenceThreshold(ai.getConfidence());
-                return chatState;
             }
         } catch (Throwable ex) {
             throw new DatabaseException(ex);
@@ -842,9 +828,10 @@ public class DatabaseAI extends Database {
             throws DatabaseException {
         try (DatabaseCall call = this.callProvider.get()) {
             String lockedAiid = (chatState.getLockedAiid() != null) ? chatState.getLockedAiid().toString() : null;
-            call.initialise("setChatState", 13)
+            call.initialise("setChatState", 16)
                     .add(devId)
                     .add(chatId)
+                    .add(chatState.getHashedChatId())
                     .add(chatState.getAi().getAiid())
                     .add(limitSize(chatState.getTopic(), 250))
                     .add(limitSize(chatState.getHistory(), 1024))
@@ -856,9 +843,77 @@ public class DatabaseAI extends Database {
                             ? null : new Timestamp(chatState.getResetHandoverTime().getMillis()))
                     .add(chatState.getBadAnswersCount())
                     .add(jsonSerializer.serialize(chatState.getChatContext()))
-                    .add(Database.getNullIfEmpty(chatState.getCurrentIntents(), jsonSerializer::serialize));
+                    .add(Database.getNullIfEmpty(chatState.getCurrentIntents(), jsonSerializer::serialize))
+                    .add(jsonSerializer.serialize(chatState.getWebhookSessions()))
+                    .add(chatState.getIntegrationData() == null
+                            ? null : jsonSerializer.serialize(chatState.getIntegrationData()));
             return call.executeUpdate() > 0;
         }
+    }
+
+    private static ChatState getChatStateFromResultset(final ResultSet rs,
+                                                       final UUID devId,
+                                                       final ApiAi ai,
+                                                       final JsonSerializer jsonSerializer)
+            throws SQLException {
+        String lockedAiid = rs.getString("locked_aiid");
+        String entitiesJson = rs.getString("entity_values");
+        HashMap<String, String> entities = (entitiesJson == null)
+                ? new HashMap<>()
+                : (HashMap<String, String>) jsonSerializer.deserialize(entitiesJson, HashMap.class);
+        double confidenceThreshold = rs.getDouble("confidence_threshold");
+        if (rs.wasNull()) {
+            confidenceThreshold = ai.getConfidence();
+        }
+        String contextJson = rs.getString("context");
+        ChatContext context = StringUtils.isEmpty(contextJson)
+                ? new ChatContext()
+                : (ChatContext) jsonSerializer.deserialize(contextJson, ChatContext.class);
+        ChatState chatState = new ChatState(
+                new DateTime(rs.getTimestamp("timestamp")),
+                rs.getString("topic"),
+                rs.getString("history"),
+                lockedAiid != null ? UUID.fromString(lockedAiid) : null,
+                entities,
+                confidenceThreshold,
+                ChatHandoverTarget.fromInt(rs.getInt("chat_target")),
+                ai,
+                context
+        );
+        String intentsJson = rs.getString("current_intents");
+        Type memoryIntentListType = new TypeToken<List<MemoryIntent>>() {
+        }.getType();
+        List<MemoryIntent> currentIntents = StringUtils.isEmpty(intentsJson)
+                ? new ArrayList<>()
+                : jsonSerializer.deserializeList(intentsJson, memoryIntentListType);
+        chatState.setCurrentIntents(currentIntents);
+        chatState.setBadAnswersCount(rs.getInt("bad_answers_count"));
+        Timestamp resetTimestamp = rs.getTimestamp("handover_reset");
+        chatState.setHandoverResetTime(resetTimestamp == null ? null : new DateTime(resetTimestamp));
+        String webhookSessionsJson = rs.getString("webhook_sessions");
+        Type webhookSessionsListType = new TypeToken<List<WebHookSession>>() {
+        }.getType();
+        List<WebHookSession> webhookSessions = StringUtils.isEmpty(webhookSessionsJson)
+                ? new ArrayList<>()
+                : jsonSerializer.deserializeList(webhookSessionsJson, webhookSessionsListType);
+        chatState.setWebhookSessions(webhookSessions);
+        chatState.setDevId(devId);
+        chatState.setHashedChatId(rs.getString("chat_id_hash"));
+        String integrationDataJson = rs.getString("integration_data");
+        if (StringUtils.isNotEmpty(integrationDataJson)) {
+            chatState.setIntegrationData(
+                    (IntegrationData) jsonSerializer.deserialize(integrationDataJson, IntegrationData.class));
+        }
+        chatState.setChatId(UUID.fromString(rs.getString("chat_id")));
+        return chatState;
+    }
+
+    private ChatState getEmptyChatState(final UUID devId, final ApiAi ai) {
+        ChatState chatState = ChatState.getEmpty();
+        chatState.setAi(ai);
+        chatState.setDevId(devId);
+        chatState.setConfidenceThreshold(ai.getConfidence());
+        return chatState;
     }
 
     private static ApiAi getAiFromResultset(final ResultSet rs,

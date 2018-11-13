@@ -34,7 +34,7 @@ public class TestTools {
     @Test
     public void testCreateHashFromUuid() {
         final UUID uuid = UUID.fromString("9d5ff3ae-1a7f-4167-8347-5d3618426096");
-        Assert.assertEquals("176bcde163edeeabec36d444453c7efba98923ef", Tools.getHashedDigestFromUuid(uuid));
+        Assert.assertEquals("51399677cc24d3c07813a64de012808c58ca8413fd1c930b527e89372770e21a", Tools.getHashedDigestFromUuid(uuid));
     }
 
     @Test

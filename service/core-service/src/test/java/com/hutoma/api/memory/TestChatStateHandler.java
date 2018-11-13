@@ -1,6 +1,7 @@
 package com.hutoma.api.memory;
 
 import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.db.DatabaseAI;
 import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.sub.ChatContext;
@@ -29,6 +30,7 @@ public class TestChatStateHandler {
     private ILogger fakeLogger;
     private ChatStateHandler chatStateHandler;
     private JsonSerializer fakeJsonSerializer;
+    private Tools fakeTools;
 
     private static void assertChatStateEquals(final ChatState expected, final ChatState actual) {
         Assert.assertEquals(expected.getLockedAiid(), actual.getLockedAiid());
@@ -40,7 +42,8 @@ public class TestChatStateHandler {
     public void setup() {
         this.fakeDatabaseAi = mock(DatabaseAI.class);
         this.fakeLogger = mock(ILogger.class);
-        this.chatStateHandler = new ChatStateHandler(fakeDatabaseAi, fakeLogger, fakeJsonSerializer);
+        this.fakeTools = mock(Tools.class);
+        this.chatStateHandler = new ChatStateHandler(fakeDatabaseAi, fakeLogger, fakeJsonSerializer, fakeTools);
     }
 
     @Test
