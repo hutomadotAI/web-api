@@ -14,25 +14,17 @@ import com.webcohesion.enunciate.metadata.rs.RequestHeader;
 import com.webcohesion.enunciate.metadata.rs.RequestHeaders;
 import com.webcohesion.enunciate.metadata.rs.ResponseCode;
 import com.webcohesion.enunciate.metadata.rs.StatusCodes;
-
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
-import java.io.InputStream;
-import java.net.HttpURLConnection;
 import javax.inject.Inject;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
 
 /**
  * AI Training endpoints.
@@ -53,7 +45,7 @@ public class TrainingEndpoint {
     @POST
     @Path("/{aiid}/training")
     @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
-    @ValidateParameters({APIParameter.AIID, APIParameter.TrainingSourceType})
+    @ValidateParameters({APIParameter.DevID, APIParameter.AIID, APIParameter.TrainingSourceType})
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @StatusCodes({
@@ -84,7 +76,7 @@ public class TrainingEndpoint {
     @PUT
     @Path("/{aiid}/training/start")
     @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
-    @ValidateParameters({APIParameter.AIID})
+    @ValidateParameters({APIParameter.DevID, APIParameter.AIID})
     @Produces(MediaType.APPLICATION_JSON)
     @StatusCodes({
             @ResponseCode(code = HttpURLConnection.HTTP_OK, condition = "Succeeded."),
@@ -108,7 +100,7 @@ public class TrainingEndpoint {
     @PUT
     @Path("/{aiid}/training/stop")
     @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
-    @ValidateParameters({APIParameter.AIID})
+    @ValidateParameters({APIParameter.DevID, APIParameter.AIID})
     @Produces(MediaType.APPLICATION_JSON)
     @StatusCodes({
             @ResponseCode(code = HttpURLConnection.HTTP_OK, condition = "Succeeded."),
@@ -130,7 +122,7 @@ public class TrainingEndpoint {
     @PUT
     @Path("/{aiid}/training/update")
     @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
-    @ValidateParameters({APIParameter.AIID})
+    @ValidateParameters({APIParameter.DevID, APIParameter.AIID})
     @Produces(MediaType.APPLICATION_JSON)
     @StatusCodes({
             @ResponseCode(code = HttpURLConnection.HTTP_OK, condition = "Succeeded."),
@@ -153,7 +145,7 @@ public class TrainingEndpoint {
     @GET
     @Path("/{aiid}/training/materials")
     @Secured({Role.ROLE_ADMIN, Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
-    @ValidateParameters({APIParameter.AIID})
+    @ValidateParameters({APIParameter.DevID, APIParameter.AIID})
     @Produces(MediaType.APPLICATION_JSON)
     @StatusCodes({
             @ResponseCode(code = HttpURLConnection.HTTP_OK, condition = "Succeeded."),

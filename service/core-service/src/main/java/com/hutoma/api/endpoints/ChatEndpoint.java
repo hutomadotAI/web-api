@@ -12,16 +12,8 @@ import com.hutoma.api.validation.APIParameter;
 import com.hutoma.api.validation.ParameterFilter;
 import com.hutoma.api.validation.ValidateParameters;
 import com.hutoma.api.validation.ValidatePost;
-import com.sun.research.ws.wadl.Param;
-import com.webcohesion.enunciate.metadata.rs.RequestHeader;
-import com.webcohesion.enunciate.metadata.rs.RequestHeaders;
-import com.webcohesion.enunciate.metadata.rs.ResourceMethodSignature;
-import com.webcohesion.enunciate.metadata.rs.ResponseCode;
-import com.webcohesion.enunciate.metadata.rs.StatusCodes;
-import com.webcohesion.enunciate.metadata.rs.TypeHint;
+import com.webcohesion.enunciate.metadata.rs.*;
 
-import java.net.HttpURLConnection;
-import java.util.Map;
 import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.container.ContainerRequestContext;
@@ -29,6 +21,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+import java.net.HttpURLConnection;
+import java.util.Map;
 
 /**
  * AI Chat endpoint.
@@ -48,7 +42,7 @@ public class ChatEndpoint {
     @GET
     @Path("{aiid}/chat")
     @RateLimit(RateKey.Chat)
-    @ValidateParameters({APIParameter.AIID, APIParameter.ChatID, APIParameter.ChatQuestion})
+    @ValidateParameters({APIParameter.DevID, APIParameter.AIID, APIParameter.ChatID, APIParameter.ChatQuestion})
     @Secured({Role.ROLE_CLIENTONLY, Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3,
             Role.ROLE_PLAN_4})
     @Produces(MediaType.APPLICATION_JSON)
@@ -99,8 +93,7 @@ public class ChatEndpoint {
     @ResourceMethodSignature(
             queryParams = {@QueryParam("chatId"), @QueryParam("target")}
     )
-    public
-    Response handOverChat(
+    public Response handOverChat(
             @Context ContainerRequestContext requestContext) {
         ApiResult result = this.chatLogic.handOver(
                 ParameterFilter.getAiid(requestContext),
@@ -128,8 +121,7 @@ public class ChatEndpoint {
             queryParams = {@QueryParam("chatId")}
     )
     @ValidatePost({APIParameter.ContextVariables})
-    public
-    Response setVariable(
+    public Response setVariable(
             @Context ContainerRequestContext requestContext) {
         ApiResult result = this.chatLogic.setContextVariable(
                 ParameterFilter.getAiid(requestContext),
@@ -186,8 +178,7 @@ public class ChatEndpoint {
             queryParams = {@QueryParam("chatId")}
     )
     @Produces(MediaType.APPLICATION_JSON)
-    public
-    Response resetChat(
+    public Response resetChat(
             @Context ContainerRequestContext requestContext) {
         ApiResult result = this.chatLogic.resetChat(
                 ParameterFilter.getAiid(requestContext),
@@ -199,7 +190,7 @@ public class ChatEndpoint {
     @GET
     @Path("load/{aiid}/chat")
     @RateLimit(RateKey.LoadTest)
-    @ValidateParameters({APIParameter.AIID, APIParameter.ChatID, APIParameter.ChatQuestion})
+    @ValidateParameters({APIParameter.DevID, APIParameter.AIID, APIParameter.ChatID, APIParameter.ChatQuestion})
     @Secured({Role.ROLE_TEST})
     @Produces(MediaType.APPLICATION_JSON)
     public Response chatLoadTest(

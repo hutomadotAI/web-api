@@ -106,7 +106,7 @@ public class UIEndpoint {
     @GET
     @Path("ai/{aiid}/details")
     @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
-    @ValidateParameters({APIParameter.AIID})
+    @ValidateParameters({APIParameter.DevID, APIParameter.AIID})
     @Produces(MediaType.APPLICATION_JSON)
     @StatusCodes({@ResponseCode(code = HttpURLConnection.HTTP_OK, condition = "Succeeded."),
             @ResponseCode(code = HttpURLConnection.HTTP_NOT_FOUND, condition = "Bot not found"),
@@ -131,7 +131,7 @@ public class UIEndpoint {
     @GET
     @RateLimit(RateKey.PollStatus)
     @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
-    @ValidateParameters({APIParameter.AIID})
+    @ValidateParameters({APIParameter.DevID, APIParameter.AIID})
     @Produces(MediaType.APPLICATION_JSON)
     @TypeHint(ApiAiWithConfig.class)
     public Response getSingleAIPoll(

@@ -94,7 +94,7 @@ public class AIEndpoint {
     @Path("{aiid}")
     @POST
     @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
-    @ValidateParameters({APIParameter.AIID})
+    @ValidateParameters({APIParameter.DevID, APIParameter.AIID})
     @ValidatePost({APIParameter.AIDescription, APIParameter.AiConfidence, APIParameter.Timezone,
             APIParameter.Locale, APIParameter.DefaultChatResponses})
     @Produces(MediaType.APPLICATION_JSON)
@@ -132,7 +132,7 @@ public class AIEndpoint {
     @Path("{aiid}/config")
     @PUT
     @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
-    @ValidateParameters({APIParameter.AIID})
+    @ValidateParameters({APIParameter.DevID, APIParameter.AIID})
     @ValidatePost()
     @Produces(MediaType.APPLICATION_JSON)
     @StatusCodes({
@@ -161,7 +161,7 @@ public class AIEndpoint {
     @Path("{aiid}/regenerate_webhook_secret")
     @POST
     @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
-    @ValidateParameters({APIParameter.AIID})
+    @ValidateParameters({APIParameter.DevID, APIParameter.AIID})
     @ValidatePost()
     @Produces(MediaType.APPLICATION_JSON)
     public Response regenerateWebhookSecret(
@@ -180,7 +180,7 @@ public class AIEndpoint {
      */
     @GET
     @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
-    @ValidateParameters({APIParameter.DevID}) // Although this is always checked need to add it to trigger the filter
+    @ValidateParameters({APIParameter.DevID})
     @Produces(MediaType.APPLICATION_JSON)
     @TypeHint(ApiAiList.class)
     public Response getAIs(
@@ -199,7 +199,7 @@ public class AIEndpoint {
     @Path("{aiid}")
     @GET
     @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
-    @ValidateParameters({APIParameter.AIID})
+    @ValidateParameters({APIParameter.DevID, APIParameter.AIID})
     @Produces(MediaType.APPLICATION_JSON)
     @TypeHint(ApiAiWithConfig.class)
     public Response getSingleAI(
@@ -219,7 +219,7 @@ public class AIEndpoint {
     @Path("{aiid}")
     @DELETE
     @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
-    @ValidateParameters({APIParameter.AIID})
+    @ValidateParameters({APIParameter.DevID, APIParameter.AIID})
     @Produces(MediaType.APPLICATION_JSON)
     public Response deleteAI(
             @Context ContainerRequestContext requestContext) {
@@ -232,7 +232,7 @@ public class AIEndpoint {
     @Path("{aiid}/export")
     @GET
     @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
-    @ValidateParameters({APIParameter.AIID})
+    @ValidateParameters({APIParameter.DevID, APIParameter.AIID})
     @Produces(MediaType.APPLICATION_JSON)
     public Response exportAI(
             @Context ContainerRequestContext requestContext) {
@@ -312,7 +312,7 @@ public class AIEndpoint {
     @Path("{aiid}/bots")
     @GET
     @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
-    @ValidateParameters({APIParameter.AIID})
+    @ValidateParameters({APIParameter.DevID, APIParameter.AIID})
     @Produces(MediaType.APPLICATION_JSON)
     @StatusCodes({
             @ResponseCode(code = HttpURLConnection.HTTP_OK, condition = "Succeeded."),
@@ -341,7 +341,7 @@ public class AIEndpoint {
     @Path("{aiid}/bots")
     @POST
     @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
-    @ValidateParameters({APIParameter.AIID, APIParameter.BotIdList})
+    @ValidateParameters({APIParameter.DevID, APIParameter.AIID, APIParameter.BotIdList})
     @Produces(MediaType.APPLICATION_JSON)
     @StatusCodes({
             @ResponseCode(code = HttpURLConnection.HTTP_OK, condition = "Succeeded."),
@@ -373,7 +373,7 @@ public class AIEndpoint {
     @Path("{aiid}/bot/{botId}")
     @GET
     @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
-    @ValidateParameters({APIParameter.AIID})
+    @ValidateParameters({APIParameter.DevID, APIParameter.AIID})
     @Produces(MediaType.APPLICATION_JSON)
     @StatusCodes({
             @ResponseCode(code = HttpURLConnection.HTTP_OK, condition = "Succeeded."),
@@ -404,7 +404,7 @@ public class AIEndpoint {
     @Path("{aiid}/bot/{botId}/config")
     @PUT
     @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
-    @ValidateParameters({APIParameter.AIID})
+    @ValidateParameters({APIParameter.DevID, APIParameter.AIID})
     @ValidatePost()
     @Produces(MediaType.APPLICATION_JSON)
     @StatusCodes({
@@ -437,7 +437,7 @@ public class AIEndpoint {
     @Path("{aiid}/bot/{botId}")
     @POST
     @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
-    @ValidateParameters({APIParameter.AIID})
+    @ValidateParameters({APIParameter.DevID, APIParameter.AIID})
     @Produces(MediaType.APPLICATION_JSON)
     @StatusCodes({
             @ResponseCode(code = HttpURLConnection.HTTP_OK, condition = "Succeeded."),
@@ -472,7 +472,7 @@ public class AIEndpoint {
     @Path("{aiid}/bot/{botId}")
     @DELETE
     @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
-    @ValidateParameters({APIParameter.AIID})
+    @ValidateParameters({APIParameter.DevID, APIParameter.AIID})
     @Produces(MediaType.APPLICATION_JSON)
     @StatusCodes({
             @ResponseCode(code = HttpURLConnection.HTTP_OK, condition = "Succeeded."),
@@ -505,7 +505,7 @@ public class AIEndpoint {
     @Path("{aiid}/bot")
     @GET
     @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
-    @ValidateParameters({APIParameter.AIID})
+    @ValidateParameters({APIParameter.DevID, APIParameter.AIID})
     @Produces(MediaType.APPLICATION_JSON)
     @StatusCodes({
             @ResponseCode(code = HttpURLConnection.HTTP_OK, condition = "Succeeded."),

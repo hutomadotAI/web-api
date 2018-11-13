@@ -7,11 +7,6 @@ import com.hutoma.api.containers.sub.ChatHandoverTarget;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
 
-import java.io.IOException;
-import java.lang.reflect.AnnotatedElement;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 import javax.annotation.Priority;
 import javax.inject.Inject;
 import javax.ws.rs.Priorities;
@@ -21,6 +16,11 @@ import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.Provider;
+import java.io.IOException;
+import java.lang.reflect.AnnotatedElement;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 @ValidateParameters
 @Provider
@@ -52,9 +52,10 @@ public class QueryFilter extends ParameterFilter implements ContainerRequestFilt
             // parameters in url query
             final MultivaluedMap<String, String> queryParameters = requestContext.getUriInfo().getQueryParameters();
 
-            // developer ID is always validated
-            requestContext.setProperty(APIParameter.DevID.toString(),
-                    validateAlphaNumPlusDashes(DEVID, requestContext.getHeaderString(DEVID)));
+            if (checkList.contains(APIParameter.DevID)) {
+                requestContext.setProperty(APIParameter.DevID.toString(),
+                        validateAlphaNumPlusDashes(DEVID, requestContext.getHeaderString(DEVID)));
+            }
 
             // extract each parameter as necessary,
             // validate and put the result into a property in the requestcontext
@@ -85,8 +86,8 @@ public class QueryFilter extends ParameterFilter implements ContainerRequestFilt
             }
             if (checkList.contains(APIParameter.ChatQuestion)) {
                 requestContext.setProperty(APIParameter.ChatQuestion.toString(),
-                                        validateChatQuestion(
-                                                getFirst(queryParameters.get(CHATQUESTION))));
+                        validateChatQuestion(
+                                getFirst(queryParameters.get(CHATQUESTION))));
             }
             if (checkList.contains(APIParameter.AIName)) {
                 requestContext.setProperty(APIParameter.AIName.toString(),
