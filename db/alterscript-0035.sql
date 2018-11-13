@@ -1,5 +1,7 @@
 USE `hutoma`;
 
+LOCK TABLES `entity` WRITE;
+
 ALTER TABLE `hutoma`.`entity` 
 ADD COLUMN `aiid` VARCHAR(50) NOT NULL DEFAULT '' AFTER `value_type`;
 
@@ -11,6 +13,7 @@ DROP INDEX `dev_id` ;
 ALTER TABLE `hutoma`.`entity` 
 ADD UNIQUE INDEX `dev_id` (`dev_id` ASC, `name` ASC, `aiid` ASC);
 
+UNLOCK TABLES;
 
 DROP PROCEDURE IF EXISTS `hutoma`.`getEntities`;
 

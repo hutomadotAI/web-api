@@ -1,10 +1,13 @@
 USE hutoma;
 
+LOCK TABLES `chatState` WRITE;
+
 ALTER TABLE `chatState` ADD COLUMN `chat_id_hash` VARCHAR(100) NULL AFTER `chat_id`;
 ALTER TABLE `chatState` ADD INDEX `idx_chat_id_hash` (`chat_id_hash`);
 ALTER TABLE `chatState` ADD COLUMN `webhook_sessions` LONGTEXT;
 ALTER TABLE `chatState` ADD COLUMN `integration_data` LONGTEXT;
 
+UNLOCK TABLES;
 
 DROP PROCEDURE IF EXISTS `setChatState`;
 DELIMITER ;;
