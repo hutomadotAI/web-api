@@ -71,6 +71,7 @@ public class IntentProcessor {
             return false;
         }
 
+        // Initial setup
         List<MemoryIntent> intentsToClear = new ArrayList<>();
         boolean handledIntent;
         Map<String, Object> intentLog = new HashMap<>();
@@ -78,6 +79,7 @@ public class IntentProcessor {
 
         chatResult.getChatState().restartChatWorkflow(false);
 
+        // Exit if we can't execute intent
         ApiIntent intent = this.intentHandler.getIntent(aiidForMemoryIntents, currentIntent.getName());
         if (!canExecuteIntent(intent, chatResult)) {
             if (StringUtils.isEmpty(intent.getConditionsFallthroughMessage())) {
