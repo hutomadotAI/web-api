@@ -881,6 +881,7 @@ public class DatabaseAI extends Database {
                 context
         );
         String intentsJson = rs.getString("current_intents");
+        chatState.setChatId(UUID.fromString(rs.getString("chat_id")));
         Type memoryIntentListType = new TypeToken<List<MemoryIntent>>() {
         }.getType();
         List<MemoryIntent> currentIntents = StringUtils.isEmpty(intentsJson)
@@ -904,7 +905,6 @@ public class DatabaseAI extends Database {
             chatState.setIntegrationData(
                     (IntegrationData) jsonSerializer.deserialize(integrationDataJson, IntegrationData.class));
         }
-        chatState.setChatId(UUID.fromString(rs.getString("chat_id")));
         return chatState;
     }
 

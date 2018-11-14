@@ -59,6 +59,7 @@ public class TestChatBase {
     ContextVariableExtractor fakeContextVariableExtractor;
     FeatureToggler fakeFeatureToggler;
 
+
     @Before
     public void setup() {
         this.fakeConfig = mock(Config.class);
@@ -76,7 +77,7 @@ public class TestChatBase {
         this.fakeContextVariableExtractor = mock(ContextVariableExtractor.class);
         this.fakeFeatureToggler = mock(FeatureToggler.class);
         this.intentProcessor = new IntentProcessor(this.fakeRecognizer, this.fakeIntentHandler, this.fakeWebHooks,
-                this.fakeConditionEvaluator, this.fakeContextVariableExtractor, mock(ILogger.class), this.fakeFeatureToggler);
+                this.fakeConditionEvaluator, this.fakeContextVariableExtractor, mock(ILogger.class), this.fakeConfig, this.fakeFeatureToggler);
 
         this.fakePassthroughHandler = new ChatPassthroughHandler(this.fakeChatServices, this.fakeWebHooks, mock(Tools.class),
                 mock(ChatLogger.class), mock(ILogger.class), this.fakeFeatureToggler);

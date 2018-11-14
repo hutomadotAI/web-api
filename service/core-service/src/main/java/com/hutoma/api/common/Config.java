@@ -295,4 +295,8 @@ public class Config extends CommonConfig implements ILoggerConfig, IThreadConfig
     public int getMaxEntityValuesPerEntity() {
         return Integer.parseInt(getConfigFromProperties("max_entity_values_entity", "10000"));
     }
+
+    public String getWebhookEncodingSecret() {
+        return getConfigFromProperties("webhook_encoding_secret", getEncodingKey());
+    }
 }

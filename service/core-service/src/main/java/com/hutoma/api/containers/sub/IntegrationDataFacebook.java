@@ -5,6 +5,10 @@ public class IntegrationDataFacebook extends IntegrationData {
     private static final String MESSAGE_ORIGINATOR_ID = "originator_id";
     private static final String PAGE_TOKEN = "page_token";
 
+    public IntegrationDataFacebook(final IntegrationData integrationData) {
+        super(integrationData);
+    }
+
     public IntegrationDataFacebook() {
         super(IntegrationType.FACEBOOK);
     }

@@ -1,5 +1,6 @@
 package com.hutoma.api.logic;
 
+import com.hutoma.api.common.Config;
 import com.hutoma.api.common.FeatureToggler;
 import com.hutoma.api.common.Pair;
 import com.hutoma.api.common.TestDataHelper;
@@ -33,6 +34,7 @@ public class TestIntentProcessor {
     private ConditionEvaluator fakeConditionalEvaluator;
     private ContextVariableExtractor fakeContextVariableExtractor;
     private FeatureToggler fakeFeatureToggler;
+    private Config fakeConfig;
 
     @Before
     public void setup() {
@@ -42,9 +44,10 @@ public class TestIntentProcessor {
         this.fakeConditionalEvaluator = mock(ConditionEvaluator.class);
         this.fakeContextVariableExtractor = mock(ContextVariableExtractor.class);
         this.fakeFeatureToggler = mock(FeatureToggler.class);
+        this.fakeConfig = mock(Config.class);
         this.intentProcessor = new IntentProcessor(this.fakeEntityRecognizer,
                 this.fakeIntentHandler, this.fakeWebHooks, this.fakeConditionalEvaluator, this.fakeContextVariableExtractor,
-                mock(ILogger.class), this.fakeFeatureToggler);
+                mock(ILogger.class), this.fakeConfig, this.fakeFeatureToggler);
     }
 
     @Test

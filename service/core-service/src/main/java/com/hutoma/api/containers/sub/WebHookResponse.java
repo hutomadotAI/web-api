@@ -17,6 +17,9 @@ public class WebHookResponse {
     @SerializedName("context")
     private ChatContext chatContext;
 
+    @SerializedName("webhook_token")
+    private String token;
+
     public WebHookResponse(final String text) {
         this.text = text;
     }
@@ -39,5 +42,9 @@ public class WebHookResponse {
 
     public ChatContext getChatContext() {
         return this.chatContext;
+    }
+
+    public String getToken() {
+        return this.token;
     }
 }

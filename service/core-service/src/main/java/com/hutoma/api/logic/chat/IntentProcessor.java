@@ -1,5 +1,6 @@
 package com.hutoma.api.logic.chat;
 
+import com.hutoma.api.common.Config;
 import com.hutoma.api.common.FeatureToggler;
 import com.hutoma.api.common.Pair;
 import com.hutoma.api.connectors.WebHooks;
@@ -31,6 +32,7 @@ public class IntentProcessor {
     private final ContextVariableExtractor contextVariableExtractor;
     private final ILogger logger;
     private final FeatureToggler featureToggler;
+    private final Config config;
 
     @Inject
     public IntentProcessor(final IEntityRecognizer entityRecognizer,
@@ -39,6 +41,7 @@ public class IntentProcessor {
                            final ConditionEvaluator conditionEvaluator,
                            final ContextVariableExtractor contextVariableExtractor,
                            final ILogger logger,
+                           final Config config,
                            final FeatureToggler featureToggler) {
         this.entityRecognizer = entityRecognizer;
         this.intentHandler = intentHandler;
@@ -46,6 +49,7 @@ public class IntentProcessor {
         this.conditionEvaluator = conditionEvaluator;
         this.contextVariableExtractor = contextVariableExtractor;
         this.logger = logger;
+        this.config = config;
         this.featureToggler = featureToggler;
     }
 
@@ -681,7 +685,8 @@ public class IntentProcessor {
 
             WebHookResponse response;
             try {
-                response = this.webHooks.executeIntentWebHook(webHook, currentIntent, chatResult, chatInfo);
+                response = this.webHooks.executeIntentWebHook(webHook, currentIntent, chatResult, chatInfo,
+                        config.getWebhookEncodingSecret());
                 // first store the whole deserialized webhook in a transient field
                 chatResult.setWebHookResponse(response);
 

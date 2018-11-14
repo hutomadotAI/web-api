@@ -67,8 +67,8 @@ public class ChatStateHandler {
         try {
             state = this.databaseAi.getChatStateFromHash(chatIdHash, jsonSerializer);
             if (state != null) {
-                // remove any expired webhook sessions
-                state.getWebhookSessions().removeIf(w -> w.getExpiryTimestamp() >= System.currentTimeMillis());
+                // remove any expired webhook sessions, to keep this to a minimum
+                state.getWebhookSessions().removeIf(w -> w.getExpiryTimestamp() < System.currentTimeMillis());
             }
         } catch (Exception ex) {
             this.logger.logException(LOGFROM, ex);

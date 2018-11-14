@@ -10,8 +10,13 @@ public class IntegrationData {
     @SerializedName("type")
     private final IntegrationType integrationType;
     @SerializedName("data")
-    private final Map<String, String> data = new HashMap<>();
+    private Map<String, String> data = new HashMap<>();
 
+
+    IntegrationData(final IntegrationData other) {
+        this.integrationType = other.integrationType;
+        this.data = other.data;
+    }
 
     IntegrationData() {
         this(IntegrationType.NONE);
