@@ -78,9 +78,10 @@ public class ChatEntityValueHandler implements IChatHandler {
             int numberRegexEntities = 0;
             try {
                 // Query DB for relevant entities and entity values
-                List<Entity> entities = this.dbEntities.getEntities(requestInfo.getDevId());
+                List<Entity> entities = this.dbEntities.getEntities(requestInfo.getDevId(), aiIdentity.getAiid());
                 for (Entity e : entities) {
-                    ApiEntity entity = this.dbEntities.getEntity(requestInfo.getDevId(), e.getName());
+                    ApiEntity entity = this.dbEntities
+                            .getEntity(requestInfo.getDevId(), e.getName(), aiIdentity.getAiid());
                     if (entity.getEntityValueType() == EntityValueType.LIST) {
                         // Handle custom regular entities
                         toSend.getEntities().put(e.getName(), entity.getEntityValueList());

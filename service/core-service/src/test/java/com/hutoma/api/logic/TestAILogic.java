@@ -1189,7 +1189,7 @@ public class TestAILogic {
     @Test(expected = AILogic.BotImportException.class)
     public void testCreateImportedBot_entities_dbException() throws AILogic.BotImportException, DatabaseException {
         setupFakeImport();
-        when(this.fakeDatabaseEntitiesIntents.getEntities(any())).thenThrow(DatabaseException.class);
+        when(this.fakeDatabaseEntitiesIntents.getEntities(any(), any())).thenThrow(DatabaseException.class);
         BotStructure botStructure = getBotstructure();
         this.aiLogic.createImportedBot(VALIDDEVID, botStructure);
     }
@@ -1239,7 +1239,7 @@ public class TestAILogic {
     @Test(expected = AILogic.BotImportException.class)
     public void testCreateImportedBot_writeEntities_dbException() throws AILogic.BotImportException, DatabaseException {
         setupFakeImport();
-        doThrow(DatabaseException.class).when(this.fakeDatabaseEntitiesIntents).writeEntity(any(), anyString(), any(), any());
+        doThrow(DatabaseException.class).when(this.fakeDatabaseEntitiesIntents).writeEntity(any(), anyString(), any(), any(), any());
         BotStructure botStructure = getBotstructure();
         this.aiLogic.createImportedBot(VALIDDEVID, botStructure);
     }
@@ -1510,7 +1510,7 @@ public class TestAILogic {
         }
         ApiEntity entity = new ApiEntity("newEntity", DEVID_UUID, valuesList, false, EntityValueType.LIST);
         botStructure.getEntities().put(entity.getEntityName(), entity);
-        when(this.fakeDatabaseEntitiesIntents.getEntityValuesCountForDevExcludingEntity(any(), any())).thenReturn(maxValues - 1);
+        when(this.fakeDatabaseEntitiesIntents.getEntityValuesCountForDevExcludingEntity(any(), any(), any())).thenReturn(maxValues - 1);
         ApiResult result = this.aiLogic.importBot(VALIDDEVID, botStructure);
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
     }
@@ -1626,7 +1626,7 @@ public class TestAILogic {
         ApiEntity intentEntity = new ApiEntity("entity", VALIDDEVID);
         when(this.fakeDatabaseEntitiesIntents.getIntents(any(), any())).thenReturn(Collections.singletonList("intent_name"));
         when(this.fakeDatabaseEntitiesIntents.getIntent(any(), any())).thenReturn(intent);
-        when(this.fakeDatabaseEntitiesIntents.getEntity(any(), any())).thenReturn(intentEntity);
+        when(this.fakeDatabaseEntitiesIntents.getEntity(any(), any(), any())).thenReturn(intentEntity);
         when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(TestDataHelper.getSampleAI());
         when(this.fakeDatabaseAi.getAiTrainingFile(any())).thenReturn("hello\nhi");
 
@@ -1655,8 +1655,8 @@ public class TestAILogic {
 
         Entity existingEntitySimple = new Entity(entityName, false, EntityValueType.LIST);
         ApiEntity existingEntity = new ApiEntity(entityName, DEVID_UUID, existingValues, false, EntityValueType.LIST);
-        when(this.fakeDatabaseEntitiesIntents.getEntities(any())).thenReturn(Collections.singletonList(existingEntitySimple));
-        when(this.fakeDatabaseEntitiesIntents.getEntity(any(), any())).thenReturn(existingEntity);
+        when(this.fakeDatabaseEntitiesIntents.getEntities(any(), any())).thenReturn(Collections.singletonList(existingEntitySimple));
+        when(this.fakeDatabaseEntitiesIntents.getEntity(any(), any(), any())).thenReturn(existingEntity);
 
         return botStructure;
     }

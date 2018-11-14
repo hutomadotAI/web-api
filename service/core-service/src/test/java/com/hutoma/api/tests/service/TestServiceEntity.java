@@ -18,6 +18,7 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
+import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -25,7 +26,8 @@ import static org.mockito.Mockito.when;
 
 public class TestServiceEntity extends ServiceTestBase {
 
-    private static final String BASEPATH = "/entity/";
+    private static final String AIID = UUID.randomUUID().toString();
+    private static final String BASEPATH = String.format("/entity/%s/", AIID);
     private static final String ENTITY_NAME_PARAM = "entity_name";
     private static final String ENTITY_NAME = "entity";
     private IMemoryIntentHandler fakeMemoryIntentHandler;

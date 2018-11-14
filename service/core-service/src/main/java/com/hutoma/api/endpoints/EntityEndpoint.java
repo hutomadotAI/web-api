@@ -36,54 +36,62 @@ public class EntityEndpoint {
     }
 
     @GET
+    @Path("{aiid}")
     @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
     @Produces(MediaType.APPLICATION_JSON)
-    @ValidateParameters({APIParameter.DevID, APIParameter.EntityName})
+    @ValidateParameters({APIParameter.DevID, APIParameter.EntityName, APIParameter.AIID})
     public Response getEntity(
             @Context final ContainerRequestContext requestContext) {
         final ApiResult result = this.entityLogic.getEntity(
                 ParameterFilter.getDevid(requestContext),
-                ParameterFilter.getEntityName(requestContext));
+                ParameterFilter.getEntityName(requestContext),
+                ParameterFilter.getAiid(requestContext));
         return result.getResponse(this.serializer).build();
     }
 
     @POST
+    @Path("{aiid}")
     @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
     @Produces(MediaType.APPLICATION_JSON)
-    @ValidateParameters({APIParameter.DevID, APIParameter.EntityName, APIParameter.EntityJson})
+    @ValidateParameters({APIParameter.DevID, APIParameter.EntityName, APIParameter.EntityJson, APIParameter.AIID})
     @ValidatePost({APIParameter.EntityJson})
     public Response postEntity(
             @Context final ContainerRequestContext requestContext) {
         final ApiResult result = this.entityLogic.writeEntity(
                 ParameterFilter.getDevid(requestContext),
                 ParameterFilter.getEntityName(requestContext),
-                ParameterFilter.getEntity(requestContext));
+                ParameterFilter.getEntity(requestContext),
+                ParameterFilter.getAiid(requestContext));
         return result.getResponse(this.serializer).build();
     }
 
     @DELETE
+    @Path("{aiid}")
     @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
     @Produces(MediaType.APPLICATION_JSON)
-    @ValidateParameters({APIParameter.DevID, APIParameter.EntityName})
+    @ValidateParameters({APIParameter.DevID, APIParameter.EntityName, APIParameter.AIID})
     public Response deleteEntity(
             @Context final ContainerRequestContext requestContext) {
         final ApiResult result = this.entityLogic.deleteEntity(
                 ParameterFilter.getDevid(requestContext),
-                ParameterFilter.getEntityName(requestContext));
+                ParameterFilter.getEntityName(requestContext),
+                ParameterFilter.getAiid(requestContext));
         return result.getResponse(this.serializer).build();
     }
 
     @PUT
+    @Path("{aiid}")
     @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
     @Produces(MediaType.APPLICATION_JSON)
-    @ValidateParameters({APIParameter.DevID, APIParameter.EntityName, APIParameter.EntityJson})
+    @ValidateParameters({APIParameter.DevID, APIParameter.EntityName, APIParameter.EntityJson, APIParameter.AIID})
     @ValidatePost({APIParameter.EntityJson})
     public Response putEntity(
             @Context final ContainerRequestContext requestContext) {
         final ApiResult result = this.entityLogic.replaceEntity(
                 ParameterFilter.getDevid(requestContext),
                 ParameterFilter.getEntityName(requestContext),
-                ParameterFilter.getEntity(requestContext));
+                ParameterFilter.getEntity(requestContext),
+                ParameterFilter.getAiid(requestContext));
         return result.getResponse(this.serializer).build();
     }
 

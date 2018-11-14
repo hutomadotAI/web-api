@@ -125,7 +125,7 @@ public class MemoryIntentHandler implements IMemoryIntentHandler {
             // This intent is not yet available in the db, so we need to initialize it from the existing
             // intent configuration
             for (IntentVariable intentVar : apiIntent.getVariables()) {
-                ApiEntity apiEntity = this.databaseIntents.getEntity(devId, intentVar.getEntityName());
+                ApiEntity apiEntity = this.databaseIntents.getEntity(devId, intentVar.getEntityName(), aiid);
                 if (apiEntity == null) {
                     // Should not happen, but in case a rogue entity was able to squeeze through the cracks,
                     // make sure we log it and move on
