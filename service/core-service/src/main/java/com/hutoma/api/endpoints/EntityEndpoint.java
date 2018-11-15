@@ -22,7 +22,6 @@ import javax.ws.rs.core.Response;
 /**
  * Created by David MG on 05/10/2016.
  */
-@RateLimit(RateKey.QuickRead)
 @Path("/entity/")
 public class EntityEndpoint {
 
@@ -36,6 +35,7 @@ public class EntityEndpoint {
     }
 
     @GET
+    @RateLimit(RateKey.QuickRead)
     @Path("{aiid}")
     @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
     @Produces(MediaType.APPLICATION_JSON)
@@ -51,6 +51,7 @@ public class EntityEndpoint {
 
     @POST
     @Path("{aiid}")
+    @RateLimit(RateKey.SaveResource)
     @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
     @Produces(MediaType.APPLICATION_JSON)
     @ValidateParameters({APIParameter.DevID, APIParameter.EntityName, APIParameter.EntityJson, APIParameter.AIID})
@@ -67,6 +68,7 @@ public class EntityEndpoint {
 
     @DELETE
     @Path("{aiid}")
+    @RateLimit(RateKey.SaveResource)
     @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
     @Produces(MediaType.APPLICATION_JSON)
     @ValidateParameters({APIParameter.DevID, APIParameter.EntityName, APIParameter.AIID})
@@ -81,6 +83,7 @@ public class EntityEndpoint {
 
     @PUT
     @Path("{aiid}")
+    @RateLimit(RateKey.SaveResource)
     @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
     @Produces(MediaType.APPLICATION_JSON)
     @ValidateParameters({APIParameter.DevID, APIParameter.EntityName, APIParameter.EntityJson, APIParameter.AIID})
