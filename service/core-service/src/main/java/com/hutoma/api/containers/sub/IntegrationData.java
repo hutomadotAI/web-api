@@ -22,7 +22,7 @@ public class IntegrationData {
         this(IntegrationType.NONE);
     }
 
-    IntegrationData(final IntegrationType integrationType) {
+    public IntegrationData(final IntegrationType integrationType) {
         this.integrationType = integrationType;
     }
 

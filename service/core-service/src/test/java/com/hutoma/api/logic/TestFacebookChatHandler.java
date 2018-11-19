@@ -17,27 +17,18 @@ import com.hutoma.api.containers.facebook.FacebookIntegrationMetadata;
 import com.hutoma.api.containers.facebook.FacebookMessageNode;
 import com.hutoma.api.containers.facebook.FacebookNotification;
 import com.hutoma.api.containers.facebook.FacebookResponseSegment;
-import com.hutoma.api.containers.sub.ChatResult;
-import com.hutoma.api.containers.sub.IntegrationRecord;
-import com.hutoma.api.containers.sub.MemoryIntent;
-import com.hutoma.api.containers.sub.MemoryVariable;
-import com.hutoma.api.containers.sub.WebHookResponse;
+import com.hutoma.api.containers.sub.*;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logic.chat.ChatBaseException;
 import com.hutoma.api.validation.ParameterValidationException;
 import com.hutoma.api.validation.QueryFilter;
-
 import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
 import javax.inject.Provider;
+import java.util.*;
 
 import static org.mockito.Mockito.*;
 
@@ -121,7 +112,7 @@ public class TestFacebookChatHandler {
         this.fakeChatLogicProvider = mock(Provider.class);
         this.fakeChatLogic = mock(ChatLogic.class);
         when(this.fakeChatLogicProvider.get()).thenReturn(this.fakeChatLogic);
-        when(this.fakeChatLogic.chatFacebook(eq(TestDataHelper.AIID), any(), any(), any(), any()))
+        when(this.fakeChatLogic.chatFacebook(eq(TestDataHelper.AIID), any(), any(), any(), any(), any()))
                 .thenAnswer(invocation -> this.chatResult);
 
         this.fakeQueryFilterProvider = mock(Provider.class);
@@ -181,7 +172,7 @@ public class TestFacebookChatHandler {
     public void testChat_OK() throws Exception {
         this.chatHandler.call();
         verify(this.fakeChatLogic, times(1)).chatFacebook(
-                eq(TestDataHelper.AIID), any(), eq(MESSAGE), anyString(), any());
+                eq(TestDataHelper.AIID), any(), eq(MESSAGE), anyString(), any(), any());
         verify(this.fakeConnector, times(1)).sendFacebookMessage(
                 eq(SENDER), eq(PAGETOKEN),
                 any());
@@ -362,7 +353,7 @@ public class TestFacebookChatHandler {
         this.chatHandler.initialise(notification.getEntryList().get(0).getMessaging().get(0));
         this.chatHandler.call();
         verify(this.fakeChatLogic, times(1)).chatFacebook(
-                eq(TestDataHelper.AIID), any(), eq(POSTBACK), anyString(), any());
+                eq(TestDataHelper.AIID), any(), eq(POSTBACK), anyString(), any(), any());
         verify(this.fakeConnector, times(1)).sendFacebookMessage(
                 eq(SENDER), eq(PAGETOKEN), any());
     }
@@ -374,7 +365,7 @@ public class TestFacebookChatHandler {
         this.chatHandler.initialise(notification.getEntryList().get(0).getMessaging().get(0));
         this.chatHandler.call();
         verify(this.fakeChatLogic, never()).chatFacebook(
-                eq(TestDataHelper.AIID), any(), any(), anyString(), any());
+                eq(TestDataHelper.AIID), any(), any(), anyString(), any(), any());
         verify(this.fakeConnector, never()).sendFacebookMessage(
                 eq(SENDER), eq(PAGETOKEN), any());
     }
@@ -386,7 +377,7 @@ public class TestFacebookChatHandler {
         this.chatHandler.initialise(notification.getEntryList().get(0).getMessaging().get(0));
         this.chatHandler.call();
         verify(this.fakeChatLogic, times(1)).chatFacebook(
-                eq(TestDataHelper.AIID), any(), eq(OPTIN), anyString(), any());
+                eq(TestDataHelper.AIID), any(), eq(OPTIN), anyString(), any(), any());
         verify(this.fakeConnector, times(1)).sendFacebookMessage(
                 eq(SENDER), eq(PAGETOKEN), any());
     }
@@ -403,7 +394,7 @@ public class TestFacebookChatHandler {
     @Test
     // chat error still sends a message back to facebook so doesn't need typing_off
     public void testSenderActions_ChatError() throws Exception {
-        when(this.fakeChatLogic.chatFacebook(eq(TestDataHelper.AIID), any(), any(), any(), any()))
+        when(this.fakeChatLogic.chatFacebook(eq(TestDataHelper.AIID), any(), any(), any(), any(), any()))
                 .thenThrow(new ChatLogic.ChatFailedException(ApiError.getInternalServerError()));
         this.chatHandler.call();
         verify(this.fakeConnector, times(1)).sendFacebookSenderAction(anyString(),
@@ -414,7 +405,7 @@ public class TestFacebookChatHandler {
 
     @Test
     public void test_ChatError_NotReady() throws Exception {
-        when(this.fakeChatLogic.chatFacebook(eq(TestDataHelper.AIID), any(), any(), any(), any()))
+        when(this.fakeChatLogic.chatFacebook(eq(TestDataHelper.AIID), any(), any(), any(), any(), any()))
                 .thenThrow(new AIChatServices.AiNotReadyToChat("dummy exception"));
         this.chatHandler.call();
         verify(this.fakeConnector, times(1)).sendFacebookMessage(
@@ -423,7 +414,7 @@ public class TestFacebookChatHandler {
 
     @Test
     public void test_ChatError_ChatFailed() throws Exception {
-        when(this.fakeChatLogic.chatFacebook(eq(TestDataHelper.AIID), any(), any(), any(), any()))
+        when(this.fakeChatLogic.chatFacebook(eq(TestDataHelper.AIID), any(), any(), any(), any(), any()))
                 .thenThrow(new ChatLogic.ChatFailedException(ApiError.getInternalServerError()));
         this.chatHandler.call();
         verify(this.fakeConnector, times(1)).sendFacebookMessage(
@@ -544,9 +535,9 @@ public class TestFacebookChatHandler {
     private void verifyRequestIgnored() throws Exception {
         this.chatHandler.call();
         verify(this.fakeChatLogic, never()).chatFacebook(
-                eq(TestDataHelper.AIID), any(), any(), anyString(), any());
+                eq(TestDataHelper.AIID), any(), any(), anyString(), any(), any());
         verify(this.fakeConnector, never()).sendFacebookMessage(
                 any(), any(), any());
     }
-    
+
 }

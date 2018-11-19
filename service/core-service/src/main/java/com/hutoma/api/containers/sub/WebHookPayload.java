@@ -9,6 +9,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * The structure for serialising a WebHook payload.
@@ -82,6 +83,7 @@ public class WebHookPayload {
                 .claim("AIID", aiid.toString())
                 .claim("TokenId", UUID.randomUUID())
                 .claim("ChatId", chatId)
+                .claim("Seed", ThreadLocalRandom.current().nextInt(Integer.MAX_VALUE))
                 .setSubject(devId.toString())
                 .compressWith(CompressionCodecs.DEFLATE)
                 .signWith(SignatureAlgorithm.HS256, tokenEndcodingSecret)

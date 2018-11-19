@@ -33,6 +33,7 @@ public class IntentProcessor {
     private final ILogger logger;
     private final FeatureToggler featureToggler;
     private final Config config;
+    private final WebhookHandler webhookHandler;
 
     @Inject
     public IntentProcessor(final IEntityRecognizer entityRecognizer,
@@ -40,6 +41,7 @@ public class IntentProcessor {
                            final WebHooks webHooks,
                            final ConditionEvaluator conditionEvaluator,
                            final ContextVariableExtractor contextVariableExtractor,
+                           final WebhookHandler webhookHandler,
                            final ILogger logger,
                            final Config config,
                            final FeatureToggler featureToggler) {
@@ -48,6 +50,7 @@ public class IntentProcessor {
         this.webHooks = webHooks;
         this.conditionEvaluator = conditionEvaluator;
         this.contextVariableExtractor = contextVariableExtractor;
+        this.webhookHandler = webhookHandler;
         this.logger = logger;
         this.config = config;
         this.featureToggler = featureToggler;
@@ -729,28 +732,13 @@ public class IntentProcessor {
                         response.getFacebookNode().getContentType().name());
             }
 
-            // Now set the chat context variables based on the ones returned by the webhook
-            ChatContext ctx = chatResult.getChatState().getChatContext();
-            if (response.getChatContext() != null) {
-                for (Map.Entry<String, String> entry : response.getChatContext().getVariablesAsStringMap().entrySet()) {
-                    String varName = entry.getKey();
-                    if (ctx.isSet(varName)) {
-                        // If we get a null variable, this then needs to be cleared
-                        if (entry.getValue() == null) {
-                            ctx.clearVariable(varName);
-                        } else {
-                            // Update value
-                            ctx.setValue(varName, entry.getValue(), ctx.getVariable(varName).getLifespanTurns());
-                        }
-                    } else if (entry.getValue() != null) {
-                        // add a new value
-                        ctx.setValue(varName, entry.getValue(), ChatContext.ChatVariableValue.DEFAULT_LIFESPAN_TURNS);
-                    }
-                }
-            }
+            this.webhookHandler.updateChatContext(chatResult.getChatState().getChatContext(),
+                    response.getChatContext());
 
         } else {
             log.put("Webhook run", false);
         }
     }
+
+
 }

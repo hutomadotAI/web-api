@@ -47,4 +47,8 @@ public class WebHookResponse {
     public String getToken() {
         return this.token;
     }
+
+    public void setToken(final String token) {
+        this.token = token;
+    }
 }

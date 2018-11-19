@@ -47,6 +47,7 @@ public class TestServiceChat extends ServiceTestBase {
     private static final String CHAT_HANDOVER = CHAT_PATH + "/target";
     private static final String CHAT_RESET = CHAT_PATH + "/reset";
     private static final String TRIGGER_INTENT = CHAT_PATH + "/triggerIntent";
+    private static final String CALLBACK_PATH = "/ai/chat/webhook/callback";
 
     @Mock
     private IMemoryIntentHandler fakeMemoryIntentHandler;
@@ -56,6 +57,8 @@ public class TestServiceChat extends ServiceTestBase {
     private ChatLogger fakeChatTelemetryLogger;
     @Mock
     private ChatStateHandler fakeChatStateHandler;
+    @Mock
+    private WebhookHandler fakeWebhookHandler;
 
     IEntityRecognizer fakeRecognizer;
     private ChatPassthroughHandler fakePassthroughHandler;
@@ -366,6 +369,19 @@ public class TestServiceChat extends ServiceTestBase {
         Assert.assertEquals(HttpURLConnection.HTTP_UNAUTHORIZED, response.getStatus());
     }
 
+    @Test
+    public void testChat_webhookCallback() {
+        String hashedChatId = "chatId";
+        WebHookResponse webHookResponse = new WebHookResponse("text");
+        String webhookResponseJson = new JsonSvcSerializer().serialize(webHookResponse);
+        when(this.fakeWebhookHandler.runWebhookCallback(any(), any())).thenReturn(new ApiResult().setSuccessStatus());
+        final Response response = target(CALLBACK_PATH)
+                .path(hashedChatId)
+                .request()
+                .post(Entity.json(webhookResponseJson));
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus());
+    }
+
     private WebTarget buildChatDefaultParams(WebTarget webTarget) {
         return webTarget
                 .queryParam("q", "question")
@@ -404,6 +420,7 @@ public class TestServiceChat extends ServiceTestBase {
         binder.bindFactory(new InstanceFactory<>(TestServiceChat.this.fakeChatTelemetryLogger)).to(ChatLogger.class);
         binder.bindFactory(new InstanceFactory<>(TestServiceChat.this.fakeChatStateHandler)).to(ChatStateHandler.class);
         binder.bindFactory(new InstanceFactory<>(TestServiceChat.this.fakeChatWorkflow)).to(ChatWorkflow.class);
+        binder.bindFactory(new InstanceFactory<>(TestServiceChat.this.fakeWebhookHandler)).to(WebhookHandler.class);
 
         return binder;
     }

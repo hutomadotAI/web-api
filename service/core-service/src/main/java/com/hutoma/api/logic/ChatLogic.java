@@ -1,7 +1,6 @@
 package com.hutoma.api.logic;
 
 import com.hutoma.api.common.ChatLogger;
-import com.hutoma.api.common.Config;
 import com.hutoma.api.common.FeatureToggler;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.NoServerAvailableException;
@@ -38,7 +37,6 @@ public class ChatLogic {
     private final DatabaseEntitiesIntents databaseEntitiesIntents;
     private final LogMap telemetryMap;
     private final ChatWorkflow chatWorkflow;
-    private final Config config;
     private ChatState chatState;
     private final FeatureToggler featureToggler;
 
@@ -51,7 +49,6 @@ public class ChatLogic {
                      final ILogger logger,
                      final ChatLogger chatLogger,
                      final ChatWorkflow chatWorkflow,
-                     final Config config,
                      final FeatureToggler featureToggler) {
         this.chatStateHandler = chatStateHandler;
         this.databaseEntitiesIntents = databaseEntitiesIntents;
@@ -60,7 +57,6 @@ public class ChatLogic {
         this.logger = logger;
         this.chatLogger = chatLogger;
         this.chatWorkflow = chatWorkflow;
-        this.config = config;
         this.featureToggler = featureToggler;
 
         this.telemetryMap = new LogMap((Map<String, Object>) null);
@@ -129,8 +125,22 @@ public class ChatLogic {
         return apiChatResult.setSuccessStatus();
     }
 
-    private ChatResult callChat(final UUID devId, final UUID aiid, final String chatIdString, final String question,
-                                Map<String, String> clientVariables)
+    private ChatResult callChat(final UUID devId,
+                                final UUID aiid,
+                                final String chatIdString,
+                                final String question,
+                                final Map<String, String> clientVariables)
+            throws NoServerAvailableException, ChatBackendConnector.AiControllerException,
+            ServerConnector.AiServicesException, ChatBaseException {
+        return this.callChat(devId, aiid, chatIdString, question, clientVariables, true);
+    }
+
+    private ChatResult callChat(final UUID devId,
+                                final UUID aiid,
+                                final String chatIdString,
+                                final String question,
+                                final Map<String, String> clientVariables,
+                                final boolean saveChatState)
             throws NoServerAvailableException, ChatBackendConnector.AiControllerException,
             ServerConnector.AiServicesException, ChatBaseException {
 
@@ -228,7 +238,9 @@ public class ChatLogic {
 
         this.chatState.setTopic(currentResult.getTopicOut());
         this.chatState.setHistory(currentResult.getHistory());
-        this.chatStateHandler.saveState(devId, aiid, currentResult.getChatId(), this.chatState);
+        if (saveChatState) {
+            this.chatStateHandler.saveState(devId, aiid, currentResult.getChatId(), this.chatState);
+        }
 
         // prepare to send back a result
         currentResult.setScore(Tools.toOneDecimalPlace(currentResult.getScore()));
@@ -249,6 +261,7 @@ public class ChatLogic {
         // log the results
         this.chatLogger.logUserTraceEvent(LOGFROM, "ApiChat", devId.toString(), this.telemetryMap);
 
+        currentResult.setChatState(this.chatState);
         return currentResult;
     }
 
@@ -258,15 +271,21 @@ public class ChatLogic {
         return doChat(devId, aiid, question, chatId, clientVariables);
     }
 
-    public ChatResult chatFacebook(final UUID aiid, final UUID devId, final String question, final String chatId,
-                                   final String facebookOriginatingUser)
+    ChatResult chatFacebook(final UUID aiid, final UUID devId, final String question, final String chatId,
+                            final String facebookOriginatingUser, final String facebookPageToken)
             throws ChatBaseException, ServerConnector.AiServicesException,
             ChatBackendConnector.AiControllerException,
             NoServerAvailableException {
         this.telemetryMap.add("ChatOrigin", "Facebook");
         this.telemetryMap.add("QFromFacebookUser", facebookOriginatingUser);
         try {
-            return callChat(devId, aiid, chatId, question, null);
+            ChatResult result = callChat(devId, aiid, chatId, question, null, false);
+            IntegrationDataFacebook integrationData = new IntegrationDataFacebook();
+            integrationData.setPageToken(facebookPageToken);
+            integrationData.setMessageOriginatorId(facebookOriginatingUser);
+            result.getChatState().setIntegrationData(integrationData);
+            this.chatStateHandler.saveState(devId, aiid, result.getChatId(), this.chatState);
+            return result;
         } finally {
             this.telemetryMap.clear();
         }

@@ -27,6 +27,7 @@ public enum APIParameter {
     PublishingType,
     BotIdList,
     ChatHandoverTarget,
+    WebHookReponse,
     // Backend
     AiStatusJson,
     ServerRegistration,

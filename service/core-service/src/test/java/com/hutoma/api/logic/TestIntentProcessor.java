@@ -13,6 +13,7 @@ import com.hutoma.api.logging.LogMap;
 import com.hutoma.api.logic.chat.ConditionEvaluator;
 import com.hutoma.api.logic.chat.ContextVariableExtractor;
 import com.hutoma.api.logic.chat.IntentProcessor;
+import com.hutoma.api.logic.chat.WebhookHandler;
 import com.hutoma.api.memory.IEntityRecognizer;
 import com.hutoma.api.memory.IMemoryIntentHandler;
 import org.joda.time.DateTime;
@@ -35,6 +36,7 @@ public class TestIntentProcessor {
     private ContextVariableExtractor fakeContextVariableExtractor;
     private FeatureToggler fakeFeatureToggler;
     private Config fakeConfig;
+    private WebhookHandler fakeWebhookHandler;
 
     @Before
     public void setup() {
@@ -45,9 +47,10 @@ public class TestIntentProcessor {
         this.fakeContextVariableExtractor = mock(ContextVariableExtractor.class);
         this.fakeFeatureToggler = mock(FeatureToggler.class);
         this.fakeConfig = mock(Config.class);
+        this.fakeWebhookHandler = mock(WebhookHandler.class);
         this.intentProcessor = new IntentProcessor(this.fakeEntityRecognizer,
                 this.fakeIntentHandler, this.fakeWebHooks, this.fakeConditionalEvaluator, this.fakeContextVariableExtractor,
-                mock(ILogger.class), this.fakeConfig, this.fakeFeatureToggler);
+                this.fakeWebhookHandler, mock(ILogger.class), this.fakeConfig, this.fakeFeatureToggler);
     }
 
     @Test
