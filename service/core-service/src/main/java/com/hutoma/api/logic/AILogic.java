@@ -833,11 +833,6 @@ public class AILogic {
         botStructure.setDefaultResponses(defaultResponses);
         botStructure.setPassthroughUrl(passthroughUrl);
 
-        // In this case we're not providing a handover message so we can leave it empty.
-        botStructure.setHandoverMessage("");
-        botStructure.setHandoverResetTimeoutSeconds(-1);
-        botStructure.setErrorThresholdHandover(-1);
-
         return this.importBot(devId, botStructure);
     }
 

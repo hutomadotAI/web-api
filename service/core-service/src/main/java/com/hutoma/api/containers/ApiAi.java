@@ -72,7 +72,7 @@ public class ApiAi extends ApiResult {
     // how many consecutive times responses with low scores are allowed to be sent to the user
     // before automatically handing over to a non-AI operator (<0 never hand over)
     @SerializedName("error_threshold_handover")
-    private int errorThresholdHandover;
+    private int errorThresholdHandover = -1;
     @SerializedName("handover_message")
     private String handoverMessage;
     @SerializedName("engine_version")
