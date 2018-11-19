@@ -1,6 +1,7 @@
 package com.hutoma.api.logic;
 
 import com.hutoma.api.common.Config;
+import com.hutoma.api.common.FeatureToggler;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.SupportedLanguage;
 import com.hutoma.api.connectors.EntityRecognizerService;
@@ -29,6 +30,7 @@ public class EntityLogic {
     private final DatabaseEntitiesIntents database;
     private final TrainingLogic trainingLogic;
     private final EntityRecognizerService entityRecognizerService;
+    private final FeatureToggler featureToggler;
     private final JsonSerializer jsonSerializer;
 
     @Inject
@@ -37,13 +39,15 @@ public class EntityLogic {
                        final DatabaseEntitiesIntents database,
                        final TrainingLogic trainingLogic,
                        final EntityRecognizerService entityRecognizerService,
-                       final JsonSerializer jsonSerializer) {
+                       final JsonSerializer jsonSerializer,
+                       final FeatureToggler featureToggler) {
         this.config = config;
         this.logger = logger;
         this.database = database;
         this.trainingLogic = trainingLogic;
         this.entityRecognizerService = entityRecognizerService;
         this.jsonSerializer = jsonSerializer;
+        this.featureToggler = featureToggler;
     }
 
     public ApiResult getEntities(final UUID devid, final UUID aiid) {
@@ -201,6 +205,14 @@ public class EntityLogic {
             Set<String> referreingAis = new HashSet<>();
             List<ApiIntent> allIntents = this.database.getAllIntents(devid);
             for (ApiIntent intent : allIntents) {
+                if (featureToggler.getStateForAiid(
+                        devid,
+                        aiid,
+                        "per-bot-entities") == FeatureToggler.FeatureState.T1) {
+                    if (!intent.getAiid().equals(aiid)) {
+                        continue;
+                    }
+                }
                 if (intent.getVariables() != null && !intent.getVariables().isEmpty()) {
                     for (IntentVariable variable : intent.getVariables()) {
                         if (variable.getEntityName().equals(entityName)) {

@@ -1,6 +1,7 @@
 package com.hutoma.api.logic;
 
 import com.hutoma.api.common.Config;
+import com.hutoma.api.common.FeatureToggler;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.connectors.EntityRecognizerService;
 import com.hutoma.api.connectors.db.DatabaseEntitiesIntents;
@@ -39,6 +40,7 @@ public class TestEntityLogic {
     private TrainingLogic trainingLogic;
     private EntityRecognizerService entityRecognizerService;
     private JsonSerializer jsonSerializer;
+    private FeatureToggler fakeFeatureToggler;
 
     @Before
     public void setup() throws EntityRecognizerService.EntityRecognizerException {
@@ -48,12 +50,14 @@ public class TestEntityLogic {
         this.trainingLogic = mock(TrainingLogic.class);
         this.entityRecognizerService = mock(EntityRecognizerService.class);
         this.jsonSerializer = mock(JsonSerializer.class);
+        this.fakeFeatureToggler = mock(FeatureToggler.class);
         this.entityLogic = new EntityLogic(this.fakeConfig,
                 this.fakeLogger,
                 this.fakeDatabase,
                 this.trainingLogic,
                 this.entityRecognizerService,
-                this.jsonSerializer);
+                this.jsonSerializer,
+                this.fakeFeatureToggler);
 
         when(this.fakeConfig.getMaxTotalEntityValues()).thenReturn(1000);
         when(this.fakeConfig.getMaxEntityValuesPerEntity()).thenReturn(500);
