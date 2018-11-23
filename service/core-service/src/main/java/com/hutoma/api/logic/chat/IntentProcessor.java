@@ -357,36 +357,24 @@ public class IntentProcessor {
         boolean handledIntent = false;
 
 
-        List<Pair<String, String>> entities = null;
-        if (!currentIntent.getVariables().isEmpty()
-                && !chatResult.getChatState().isInIntentLoop()) { // we cannot infer variables in nested intents
-            // At this stage we're guaranteed to have variables with different entity types
-            // Attempt to retrieve entities from the question
-            entities = this.entityRecognizer.retrieveEntities(chatInfo, memoryVariables);
-
-            // Also if we can process entities and variables, we can
-            // delete variable from context if clear on entry is set
-            ChatContext ctx = chatResult.getChatState().getChatContext();
-            for (MemoryVariable var : currentIntent.getVariables()) {
-                if (ctx.isSet(var.getLabel())) {
-                    if (var.getResetOnEntry()) {
-                        ctx.clearVariable(var.getLabel());
-                    }
-                }
-            }
+        // Get entities from NER
+        List<Pair<String, String>> entitiesFromNER = null;
+        if (!currentIntent.getVariables().isEmpty() && !chatResult.getChatState().isInIntentLoop()) { // we cannot infer variables in nested intents
+            entitiesFromNER = getEntitiesFromNER(chatInfo, currentIntent, chatResult, memoryVariables, entitiesFromNER);
         }
 
-        if (entities != null && !entities.isEmpty()) {
-            log.put("Entities retrieved", StringUtils.join(entities, ','));
+        // Update and store recognised entities
+        if (entitiesFromNER != null && !entitiesFromNER.isEmpty()) {
+            log.put("Entities retrieved", StringUtils.join(entitiesFromNER, ','));
 
             // If we're processing just one requested variable, we need to check if we have a value recognized
             // for it, and use it
-            if (memoryVariables.size() == 1 && memoryVariables.get(0).getName().equals(entities.get(0).getA())) {
-                memoryVariables.get(0).setCurrentValue(entities.get(0).getB());
+            if (memoryVariables.size() == 1 && memoryVariables.get(0).getName().equals(entitiesFromNER.get(0).getA())) {
+                memoryVariables.get(0).setCurrentValue(entitiesFromNER.get(0).getB());
                 memoryVariables.get(0).setRequested(false);
             } else {
                 // Otherwise try to fulfill variables the normal way
-                currentIntent.fulfillVariables(entities);
+                currentIntent.fulfillVariables(entitiesFromNER);
             }
 
             // Write recognised persistent entities.
@@ -427,32 +415,8 @@ public class IntentProcessor {
             HashMap<String, List<String>> localEntityCandidateMatches = new HashMap<>();
             // Keep a mapping of entity names to entity labels for this intent, for later
             HashMap<String, String> localEntityNameLabelMap = new HashMap<>();
-            for (IntentVariable variable : intent.getVariables()) {
-                for (Map.Entry<String, List<String>> candidate :
-                        chatResult.getChatState().getCandidateValues().entrySet()) {
-                    if (candidate.getValue().contains(variable.getEntityName())) {
-                        // we need to consider this value
-                        if (localEntityCandidateMatches.containsKey(candidate.getKey())) {
-                            localEntityCandidateMatches.get(candidate.getKey()).add(variable.getEntityName());
-                        } else {
-                            List<String> newEntities = new ArrayList<String>();
-                            newEntities.add(variable.getEntityName());
-                            localEntityCandidateMatches.put(candidate.getKey(), newEntities);
-                        }
-                        localEntityNameLabelMap.put(variable.getEntityName(), variable.getLabel());
-                    }
-                }
-            }
 
-            // dump the candidate matches in the log
-            logger.logUserTraceEvent("IntentProcessor",
-                    "Found localEntityCandidateMatches",
-                    chatInfo.getDevId().toString(),
-                    LogMap.map("AIID", chatResult.getAiid())
-                            .put("DevId", chatInfo.getDevId())
-                            .put("ChatId", chatResult.getChatId())
-                            .put("Intent", intent.getIntentName())
-                            .put("candidate", localEntityCandidateMatches));
+            filterEntityCandidates(chatInfo, chatResult, intent, localEntityCandidateMatches, localEntityNameLabelMap);
 
             ChatState chatState = chatResult.getChatState();
             // If there are any candidateValues remaining with only one possible match, use that one
@@ -536,6 +500,53 @@ public class IntentProcessor {
         }
 
         return handledIntent;
+    }
+
+    private void filterEntityCandidates(ChatRequestInfo chatInfo, ChatResult chatResult, ApiIntent intent, HashMap<String, List<String>> localEntityCandidateMatches, HashMap<String, String> localEntityNameLabelMap) {
+        for (IntentVariable variable : intent.getVariables()) {
+            for (Map.Entry<String, List<String>> candidate :
+                    chatResult.getChatState().getCandidateValues().entrySet()) {
+                if (candidate.getValue().contains(variable.getEntityName())) {
+                    // we need to consider this value
+                    if (localEntityCandidateMatches.containsKey(candidate.getKey())) {
+                        localEntityCandidateMatches.get(candidate.getKey()).add(variable.getEntityName());
+                    } else {
+                        List<String> newEntities = new ArrayList<String>();
+                        newEntities.add(variable.getEntityName());
+                        localEntityCandidateMatches.put(candidate.getKey(), newEntities);
+                    }
+                    localEntityNameLabelMap.put(variable.getEntityName(), variable.getLabel());
+                }
+            }
+        }
+
+        // dump the candidate matches in the log
+        logger.logUserTraceEvent("IntentProcessor",
+                "Found localEntityCandidateMatches",
+                chatInfo.getDevId().toString(),
+                LogMap.map("AIID", chatResult.getAiid())
+                        .put("DevId", chatInfo.getDevId())
+                        .put("ChatId", chatResult.getChatId())
+                        .put("Intent", intent.getIntentName())
+                        .put("candidate", localEntityCandidateMatches));
+    }
+
+    private List<Pair<String, String>> getEntitiesFromNER(ChatRequestInfo chatInfo, MemoryIntent currentIntent, ChatResult chatResult, List<MemoryVariable> memoryVariables, List<Pair<String, String>> entitiesFromNER) {
+        // At this stage we're guaranteed to have variables with different entity types
+        // Attempt to retrieve entities from the question
+        entitiesFromNER = this.entityRecognizer.retrieveEntities(chatInfo, memoryVariables);
+
+        // Also if we can process entities and variables, we can
+        // delete variable from context if clear on entry is set
+        ChatContext ctx = chatResult.getChatState().getChatContext();
+        for (MemoryVariable var : currentIntent.getVariables()) {
+            if (ctx.isSet(var.getLabel())) {
+                if (var.getResetOnEntry()) {
+                    ctx.clearVariable(var.getLabel());
+                }
+            }
+        }
+        return entitiesFromNER;
     }
 
     /**
