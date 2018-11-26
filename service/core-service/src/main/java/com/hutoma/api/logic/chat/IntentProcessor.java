@@ -502,7 +502,11 @@ public class IntentProcessor {
         return handledIntent;
     }
 
-    private void filterEntityCandidates(ChatRequestInfo chatInfo, ChatResult chatResult, ApiIntent intent, HashMap<String, List<String>> localEntityCandidateMatches, HashMap<String, String> localEntityNameLabelMap) {
+    private void filterEntityCandidates(final ChatRequestInfo chatInfo,
+                                        final ChatResult chatResult,
+                                        final ApiIntent intent,
+                                        final HashMap<String, List<String>> localEntityCandidateMatches,
+                                        final HashMap<String, String> localEntityNameLabelMap) {
         for (IntentVariable variable : intent.getVariables()) {
             for (Map.Entry<String, List<String>> candidate :
                     chatResult.getChatState().getCandidateValues().entrySet()) {
@@ -521,7 +525,7 @@ public class IntentProcessor {
         }
 
         // dump the candidate matches in the log
-        logger.logUserTraceEvent("IntentProcessor",
+        logger.logUserInfoEvent("IntentProcessor",
                 "Found localEntityCandidateMatches",
                 chatInfo.getDevId().toString(),
                 LogMap.map("AIID", chatResult.getAiid())
@@ -531,7 +535,11 @@ public class IntentProcessor {
                         .put("candidate", localEntityCandidateMatches));
     }
 
-    private List<Pair<String, String>> getEntitiesFromNER(ChatRequestInfo chatInfo, MemoryIntent currentIntent, ChatResult chatResult, List<MemoryVariable> memoryVariables, List<Pair<String, String>> entitiesFromNER) {
+    private List<Pair<String, String>> getEntitiesFromNER(final ChatRequestInfo chatInfo,
+                                                          final MemoryIntent currentIntent,
+                                                          final ChatResult chatResult,
+                                                          final List<MemoryVariable> memoryVariables,
+                                                          List<Pair<String, String>> entitiesFromNER) {
         // At this stage we're guaranteed to have variables with different entity types
         // Attempt to retrieve entities from the question
         entitiesFromNER = this.entityRecognizer.retrieveEntities(chatInfo, memoryVariables);

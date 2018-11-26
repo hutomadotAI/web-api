@@ -187,8 +187,8 @@ public class ChatEntityValueHandler implements IChatHandler {
         return false;
     }
 
-    private List<Pair<String, String>> getEntitiesFromNER(ChatRequestInfo chatInfo,
-                                                          List<MemoryVariable> memoryVariables) {
+    private List<Pair<String, String>> getEntitiesFromNER(final ChatRequestInfo chatInfo,
+                                                          final List<MemoryVariable> memoryVariables) {
         // At this stage we're guaranteed to have variables with different entity types
         // Attempt to retrieve entities from the question
         List<Pair<String, String>> entitiesFromNER;
