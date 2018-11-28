@@ -107,5 +107,20 @@
         <sha1>250ab907c35a1777e70d54038086e84855d74aea</sha1>
         <cve>CVE-2016-5725</cve>
     </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file name: guava-16.0.1.jar
+   ]]></notes>
+        <sha1>5fa98cd1a63c99a44dd8d3b77e4762b066a5d0c5</sha1>
+        <cve>CVE-2018-10237</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file name: guava-23.6-jre.jar
+   ]]></notes>
+        <sha1>c0b638df79e7b2e1ed98f8d68ac62538a715ab1d</sha1>
+        <cve>CVE-2018-10237</cve>
+    </suppress>
 
 </suppressions>
+
