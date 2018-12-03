@@ -126,6 +126,14 @@ public class IntentProcessor {
             }
         }
 
+        for (MemoryVariable entity : currentIntent.getVariables()) {
+            String entityLabel = entity.getLabel();
+            if (chatResult.getChatState().getChatContext().isSet(entityLabel) && !entity.getResetOnEntry()) {
+                String contextValue = chatResult.getChatState().getChatContext().getValue(entityLabel);
+                entity.setCurrentValue(contextValue);
+            }
+        }
+
         // Make sure all context_in variables are read and applied to the chat state
         intent.getContextIn().forEach((k, v) ->
                 chatResult.getChatState().getChatContext()
