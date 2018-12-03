@@ -230,6 +230,7 @@ public class TestChatBase {
                 maxPrompts,
                 0,
                 false,
+                EntityValueType.LIST,
                 false,
                 "label",
                 false);
@@ -256,6 +257,7 @@ public class TestChatBase {
                 maxPrompts,
                 0,
                 false,
+                EntityValueType.LIST,
                 false,
                 "label1",
                 false);
@@ -270,6 +272,7 @@ public class TestChatBase {
                 maxPrompts,
                 0,
                 false,
+                EntityValueType.LIST,
                 true,
                 "label2",
                 false);

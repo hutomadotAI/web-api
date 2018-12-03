@@ -22,6 +22,8 @@ public class MemoryVariable {
     private boolean persistent;
     @SerializedName("system_entity")
     private boolean isSystem;
+    @SerializedName("value_type")
+    private EntityValueType valueType;
     @SerializedName("label")
     private String label;
     @SerializedName("requested")
@@ -56,8 +58,8 @@ public class MemoryVariable {
 
     public MemoryVariable(final String name, final String currentValue, final boolean isMandatory,
                           final List<String> entityKeys, final List<String> prompts, final int timesToPrompt,
-                          final int timesPrompted, final boolean isSystem, final boolean persistent,
-                          final String label, final boolean resetOnEntry) {
+                          final int timesPrompted, final boolean isSystem, final EntityValueType valueType,
+                          final boolean persistent, final String label, final boolean resetOnEntry) {
         this(name, entityKeys);
         this.currentValue = currentValue;
         this.isMandatory = isMandatory;
@@ -66,6 +68,7 @@ public class MemoryVariable {
         this.timesToPrompt = timesToPrompt;
         this.persistent = persistent;
         this.isSystem = isSystem;
+        this.valueType = valueType;
         this.label = label;
         this.resetOnEntry = resetOnEntry;
     }
@@ -87,6 +90,7 @@ public class MemoryVariable {
         this.timesToPrompt = source.timesToPrompt;
         this.persistent = source.persistent;
         this.isSystem = source.isSystem;
+        this.valueType = source.valueType;
         this.label = source.label;
         this.requested = source.requested;
         this.resetOnEntry = source.resetOnEntry;
@@ -222,7 +226,7 @@ public class MemoryVariable {
      * @param resetOnEntry Whether the entity should be reset.
      */
     public void setResetOnEntry(final boolean resetOnEntry) {
-        this.resetOnEntry = resetOnEntry; 
+        this.resetOnEntry = resetOnEntry;
     }
 
     /**
@@ -247,6 +251,14 @@ public class MemoryVariable {
      */
     public boolean isSystem() {
         return this.isSystem;
+    }
+
+    /**
+     * Gets the type of the variable
+     * @return the variable type
+     */
+    public EntityValueType getValueType() {
+        return this.valueType;
     }
 
     /**
