@@ -351,7 +351,7 @@ public class IntentProcessor {
      * @param aiidForMemoryIntents AI id for the intent being processed
      * @param currentIntent        intent being processed
      * @param chatResult           the current chat result
-     * @param memoryVariables      list of memory variables
+     * @param memoryVariables      list of memory variables to consider - either all in intent, or the prompted entity
      * @param intentsToClear       list of intents to clear
      * @param intent               intent definition
      * @param log                  log structure
@@ -442,22 +442,24 @@ public class IntentProcessor {
                             + intent.getIntentName());
 
             // We need to filter the relevant candidates and then count how many we have left
+            // This function is called with a list of memory variables - that will either be all entities linked
+            // to the current intent, or a singleton if we've previously been prompted for an entity, so filter to that
             HashMap<String, List<String>> localEntityCandidateMatches = new HashMap<>();
             // Keep a mapping of entity names to entity labels for this intent, for later
             HashMap<String, String> localEntityNameLabelMap = new HashMap<>();
-            for (IntentVariable variable : intent.getVariables()) {
+            for (MemoryVariable variable : memoryVariables) {
                 for (Map.Entry<String, List<String>> candidate :
                         chatResult.getChatState().getCandidateValues().entrySet()) {
-                    if (candidate.getValue().contains(variable.getEntityName())) {
+                    if (candidate.getValue().contains(variable.getName())) {
                         // we need to consider this value
                         if (localEntityCandidateMatches.containsKey(candidate.getKey())) {
-                            localEntityCandidateMatches.get(candidate.getKey()).add(variable.getEntityName());
+                            localEntityCandidateMatches.get(candidate.getKey()).add(variable.getName());
                         } else {
                             List<String> newEntities = new ArrayList<String>();
-                            newEntities.add(variable.getEntityName());
+                            newEntities.add(variable.getName());
                             localEntityCandidateMatches.put(candidate.getKey(), newEntities);
                         }
-                        localEntityNameLabelMap.put(variable.getEntityName(), variable.getLabel());
+                        localEntityNameLabelMap.put(variable.getName(), variable.getLabel());
                     }
                 }
             }
