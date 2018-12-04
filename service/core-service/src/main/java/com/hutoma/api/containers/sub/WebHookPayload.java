@@ -1,15 +1,12 @@
 package com.hutoma.api.containers.sub;
 
 import com.google.gson.annotations.SerializedName;
+import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.AiBotConfig;
-import io.jsonwebtoken.CompressionCodecs;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * The structure for serialising a WebHook payload.
@@ -46,9 +43,8 @@ public class WebHookPayload {
     public WebHookPayload(final MemoryIntent intent,
                           final ChatResult chatResult,
                           final ChatRequestInfo chatInfo,
-                          final AiBotConfig config,
-                          final String tokenEndcodingSecret) {
-        this(chatResult, chatInfo, config, tokenEndcodingSecret);
+                          final AiBotConfig config) {
+        this(chatResult, chatInfo, config);
         this.intentName = intent.getName();
         this.variables = intent.getVariables();
         this.variablesMap = intent.getVariablesMap();
@@ -56,16 +52,12 @@ public class WebHookPayload {
 
     public WebHookPayload(final ChatResult chatResult,
                           final ChatRequestInfo chatInfo,
-                          final AiBotConfig config,
-                          final String tokenEndcodingSecret) {
+                          final AiBotConfig config) {
         this.chatResult = chatResult;
         this.originatingAiid = chatInfo.getAiid().toString();
         this.clientVariables = chatInfo.getClientVariables();
         this.chatSession = chatResult.getChatState().getHashedChatId();
-        this.webhookToken = tokenEndcodingSecret == null
-                ? null
-                : generateWebhookToken(chatInfo.getDevId(), chatInfo.getAiid(),
-                chatInfo.getChatId(), tokenEndcodingSecret);
+        this.webhookToken = generateWebhookToken(chatInfo.getDevId(), chatInfo.getAiid(), chatInfo.getChatId());
         this.config = config;
     }
 
@@ -77,16 +69,14 @@ public class WebHookPayload {
         return this.webhookToken;
     }
 
-    public static String generateWebhookToken(final UUID devId, final UUID aiid, final UUID chatId,
-                                              final String tokenEndcodingSecret) {
-        return Jwts.builder()
-                .claim("AIID", aiid.toString())
-                .claim("TokenId", UUID.randomUUID())
-                .claim("ChatId", chatId)
-                .claim("Seed", ThreadLocalRandom.current().nextInt(Integer.MAX_VALUE))
-                .setSubject(devId.toString())
-                .compressWith(CompressionCodecs.DEFLATE)
-                .signWith(SignatureAlgorithm.HS256, tokenEndcodingSecret)
-                .compact();
+    public static String generateWebhookToken(final UUID devId, final UUID aiid, final UUID chatId) {
+        return Tools.getHashedDigest(getStringFromClaims(devId, aiid, chatId));
+    }
+
+    private static String getStringFromClaims(final UUID devId, final UUID aiid, final UUID chatId) {
+        // Build a string that contains the data for the token
+        StringBuilder sb = new StringBuilder();
+        sb.append(devId.toString()).append(aiid.toString()).append(chatId.toString());
+        return sb.toString();
     }
 }

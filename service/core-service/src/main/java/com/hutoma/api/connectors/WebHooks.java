@@ -63,8 +63,7 @@ public class WebHooks {
     public WebHookResponse executeIntentWebHook(final WebHook webHook,
                                                 final MemoryIntent intent,
                                                 final ChatResult chatResult,
-                                                final ChatRequestInfo chatInfo,
-                                                final String tokenEndcodingSecret)
+                                                final ChatRequestInfo chatInfo)
             throws WebHookException {
         final String devIdString = chatInfo.getDevId().toString();
         if (webHook == null) {
@@ -86,8 +85,7 @@ public class WebHooks {
         WebHookPayload payload = new WebHookPayload(MemoryIntent.getUserViewable(intent),
                 ChatResult.getUserViewable(chatResult),
                 chatInfo,
-                config,
-                tokenEndcodingSecret);
+                config);
 
         WebHookResponse webHookResponse = this.executeWebhook(webHookEndpoint, payload, devIdString,
                 chatInfo.getAiid());
@@ -116,9 +114,7 @@ public class WebHooks {
             throw new WebHookExternalException("Invalid URL for passthrough webhook");
         }
 
-        WebHookPayload payload = new WebHookPayload(
-                ChatResult.getUserViewable(chatResult),
-                chatInfo, null, null);
+        WebHookPayload payload = new WebHookPayload(ChatResult.getUserViewable(chatResult), chatInfo, null);
 
         WebHookResponse webHookResponse = this.executeWebhook(passthroughUrl, payload, devIdString, chatInfo.getAiid());
         this.logger.logInfo(LOGFROM,

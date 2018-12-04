@@ -707,8 +707,7 @@ public class IntentProcessor {
 
             WebHookResponse response;
             try {
-                response = this.webHooks.executeIntentWebHook(webHook, currentIntent, chatResult, chatInfo,
-                        config.getWebhookEncodingSecret());
+                response = this.webHooks.executeIntentWebHook(webHook, currentIntent, chatResult, chatInfo);
                 // first store the whole deserialized webhook in a transient field
                 chatResult.setWebHookResponse(response);
 

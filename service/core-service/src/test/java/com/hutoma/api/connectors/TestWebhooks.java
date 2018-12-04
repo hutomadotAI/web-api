@@ -7,8 +7,6 @@ import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.connectors.db.DatabaseMarketplace;
 import com.hutoma.api.containers.sub.*;
 import com.hutoma.api.logging.ILogger;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
 import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.client.JerseyInvocation;
 import org.glassfish.jersey.client.JerseyWebTarget;
@@ -31,7 +29,6 @@ public class TestWebhooks {
     private static final UUID CHATID = UUID.fromString("89da2d5f-3ce5-4749-adc3-1f2ff6073fea");
     private static final UUID DEVID = UUID.fromString("ef1593e6-503f-481c-a1fd-071a32c69271");
     private static final ChatRequestInfo CHATINFO = new ChatRequestInfo(new AiIdentity(DEVID, AIID), CHATID, "hi", null);
-    private static final String WEBHOOK_TOKEN_ENCODING_SECRET = "secret";
     private JsonSerializer serializer;
     private DatabaseAI fakeDatabase;
     private DatabaseMarketplace fakeDatabaseMarketplace;
@@ -65,7 +62,7 @@ public class TestWebhooks {
         when(getFakeBuilder().post(any())).thenReturn(Response.ok().entity("{\"text\":\"test\"}").build());
 
         assertThatExceptionOfType(WebHooks.WebHookInternalException.class)
-                .isThrownBy(() -> this.webHooks.executeIntentWebHook(wh, null, chatResult, CHATINFO, WEBHOOK_TOKEN_ENCODING_SECRET));
+                .isThrownBy(() -> this.webHooks.executeIntentWebHook(wh, null, chatResult, CHATINFO));
     }
 
     /*
@@ -84,7 +81,7 @@ public class TestWebhooks {
         when(getFakeBuilder().post(any())).thenReturn(Response.serverError().build());
 
         assertThatExceptionOfType(WebHooks.WebHookExternalException.class)
-                .isThrownBy(() -> this.webHooks.executeIntentWebHook(wh, mi, chatResult, CHATINFO, WEBHOOK_TOKEN_ENCODING_SECRET));
+                .isThrownBy(() -> this.webHooks.executeIntentWebHook(wh, mi, chatResult, CHATINFO));
     }
 
     /*
@@ -105,7 +102,7 @@ public class TestWebhooks {
         WebHooks spy = Mockito.spy(this.webHooks);
         doReturn(new WebHookResponse("response")).when(spy).deserializeResponse(any());
         when(getFakeBuilder().post(any())).thenReturn(Response.ok().entity(new WebHookResponse("Success")).build());
-        WebHookResponse response = spy.executeIntentWebHook(wh, mi, chatResult, CHATINFO, WEBHOOK_TOKEN_ENCODING_SECRET);
+        WebHookResponse response = spy.executeIntentWebHook(wh, mi, chatResult, CHATINFO);
         verify(spy).getMessageHash(any(), any());
         verify(this.fakeTools, Mockito.never()).generateRandomHexString(anyInt());
         verify(this.fakeDatabase).getBotConfigForWebhookCall(any(), any(), any(), any());
@@ -129,7 +126,7 @@ public class TestWebhooks {
         WebHooks spy = Mockito.spy(this.webHooks);
         doReturn(new WebHookResponse("response")).when(spy).deserializeResponse(any());
         when(getFakeBuilder().post(any())).thenReturn(Response.ok().entity(new WebHookResponse("Success")).build());
-        WebHookResponse response = spy.executeIntentWebHook(wh, mi, chatResult, CHATINFO, WEBHOOK_TOKEN_ENCODING_SECRET);
+        WebHookResponse response = spy.executeIntentWebHook(wh, mi, chatResult, CHATINFO);
         verify(spy, Mockito.never()).getMessageHash(any(), any());
         Assert.assertNotNull(response);
     }
@@ -152,7 +149,7 @@ public class TestWebhooks {
         WebHooks spy = Mockito.spy(this.webHooks);
         doReturn(new WebHookResponse("response")).when(spy).deserializeResponse(any());
         when(getFakeBuilder().post(any())).thenReturn(Response.ok().entity(new WebHookResponse("Success")).build());
-        WebHookResponse response = spy.executeIntentWebHook(wh, mi, chatResult, CHATINFO, WEBHOOK_TOKEN_ENCODING_SECRET);
+        WebHookResponse response = spy.executeIntentWebHook(wh, mi, chatResult, CHATINFO);
         verify(spy).getMessageHash(any(), any());
         verify(this.fakeTools).generateRandomHexString(anyInt());
         Assert.assertNotNull(response);
@@ -168,7 +165,7 @@ public class TestWebhooks {
         ChatResult chatResult = new ChatResult("Hi");
 
         assertThatExceptionOfType(WebHooks.WebHookInternalException.class)
-                .isThrownBy(() -> this.webHooks.executeIntentWebHook(null, mi, chatResult, CHATINFO, WEBHOOK_TOKEN_ENCODING_SECRET));
+                .isThrownBy(() -> this.webHooks.executeIntentWebHook(null, mi, chatResult, CHATINFO));
     }
 
     /*
@@ -188,7 +185,7 @@ public class TestWebhooks {
         when(this.serializer.deserialize(anyString(), any())).thenReturn(null);
 
         assertThatExceptionOfType(WebHooks.WebHookExternalException.class)
-                .isThrownBy(() -> this.webHooks.executeIntentWebHook(wh, mi, chatResult, CHATINFO, WEBHOOK_TOKEN_ENCODING_SECRET));
+                .isThrownBy(() -> this.webHooks.executeIntentWebHook(wh, mi, chatResult, CHATINFO));
     }
 
     /*
@@ -207,7 +204,7 @@ public class TestWebhooks {
         when(getFakeBuilder().post(any())).thenReturn(Response.status(0).entity(new WebHookResponse("Success")).build());
 
         assertThatExceptionOfType(WebHooks.WebHookExternalException.class)
-                .isThrownBy(() -> this.webHooks.executeIntentWebHook(wh, mi, chatResult, CHATINFO, WEBHOOK_TOKEN_ENCODING_SECRET));
+                .isThrownBy(() -> this.webHooks.executeIntentWebHook(wh, mi, chatResult, CHATINFO));
     }
 
     /*
@@ -221,7 +218,7 @@ public class TestWebhooks {
         when(this.fakeDatabase.getBotConfigForWebhookCall(any(), any(), any(), any())).thenThrow(new DatabaseException("BAD CALL"));
 
         assertThatExceptionOfType(WebHooks.WebHookInternalException.class)
-                .isThrownBy(() -> this.webHooks.executeIntentWebHook(wh, mi, chatResult, CHATINFO, WEBHOOK_TOKEN_ENCODING_SECRET));
+                .isThrownBy(() -> this.webHooks.executeIntentWebHook(wh, mi, chatResult, CHATINFO));
 
         verify(this.fakeDatabase).getBotConfigForWebhookCall(any(), any(), any(), any());
         // ensure no attempt is made to build the webhook call
@@ -237,18 +234,6 @@ public class TestWebhooks {
 
         // Here's what Python calculated this should be using HMAC SHA256
         assert (hashString).equals("13f5ef193847035a837ef7123ffe2efd4748f57f0be74c3897f82064443457f2");
-    }
-
-    @Test
-    public void testWebhookToken_generate_canObtainClaims() {
-        final UUID chatId = UUID.randomUUID();
-        final String secret = "secret";
-        String token = WebHookPayload.generateWebhookToken(DEVID, AIID, chatId, secret);
-        Claims claims = Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
-        Assert.assertEquals(DEVID.toString(), claims.getSubject());
-        Assert.assertEquals(AIID.toString(), claims.get("AIID"));
-        Assert.assertEquals(chatId.toString(), claims.get("ChatId"));
-        Assert.assertNotNull(claims.get("TokenId"));
     }
 
     /*

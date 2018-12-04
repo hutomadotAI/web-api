@@ -56,7 +56,7 @@ public class ChatStateHandler {
             state = ChatState.getEmpty();
         }
         if (state.getHashedChatId() == null) {
-            state.setHashedChatId(Tools.getHashedDigestFromUuid(chatId));
+            state.setHashedChatId(Tools.getHashedDigest(chatId));
         }
 
         return state;

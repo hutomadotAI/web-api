@@ -2,14 +2,13 @@ package com.hutoma.api.logic.chat;
 
 import com.hutoma.api.common.ChatLogger;
 import com.hutoma.api.common.Config;
+import com.hutoma.api.common.FeatureToggler;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.*;
 import com.hutoma.api.logging.LogMap;
 import com.hutoma.api.logic.FacebookChatHandler;
 import com.hutoma.api.memory.ChatStateHandler;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
 
 import javax.inject.Inject;
 import java.util.Map;
@@ -24,16 +23,19 @@ public class WebhookHandler {
     private final FacebookChatHandler facebookChatHandler;
     private final ChatLogger chatLogger;
     private final Config config;
+    private final FeatureToggler featureToggler;
 
     @Inject
     WebhookHandler(final ChatStateHandler chatStateHandler,
                    final FacebookChatHandler facebookChatHandler,
                    final Config config,
-                   final ChatLogger chatLogger) {
+                   final ChatLogger chatLogger,
+                   final FeatureToggler featureToggler) {
         this.chatStateHandler = chatStateHandler;
         this.facebookChatHandler = facebookChatHandler;
         this.chatLogger = chatLogger;
         this.config = config;
+        this.featureToggler = featureToggler;
     }
 
     void updateChatContext(final ChatContext sessionCtx, final ChatContext responseCtx) {
@@ -83,16 +85,14 @@ public class WebhookHandler {
             }
             aiid = UUID.fromString(state.getAi().getAiid());
 
-            webHookSession = optWebHookSession.get();
-            String token = webHookSession.getToken();
-            Claims claims = Jwts.parser().setSigningKey(this.config.getWebhookEncodingSecret())
-                    .parseClaimsJws(token).getBody();
-            if (!state.getDevId().toString().equals(claims.getSubject())
-                    || !aiid.toString().equals(claims.get("AIID"))) {
-                this.chatLogger.logUserTraceEvent(LOGFROM, "doCallback - no DEVID or AIID match within token",
-                        devIdString, logMap.put("AIID", aiid).put("DevId", claims.getSubject()));
-                return ApiError.getBadRequest("Invalid chat session token");
+            if (this.featureToggler.getStateForAiid(state.getDevId(), aiid, "webhook-callback")
+                    != FeatureToggler.FeatureState.T1) {
+                this.chatLogger.logUserTraceEvent(LOGFROM, "doCallback - webhook callback not allowed",
+                        devIdString, logMap);
+                return ApiError.getForbidden("Bot not authorized for callback");
             }
+
+            webHookSession = optWebHookSession.get();
 
             if (state.getIntegrationData() == null) {
                 this.chatLogger.logUserTraceEvent(LOGFROM, "doCallback - session without integration data",
