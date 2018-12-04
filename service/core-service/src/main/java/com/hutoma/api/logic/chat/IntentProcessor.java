@@ -128,6 +128,7 @@ public class IntentProcessor {
 
         for (MemoryVariable entity : currentIntent.getVariables()) {
             String entityLabel = entity.getLabel();
+            String entityName = entity.getName();
             if (chatResult.getChatState().getChatContext().isSet(entityLabel) && !entity.getResetOnEntry()) {
                 String contextValue = chatResult.getChatState().getChatContext().getValue(entityLabel);
                 entity.setCurrentValue(contextValue);
@@ -138,7 +139,7 @@ public class IntentProcessor {
                 // This is a quick fix until the refactor is finished
                 for (Map.Entry<String, List<String>> candidate :
                         chatResult.getChatState().getCandidateValues().entrySet()) {
-                    if (candidate.getValue().contains(entityLabel)) {
+                    if (candidate.getValue().contains(entityName)) {
                         entity.setCurrentValue(candidate.getKey());
                     }
                 }
@@ -163,18 +164,9 @@ public class IntentProcessor {
                 telemetryMap.add("EntityRequested.Label", mv.getLabel());
                 chatResult.setScore(SCORE_INTENT_RECOGNIZED);
 
-                // Attempt to retrieve entities from the question
-                List<Pair<String, String>> entities = this.entityRecognizer.retrieveEntities(chatInfo.getQuestion(),
-                        chatInfo.getAiIdentity().getLanguage(),
-                        currentIntent.getVariables());
-                // Did the recognizer find something for this entity?
-                Optional<Pair<String, String>> entityValue = entities.stream()
-                        .filter(x -> x.getA().equals(mv.getName())).findFirst();
-                if (entityValue.isPresent() || mv.getName().equals(SYSANY)) {
-                    handledIntent = processVariables(chatInfo, aiidForMemoryIntents, currentIntent, chatResult,
-                            Collections.singletonList(mv), intentsToClear, intent, intentLog, telemetryMap);
-
-                } else {
+                handledIntent = processVariables(chatInfo, aiidForMemoryIntents, currentIntent, chatResult,
+                        Collections.singletonList(mv), intentsToClear, intent, intentLog, telemetryMap);
+                if (!handledIntent) {
                     // If we have prompted enough, then give up
                     if (mv.getTimesPrompted() >= mv.getTimesToPrompt()) {
                         mv.setRequested(false);
