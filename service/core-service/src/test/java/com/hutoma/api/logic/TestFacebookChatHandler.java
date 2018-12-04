@@ -497,6 +497,70 @@ public class TestFacebookChatHandler {
         Assert.assertFalse(getOutput(chatOutput.get(0)).hasQuickReplies());
     }
 
+    @Test
+    public void testChat_OK_multipleResponseNodes() throws Exception {
+        String answer = ANSWER;
+        String s = "{" +
+                "\"text\": \"" + answer + "\"," +
+                "\"facebook_multi\":[" +
+                "       {\"quick_replies\":[{" +
+                "            \"content_type\":\"text\"," +
+                "            \"title\":\"Search\"," +
+                "            \"payload\":\"PAYLOAD\"," +
+                "            \"image_url\":\"image_url\"" +
+                "            }]" +
+                "       }," +
+                "       {\"attachment\":" +
+                "           {\"type\": \"template\", \"payload\":" +
+                "               {\"template_type\": \"generic\", \"elements\":[" +
+                "                   {\"title\": \"title\", \"image_url\": \"image_url\", \"subtitle\": \"subtitle\", \"webview_height_ratio\": \"tall\"," +
+                "                   \"buttons\": [{\"type\": \"postback\", \"title\": \"button\", \"payload\": \"payload\"}]" +
+                "                   }" +
+                "               ]}" +
+                "           }" +
+                "       }" +
+                "   ]" +
+                "}";
+        WebHookResponse hookResponse = (WebHookResponse) this.serializer.deserialize(s, WebHookResponse.class);
+        List<FacebookResponseSegment> chatOutput = makeChatCall(answer, hookResponse);
+        Assert.assertTrue(getOutput(chatOutput.get(0)).hasQuickReplies());
+        Assert.assertTrue(getOutput(chatOutput.get(1)).hasAttachment());
+        // Text for first node is set since it's a quick reply
+        Assert.assertEquals(ANSWER, getOutput(chatOutput.get(0)).getText());
+    }
+
+    @Test
+    public void testChat_OK_multipleResponseNodes_singleNodeIgnored() throws Exception {
+        String answer = ANSWER;
+        String s = "{" +
+                "\"text\": \"" + answer + "\"," +
+                "\"facebook\": {\"quick_replies\":[{" +
+                "            \"content_type\":\"text\"," +
+                "            \"title\":\"Search\"," +
+                "            \"payload\":\"PAYLOAD\"," +
+                "            \"image_url\":\"image_url\"" +
+                "            }]" +
+                "       }," +
+                "\"facebook_multi\":[" +
+                "       {\"attachment\":" +
+                "           {\"type\": \"template\", \"payload\":" +
+                "               {\"template_type\": \"generic\", \"elements\":[" +
+                "                   {\"title\": \"title\", \"image_url\": \"image_url\", \"subtitle\": \"subtitle\", \"webview_height_ratio\": \"tall\"," +
+                "                   \"buttons\": [{\"type\": \"postback\", \"title\": \"button\", \"payload\": \"payload\"}]" +
+                "                   }" +
+                "               ]}" +
+                "           }" +
+                "       }" +
+                "   ]" +
+                "}";
+        WebHookResponse hookResponse = (WebHookResponse) this.serializer.deserialize(s, WebHookResponse.class);
+        List<FacebookResponseSegment> chatOutput = makeChatCall(answer, hookResponse);
+        Assert.assertFalse(getOutput(chatOutput.get(0)).hasQuickReplies());
+        Assert.assertTrue(getOutput(chatOutput.get(0)).hasAttachment());
+        // Response text for single node is not set (although a quick reply) since the whole node should be ignored
+        Assert.assertNull(getOutput(chatOutput.get(0)).getText());
+    }
+
     private FacebookMessageNode getOutput(FacebookResponseSegment segment) {
         FacebookConnector.SendMessage sendMessage = new FacebookConnector.SendMessage("recipient");
         segment.populateMessageContent(sendMessage);

@@ -350,39 +350,51 @@ public class FacebookChatHandler implements Callable {
             final WebHookResponse webHookResponse,
             final String responseText,
             final LogMap logMap) {
-        // otherwise, do we have rich content from a webhook?
+
+        // Do we have rich content from a webhook?
         boolean webhookResponseSentRichContent =
                 webHookResponse != null
-                        && webHookResponse.getFacebookNode() != null;
+                        && (webHookResponse.getFacebookNode() != null || webHookResponse.getFacebookNodes() != null);
 
         logMap.add("Facebook_RichWebhook", webhookResponseSentRichContent);
 
         if (webhookResponseSentRichContent) {
 
-            // if the webhook returned rich data in the old format then we
-            // have to convert it to the new format
-            FacebookMessageNode richNode =
-                    convertDeprecatedFormat(logMap, webHookResponse.getFacebookNode());
-
-            // is this a quick reply?
-            if (richNode.hasQuickReplies()) {
-
-                // quick reply with attachment or with plain text?
-                if (richNode.hasAttachment()) {
-                    responseList.add(
-                            new FacebookResponseSegment.FacebookResponseQuickRepliesSegment(
-                                    richNode.getQuickReplies(), richNode.getAttachment()));
-                } else {
-                    responseList.add(
-                            new FacebookResponseSegment.FacebookResponseQuickRepliesSegment(
-                                    richNode.getQuickReplies(), responseText));
-
-                }
+            // If we have a list of message nodes stick with that, otherwise just use the single response node
+            List<FacebookMessageNode> nodeList = null;
+            if (webHookResponse.getFacebookNodes() != null) {
+                nodeList = webHookResponse.getFacebookNodes();
             } else {
-                // otherwise just plain attachment
-                responseList.add(
-                        new FacebookResponseSegment.FacebookResponseAttachmentSegment(
-                                richNode.getAttachment()));
+                nodeList = new ArrayList<>();
+                nodeList.add(webHookResponse.getFacebookNode());
+            }
+
+            for (FacebookMessageNode node : nodeList) {
+
+                // if the webhook returned rich data in the old format then we
+                // have to convert it to the new format
+                FacebookMessageNode richNode = convertDeprecatedFormat(logMap, node);
+
+                // is this a quick reply?
+                if (richNode.hasQuickReplies()) {
+
+                    // quick reply with attachment or with plain text?
+                    if (richNode.hasAttachment()) {
+                        responseList.add(
+                                new FacebookResponseSegment.FacebookResponseQuickRepliesSegment(
+                                        richNode.getQuickReplies(), richNode.getAttachment()));
+                    } else {
+                        responseList.add(
+                                new FacebookResponseSegment.FacebookResponseQuickRepliesSegment(
+                                        richNode.getQuickReplies(), responseText));
+
+                    }
+                } else {
+                    // otherwise just plain attachment
+                    responseList.add(
+                            new FacebookResponseSegment.FacebookResponseAttachmentSegment(
+                                    richNode.getAttachment()));
+                }
             }
 
         } else {
