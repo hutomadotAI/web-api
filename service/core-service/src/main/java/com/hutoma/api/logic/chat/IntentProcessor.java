@@ -131,6 +131,17 @@ public class IntentProcessor {
             if (chatResult.getChatState().getChatContext().isSet(entityLabel) && !entity.getResetOnEntry()) {
                 String contextValue = chatResult.getChatState().getChatContext().getValue(entityLabel);
                 entity.setCurrentValue(contextValue);
+            } else {
+                // The entity value might be from the new entity bits
+                // There might be more than one match, for now just use the first to mark the value fulfilled
+                // Other matches are considered later on in processing the variables
+                // This is a quick fix until the refactor is finished
+                for (Map.Entry<String, List<String>> candidate :
+                        chatResult.getChatState().getCandidateValues().entrySet()) {
+                    if (candidate.getValue().contains(entityLabel)) {
+                        entity.setCurrentValue(candidate.getKey());
+                    }
+                }
             }
         }
 
