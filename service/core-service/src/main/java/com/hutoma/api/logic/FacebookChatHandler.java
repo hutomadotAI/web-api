@@ -370,30 +370,34 @@ public class FacebookChatHandler implements Callable {
             }
 
             for (FacebookMessageNode node : nodeList) {
+                if (node != null) {
 
-                // if the webhook returned rich data in the old format then we
-                // have to convert it to the new format
-                FacebookMessageNode richNode = convertDeprecatedFormat(logMap, node);
+                    // if the webhook returned rich data in the old format then we
+                    // have to convert it to the new format
+                    FacebookMessageNode richNode = convertDeprecatedFormat(logMap, node);
 
-                // is this a quick reply?
-                if (richNode.hasQuickReplies()) {
+                    // is this a quick reply?
+                    if (richNode.hasQuickReplies()) {
 
-                    // quick reply with attachment or with plain text?
-                    if (richNode.hasAttachment()) {
+                        // quick reply with attachment or with plain text?
+                        if (richNode.hasAttachment()) {
+                            responseList.add(
+                                    new FacebookResponseSegment.FacebookResponseQuickRepliesSegment(
+                                            richNode.getQuickReplies(), richNode.getAttachment()));
+                        } else {
+                            responseList.add(
+                                    new FacebookResponseSegment.FacebookResponseQuickRepliesSegment(
+                                            richNode.getQuickReplies(), responseText));
+
+                        }
+                    } else if (richNode.hasAttachment()) {
                         responseList.add(
-                                new FacebookResponseSegment.FacebookResponseQuickRepliesSegment(
-                                        richNode.getQuickReplies(), richNode.getAttachment()));
-                    } else {
-                        responseList.add(
-                                new FacebookResponseSegment.FacebookResponseQuickRepliesSegment(
-                                        richNode.getQuickReplies(), responseText));
+                                new FacebookResponseSegment.FacebookResponseAttachmentSegment(
+                                        richNode.getAttachment()));
 
+                    } else if (richNode.hasText()) {
+                        createTextResponse(responseList, richNode.getText());
                     }
-                } else {
-                    // otherwise just plain attachment
-                    responseList.add(
-                            new FacebookResponseSegment.FacebookResponseAttachmentSegment(
-                                    richNode.getAttachment()));
                 }
             }
 

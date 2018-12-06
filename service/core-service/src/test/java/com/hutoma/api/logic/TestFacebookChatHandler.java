@@ -561,6 +561,54 @@ public class TestFacebookChatHandler {
         Assert.assertNull(getOutput(chatOutput.get(0)).getText());
     }
 
+    @Test
+    public void testChat_OK_multipleResponseNodes_multipleTextNodes() throws Exception {
+        String answer = ANSWER;
+        String s = "{" +
+                "\"text\": \"" + answer + "\"," +
+                "\"facebook_multi\":[" +
+                "       {\"text\":\"text1\"}," +
+                "       {\"text\":\"text2\"}" +
+                "   ]" +
+                "}";
+        WebHookResponse hookResponse = (WebHookResponse) this.serializer.deserialize(s, WebHookResponse.class);
+        List<FacebookResponseSegment> chatOutput = makeChatCall(answer, hookResponse);
+        Assert.assertFalse(getOutput(chatOutput.get(0)).hasQuickReplies());
+        Assert.assertTrue(getOutput(chatOutput.get(0)).hasText());
+        Assert.assertTrue(getOutput(chatOutput.get(1)).hasText());
+        Assert.assertEquals("text1", getOutput(chatOutput.get(0)).getText());
+        Assert.assertEquals("text2", getOutput(chatOutput.get(1)).getText());
+    }
+
+    @Test
+    public void testChat_OK_multipleResponseNodes_multipleTextNodes_oneNull() throws Exception {
+        String answer = ANSWER;
+        String s = "{" +
+                "\"text\": \"" + answer + "\"," +
+                "\"facebook_multi\":[" +
+                "       {\"text\":\"text1\"}," + // Note the ',', this will cause the array to have 2 nodes, last null
+                "   ]" +
+                "}";
+        WebHookResponse hookResponse = (WebHookResponse) this.serializer.deserialize(s, WebHookResponse.class);
+        List<FacebookResponseSegment> chatOutput = makeChatCall(answer, hookResponse);
+        Assert.assertEquals(1, chatOutput.size());
+        Assert.assertEquals("text1", getOutput(chatOutput.get(0)).getText());
+    }
+
+    @Test
+    public void testChat_OK_multipleResponseNodes_emptyText_isIgnored() throws Exception {
+        String answer = ANSWER;
+        String s = "{" +
+                "\"text\": \"" + answer + "\"," +
+                "\"facebook_multi\":[" +
+                "       {\"text\":\"\"}" +
+                "   ]" +
+                "}";
+        WebHookResponse hookResponse = (WebHookResponse) this.serializer.deserialize(s, WebHookResponse.class);
+        List<FacebookResponseSegment> chatOutput = makeChatCall(answer, hookResponse);
+        Assert.assertTrue(chatOutput.isEmpty());
+    }
+
     private FacebookMessageNode getOutput(FacebookResponseSegment segment) {
         FacebookConnector.SendMessage sendMessage = new FacebookConnector.SendMessage("recipient");
         segment.populateMessageContent(sendMessage);
