@@ -381,18 +381,6 @@ public class IntentProcessor {
             // Attempt to retrieve entities from the question
             entities = this.entityRecognizer.retrieveEntities(chatInfo.getQuestion(),
                     chatInfo.getAiIdentity().getLanguage(), memoryVariables);
-
-            // Also if we can process entities and variables, we can
-            // delete variable from context if clear on entry is set
-            // but only work on variables supplied - we might be in a prompt loop
-            ChatContext ctx = chatResult.getChatState().getChatContext();
-            for (MemoryVariable var : currentIntent.getVariables()) {
-                if (ctx.isSet(var.getLabel())) {
-                    if (var.getResetOnEntry()) {
-                        ctx.clearVariable(var.getLabel());
-                    }
-                }
-            }
         }
 
         // we have a potential list of entities from the above call. need also to consider the candidate
