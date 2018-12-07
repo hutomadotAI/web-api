@@ -1,6 +1,7 @@
 package com.hutoma.api.containers.sub;
 
 import com.google.gson.annotations.SerializedName;
+import com.hutoma.api.containers.facebook.FacebookMessageNode;
 
 import java.util.List;
 import java.util.Map;
@@ -41,6 +42,8 @@ public class ChatResult {
     private String chatTarget;
     @SerializedName("timestamp")
     private long timestamp;
+    @SerializedName("rich_answer")
+    private RichAnswer richAnswer;
 
     /**
      * Section for transient fields (non-serializable to JSON)
@@ -81,11 +84,11 @@ public class ChatResult {
         this.webHookResponse = source.webHookResponse;
         this.chatState = source.chatState;
         this.timestamp = source.timestamp;
-        this.context = source.context;
     }
 
     /**
      * Ctor.
+     *
      * @param chatId          the chat id
      * @param score           the response score
      * @param query           the initial query
@@ -106,6 +109,7 @@ public class ChatResult {
 
     /**
      * Gets the answer.
+     *
      * @return the answer
      */
     public String getAnswer() {
@@ -114,6 +118,7 @@ public class ChatResult {
 
     /**
      * Sets the answer.
+     *
      * @param answer the answer
      */
     public void setAnswer(final String answer) {
@@ -122,6 +127,7 @@ public class ChatResult {
 
     /**
      * Gets the initial query.
+     *
      * @return the query
      */
     public final String getQuery() {
@@ -130,6 +136,7 @@ public class ChatResult {
 
     /**
      * Sets the initial query.
+     *
      * @param query the query
      */
     public void setQuery(final String query) {
@@ -138,6 +145,7 @@ public class ChatResult {
 
     /**
      * Sets the chat context.
+     *
      * @param context the new context
      */
     public void setContext(final Map<String, String> context) {
@@ -146,6 +154,7 @@ public class ChatResult {
 
     /**
      * Gets the response score.
+     *
      * @return the score
      */
     public double getScore() {
@@ -154,6 +163,7 @@ public class ChatResult {
 
     /**
      * Sets the response score.
+     *
      * @param score the score
      */
     public void setScore(final double score) {
@@ -162,6 +172,7 @@ public class ChatResult {
 
     /**
      * Sets the input topic.
+     *
      * @param topicIn the input topic
      */
     public void setTopicIn(final String topicIn) {
@@ -170,6 +181,7 @@ public class ChatResult {
 
     /**
      * Gets the output topic.
+     *
      * @return the output topic
      */
     public String getTopicOut() {
@@ -178,6 +190,7 @@ public class ChatResult {
 
     /**
      * Sets the output topic.
+     *
      * @param topicOut the output topic
      */
     public void setTopicOut(final String topicOut) {
@@ -186,6 +199,7 @@ public class ChatResult {
 
     /**
      * Gets the elapse time.
+     *
      * @return the elapsed time
      */
     public double getElapsedTime() {
@@ -194,6 +208,7 @@ public class ChatResult {
 
     /**
      * Sets the elapsed time
+     *
      * @param elapsedTime the elapsed time
      */
     public void setElapsedTime(final double elapsedTime) {
@@ -202,6 +217,7 @@ public class ChatResult {
 
     /**
      * Gets the chat session id.
+     *
      * @return the chat session id
      */
     public UUID getChatId() {
@@ -210,6 +226,7 @@ public class ChatResult {
 
     /**
      * Sets the chat session id.
+     *
      * @param chatId the chat session id
      */
     public void setChatId(final UUID chatId) {
@@ -218,6 +235,7 @@ public class ChatResult {
 
     /**
      * Gets the list of intents in flight.
+     *
      * @return the list of intents in flight
      */
     public List<MemoryIntent> getIntents() {
@@ -226,6 +244,7 @@ public class ChatResult {
 
     /**
      * Sets the list of intents in flight.
+     *
      * @param intents the list of intents in flight
      */
     public void setIntents(final List<MemoryIntent> intents) {
@@ -234,6 +253,7 @@ public class ChatResult {
 
     /**
      * Gets the history.
+     *
      * @return the history
      */
     public String getHistory() {
@@ -242,6 +262,7 @@ public class ChatResult {
 
     /**
      * Sets the history.
+     *
      * @param history the history
      */
     public void setHistory(final String history) {
@@ -250,6 +271,7 @@ public class ChatResult {
 
     /**
      * Gets the AI id.
+     *
      * @return the AI id
      */
     public UUID getAiid() {
@@ -258,6 +280,7 @@ public class ChatResult {
 
     /**
      * Sets the AI id.
+     *
      * @param aiid the AI id
      */
     public void setAiid(final UUID aiid) {
@@ -266,14 +289,17 @@ public class ChatResult {
 
     /**
      * Sets the webhook response.
+     *
      * @param webHookResponse the webhook response
      */
     public void setWebHookResponse(final WebHookResponse webHookResponse) {
         this.webHookResponse = webHookResponse;
+        this.richAnswer = new RichAnswer(webHookResponse);
     }
 
     /**
      * Sets the reset conversation flag.
+     *
      * @param resetConversation whether to reset the conversation or not
      */
     public void setResetConversation(final boolean resetConversation) {
@@ -282,6 +308,7 @@ public class ChatResult {
 
     /**
      * Gets the webhook response.
+     *
      * @return the webhook response
      */
     public WebHookResponse getWebhookResponse() {
@@ -290,6 +317,7 @@ public class ChatResult {
 
     /**
      * Gets the prompt for requesting a variable from an intent in flight.
+     *
      * @return the prompt
      */
     public String getPromptForIntentVariable() {
@@ -298,6 +326,7 @@ public class ChatResult {
 
     /**
      * Sets the prompt for requesting a variable from an intent in flight.
+     *
      * @param promptForIntentVariable the prompt
      */
     public void setPromptForIntentVariable(final String promptForIntentVariable) {
@@ -306,6 +335,7 @@ public class ChatResult {
 
     /**
      * Sets the timestamp of the chat call.
+     *
      * @param timestamp the timestamp
      */
     public void setTimestamp(final long timestamp) {
@@ -314,6 +344,7 @@ public class ChatResult {
 
     /**
      * Gets the timestamp of the chat call.
+     *
      * @return the timestamp
      */
     public long getTimestamp() {
@@ -322,6 +353,7 @@ public class ChatResult {
 
     /**
      * Sets the current chat target @see com.hutoma.api.containers.sub.ChatHandoverTarget
+     *
      * @param chatTarget the new chat target
      */
     public void setChatTarget(final String chatTarget) {
@@ -330,6 +362,7 @@ public class ChatResult {
 
     /**
      * Gets the current chat target.
+     *
      * @return the current chat target
      */
     public String getChatTarget() {
@@ -358,6 +391,7 @@ public class ChatResult {
 
     /**
      * Gets the current chat state.
+     *
      * @return the chat state
      */
     public ChatState getChatState() {
@@ -366,6 +400,7 @@ public class ChatResult {
 
     /**
      * Sets the chat state.
+     *
      * @param chatState the new chat state
      */
     public void setChatState(final ChatState chatState) {
@@ -375,4 +410,32 @@ public class ChatResult {
     public Map<String, String> getContext() {
         return this.context;
     }
+
+    public RichAnswer getRichAnswer() {
+        return this.richAnswer;
+    }
+
+
+    public static class RichAnswer {
+        @SerializedName("facebook")
+        private FacebookMessageNode facebookNode;
+        @SerializedName("facebook_multi")
+        private List<FacebookMessageNode> facebookNodes;
+
+        RichAnswer(final WebHookResponse response) {
+            if (response != null) {
+                this.facebookNode = response.getFacebookNode();
+                this.facebookNodes = response.getFacebookNodes();
+            }
+        }
+
+        public FacebookMessageNode getFacebookNode() {
+            return this.facebookNode;
+        }
+
+        public List<FacebookMessageNode> getFacebookNodes() {
+            return this.facebookNodes;
+        }
+    }
+
 }

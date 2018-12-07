@@ -4,7 +4,6 @@ import com.hutoma.api.connectors.NoServerAvailableException;
 import com.hutoma.api.connectors.ServerConnector;
 import com.hutoma.api.connectors.WebHooks;
 import com.hutoma.api.connectors.chat.ChatBackendConnector;
-import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.ApiChat;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.ApiIntent;
@@ -37,7 +36,7 @@ public class TestChatLogicWebhooks extends TestChatBase {
      */
     @Test
     public void testChat_webHookTriggered()
-            throws ChatBackendConnector.AiControllerException, WebHooks.WebHookException, DatabaseException, ChatLogic.IntentException {
+            throws ChatBackendConnector.AiControllerException, WebHooks.WebHookException, ChatLogic.IntentException {
         final String intentName = "intent1";
         final String webHookResponse = "webhook executed";
 
@@ -68,7 +67,7 @@ public class TestChatLogicWebhooks extends TestChatBase {
      */
     @Test
     public void testChat_webHookNullResponseHandled()
-            throws ChatBackendConnector.AiControllerException, DatabaseException, WebHooks.WebHookException, ChatLogic.IntentException {
+            throws ChatBackendConnector.AiControllerException, WebHooks.WebHookException, ChatLogic.IntentException {
         final String intentName = "intent1";
         final String webHookResponse = null;
         MemoryVariable mv = new MemoryVariable("var", Arrays.asList("a", "b"));
@@ -94,7 +93,7 @@ public class TestChatLogicWebhooks extends TestChatBase {
      */
     @Test
     public void testChat_webHookFacebookHandled()
-            throws ChatBackendConnector.AiControllerException, DatabaseException, ChatBaseException,
+            throws ChatBackendConnector.AiControllerException, ChatBaseException,
             ServerConnector.AiServicesException, NoServerAvailableException {
         final String intentName = "intent1";
 
@@ -124,6 +123,10 @@ public class TestChatLogicWebhooks extends TestChatBase {
         Assert.assertNotNull(result.getWebhookResponse().getFacebookNode().getAttachment());
         FacebookRichContentPayload payload = result.getWebhookResponse().getFacebookNode().getAttachment().getPayload();
         Assert.assertEquals(webHookResponse, payload.getText());
+        // Make sure the facebook payload is available on the "public" response
+        Assert.assertNotNull(result.getRichAnswer());
+        Assert.assertEquals(result.getWebhookResponse().getFacebookNode(), result.getRichAnswer().getFacebookNode());
+        Assert.assertEquals(result.getWebhookResponse().getFacebookNodes(), result.getRichAnswer().getFacebookNodes());
     }
 
     private WebHookResponse getFacebookWebHookResponse(final String webHookResponse) {
@@ -141,6 +144,7 @@ public class TestChatLogicWebhooks extends TestChatBase {
                 new FacebookRichContentAttachment(
                         FacebookRichContentAttachment.RichContentType.image, richContentPayload));
         wr.setFacebookNode(node);
+        wr.setFacebookNodes(Collections.singletonList(node));
         return wr;
     }
 
