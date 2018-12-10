@@ -81,9 +81,9 @@ public class ChatResult {
         this.chatId = source.chatId;
         this.aiid = source.aiid;
         this.chatTarget = source.chatTarget;
-        this.webHookResponse = source.webHookResponse;
         this.chatState = source.chatState;
         this.timestamp = source.timestamp;
+        this.setWebHookResponse(source.webHookResponse);
     }
 
     /**
