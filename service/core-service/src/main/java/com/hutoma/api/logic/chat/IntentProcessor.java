@@ -126,21 +126,35 @@ public class IntentProcessor {
             }
         }
 
-        for (MemoryVariable entity : currentIntent.getVariables()) {
-            String entityLabel = entity.getLabel();
-            String entityName = entity.getName();
-            if (chatResult.getChatState().getChatContext().isSet(entityLabel) && !entity.getResetOnEntry()) {
-                String contextValue = chatResult.getChatState().getChatContext().getValue(entityLabel);
-                entity.setCurrentValue(contextValue);
-            } else {
-                // The entity value might be from the new entity bits
-                // There might be more than one match, for now just use the first to mark the value fulfilled
-                // Other matches are considered later on in processing the variables
-                // This is a quick fix until the refactor is finished
-                for (Map.Entry<String, List<String>> candidate :
-                        chatResult.getChatState().getCandidateValues().entrySet()) {
-                    if (candidate.getValue().contains(entityName)) {
-                        entity.setCurrentValue(candidate.getKey());
+        // Are we in the middle of an entity value request?
+        Optional<MemoryVariable> requestedVariable = currentIntent.getVariables()
+                .stream().filter(MemoryVariable::isRequested).findFirst();
+
+        List<MemoryVariable> variablesToProcess;
+
+        if (requestedVariable.isPresent()) {
+            variablesToProcess = new ArrayList<MemoryVariable>();
+            variablesToProcess.add(requestedVariable.get());
+        } else {
+            variablesToProcess = currentIntent.getVariables();
+        }
+
+        for (MemoryVariable entity : variablesToProcess) {
+            long entityOccurances = variablesToProcess.stream()
+                    .filter(var -> var.getName().equals(entity.getName())).count();
+            if (entityOccurances == 1) {
+                String entityLabel = entity.getLabel();
+                String entityName = entity.getName();
+                if (chatResult.getChatState().getChatContext().isSet(entityLabel) && !entity.getResetOnEntry()) {
+                    String contextValue = chatResult.getChatState().getChatContext().getValue(entityLabel);
+                    entity.setCurrentValue(contextValue);
+                } else {
+                    // If we dont have the value from the existing context, check the candidate matches
+                    for (Map.Entry<String, List<String>> candidate :
+                            chatResult.getChatState().getCandidateValues().entrySet()) {
+                        if (candidate.getValue().contains(entityName)) {
+                            entity.setCurrentValue(candidate.getKey());
+                        }
                     }
                 }
             }
@@ -150,10 +164,6 @@ public class IntentProcessor {
         intent.getContextIn().forEach((k, v) ->
                 chatResult.getChatState().getChatContext()
                         .setValue(k, v, ChatContext.ChatVariableValue.DEFAULT_LIFESPAN_TURNS));
-
-        // Are we in the middle of an entity value request?
-        Optional<MemoryVariable> requestedVariable = currentIntent.getVariables()
-                .stream().filter(MemoryVariable::isRequested).findFirst();
 
         try {
 
@@ -381,15 +391,70 @@ public class IntentProcessor {
             // Attempt to retrieve entities from the question
             entities = this.entityRecognizer.retrieveEntities(chatInfo.getQuestion(),
                     chatInfo.getAiIdentity().getLanguage(), memoryVariables);
+        }
 
-            // Also if we can process entities and variables, we can
-            // delete variable from context if clear on entry is set
-            ChatContext ctx = chatResult.getChatState().getChatContext();
-            for (MemoryVariable var : currentIntent.getVariables()) {
-                if (ctx.isSet(var.getLabel())) {
-                    if (var.getResetOnEntry()) {
-                        ctx.clearVariable(var.getLabel());
+        // we have a potential list of entities from the above call. need also to consider the candidate
+        // entity values from chat entity value handler
+        if (featureToggler.getStateForAiid(
+                chatInfo.getDevId(),
+                chatInfo.getAiid(),
+                "entity-value-replacement") == FeatureToggler.FeatureState.T1) {
+            logger.logInfo("IntentProcessor",
+                    "Checking for entity value matching for intent "
+                            + intent.getIntentName());
+
+            // We need to filter the relevant candidates and then count how many we have left
+            // This function is called with a list of memory variables - that will either be all entities linked
+            // to the current intent, or a singleton if we've previously been prompted for an entity, so filter to that
+            HashMap<String, List<String>> localEntityCandidateMatches = new HashMap<>();
+            // Keep a mapping of entity names to entity labels for this intent, for later
+            //HashMap<String, String> localEntityNameLabelMap = new HashMap<>();
+
+            // Loop through the supplied variables only (to handle the case of this being a prompted run)
+            for (MemoryVariable variable : memoryVariables) {
+                // Loop through the list of values to entity names from ER
+                for (Map.Entry<String, List<String>> candidate :
+                        chatResult.getChatState().getCandidateValues().entrySet()) {
+                    // If the entity name is in the list of entity names from the candidate matches then...
+                    if (candidate.getValue().contains(variable.getName())) {
+                        // ...we need to consider this value
+                        if (localEntityCandidateMatches.containsKey(candidate.getKey())) {
+                            localEntityCandidateMatches.get(candidate.getKey()).add(variable.getName());
+                        } else {
+                            List<String> newEntities = new ArrayList<String>();
+                            newEntities.add(variable.getName());
+                            localEntityCandidateMatches.put(candidate.getKey(), newEntities);
+                        }
+                        //localEntityNameLabelMap.put(variable.getName(), variable.getLabel());
                     }
+                }
+            }
+
+            // At this point we have localEntityCandidateMatches - Map of strings to List<entity names> (in scope only)
+            // And localEntityNameLabelMap - map of entityName to entityLabel (in scope only)
+
+            ChatState chatState = chatResult.getChatState();
+            // If there are any candidateValues remaining with only one possible match, use that one
+            for (Map.Entry<String, List<String>> candidate : localEntityCandidateMatches.entrySet()) {
+                if (candidate.getValue().size() == 1) {
+                    String entityName = candidate.getValue().get(0);
+                    //String entityLabel = localEntityNameLabelMap.get(entityName);
+                    String entityValue = candidate.getKey();
+                    // Update the entity list
+                    //chatState.getEntityValues().put(entityName, entityValue);
+                    entities.add(new Pair<String, String>(entityName, entityValue));
+
+                    // Dont update chat context here - as we've now appended to the single list of entities
+                    // the context and persistance will be correctly updated automatically
+
+                    // Also need to update the entity labels in chatContext, but that is indexed on entity-label
+                    // If the variable already exists, make sure the lifespan is maintained
+                    //chatState.getChatContext().setValue(entityLabel, entityValue,
+                    //        chatState.getChatContext().isSet(entityLabel)
+                    //                ? chatState.getChatContext().getVariable(entityLabel).getLifespanTurns()
+                    //                : ChatContext.ChatVariableValue.DEFAULT_LIFESPAN_TURNS);
+                    logger.logInfo("IntentProcessor",
+                            String.format("Added entity value %s from entity value matching", entityValue));
                 }
             }
         }
@@ -407,8 +472,8 @@ public class IntentProcessor {
                 currentIntent.fulfillVariables(entities);
             }
 
-            // Write recognised persistent entities.
-            for (Object entity : currentIntent.getVariables()
+            // Write recognised persistent entities, for the supplied variables
+            for (Object entity : memoryVariables
                     .stream()
                     .filter(x -> x.getIsPersistent() && x.getCurrentValue() != null)
                     .toArray()) {
@@ -420,68 +485,17 @@ public class IntentProcessor {
             Map<String, Integer> lifetimeMap = new HashMap<>(); // maps entity label to lifetime
             intent.getVariables().forEach(x -> lifetimeMap.put(x.getLabel(), x.getLifetimeTurns()));
             // Add the variablest to the context, including the lifetime
-            currentIntent.getVariables().forEach(
+            memoryVariables.forEach(
                     v -> chatResult.getChatState().getChatContext().setValue(
                             v.getLabel(), v.getCurrentValue(),
-                            lifetimeMap.getOrDefault(v.getLabel(), -1)));
+                            lifetimeMap.getOrDefault(v.getLabel(),
+                                    ChatContext.ChatVariableValue.DEFAULT_LIFESPAN_TURNS)));
         }
 
-        // Populate the entities from context
-        for (MemoryVariable var : currentIntent.getVariables()) {
+        // Populate the entities from context - only for those variables prompted
+        for (MemoryVariable var : memoryVariables) {
             if (chatResult.getChatState().getChatContext().isSet(var.getLabel())) {
                 var.setCurrentValue(chatResult.getChatState().getChatContext().getValue(var.getLabel()));
-            }
-        }
-
-        if (featureToggler.getStateForAiid(
-                chatInfo.getDevId(),
-                chatInfo.getAiid(),
-                "entity-value-replacement") == FeatureToggler.FeatureState.T1) {
-            logger.logInfo("IntentProcessor",
-                    "Checking for entity value matching for intent "
-                            + intent.getIntentName());
-
-            // We need to filter the relevant candidates and then count how many we have left
-            // This function is called with a list of memory variables - that will either be all entities linked
-            // to the current intent, or a singleton if we've previously been prompted for an entity, so filter to that
-            HashMap<String, List<String>> localEntityCandidateMatches = new HashMap<>();
-            // Keep a mapping of entity names to entity labels for this intent, for later
-            HashMap<String, String> localEntityNameLabelMap = new HashMap<>();
-            for (MemoryVariable variable : memoryVariables) {
-                for (Map.Entry<String, List<String>> candidate :
-                        chatResult.getChatState().getCandidateValues().entrySet()) {
-                    if (candidate.getValue().contains(variable.getName())) {
-                        // we need to consider this value
-                        if (localEntityCandidateMatches.containsKey(candidate.getKey())) {
-                            localEntityCandidateMatches.get(candidate.getKey()).add(variable.getName());
-                        } else {
-                            List<String> newEntities = new ArrayList<String>();
-                            newEntities.add(variable.getName());
-                            localEntityCandidateMatches.put(candidate.getKey(), newEntities);
-                        }
-                        localEntityNameLabelMap.put(variable.getName(), variable.getLabel());
-                    }
-                }
-            }
-
-            ChatState chatState = chatResult.getChatState();
-            // If there are any candidateValues remaining with only one possible match, use that one
-            for (Map.Entry<String, List<String>> candidate : localEntityCandidateMatches.entrySet()) {
-                if (candidate.getValue().size() == 1) {
-                    String entityName = candidate.getValue().get(0);
-                    String entityLabel = localEntityNameLabelMap.get(entityName);
-                    String entityValue = candidate.getKey();
-                    // Update the entity list
-                    chatState.getEntityValues().put(entityName, entityValue);
-                    // Also need to update the entity labels in chatContext, but that is indexed on entity-label
-                    // If the variable already exists, make sure the lifespan is maintained
-                    chatState.getChatContext().setValue(entityLabel, entityValue,
-                            chatState.getChatContext().isSet(entityLabel)
-                                    ? chatState.getChatContext().getVariable(entityLabel).getLifespanTurns()
-                                    : ChatContext.ChatVariableValue.DEFAULT_LIFESPAN_TURNS);
-                    logger.logInfo("IntentProcessor",
-                            String.format("Added entity value %s from entity value matching", entityValue));
-                }
             }
         }
 
