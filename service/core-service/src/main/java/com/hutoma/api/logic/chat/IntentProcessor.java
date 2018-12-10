@@ -149,10 +149,7 @@ public class IntentProcessor {
                     String contextValue = chatResult.getChatState().getChatContext().getValue(entityLabel);
                     entity.setCurrentValue(contextValue);
                 } else {
-                    // The entity value might be from the new entity bits
-                    // There might be more than one match, for now just use the first to mark the value fulfilled
-                    // Other matches are considered later on in processing the variables
-                    // This is a quick fix until the refactor is finished
+                    // If we dont have the value from the existing context, check the candidate matches
                     for (Map.Entry<String, List<String>> candidate :
                             chatResult.getChatState().getCandidateValues().entrySet()) {
                         if (candidate.getValue().contains(entityName)) {
@@ -491,7 +488,8 @@ public class IntentProcessor {
             memoryVariables.forEach(
                     v -> chatResult.getChatState().getChatContext().setValue(
                             v.getLabel(), v.getCurrentValue(),
-                            lifetimeMap.getOrDefault(v.getLabel(), -1)));
+                            lifetimeMap.getOrDefault(v.getLabel(),
+                                    ChatContext.ChatVariableValue.DEFAULT_LIFESPAN_TURNS)));
         }
 
         // Populate the entities from context - only for those variables prompted
