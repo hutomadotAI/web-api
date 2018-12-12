@@ -392,8 +392,7 @@ public class IntentProcessor {
                 && !chatResult.getChatState().isInIntentLoop()) { // we cannot infer variables in nested intents
             // At this stage we're guaranteed to have variables with different entity types
             // Attempt to retrieve entities from the question
-            entities = this.entityRecognizer.retrieveEntities(chatInfo.getQuestion(),
-                    chatInfo.getAiIdentity().getLanguage(), memoryVariables);
+            entities = this.entityRecognizer.retrieveEntities(chatInfo, memoryVariables);
         }
 
         // we have a potential list of entities from the above call. need also to consider the candidate

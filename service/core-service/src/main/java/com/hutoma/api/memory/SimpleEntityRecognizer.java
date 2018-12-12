@@ -1,6 +1,7 @@
 package com.hutoma.api.memory;
 
 import com.hutoma.api.common.SupportedLanguage;
+import com.hutoma.api.containers.sub.ChatRequestInfo;
 import com.hutoma.api.containers.sub.EntityValueType;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.common.Pair;

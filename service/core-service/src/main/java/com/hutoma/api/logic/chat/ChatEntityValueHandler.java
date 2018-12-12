@@ -65,8 +65,8 @@ public class ChatEntityValueHandler implements IChatHandler {
                 .put("Version", aiIdentity.getServerVersion());
 
         // Call the old entity recognition (this includes system entities)
-        List<MemoryVariable> mvEntities = new ArrayList<MemoryVariable>() {};
-        List<Pair<String, String>> entitiesFromNER = getEntitiesFromNER(requestInfo, mvEntities);
+        //List<MemoryVariable> mvEntities = new ArrayList<MemoryVariable>() {};
+        //List<Pair<String, String>> entitiesFromNER = getEntitiesFromNER(requestInfo, mvEntities);
 
         // Check if this feature applies
         if (featureToggler.getStateForAiid(
