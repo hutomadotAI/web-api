@@ -47,7 +47,7 @@ public class BotStructureSerializer {
             for (IntentVariable intentVariable : apiIntent.getVariables()) {
                 String entityName = intentVariable.getEntityName();
                 if (!entityMap.containsKey(entityName)) {
-                    ApiEntity entity = databaseEntitiesIntents.getEntity(devId, entityName);
+                    ApiEntity entity = databaseEntitiesIntents.getEntity(devId, entityName, aiid);
                     if (entity != null && !entity.isSystem()) {
                         entityMap.put(entityName, entity);
                     }

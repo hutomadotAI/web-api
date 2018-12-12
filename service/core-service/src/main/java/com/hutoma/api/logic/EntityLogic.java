@@ -1,6 +1,7 @@
 package com.hutoma.api.logic;
 
 import com.hutoma.api.common.Config;
+import com.hutoma.api.common.FeatureToggler;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.SupportedLanguage;
 import com.hutoma.api.connectors.EntityRecognizerService;
@@ -29,6 +30,7 @@ public class EntityLogic {
     private final DatabaseEntitiesIntents database;
     private final TrainingLogic trainingLogic;
     private final EntityRecognizerService entityRecognizerService;
+    private final FeatureToggler featureToggler;
     private final JsonSerializer jsonSerializer;
 
     @Inject
@@ -37,19 +39,21 @@ public class EntityLogic {
                        final DatabaseEntitiesIntents database,
                        final TrainingLogic trainingLogic,
                        final EntityRecognizerService entityRecognizerService,
-                       final JsonSerializer jsonSerializer) {
+                       final JsonSerializer jsonSerializer,
+                       final FeatureToggler featureToggler) {
         this.config = config;
         this.logger = logger;
         this.database = database;
         this.trainingLogic = trainingLogic;
         this.entityRecognizerService = entityRecognizerService;
         this.jsonSerializer = jsonSerializer;
+        this.featureToggler = featureToggler;
     }
 
-    public ApiResult getEntities(final UUID devid) {
+    public ApiResult getEntities(final UUID devid, final UUID aiid) {
         final String devidString = devid.toString();
         try {
-            List<Entity> entityList = this.database.getEntities(devid);
+            List<Entity> entityList = this.database.getEntities(devid, aiid);
             this.logger.logUserTraceEvent(LOGFROM, "GetEntities", devidString,
                     LogMap.map("Num Entities", entityList.size()));
             return new ApiEntityList(entityList).setSuccessStatus();
@@ -59,11 +63,11 @@ public class EntityLogic {
         }
     }
 
-    public ApiResult getEntity(final UUID devid, final String entityName) {
+    public ApiResult getEntity(final UUID devid, final String entityName, final UUID aiid) {
         final String devidString = devid.toString();
         LogMap logMap = LogMap.map("Entity", entityName);
         try {
-            final ApiEntity entity = this.database.getEntity(devid, entityName);
+            final ApiEntity entity = this.database.getEntity(devid, entityName, aiid);
             if (entity == null) {
                 this.logger.logUserWarnEvent(LOGFROM, "GetEntity - not found", devidString, logMap);
                 return ApiError.getNotFound();
@@ -76,7 +80,7 @@ public class EntityLogic {
         }
     }
 
-    public ApiResult writeEntity(final UUID devid, final String entityName, final ApiEntity entity) {
+    public ApiResult writeEntity(final UUID devid, final String entityName, final ApiEntity entity, final UUID aiid) {
         final String devidString = devid.toString();
         LogMap logMap = LogMap.map("Entity", entityName);
         try {
@@ -103,7 +107,7 @@ public class EntityLogic {
             }
 
             int expectedTotalEntityValuesCount =
-                    this.database.getEntityValuesCountForDevExcludingEntity(devid, entityName)
+                    this.database.getEntityValuesCountForDevExcludingEntity(devid, entityName, aiid)
                             + (entity.getEntityValueList() == null ? 0 : entity.getEntityValueList().size());
 
             if (expectedTotalEntityValuesCount > this.config.getMaxTotalEntityValues()) {
@@ -145,8 +149,8 @@ public class EntityLogic {
                 }
             }
 
-            final boolean created = this.database.getEntity(devid, entityName) == null;
-            this.database.writeEntity(devid, entityName, entity);
+            final boolean created = this.database.getEntity(devid, entityName, aiid) == null;
+            this.database.writeEntity(devid, entityName, entity, aiid);
             this.logger.logUserTraceEvent(LOGFROM, "WriteEntity", devidString, logMap);
             if (created) {
                 return new ApiResult().setCreatedStatus("Entity created.");
@@ -163,7 +167,7 @@ public class EntityLogic {
         }
     }
 
-    public ApiResult replaceEntity(final UUID devid, final String entityName, final ApiEntity entity) {
+    public ApiResult replaceEntity(final UUID devid, final String entityName, final ApiEntity entity, final UUID aiid) {
         final String devidString = devid.toString();
         LogMap logMap = LogMap.map("Entity", entityName);
         try {
@@ -172,13 +176,13 @@ public class EntityLogic {
                         devidString, logMap);
                 return ApiError.getBadRequest("Cannot replace a system entity.");
             }
-            final boolean exists = this.database.getEntity(devid, entityName) != null;
+            final boolean exists = this.database.getEntity(devid, entityName, aiid) != null;
             if (!exists) {
                 return ApiError.getBadRequest("Entity doesn't exist.");
             }
 
             // Replace entity values.
-            this.database.writeEntity(devid, entityName, entity);
+            this.database.writeEntity(devid, entityName, entity, aiid);
             this.logger.logUserTraceEvent(LOGFROM, "ReplaceEntity", devidString, logMap);
             return new ApiResult().setSuccessStatus("Entity updated.");
         } catch (final Exception e) {
@@ -187,11 +191,11 @@ public class EntityLogic {
         }
     }
 
-    public ApiResult deleteEntity(final UUID devid, final String entityName) {
+    public ApiResult deleteEntity(final UUID devid, final String entityName, final UUID aiid) {
         final String devidString = devid.toString();
         try {
             LogMap logMap = LogMap.map("Entity", entityName);
-            OptionalInt entityId = this.database.getEntityIdForDev(devid, entityName);
+            OptionalInt entityId = this.database.getEntityIdForDev(devid, entityName, aiid);
             if (!entityId.isPresent()) {
                 this.logger.logUserTraceEvent(LOGFROM, "DeleteEntity - not found", devidString, logMap);
                 return ApiError.getNotFound();
@@ -201,6 +205,14 @@ public class EntityLogic {
             Set<String> referreingAis = new HashSet<>();
             List<ApiIntent> allIntents = this.database.getAllIntents(devid);
             for (ApiIntent intent : allIntents) {
+                if (featureToggler.getStateForAiid(
+                        devid,
+                        aiid,
+                        "per-bot-entities") == FeatureToggler.FeatureState.T1) {
+                    if (!intent.getAiid().equals(aiid)) {
+                        continue;
+                    }
+                }
                 if (intent.getVariables() != null && !intent.getVariables().isEmpty()) {
                     for (IntentVariable variable : intent.getVariables()) {
                         if (variable.getEntityName().equals(entityName)) {

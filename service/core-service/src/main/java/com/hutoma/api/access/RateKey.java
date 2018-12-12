@@ -5,6 +5,7 @@ public enum RateKey {
     Chat,
     LoadTest,
     QuickRead,
+    SaveResource,
     PollStatus,
     Botstore_Publish,
     Botstore_Metadata,

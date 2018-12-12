@@ -8,30 +8,24 @@ import com.hutoma.api.connectors.db.DatabaseAI;
 import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.connectors.db.DatabaseMarketplace;
 import com.hutoma.api.containers.AiBotConfig;
-import com.hutoma.api.containers.sub.ChatRequestInfo;
-import com.hutoma.api.containers.sub.ChatResult;
-import com.hutoma.api.containers.sub.MemoryIntent;
-import com.hutoma.api.containers.sub.WebHook;
-import com.hutoma.api.containers.sub.WebHookPayload;
-import com.hutoma.api.containers.sub.WebHookResponse;
+import com.hutoma.api.containers.sub.*;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
 import com.hutoma.api.logic.chat.ChatBaseException;
-
 import org.apache.commons.codec.binary.Hex;
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.client.JerseyInvocation;
 
-import java.net.HttpURLConnection;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.util.UUID;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import javax.inject.Inject;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
+import java.net.HttpURLConnection;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.util.UUID;
 
 /**
  * Management and execution of WebHooks.
@@ -66,8 +60,10 @@ public class WebHooks {
      * @param chatResult The chat result for the request.
      * @return a WebHookResponse containing the returned data.
      */
-    public WebHookResponse executeIntentWebHook(final WebHook webHook, final MemoryIntent intent,
-                                                final ChatResult chatResult, final ChatRequestInfo chatInfo)
+    public WebHookResponse executeIntentWebHook(final WebHook webHook,
+                                                final MemoryIntent intent,
+                                                final ChatResult chatResult,
+                                                final ChatRequestInfo chatInfo)
             throws WebHookException {
         final String devIdString = chatInfo.getDevId().toString();
         if (webHook == null) {
@@ -86,13 +82,16 @@ public class WebHooks {
             throw new WebHookInternalException("Webhook aborted due to failure to load config", e);
         }
 
-        WebHookPayload payload = new WebHookPayload(
-                MemoryIntent.getUserViewable(intent),
+        WebHookPayload payload = new WebHookPayload(MemoryIntent.getUserViewable(intent),
                 ChatResult.getUserViewable(chatResult),
-                chatInfo, config);
+                chatInfo,
+                config);
 
         WebHookResponse webHookResponse = this.executeWebhook(webHookEndpoint, payload, devIdString,
                 chatInfo.getAiid());
+
+        // Store webhook token in session
+        chatResult.getChatState().getWebhookSessions().add(new WebHookSession(payload.getWebhookToken()));
 
         this.logger.logInfo(LOGFROM,
                 String.format("Successfully executed webhook for aiid %s and intent %s",
@@ -101,7 +100,8 @@ public class WebHooks {
                         .put("AIID", intent.getAiid())
                         .put("Endpoint", webHook.getEndpoint())
                         .put("ChatId", chatInfo.getChatId())
-                        .put("ObfuscatedChatSession", payload.getObfuscatedChatSession()));
+                        .put("ObfuscatedChatSession", payload.getObfuscatedChatSession())
+                        .put("WebhookToken", payload.getWebhookToken()));
         return webHookResponse;
     }
 
@@ -114,9 +114,7 @@ public class WebHooks {
             throw new WebHookExternalException("Invalid URL for passthrough webhook");
         }
 
-        WebHookPayload payload = new WebHookPayload(
-                ChatResult.getUserViewable(chatResult),
-                chatInfo, null);
+        WebHookPayload payload = new WebHookPayload(ChatResult.getUserViewable(chatResult), chatInfo, null);
 
         WebHookResponse webHookResponse = this.executeWebhook(passthroughUrl, payload, devIdString, chatInfo.getAiid());
         this.logger.logInfo(LOGFROM,

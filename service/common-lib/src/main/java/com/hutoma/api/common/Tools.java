@@ -3,6 +3,7 @@ package com.hutoma.api.common;
 import org.apache.commons.codec.binary.Hex;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -43,20 +44,41 @@ public class Tools {
         return Hex.encodeHexString(bytesToFill);
     }
 
-    public static String getHashedDigestFromUuid(final UUID uuid) {
+    public static byte[] generateSalt() throws NoSuchAlgorithmException {
+        SecureRandom sr = SecureRandom.getInstance("SHA1PRNG");
+        byte[] salt = new byte[16];
+        sr.nextBytes(salt);
+        return salt;
+    }
+
+    public static String getHashedDigest(final byte[] bytes) {
+        String hashedDigest = null;
+        try {
+            MessageDigest shaDigest = MessageDigest.getInstance("SHA-256");
+            shaDigest.update(generateSalt());
+            byte[] digestedBytes = shaDigest.digest(bytes);
+            return Hex.encodeHexString(digestedBytes);
+        } catch (NoSuchAlgorithmException ex) {
+            // Every implementation of the Java platform is required to support MD5, SHA-1 and SHA-256
+            // https://docs.oracle.com/javase/7/docs/api/java/security/MessageDigest.html
+        }
+        return hashedDigest;
+    }
+
+    public static String getHashedDigest(final String string) {
+        if (string == null) {
+            return null;
+        }
+        return getHashedDigest(string.getBytes(StandardCharsets.UTF_8));
+    }
+
+    public static String getHashedDigest(final UUID uuid) {
         String result = null;
         if (uuid != null) {
-            try {
-                ByteBuffer bb = ByteBuffer.wrap(new byte[16]);
-                bb.putLong(uuid.getMostSignificantBits());
-                bb.putLong(uuid.getLeastSignificantBits());
-                MessageDigest shaDigest = MessageDigest.getInstance("SHA-256");
-                byte[] resultArray = shaDigest.digest(bb.array());
-                result = Hex.encodeHexString(resultArray);
-            } catch (NoSuchAlgorithmException ex) {
-                // Every implementation of the Java platform is required to support MD5, SHA-1 and SHA-256
-                // https://docs.oracle.com/javase/7/docs/api/java/security/MessageDigest.html
-            }
+            ByteBuffer bb = ByteBuffer.wrap(new byte[16]);
+            bb.putLong(uuid.getMostSignificantBits());
+            bb.putLong(uuid.getLeastSignificantBits());
+            result = getHashedDigest(bb.array());
         }
         return result;
     }

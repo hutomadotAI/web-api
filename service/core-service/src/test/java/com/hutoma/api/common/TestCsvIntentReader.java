@@ -162,7 +162,7 @@ public class TestCsvIntentReader {
         for (String line: lines) {
             ApiCsvImportResult result = getReader().parseIntents(line);
             Assert.assertTrue(result.getImported().isEmpty());
-            Assert.assertEquals(1, result.getErrors().size());
+            Assert.assertEquals(1, result.getWarnings().size());
         }
     }
 
@@ -171,8 +171,8 @@ public class TestCsvIntentReader {
         doThrow(ParameterValidationException.class).when(this.fakeValidate).validateIntentName(anyString());
         ApiCsvImportResult result = getReader().parseIntents("name,us,r");
         Assert.assertTrue(result.getImported().isEmpty());
-        Assert.assertEquals(1, result.getErrors().size());
-        Assert.assertEquals("Invalid intent name: name", result.getErrors().get(0).getError());
+        Assert.assertEquals(1, result.getWarnings().size());
+        Assert.assertEquals("Invalid intent name: name at line 1", result.getWarnings().get(0).getWarning());
     }
 
     @Test
@@ -181,7 +181,7 @@ public class TestCsvIntentReader {
         when(this.fakeValidate.areIntentResponsesValid(any())).thenReturn(false);
         ApiCsvImportResult result = getReader().parseIntents("name,us,r");
         Assert.assertTrue(result.getImported().isEmpty());
-        Assert.assertEquals(1, result.getErrors().size());
+        Assert.assertEquals(1, result.getWarnings().size());
     }
 
     @Test
@@ -191,7 +191,7 @@ public class TestCsvIntentReader {
         when(this.fakeValidate.areIntentUserSaysValid(any())).thenReturn(false);
         ApiCsvImportResult result = getReader().parseIntents("name,us,r");
         Assert.assertTrue(result.getImported().isEmpty());
-        Assert.assertEquals(1, result.getErrors().size());
+        Assert.assertEquals(1, result.getWarnings().size());
     }
 
     @Test

@@ -28,19 +28,42 @@ public class TestTools {
 
     @Test
     public void testCreateHashFromUuid_nullUuid() {
-        Assert.assertNull(Tools.getHashedDigestFromUuid(null));
+        Assert.assertNull(Tools.getHashedDigest((UUID) null));
     }
 
     @Test
     public void testCreateHashFromUuid() {
         final UUID uuid = UUID.fromString("9d5ff3ae-1a7f-4167-8347-5d3618426096");
-        Assert.assertEquals("51399677cc24d3c07813a64de012808c58ca8413fd1c930b527e89372770e21a", Tools.getHashedDigestFromUuid(uuid));
+        Assert.assertEquals(64, Tools.getHashedDigest(uuid).length());
     }
 
     @Test
     public void testCreateHashFromUuid_different() {
-        Assert.assertNotEquals(Tools.getHashedDigestFromUuid(UUID.randomUUID()), Tools.getHashedDigestFromUuid(UUID.randomUUID()));
+        Assert.assertNotEquals(Tools.getHashedDigest(UUID.randomUUID()), Tools.getHashedDigest(UUID.randomUUID()));
     }
+
+    @Test
+    public void testCreateHashFromString() {
+        final String toHash = "this is a string to hash";
+        Assert.assertEquals(64, Tools.getHashedDigest(toHash).length());
+    }
+
+    @Test
+    public void testCreateHashFromString_null() {
+        Assert.assertNull(Tools.getHashedDigest((String) null));
+    }
+
+    @Test
+    public void testCreateHashFromString_notEqual() {
+        Assert.assertNotEquals(Tools.getHashedDigest("string1"), Tools.getHashedDigest("string2"));
+    }
+
+    @Test
+    public void testCreateHashFromString_stringsEqual_resultNotEqual() {
+        String string = "this is the same string";
+        Assert.assertNotEquals(Tools.getHashedDigest(string), Tools.getHashedDigest(string));
+    }
+
 
     @Test
     public void testAnalytics_isNumber() {

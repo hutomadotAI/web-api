@@ -36,6 +36,7 @@ public class ApiError extends ApiResult {
     /**
      * Use with care. Don't give too much information about what is happening internally.
      * For most situations, use the version of this call without a parameter
+     *
      * @param reason
      * @return
      */
@@ -81,7 +82,7 @@ public class ApiError extends ApiResult {
     public static ApiError getBadRequest() {
         return ApiError.getBadRequest("Bad Request", null);
     }
-    
+
     public static ApiError getNotFound(String message) {
         return ApiError.getError(HttpURLConnection.HTTP_NOT_FOUND, message);
     }
@@ -100,5 +101,18 @@ public class ApiError extends ApiResult {
 
     public static ApiError getConflict(String message) {
         return ApiError.getError(HttpURLConnection.HTTP_CONFLICT, message);
+    }
+
+    /***
+     * Forbidden resource was attemted to be accessed.
+     * @param message the error message to sned back
+     * @return the error response
+     *
+     * Note Forbidden vs Unauthorized, Unauthorized should only be used for retrying authorisations
+     * http://www.dirv.me/blog/2011/07/18/understanding-403-forbidden/index.html
+     * https://www.loggly.com/blog/http-status-code-diagram/
+     */
+    public static ApiError getForbidden(final String message) {
+        return ApiError.getError(HttpURLConnection.HTTP_FORBIDDEN, message);
     }
 }

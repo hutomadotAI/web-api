@@ -833,11 +833,6 @@ public class AILogic {
         botStructure.setDefaultResponses(defaultResponses);
         botStructure.setPassthroughUrl(passthroughUrl);
 
-        // In this case we're not providing a handover message so we can leave it empty.
-        botStructure.setHandoverMessage("");
-        botStructure.setHandoverResetTimeoutSeconds(-1);
-        botStructure.setErrorThresholdHandover(-1);
-
         return this.importBot(devId, botStructure);
     }
 
@@ -1114,7 +1109,7 @@ public class AILogic {
         List<Entity> userEntities;
         try {
             // Add the entities that the user doesn't currently have.
-            userEntities = this.databaseEntitiesIntents.getEntities(devId);
+            userEntities = this.databaseEntitiesIntents.getEntities(devId, aiid);
         } catch (DatabaseException ex) {
             this.logger.logUserExceptionEvent(LOGFROM, "ImportBot - retrieving existing entities ai",
                     devId.toString(), ex, logMap);
@@ -1131,7 +1126,8 @@ public class AILogic {
                 for (Entity entity : userEntities) {
                     String entityName = entity.getName();
                     if (entitNamesToImport.contains(entityName)) {
-                        ApiEntity existingEntity = this.databaseEntitiesIntents.getEntity(devId, entityName);
+                        ApiEntity existingEntity = this.databaseEntitiesIntents
+                                .getEntity(devId, entityName, newBotAiid);
                         if (botToImport.getEntities().get(entityName).getEntityValueList().size()
                                 != existingEntity.getEntityValueList().size()) {
                             this.logger.logUserTraceEvent(LOGFROM,
@@ -1186,7 +1182,7 @@ public class AILogic {
                         }
                         int expectedValuesCount =
                                 this.databaseEntitiesIntents.getEntityValuesCountForDevExcludingEntity(
-                                        devId, e.getEntityName())
+                                        devId, e.getEntityName(), newBotAiid)
                                         + e.getEntityValueList().size();
                         if (expectedValuesCount > this.config.getMaxTotalEntityValues()) {
                             this.logger.logUserTraceEvent(LOGFROM, "ImportBot - exceeded values per dev",
@@ -1201,7 +1197,7 @@ public class AILogic {
                         if (e.getEntityValueType() == null) {
                             e.setEntityValueType(EntityValueType.LIST);
                         }
-                        this.databaseEntitiesIntents.writeEntity(devId, e.getEntityName(), e, transaction);
+                        this.databaseEntitiesIntents.writeEntity(devId, e.getEntityName(), e, transaction, newBotAiid);
                     }
                 }
             } catch (DatabaseException ex) {

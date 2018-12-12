@@ -415,9 +415,9 @@ public class DatabaseAI extends Database {
         }
         try {
             ApiAi ai = getAI(devId, aiid, serializer, transaction);
-            String engineVersion = StringUtils.isEmpty(overridenEngineVersion)
-                    ? ai.getEngineVersion() : overridenEngineVersion;
             if (ai != null) {
+                String engineVersion = StringUtils.isEmpty(overridenEngineVersion)
+                        ? ai.getEngineVersion() : overridenEngineVersion;
                 AiIdentity identity = new AiIdentity(devId, aiid, ai.getLanguage(), engineVersion);
                 BackendStatus backendStatus = DatabaseBackends.getBackendStatus(identity,
                         transaction.getDatabaseCall());
@@ -881,6 +881,7 @@ public class DatabaseAI extends Database {
                 context
         );
         String intentsJson = rs.getString("current_intents");
+        chatState.setChatId(UUID.fromString(rs.getString("chat_id")));
         Type memoryIntentListType = new TypeToken<List<MemoryIntent>>() {
         }.getType();
         List<MemoryIntent> currentIntents = StringUtils.isEmpty(intentsJson)
@@ -904,7 +905,6 @@ public class DatabaseAI extends Database {
             chatState.setIntegrationData(
                     (IntegrationData) jsonSerializer.deserialize(integrationDataJson, IntegrationData.class));
         }
-        chatState.setChatId(UUID.fromString(rs.getString("chat_id")));
         return chatState;
     }
 

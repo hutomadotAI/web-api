@@ -5,10 +5,8 @@ import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.db.DatabaseAI;
 import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.connectors.db.DatabaseMarketplace;
-import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.sub.*;
 import com.hutoma.api.logging.ILogger;
-
 import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.client.JerseyInvocation;
 import org.glassfish.jersey.client.JerseyWebTarget;
@@ -17,8 +15,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import java.util.UUID;
 import javax.ws.rs.core.Response;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.*;
@@ -75,6 +73,7 @@ public class TestWebhooks {
         WebHook wh = new WebHook(UUID.randomUUID(), "testName", "", false);
         MemoryIntent mi = new MemoryIntent("intent1", AIID, CHATID, null);
         ChatResult chatResult = new ChatResult("Hi");
+        chatResult.setChatState(ChatState.getEmpty());
 
         when(this.fakeDatabase.getWebhookSecretForBot(any())).thenReturn("123456");
         when(this.serializer.serialize(any())).thenReturn("{\"intentName\":\"test\"}");
@@ -97,6 +96,7 @@ public class TestWebhooks {
         MemoryIntent mi = new MemoryIntent("intent1", AIID, CHATID, null);
         ChatResult chatResult = new ChatResult("Hi");
         chatResult.setChatId(CHATID);
+        chatResult.setChatState(ChatState.getEmpty());
 
         when(this.serializer.serialize(any())).thenReturn("{\"intentName\":\"test\"}");
         WebHooks spy = Mockito.spy(this.webHooks);
@@ -120,6 +120,7 @@ public class TestWebhooks {
         MemoryIntent mi = new MemoryIntent("intent1", AIID, CHATID, null);
         ChatResult chatResult = new ChatResult("Hi");
         chatResult.setChatId(CHATID);
+        chatResult.setChatState(ChatState.getEmpty());
 
         when(this.serializer.serialize(any())).thenReturn("{\"intentName\":\"test\"}");
         WebHooks spy = Mockito.spy(this.webHooks);
@@ -131,8 +132,8 @@ public class TestWebhooks {
     }
 
     /*
-    * executeIntentWebHook Check that do generate secret if there already is one
-    */
+     * executeIntentWebHook Check that do generate secret if there already is one
+     */
     @Test
     public void testExecuteWebHook_generateSecretifNull()
             throws DatabaseException, WebHooks.WebHookException {
@@ -142,6 +143,7 @@ public class TestWebhooks {
         MemoryIntent mi = new MemoryIntent("intent1", AIID, CHATID, null);
         ChatResult chatResult = new ChatResult("Hi");
         chatResult.setChatId(CHATID);
+        chatResult.setChatState(ChatState.getEmpty());
 
         when(this.serializer.serialize(any())).thenReturn("{\"intentName\":\"test\"}");
         WebHooks spy = Mockito.spy(this.webHooks);
@@ -175,6 +177,7 @@ public class TestWebhooks {
         MemoryIntent mi = new MemoryIntent("intent1", AIID, CHATID, null);
         ChatResult chatResult = new ChatResult("Hi");
         chatResult.setChatId(CHATID);
+        chatResult.setChatState(ChatState.getEmpty());
 
         when(this.fakeDatabase.getWebhookSecretForBot(any())).thenReturn("123456");
         when(getFakeBuilder().post(any())).thenReturn(Response.ok(new WebHookResponse("Success")).build());
@@ -194,6 +197,7 @@ public class TestWebhooks {
         MemoryIntent mi = new MemoryIntent("intent1", AIID, CHATID, null);
         ChatResult chatResult = new ChatResult("Hi");
         chatResult.setChatId(CHATID);
+        chatResult.setChatState(ChatState.getEmpty());
 
         when(this.fakeDatabase.getWebhookSecretForBot(any())).thenReturn("123456");
         when(this.serializer.serialize(any())).thenReturn("{\"intentName\":\"test\"}");
@@ -250,9 +254,9 @@ public class TestWebhooks {
     public static class WebHooksWrapper extends WebHooks {
 
         WebHooksWrapper(final DatabaseAI databaseAi, final DatabaseMarketplace databaseMarketplace,
-                               final ILogger logger,
-                               final JsonSerializer serializer, final JerseyClient jerseyClient,
-                               final Tools tools) {
+                        final ILogger logger,
+                        final JsonSerializer serializer, final JerseyClient jerseyClient,
+                        final Tools tools) {
             super(databaseAi, databaseMarketplace, logger, serializer, jerseyClient, tools);
         }
 

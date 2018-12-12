@@ -3,6 +3,8 @@ package com.hutoma.api.containers.sub;
 import com.google.gson.annotations.SerializedName;
 import com.hutoma.api.containers.facebook.FacebookMessageNode;
 
+import java.util.List;
+
 /**
  * The structure for a response received from a WebHook.
  */
@@ -14,8 +16,14 @@ public class WebHookResponse {
     @SerializedName("facebook")
     private FacebookMessageNode facebookNode;
 
+    @SerializedName("facebook_multi")
+    private List<FacebookMessageNode> facebookNodes;
+
     @SerializedName("context")
     private ChatContext chatContext;
+
+    @SerializedName("webhook_token")
+    private String token;
 
     public WebHookResponse(final String text) {
         this.text = text;
@@ -39,5 +47,21 @@ public class WebHookResponse {
 
     public ChatContext getChatContext() {
         return this.chatContext;
+    }
+
+    public String getToken() {
+        return this.token;
+    }
+
+    public void setToken(final String token) {
+        this.token = token;
+    }
+
+    public List<FacebookMessageNode> getFacebookNodes() {
+        return this.facebookNodes;
+    }
+
+    public void setFacebookNodes(final List<FacebookMessageNode> facebookNodes) {
+        this.facebookNodes = facebookNodes;
     }
 }

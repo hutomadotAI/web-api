@@ -8,6 +8,7 @@ import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.containers.ApiResult;
 import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.logic.ChatLogic;
+import com.hutoma.api.logic.chat.WebhookHandler;
 import com.hutoma.api.validation.APIParameter;
 import com.hutoma.api.validation.ParameterFilter;
 import com.hutoma.api.validation.ValidateParameters;
@@ -32,10 +33,14 @@ public class ChatEndpoint {
 
     private final ChatLogic chatLogic;
     private final JsonSerializer serializer;
+    private final WebhookHandler webhookHandler;
 
     @Inject
-    public ChatEndpoint(ChatLogic chatLogic, JsonSerializer serializer) {
+    public ChatEndpoint(final ChatLogic chatLogic,
+                        final WebhookHandler webhookHandler,
+                        final JsonSerializer serializer) {
         this.chatLogic = chatLogic;
+        this.webhookHandler = webhookHandler;
         this.serializer = serializer;
     }
 
@@ -201,6 +206,31 @@ public class ChatEndpoint {
                 ParameterFilter.getChatQuestion(requestContext),
                 ParameterFilter.getChatID(requestContext),
                 null);
+        return result.getResponse(this.serializer).build();
+    }
+
+
+    @POST
+    @Path("/chat/webhook/callback/{chat_id_hash}")
+    @ValidatePost({APIParameter.WebHookReponse})
+    @StatusCodes({
+            @ResponseCode(code = HttpURLConnection.HTTP_OK, condition = "Succeeded."),
+            @ResponseCode(code = HttpURLConnection.HTTP_BAD_REQUEST, condition = "Invalid variables"),
+            @ResponseCode(code = HttpURLConnection.HTTP_INTERNAL_ERROR, condition = "Internal error")
+    })
+    @RequestHeaders({
+            @RequestHeader(name = "Authorization", description = "Webhook token")
+    })
+    @ResourceMethodSignature(
+            pathParams = {
+                    @PathParam("chat_id_hash")
+            }
+    )
+    public Response runCallback(
+            @Context ContainerRequestContext requestContext,
+            @PathParam("chat_id_hash") String chatIdHash) {
+        ApiResult result = this.webhookHandler.runWebhookCallback(chatIdHash,
+                ParameterFilter.getWebHookResponse(requestContext));
         return result.getResponse(this.serializer).build();
     }
 }

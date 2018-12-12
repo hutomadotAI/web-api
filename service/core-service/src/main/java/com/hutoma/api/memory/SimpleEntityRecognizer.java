@@ -1,7 +1,7 @@
 package com.hutoma.api.memory;
 
 import com.hutoma.api.common.SupportedLanguage;
-import com.hutoma.api.containers.sub.ChatRequestInfo;
+import com.hutoma.api.containers.sub.EntityValueType;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.common.Pair;
 import com.hutoma.api.containers.sub.MemoryVariable;
@@ -57,13 +57,16 @@ public class SimpleEntityRecognizer implements IEntityRecognizer {
         final String lowercaseResponse = chatLine.toLowerCase();
         for (MemoryVariable v : entities) {
             for (String key : v.getEntityKeys()) {
-                if (v.getName() != null) {
-                    Matcher matcher = Pattern.compile("(?i:\\b" + key + "\\b)").matcher(lowercaseResponse);
-                    if (matcher.find()) {
-                        // it's this one
-                        vars.add(new Pair<>(v.getName(), key));
-                        // stop processing this entity
-                        break;
+                // This should all be deleted soon, but ensure this isnt a regex..
+                if (v.getValueType() != EntityValueType.REGEX) {
+                    if (v.getName() != null) {
+                        Matcher matcher = Pattern.compile("(?i:\\b" + key + "\\b)").matcher(lowercaseResponse);
+                        if (matcher.find()) {
+                            // it's this one
+                            vars.add(new Pair<>(v.getName(), key));
+                            // stop processing this entity
+                            break;
+                        }
                     }
                 }
             }

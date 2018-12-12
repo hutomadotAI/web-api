@@ -1,18 +1,15 @@
 package com.hutoma.api.access;
 
 import com.hutoma.api.common.Config;
-import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.logging.LogMap;
 import com.hutoma.api.connectors.db.Database;
 import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.ApiError;
 import com.hutoma.api.containers.sub.RateLimitStatus;
+import com.hutoma.api.logging.ILogger;
+import com.hutoma.api.logging.LogMap;
 import com.hutoma.api.validation.ParameterFilter;
 
-import java.io.IOException;
-import java.lang.reflect.AnnotatedElement;
-import java.util.UUID;
 import javax.annotation.Priority;
 import javax.inject.Inject;
 import javax.ws.rs.Priorities;
@@ -21,6 +18,9 @@ import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.ext.Provider;
+import java.io.IOException;
+import java.lang.reflect.AnnotatedElement;
+import java.util.UUID;
 
 @RateLimit
 @Provider
@@ -72,6 +72,10 @@ public class RateLimitCheck implements ContainerRequestFilter {
                 case QuickRead:
                     burst = this.config.getRateLimit_QuickRead_BurstRequests();
                     frequency = this.config.getRateLimit_QuickRead_Frequency();
+                    break;
+                case SaveResource:
+                    burst = this.config.getRateLimit_SaveResource_BurstRequests();
+                    frequency = this.config.getRateLimit_SaveResource_Frequency();
                     break;
                 case PollStatus:
                     burst = this.config.getRateLimit_PollStatus_BurstRequests();

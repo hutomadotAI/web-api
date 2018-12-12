@@ -1,5 +1,6 @@
 package com.hutoma.api.connectors.db;
 
+import com.hutoma.api.common.FeatureToggler;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.containers.ApiEntity;
 import com.hutoma.api.containers.ApiIntent;
@@ -22,19 +23,28 @@ import java.util.*;
 public class DatabaseEntitiesIntents extends DatabaseAI {
 
     private final JsonSerializer serializer;
+    private final FeatureToggler featureToggler;
+    private final String emptyAiid = "";
 
     @Inject
     public DatabaseEntitiesIntents(final ILogger logger,
                                    final Provider<DatabaseCall> callProvider,
                                    final Provider<DatabaseTransaction> transactionProvider,
-                                   final JsonSerializer serializer) {
+                                   final JsonSerializer serializer,
+                                   final FeatureToggler featureToggler) {
         super(logger, callProvider, transactionProvider);
         this.serializer = serializer;
+        this.featureToggler = featureToggler;
     }
 
-    public List<Entity> getEntities(final UUID devid) throws DatabaseException {
+    public List<Entity> getEntities(final UUID devid, final UUID aiid) throws DatabaseException {
+        String aiidString = aiid.toString();
+        if (this.featureToggler.getStateforDev(devid, "per-bot-entities") != FeatureToggler.FeatureState.T1) {
+            aiidString = emptyAiid;
+        }
+
         try (DatabaseCall call = this.callProvider.get()) {
-            call.initialise("getEntities", 2).add(devid).add("");
+            call.initialise("getEntities", 2).add(devid).add(aiidString);
             final ResultSet rs = call.executeQuery();
             try {
                 List<Entity> entities = new ArrayList<>();
@@ -69,12 +79,17 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
         }
     }
 
-    public ApiEntity getEntity(final UUID devid, final String entityName) throws DatabaseException {
+    public ApiEntity getEntity(final UUID devid, final String entityName, final UUID aiid) throws DatabaseException {
+        String aiidString = aiid.toString();
+        if (this.featureToggler.getStateforDev(devid, "per-bot-entities") != FeatureToggler.FeatureState.T1) {
+            aiidString = emptyAiid;
+        }
+
         try (DatabaseTransaction transaction = this.transactionProvider.get()) {
             try {
                 ApiEntity result = null;
                 ResultSet rs = transaction.getDatabaseCall().initialise("getEntityDetails", 3)
-                        .add(devid).add(entityName).add("").executeQuery();
+                        .add(devid).add(entityName).add(aiidString).executeQuery();
                 if (rs.next()) {
                     boolean isSystem = rs.getBoolean("isSystem");
                     EntityValueType valueType = EntityValueType.fromString(rs.getString("value_type"));
@@ -82,7 +97,7 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
                     // only custom entities have values as system entities are handled externally
                     if (!isSystem) {
                         ResultSet valuesRs = transaction.getDatabaseCall().initialise("getEntityValues", 3)
-                                .add(devid).add(entityName).add("").executeQuery();
+                                .add(devid).add(entityName).add(aiidString).executeQuery();
                         while (valuesRs.next()) {
                             entityValues.add(valuesRs.getString("value"));
                         }
@@ -129,13 +144,18 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
         }
     }
 
-    public int getEntityValuesCountForDevExcludingEntity(final UUID devId, final String entityName)
+    public int getEntityValuesCountForDevExcludingEntity(final UUID devId, final String entityName, final UUID aiid)
             throws DatabaseException {
+        String aiidString = aiid.toString();
+        if (this.featureToggler.getStateforDev(devId, "per-bot-entities") != FeatureToggler.FeatureState.T1) {
+            aiidString = emptyAiid;
+        }
+
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("getEntityValuesCountForDevExcludingEntity", 3)
                     .add(devId)
                     .add(entityName)
-                    .add("");
+                    .add(aiidString);
             ResultSet rs = call.executeQuery();
             if (rs.next()) {
                 return rs.getInt("COUNT");
@@ -202,10 +222,10 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
      * @param entity        the entity's new name
      * @throws DatabaseException if something goes wrong
      */
-    public void writeEntity(final UUID devid, final String entityOldName, final ApiEntity entity)
+    public void writeEntity(final UUID devid, final String entityOldName, final ApiEntity entity, final UUID aiid)
             throws DatabaseException {
         try (DatabaseTransaction transaction = this.transactionProvider.get()) {
-            this.writeEntity(devid, entityOldName, entity, transaction);
+            this.writeEntity(devid, entityOldName, entity, transaction, aiid);
             transaction.commit();
         }
     }
@@ -220,11 +240,17 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
      * @throws DatabaseException if something goes wrong
      */
     public void writeEntity(final UUID devid, final String entityOldName, final ApiEntity entity,
-                            final DatabaseTransaction transaction)
+                            final DatabaseTransaction transaction, final UUID aiid)
             throws DatabaseException {
         if (transaction == null) {
             throw new IllegalArgumentException("transaction");
         }
+
+        String aiidString = aiid.toString();
+        if (this.featureToggler.getStateforDev(devid, "per-bot-entities") != FeatureToggler.FeatureState.T1) {
+            aiidString = emptyAiid;
+        }
+
         try {
             // add or update the entity
             transaction.getDatabaseCall().initialise("addUpdateEntity", 5)
@@ -232,12 +258,12 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
                     .add(entityOldName)
                     .add(entity.getEntityName())
                     .add(entity.getEntityValueType().name())
-                    .add("")
+                    .add(aiidString)
                     .executeUpdate();
 
             // read the entity's values
             ResultSet valuesRs = transaction.getDatabaseCall().initialise("getEntityValues", 3)
-                    .add(devid).add(entity.getEntityName()).add("").executeQuery();
+                    .add(devid).add(entity.getEntityName()).add(aiidString).executeQuery();
 
             // put them into a set
             HashSet<String> currentValues = new HashSet<>();
@@ -248,14 +274,22 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
             // Delete all the old entity values.
             for (String obsoleteEntityValue : currentValues) {
                 transaction.getDatabaseCall().initialise("deleteEntityValue", 4)
-                        .add(devid).add(entity.getEntityName()).add(obsoleteEntityValue).add("").executeUpdate();
+                        .add(devid)
+                        .add(entity.getEntityName())
+                        .add(obsoleteEntityValue)
+                        .add(aiidString)
+                        .executeUpdate();
             }
 
             // Add all the new entity values.
             if (entity.getEntityValueList() != null) {
                 for (String entityValue : entity.getEntityValueList()) {
                         transaction.getDatabaseCall().initialise("addEntityValue", 4)
-                                .add(devid).add(entity.getEntityName()).add(entityValue).add("").executeUpdate();
+                                .add(devid)
+                                .add(entity.getEntityName())
+                                .add(entityValue)
+                                .add(aiidString)
+                                .executeUpdate();
                     }
             }
 
@@ -266,11 +300,16 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
         }
     }
 
-    public OptionalInt getEntityIdForDev(UUID devid, String entityName) throws DatabaseException {
+    public OptionalInt getEntityIdForDev(UUID devid, String entityName, UUID aiid) throws DatabaseException {
+        String aiidString = aiid.toString();
+        if (this.featureToggler.getStateforDev(devid, "per-bot-entities") != FeatureToggler.FeatureState.T1) {
+            aiidString = emptyAiid;
+        }
+
         try (DatabaseCall call = this.callProvider.get()) {
             ResultSet rs;
             try {
-                call.initialise("getEntityIdForDev", 3).add(devid).add(entityName).add("");
+                call.initialise("getEntityIdForDev", 3).add(devid).add(entityName).add(aiidString);
                 rs = call.executeQuery();
                 OptionalInt entityId = OptionalInt.empty();
                 if (rs.next()) {

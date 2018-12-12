@@ -2,22 +2,9 @@ package com.hutoma.api;
 
 import com.hutoma.api.access.RateLimitCheck;
 import com.hutoma.api.common.*;
-import com.hutoma.api.connectors.AiStrings;
-import com.hutoma.api.connectors.AnalyticsESConnector;
-import com.hutoma.api.connectors.EntityRecognizerService;
-import com.hutoma.api.connectors.FacebookConnector;
-import com.hutoma.api.connectors.IConnectConfig;
-import com.hutoma.api.connectors.WebHooks;
-import com.hutoma.api.connectors.aiservices.AIServices;
-import com.hutoma.api.connectors.aiservices.AiServicesQueue;
-import com.hutoma.api.connectors.aiservices.AimlServicesConnector;
-import com.hutoma.api.connectors.aiservices.BackendServicesConnectors;
-import com.hutoma.api.connectors.aiservices.EmbServicesConnector;
-import com.hutoma.api.connectors.chat.AIChatServices;
-import com.hutoma.api.connectors.chat.ChatAimlConnector;
-import com.hutoma.api.connectors.chat.ChatBackendRequester;
-import com.hutoma.api.connectors.chat.ChatConnectors;
-import com.hutoma.api.connectors.chat.ChatEmbConnector;
+import com.hutoma.api.connectors.*;
+import com.hutoma.api.connectors.aiservices.*;
+import com.hutoma.api.connectors.chat.*;
 import com.hutoma.api.connectors.db.*;
 import com.hutoma.api.containers.facebook.FacebookMachineID;
 import com.hutoma.api.logging.CentralLogger;
@@ -25,15 +12,10 @@ import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.ILoggerConfig;
 import com.hutoma.api.logic.*;
 import com.hutoma.api.logic.chat.*;
-import com.hutoma.api.memory.ChatStateHandler;
-import com.hutoma.api.memory.ExternalEntityRecognizer;
-import com.hutoma.api.memory.IEntityRecognizer;
-import com.hutoma.api.memory.IMemoryIntentHandler;
-import com.hutoma.api.memory.MemoryIntentHandler;
+import com.hutoma.api.memory.*;
 import com.hutoma.api.thread.*;
 import com.hutoma.api.validation.QueryFilter;
 import com.hutoma.api.validation.Validate;
-
 import org.glassfish.hk2.api.Factory;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.glassfish.jersey.client.JerseyClient;
@@ -120,6 +102,7 @@ public class ServerBinder extends AbstractBinder {
         bind(ContextVariableExtractor.class).to(ContextVariableExtractor.class);
         bind(ChatDefaultHandler.class).to(ChatDefaultHandler.class);
         bind(ChatConnectors.class).to(ChatConnectors.class);
+        bind(WebhookHandler.class).to(WebhookHandler.class);
 
         // Feature toggler
         bind(FeatureToggler.class).to(FeatureToggler.class).in(Singleton.class);

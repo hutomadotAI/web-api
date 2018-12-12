@@ -1,6 +1,7 @@
 package com.hutoma.api.containers.facebook;
 
 import com.google.gson.annotations.SerializedName;
+import org.apache.commons.lang.StringUtils;
 
 import java.util.List;
 
@@ -73,5 +74,9 @@ public class FacebookMessageNode extends FacebookRichContentAttachment {
     public FacebookMessageNode setAttachment(final FacebookRichContentAttachment attachment) {
         this.attachment = attachment;
         return this;
+    }
+
+    public boolean hasText() {
+        return !StringUtils.isEmpty(this.text);
     }
 }

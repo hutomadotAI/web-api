@@ -306,6 +306,7 @@ public abstract class ServiceTestBase extends JerseyTest {
         when(this.fakeConfig.getMaxLinkedBotsPerAi()).thenReturn(5);
         // Set the rate limit frequency to a positive value to allow the tests to run
         when(this.fakeConfig.getRateLimit_QuickRead_Frequency()).thenReturn(1.0);
+        when(this.fakeConfig.getRateLimit_SaveResource_Frequency()).thenReturn(1.0);
         when(this.fakeConfig.getRateLimit_Chat_Frequency()).thenReturn(1.0);
         when(this.fakeConfig.getRateLimit_PollStatus_Frequency()).thenReturn(1.0);
 

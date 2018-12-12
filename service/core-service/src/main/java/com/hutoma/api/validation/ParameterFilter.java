@@ -10,6 +10,7 @@ import com.hutoma.api.containers.facebook.FacebookConnect;
 import com.hutoma.api.containers.facebook.FacebookNotification;
 import com.hutoma.api.containers.sub.AiBot;
 import com.hutoma.api.containers.sub.ChatHandoverTarget;
+import com.hutoma.api.containers.sub.WebHookResponse;
 import com.hutoma.api.logging.ILogger;
 
 import javax.inject.Inject;
@@ -152,6 +153,10 @@ public class ParameterFilter extends Validate {
 
     public static Map<String, String> getContextVariables(final ContainerRequestContext requestContext) {
         return (Map<String, String>) requestContext.getProperty(APIParameter.ContextVariables.toString());
+    }
+
+    public static WebHookResponse getWebHookResponse(final ContainerRequestContext requestContext) {
+        return (WebHookResponse) requestContext.getProperty(APIParameter.WebHookReponse.toString());
     }
 
     public static String getExperimentFeatureName(final ContainerRequestContext requestContext) {

@@ -118,7 +118,7 @@ public class TestMemoryIntentHandler {
         ApiEntity apiEntity = new ApiEntity(entityName, DEVID_UUID, Arrays.asList("a", "b"), false, EntityValueType.LIST);
         apiIntent.addVariable(iv);
         when(this.fakeDatabaseEntities.getIntent(any(), anyString())).thenReturn(apiIntent);
-        when(this.fakeDatabaseEntities.getEntity(any(), anyString())).thenReturn(apiEntity);
+        when(this.fakeDatabaseEntities.getEntity(any(), anyString(), any())).thenReturn(apiEntity);
         MemoryIntent mi = this.memoryIntentHandler.parseAiResponseForIntent(DEVID_UUID, AIID, CHATID, DEFAULT_INTENT, buildChatState());
         Assert.assertNotNull(mi.getVariables());
         Assert.assertEquals(1, mi.getVariables().size());
@@ -130,9 +130,9 @@ public class TestMemoryIntentHandler {
     public void testLoadIntentForAi_duplicateLabels_throwsException() {
         final String label = "theLabel";
         MemoryVariable var1 = new MemoryVariable("var1", "val", true, Collections.singletonList("sys.test"),
-                Collections.singletonList("Prompt"), 1, 0, true, false, label, false);
+                Collections.singletonList("Prompt"), 1, 0, true, EntityValueType.LIST, false, label, false);
         MemoryVariable var2 = new MemoryVariable("var2", "val", true, Collections.singletonList("sys.test"),
-                Collections.singletonList("Prompt"), 1, 0, true, false, label, false);
+                Collections.singletonList("Prompt"), 1, 0, true, EntityValueType.LIST, false, label, false);
         new MemoryIntent(INTENT_NAME, AIID, CHATID, Arrays.asList(var1, var2));
     }
 
@@ -182,6 +182,7 @@ public class TestMemoryIntentHandler {
                 123,
                 5,
                 false,
+                EntityValueType.LIST,
                 false,
                 "label",
                 false);

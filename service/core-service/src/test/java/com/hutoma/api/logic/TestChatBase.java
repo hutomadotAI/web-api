@@ -58,6 +58,9 @@ public class TestChatBase {
     ConditionEvaluator fakeConditionEvaluator;
     ContextVariableExtractor fakeContextVariableExtractor;
     FeatureToggler fakeFeatureToggler;
+    FacebookChatHandler fakeFacebookChathandler;
+    WebhookHandler fakeWebhookHandler;
+
 
     @Before
     public void setup() {
@@ -75,8 +78,10 @@ public class TestChatBase {
         this.fakeConditionEvaluator = mock(ConditionEvaluator.class);
         this.fakeContextVariableExtractor = mock(ContextVariableExtractor.class);
         this.fakeFeatureToggler = mock(FeatureToggler.class);
+        this.fakeWebhookHandler = mock(WebhookHandler.class);
         this.intentProcessor = new IntentProcessor(this.fakeRecognizer, this.fakeIntentHandler, this.fakeWebHooks,
-                this.fakeConditionEvaluator, this.fakeContextVariableExtractor, mock(ILogger.class), this.fakeFeatureToggler);
+                this.fakeConditionEvaluator, this.fakeContextVariableExtractor, this.fakeWebhookHandler,
+                mock(ILogger.class), this.fakeConfig, this.fakeFeatureToggler);
 
         this.fakePassthroughHandler = new ChatPassthroughHandler(this.fakeChatServices, this.fakeWebHooks, mock(Tools.class),
                 mock(ChatLogger.class), mock(ILogger.class), this.fakeFeatureToggler);
@@ -86,6 +91,7 @@ public class TestChatBase {
         this.fakeEmbHandler = new ChatEmbHandler(this.fakeIntentHandler, this.intentProcessor, this.fakeContextVariableExtractor, mock(ILogger.class));
         this.fakeAimlHandler = new ChatAimlHandler(mock(ILogger.class));
         this.fakeDefaultHandler = new ChatDefaultHandler(this.fakeAiStrings, mock(ILogger.class));
+        this.fakeFacebookChathandler = mock(FacebookChatHandler.class);
 
         when(fakeConfig.getEncodingKey()).thenReturn(TestDataHelper.VALID_ENCODING_KEY);
 
@@ -98,7 +104,7 @@ public class TestChatBase {
                         this.fakeAimlHandler, this.fakeDefaultHandler));
 
         this.chatLogic = new ChatLogic(this.fakeChatServices, this.fakeChatStateHandler, this.fakeDatabaseEntitiesIntents, mock(Tools.class),
-                mock(ILogger.class), mock(ChatLogger.class), this.fakeChatWorkflow, this.fakeConfig, this.fakeFeatureToggler);
+                mock(ILogger.class), mock(ChatLogger.class), this.fakeChatWorkflow, this.fakeFeatureToggler);
 
         ChatState emptyState = ChatState.getEmpty();
         emptyState.setAi(getSampleAI());
@@ -135,7 +141,7 @@ public class TestChatBase {
             throws NoServerAvailableException, ChatBaseException,
             ChatBackendConnector.AiControllerException, ServerConnector.AiServicesException {
         mapMinP(minP);
-        return this.chatLogic.chatFacebook(AIID, DEVID_UUID, question, CHATID.toString(), "facebookuser");
+        return this.chatLogic.chatFacebook(AIID, DEVID_UUID, question, CHATID.toString(), "facebookuser", "pageToken");
     }
 
     private void mapMinP(final double minP) {
@@ -224,6 +230,7 @@ public class TestChatBase {
                 maxPrompts,
                 0,
                 false,
+                EntityValueType.LIST,
                 false,
                 "label",
                 false);
@@ -250,6 +257,7 @@ public class TestChatBase {
                 maxPrompts,
                 0,
                 false,
+                EntityValueType.LIST,
                 false,
                 "label1",
                 false);
@@ -264,6 +272,7 @@ public class TestChatBase {
                 maxPrompts,
                 0,
                 false,
+                EntityValueType.LIST,
                 true,
                 "label2",
                 false);

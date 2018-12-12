@@ -66,11 +66,11 @@ public class Config extends CommonConfig implements ILoggerConfig, IThreadConfig
     }
 
     public double getRateLimit_Chat_BurstRequests() {
-        return Double.parseDouble(getConfigFromProperties("ratelimit_chat_burst", "3.0"));
+        return Double.parseDouble(getConfigFromProperties("ratelimit_chat_burst", "20.0"));
     }
 
     public double getRateLimit_Chat_Frequency() {
-        return Double.parseDouble(getConfigFromProperties("ratelimit_chat_frequency", "2.0"));
+        return Double.parseDouble(getConfigFromProperties("ratelimit_chat_frequency", "0.1"));
     }
 
     public double getRateLimit_QuickRead_BurstRequests() {
@@ -87,6 +87,14 @@ public class Config extends CommonConfig implements ILoggerConfig, IThreadConfig
 
     public double getRateLimit_PollStatus_Frequency() {
         return Double.parseDouble(getConfigFromProperties("ratelimit_pollstatus_frequency", "0.2"));
+    }
+
+    public double getRateLimit_SaveResource_BurstRequests() {
+        return Double.parseDouble(getConfigFromProperties("ratelimit_saveresource_burst", "5.0"));
+    }
+
+    public double getRateLimit_SaveResource_Frequency() {
+        return Double.parseDouble(getConfigFromProperties("ratelimit_saveresource_frequency", "0.5"));
     }
 
     /***

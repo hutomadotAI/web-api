@@ -10,10 +10,7 @@ import com.hutoma.api.containers.ApiFacebookCustomisation;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.facebook.FacebookConnect;
 import com.hutoma.api.containers.facebook.FacebookNotification;
-import com.hutoma.api.containers.sub.BotStructure;
-import com.hutoma.api.containers.sub.EntityValueType;
-import com.hutoma.api.containers.sub.IntentVariable;
-import com.hutoma.api.containers.sub.WebHook;
+import com.hutoma.api.containers.sub.*;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
 import com.hutoma.api.logic.chat.ChatDefaultHandler;
@@ -85,6 +82,8 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
                 case FacebookCustomisations:
                     //fallthrough
                 case ContextVariables:
+                    //fallthrough
+                case WebHookReponse:
                     expectingJson = true;
                     break;
 
@@ -264,6 +263,12 @@ public class PostFilter extends ParameterFilter implements ContainerRequestFilte
                 Map<String, String> variables =
                         this.serializer.deserializeStringMap(request.getEntityStream());
                 request.setProperty(APIParameter.ContextVariables.toString(), variables);
+            }
+
+            if (checkList.contains(APIParameter.WebHookReponse)) {
+                WebHookResponse webHookResponse = (WebHookResponse) this.serializer.deserialize(
+                        request.getEntityStream(), WebHookResponse.class);
+                request.setProperty(APIParameter.WebHookReponse.toString(), webHookResponse);
             }
 
         } catch (JsonParseException jpe) {

@@ -39,29 +39,43 @@ public class CsvIntentReader {
         if (csvFile != null && !csvFile.isEmpty()) {
             String[] lines = splitLines(csvFile);
             for (int i = 0; i < lines.length; i++) {
+                int lineNumber = i + 1;
                 ApiIntent intent = parseLine(lines[i].trim());
                 if (intent != null) {
-
-                    if (!this.validate.isIntentNameValid(intent.getIntentName())) {
-                        result.addError(String.format("Invalid intent name: %s", intent.getIntentName()));
+                    String intentName = intent.getIntentName();
+                    if (!this.validate.isIntentNameValid(intentName)) {
+                        addErrorMessageToResult(result, "Invalid intent name: %s at line %d", intentName, lineNumber);
                     } else if (intent.getResponses().isEmpty()
                             || intent.getResponses().stream().allMatch(String::isEmpty)
                             || !this.validate.areIntentResponsesValid(intent.getResponses())) {
-                        result.addError(String.format("No valid responses for intent %s", intent.getIntentName()));
+                        addErrorMessageToResult(result, "No valid responses for intent %s at line %d",
+                                intentName, lineNumber);
                     } else if (intent.getUserSays().isEmpty()
                             || intent.getUserSays().stream().allMatch(String::isEmpty)
                             || !this.validate.areIntentUserSaysValid(intent.getUserSays())) {
-                        result.addError(String.format("No valid expressions for intent %s", intent.getIntentName()));
+                        addErrorMessageToResult(result, "No valid expressions for intent %s at line %d",
+                                intentName, lineNumber);
                     } else {
                         result.addImported(intent);
                     }
                 } else {
-                    result.addWarning(String.format("No valid data to import at line %d", i + 1));
+                    result.addWarning(String.format("No valid data to import at line %d", lineNumber));
                 }
             }
         }
 
         return result;
+    }
+
+    void addErrorMessageToResult(ApiCsvImportResult result, String formatString, String intentName, int lineNumber) {
+        String errorMessage = String.format(formatString, intentName, lineNumber);
+        if (lineNumber == 1) {
+            // first line probably has header data, so reduce this to a warning
+            result.addWarning(errorMessage);
+        }
+        else {
+            result.addError(errorMessage);
+        }
     }
 
     String[] splitLines(final String csvFile) {

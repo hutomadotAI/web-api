@@ -13,13 +13,7 @@ import com.hutoma.api.validation.ValidateParameters;
 import com.hutoma.api.validation.ValidatePost;
 
 import javax.inject.Inject;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -28,7 +22,6 @@ import javax.ws.rs.core.Response;
 /**
  * Created by David MG on 05/10/2016.
  */
-@RateLimit(RateKey.QuickRead)
 @Path("/intent/")
 public class IntentEndpoint {
 
@@ -45,6 +38,7 @@ public class IntentEndpoint {
 
     @GET
     @Path("{aiid}")
+    @RateLimit(RateKey.QuickRead)
     @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
     @Produces(MediaType.APPLICATION_JSON)
     @ValidateParameters({APIParameter.DevID, APIParameter.AIID, APIParameter.IntentName})
@@ -58,6 +52,7 @@ public class IntentEndpoint {
     }
 
     @POST
+    @RateLimit(RateKey.SaveResource)
     @Path("{aiid}")
     @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
     @Produces(MediaType.APPLICATION_JSON)
@@ -73,6 +68,7 @@ public class IntentEndpoint {
     }
 
     @PUT
+    @RateLimit(RateKey.SaveResource)
     @Path("{aiid}/{intent_name}")
     @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
     @Produces(MediaType.APPLICATION_JSON)
@@ -91,6 +87,7 @@ public class IntentEndpoint {
 
 
     @DELETE
+    @RateLimit(RateKey.SaveResource)
     @Path("{aiid}")
     @Secured({Role.ROLE_FREE, Role.ROLE_PLAN_1, Role.ROLE_PLAN_2, Role.ROLE_PLAN_3, Role.ROLE_PLAN_4})
     @Produces(MediaType.APPLICATION_JSON)
