@@ -6,24 +6,19 @@ import com.hutoma.api.containers.sub.AiIdentity;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
 import com.hutoma.api.thread.ITrackedThreadSubPool;
-
 import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.client.JerseyInvocation;
 import org.glassfish.jersey.client.JerseyWebTarget;
 import org.glassfish.jersey.media.multipart.internal.MultiPartWriter;
 
+import javax.inject.Inject;
+import javax.ws.rs.core.Response;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import javax.inject.Inject;
-import javax.ws.rs.core.Response;
+import java.util.concurrent.*;
 
 import static org.glassfish.jersey.client.ClientProperties.CONNECT_TIMEOUT;
 import static org.glassfish.jersey.client.ClientProperties.READ_TIMEOUT;
@@ -176,6 +171,10 @@ public class ServerConnector {
                     } catch (Exception e) {
                         this.logger.logError(LOGFROM, String.format("Failed to close http connection after use: %s",
                                 e.toString()));
+                    }
+                    // Cancel any futures not started, and interrupt any in execution
+                    if (!future.isDone() && !future.isCancelled()) {
+                        future.cancel(true);
                     }
                 });
             }
