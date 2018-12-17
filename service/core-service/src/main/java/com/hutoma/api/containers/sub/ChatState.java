@@ -24,8 +24,8 @@ public class ChatState {
     // Conversation history - TODO: only used in WNET, consider removing
     @SerializedName("history")
     private String history;
-    @SerializedName("entityValues")
-    private HashMap<String, String> entityValues;
+    //@SerializedName("entityValues")
+    //private HashMap<String, String> entityValues;
     @SerializedName("confidenceThreshold")
     private double confidenceThreshold;
     // Chat target (whether it's been handed over to another system or not)
@@ -69,13 +69,13 @@ public class ChatState {
     private transient Map<String, List<String>> candidateValues;
 
     public ChatState(final DateTime timestamp, final String topic, final String history, final UUID lockedAiid,
-                     final HashMap<String, String> entityValues, final double confidenceThreshold,
+                     /*final HashMap<String, String> entityValues,*/ final double confidenceThreshold,
                      final ChatHandoverTarget chatTarget, final ApiAi ai, final ChatContext chatContext) {
         this.timestamp = timestamp;
         this.topic = topic;
         this.history = history;
         this.lockedAiid = lockedAiid;
-        this.entityValues = entityValues;
+        //this.entityValues = entityValues;
         this.confidenceThreshold = confidenceThreshold;
         this.chatTarget = chatTarget;
         this.ai = ai;
@@ -86,7 +86,7 @@ public class ChatState {
 
     public static ChatState getEmpty() {
         return new ChatState(
-                null, null, null, null, new HashMap<>(), 0.0d, ChatHandoverTarget.Ai,
+                null, null, null, null, /*new HashMap<>(),*/ 0.0d, ChatHandoverTarget.Ai,
                 null, new ChatContext()
         );
     }
@@ -123,17 +123,17 @@ public class ChatState {
         this.history = history;
     }
 
-    public String getEntityValue(String entityName) {
-        return this.entityValues.getOrDefault(entityName, null);
-    }
+    //public String getEntityValue(String entityName) {
+    //    return this.entityValues.getOrDefault(entityName, null);
+    //}
 
-    public HashMap<String, String> getEntityValues() {
-        return this.entityValues;
-    }
+    //public HashMap<String, String> getEntityValues() {
+    //    return this.entityValues;
+    //}
 
-    public void setEntityValue(String entityName, String value) {
-        this.entityValues.put(entityName, value);
-    }
+    //public void setEntityValue(String entityName, String value) {
+    //    this.entityValues.put(entityName, value);
+    //}
 
     public void setConfidenceThreshold(final double confidenceThreshold) {
         this.confidenceThreshold = confidenceThreshold;

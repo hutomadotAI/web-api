@@ -836,7 +836,7 @@ public class DatabaseAI extends Database {
                     .add(limitSize(chatState.getTopic(), 250))
                     .add(limitSize(chatState.getHistory(), 1024))
                     .add(lockedAiid)
-                    .add(Database.getNullIfEmpty(chatState.getEntityValues(), jsonSerializer::serialize))
+                    .add((String)null)    // Temporary null for no entity values until schema is updated
                     .add(chatState.getConfidenceThreshold())
                     .add(chatState.getChatTarget().getIntValue())
                     .add(chatState.getResetHandoverTime() == null
@@ -874,7 +874,6 @@ public class DatabaseAI extends Database {
                 rs.getString("topic"),
                 rs.getString("history"),
                 lockedAiid != null ? UUID.fromString(lockedAiid) : null,
-                entities,
                 confidenceThreshold,
                 ChatHandoverTarget.fromInt(rs.getInt("chat_target")),
                 ai,

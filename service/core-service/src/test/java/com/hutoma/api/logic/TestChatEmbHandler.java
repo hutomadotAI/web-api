@@ -54,7 +54,7 @@ public class TestChatEmbHandler {
         final String variableValue = "myValue";
         ChatRequestInfo chatInfo = new ChatRequestInfo(TestDataHelper.AI_IDENTITY, UUID.randomUUID(), "question", null);
         ChatState chatState = new ChatState(DateTime.now(),
-                null, null, UUID.randomUUID(), new HashMap<>(), 0.1d, ChatHandoverTarget.Ai,
+                null, null, UUID.randomUUID(), 0.1d, ChatHandoverTarget.Ai,
                 getSampleAI(), new ChatContext());
         chatState.setAiChatServices(this.fakeChatServices);
         ChatResult chatResult = new ChatResult("variable $var1");

@@ -255,52 +255,6 @@ public class TestChatLogicIntents extends TestChatBase {
         Assert.assertEquals(0, mi.getVariables().get(0).getTimesPrompted());
     }
 
-    /***
-     * Memory intent with multiple entities is fulfilled from persisted value.
-     */
-    @Test
-    public void testChat_multiLineIntent_fulfilledFromPersistence()
-            throws ChatBackendConnector.AiControllerException,
-            ChatStateHandler.ChatStateException, ChatLogic.IntentException {
-        MemoryIntent mi = getMultiEntityMemoryIntentForPrompt(3, "prompt");
-
-        // Make sure all variables are clean
-        for (MemoryVariable mv : mi.getVariables()) {
-            mv.setCurrentValue(null);
-        }
-
-        when(this.fakeIntentHandler.getIntent(any(), anyString())).thenReturn(TestIntentLogic.getIntent());
-
-        HashMap<String, String> entityValues = new HashMap<>();
-        entityValues.put("persistent_var", "persistentValue");
-        ChatState state = new ChatState(DateTime.now(), null, null, null, entityValues, 0.5d,
-                ChatHandoverTarget.Ai, getSampleAI(), new ChatContext());
-        when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(state);
-
-        // First question, triggers the intent but without the right entity value
-        ApiResult result = getChat(0.5f, "nothing to see here.");
-        ChatResult r = ((ApiChat) result).getResult();
-        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
-        // Verify intent is triggered
-        Assert.assertEquals(1, r.getIntents().size());
-        Assert.assertEquals(mi.getName(), r.getIntents().get(0).getName());
-        Assert.assertFalse(r.getIntents().get(0).isFulfilled());
-
-        when(this.fakeIntentHandler.getCurrentIntentsStateForChat(any()))
-                .thenReturn(Collections.singletonList(r.getIntents().get(0)));
-        // Second question, the answer to the prompt with the right entity value
-        final String varValue = "_value_";
-        List<Pair<String, String>> entities = new ArrayList<Pair<String, String>>() {{
-            this.add(new Pair<>(mi.getVariables().get(0).getName(), varValue));
-        }};
-        when(this.fakeRecognizer.retrieveEntities(any(), any())).thenReturn(entities);
-        result = getChat(0.5f, "nothing to see here.");
-        r = ((ApiChat) result).getResult();
-        Assert.assertEquals(1, r.getIntents().size());
-        Assert.assertEquals(mi.getName(), r.getIntents().get(0).getName());
-        // Is fulfilled
-        Assert.assertTrue(r.getIntents().get(0).isFulfilled());
-    }
 
     /***
      * Memory intent is not fulfilled when persistent variable has not been set.
@@ -668,7 +622,7 @@ public class TestChatLogicIntents extends TestChatBase {
         final String varName = "var";
         ChatContext ctx = new ChatContext();
         ctx.setValue(varName, "value", ChatContext.ChatVariableValue.DEFAULT_LIFESPAN_TURNS);
-        ChatState state = new ChatState(DateTime.now(), null, null, null, null, 0.5d,
+        ChatState state = new ChatState(DateTime.now(), null, null, null, 0.5d,
                 ChatHandoverTarget.Ai, getSampleAI(), ctx);
         when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(state);
         Assert.assertEquals(-1, ctx.getVariable(varName).getLifespanTurns());
@@ -683,7 +637,7 @@ public class TestChatLogicIntents extends TestChatBase {
         ChatContext ctx = new ChatContext();
         // Set the lifetime of the variable to 3 turns
         ctx.setValue(varName, "value", 3);
-        ChatState state = new ChatState(DateTime.now(), null, null, null, null, 0.5d,
+        ChatState state = new ChatState(DateTime.now(), null, null, null, 0.5d,
                 ChatHandoverTarget.Ai, getSampleAI(), ctx);
         when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(state);
         // First turn

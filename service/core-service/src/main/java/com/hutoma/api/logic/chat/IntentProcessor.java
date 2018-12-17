@@ -209,12 +209,12 @@ public class IntentProcessor {
             } else {
 
                 // Populate persistent entities.
-                for (MemoryVariable variable : currentIntent.getVariables()) {
-                    String persistentValue = chatResult.getChatState().getEntityValue(variable.getName());
-                    if (persistentValue != null) {
-                        variable.setCurrentValue(persistentValue);
-                    }
-                }
+                //for (MemoryVariable variable : currentIntent.getVariables()) {
+                //    String persistentValue = chatResult.getChatState().getEntityValue(variable.getName());
+                //    if (persistentValue != null) {
+                //        variable.setCurrentValue(persistentValue);
+                //    }
+                //}
 
                 // Do we have multiple entities with the same type?
                 MemoryVariable variableToPrompt = getVariableToPromptFromEntityList(currentIntent.getVariables());
@@ -475,13 +475,13 @@ public class IntentProcessor {
             }
 
             // Write recognised persistent entities, for the supplied variables
-            for (Object entity : memoryVariables
-                    .stream()
-                    .filter(x -> x.getIsPersistent() && x.getCurrentValue() != null)
-                    .toArray()) {
-                MemoryVariable memoryVariable = (MemoryVariable) entity;
-                chatResult.getChatState().setEntityValue(memoryVariable.getName(), memoryVariable.getCurrentValue());
-            }
+            //for (Object entity : memoryVariables
+            //        .stream()
+            //        .filter(x -> x.getIsPersistent() && x.getCurrentValue() != null)
+            //        .toArray()) {
+            //    MemoryVariable memoryVariable = (MemoryVariable) entity;
+            //    chatResult.getChatState().setEntityValue(memoryVariable.getName(), memoryVariable.getCurrentValue());
+            //}
 
             // Update context
             Map<String, Integer> lifetimeMap = new HashMap<>(); // maps entity label to lifetime
