@@ -857,10 +857,6 @@ public class DatabaseAI extends Database {
                                                        final JsonSerializer jsonSerializer)
             throws SQLException {
         String lockedAiid = rs.getString("locked_aiid");
-        String entitiesJson = rs.getString("entity_values");
-        HashMap<String, String> entities = (entitiesJson == null)
-                ? new HashMap<>()
-                : (HashMap<String, String>) jsonSerializer.deserialize(entitiesJson, HashMap.class);
         double confidenceThreshold = rs.getDouble("confidence_threshold");
         if (rs.wasNull()) {
             confidenceThreshold = ai.getConfidence();
