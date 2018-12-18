@@ -2,6 +2,7 @@ package com.hutoma.api.logic.chat;
 
 import com.hutoma.api.common.FeatureToggler;
 import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.common.Pair;
 import com.hutoma.api.connectors.EntityRecognizerService;
 import com.hutoma.api.connectors.db.DatabaseEntitiesIntents;
 import com.hutoma.api.connectors.db.DatabaseException;
@@ -13,8 +14,10 @@ import com.hutoma.api.logging.LogMap;
 import com.hutoma.api.logic.ChatLogic;
 import com.hutoma.api.logic.chat.EntityRecognizerMessage;
 import com.hutoma.api.common.Tools;
+import com.hutoma.api.memory.IEntityRecognizer;
 
 import javax.inject.Inject;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +28,8 @@ public class ChatEntityValueHandler implements IChatHandler {
     private final DatabaseEntitiesIntents dbEntities;
     private final JsonSerializer serializer;
     private final EntityRecognizerService entityRecognizerService;
+    // IEntityRecognizer ultimately calls EntityRecognizerService, will be cleaned up in a future PR
+    private final IEntityRecognizer entityRecognizer;
     private final FeatureToggler featureToggler;
     private final ILogger logger;
     private final Tools tools;
@@ -34,12 +39,14 @@ public class ChatEntityValueHandler implements IChatHandler {
     public ChatEntityValueHandler(final DatabaseEntitiesIntents dbEntities,
                                   final JsonSerializer serializer,
                                   final EntityRecognizerService entityRecognizerService,
+                                  final IEntityRecognizer entityRecognizer,
                                   final FeatureToggler featureToggler,
                                   final ILogger logger,
                                   final Tools tools) {
         this.dbEntities = dbEntities;
         this.serializer = serializer;
         this.entityRecognizerService = entityRecognizerService;
+        this.entityRecognizer = entityRecognizer;
         this.featureToggler = featureToggler;
         this.logger = logger;
         this.tools = tools;
@@ -53,8 +60,13 @@ public class ChatEntityValueHandler implements IChatHandler {
 
         LogMap logMap = LogMap.map("AIID", aiIdentity.getAiid().toString())
                 .put("DevID", aiIdentity.getDevId().toString())
+                .put("ChatId", currentResult.getChatId().toString())
                 .put("Language", aiIdentity.getLanguage())
                 .put("Version", aiIdentity.getServerVersion());
+
+        // Call the old entity recognition (this includes system entities)
+        //List<MemoryVariable> mvEntities = new ArrayList<MemoryVariable>() {};
+        //List<Pair<String, String>> entitiesFromNER = getEntitiesFromNER(requestInfo, mvEntities);
 
         // Check if this feature applies
         if (featureToggler.getStateForAiid(
@@ -175,4 +187,15 @@ public class ChatEntityValueHandler implements IChatHandler {
         // This never completes the chat
         return false;
     }
+
+    private List<Pair<String, String>> getEntitiesFromNER(final ChatRequestInfo chatInfo,
+                                                          final List<MemoryVariable> memoryVariables) {
+        // At this stage we're guaranteed to have variables with different entity types
+        // Attempt to retrieve entities from the question
+        List<Pair<String, String>> entitiesFromNER;
+        entitiesFromNER = this.entityRecognizer.retrieveEntities(chatInfo, memoryVariables);
+
+        return entitiesFromNER;
+    }
+
 }

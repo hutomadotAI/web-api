@@ -124,7 +124,7 @@ public class TestChatStateHandler {
     }
 
     private ChatState getTestChatState() {
-        return new ChatState(DateTime.now(), "theTopic", "theHistory", AIID, new HashMap<>(), 0.5d,
+        return new ChatState(DateTime.now(), "theTopic", "theHistory", AIID, 0.5d,
                 ChatHandoverTarget.Ai, getSampleAI(), new ChatContext());
     }
 }

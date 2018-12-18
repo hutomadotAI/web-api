@@ -59,7 +59,7 @@ public class TestIntentProcessor {
         final String responseTemplate = "response %s";
         final String label = "label1";
         ChatState chatState = new ChatState(DateTime.now(),
-                null, null, UUID.randomUUID(), new HashMap<>(), 0.1d, ChatHandoverTarget.Ai,
+                null, null, UUID.randomUUID(),0.1d, ChatHandoverTarget.Ai,
                 getSampleAI(), new ChatContext());
         ChatRequestInfo chatInfo = new ChatRequestInfo(TestDataHelper.AI_IDENTITY, chatId, "question", null);
         MemoryVariable memVar = new MemoryVariable(label, Collections.singletonList("val1"));
@@ -92,7 +92,7 @@ public class TestIntentProcessor {
         final String responseTemplate = "response %s";
         final String label = "label1";
         ChatState chatState = new ChatState(DateTime.now(),
-                null, null, UUID.randomUUID(), new HashMap<>(), 0.1d, ChatHandoverTarget.Ai,
+                null, null, UUID.randomUUID(), 0.1d, ChatHandoverTarget.Ai,
                 getSampleAI(), new ChatContext());
         ChatRequestInfo chatInfo = new ChatRequestInfo(TestDataHelper.AI_IDENTITY, chatId, "question", null);
         MemoryVariable memVar = new MemoryVariable(label, Collections.singletonList("val1"));
@@ -143,7 +143,7 @@ public class TestIntentProcessor {
         final String label = "label1";
         final String nextIntentName = "nextIntent";
         ChatState chatState = new ChatState(DateTime.now(),
-                null, null, UUID.randomUUID(), new HashMap<>(), 0.1d, ChatHandoverTarget.Ai,
+                null, null, UUID.randomUUID(),0.1d, ChatHandoverTarget.Ai,
                 getSampleAI(), new ChatContext());
         ChatRequestInfo chatInfo = new ChatRequestInfo(TestDataHelper.AI_IDENTITY, chatId, "question", null);
         MemoryVariable memVar = new MemoryVariable(label, Collections.singletonList("val1"));
@@ -165,7 +165,7 @@ public class TestIntentProcessor {
 
         List<Pair<String, String>> entities = new ArrayList<>();
         entities.add(new Pair<String, String>("none", "none"));
-        when(this.fakeEntityRecognizer.retrieveEntities(any(), any(), any())).thenReturn(entities);
+        when(this.fakeEntityRecognizer.retrieveEntities(any(), any())).thenReturn(entities);
 
         intent.setIntentOutConditionals(outConditionals);
         when(this.fakeIntentHandler.getIntent(any(), any())).thenReturn(intent);
@@ -195,7 +195,7 @@ public class TestIntentProcessor {
         final String label = "label1";
         final String nextIntentName = "nextIntent";
         ChatState chatState = new ChatState(DateTime.now(),
-                null, null, UUID.randomUUID(), new HashMap<>(), 0.1d, ChatHandoverTarget.Ai,
+                null, null, UUID.randomUUID(),0.1d, ChatHandoverTarget.Ai,
                 getSampleAI(), new ChatContext());
         ChatRequestInfo chatInfo = new ChatRequestInfo(TestDataHelper.AI_IDENTITY, chatId, "question", null);
         MemoryVariable memVar = new MemoryVariable(label, Collections.singletonList("val1"));
@@ -217,7 +217,7 @@ public class TestIntentProcessor {
 
         List<Pair<String, String>> entities = new ArrayList<>();
         entities.add(new Pair<String, String>("label1", "label1"));
-        when(this.fakeEntityRecognizer.retrieveEntities(any(), any(), any())).thenReturn(entities);
+        when(this.fakeEntityRecognizer.retrieveEntities(any(), any())).thenReturn(entities);
         when(this.fakeFeatureToggler.getStateForAiid(any(), any(), any())).thenReturn(FeatureToggler.FeatureState.T1);
 
         intent.setIntentOutConditionals(outConditionals);
@@ -250,7 +250,7 @@ public class TestIntentProcessor {
         final String entityValue = "val1";
         context.setValue(label, entityValue, ChatContext.ChatVariableValue.DEFAULT_LIFESPAN_TURNS);
         ChatState chatState = new ChatState(DateTime.now(),
-                null, null, UUID.randomUUID(), new HashMap<>(), 0.1d, ChatHandoverTarget.Ai,
+                null, null, UUID.randomUUID(), 0.1d, ChatHandoverTarget.Ai,
                 getSampleAI(), context);
         ChatRequestInfo chatInfo = new ChatRequestInfo(TestDataHelper.AI_IDENTITY, chatId, "question", null);
         MemoryVariable memVar = new MemoryVariable(label, Collections.singletonList(entityValue), false, label);
@@ -289,7 +289,7 @@ public class TestIntentProcessor {
         final String entityValue = "val1";
         context.setValue(label, entityValue, ChatContext.ChatVariableValue.DEFAULT_LIFESPAN_TURNS);
         ChatState chatState = new ChatState(DateTime.now(),
-                null, null, UUID.randomUUID(), new HashMap<>(), 0.1d, ChatHandoverTarget.Ai,
+                null, null, UUID.randomUUID(), 0.1d, ChatHandoverTarget.Ai,
                 getSampleAI(), context);
         ChatRequestInfo chatInfo = new ChatRequestInfo(TestDataHelper.AI_IDENTITY, chatId, "question", null);
         MemoryVariable memVar = new MemoryVariable(label, Collections.singletonList(entityValue), false, label);
@@ -325,7 +325,7 @@ public class TestIntentProcessor {
         final String entityValue = "val1";
         context.setValue(label, entityValue, ChatContext.ChatVariableValue.DEFAULT_LIFESPAN_TURNS);
         ChatState chatState = new ChatState(DateTime.now(),
-                null, null, UUID.randomUUID(), new HashMap<>(), 0.1d, ChatHandoverTarget.Ai,
+                null, null, UUID.randomUUID(), 0.1d, ChatHandoverTarget.Ai,
                 getSampleAI(), context);
         ChatRequestInfo chatInfo = new ChatRequestInfo(TestDataHelper.AI_IDENTITY, chatId, "question", null);
         MemoryVariable memVar = new MemoryVariable(label, Collections.singletonList(entityValue), false, label);

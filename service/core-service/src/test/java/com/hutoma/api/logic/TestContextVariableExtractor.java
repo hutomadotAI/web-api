@@ -98,7 +98,7 @@ public class TestContextVariableExtractor extends TestChatBase {
                 ctx.setValue(entry.getKey(), entry.getValue(), ChatContext.ChatVariableValue.DEFAULT_LIFESPAN_TURNS);
             }
         }
-        result.setChatState(new ChatState(DateTime.now(), null, null, UUID.randomUUID(), new HashMap<>(), 0.5d,
+        result.setChatState(new ChatState(DateTime.now(), null, null, UUID.randomUUID(), 0.5d,
                 ChatHandoverTarget.Ai, getSampleAI(), ctx));
         return result;
     }
