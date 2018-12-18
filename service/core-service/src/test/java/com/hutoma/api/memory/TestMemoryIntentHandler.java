@@ -158,17 +158,17 @@ public class TestMemoryIntentHandler {
         Assert.assertEquals(false, mi.isFulfilled());
     }
 
-    @Test
-    public void testMemoryIntentClearIntents_deleteIntentAndEntityValues() {
-        MemoryVariable var = new MemoryVariable("entity1", Collections.singletonList("value"));
-        MemoryIntent mi = new MemoryIntent(INTENT_NAME, AIID, CHATID, Collections.singletonList(var));
-        ChatState state = buildChatState();
-        state.getCurrentIntents().add(mi);
-        state.setEntityValue(mi.getName(), mi.getVariables().get(0).getCurrentValue());
-        this.memoryIntentHandler.clearIntents(state, Collections.singletonList(mi));
-        Assert.assertTrue(state.getCurrentIntents().isEmpty());
-        Assert.assertTrue(state.getEntityValues().isEmpty());
-    }
+//    @Test
+//    public void testMemoryIntentClearIntents_deleteIntentAndEntityValues() {
+//        MemoryVariable var = new MemoryVariable("entity1", Collections.singletonList("value"));
+//        MemoryIntent mi = new MemoryIntent(INTENT_NAME, AIID, CHATID, Collections.singletonList(var));
+//        ChatState state = buildChatState();
+//        state.getCurrentIntents().add(mi);
+//        state.setEntityValue(mi.getName(), mi.getVariables().get(0).getCurrentValue());
+//        this.memoryIntentHandler.clearIntents(state, Collections.singletonList(mi));
+//        Assert.assertTrue(state.getCurrentIntents().isEmpty());
+//        Assert.assertTrue(state.getEntityValues().isEmpty());
+//    }
 
     @Test
     public void testMemoryVariableProperties() {
@@ -212,7 +212,7 @@ public class TestMemoryIntentHandler {
     }
 
     private ChatState buildChatState() {
-        return new ChatState(DateTime.now(), "theTopic", "theHistory", AIID, new HashMap<>(), 0.5d,
+        return new ChatState(DateTime.now(), "theTopic", "theHistory", AIID, 0.5d,
                 ChatHandoverTarget.Ai, getSampleAI(), new ChatContext());
     }
 }

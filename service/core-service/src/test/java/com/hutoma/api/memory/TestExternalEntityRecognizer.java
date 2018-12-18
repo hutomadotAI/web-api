@@ -1,6 +1,8 @@
 package com.hutoma.api.memory;
 
+import com.hutoma.api.common.FeatureToggler;
 import com.hutoma.api.common.SupportedLanguage;
+import com.hutoma.api.containers.sub.ChatRequestInfo;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.common.Pair;
 import com.hutoma.api.connectors.EntityRecognizerService;
@@ -28,18 +30,24 @@ import static org.mockito.Mockito.when;
 public class TestExternalEntityRecognizer {
     private ExternalEntityRecognizer recognizer;
     private EntityRecognizerService fakeService;
+    private ChatRequestInfo fakeChatInfo;
+    private FeatureToggler fakeFeatureToggler;
 
     @Before
     public void setup() {
         this.fakeService = mock(EntityRecognizerService.class);
-        this.recognizer = new ExternalEntityRecognizer(this.fakeService, mock(ILogger.class));
+        this.fakeFeatureToggler = mock(FeatureToggler.class);
+        this.recognizer = new ExternalEntityRecognizer(this.fakeService, mock(ILogger.class), fakeFeatureToggler);
+        this.fakeChatInfo = mock(ChatRequestInfo.class, Mockito.RETURNS_DEEP_STUBS);
+
+        when(this.fakeFeatureToggler.getStateForAiid(any(), any(), any())).thenReturn(FeatureToggler.FeatureState.C);
     }
 
     @Test
     public void testExternal_injectedCtor() {
         ServiceLocator sl = Mockito.mock(ServiceLocator.class);
         ILogger logger = mock(ILogger.class);
-        ExternalEntityRecognizer r = new ExternalEntityRecognizer(sl,logger);
+        ExternalEntityRecognizer r = new ExternalEntityRecognizer(sl, logger, fakeFeatureToggler);
         Assert.assertEquals(logger, r.getLogger());
     }
 
@@ -71,12 +79,14 @@ public class TestExternalEntityRecognizer {
 
 
         when(this.fakeService.getEntities(any(), any())).thenReturn(systemEntities);
+        when(this.fakeChatInfo.getQuestion()).thenReturn(
+                String.format("CustomEntities %s and %s and SystemEntities %s and %s",
+                varValues[1], varValues[0],
+                systemEntities.get(0).getValue(), systemEntities.get(0).getValue()));
+        when(this.fakeChatInfo.getAiIdentity().getLanguage()).thenReturn(SupportedLanguage.EN);
 
         List<Pair<String, String>> r = this.recognizer.retrieveEntities(
-                String.format("CustomEntities %s and %s and SystemEntities %s and %s",
-                        varValues[1], varValues[0],
-                        systemEntities.get(0).getValue(), systemEntities.get(0).getValue()),
-                SupportedLanguage.EN,
+                fakeChatInfo,
                 l);
         Assert.assertEquals(4, r.size());
         // Note - the order is currently defined by the order on the MemoryVariable list,
@@ -118,8 +128,10 @@ public class TestExternalEntityRecognizer {
             this.add(new RecognizedEntity("sys.number", Integer.toString(number + 1)));
         }};
         when(this.fakeService.getEntities(any(), any())).thenReturn(systemEntities);
+        when(this.fakeChatInfo.getQuestion()).thenReturn(String.format("string with number %d", number));
+        when(this.fakeChatInfo.getAiIdentity().getLanguage()).thenReturn(SupportedLanguage.EN);
         List<Pair<String, String>> r = this.recognizer.retrieveEntities(
-                String.format("string with number %d", number), SupportedLanguage.EN, Collections.emptyList());
+                fakeChatInfo, Collections.emptyList());
         Assert.assertEquals(1, r.size());
         Assert.assertEquals("sys.number", r.get(0).getA());
         Assert.assertEquals(number, Integer.parseInt(r.get(0).getB()));

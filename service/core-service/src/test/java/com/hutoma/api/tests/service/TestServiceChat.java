@@ -208,7 +208,7 @@ public class TestServiceChat extends ServiceTestBase {
 
         // Need to set the state to the intents since we're mocking the intent processor's ::processIntent which is
         // responsible for adding the intent to the state
-        ChatState state = new ChatState(DateTime.now(), null, null, null, null, 0.5d,
+        ChatState state = new ChatState(DateTime.now(), null, null, null, 0.5d,
                 ChatHandoverTarget.Ai, getSampleAI(), new ChatContext());
         state.setCurrentIntents(intents);
         when(this.fakeChatStateHandler.getState(any(), any(), any())).thenReturn(state);
@@ -273,7 +273,7 @@ public class TestServiceChat extends ServiceTestBase {
         MemoryIntent mi = new MemoryIntent("intent1", AIID, chatId, Collections.emptyList(), false);
         List<MemoryIntent> intents = Collections.singletonList(mi);
 
-        ChatState state = new ChatState(DateTime.now(), null, null, null, null, 0.5d,
+        ChatState state = new ChatState(DateTime.now(), null, null, null, 0.5d,
                 ChatHandoverTarget.Ai, getSampleAI(), context);
         state.setCurrentIntents(intents);
 
@@ -309,7 +309,7 @@ public class TestServiceChat extends ServiceTestBase {
         MemoryIntent mi = new MemoryIntent("intent1", AIID, chatId, Collections.emptyList(), false);
         List<MemoryIntent> intents = Collections.singletonList(mi);
 
-        ChatState state = new ChatState(DateTime.now(), null, null, null, null, 0.5d,
+        ChatState state = new ChatState(DateTime.now(), null, null, null, 0.5d,
                 ChatHandoverTarget.Ai, getSampleAI(), context);
         state.setCurrentIntents(intents);
 
