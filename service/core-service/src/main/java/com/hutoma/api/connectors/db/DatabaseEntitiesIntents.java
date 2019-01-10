@@ -268,7 +268,7 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
             // put them into a set
             HashSet<String> currentValues = new HashSet<>();
             while (valuesRs.next()) {
-                currentValues.add(valuesRs.getString("value").toLowerCase());
+                currentValues.add(valuesRs.getString("value"));
             }
 
             // Delete all the old entity values.
@@ -284,15 +284,14 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
             // Add all the new entity values.
             if (entity.getEntityValueList() != null) {
                 for (String entityValue : entity.getEntityValueList()) {
-                        transaction.getDatabaseCall().initialise("addEntityValue", 4)
-                                .add(devid)
-                                .add(entity.getEntityName())
-                                .add(entityValue)
-                                .add(aiidString)
-                                .executeUpdate();
-                    }
+                    transaction.getDatabaseCall().initialise("addEntityValue", 4)
+                            .add(devid)
+                            .add(entity.getEntityName())
+                            .add(entityValue)
+                            .add(aiidString)
+                            .executeUpdate();
+                }
             }
-
 
 
         } catch (SQLException e) {
