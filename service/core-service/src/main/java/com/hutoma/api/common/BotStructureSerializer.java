@@ -8,6 +8,7 @@ import com.hutoma.api.containers.ApiEntity;
 import com.hutoma.api.containers.ApiIntent;
 import com.hutoma.api.containers.sub.AiBot;
 import com.hutoma.api.containers.sub.BotStructure;
+import com.hutoma.api.containers.sub.Entity;
 import com.hutoma.api.containers.sub.IntentVariable;
 
 import java.util.ArrayList;
@@ -30,7 +31,7 @@ public class BotStructureSerializer {
         if (bot == null) {
             return null;
         }
-        String trainingFile = database.getAiTrainingFile(aiid);
+
         final List<String> intentList = databaseEntitiesIntents.getIntents(devId, aiid);
 
         List<ApiIntent> intents = new ArrayList<>();
@@ -43,18 +44,19 @@ public class BotStructureSerializer {
                 apiIntent.setWebHook(null);
             }
             intents.add(apiIntent);
+        }
 
-            for (IntentVariable intentVariable : apiIntent.getVariables()) {
-                String entityName = intentVariable.getEntityName();
-                if (!entityMap.containsKey(entityName)) {
-                    ApiEntity entity = databaseEntitiesIntents.getEntity(devId, entityName, aiid);
-                    if (entity != null && !entity.isSystem()) {
-                        entityMap.put(entityName, entity);
-                    }
-                }
+        final List<Entity> entities = databaseEntitiesIntents.getEntities(devId, aiid);
+
+        for (Entity entity : entities) {
+            ApiEntity apiEntity = databaseEntitiesIntents.getEntity(devId, entity.getName(), aiid);
+            if (apiEntity != null && !apiEntity.isSystem()) {
+                entityMap.put(entity.getName(), apiEntity);
             }
         }
 
+        String trainingFile = database.getAiTrainingFile(aiid);
+        
         List<AiBot> linkedBots = database.getBotsLinkedToAi(devId, aiid);
         bot.setLinkedBots(linkedBots.stream().map(AiBot::getBotId).collect(Collectors.toList()));
 
