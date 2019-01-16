@@ -1106,98 +1106,53 @@ public class AILogic {
             throw new BotImportException(IMPORT_GENERIC_ERROR);
         }
 
-        List<Entity> userEntities;
-        try {
-            // Add the entities that the user doesn't currently have.
-            userEntities = this.databaseEntitiesIntents.getEntities(devId, aiid);
-        } catch (DatabaseException ex) {
-            this.logger.logUserExceptionEvent(LOGFROM, "ImportBot - retrieving existing entities ai",
-                    devId.toString(), ex, logMap);
-            throw new BotImportException(IMPORT_GENERIC_ERROR);
-        }
-
-        // Check if there are any existing entities with the same name, and if they have different values.
-        // If they do, we don't really know what to do (delete, add, etc) since they may completely
-        // break the intents linked to it
-        if (botToImport.getEntities() != null && !botToImport.getEntities().isEmpty()
-                && userEntities != null && !userEntities.isEmpty()) {
+        // Delete all of the older entities.
+        for (Entity oldEntity : this.databaseEntitiesIntents.getEntities(devId, aiid)) {
             try {
-                Set<String> entitNamesToImport = new HashSet<>(botToImport.getEntities().keySet());
-                for (Entity entity : userEntities) {
-                    String entityName = entity.getName();
-                    if (entitNamesToImport.contains(entityName)) {
-                        ApiEntity existingEntity = this.databaseEntitiesIntents
-                                .getEntity(devId, entityName, newBotAiid);
-                        if (botToImport.getEntities().get(entityName).getEntityValueList().size()
-                                != existingEntity.getEntityValueList().size()) {
-                            this.logger.logUserTraceEvent(LOGFROM,
-                                    "ImportBot - existing entity with different number of values",
-                                    devId.toString(), logMap.put("EntityName", entityName));
-                            throw new BotImportUserException(String.format(
-                                    "Entity %s already exists and has different number of values", entityName));
-                        }
-                        if (!existingEntity.getEntityValueList().containsAll(
-                                botToImport.getEntities().get(entityName).getEntityValueList())
-                                && !botToImport.getEntities().get(entityName).getEntityValueList().containsAll(
-                                existingEntity.getEntityValueList())) {
-                            this.logger.logUserTraceEvent(LOGFROM,
-                                    "ImportBot - existing entity with different values",
-                                    devId.toString(), logMap.put("EntityName", entityName)
-                                            .put("ExistingValues",
-                                                    StringUtils.join(existingEntity.getEntityValueList(), ','))
-                                            .put("NewValues",
-                                                    StringUtils.join(botToImport.getEntities().get(entityName), ',')));
-                            throw new BotImportUserException(String.format(
-                                    "Entity %s already exists and has different set of values", entityName));
-                        }
-                    }
-                }
-            } catch (DatabaseException ex) {
-                this.logger.logUserExceptionEvent(LOGFROM, "ImportBot - retrieving entity values",
-                        devId.toString(), ex, logMap);
+                this.databaseEntitiesIntents.deleteEntityByName(devId, aiid, oldEntity.getName(), transaction);
+
+            } catch (DatabaseException e) {
                 throw new BotImportException(IMPORT_GENERIC_ERROR);
             }
         }
 
         if (botToImport.getEntities() != null && !botToImport.getEntities().isEmpty()) {
             try {
-                for (ApiEntity e : botToImport.getEntities().values()) {
-                    boolean hasEntity = false;
-                    for (Entity ue : userEntities) {
-                        if (ue.getName().equals(e.getEntityName())) {
-                            hasEntity = true;
-                            break;
-                        }
-                    }
-                    if (!hasEntity && e.getEntityValueList() != null) {
-                        if (e.getEntityValueList().size() > this.config.getMaxEntityValuesPerEntity()) {
+                for (ApiEntity entity : botToImport.getEntities().values()) {
+                    if (entity.getEntityValueList() != null) {
+                        if (entity.getEntityValueList().size() > this.config.getMaxEntityValuesPerEntity()) {
                             this.logger.logUserTraceEvent(LOGFROM, "ImportBot - exceeded values per entity",
                                     devId.toString(),
                                     logMap.put("Max", this.config.getMaxEntityValuesPerEntity())
-                                            .put("ValuesOnEntity", e.getEntityValueList().size()));
+                                            .put("ValuesOnEntity", entity.getEntityValueList().size()));
                             throw new BotImportException(String.format(
                                     "Entity %s has %d values and exceeds maximum of %d",
-                                    e.getEntityName(), e.getEntityValueList().size(),
+                                    entity.getEntityName(), entity.getEntityValueList().size(),
                                     this.config.getMaxEntityValuesPerEntity()));
                         }
                         int expectedValuesCount =
                                 this.databaseEntitiesIntents.getEntityValuesCountForDevExcludingEntity(
-                                        devId, e.getEntityName(), newBotAiid)
-                                        + e.getEntityValueList().size();
+                                        devId, entity.getEntityName(), newBotAiid)
+                                        + entity.getEntityValueList().size();
                         if (expectedValuesCount > this.config.getMaxTotalEntityValues()) {
                             this.logger.logUserTraceEvent(LOGFROM, "ImportBot - exceeded values per dev",
                                     devId.toString(),
                                     logMap.put("Max", this.config.getMaxEntityValuesPerEntity())
-                                            .put("ValuesOnEntity", e.getEntityValueList().size()));
+                                            .put("ValuesOnEntity", entity.getEntityValueList().size()));
                             throw new BotImportException(String.format(
                                     "Entity %s has %d values and exceeds account maximum of %d",
-                                    e.getEntityName(), e.getEntityValueList().size(),
+                                    entity.getEntityName(), entity.getEntityValueList().size(),
                                     this.config.getMaxTotalEntityValues()));
                         }
-                        if (e.getEntityValueType() == null) {
-                            e.setEntityValueType(EntityValueType.LIST);
+                        if (entity.getEntityValueType() == null) {
+                            entity.setEntityValueType(EntityValueType.LIST);
                         }
-                        this.databaseEntitiesIntents.writeEntity(devId, e.getEntityName(), e, transaction, newBotAiid);
+                        this.databaseEntitiesIntents.writeEntity(
+                                devId,
+                                entity.getEntityName(),
+                                entity,
+                                transaction,
+                                newBotAiid);
                     }
                 }
             } catch (DatabaseException ex) {

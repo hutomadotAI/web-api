@@ -1200,9 +1200,6 @@ public class TestAILogic {
         List<String> existingValues = Arrays.asList("value1", "value2", "value3");
         List<String> newValues = Arrays.asList("value4", "value5");
         BotStructure botToImport = setupImportEntityValueTests(entityName, existingValues, newValues);
-
-        expectedException.expect(AILogic.BotImportUserException.class);
-        expectedException.expectMessage("Entity entity already exists and has different number of values");
         this.aiLogic.createImportedBot(VALIDDEVID, botToImport);
     }
 
@@ -1212,9 +1209,6 @@ public class TestAILogic {
         List<String> existingValues = Arrays.asList("value1", "value2");
         List<String> newValues = Arrays.asList(existingValues.get(0), "value3");
         BotStructure botToImport = setupImportEntityValueTests(entityName, existingValues, newValues);
-
-        expectedException.expect(AILogic.BotImportUserException.class);
-        expectedException.expectMessage("Entity entity already exists and has different set of values");
         this.aiLogic.createImportedBot(VALIDDEVID, botToImport);
     }
 

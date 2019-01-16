@@ -195,9 +195,8 @@ public class EntityLogic {
         final String devidString = devid.toString();
         try {
             LogMap logMap = LogMap.map("Entity", entityName);
-            OptionalInt entityId = this.database.getEntityIdForDev(devid, entityName, aiid);
-            if (!entityId.isPresent()) {
-                this.logger.logUserTraceEvent(LOGFROM, "DeleteEntity - not found", devidString, logMap);
+
+            if (this.database.getEntity(devid, entityName, aiid) == null) {
                 return ApiError.getNotFound();
             }
 
@@ -228,7 +227,7 @@ public class EntityLogic {
                         referreingAis.size() != 1 ? "s" : ""));
             }
 
-            if (!this.database.deleteEntity(devid, entityId.getAsInt())) {
+            if (!this.database.deleteEntityByName(devid, aiid, entityName, null)) {
                 this.logger.logUserTraceEvent(LOGFROM, "DeleteEntity - could not delete", devidString, logMap);
                 return ApiError.getInternalServerError();
             }

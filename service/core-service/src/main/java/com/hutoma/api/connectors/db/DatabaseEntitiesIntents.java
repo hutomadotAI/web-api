@@ -299,33 +299,26 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
         }
     }
 
-    public OptionalInt getEntityIdForDev(UUID devid, String entityName, UUID aiid) throws DatabaseException {
+    /***
+     * Deletes a specific entity for a user.
+     * @param devid The devid the entity belongs to.
+     * @param aiid The aiid the entity belongs to.
+     * @param name The name of the entity.
+     * @return The number of entities deleted.
+     * @throws DatabaseException if something goes wrong
+     */
+    public boolean deleteEntityByName(final UUID devid, final UUID aiid, final String name,
+                                      DatabaseTransaction transaction) throws DatabaseException {
         String aiidString = aiid.toString();
         if (this.featureToggler.getStateforDev(devid, "per-bot-entities") != FeatureToggler.FeatureState.T1) {
             aiidString = emptyAiid;
         }
 
-        try (DatabaseCall call = this.callProvider.get()) {
-            ResultSet rs;
-            try {
-                call.initialise("getEntityIdForDev", 3).add(devid).add(entityName).add(aiidString);
-                rs = call.executeQuery();
-                OptionalInt entityId = OptionalInt.empty();
-                if (rs.next()) {
-                    entityId = OptionalInt.of(rs.getInt("id"));
-                }
-                return entityId;
-            } catch (final SQLException sqle) {
-                throw new DatabaseException(sqle);
-            }
-        }
-    }
+        transaction = transaction != null ? transaction : this.transactionProvider.get();
 
-    public boolean deleteEntity(final UUID devid, final int entityId) throws DatabaseException {
-        try (DatabaseCall call = this.callProvider.get()) {
-            int rowCount = call.initialise("deleteEntity", 2).add(devid).add(entityId).executeUpdate();
-            return rowCount > 0;
-        }
+        int rowCount = transaction.getDatabaseCall().initialise("deleteEntityByName", 3)
+                .add(devid).add(aiidString).add(name).executeUpdate();
+        return rowCount > 0;
     }
 
     /***

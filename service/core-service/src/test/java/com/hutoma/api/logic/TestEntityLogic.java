@@ -157,24 +157,24 @@ public class TestEntityLogic {
 
     @Test
     public void testDeleteEntity_Success() throws DatabaseException {
-        when(this.fakeDatabase.getEntityIdForDev(any(), anyString(), any())).thenReturn(ENTITY_ID);
-        when(this.fakeDatabase.deleteEntity(any(), anyInt())).thenReturn(true);
+        when(this.fakeDatabase.getEntity(any(), any(), any())).thenReturn(new ApiEntity(ENTITY_NAME, DEVID_UUID));
+        when(this.fakeDatabase.deleteEntityByName(any(), any(), any(), any())).thenReturn(true);
         final ApiResult result = this.entityLogic.deleteEntity(DEVID_UUID, ENTITY_NAME, AIID);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
     }
 
     @Test
     public void testDeleteEntity_Error() throws DatabaseException {
-        when(this.fakeDatabase.getEntityIdForDev(any(), anyString(), any())).thenReturn(ENTITY_ID);
-        when(this.fakeDatabase.deleteEntity(any(), anyInt())).thenThrow(DatabaseException.class);
+        when(this.fakeDatabase.getEntity(any(), any(), any())).thenReturn(new ApiEntity(ENTITY_NAME, DEVID_UUID));
+        when(this.fakeDatabase.deleteEntityByName(any(), any(), any(), any())).thenThrow(DatabaseException.class);
         final ApiResult result = this.entityLogic.deleteEntity(DEVID_UUID, ENTITY_NAME, AIID);
         Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
     }
 
     @Test
     public void testDeleteEntity_NotFound() throws DatabaseException {
-        when(this.fakeDatabase.getEntityIdForDev(any(), anyString(), any())).thenReturn(OptionalInt.empty());
-        when(this.fakeDatabase.deleteEntity(any(), anyInt())).thenReturn(false);
+        when(this.fakeDatabase.getEntity(any(), any(), any())).thenReturn(null);
+        when(this.fakeDatabase.deleteEntityByName(any(), any(), any(), any())).thenReturn(false);
         final ApiResult result = this.entityLogic.deleteEntity(DEVID_UUID, ENTITY_NAME, AIID);
         Assert.assertEquals(HttpURLConnection.HTTP_NOT_FOUND, result.getStatus().getCode());
     }
@@ -185,16 +185,14 @@ public class TestEntityLogic {
         ApiIntent intent = TestIntentLogic.getIntent();
         intent.getVariables().add(new IntentVariable(ENTITY_NAME, DEVID_UUID, true, 1, "value", false, "label", false));
         when(this.fakeDatabase.getAllIntents(DEVID_UUID)).thenReturn(Collections.singletonList(intent));
-        when(this.fakeDatabase.getEntityIdForDev(any(), anyString(), any())).thenReturn(ENTITY_ID);
         this.entityLogic.deleteEntity(DEVID_UUID, ENTITY_NAME, AIID);
-        verify(this.fakeDatabase, never()).deleteEntity(any(), anyInt());
+        verify(this.fakeDatabase, never()).deleteEntityByName(any(), any(), any(), any());
     }
 
     @Test
     public void testDeleteEntity_entityNotInUse_doesNotStopTraining() throws DatabaseException {
         when(this.fakeDatabase.getAllIntents(DEVID_UUID)).thenReturn(Collections.emptyList());
-        when(this.fakeDatabase.getEntityIdForDev(any(), anyString(), any())).thenReturn(ENTITY_ID);
-        when(this.fakeDatabase.deleteEntity(any(), anyInt())).thenReturn(true);
+        when(this.fakeDatabase.deleteEntityByName(any(), any(), any(), any())).thenReturn(true);
         this.entityLogic.deleteEntity(DEVID_UUID, ENTITY_NAME, AIID);
         verify(this.trainingLogic, never()).stopTraining(any(), any());
     }
@@ -202,8 +200,7 @@ public class TestEntityLogic {
     @Test
     public void testDeleteEntity_dbError_doesNotStopTraining() throws DatabaseException {
         when(this.fakeDatabase.getAllIntents(DEVID_UUID)).thenReturn(Collections.emptyList());
-        when(this.fakeDatabase.getEntityIdForDev(any(), anyString(), any())).thenReturn(ENTITY_ID);
-        when(this.fakeDatabase.deleteEntity(any(), anyInt())).thenThrow(DatabaseException.class);
+        when(this.fakeDatabase.deleteEntityByName(any(), any(), any(), any())).thenThrow(DatabaseException.class);
         this.entityLogic.deleteEntity(DEVID_UUID, ENTITY_NAME, AIID);
         verify(this.trainingLogic, never()).stopTraining(any(), any());
     }
