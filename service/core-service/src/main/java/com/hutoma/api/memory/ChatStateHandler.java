@@ -46,6 +46,7 @@ public class ChatStateHandler {
                 throw new ChatStateUserException("Unknown AI.");
             }
             state = this.databaseAi.getChatState(devId, aiid, chatId, jsonSerializer);
+            cleanupOldWebhookSessions(state);
         } catch (ChatStateUserException ex) {
             this.logger.logUserExceptionEvent(LOGFROM, ex.getMessage(), devId.toString(), ex);
             throw ex;
@@ -66,10 +67,7 @@ public class ChatStateHandler {
         ChatState state = null;
         try {
             state = this.databaseAi.getChatStateFromHash(chatIdHash, jsonSerializer);
-            if (state != null) {
-                // remove any expired webhook sessions, to keep this to a minimum
-                state.getWebhookSessions().removeIf(w -> w.getExpiryTimestamp() < System.currentTimeMillis());
-            }
+            cleanupOldWebhookSessions(state);
         } catch (Exception ex) {
             this.logger.logException(LOGFROM, ex);
         }
@@ -105,6 +103,13 @@ public class ChatStateHandler {
         chatState.setLockedAiid(null);
         chatState.setTopic(null);
         saveState(devId, aiid, chatId, chatState);
+    }
+
+    private void cleanupOldWebhookSessions(final ChatState state) {
+        if (state != null && state.getWebhookSessions() != null) {
+            // remove any expired webhook sessions, to keep this to a minimum
+            state.getWebhookSessions().removeIf(w -> w.getExpiryTimestamp() < System.currentTimeMillis());
+        }
     }
 
     public static class ChatStateException extends ChatBaseException {
