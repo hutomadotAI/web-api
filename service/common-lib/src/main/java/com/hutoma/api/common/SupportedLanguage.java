@@ -9,6 +9,7 @@ public enum SupportedLanguage {
     PT,
     FR,
     NL,
+    IT,
     // CA (catalan) -> falls back to ES
     ;
 
