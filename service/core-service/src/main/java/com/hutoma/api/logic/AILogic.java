@@ -54,6 +54,7 @@ public class AILogic {
     private final Provider<DatabaseTransaction> transactionProvider;
     private Provider<AIIntegrationLogic> integrationLogicProvider;
     private final FeatureToggler featureToggler;
+    private final LanguageLogic languageLogic;
 
     @Inject
     public AILogic(final Config config,
@@ -67,7 +68,8 @@ public class AILogic {
                    final Validate validate,
                    final Provider<AIIntegrationLogic> integrationLogicProvider,
                    final Provider<DatabaseTransaction> transactionProvider,
-                   final FeatureToggler featureToggler) {
+                   final FeatureToggler featureToggler,
+                   final LanguageLogic languageLogic) {
         this.config = config;
         this.jsonSerializer = jsonSerializer;
         this.databaseAi = databaseAi;
@@ -80,6 +82,7 @@ public class AILogic {
         this.integrationLogicProvider = integrationLogicProvider;
         this.transactionProvider = transactionProvider;
         this.featureToggler = featureToggler;
+        this.languageLogic = languageLogic;
     }
 
     public ApiResult createAI(
@@ -706,7 +709,7 @@ public class AILogic {
                 return ApiError.getBadRequest("Cannot overwrite a published bot");
             }
 
-            Locale locale = getSafeLocaleFromBot(botToImport);
+            Locale locale = getVerifiedLocaleFromBot(botToImport, devId, aiid);
 
             // Make the changes
             bot.setDescription(botToImport.getDescription());
@@ -970,7 +973,7 @@ public class AILogic {
     @VisibleForTesting
     ApiAi createImportedBot(final UUID devId, final BotStructure importedBot) throws BotImportException {
         // try to interpret the locale
-        Locale locale = getSafeLocaleFromBot(importedBot);
+        Locale locale = getVerifiedLocaleFromBot(importedBot, devId, null);
 
         boolean hasLinkedSkills = importedBot.getLinkedSkills() != null && !importedBot.getLinkedSkills().isEmpty();
 
@@ -1204,13 +1207,20 @@ public class AILogic {
         }
     }
 
-    private Locale getSafeLocaleFromBot(final BotStructure bot) {
+    private Locale getVerifiedLocaleFromBot(final BotStructure bot, final UUID devId, final UUID aiid) 
+            throws BotImportException{
         Locale locale;
         try {
             locale = this.validate.validateLocale("locale", bot.getLanguage());
         } catch (ParameterValidationException e) {
             // if the local is missing or badly formatted then use en-US
             locale = DEFAULT_LOCALE;
+        }
+        if (!this.languageLogic.isLanguageAvailable(locale, devId, aiid)) {
+            String message = String.format("Import - language not available: %s", locale);
+            this.logger.logUserErrorEvent(LOGFROM, message, devId.toString(),
+                LogMap.map("locale", locale));
+            throw new BotImportException(message);
         }
         return locale;
     }

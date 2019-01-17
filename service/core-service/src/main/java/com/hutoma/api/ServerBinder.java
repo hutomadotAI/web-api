@@ -75,6 +75,7 @@ public class ServerBinder extends AbstractBinder {
         // business logic
         bind(AdminLogic.class).to(AdminLogic.class);
         bind(AILogic.class).to(AILogic.class);
+        bind(LanguageLogic.class).to(LanguageLogic.class);
         bind(AIBotStoreLogic.class).to(AIBotStoreLogic.class);
         bind(ChatLogic.class).to(ChatLogic.class);
         bind(MemoryIntentHandler.class).to(MemoryIntentHandler.class).to(IMemoryIntentHandler.class);
