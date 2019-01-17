@@ -303,4 +303,9 @@ public class Config extends CommonConfig implements ILoggerConfig, IThreadConfig
     public int getMaxEntityValuesPerEntity() {
         return Integer.parseInt(getConfigFromProperties("max_entity_values_entity", "10000"));
     }
+
+    public List<String> getLanguagesAvailable() {
+        List<String> stringList = getCSList("languages_available");
+        return stringList == null ? Collections.singletonList("en") : stringList;
+    }
 }

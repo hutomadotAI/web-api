@@ -49,6 +49,7 @@ public class TestAILogic {
     private DatabaseTransaction fakeTransaction;
     private FeatureToggler fakeFeatureToggler;
     private AIIntegrationLogic fakeIntegration;
+    private LanguageLogic fakeLanguageLogic;
 
     @Rule
     public final ExpectedException expectedException = ExpectedException.none();
@@ -70,6 +71,7 @@ public class TestAILogic {
         this.fakeTransaction = mock(DatabaseTransaction.class);
         this.fakeFeatureToggler = mock(FeatureToggler.class);
         this.fakeIntegration = mock(AIIntegrationLogic.class);
+        this.fakeLanguageLogic = mock(LanguageLogic.class); 
 
         TestDataHelper.setFeatureToggleToControl(this.fakeFeatureToggler);
 
@@ -79,10 +81,12 @@ public class TestAILogic {
         when(this.fakeConfig.getMaxTotalEntityValues()).thenReturn(200);
         when(this.fakeConfig.getMaxEntityValuesPerEntity()).thenReturn(100);
         when(this.fakeTools.createNewRandomUUID()).thenReturn(UUID.fromString("00000000-0000-0000-0000-000000000000"));
+        when(this.fakeLanguageLogic.isLanguageAvailable(any(), any(), any())).thenReturn(true);
+        
         this.aiLogic = new AILogic(this.fakeConfig, this.fakeSerializer, this.fakeDatabaseAi,
                 this.fakeDatabaseEntitiesIntents, this.fakeDatabaseMarketplace, this.fakeAiServices, this.fakeLogger,
                 this.fakeTools, this.fakeValidate, this.fakeAiIntegrationLogicProvider, this.fakeDatabaseTransactionProvider,
-                this.fakeFeatureToggler);
+                this.fakeFeatureToggler, this.fakeLanguageLogic);
     }
 
     @Test

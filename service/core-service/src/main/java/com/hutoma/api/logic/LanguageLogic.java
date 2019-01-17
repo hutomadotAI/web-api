@@ -4,8 +4,10 @@ import com.hutoma.api.common.Config;
 import com.hutoma.api.common.FeatureToggler;
 import com.hutoma.api.common.SupportedLanguage;
 
+import java.util.stream.Collectors;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -17,7 +19,7 @@ public class LanguageLogic {
     private static final String LOGFROM = "languagelogic";
     private final Config config;
     private final FeatureToggler featureToggler;
-    private List<SupportedLanguage> availableLanguages;
+    private Set<SupportedLanguage> availableLanguages;
 
     @Inject
     public LanguageLogic(final Config config, final FeatureToggler featureToggler) {
@@ -25,7 +27,15 @@ public class LanguageLogic {
         this.featureToggler = featureToggler;
     }
 
-    public Boolean isLanguageAvailable(final Locale lang, final UUID devId, final UUID aiid) {
+    public boolean isLanguageAvailable(final Locale lang, final UUID devId, final UUID aiid) {
+        initAvailableLanguages();
         return true;
+    }
+
+    private void initAvailableLanguages() {
+        if (availableLanguages == null) {
+            List<String> langs = config.getLanguagesAvailable();
+            availableLanguages = langs.stream().map(SupportedLanguage::get).collect(Collectors.toSet());
+        }
     }
 }
