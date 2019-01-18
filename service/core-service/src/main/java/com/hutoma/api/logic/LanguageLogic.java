@@ -7,6 +7,7 @@ import com.hutoma.api.common.SupportedLanguage;
 import java.util.stream.Collectors;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -27,15 +28,34 @@ public class LanguageLogic {
         this.featureToggler = featureToggler;
     }
 
-    public boolean isLanguageAvailable(final Locale lang, final UUID devId, final UUID aiid) {
+    public boolean isLanguageAvailable(final String langCode, final UUID devId, final UUID aiid) {
         initAvailableLanguages();
-        return true;
+        if (langCode == null || langCode.isEmpty()) {
+            return false;
+        }
+
+        Optional<SupportedLanguage> supportedLanguageOpt = SupportedLanguage.get(langCode);
+        if (!supportedLanguageOpt.isPresent()) {
+            return false;
+        }
+        return availableLanguages.contains(supportedLanguageOpt.get());
+    }
+
+    public boolean isLocaleAvailable(final Locale locale, final UUID devId, final UUID aiid) {
+        if (locale == null) {
+            return false;
+        }
+        return isLanguageAvailable(locale.getLanguage(), devId, aiid);
     }
 
     private void initAvailableLanguages() {
         if (availableLanguages == null) {
             List<String> langs = config.getLanguagesAvailable();
-            availableLanguages = langs.stream().map(SupportedLanguage::get).collect(Collectors.toSet());
+            availableLanguages = langs.stream()
+                .map(SupportedLanguage::get)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toSet());
         }
     }
 }

@@ -32,19 +32,45 @@ public class TestLanguageLogic {
         this.fakeConfig = mock(Config.class);
         this.fakeFeatureToggler = mock(FeatureToggler.class);
 
-        when(this.fakeConfig.getMaxLinkedBotsPerAi()).thenReturn(5);
-        when(this.fakeConfig.getMaxTotalEntityValues()).thenReturn(200);
-        when(this.fakeConfig.getMaxEntityValuesPerEntity()).thenReturn(100);
+        when(this.fakeConfig.getLanguagesAvailable()).thenReturn(Arrays.asList("en", "es"));
         this.languageLogic = new LanguageLogic(this.fakeConfig,
                 this.fakeFeatureToggler);
     }
 
     @Test
-    public void testEnValid() {
-        when(this.fakeConfig.getLanguagesAvailable()).thenReturn(Arrays.asList("en"));
-        boolean result = this.languageLogic.isLanguageAvailable(Locale.ENGLISH, null, null);
+    public void testEnLocaleValid() {
+        boolean result = this.languageLogic.isLocaleAvailable(Locale.ENGLISH, null, null);
         Assert.assertEquals(true, result);
     }
 
+    @Test
+    public void testEnLanguageValid() {
+        boolean result = this.languageLogic.isLanguageAvailable("en", null, null);
+        Assert.assertEquals(true, result);
+    }
+
+    @Test
+    public void testNullLocaleInvalid() {
+        boolean result = this.languageLogic.isLocaleAvailable(null, null, null);
+        Assert.assertEquals(false, result);
+    }
+
+    @Test
+    public void testNullLanguageInvalid() {
+        boolean result = this.languageLogic.isLanguageAvailable(null, null, null);
+        Assert.assertEquals(false, result);
+    }
+
+    @Test
+    public void testFrLocaleInvalid() {
+        boolean result = this.languageLogic.isLocaleAvailable(Locale.FRENCH, null, null);
+        Assert.assertEquals(false, result);
+    }
+
+    @Test
+    public void testFrLanguageInvalid() {
+        boolean result = this.languageLogic.isLanguageAvailable("fr", null, null);
+        Assert.assertEquals(false, result);
+    }
 }
 

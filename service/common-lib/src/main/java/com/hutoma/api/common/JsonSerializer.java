@@ -245,8 +245,12 @@ public class JsonSerializer {
                 reader.nextNull();
                 return SupportedLanguage.EN;
             }
-            String supportedLanguage = reader.nextString();
-            return SupportedLanguage.get(supportedLanguage);
+            String supportedLanguageString = reader.nextString();
+            Optional<SupportedLanguage> supportedLanguageOpt = SupportedLanguage.get(supportedLanguageString);
+            if (!supportedLanguageOpt.isPresent()) {
+                throw new JsonParseException(String.format("Supported language invalid: %s", supportedLanguageString));
+            }
+            return supportedLanguageOpt.get();
         }
     }
 }

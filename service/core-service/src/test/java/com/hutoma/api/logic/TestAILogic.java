@@ -82,7 +82,8 @@ public class TestAILogic {
         when(this.fakeConfig.getMaxEntityValuesPerEntity()).thenReturn(100);
         when(this.fakeTools.createNewRandomUUID()).thenReturn(UUID.fromString("00000000-0000-0000-0000-000000000000"));
         when(this.fakeLanguageLogic.isLanguageAvailable(any(), any(), any())).thenReturn(true);
-        
+        when(this.fakeLanguageLogic.isLocaleAvailable(any(), any(), any())).thenReturn(true);
+
         this.aiLogic = new AILogic(this.fakeConfig, this.fakeSerializer, this.fakeDatabaseAi,
                 this.fakeDatabaseEntitiesIntents, this.fakeDatabaseMarketplace, this.fakeAiServices, this.fakeLogger,
                 this.fakeTools, this.fakeValidate, this.fakeAiIntegrationLogicProvider, this.fakeDatabaseTransactionProvider,

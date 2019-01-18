@@ -1210,14 +1210,18 @@ public class AILogic {
     private Locale getVerifiedLocaleFromBot(final BotStructure bot, final UUID devId, final UUID aiid) 
             throws BotImportException{
         Locale locale;
+        String botLanguage = bot.getLanguage();
         try {
-            locale = this.validate.validateLocale("locale", bot.getLanguage());
+            locale = this.validate.validateLocale("locale", botLanguage);
         } catch (ParameterValidationException e) {
-            // if the local is missing or badly formatted then use en-US
-            locale = DEFAULT_LOCALE;
+            // if the locale is missing or badly formatted then abort
+            String message = String.format("ImportBot - malformed or missing language: %s", botLanguage);
+            this.logger.logUserErrorEvent(LOGFROM, message, devId.toString(),
+                LogMap.map("locale", botLanguage));
+            throw new BotImportException(message);
         }
-        if (!this.languageLogic.isLanguageAvailable(locale, devId, aiid)) {
-            String message = String.format("Import - language not available: %s", locale);
+        if (!this.languageLogic.isLocaleAvailable(locale, devId, aiid)) {
+            String message = String.format("ImportBot - language not available: %s", locale);
             this.logger.logUserErrorEvent(LOGFROM, message, devId.toString(),
                 LogMap.map("locale", locale));
             throw new BotImportException(message);
