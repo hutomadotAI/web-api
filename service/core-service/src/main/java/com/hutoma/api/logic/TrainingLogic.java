@@ -4,6 +4,7 @@ import com.hutoma.api.common.Config;
 import com.hutoma.api.common.FeatureToggler;
 import com.hutoma.api.common.HTMLExtractor;
 import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.common.SupportedLanguage;
 import com.hutoma.api.connectors.BackendServerType;
 import com.hutoma.api.connectors.BackendStatus;
 import com.hutoma.api.connectors.aiservices.AIServices;
@@ -53,6 +54,7 @@ public class TrainingLogic {
     private final IMemoryIntentHandler memoryIntentHandler;
     private final JsonSerializer jsonSerializer;
     private final FeatureToggler featureToggler;
+    private final LanguageLogic languageLogic;
 
     @Inject
     public TrainingLogic(final Config config,
@@ -63,7 +65,8 @@ public class TrainingLogic {
                          final Validate validate,
                          final IMemoryIntentHandler memoryIntentHandler,
                          final FeatureToggler featureToggler,
-                         final JsonSerializer jsonSerializer) {
+                         final JsonSerializer jsonSerializer,
+                         final LanguageLogic languageLogic) {
         this.config = config;
         this.aiServices = aiServices;
         this.htmlExtractor = htmlExtractor;
@@ -73,6 +76,7 @@ public class TrainingLogic {
         this.memoryIntentHandler = memoryIntentHandler;
         this.featureToggler = featureToggler;
         this.jsonSerializer = jsonSerializer;
+        this.languageLogic = languageLogic;
     }
 
     public ApiResult uploadFile(final UUID devid,
@@ -223,12 +227,17 @@ public class TrainingLogic {
         }
 
         TrainingStatus trainingStatus = ai.getSummaryAiStatus();
+        Locale locale = ai.getLanguage();
+        Optional<SupportedLanguage> availableLanguage = languageLogic.getAvailableLanguage(locale, devid, aiid);
+        if (!availableLanguage.isPresent()) {
+            return ApiError.getBadRequest(String.format("Language not available %s", locale));
+        }
         logMap.add("Start from state", trainingStatus.name());
         if (trainingStatus == TrainingStatus.AI_READY_TO_TRAIN
                 || trainingStatus == TrainingStatus.AI_TRAINING_STOPPED) {
             try {
                 this.aiServices.startTraining(ai.getBackendStatus(),
-                        new AiIdentity(devid, aiid, ai.getLanguage(), ai.getEngineVersion()));
+                        new AiIdentity(devid, aiid, availableLanguage.get(), ai.getEngineVersion()));
             } catch (AIServices.AiServicesException | RuntimeException ex) {
                 this.logger.logUserExceptionEvent(LOGFROM, "StartTraining", devidString, ex);
                 return ApiError.getInternalServerError();
@@ -265,12 +274,19 @@ public class TrainingLogic {
     public ApiResult stopTraining(final UUID devId, UUID aiid) {
         final String devidString = devId.toString();
         LogMap logMap = LogMap.map("AIID", aiid);
+        
         try {
             ApiAi ai = this.databaseAi.getAIWithStatus(devId, aiid, this.jsonSerializer);
             if (ai == null) {
                 this.logger.logUserTraceEvent(LOGFROM, "StopTraining - AI not found", devidString, logMap);
                 return ApiError.getNotFound();
             }
+            Locale locale = ai.getLanguage();
+            Optional<SupportedLanguage> availableLanguage = languageLogic.getAvailableLanguage(locale, devId, aiid);
+            if (!availableLanguage.isPresent()) {
+                return ApiError.getBadRequest(String.format("Language not available %s", locale));
+            }
+    
             logMap.add("EngineVersion", ai.getEngineVersion());
             if (ai.isReadOnly()) {
                 this.logger.logUserTraceEvent(LOGFROM, "StopTraining - Bot is RO", devidString, logMap);
@@ -281,7 +297,7 @@ public class TrainingLogic {
             TrainingStatus embStatus = backendStatus.getEngineStatus(BackendServerType.EMB).getTrainingStatus();
             if (embStatus == TrainingStatus.AI_TRAINING_QUEUED || embStatus == TrainingStatus.AI_TRAINING) {
                 this.aiServices.stopTraining(backendStatus,
-                        new AiIdentity(devId, aiid, ai.getLanguage(), ai.getEngineVersion()));
+                        new AiIdentity(devId, aiid, availableLanguage.get(), ai.getEngineVersion()));
                 this.logger.logUserTraceEvent(LOGFROM, "StopTraining", devidString, logMap);
                 return new ApiResult().setSuccessStatus("Training session stopped.");
             } else {
@@ -343,7 +359,11 @@ public class TrainingLogic {
                 this.logger.logUserTraceEvent(LOGFROM, "UpdateTraining - Bot is RO", devidString, logMap);
                 return ApiError.getBadRequest(AILogic.BOT_RO_MESSAGE);
             }
-
+            Locale locale = ai.getLanguage();
+            Optional<SupportedLanguage> availableLanguage = languageLogic.getAvailableLanguage(locale, devid, aiid);
+            if (!availableLanguage.isPresent()) {
+                return ApiError.getBadRequest(String.format("Language not available %s", locale));
+            }
             switch (ai.getSummaryAiStatus()) {
                 case AI_TRAINING:           // fallthrough
                 case AI_READY_TO_TRAIN:     // fallthrough
@@ -361,7 +381,7 @@ public class TrainingLogic {
                             return ApiError.getBadRequest("There is no training data.");
                         }
                         this.aiServices.uploadTraining(ai.getBackendStatus(),
-                                new AiIdentity(devid, aiid, ai.getLanguage(), engineVersion),
+                                new AiIdentity(devid, aiid, availableLanguage.get(), engineVersion),
                                 trainingMaterials);
                         // Delete all memory variables for this AI
                         this.memoryIntentHandler.resetIntentsStateForAi(devid, aiid);
@@ -614,10 +634,15 @@ public class TrainingLogic {
                                          final TrainingFileParsingResult result) {
         final String devidString = devid.toString();
         LogMap logMap = LogMap.map("AIID", aiid).put("EngineVersion", ai.getEngineVersion());
+        Locale locale = ai.getLanguage();
+        Optional<SupportedLanguage> availableLanguage = languageLogic.getAvailableLanguage(locale, devid, aiid);
+        if (!availableLanguage.isPresent()) {
+            return ApiError.getBadRequest(String.format("Language not available %s", locale));
+        }
         try {
 
             this.aiServices.uploadTraining(ai.getBackendStatus(),
-                    new AiIdentity(devid, aiid, ai.getLanguage(), ai.getEngineVersion()),
+                    new AiIdentity(devid, aiid, availableLanguage.get(), ai.getEngineVersion()),
                     trainingMaterials);
         } catch (AIServices.AiServicesException ex) {
             this.logger.logUserExceptionEvent(LOGFROM, "UploadTrainingFile", devidString, ex, logMap);

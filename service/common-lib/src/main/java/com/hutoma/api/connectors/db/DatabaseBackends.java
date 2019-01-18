@@ -18,6 +18,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 public class DatabaseBackends extends Database {
@@ -52,7 +53,11 @@ public class DatabaseBackends extends Database {
                 throw new DatabaseException("bad trainingstatus");
             }
             UUID aiid = UUID.fromString(rs.getString("aiid"));
-            SupportedLanguage language = SupportedLanguage.get(rs.getString("server_language"));
+            String language = rs.getString("server_language");
+            Optional<SupportedLanguage> supportedLanguageOpt = SupportedLanguage.get(language);
+            if (!supportedLanguageOpt.isPresent()) {
+                throw new DatabaseException(String.format("Language invalid: %s", language));
+            }
             String serverVersion = rs.getString("server_version");
 
             // queue status
@@ -63,7 +68,8 @@ public class DatabaseBackends extends Database {
 
             BackendEngineStatus status = new BackendEngineStatus(aiid, trainingStatus, trainingError,
                     trainingProgress, action, serverIdentifier, updateTime);
-            ServiceIdentity serviceIdentity = new ServiceIdentity(serverType, language, serverVersion);
+            ServiceIdentity serviceIdentity = new ServiceIdentity(serverType, 
+                    supportedLanguageOpt.get(), serverVersion);
             return new Pair<>(serviceIdentity, status);
         } catch (SQLException e) {
             throw new DatabaseException(e);

@@ -12,7 +12,6 @@ import com.hutoma.api.containers.sub.*;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
 import com.hutoma.api.logic.chat.ChatDefaultHandler;
-import com.hutoma.api.validation.ParameterValidationException;
 import com.hutoma.api.validation.Validate;
 import io.jsonwebtoken.CompressionCodecs;
 import io.jsonwebtoken.Jwts;
@@ -430,7 +429,8 @@ public class AILogic {
                 Locale aiLanguage = ai.getLanguage();
                 Optional<SupportedLanguage> supportedLanguageOpt = SupportedLanguage.get(aiLanguage);
                 if (!supportedLanguageOpt.isPresent()) {
-                    this.logger.logUserErrorEvent(LOGFROM, "DeleteAI - Bot is in unsupported language", devIdString, logMap);
+                    this.logger.logUserErrorEvent(LOGFROM, "DeleteAI - Bot is in unsupported language",
+                        devIdString, logMap);
                     return ApiError.getInternalServerError();
                 }
                 this.aiServices.deleteAI(ai.getBackendStatus(), new AiIdentity(devid, aiid, supportedLanguageOpt.get(),
@@ -716,7 +716,8 @@ public class AILogic {
             }
 
             String botLanguage = botToImport.getLanguage();
-            Optional<SupportedLanguage> supportedLanguageOpt = languageLogic.getAvailableLanguage(botLanguage, devId, aiid);
+            Optional<SupportedLanguage> supportedLanguageOpt = languageLogic.getAvailableLanguage(
+                botLanguage, devId, aiid);
             if (!supportedLanguageOpt.isPresent()) {
                 String message = String.format("Import bot in-place - invalid language %s", botLanguage);
                 this.logger.logUserTraceEvent(LOGFROM,

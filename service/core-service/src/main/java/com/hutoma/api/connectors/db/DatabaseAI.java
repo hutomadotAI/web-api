@@ -3,6 +3,7 @@ package com.hutoma.api.connectors.db;
 import com.google.gson.reflect.TypeToken;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Pair;
+import com.hutoma.api.common.SupportedLanguage;
 import com.hutoma.api.connectors.BackendStatus;
 import com.hutoma.api.containers.*;
 import com.hutoma.api.containers.sub.*;
@@ -418,7 +419,13 @@ public class DatabaseAI extends Database {
             if (ai != null) {
                 String engineVersion = StringUtils.isEmpty(overridenEngineVersion)
                         ? ai.getEngineVersion() : overridenEngineVersion;
-                AiIdentity identity = new AiIdentity(devId, aiid, ai.getLanguage(), engineVersion);
+
+                Locale locale = ai.getLanguage();
+                Optional<SupportedLanguage> supportedLanguageOpt = SupportedLanguage.get(locale);
+                if (!supportedLanguageOpt.isPresent()) {
+                    throw new DatabaseException(String.format("Language invalid: %s", locale));
+                }
+                AiIdentity identity = new AiIdentity(devId, aiid, supportedLanguageOpt.get(), engineVersion);
                 BackendStatus backendStatus = DatabaseBackends.getBackendStatus(identity,
                         transaction.getDatabaseCall());
                 if (backendStatus != null) {
