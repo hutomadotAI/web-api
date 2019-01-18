@@ -28,24 +28,25 @@ public class LanguageLogic {
         this.featureToggler = featureToggler;
     }
 
-    public boolean isLanguageAvailable(final String langCode, final UUID devId, final UUID aiid) {
+    public Optional<SupportedLanguage> getAvailableLanguage(final Locale locale, final UUID devId, final UUID aiid) {
+        if (locale == null) {
+            return Optional.empty();
+        }
+        return getAvailableLanguage(locale.getLanguage(), devId, aiid);
+    }
+
+    public Optional<SupportedLanguage> getAvailableLanguage(final String langCode, final UUID devId, final UUID aiid) {
         initAvailableLanguages();
         if (langCode == null || langCode.isEmpty()) {
-            return false;
+            return Optional.empty();
         }
 
         Optional<SupportedLanguage> supportedLanguageOpt = SupportedLanguage.get(langCode);
         if (!supportedLanguageOpt.isPresent()) {
-            return false;
+            return Optional.empty();
         }
-        return availableLanguages.contains(supportedLanguageOpt.get());
-    }
-
-    public boolean isLocaleAvailable(final Locale locale, final UUID devId, final UUID aiid) {
-        if (locale == null) {
-            return false;
-        }
-        return isLanguageAvailable(locale.getLanguage(), devId, aiid);
+        SupportedLanguage supportedLanguage = supportedLanguageOpt.get();
+        return availableLanguages.contains(supportedLanguage) ? supportedLanguageOpt : Optional.empty();
     }
 
     private void initAvailableLanguages() {

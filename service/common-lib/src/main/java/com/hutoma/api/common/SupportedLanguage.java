@@ -13,13 +13,6 @@ public enum SupportedLanguage {
     IT,
     ;
 
-    public static Optional<SupportedLanguage> get(final String langCode) {
-        if (langCode == null || langCode.isEmpty()) {
-            return Optional.of(SupportedLanguage.EN);
-        }
-        return getLanguage(langCode);
-    }
-
     public static Optional<SupportedLanguage> get(final Locale locale) {
         if (locale == null) {
             return Optional.of(SupportedLanguage.EN);
@@ -27,11 +20,15 @@ public enum SupportedLanguage {
         return get(locale.getLanguage());
     }
 
-    private static Optional<SupportedLanguage> getLanguage(final String language) {
-        String substLang = language;
-        if (language.length() > 2) {
+    public static Optional<SupportedLanguage> get(final String langCode) {
+        if (langCode == null || langCode.isEmpty()) {
+            return Optional.of(SupportedLanguage.EN);
+        }
+
+        String substLang = langCode;
+        if (langCode.length() > 2) {
             // just get the language tag
-            String[] parts = language.split("-");
+            String[] parts = langCode.split("-");
             if (parts.length > 0) {
                 substLang = parts[0];
             }
@@ -41,6 +38,11 @@ public enum SupportedLanguage {
         return Arrays.stream(SupportedLanguage.values())
                 .filter(x -> langTag.equalsIgnoreCase(x.toString()))
                 .findFirst();
+    }
+
+    public Locale toLocale() {
+        Locale locale = new Locale(this.toString());
+        return locale;
     }
 }
 

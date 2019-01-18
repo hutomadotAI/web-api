@@ -3,8 +3,8 @@ package com.hutoma.api.logic;
 import com.hutoma.api.common.*;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -39,38 +39,38 @@ public class TestLanguageLogic {
 
     @Test
     public void testEnLocaleValid() {
-        boolean result = this.languageLogic.isLocaleAvailable(Locale.ENGLISH, null, null);
-        Assert.assertEquals(true, result);
+        Optional<SupportedLanguage> result = this.languageLogic.getAvailableLanguage(Locale.ENGLISH, null, null);
+        Assert.assertEquals(Optional.of(SupportedLanguage.EN), result);
     }
 
     @Test
     public void testEnLanguageValid() {
-        boolean result = this.languageLogic.isLanguageAvailable("en", null, null);
-        Assert.assertEquals(true, result);
+        Optional<SupportedLanguage> result = this.languageLogic.getAvailableLanguage("en", null, null);
+        Assert.assertEquals(Optional.of(SupportedLanguage.EN), result);
     }
 
     @Test
     public void testNullLocaleInvalid() {
-        boolean result = this.languageLogic.isLocaleAvailable(null, null, null);
-        Assert.assertEquals(false, result);
+        Optional<SupportedLanguage> result = this.languageLogic.getAvailableLanguage((Locale) null, null, null);
+        Assert.assertEquals(Optional.empty(), result);
     }
 
     @Test
     public void testNullLanguageInvalid() {
-        boolean result = this.languageLogic.isLanguageAvailable(null, null, null);
-        Assert.assertEquals(false, result);
+        Optional<SupportedLanguage> result = this.languageLogic.getAvailableLanguage((String) null, null, null);
+        Assert.assertEquals(Optional.empty(), result);
     }
 
     @Test
     public void testFrLocaleInvalid() {
-        boolean result = this.languageLogic.isLocaleAvailable(Locale.FRENCH, null, null);
-        Assert.assertEquals(false, result);
+        Optional<SupportedLanguage> result = this.languageLogic.getAvailableLanguage(Locale.FRENCH, null, null);
+        Assert.assertEquals(Optional.empty(), result);
     }
 
     @Test
     public void testFrLanguageInvalid() {
-        boolean result = this.languageLogic.isLanguageAvailable("fr", null, null);
-        Assert.assertEquals(false, result);
+        Optional<SupportedLanguage> result = this.languageLogic.getAvailableLanguage("fr", null, null);
+        Assert.assertEquals(Optional.empty(), result);
     }
 }
 

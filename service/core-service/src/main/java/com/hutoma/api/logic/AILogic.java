@@ -417,7 +417,7 @@ public class AILogic {
                 return ApiError.getNotFound();
             }
             if (ai.isReadOnly()) {
-                this.logger.logUserTraceEvent(LOGFROM, "setAiConfig - Bot is RO", devIdString, logMap);
+                this.logger.logUserTraceEvent(LOGFROM, "DeleteAI - Bot is RO", devIdString, logMap);
                 return ApiError.getBadRequest(BOT_RO_MESSAGE);
             }
 
@@ -427,7 +427,13 @@ public class AILogic {
             this.integrationLogicProvider.get().deleteIntegrations(aiid, devid);
 
             try {
-                this.aiServices.deleteAI(ai.getBackendStatus(), new AiIdentity(devid, aiid, ai.getLanguage(),
+                Locale aiLanguage = ai.getLanguage();
+                Optional<SupportedLanguage> supportedLanguageOpt = SupportedLanguage.get(aiLanguage);
+                if (!supportedLanguageOpt.isPresent()) {
+                    this.logger.logUserErrorEvent(LOGFROM, "DeleteAI - Bot is in unsupported language", devIdString, logMap);
+                    return ApiError.getInternalServerError();
+                }
+                this.aiServices.deleteAI(ai.getBackendStatus(), new AiIdentity(devid, aiid, supportedLanguageOpt.get(),
                         ai.getEngineVersion()));
             } catch (ServerConnector.AiServicesException ex) {
                 if (Stream.of(ex.getSuppressed())
@@ -709,12 +715,19 @@ public class AILogic {
                 return ApiError.getBadRequest("Cannot overwrite a published bot");
             }
 
-            Locale locale = getVerifiedLocaleFromBot(botToImport, devId, aiid);
-
+            String botLanguage = botToImport.getLanguage();
+            Optional<SupportedLanguage> supportedLanguageOpt = languageLogic.getAvailableLanguage(botLanguage, devId, aiid);
+            if (!supportedLanguageOpt.isPresent()) {
+                String message = String.format("Import bot in-place - invalid language %s", botLanguage);
+                this.logger.logUserTraceEvent(LOGFROM,
+                        message, devId.toString());
+                return ApiError.getBadRequest(message);
+            }
+            SupportedLanguage supportedLanguage = supportedLanguageOpt.get();
             // Make the changes
             bot.setDescription(botToImport.getDescription());
             bot.setPrivate(botToImport.isPrivate());
-            bot.setLanguage(locale);
+            bot.setLanguage(supportedLanguage.toLocale());
             bot.setTimezone(botToImport.getTimezone());
             bot.setConfidence(botToImport.getConfidence());
             bot.setPersonality(botToImport.getPersonality());
@@ -747,7 +760,7 @@ public class AILogic {
 
             transaction.commit();
 
-            AiIdentity aiIdentity = new AiIdentity(devId, aiid, createdBot.getLanguage(),
+            AiIdentity aiIdentity = new AiIdentity(devId, aiid, supportedLanguage,
                     createdBot.getEngineVersion());
             ApiResult result = uploadAndStartTraining(aiIdentity, createdBot, false);
 
@@ -768,15 +781,25 @@ public class AILogic {
             return ApiError.getBadRequest();
         }
 
+        String botLanguage = importedBot.getLanguage();
+        Optional<SupportedLanguage> supportedLanguageOpt = languageLogic.getAvailableLanguage(botLanguage, devId, null);
+        if (!supportedLanguageOpt.isPresent()) {
+            String message = String.format("Import - invalid language %s", botLanguage);
+            this.logger.logUserTraceEvent(LOGFROM,
+                    message, devId.toString());
+            return ApiError.getBadRequest(message);
+        }
+
+        SupportedLanguage supportedLanguage = supportedLanguageOpt.get();
         ApiAi createdBot;
         try {
-            createdBot = createImportedBot(devId, importedBot);
+            createdBot = createImportedBot(devId, importedBot, supportedLanguage.toLocale());
         } catch (BotImportException e) {
             return ApiError.getBadRequest(e.getMessage());
         }
 
         AiIdentity aiIdentity = new AiIdentity(devId, UUID.fromString(createdBot.getAiid()),
-                createdBot.getLanguage(), createdBot.getEngineVersion());
+            supportedLanguage, createdBot.getEngineVersion());
         ApiResult result = uploadAndStartTraining(aiIdentity, createdBot, true);
         logImport(devId, result, importedBot);
         return result;
@@ -971,10 +994,7 @@ public class AILogic {
     }
 
     @VisibleForTesting
-    ApiAi createImportedBot(final UUID devId, final BotStructure importedBot) throws BotImportException {
-        // try to interpret the locale
-        Locale locale = getVerifiedLocaleFromBot(importedBot, devId, null);
-
+    ApiAi createImportedBot(final UUID devId, final BotStructure importedBot, Locale locale) throws BotImportException {
         boolean hasLinkedSkills = importedBot.getLinkedSkills() != null && !importedBot.getLinkedSkills().isEmpty();
 
         if (org.apache.commons.lang.StringUtils.isNotBlank(importedBot.getPassthroughUrl())
@@ -1205,28 +1225,6 @@ public class AILogic {
                 this.databaseAi.linkBotToAi(devId, aiid, linkedSkill, transaction);
             }
         }
-    }
-
-    private Locale getVerifiedLocaleFromBot(final BotStructure bot, final UUID devId, final UUID aiid) 
-            throws BotImportException{
-        Locale locale;
-        String botLanguage = bot.getLanguage();
-        try {
-            locale = this.validate.validateLocale("locale", botLanguage);
-        } catch (ParameterValidationException e) {
-            // if the locale is missing or badly formatted then abort
-            String message = String.format("ImportBot - malformed or missing language: %s", botLanguage);
-            this.logger.logUserErrorEvent(LOGFROM, message, devId.toString(),
-                LogMap.map("locale", botLanguage));
-            throw new BotImportException(message);
-        }
-        if (!this.languageLogic.isLocaleAvailable(locale, devId, aiid)) {
-            String message = String.format("ImportBot - language not available: %s", locale);
-            this.logger.logUserErrorEvent(LOGFROM, message, devId.toString(),
-                LogMap.map("locale", locale));
-            throw new BotImportException(message);
-        }
-        return locale;
     }
 
     static class BotImportException extends Exception {
