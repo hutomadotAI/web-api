@@ -11,6 +11,7 @@ import com.hutoma.api.connectors.db.*;
 import com.hutoma.api.containers.sub.RateLimitStatus;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logic.FacebookChatHandler;
+import com.hutoma.api.logic.LanguageLogic;
 import com.hutoma.api.logic.chat.ChatDefaultHandler;
 import com.hutoma.api.thread.*;
 import com.hutoma.api.validation.PostFilter;
@@ -44,7 +45,10 @@ import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Locale;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.*;
 
@@ -109,6 +113,8 @@ public abstract class ServiceTestBase extends JerseyTest {
     AiStrings fakeAiStrings;
     @Mock
     FeatureToggler fakeFeatureToggler;
+    @Mock
+    LanguageLogic fakeLanguageLogic;
 
     private static MultivaluedHashMap<String, Object> getDevIdAuthHeaders(final Role role, final UUID devId) {
         return new MultivaluedHashMap<String, Object>() {
@@ -194,6 +200,7 @@ public abstract class ServiceTestBase extends JerseyTest {
                         .to(FacebookConnector.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeAiStrings)).to(AiStrings.class);
                 bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeFeatureToggler)).to(FeatureToggler.class);
+                bindFactory(new InstanceFactory<>(ServiceTestBase.this.fakeLanguageLogic)).to(LanguageLogic.class);
 
                 // Bind all the internal dependencies to real classes
                 bind(JsonSerializer.class).to(JsonSerializer.class);
@@ -318,6 +325,10 @@ public abstract class ServiceTestBase extends JerseyTest {
 
         when(this.fakeConfig.getMaxEntityValuesPerEntity()).thenReturn(100);
         when(this.fakeConfig.getMaxTotalEntityValues()).thenReturn(200);
+        when(this.fakeConfig.getLanguagesAvailable()).thenReturn(Arrays.asList("en"));
+
+        when(this.fakeLanguageLogic.getAvailableLanguage(any(String.class), any(), any())).thenReturn(Optional.of(SupportedLanguage.EN));
+        when(this.fakeLanguageLogic.getAvailableLanguage(any(Locale.class), any(), any())).thenReturn(Optional.of(SupportedLanguage.EN));
 
         try {
             when(this.fakeAiStrings.getDefaultChatResponses(any(), any()))

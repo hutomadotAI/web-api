@@ -60,6 +60,7 @@ public class TestTrainingLogic {
     private IMemoryIntentHandler fakeIntentHandler;
     private JsonSerializer fakeSerializer;
     private FeatureToggler fakeFeatureToggler;
+    private LanguageLogic fakeLanguageLogic;
 
     @DataProvider
     public static Object[] updateTraining_successStates() {
@@ -137,8 +138,11 @@ public class TestTrainingLogic {
         this.fakeIntentHandler = mock(IMemoryIntentHandler.class);
         this.fakeSerializer = mock(JsonSerializer.class);
         this.fakeFeatureToggler = mock(FeatureToggler.class);
+        this.fakeLanguageLogic = mock(LanguageLogic.class);
+
         this.logic = new TrainingLogic(this.fakeConfig, this.fakeAiServices, this.fakeExtractor, this.fakeDatabaseAi,
-                this.fakeLogger, this.fakeValidation, this.fakeIntentHandler, this.fakeFeatureToggler, this.fakeSerializer);
+                this.fakeLogger, this.fakeValidation, this.fakeIntentHandler, this.fakeFeatureToggler,
+                this.fakeSerializer, this.fakeLanguageLogic);
 
         when(this.fakeConfig.getEncodingKey()).thenReturn(TestDataHelper.VALID_ENCODING_KEY);
         when(this.fakeTools.createNewRandomUUID()).thenReturn(UUID.fromString("00000000-0000-0000-0000-000000000000"));
@@ -146,6 +150,8 @@ public class TestTrainingLogic {
         when(this.fakeValidation.filterControlAndCoalesceSpaces(anyString())).thenCallRealMethod();
         when(this.fakeConfig.getMaxUploadSizeKb()).thenReturn(4096);
         when(this.fakeDatabaseAi.getAI(any(), any(), any())).thenReturn(getSampleAI());
+        when(this.fakeLanguageLogic.getAvailableLanguage(any(String.class), any(), any())).thenReturn(Optional.of(SupportedLanguage.EN));
+        when(this.fakeLanguageLogic.getAvailableLanguage(any(Locale.class), any(), any())).thenReturn(Optional.of(SupportedLanguage.EN));
         TestDataHelper.setFeatureToggleToControl(this.fakeFeatureToggler);
     }
 
