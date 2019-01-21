@@ -43,6 +43,15 @@
         <cve>CVE-2018-3182</cve>
         <cve>CVE-2018-3286</cve>
         <cve>CVE-2018-3258</cve>
+        <cve>CVE-2019-2436</cve>
+        <cve>CVE-2019-2494</cve>
+        <cve>CVE-2019-2495</cve>
+        <cve>CVE-2019-2502</cve>
+        <cve>CVE-2019-2530</cve>
+        <cve>CVE-2019-2533</cve>
+        <cve>CVE-2019-2535</cve>
+        <cve>CVE-2019-2536</cve>
+        <cve>CVE-2019-2539</cve>
     </suppress>
 
 
