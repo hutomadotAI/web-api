@@ -49,6 +49,7 @@ public class TestAILogic {
     private DatabaseTransaction fakeTransaction;
     private FeatureToggler fakeFeatureToggler;
     private AIIntegrationLogic fakeIntegration;
+    private LanguageLogic fakeLanguageLogic;
 
     @Rule
     public final ExpectedException expectedException = ExpectedException.none();
@@ -70,6 +71,7 @@ public class TestAILogic {
         this.fakeTransaction = mock(DatabaseTransaction.class);
         this.fakeFeatureToggler = mock(FeatureToggler.class);
         this.fakeIntegration = mock(AIIntegrationLogic.class);
+        this.fakeLanguageLogic = mock(LanguageLogic.class); 
 
         TestDataHelper.setFeatureToggleToControl(this.fakeFeatureToggler);
 
@@ -79,10 +81,13 @@ public class TestAILogic {
         when(this.fakeConfig.getMaxTotalEntityValues()).thenReturn(200);
         when(this.fakeConfig.getMaxEntityValuesPerEntity()).thenReturn(100);
         when(this.fakeTools.createNewRandomUUID()).thenReturn(UUID.fromString("00000000-0000-0000-0000-000000000000"));
+        when(this.fakeLanguageLogic.getAvailableLanguage(any(String.class), any(), any())).thenReturn(Optional.of(SupportedLanguage.EN));
+        when(this.fakeLanguageLogic.getAvailableLanguage(any(Locale.class), any(), any())).thenReturn(Optional.of(SupportedLanguage.EN));
+
         this.aiLogic = new AILogic(this.fakeConfig, this.fakeSerializer, this.fakeDatabaseAi,
                 this.fakeDatabaseEntitiesIntents, this.fakeDatabaseMarketplace, this.fakeAiServices, this.fakeLogger,
                 this.fakeTools, this.fakeValidate, this.fakeAiIntegrationLogicProvider, this.fakeDatabaseTransactionProvider,
-                this.fakeFeatureToggler);
+                this.fakeFeatureToggler, this.fakeLanguageLogic);
     }
 
     @Test
@@ -1152,21 +1157,7 @@ public class TestAILogic {
     public void testCreateImportedBot() throws AILogic.BotImportException, DatabaseException {
         setupFakeImport();
         BotStructure botStructure = getBotstructure();
-        this.aiLogic.createImportedBot(VALIDDEVID, botStructure);
-    }
-
-    @Test
-    public void testCreateImportedBot_language_fallback()
-            throws AILogic.BotImportException, ParameterValidationException, DatabaseException {
-        setupFakeImport();
-        BotStructure botStructure = getBotstructure();
-        botStructure.setLanguage("NOT A REAL LANGUAGE");
-        when(this.fakeValidate.validateLocale(anyString(), anyString())).thenThrow(ParameterValidationException.class);
-        this.aiLogic.createImportedBot(VALIDDEVID, botStructure);
-        ArgumentCaptor<Locale> localeArg = ArgumentCaptor.forClass(Locale.class);
-        verify(this.fakeDatabaseAi).createAI(any(), anyString(), anyString(), any(), anyBoolean(), anyString(),
-                localeArg.capture(), anyString(), anyDouble(), anyInt(), anyInt(), any(), anyInt(), anyInt(), any(), any(), any());
-        Assert.assertEquals(AILogic.DEFAULT_LOCALE, localeArg.getValue());
+        this.aiLogic.createImportedBot(VALIDDEVID, botStructure, Locale.ENGLISH);
     }
 
     @Test(expected = AILogic.BotImportException.class)
@@ -1175,7 +1166,7 @@ public class TestAILogic {
         when(this.fakeDatabaseAi.createAI(any(), anyString(), anyString(), any(), anyBoolean(), anyString(),
                 any(), anyString(), anyDouble(), anyInt(), anyInt(), any(), anyInt(), anyInt(), any(), any(), any())).thenThrow(DatabaseException.class);
         BotStructure botStructure = getBotstructure();
-        this.aiLogic.createImportedBot(VALIDDEVID, botStructure);
+        this.aiLogic.createImportedBot(VALIDDEVID, botStructure, Locale.ENGLISH);
     }
 
     @Test(expected = AILogic.BotImportException.class)
@@ -1183,7 +1174,7 @@ public class TestAILogic {
         setupFakeImport();
         when(this.fakeDatabaseAi.getAIWithStatusForEngineVersion(any(UUID.class), any(UUID.class), anyString(), any(JsonSerializer.class), any(DatabaseTransaction.class))).thenThrow(DatabaseException.class);
         BotStructure botStructure = getBotstructure();
-        this.aiLogic.createImportedBot(VALIDDEVID, botStructure);
+        this.aiLogic.createImportedBot(VALIDDEVID, botStructure, Locale.ENGLISH);
     }
 
     @Test(expected = AILogic.BotImportException.class)
@@ -1191,7 +1182,7 @@ public class TestAILogic {
         setupFakeImport();
         when(this.fakeDatabaseEntitiesIntents.getEntities(any(), any())).thenThrow(DatabaseException.class);
         BotStructure botStructure = getBotstructure();
-        this.aiLogic.createImportedBot(VALIDDEVID, botStructure);
+        this.aiLogic.createImportedBot(VALIDDEVID, botStructure, Locale.ENGLISH);
     }
 
     @Test
@@ -1200,7 +1191,7 @@ public class TestAILogic {
         List<String> existingValues = Arrays.asList("value1", "value2", "value3");
         List<String> newValues = Arrays.asList("value4", "value5");
         BotStructure botToImport = setupImportEntityValueTests(entityName, existingValues, newValues);
-        this.aiLogic.createImportedBot(VALIDDEVID, botToImport);
+        this.aiLogic.createImportedBot(VALIDDEVID, botToImport, Locale.ENGLISH);
     }
 
     @Test
@@ -1209,7 +1200,7 @@ public class TestAILogic {
         List<String> existingValues = Arrays.asList("value1", "value2");
         List<String> newValues = Arrays.asList(existingValues.get(0), "value3");
         BotStructure botToImport = setupImportEntityValueTests(entityName, existingValues, newValues);
-        this.aiLogic.createImportedBot(VALIDDEVID, botToImport);
+        this.aiLogic.createImportedBot(VALIDDEVID, botToImport, Locale.ENGLISH);
     }
 
     @Test
@@ -1218,7 +1209,7 @@ public class TestAILogic {
         setupFakeImport();
         BotStructure botStructure = getBotstructure();
         botStructure.setHandoverMessage("message");
-        this.aiLogic.createImportedBot(VALIDDEVID, botStructure);
+        this.aiLogic.createImportedBot(VALIDDEVID, botStructure, Locale.ENGLISH);
     }
 
     @Test(expected = AILogic.BotImportException.class)
@@ -1227,7 +1218,7 @@ public class TestAILogic {
         BotStructure botStructure = getBotstructure();
         botStructure.setErrorThresholdHandover(1);
         botStructure.setHandoverResetTimeoutSeconds(1);
-        this.aiLogic.createImportedBot(VALIDDEVID, botStructure);
+        this.aiLogic.createImportedBot(VALIDDEVID, botStructure, Locale.ENGLISH);
     }
 
     @Test(expected = AILogic.BotImportException.class)
@@ -1235,7 +1226,7 @@ public class TestAILogic {
         setupFakeImport();
         doThrow(DatabaseException.class).when(this.fakeDatabaseEntitiesIntents).writeEntity(any(), anyString(), any(), any(), any());
         BotStructure botStructure = getBotstructure();
-        this.aiLogic.createImportedBot(VALIDDEVID, botStructure);
+        this.aiLogic.createImportedBot(VALIDDEVID, botStructure, Locale.ENGLISH);
     }
 
     @Test(expected = AILogic.BotImportException.class)
@@ -1243,7 +1234,7 @@ public class TestAILogic {
         setupFakeImport();
         doThrow(DatabaseException.class).when(this.fakeDatabaseEntitiesIntents).writeIntent(any(), any(), anyString(), any(), any());
         BotStructure botStructure = getBotstructure();
-        this.aiLogic.createImportedBot(VALIDDEVID, botStructure);
+        this.aiLogic.createImportedBot(VALIDDEVID, botStructure, Locale.ENGLISH);
     }
 
     @Test(expected = AILogic.BotImportException.class)
@@ -1251,7 +1242,7 @@ public class TestAILogic {
         setupFakeImport();
         when(this.fakeDatabaseEntitiesIntents.createWebHook(any(), anyString(), anyString(), anyBoolean(), any())).thenReturn(false);
         BotStructure botStructure = getBotstructure();
-        this.aiLogic.createImportedBot(VALIDDEVID, botStructure);
+        this.aiLogic.createImportedBot(VALIDDEVID, botStructure, Locale.ENGLISH);
     }
 
     @Test(expected = AILogic.BotImportException.class)
@@ -1259,7 +1250,7 @@ public class TestAILogic {
         setupFakeImport();
         when(this.fakeDatabaseAi.updateAiTrainingFile(any(), anyString(), any())).thenThrow(DatabaseException.class);
         BotStructure botStructure = getBotstructure();
-        this.aiLogic.createImportedBot(VALIDDEVID, botStructure);
+        this.aiLogic.createImportedBot(VALIDDEVID, botStructure, Locale.ENGLISH);
     }
 
     @Test(expected = AILogic.BotImportException.class)
@@ -1267,7 +1258,7 @@ public class TestAILogic {
         setupFakeImport();
         doThrow(DatabaseException.class).when(this.fakeTransaction).commit();
         BotStructure botStructure = getBotstructure();
-        this.aiLogic.createImportedBot(VALIDDEVID, botStructure);
+        this.aiLogic.createImportedBot(VALIDDEVID, botStructure, Locale.ENGLISH);
     }
 
     @Test(expected = AILogic.BotImportException.class)
@@ -1276,7 +1267,7 @@ public class TestAILogic {
         when(this.fakeDatabaseAi.updatePassthroughUrl(any(), any(), anyString(), any())).thenReturn(false);
         BotStructure botStructure = getBotstructure();
         botStructure.setPassthroughUrl("http://my.url");
-        this.aiLogic.createImportedBot(VALIDDEVID, botStructure);
+        this.aiLogic.createImportedBot(VALIDDEVID, botStructure, Locale.ENGLISH);
     }
 
     @Test(expected = AILogic.BotImportException.class)
@@ -1284,7 +1275,7 @@ public class TestAILogic {
         setupFakeImport();
         when(this.fakeDatabaseAi.updateDefaultChatResponses(any(), any(), any(), any(), any())).thenReturn(false);
         BotStructure botStructure = getBotstructure();
-        this.aiLogic.createImportedBot(VALIDDEVID, botStructure);
+        this.aiLogic.createImportedBot(VALIDDEVID, botStructure, Locale.ENGLISH);
     }
 
     @Test
@@ -1295,7 +1286,7 @@ public class TestAILogic {
         botStructure.setLinkedSkills(Collections.singletonList(botId));
         expectedException.expect(AILogic.BotImportException.class);
         expectedException.expectMessage(String.format(AILogic.LINK_BOT_NOT_EXIST_TEMPLATE, botId));
-        this.aiLogic.createImportedBot(VALIDDEVID, botStructure);
+        this.aiLogic.createImportedBot(VALIDDEVID, botStructure, Locale.ENGLISH);
     }
 
     @Test
@@ -1308,7 +1299,7 @@ public class TestAILogic {
         when(this.fakeDatabaseMarketplace.getBotDetails(anyInt())).thenReturn(getAiBot(botId, botName));
         expectedException.expect(AILogic.BotImportException.class);
         expectedException.expectMessage(String.format(AILogic.LINK_BOT_NOT_OWNED_TEMPLATE, botName, botId));
-        this.aiLogic.createImportedBot(VALIDDEVID, botStructure);
+        this.aiLogic.createImportedBot(VALIDDEVID, botStructure, Locale.ENGLISH);
     }
 
     @Test
@@ -1322,7 +1313,7 @@ public class TestAILogic {
         when(this.fakeDatabaseMarketplace.getPurchasedBots(any())).thenReturn(Arrays.asList(
                 getAiBot(999, "other"), getAiBot(botId, botName)));
         when(this.fakeDatabaseMarketplace.getBotDetails(anyInt())).thenReturn(getAiBot(botId, botName));
-        this.aiLogic.createImportedBot(VALIDDEVID, botStructure);
+        this.aiLogic.createImportedBot(VALIDDEVID, botStructure, Locale.ENGLISH);
         verify(this.fakeDatabaseAi).linkBotToAi(VALIDDEVID, AIID, botId, this.fakeTransaction);
     }
 
@@ -1334,7 +1325,7 @@ public class TestAILogic {
         botStructure.setLinkedSkills(Collections.singletonList(botId));
         when(this.fakeTools.createNewRandomUUID()).thenReturn(AIID);
         when(this.fakeDatabaseMarketplace.getPurchasedBots(any())).thenThrow(DatabaseException.class);
-        this.aiLogic.createImportedBot(VALIDDEVID, botStructure);
+        this.aiLogic.createImportedBot(VALIDDEVID, botStructure, Locale.ENGLISH);
     }
 
     @Test
@@ -1345,7 +1336,7 @@ public class TestAILogic {
         BotStructure botStructure = getBotstructure();
         expectedException.expect(AILogic.BotImportException.class);
         expectedException.expectMessage("A bot with that name already exists");
-        this.aiLogic.createImportedBot(VALIDDEVID, botStructure);
+        this.aiLogic.createImportedBot(VALIDDEVID, botStructure, Locale.ENGLISH);
     }
 
     @Test
@@ -1355,7 +1346,7 @@ public class TestAILogic {
         botStructure.setPassthroughUrl("passthrough_url");
         expectedException.expect(AILogic.BotImportException.class);
         expectedException.expectMessage("This bot uses passthrough URL, but this is not available for this DevId.");
-        this.aiLogic.createImportedBot(VALIDDEVID, botStructure);
+        this.aiLogic.createImportedBot(VALIDDEVID, botStructure, Locale.ENGLISH);
     }
 
     @Test
@@ -1364,23 +1355,22 @@ public class TestAILogic {
         BotStructure botStructure = getBotstructure();
         botStructure.setPassthroughUrl("passthrough_url");
         when(this.fakeFeatureToggler.getStateforDev(any(), eq("enable-passthrough-url"))).thenReturn(FeatureToggler.FeatureState.T1);
-        this.aiLogic.createImportedBot(VALIDDEVID, botStructure);
+        this.aiLogic.createImportedBot(VALIDDEVID, botStructure, Locale.ENGLISH);
     }
 
     @Test
     public void testCreateImportedBotInPlace() throws DatabaseException, ParameterValidationException {
         setupFakeImport();
+        when(this.fakeLanguageLogic.getAvailableLanguage(any(String.class), any(), any())).thenReturn(Optional.of(SupportedLanguage.FR));
         BotStructure botStructure = getBotstructure();
         botStructure.setDescription("newndescription");
         botStructure.setTimezone("newtimezone");
-        botStructure.setLanguage("ca-ES");
+        botStructure.setLanguage("fr");
         botStructure.setConfidence(0.999);
         botStructure.setPersonality(1234);
         botStructure.setVoice(4321);
         List<String> defaultResponses = Collections.singletonList("newdefresponse");
         botStructure.setDefaultResponses(defaultResponses);
-
-        when(this.fakeValidate.validateLocale(any(), any())).thenReturn(Locale.forLanguageTag("ca-ES"));
 
         ApiAi result = (ApiAi) this.aiLogic.importBotInPlace(VALIDDEVID, AIID, botStructure);
 
@@ -1393,13 +1383,25 @@ public class TestAILogic {
                 any(DatabaseTransaction.class));
 
         Assert.assertEquals("newndescription", argument.getValue().getDescription());
-        Assert.assertEquals(Locale.forLanguageTag("ca-ES"), argument.getValue().getLanguage());
+        Assert.assertEquals(Locale.forLanguageTag("fr"), argument.getValue().getLanguage());
         Assert.assertEquals("newtimezone", argument.getValue().getTimezone());
         Assert.assertEquals(0.999, argument.getValue().getConfidence(), 0.00001);
         Assert.assertEquals(1234, argument.getValue().getPersonality());
         Assert.assertEquals(4321, argument.getValue().getVoice());
         Assert.assertEquals(defaultResponses, argument.getValue().getDefaultChatResponses());
 
+    }
+
+    @Test
+    public void testCreateImportedBotInPlace_badLanguage() throws DatabaseException, ParameterValidationException {
+        setupFakeImport();
+        when(this.fakeLanguageLogic.getAvailableLanguage(any(String.class), any(), any())).thenReturn(Optional.empty());
+        BotStructure botStructure = getBotstructure();
+        botStructure.setLanguage("fr");
+
+        ApiResult result = this.aiLogic.importBotInPlace(VALIDDEVID, AIID, botStructure);
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
+        Assert.assertEquals("Import bot in-place - invalid language fr", result.getStatus().getInfo());
     }
 
     @Test
@@ -1491,6 +1493,16 @@ public class TestAILogic {
         }
         ApiResult result = this.aiLogic.importBot(VALIDDEVID, botStructure);
         Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
+    }
+
+    @Test
+    public void testImportBot_badLanguage() {
+        when(this.fakeLanguageLogic.getAvailableLanguage(any(String.class), any(), any())).thenReturn(Optional.empty());
+        BotStructure botStructure = getBotstructure();
+        botStructure.setLanguage("ca");
+        ApiResult result = this.aiLogic.importBot(VALIDDEVID, botStructure);
+        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
+        Assert.assertEquals("Import - invalid language ca", result.getStatus().getInfo());
     }
 
     @Test

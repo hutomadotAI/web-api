@@ -60,7 +60,7 @@ public class TestChatBase {
     FeatureToggler fakeFeatureToggler;
     FacebookChatHandler fakeFacebookChathandler;
     WebhookHandler fakeWebhookHandler;
-
+    LanguageLogic fakeLanguageLogic;
 
     @Before
     public void setup() {
@@ -92,8 +92,11 @@ public class TestChatBase {
         this.fakeAimlHandler = new ChatAimlHandler(mock(ILogger.class));
         this.fakeDefaultHandler = new ChatDefaultHandler(this.fakeAiStrings, mock(ILogger.class));
         this.fakeFacebookChathandler = mock(FacebookChatHandler.class);
+        this.fakeLanguageLogic = mock(LanguageLogic.class);
 
         when(fakeConfig.getEncodingKey()).thenReturn(TestDataHelper.VALID_ENCODING_KEY);
+        when(this.fakeLanguageLogic.getAvailableLanguage(any(String.class), any(), any())).thenReturn(Optional.of(SupportedLanguage.EN));
+        when(this.fakeLanguageLogic.getAvailableLanguage(any(Locale.class), any(), any())).thenReturn(Optional.of(SupportedLanguage.EN));
 
         // Set feature toggles to Control
         TestDataHelper.setFeatureToggleToControl(this.fakeFeatureToggler);
@@ -104,7 +107,7 @@ public class TestChatBase {
                         this.fakeAimlHandler, this.fakeDefaultHandler));
 
         this.chatLogic = new ChatLogic(this.fakeChatServices, this.fakeChatStateHandler, this.fakeDatabaseEntitiesIntents, mock(Tools.class),
-                mock(ILogger.class), mock(ChatLogger.class), this.fakeChatWorkflow, this.fakeFeatureToggler);
+                mock(ILogger.class), mock(ChatLogger.class), this.fakeChatWorkflow, this.fakeFeatureToggler, this.fakeLanguageLogic);
 
         ChatState emptyState = ChatState.getEmpty();
         emptyState.setAi(getSampleAI());

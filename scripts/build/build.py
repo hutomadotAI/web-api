@@ -12,8 +12,10 @@ SCRIPT_PATH = Path(os.path.dirname(os.path.realpath(__file__)))
 ROOT_DIR = SCRIPT_PATH.parent.parent
 
 
-def maven_build(path, modules, clean=False):
+def maven_build(path, modules, skip, clean):
     """Does a maven build"""
+    if skip:
+        return
     os.chdir(str(path))
     cmdline = ["mvn", "-pl", ",".join(modules)]
     if clean:
@@ -27,13 +29,16 @@ def main(build_args):
     component = build_args.component
     tag = build_args.tag_version
     clean = build_args.clean
+    skip_maven = build_args.skip_maven
     service_path = ROOT_DIR / "service"
     REGISTRY = 'eu.gcr.io/hutoma-backend'
 
     if component == "ctrl":
         image = "api/controller"
         maven_build(
-            service_path, ["common-lib", "controller-service"], clean=clean)
+            service_path, ["common-lib", "controller-service"],
+            skip=skip_maven,
+            clean=clean)
         docker_image = DockerImage(
             service_path / "controller-service",
             image,
@@ -42,7 +47,10 @@ def main(build_args):
 
     elif component == "svc":
         image = "api/service"
-        maven_build(service_path, ["common-lib", "core-service"], clean=clean)
+        maven_build(
+            service_path, ["common-lib", "core-service"],
+            skip=skip_maven,
+            clean=clean)
         docker_image = DockerImage(
             service_path / "core-service",
             image,
@@ -68,6 +76,8 @@ if __name__ == "__main__":
         choices=['ctrl', 'svc', 'db'])
     PARSER.add_argument(
         'tag_version', help='Docker tag version', default='latest')
+    PARSER.add_argument(
+        '--skip-maven', help='Skip maven builds', action="store_true")
     PARSER.add_argument(
         '--clean', help='Clean maven builds', action="store_true")
     PARSER.add_argument(

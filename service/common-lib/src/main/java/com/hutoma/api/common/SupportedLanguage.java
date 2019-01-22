@@ -2,6 +2,7 @@ package com.hutoma.api.common;
 
 import java.util.Arrays;
 import java.util.Locale;
+import java.util.Optional;
 
 public enum SupportedLanguage {
     EN,
@@ -9,46 +10,39 @@ public enum SupportedLanguage {
     PT,
     FR,
     NL,
-    // CA (catalan) -> falls back to ES
+    IT,
     ;
 
-    public static SupportedLanguage get(final String langCode) {
-        if (langCode == null || langCode.isEmpty()) {
-            return SupportedLanguage.EN;
-        }
-        return getLanguageWithFallbacks(langCode);
-    }
-
-    public static SupportedLanguage get(final Locale locale) {
+    public static Optional<SupportedLanguage> get(final Locale locale) {
         if (locale == null) {
-            return SupportedLanguage.EN;
+            return Optional.of(SupportedLanguage.EN);
         }
         return get(locale.getLanguage());
     }
 
-    private static SupportedLanguage getLanguageWithFallbacks(final String language) {
-        String substLang = language;
-        if (language.length() > 2) {
+    public static Optional<SupportedLanguage> get(final String langCode) {
+        if (langCode == null || langCode.isEmpty()) {
+            return Optional.of(SupportedLanguage.EN);
+        }
+
+        String substLang = langCode;
+        if (langCode.length() > 2) {
             // just get the language tag
-            String[] parts = language.split("-");
+            String[] parts = langCode.split("-");
             if (parts.length > 0) {
                 substLang = parts[0];
             }
         }
 
-        switch (substLang.toLowerCase()) {
-            case "ca":
-                substLang = "es";
-                break;
-            default:
-                break;
-        }
-
         final String langTag = substLang;
         return Arrays.stream(SupportedLanguage.values())
                 .filter(x -> langTag.equalsIgnoreCase(x.toString()))
-                .findFirst()
-                .orElse(SupportedLanguage.EN);
+                .findFirst();
+    }
+
+    public Locale toLocale() {
+        Locale locale = new Locale(this.toString());
+        return locale;
     }
 }
 

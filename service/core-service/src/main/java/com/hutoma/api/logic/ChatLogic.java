@@ -2,6 +2,7 @@ package com.hutoma.api.logic;
 
 import com.hutoma.api.common.ChatLogger;
 import com.hutoma.api.common.FeatureToggler;
+import com.hutoma.api.common.SupportedLanguage;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.NoServerAvailableException;
 import com.hutoma.api.connectors.ServerConnector;
@@ -39,6 +40,7 @@ public class ChatLogic {
     private final ChatWorkflow chatWorkflow;
     private ChatState chatState;
     private final FeatureToggler featureToggler;
+    private final LanguageLogic languageLogic;
 
 
     @Inject
@@ -49,7 +51,8 @@ public class ChatLogic {
                      final ILogger logger,
                      final ChatLogger chatLogger,
                      final ChatWorkflow chatWorkflow,
-                     final FeatureToggler featureToggler) {
+                     final FeatureToggler featureToggler,
+                     final LanguageLogic languageLogic) {
         this.chatStateHandler = chatStateHandler;
         this.databaseEntitiesIntents = databaseEntitiesIntents;
         this.chatServices = chatServices;
@@ -58,6 +61,7 @@ public class ChatLogic {
         this.chatLogger = chatLogger;
         this.chatWorkflow = chatWorkflow;
         this.featureToggler = featureToggler;
+        this.languageLogic = languageLogic;
 
         this.telemetryMap = new LogMap((Map<String, Object>) null);
     }
@@ -158,8 +162,13 @@ public class ChatLogic {
         }
 
         this.chatState = this.chatStateHandler.getState(devId, aiid, chatId);
+        Locale locale = this.chatState.getAi().getLanguage();
+        Optional<SupportedLanguage> availableLanguage = languageLogic.getAvailableLanguage(locale, devId, aiid);
+        if (!availableLanguage.isPresent()) {
+            throw new ChatFailedException(ApiError.getBadRequest(String.format("Language not available %s", locale)));
+        }
         AiIdentity aiIdentity = new AiIdentity(devId, aiid,
-                this.chatState.getAi().getLanguage(), this.chatState.getAi().getEngineVersion());
+            availableLanguage.get(), this.chatState.getAi().getEngineVersion());
         ChatRequestInfo requestInfo = new ChatRequestInfo(aiIdentity, chatId, question, clientVariables);
         ChatResult currentResult = new ChatResult(question);
         currentResult.setTimestamp(this.tools.getTimestamp());
