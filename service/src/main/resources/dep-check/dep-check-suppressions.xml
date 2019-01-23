@@ -11,48 +11,6 @@
         <cve>CVE-2018-12070</cve>
     </suppress>
 
-    <suppress>
-        <notes><![CDATA[
-   File name: mysql-connector-java-6.0.3.jar
-   Known vulnerabilities: CVE-2018-3056, CVE-2018-3078, CVE-2018-3079, CVE-2018-3054, CVE-2018-3077, CVE-2018-3075, CVE-2018-3073, CVE-2018-3080, CVE-2018-3067, CVE-2018-3065, CVE-2018-3064, CVE-2018-3081, CVE-2018-3060, CVE-2018-3082
-   Reason: any mysql connector lib version beyond this one will not work with our current db server version
-   ]]></notes>
-        <sha1>49506be68e2ab1b619d77dee24c2e55d399d371a</sha1>
-        <cve>CVE-2018-3056</cve>
-        <cve>CVE-2018-3078</cve>
-        <cve>CVE-2018-3079</cve>
-        <cve>CVE-2018-3054</cve>
-        <cve>CVE-2018-3077</cve>
-        <cve>CVE-2018-3075</cve>
-        <cve>CVE-2018-3073</cve>
-        <cve>CVE-2018-3080</cve>
-        <cve>CVE-2018-3067</cve>
-        <cve>CVE-2018-3065</cve>
-        <cve>CVE-2018-3064</cve>
-        <cve>CVE-2018-3081</cve>
-        <cve>CVE-2018-3060</cve>
-        <cve>CVE-2018-3082</cve>
-        <cve>CVE-2018-3137</cve>
-        <cve>CVE-2018-3212</cve>
-        <cve>CVE-2018-3279</cve>
-        <cve>CVE-2018-3195</cve>
-        <cve>CVE-2018-3170</cve>
-        <cve>CVE-2018-3203</cve>
-        <cve>CVE-2018-3145</cve>
-        <cve>CVE-2018-3186</cve>
-        <cve>CVE-2018-3182</cve>
-        <cve>CVE-2018-3286</cve>
-        <cve>CVE-2018-3258</cve>
-        <cve>CVE-2019-2436</cve>
-        <cve>CVE-2019-2494</cve>
-        <cve>CVE-2019-2495</cve>
-        <cve>CVE-2019-2502</cve>
-        <cve>CVE-2019-2530</cve>
-        <cve>CVE-2019-2533</cve>
-        <cve>CVE-2019-2535</cve>
-        <cve>CVE-2019-2536</cve>
-        <cve>CVE-2019-2539</cve>
-    </suppress>
 
 
     <!--

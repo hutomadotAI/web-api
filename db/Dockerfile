@@ -1,4 +1,4 @@
-FROM mysql:5.7.22
+FROM mysql:5.7.25
 LABEL maintainer  "Pedro Teixeira<pedrotei@hutoma.com>"
 
 # Configuration files

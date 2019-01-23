@@ -246,14 +246,14 @@
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>6.0.3</version> <!-- versions beyond this one will fail to authenticate against the current db (version = 5.7.21) -->
+            <version>8.0.14</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.apache.tomcat/tomcat-jdbc -->
         <dependency>
             <groupId>org.apache.tomcat</groupId>
             <artifactId>tomcat-jdbc</artifactId>
-            <version>9.0.10</version>
+            <version>9.0.14</version>
         </dependency>
 
         <dependency>
@@ -333,16 +333,6 @@
         </dependency>
 
         <!-- ********************************* Override dependencies ****************************************** -->
-
-        <!-- Due to protobuf-java-2.6.0.jar: CVE-2015-5237 brought in by mysql-connector-java:jar:8.0.11 -->
-        <!-- https://mvnrepository.com/artifact/com.google.protobuf/protobuf-java -->
-        <dependency>
-            <groupId>com.google.protobuf</groupId>
-            <artifactId>protobuf-java</artifactId>
-            <version>3.6.0</version>
-        </dependency>
-
-
     </dependencies>
 
 </project>
