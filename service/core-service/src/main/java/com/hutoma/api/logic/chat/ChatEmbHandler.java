@@ -109,7 +109,7 @@ public class ChatEmbHandler extends ChatGenericBackend implements IChatHandler {
                 requestInfo.getDevId(), aiidFromResult, requestInfo.getChatId(), result.getAnswer(), state);
         if (memoryIntent != null // Intent was recognized
                 && !memoryIntent.isFulfilled()) {
-
+            state.setIntentScore(result.getScore());
             telemetryMap.add("IntentRecognized", true);
 
             result.setChatState(state);
