@@ -49,8 +49,6 @@ public class ChatState {
     private List<WebHookSession> webhookSessions = new ArrayList<>();
     @SerializedName("integration_data")
     private IntegrationData integrationData;
-    @SerializedName("intent_score")
-    private double intentScore;
 
     // ChatServices service
     private transient AIChatServices aiChatServices;
@@ -261,13 +259,5 @@ public class ChatState {
 
     public void setHashedChatId(final String hashedChatId) {
         this.hashedChatId = hashedChatId;
-    }
-
-    public double getIntentScore() {
-        return this.intentScore;
-    }
-
-    public void setIntentScore(final double intentScore) {
-        this.intentScore = intentScore;
     }
 }

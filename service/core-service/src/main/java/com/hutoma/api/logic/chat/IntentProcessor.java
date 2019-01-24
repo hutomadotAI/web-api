@@ -86,13 +86,15 @@ public class IntentProcessor {
         ChatState chatState = chatResult.getChatState();
         chatState.restartChatWorkflow(false);
 
+        ChatContext chatContext = chatState.getChatContext();
+
         // Exit if we can't execute intent
         ApiIntent intent = this.intentHandler.getIntent(aiidForMemoryIntents, currentIntent.getName());
         if (!canExecuteIntent(intent, chatResult)) {
             if (StringUtils.isEmpty(intent.getConditionsFallthroughMessage())) {
                 return false;
             } else {
-                chatResult.setScore(chatState.getIntentScore());
+                chatResult.setScore(chatContext.getIntentScore());
                 chatResult.setAnswer(intent.getConditionsFallthroughMessage());
                 chatState.clearFromCurrentIntents(Collections.singletonList(currentIntent));
                 telemetryMap.add("AnsweredBy", "IntentProcessor");
@@ -103,7 +105,7 @@ public class IntentProcessor {
         // If the intent is gated on any conditionals, evaluate them
         if (!intent.getConditionsIn().isEmpty()) {
             ConditionEvaluator.Results results =
-                    this.conditionEvaluator.evaluate(chatState.getChatContext());
+                    this.conditionEvaluator.evaluate(chatContext);
             if (results.failed()) {
                 ConditionEvaluator.Result failed = results.firstFailed();
                 // failed cannot be null, but just doublecheck
@@ -147,8 +149,8 @@ public class IntentProcessor {
             if (entityOccurances == 1) {
                 String entityLabel = entity.getLabel();
                 String entityName = entity.getName();
-                if (chatState.getChatContext().isSet(entityLabel) && !entity.getResetOnEntry()) {
-                    String contextValue = chatState.getChatContext().getValue(entityLabel);
+                if (chatContext.isSet(entityLabel) && !entity.getResetOnEntry()) {
+                    String contextValue = chatContext.getValue(entityLabel);
                     entity.setCurrentValue(contextValue);
                 } else {
                     // If we dont have the value from the existing context, check the candidate matches
@@ -164,8 +166,7 @@ public class IntentProcessor {
 
         // Make sure all context_in variables are read and applied to the chat state
         intent.getContextIn().forEach((k, v) ->
-                chatState.getChatContext()
-                        .setValue(k, v, ChatContext.ChatVariableValue.DEFAULT_LIFESPAN_TURNS));
+                chatContext.setValue(k, v, ChatContext.ChatVariableValue.DEFAULT_LIFESPAN_TURNS));
 
         try {
 
@@ -174,7 +175,7 @@ public class IntentProcessor {
 
                 telemetryMap.add("EntityRequested.Name", mv.getName());
                 telemetryMap.add("EntityRequested.Label", mv.getLabel());
-                chatResult.setScore(chatState.getIntentScore());
+                chatResult.setScore(chatContext.getIntentScore());
 
                 handledIntent = processVariables(chatInfo, aiidForMemoryIntents, currentIntent, chatResult,
                         Collections.singletonList(mv), intentsToClear, intent, intentLog, telemetryMap);
@@ -235,7 +236,7 @@ public class IntentProcessor {
         }
 
         // Intent was handled
-        chatResult.setScore(chatState.getIntentScore());
+        chatResult.setScore(chatContext.getIntentScore());
         chatResult.setIntents(Collections.singletonList(currentIntent));
         telemetryMap.add("AnsweredBy", "IntentProcessor");
 
@@ -248,13 +249,12 @@ public class IntentProcessor {
             }
 
             if (intent.getResetContextOnExit()) {
-                chatState.getChatContext().clear();
+                chatContext.clear();
                 intentLog.put("ResetOnExit", intent.getResetContextOnExit());
             } else {
                 // Make sure all context_out variables are read and applied to the chat state
                 intent.getContextOut().forEach((k, v) ->
-                        chatState.getChatContext()
-                                .setValue(k, v, ChatContext.ChatVariableValue.DEFAULT_LIFESPAN_TURNS));
+                    chatContext.setValue(k, v, ChatContext.ChatVariableValue.DEFAULT_LIFESPAN_TURNS));
             }
 
             boolean hasNextedIntentToExecute = false;
@@ -264,7 +264,7 @@ public class IntentProcessor {
                 for (IntentOutConditional outConditional : intent.getIntentOutConditionals()) {
                     this.conditionEvaluator.setConditions(outConditional.getConditions());
                     ConditionEvaluator.Results results = this.conditionEvaluator.evaluate(
-                            chatState.getChatContext());
+                            chatContext);
                     if (results.passed()) {
                         try {
                             MemoryIntent intentToTrigger = this.intentHandler.buildMemoryIntentFromIntentName(
@@ -442,9 +442,9 @@ public class IntentProcessor {
 
                     // Also need to update the entity labels in chatContext, but that is indexed on entity-label
                     // If the variable already exists, make sure the lifespan is maintained
-                    //chatState.getChatContext().setValue(entityLabel, entityValue,
-                    //        chatState.getChatContext().isSet(entityLabel)
-                    //                ? chatState.getChatContext().getVariable(entityLabel).getLifespanTurns()
+                    //chatContext.setValue(entityLabel, entityValue,
+                    //        chatContext.isSet(entityLabel)
+                    //                ? chatContext.getVariable(entityLabel).getLifespanTurns()
                     //                : ChatContext.ChatVariableValue.DEFAULT_LIFESPAN_TURNS);
                     logger.logInfo("IntentProcessor",
                             String.format("Added entity value %s from entity value matching", entityValue));

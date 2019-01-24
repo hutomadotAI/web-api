@@ -109,14 +109,14 @@ public class ChatEmbHandler extends ChatGenericBackend implements IChatHandler {
                 requestInfo.getDevId(), aiidFromResult, requestInfo.getChatId(), result.getAnswer(), state);
         if (memoryIntent != null // Intent was recognized
                 && !memoryIntent.isFulfilled()) {
-            state.setIntentScore(result.getScore());
             telemetryMap.add("IntentRecognized", true);
-
             result.setChatState(state);
+
+            ChatContext ctx = state.getChatContext(); 
+            ctx.setIntentScore(result.getScore());
 
             // Before we process this intent, we should clear the variables we need to clear
             if (!memoryIntent.getVariables().isEmpty()) {
-                ChatContext ctx = result.getChatState().getChatContext();
                 for (MemoryVariable var : memoryIntent.getVariables()) {
                     if (ctx.isSet(var.getLabel())) {
                         if (var.getResetOnEntry()) {
