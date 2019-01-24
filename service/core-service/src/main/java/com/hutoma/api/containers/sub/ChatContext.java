@@ -11,9 +11,27 @@ import java.util.Map;
  * manipulated, and used for gating the execution of actions.
  */
 public class ChatContext {
+    @SerializedName("intent_score")
+    private double intentScore;
 
     @SerializedName("variables")
     private Map<String, ChatVariableValue> variables = new HashMap<>();
+
+    /**
+     * Gets the intent score
+     */ 
+    public double getIntentScore() {
+        return this.intentScore;
+    }
+
+    /**
+     * Sets the intent score
+     * 
+     * @param intentScore the intent score
+     */ 
+    public void setIntentScore(final double intentScore) {
+        this.intentScore = intentScore;
+    }
 
     /**
      * Sets a value for a variable.
@@ -49,6 +67,7 @@ public class ChatContext {
      * Clears all the variables.
      */
     public void clear() {
+        this.intentScore = 0.0;
         this.variables.clear();
     }
 

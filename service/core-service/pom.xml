@@ -15,7 +15,7 @@
     <name>core-service</name>
 
     <properties>
-        <project.component.fasterxml-jackson.version>2.9.6</project.component.fasterxml-jackson.version>
+        <project.component.fasterxml-jackson.version>2.9.8</project.component.fasterxml-jackson.version>
     </properties>
 
 
