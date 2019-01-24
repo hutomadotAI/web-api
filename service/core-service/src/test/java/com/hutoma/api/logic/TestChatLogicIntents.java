@@ -304,7 +304,7 @@ public class TestChatLogicIntents extends TestChatBase {
     public void testChat_multiLineIntent_fulfilled()
             throws ChatBackendConnector.AiControllerException, ChatLogic.IntentException {
         MemoryIntent mi = getMemoryIntentForPrompt(3, "prompt");
-
+        final double DOUBLE_EPSILON = 1e-15;
         // Make sure all variables are clean
         for (MemoryVariable mv : mi.getVariables()) {
             mv.setCurrentValue(null);
@@ -313,6 +313,10 @@ public class TestChatLogicIntents extends TestChatBase {
         ApiResult result = getChat(0.5f, "nothing to see here.");
         ChatResult r = ((ApiChat) result).getResult();
         Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
+        // Verify score, and that it is in chat context
+        Assert.assertEquals(EMB_CHAT_SCORE, r.getScore(), DOUBLE_EPSILON);
+        Assert.assertEquals(EMB_CHAT_SCORE, r.getChatState().getChatContext().getIntentScore(), DOUBLE_EPSILON);
+
         // Verify intent is triggered
         Assert.assertEquals(1, r.getIntents().size());
         Assert.assertEquals(mi.getName(), r.getIntents().get(0).getName());
@@ -338,8 +342,8 @@ public class TestChatLogicIntents extends TestChatBase {
         // Intent has the entity with currentValue set to what we've defined
         Assert.assertEquals(varValue, r.getIntents().get(0).getVariables().get(0).getCurrentValue());
         Assert.assertEquals(1, r.getIntents().get(0).getVariables().get(0).getTimesPrompted());
-        // Score is 1.0
-        Assert.assertEquals(1.0d, r.getScore(), 0.00000001d);
+        // Score is as before
+        Assert.assertEquals(EMB_CHAT_SCORE, r.getScore(), DOUBLE_EPSILON);
         Assert.assertTrue(r.getChatState().getCurrentIntents().isEmpty());
     }
 

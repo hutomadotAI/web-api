@@ -33,6 +33,7 @@ public class TestChatBase {
     static final String AIMLRESULT = "aimlresult";
     static final String MEMORY_VARIABLE_PROMPT = "prompt1";
     static final WebHook VALID_WEBHOOK = new WebHook(AIID, "intent", "endpoint", true);
+    static final double EMB_CHAT_SCORE = 0.9d;
     private static final UUID AIML_BOT_AIID = UUID.fromString("bd2700ff-279b-4bac-ad2f-85a5275ac073");
     private static final String QUESTION = "question";
 
@@ -240,7 +241,7 @@ public class TestChatBase {
         MemoryIntent mi = new MemoryIntent(intentName, AIID, CHATID, Collections.singletonList(mv));
 
         when(this.fakeIntentHandler.getIntent(any(), anyString())).thenReturn(TestIntentLogic.getIntent());
-        setupFakeChat(0.9d, MemoryIntentHandler.META_INTENT_TAG + intentName, 0.3d, "");
+        setupFakeChat(EMB_CHAT_SCORE, MemoryIntentHandler.META_INTENT_TAG + intentName, 0.3d, "");
         when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), any(), any())).thenReturn(mi);
         return mi;
     }
@@ -284,7 +285,7 @@ public class TestChatBase {
         variables.add(persistentVariable);
         MemoryIntent mi = new MemoryIntent(intentName, AIID, CHATID, variables);
 
-        setupFakeChat(0.9d, MemoryIntentHandler.META_INTENT_TAG + intentName, 0.3d, "");
+        setupFakeChat(EMB_CHAT_SCORE, MemoryIntentHandler.META_INTENT_TAG + intentName, 0.3d, "");
         when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), any(), any())).thenReturn(mi);
         return mi;
     }
