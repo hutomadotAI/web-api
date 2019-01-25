@@ -1,5 +1,7 @@
 package com.hutoma.api;
 
+import com.hutoma.api.jersey.SafetyNetExceptionMapper;
+
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 
@@ -19,6 +21,9 @@ public class ServerApp extends ResourceConfig {
         // initialisation
         register(ServerInit.class);
 
+        // exception mapper
+        register(SafetyNetExceptionMapper.class);
+        
         // validation and param extraction
         packages(false, "com.hutoma.api.validation");
 

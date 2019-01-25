@@ -1,6 +1,7 @@
 package com.hutoma.api;
 
 import com.hutoma.api.common.JerseyGsonProvider;
+import com.hutoma.api.jersey.SafetyNetExceptionMapper;
 
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -24,6 +25,9 @@ public class ServerApp extends ResourceConfig {
         // JSON serializer using GSON
         register(JerseyGsonProvider.class);
 
+        // exception mapper
+        register(SafetyNetExceptionMapper.class);
+        
         // authorization filter
         packages(false, "com.hutoma.api.access");
 
