@@ -40,6 +40,9 @@ public class WebHookPayload {
     @SerializedName("webhook_token")
     private String webhookToken;
 
+    @SerializedName("language")
+    private String language;
+
     public WebHookPayload(final MemoryIntent intent,
                           final ChatResult chatResult,
                           final ChatRequestInfo chatInfo,
@@ -55,6 +58,7 @@ public class WebHookPayload {
                           final AiBotConfig config) {
         this.chatResult = chatResult;
         this.originatingAiid = chatInfo.getAiid().toString();
+        this.language = chatInfo.getAiIdentity().getLanguage().toString();
         this.clientVariables = chatInfo.getClientVariables();
         this.chatSession = chatResult.getChatState().getHashedChatId();
         this.webhookToken = generateWebhookToken(chatInfo.getDevId(), chatInfo.getAiid(), chatInfo.getChatId());

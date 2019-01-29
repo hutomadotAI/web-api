@@ -168,7 +168,7 @@ public class ChatLogic {
             throw new ChatFailedException(ApiError.getBadRequest(String.format("Language not available %s", locale)));
         }
         AiIdentity aiIdentity = new AiIdentity(devId, aiid,
-            availableLanguage.get(), this.chatState.getAi().getEngineVersion());
+                availableLanguage.get(), this.chatState.getAi().getEngineVersion());
         ChatRequestInfo requestInfo = new ChatRequestInfo(aiIdentity, chatId, question, clientVariables);
         ChatResult currentResult = new ChatResult(question);
         currentResult.setTimestamp(this.tools.getTimestamp());
@@ -180,7 +180,8 @@ public class ChatLogic {
         // Add telemetry for the request
         this.telemetryMap.add("DevId", devId);
         this.telemetryMap.add("AIID", aiid);
-        this.telemetryMap.add("EngineVersion", this.chatState.getAi().getEngineVersion());
+        this.telemetryMap.add("EngineVersion", aiIdentity.getServerVersion());
+        this.telemetryMap.add("Language", aiIdentity.getLanguage().toString());
         this.telemetryMap.add("Topic", this.chatState.getTopic());
         this.telemetryMap.add("History", this.chatState.getHistory());
         this.telemetryMap.add("ChatType", "Platform");
