@@ -3,6 +3,7 @@ package com.hutoma.api.logic;
 import com.google.common.annotations.VisibleForTesting;
 import com.hutoma.api.access.Role;
 import com.hutoma.api.common.*;
+import com.hutoma.api.connectors.EntityRecognizerService;
 import com.hutoma.api.connectors.ServerConnector;
 import com.hutoma.api.connectors.WebHooks;
 import com.hutoma.api.connectors.aiservices.AIServices;
@@ -12,6 +13,8 @@ import com.hutoma.api.containers.sub.*;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.logging.LogMap;
 import com.hutoma.api.logic.chat.ChatDefaultHandler;
+import com.hutoma.api.logic.chat.EntityRecognizerMessage;
+import com.hutoma.api.validation.ParameterValidationException;
 import com.hutoma.api.validation.Validate;
 import io.jsonwebtoken.CompressionCodecs;
 import io.jsonwebtoken.Jwts;
@@ -53,6 +56,7 @@ public class AILogic {
     private final Provider<DatabaseTransaction> transactionProvider;
     private Provider<AIIntegrationLogic> integrationLogicProvider;
     private final FeatureToggler featureToggler;
+    private final EntityRecognizerService entityRecognizerService;
     private final LanguageLogic languageLogic;
 
     @Inject
@@ -68,6 +72,7 @@ public class AILogic {
                    final Provider<AIIntegrationLogic> integrationLogicProvider,
                    final Provider<DatabaseTransaction> transactionProvider,
                    final FeatureToggler featureToggler,
+                   final EntityRecognizerService entityRecognizerService,
                    final LanguageLogic languageLogic) {
         this.config = config;
         this.jsonSerializer = jsonSerializer;
@@ -81,6 +86,7 @@ public class AILogic {
         this.integrationLogicProvider = integrationLogicProvider;
         this.transactionProvider = transactionProvider;
         this.featureToggler = featureToggler;
+        this.entityRecognizerService = entityRecognizerService;
         this.languageLogic = languageLogic;
     }
 
@@ -1171,6 +1177,29 @@ public class AILogic {
                         if (entity.getEntityValueType() == null) {
                             entity.setEntityValueType(EntityValueType.LIST);
                         }
+
+                        // If this is a regex entity, validate it
+                        boolean regexValidated = true;
+                        if (entity.getEntityValueType() == EntityValueType.REGEX) {
+                            EntityRecognizerMessage testMessage = new EntityRecognizerMessage();
+                            testMessage.setConversation("validate regex");
+                            testMessage.getRegexEntities()
+                                    .put(entity.getEntityName(), entity.getEntityValueList().get(0));
+
+                            try {
+                                entityRecognizerService.findEntities(jsonSerializer.serialize(testMessage),
+                                        SupportedLanguage.EN);
+                                regexValidated = true;
+                            } catch (EntityRecognizerService.EntityRecognizerException ex) {
+                                regexValidated = false;
+                            }
+
+                            if (!regexValidated) {
+                                throw new BotImportUserException((String.format(
+                                        "Could not validate Regex Entity %s", entity.getEntityName())));
+                            }
+                        }
+
                         this.databaseEntitiesIntents.writeEntity(
                                 devId,
                                 entity.getEntityName(),

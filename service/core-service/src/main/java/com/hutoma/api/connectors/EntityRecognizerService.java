@@ -81,15 +81,22 @@ public class EntityRecognizerService {
             throws EntityRecognizerException {
         Response response = null;
         String json = null;
+        String ersUrl = findErsUrlForLanguage(this.findEntityUrl, language);
+        this.logger.logInfo(LOGFROM, "Calling entity recogniser",
+                LogMap.map("server", ersUrl));
         try {
-            String ersUrl = findErsUrlForLanguage(this.findEntityUrl, language);
             response = this.jerseyClient.target(ersUrl)
                     .request(MediaType.APPLICATION_JSON_TYPE)
                     .post(javax.ws.rs.client.Entity.entity(question, MediaType.APPLICATION_JSON));
             response.bufferEntity();
             json = response.readEntity(String.class);
+            this.logger.logInfo(LOGFROM, "Entity Recogniser responded",
+                    LogMap.map("server", ersUrl)
+                        .put("Status", response.getStatus())
+                        .put("Reason phrase", response.getStatusInfo().getReasonPhrase())
+                        .put("Body", json));
             if (response.getStatus() == HttpURLConnection.HTTP_BAD_REQUEST) {
-                if (response.getStatusInfo().getReasonPhrase().equals("Invalid regex found")) {
+                if (json.equals("400: Invalid regex found")) {
                     this.logger.logInfo(LOGFROM,
                             "Invalid regex supplied ",
                             LogMap.map("server", ersUrl)
@@ -98,6 +105,11 @@ public class EntityRecognizerService {
                 }
 
                 // Otherwise, flag it as an unknown reason
+                this.logger.logInfo(LOGFROM,
+                        "Unknown error from findentities ",
+                        LogMap.map("server", ersUrl)
+                                .put("Status", Integer.toString(response.getStatus()))
+                                .put("ExceptionMessage", response.getStatusInfo().getReasonPhrase()));
                 throw new EntityRecognizerException(EntityRecognizerException.EntityRecognizerError.UNKNOWN);
             }
             if (response.getStatus() != HttpURLConnection.HTTP_OK) {

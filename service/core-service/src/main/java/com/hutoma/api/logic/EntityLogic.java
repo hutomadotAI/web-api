@@ -167,30 +167,6 @@ public class EntityLogic {
         }
     }
 
-    public ApiResult replaceEntity(final UUID devid, final String entityName, final ApiEntity entity, final UUID aiid) {
-        final String devidString = devid.toString();
-        LogMap logMap = LogMap.map("Entity", entityName);
-        try {
-            if (entityName.startsWith(IEntityRecognizer.SYSTEM_ENTITY_PREFIX) || entity.isSystem()) {
-                this.logger.logUserTraceEvent(LOGFROM, "ReplaceEntity - attempted to replace a system entity.",
-                        devidString, logMap);
-                return ApiError.getBadRequest("Cannot replace a system entity.");
-            }
-            final boolean exists = this.database.getEntity(devid, entityName, aiid) != null;
-            if (!exists) {
-                return ApiError.getBadRequest("Entity doesn't exist.");
-            }
-
-            // Replace entity values.
-            this.database.writeEntity(devid, entityName, entity, aiid);
-            this.logger.logUserTraceEvent(LOGFROM, "ReplaceEntity", devidString, logMap);
-            return new ApiResult().setSuccessStatus("Entity updated.");
-        } catch (final Exception e) {
-            this.logger.logUserExceptionEvent(LOGFROM, "ReplaceEntity", devidString, e);
-            return ApiError.getInternalServerError();
-        }
-    }
-
     public ApiResult deleteEntity(final UUID devid, final String entityName, final UUID aiid) {
         final String devidString = devid.toString();
         try {

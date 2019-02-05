@@ -90,7 +90,7 @@ public class EntityEndpoint {
     @ValidatePost({APIParameter.EntityJson})
     public Response putEntity(
             @Context final ContainerRequestContext requestContext) {
-        final ApiResult result = this.entityLogic.replaceEntity(
+        final ApiResult result = this.entityLogic.writeEntity(
                 ParameterFilter.getDevid(requestContext),
                 ParameterFilter.getEntityName(requestContext),
                 ParameterFilter.getEntity(requestContext),

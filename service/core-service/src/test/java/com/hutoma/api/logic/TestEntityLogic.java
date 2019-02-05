@@ -221,28 +221,6 @@ public class TestEntityLogic {
     }
 
     @Test
-    public void testReplaceEntity_entityDoesNotExist_Failure() throws DatabaseException {
-        when(this.fakeDatabase.getEntity(any(), anyString(), any())).thenReturn(null);
-        final ApiResult result = this.entityLogic.replaceEntity(DEVID_UUID, "DIFFERENT_NAME", new ApiEntity("DIFFERENT_NAME", DEVID_UUID), AIID);
-        Assert.assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, result.getStatus().getCode());
-    }
-
-    @Test
-    public void testReplaceEntity_Update_Success() throws DatabaseException {
-        when(this.fakeDatabase.getEntity(any(), anyString(), any())).thenReturn(getEntity());
-        final ApiResult result = this.entityLogic.replaceEntity(DEVID_UUID, ENTITY_NAME, new ApiEntity(ENTITY_NAME, DEVID_UUID), AIID);
-        Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getStatus().getCode());
-    }
-
-    @Test
-    public void testReplaceEntity_Error() throws DatabaseException {
-        when(this.fakeDatabase.getEntity(any(), anyString(), any())).thenReturn(getEntity());
-        doThrow(DatabaseException.class).when(this.fakeDatabase).writeEntity(any(), anyString(), any(), any());
-        final ApiResult result = this.entityLogic.replaceEntity(DEVID_UUID, ENTITY_NAME, new ApiEntity(ENTITY_NAME, DEVID_UUID), AIID);
-        Assert.assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, result.getStatus().getCode());
-    }
-
-    @Test
     public void testEntityMax_exceedsEntityMaxValues() {
         final int maxValuesPerEntity = 5;
         when(this.fakeConfig.getMaxEntityValuesPerEntity()).thenReturn(maxValuesPerEntity);

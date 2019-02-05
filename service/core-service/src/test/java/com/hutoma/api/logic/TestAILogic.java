@@ -2,6 +2,7 @@ package com.hutoma.api.logic;
 
 import com.google.common.collect.ImmutableMap;
 import com.hutoma.api.common.*;
+import com.hutoma.api.connectors.EntityRecognizerService;
 import com.hutoma.api.connectors.ServerConnector;
 import com.hutoma.api.connectors.aiservices.AIServices;
 import com.hutoma.api.connectors.db.*;
@@ -49,6 +50,7 @@ public class TestAILogic {
     private DatabaseTransaction fakeTransaction;
     private FeatureToggler fakeFeatureToggler;
     private AIIntegrationLogic fakeIntegration;
+    private EntityRecognizerService fakeEntityRecognizerService;
     private LanguageLogic fakeLanguageLogic;
 
     @Rule
@@ -71,6 +73,7 @@ public class TestAILogic {
         this.fakeTransaction = mock(DatabaseTransaction.class);
         this.fakeFeatureToggler = mock(FeatureToggler.class);
         this.fakeIntegration = mock(AIIntegrationLogic.class);
+        this.fakeEntityRecognizerService = mock(EntityRecognizerService.class);
         this.fakeLanguageLogic = mock(LanguageLogic.class); 
 
         TestDataHelper.setFeatureToggleToControl(this.fakeFeatureToggler);
@@ -87,7 +90,7 @@ public class TestAILogic {
         this.aiLogic = new AILogic(this.fakeConfig, this.fakeSerializer, this.fakeDatabaseAi,
                 this.fakeDatabaseEntitiesIntents, this.fakeDatabaseMarketplace, this.fakeAiServices, this.fakeLogger,
                 this.fakeTools, this.fakeValidate, this.fakeAiIntegrationLogicProvider, this.fakeDatabaseTransactionProvider,
-                this.fakeFeatureToggler, this.fakeLanguageLogic);
+                this.fakeFeatureToggler, this.fakeEntityRecognizerService, this.fakeLanguageLogic);
     }
 
     @Test
