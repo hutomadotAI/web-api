@@ -19,16 +19,16 @@ public class ChatContext {
 
     /**
      * Gets the intent score
-     */ 
+     */
     public double getIntentScore() {
         return this.intentScore;
     }
 
     /**
      * Sets the intent score
-     * 
+     *
      * @param intentScore the intent score
-     */ 
+     */
     public void setIntentScore(final double intentScore) {
         this.intentScore = intentScore;
     }
@@ -86,7 +86,7 @@ public class ChatContext {
      */
     public Map<String, String> getVariablesAsStringMap() {
         Map<String, String> ctx = new HashMap<>();
-        this.variables.forEach((k, v) -> ctx.put(k, v.getValue()));
+        this.variables.forEach((k, v) -> ctx.put(k, v != null ? v.getValue() : null));
         return ctx;
     }
 

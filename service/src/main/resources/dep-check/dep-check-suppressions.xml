@@ -12,7 +12,6 @@
     </suppress>
 
 
-
     <!--
     JCraft Jsch components
    Known vulnerabilities: CVE-2016-5725
@@ -151,6 +150,22 @@
    ]]></notes>
         <sha1>562424e36df3d2327e8e9301a76027fca17d54ea</sha1>
         <cve>CVE-2018-8088</cve>
+    </suppress>
+
+    <suppress>
+        <notes><![CDATA[
+   file name: boilerpipe-1.1.0.jar
+   ]]></notes>
+        <sha1>f62cb75ed52455a9e68d1d05b84c500673340eb2</sha1>
+        <cve>CVE-2018-16481</cve>
+    </suppress>
+
+    <suppress>
+        <notes><![CDATA[
+   file name: javax.json-1.0.4.jar
+   ]]></notes>
+        <sha1>3178f73569fd7a1e5ffc464e680f7a8cc784b85a</sha1>
+        <cve>CVE-2018-1000840</cve>
     </suppress>
 
 </suppressions>
