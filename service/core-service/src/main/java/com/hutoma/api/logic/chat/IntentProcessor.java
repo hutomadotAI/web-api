@@ -143,6 +143,9 @@ public class IntentProcessor {
             variablesToProcess = currentIntent.getVariables();
         }
 
+        // Sort the entities so that they're prompted in order.
+        variablesToProcess.sort(Comparator.comparingInt(MemoryVariable::getPromptIndex));
+
         for (MemoryVariable entity : variablesToProcess) {
             long entityOccurances = variablesToProcess.stream()
                     .filter(var -> var.getName().equals(entity.getName())).count();

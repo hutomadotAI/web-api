@@ -130,9 +130,9 @@ public class TestMemoryIntentHandler {
     public void testLoadIntentForAi_duplicateLabels_throwsException() {
         final String label = "theLabel";
         MemoryVariable var1 = new MemoryVariable("var1", "val", true, Collections.singletonList("sys.test"),
-                Collections.singletonList("Prompt"), 1, 0, true, EntityValueType.LIST, false, label, false);
+                Collections.singletonList("Prompt"), 1, 0, true, EntityValueType.LIST, false, label, false, 0);
         MemoryVariable var2 = new MemoryVariable("var2", "val", true, Collections.singletonList("sys.test"),
-                Collections.singletonList("Prompt"), 1, 0, true, EntityValueType.LIST, false, label, false);
+                Collections.singletonList("Prompt"), 1, 0, true, EntityValueType.LIST, false, label, false, 1);
         new MemoryIntent(INTENT_NAME, AIID, CHATID, Arrays.asList(var1, var2));
     }
 
@@ -185,7 +185,8 @@ public class TestMemoryIntentHandler {
                 EntityValueType.LIST,
                 false,
                 "label",
-                false);
+                false,
+                0);
         Assert.assertEquals("name", mv.getName());
         Assert.assertEquals("currentValue", mv.getCurrentValue());
         Assert.assertEquals(values, mv.getEntityKeys());

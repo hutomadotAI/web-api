@@ -195,9 +195,9 @@ public class TestServiceChat extends ServiceTestBase {
         String label1 = "label1";
         String label2 = "label2";
         MemoryVariable mv1 = new MemoryVariable("entity1", null, true, Collections.singletonList("1"),
-                Collections.singletonList("prompt1"), 2, 0, false, EntityValueType.LIST, false, label1, false);
+                Collections.singletonList("prompt1"), 2, 0, false, EntityValueType.LIST, false, label1, false, 0);
         MemoryVariable mv2 = new MemoryVariable("entity2", null, true, Collections.singletonList("2"),
-                Collections.singletonList("prompt2"), 2, 0, false, EntityValueType.LIST, false, label2, false);
+                Collections.singletonList("prompt2"), 2, 0, false, EntityValueType.LIST, false, label2, false, 1);
         List<MemoryVariable> vars = Arrays.asList(mv1, mv2);
         MemoryIntent mi = new MemoryIntent("intent1", AIID, chatId, vars, false);
         List<MemoryIntent> intents = Collections.singletonList(mi);

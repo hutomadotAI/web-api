@@ -237,7 +237,8 @@ public class TestChatBase {
                 EntityValueType.LIST,
                 false,
                 "label",
-                false);
+                false,
+                0);
         MemoryIntent mi = new MemoryIntent(intentName, AIID, CHATID, Collections.singletonList(mv));
 
         when(this.fakeIntentHandler.getIntent(any(), anyString())).thenReturn(TestIntentLogic.getIntent());
@@ -264,7 +265,8 @@ public class TestChatBase {
                 EntityValueType.LIST,
                 false,
                 "label1",
-                false);
+                false,
+                0);
         final String persistentTrigger = "persistentValue";
         final String persistentPrompt = "persistentPrompt";
         MemoryVariable persistentVariable = new MemoryVariable(
@@ -279,7 +281,8 @@ public class TestChatBase {
                 EntityValueType.LIST,
                 true,
                 "label2",
-                false);
+                false,
+                1);
         List<MemoryVariable> variables = new ArrayList<>();
         variables.add(mv);
         variables.add(persistentVariable);

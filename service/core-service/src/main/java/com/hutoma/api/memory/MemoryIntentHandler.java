@@ -143,7 +143,8 @@ public class MemoryIntentHandler implements IMemoryIntentHandler {
                             apiEntity.getEntityValueType(),
                             intentVar.isPersistent(),
                             intentVar.getLabel(),
-                            intentVar.getClearOnEntry());
+                            intentVar.getClearOnEntry(),
+                            intentVar.getId());
                     variables.add(variable);
                 }
             }

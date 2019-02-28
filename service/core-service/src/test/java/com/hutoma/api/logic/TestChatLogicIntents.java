@@ -174,7 +174,7 @@ public class TestChatLogicIntents extends TestChatBase {
         final String intentName = "intent1";
         MemoryVariable mv = new MemoryVariable("sys.any", null, true,
                 Arrays.asList("a", "b"), Collections.singletonList("prompt"), 1, 0,
-                true, EntityValueType.SYS, false, "label1", false);
+                true, EntityValueType.SYS, false, "label1", false, 0);
         MemoryIntent mi = new MemoryIntent(intentName, AIID, CHATID, Collections.singletonList(mv));
         setupFakeChat(0.7d, MemoryIntentHandler.META_INTENT_TAG + intentName, 0.0d, AIMLRESULT);
         when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), anyString(), any())).thenReturn(mi);
@@ -202,10 +202,10 @@ public class TestChatLogicIntents extends TestChatBase {
         final String labelSysAny2 = "sysany2";
         MemoryVariable mv1 = new MemoryVariable("sys.any", null, true,
                 null, Collections.singletonList("prompt1"), 3, 0,
-                true, EntityValueType.SYS, false, labelSysAny1, false);
+                true, EntityValueType.SYS, false, labelSysAny1, false, 0);
         MemoryVariable mv2 = new MemoryVariable("sys.any", null, true,
                 null, Collections.singletonList("prompt2"), 3, 0,
-                true, EntityValueType.SYS, false, labelSysAny2, false);
+                true, EntityValueType.SYS, false, labelSysAny2, false, 1);
         MemoryIntent mi = new MemoryIntent(intentName, AIID, CHATID, Arrays.asList(mv1, mv2));
         setupFakeChat(0.7d, MemoryIntentHandler.META_INTENT_TAG + intentName, 0.0d, AIMLRESULT);
         when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), anyString(), any())).thenReturn(mi);
@@ -423,7 +423,8 @@ public class TestChatLogicIntents extends TestChatBase {
                 EntityValueType.LIST,
                 false,
                 "label1",
-                false);
+                false,
+                0);
         MemoryVariable mv2 = new MemoryVariable(
                 "var2",
                 null,
@@ -436,7 +437,8 @@ public class TestChatLogicIntents extends TestChatBase {
                 EntityValueType.LIST,
                 false,
                 "label2",
-                false);
+                false,
+                1);
         MemoryIntent mi = new MemoryIntent("intent", AIID, UUID.randomUUID(), Arrays.asList(mv1, mv2), false);
         when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), any(), any())).thenReturn(mi);
         when(this.fakeIntentHandler.getIntent(any(), anyString())).thenReturn(TestIntentLogic.getIntent());
@@ -469,11 +471,11 @@ public class TestChatLogicIntents extends TestChatBase {
         final String intentName = "intent1";
         final String sameEntityName = "sameEntityName";
         MemoryVariable mv1 = new MemoryVariable("entity1", null, true, Collections.singletonList("1"),
-                Collections.singletonList("prompt1"), 2, 0, false, EntityValueType.LIST, false, "label1", false);
+                Collections.singletonList("prompt1"), 2, 0, false, EntityValueType.LIST, false, "label1", false, 0);
         MemoryVariable mv2 = new MemoryVariable(sameEntityName, null, true, Arrays.asList("a", "b"),
-                Collections.singletonList("prompt2"), 2, 0, false, EntityValueType.LIST, false, "label2", false);
+                Collections.singletonList("prompt2"), 2, 0, false, EntityValueType.LIST, false, "label2", false, 1);
         MemoryVariable mv3 = new MemoryVariable(sameEntityName, null, true, Collections.singletonList("c"),
-                Collections.singletonList("prompt3"), 1, 0, false, EntityValueType.LIST, false, "label3", false);
+                Collections.singletonList("prompt3"), 1, 0, false, EntityValueType.LIST, false, "label3", false, 2);
         MemoryIntent mi = new MemoryIntent(intentName, AIID, CHATID, Arrays.asList(mv1, mv2, mv3));
 
 
@@ -606,7 +608,7 @@ public class TestChatLogicIntents extends TestChatBase {
         ApiIntent intent = TestIntentLogic.getIntent();
         intent.setContextOut(ImmutableMap.of("aa", "bb"));
         MemoryVariable mv = new MemoryVariable("entity1", null, true, Collections.singletonList("1"),
-                Collections.singletonList("prompt1"), 2, 0, false, EntityValueType.LIST, false, "label1", false);
+                Collections.singletonList("prompt1"), 2, 0, false, EntityValueType.LIST, false, "label1", false, 0);
         MemoryIntent mi = new MemoryIntent(intentName, AIID, CHATID, Collections.singletonList(mv));
         List<MemoryIntent> miList = Collections.singletonList(mi);
         setupFakeChat(0.7d, MemoryIntentHandler.META_INTENT_TAG + intentName, 0.0d, AIMLRESULT);
@@ -757,7 +759,7 @@ public class TestChatLogicIntents extends TestChatBase {
         when(this.fakeDatabaseEntitiesIntents.getIntent(any(), any())).thenReturn(intent);
         when(this.fakeIntentHandler.getIntent(any(), any())).thenReturn(intent);
         MemoryVariable mv = new MemoryVariable("entity1", null, true, Collections.singletonList("1"),
-                Collections.singletonList("prompt1"), 2, 0, false, EntityValueType.LIST, false, "label1", false);
+                Collections.singletonList("prompt1"), 2, 0, false, EntityValueType.LIST, false, "label1", false, 1);
         List<MemoryIntent> intentList = new ArrayList<>();
         intentList.add(new MemoryIntent("intentName", AIID, CHATID, Collections.singletonList(mv)));
         when(this.fakeIntentHandler.getCurrentIntentsStateForChat(any())).thenReturn(intentList);
@@ -766,6 +768,48 @@ public class TestChatLogicIntents extends TestChatBase {
 
         ApiResult response = this.chatLogic.chat(AIID, DEVID_UUID, "what?", CHATID.toString(), null);
         Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatus().getCode());
+    }
+
+    @Test
+    public void testChat_IntentPrompt_multiple_reverseOrder() throws ChatBackendConnector.AiControllerException,
+            ChatLogic.IntentException {
+
+        final String intentName = "intent1";
+        final String firstentity = "firstentity";
+        final String secondentity = "secondentity";
+        MemoryVariable firstVariable = new MemoryVariable("sys.any", null, true,
+                null, Collections.singletonList("prompt1"), 3, 0,
+                true, EntityValueType.SYS, false, firstentity, false, 1);
+        MemoryVariable secondVariable = new MemoryVariable("sys.any", null, true,
+                null, Collections.singletonList("prompt2"), 3, 0,
+                true, EntityValueType.SYS, false, secondentity, false, 0);
+        MemoryIntent memoryIntent = new MemoryIntent(intentName, AIID, CHATID, Arrays.asList(firstVariable, secondVariable));
+        setupFakeChat(0.7d, MemoryIntentHandler.META_INTENT_TAG + intentName, 0.0d, AIMLRESULT);
+        when(this.fakeIntentHandler.parseAiResponseForIntent(any(), any(), any(), anyString(), any())).thenReturn(memoryIntent);
+        ApiIntent intent = new ApiIntent(intentName, "", "");
+        intent.setResponses(Collections.singletonList("response"));
+        when(this.fakeIntentHandler.getIntent(any(), any())).thenReturn(intent);
+        when(this.fakeIntentHandler.getCurrentIntentsStateForChat(any())).thenReturn(Collections.singletonList(memoryIntent));
+
+        ApiChat result = (ApiChat) getChat(0.5f, "start intent");
+
+        // Check that the second entity has been prompted first, per the index order.
+        Assert.assertEquals(secondVariable.getPrompts().get(0), result.getResult().getAnswer());
+        final String answerToFirstPrompt = "answer2";
+        result = (ApiChat) getChat(0.5f, answerToFirstPrompt);
+        Assert.assertEquals(answerToFirstPrompt, result.getResult().getIntents().get(0).getVariablesMap().get(secondentity).getCurrentValue());
+        Assert.assertEquals(firstVariable.getPrompts().get(0), result.getResult().getAnswer());
+
+        // Intent is not fulfilled
+        Assert.assertFalse(result.getResult().getIntents().get(0).isFulfilled());
+
+        // Check that the first entity has been prompted second.
+        final String answerToSecondPrompt = "answer1";
+        result = (ApiChat) getChat(0.5f, answerToSecondPrompt);
+        Assert.assertEquals(answerToSecondPrompt, result.getResult().getIntents().get(0).getVariablesMap().get(firstentity).getCurrentValue());
+
+        Assert.assertEquals(intent.getResponses().get(0), result.getResult().getAnswer());
+        Assert.assertTrue(result.getResult().getIntents().get(0).isFulfilled());
     }
 
     private ChatResult testIntentConditionOut(final String intent1Name, final String intent2Name, final ConditionEvaluator.ResultType evaluationResult)

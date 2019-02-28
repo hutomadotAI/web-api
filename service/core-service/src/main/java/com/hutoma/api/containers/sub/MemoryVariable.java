@@ -3,6 +3,7 @@ package com.hutoma.api.containers.sub;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -30,6 +31,8 @@ public class MemoryVariable {
     private boolean requested;
     @SerializedName("reset_on_entry")
     private boolean resetOnEntry;
+    @SerializedName("index")
+    private int index;
 
     // do not send these back to the user
     @SerializedName("entity_keys")
@@ -54,12 +57,13 @@ public class MemoryVariable {
         this.entityKeys = entityKeys;
         this.isSystem = isSystem;
         this.label = label;
+        this.index = 0;
     }
 
     public MemoryVariable(final String name, final String currentValue, final boolean isMandatory,
                           final List<String> entityKeys, final List<String> prompts, final int timesToPrompt,
                           final int timesPrompted, final boolean isSystem, final EntityValueType valueType,
-                          final boolean persistent, final String label, final boolean resetOnEntry) {
+                          final boolean persistent, final String label, final boolean resetOnEntry, final int index) {
         this(name, entityKeys);
         this.currentValue = currentValue;
         this.isMandatory = isMandatory;
@@ -71,6 +75,7 @@ public class MemoryVariable {
         this.valueType = valueType;
         this.label = label;
         this.resetOnEntry = resetOnEntry;
+        this.index = index;
     }
 
     public MemoryVariable(final IntentVariable intentVariable) {
@@ -80,6 +85,7 @@ public class MemoryVariable {
         this.isMandatory = intentVariable.isRequired();
         this.prompts = intentVariable.getPrompts();
         this.resetOnEntry = intentVariable.getClearOnEntry();
+        this.index = intentVariable.getId();
     }
 
     private MemoryVariable(final MemoryVariable source) {
@@ -94,6 +100,7 @@ public class MemoryVariable {
         this.label = source.label;
         this.requested = source.requested;
         this.resetOnEntry = source.resetOnEntry;
+        this.index = source.index;
     }
 
     public boolean isRequested() {
@@ -275,6 +282,13 @@ public class MemoryVariable {
      */
     public void setLabel(final String label) {
         this.label = label;
+    }
+
+    /*
+     * Gets the prompt index for this entity.
+     */
+    public int getPromptIndex() {
+        return this.index;
     }
 
     /***

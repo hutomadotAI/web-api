@@ -47,6 +47,7 @@ public class IntentVariable {
         this.persistent = persistent;
         this.label = label;
         this.clearOnEntry = clearOnEntry;
+        this.id = 0;
     }
 
     public IntentVariable(final String entityName, final UUID devOwner, final boolean required, final int numPrompts,
