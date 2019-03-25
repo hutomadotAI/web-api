@@ -314,10 +314,21 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
             aiidString = emptyAiid;
         }
 
-        transaction = transaction != null ? transaction : this.transactionProvider.get();
+        boolean createTrans = transaction == null;
+        if (createTrans) {
+            transaction = this.transactionProvider.get();
+        }
 
-        int rowCount = transaction.getDatabaseCall().initialise("deleteEntityByName", 3)
-                .add(devid).add(aiidString).add(name).executeUpdate();
+        int rowCount = transaction.getDatabaseCall()
+                .initialise("deleteEntityByName", 3)
+                .add(devid)
+                .add(aiidString)
+                .add(name)
+                .executeUpdate();
+
+        if (createTrans) {
+            transaction.commit();
+        }
         return rowCount > 0;
     }
 
