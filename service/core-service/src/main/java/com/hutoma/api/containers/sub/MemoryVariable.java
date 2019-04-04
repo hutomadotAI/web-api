@@ -260,6 +260,10 @@ public class MemoryVariable {
         return this.isSystem;
     }
 
+    public void setSystem(final boolean isSystem) {
+        this.isSystem = isSystem;
+    }
+
     /**
      * Gets the type of the variable
      * @return the variable type

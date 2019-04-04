@@ -89,63 +89,6 @@
     </suppress>
     <suppress>
         <notes><![CDATA[
-   file name: elasticsearch-core-6.2.4.jar
-   ]]></notes>
-        <sha1>99611d82dba516f0e48a6d65a788e5df4a6219eb</sha1>
-        <cve>CVE-2018-3831</cve>
-        <cve>CVE-2018-3826</cve>
-    </suppress>
-    <suppress>
-        <notes><![CDATA[
-   file name: elasticsearch-cli-6.2.4.jar
-   ]]></notes>
-        <sha1>73b92527f0bc0802cf74c3fb209d4f8b43258509</sha1>
-        <cve>CVE-2018-3831</cve>
-        <cve>CVE-2018-3826</cve>
-    </suppress>
-    <suppress>
-        <notes><![CDATA[
-   file name: elasticsearch-rest-client-6.2.4.jar
-   ]]></notes>
-        <sha1>3aaa0527c407ebb9ff2d82a65b2872d83d739778</sha1>
-        <cve>CVE-2018-3831</cve>
-        <cve>CVE-2018-3826</cve>
-    </suppress>
-    <suppress>
-        <notes><![CDATA[
-   file name: elasticsearch-rest-high-level-client-6.2.4.jar
-   ]]></notes>
-        <sha1>13bb3745b6328e00fbfc6092a20845f6bbf51098</sha1>
-        <cve>CVE-2018-3831</cve>
-        <cve>CVE-2018-3826</cve>
-    </suppress>
-
-    <suppress>
-        <notes><![CDATA[
-   file name: elasticsearch-6.2.4.jar
-   ]]></notes>
-        <sha1>6d8457abdfc9fe0eb6b7ba99f00605c297e433fd</sha1>
-        <cve>CVE-2018-3831</cve>
-        <cve>CVE-2018-3826</cve>
-    </suppress>
-    <suppress>
-        <notes><![CDATA[
-   file name: parent-join-client-6.2.4.jar
-   ]]></notes>
-        <sha1>501c7e31f3279519b6572b9dee78e2fbd84ee648</sha1>
-        <cve>CVE-2018-3831</cve>
-        <cve>CVE-2018-3826</cve>
-    </suppress>
-    <suppress>
-        <notes><![CDATA[
-   file name: aggs-matrix-stats-client-6.2.4.jar
-   ]]></notes>
-        <sha1>f1f23f7c749d74d681843034abda011fe0033753</sha1>
-        <cve>CVE-2018-3831</cve>
-        <cve>CVE-2018-3826</cve>
-    </suppress>
-    <suppress>
-        <notes><![CDATA[
    file name: slf4j-api-1.7.6.jar
    ]]></notes>
         <sha1>562424e36df3d2327e8e9301a76027fca17d54ea</sha1>

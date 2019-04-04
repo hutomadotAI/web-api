@@ -104,6 +104,7 @@ public class ServerBinder extends AbstractBinder {
         bind(ChatDefaultHandler.class).to(ChatDefaultHandler.class);
         bind(ChatConnectors.class).to(ChatConnectors.class);
         bind(WebhookHandler.class).to(WebhookHandler.class);
+        bind(SysAnyCommandsHandler.class).to(SysAnyCommandsHandler.class);
 
         // Feature toggler
         bind(FeatureToggler.class).to(FeatureToggler.class).in(Singleton.class);

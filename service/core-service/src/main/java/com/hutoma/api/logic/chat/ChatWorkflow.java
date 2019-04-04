@@ -26,14 +26,16 @@ public class ChatWorkflow {
                         final ChatRequestTrigger requestBETrigger,
                         final ChatEmbHandler embHandler,
                         final ChatAimlHandler aimlHandler,
-                        final ChatDefaultHandler defaultHandler) {
+                        final ChatDefaultHandler defaultHandler,
+                        final SysAnyCommandsHandler sysAnyCommandsHandler) {
 
         // Handlers are executed based on its position in the list
         this.handlers = Arrays.asList(
-                entityHandler,
                 handoverHandler,
                 passthroughHandler,
+                entityHandler,
                 intentHandler,
+                sysAnyCommandsHandler,
                 requestBETrigger,
                 embHandler,
                 aimlHandler,

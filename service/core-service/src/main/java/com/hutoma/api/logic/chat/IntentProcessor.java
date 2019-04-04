@@ -23,7 +23,7 @@ import java.util.*;
 public class IntentProcessor {
 
     private static final String LOGFROM = "chatintenthandler";
-    private static final String SYSANY = "sys.any";
+    public static final String SYSANY = "sys.any";
     private final IEntityRecognizer entityRecognizer;
     private final IMemoryIntentHandler intentHandler;
     private final WebHooks webHooks;
@@ -382,8 +382,15 @@ public class IntentProcessor {
 
         // Get entities from NER
         List<Pair<String, String>> entities = null;
-        if (!currentIntent.getVariables().isEmpty()
-                && !chatResult.getChatState().isInIntentLoop()) { // we cannot infer variables in nested intents
+        boolean retrieveEntitiesFromNer = !currentIntent.getVariables().isEmpty()
+                && !chatResult.getChatState().isInIntentLoop();
+
+        if (this.featureToggler.getStateForAiid(chatInfo.getDevId(), chatInfo.getAiid(), "SYSANY_COMMANDS")
+                == FeatureToggler.FeatureState.T1) {
+            retrieveEntitiesFromNer = retrieveEntitiesFromNer && !currentIntent.isFulfilled();
+        }
+
+        if (retrieveEntitiesFromNer) { // we cannot infer variables in nested intents
             // At this stage we're guaranteed to have variables with different entity types
             // Attempt to retrieve entities from the question
             entities = this.entityRecognizer.retrieveEntities(chatInfo, memoryVariables);
