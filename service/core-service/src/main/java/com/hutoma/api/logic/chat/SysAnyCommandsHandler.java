@@ -30,18 +30,15 @@ import java.util.*;
  */
 public class SysAnyCommandsHandler implements IChatHandler {
 
-    private final IMemoryIntentHandler intentHandler;
     private final IntentProcessor intentProcessor;
     private final IntentLogic intentLogic;
     private boolean answered;
     private final FeatureToggler featureToggler;
 
     @Inject
-    public SysAnyCommandsHandler(final IMemoryIntentHandler intentHandler,
-                                 final IntentProcessor intentProcessor,
+    public SysAnyCommandsHandler(final IntentProcessor intentProcessor,
                                  final IntentLogic intentLogic,
                                  final FeatureToggler featureToggler) {
-        this.intentHandler = intentHandler;
         this.intentProcessor = intentProcessor;
         this.featureToggler = featureToggler;
         this.intentLogic = intentLogic;
@@ -70,39 +67,43 @@ public class SysAnyCommandsHandler implements IChatHandler {
                     // construct a lowercase userSays list to avoid having to do this every iteration
                     List<String> userSays = new ArrayList<>(intent.getUserSays());
                     userSays.replaceAll(String::toLowerCase);
-                    // Check only the ones who have a sys.any variable
-                    for (IntentVariable intentVariable: intent.getVariables()) {
-                        if (intentVariable.getEntityName().equalsIgnoreCase(IntentProcessor.SYSANY)) {
-                            // We now have a SYS.ANY variable, check if the question matches the intent
-                            for (String us: userSays) {
-                                String triggerString = us + ' '; //
-                                if (questionLowercase.startsWith(us)) {
-                                    // Found it! - construct an intent and fire it away
-                                    MemoryVariable memoryVariable = new MemoryVariable(
-                                            intentVariable.getEntityName(),
-                                            null
-                                    );
-                                    memoryVariable.setSystem(true);
-                                    memoryVariable.setLabel(intentVariable.getLabel());
-                                    String value = requestInfo.getQuestion().substring(triggerString.length());
-                                    memoryVariable.setCurrentValue(value.trim());
-                                    MemoryIntent memoryIntent = new MemoryIntent(
-                                            intent.getIntentName(),
-                                            requestInfo.getAiid(),
-                                            requestInfo.getChatId(),
-                                            Collections.singletonList(memoryVariable),
-                                            true);
+                    // We will only proceed if there's only ONE variable and it's SYS.ANY
+                    if (intent.getVariables().size() == 1
+                            && intent.getVariables().get(0).getEntityName().equalsIgnoreCase(IntentProcessor.SYSANY)) {
+                        IntentVariable intentVariable = intent.getVariables().get(0);
+                        // We now have a SYS.ANY variable, check if the question matches the intent
+                        for (String us: userSays) {
+                            String triggerString = us + ' '; //
+                            if (questionLowercase.startsWith(us)) {
+                                // Found it! - construct an intent and fire it away
+                                MemoryVariable memoryVariable = new MemoryVariable(
+                                        intentVariable.getEntityName(),
+                                        null
+                                );
+                                memoryVariable.setSystem(true);
+                                memoryVariable.setLabel(intentVariable.getLabel());
+                                String value = triggerString.length() >= requestInfo.getQuestion().trim().length()
+                                    ? null
+                                    : requestInfo.getQuestion().substring(triggerString.length()).trim();
+                                // The value needs to have something as well
+                                if (value == null || value.length() < 1) {
+                                    break;
+                                }
+                                memoryVariable.setCurrentValue(value.trim());
+                                MemoryIntent memoryIntent = new MemoryIntent(
+                                        intent.getIntentName(),
+                                        requestInfo.getAiid(),
+                                        requestInfo.getChatId(),
+                                        Collections.singletonList(memoryVariable),
+                                        true);
 
-                                    if (intentProcessor.processIntent(
-                                            requestInfo,
-                                            requestInfo.getAiid(),
-                                            memoryIntent,
-                                            currentResult,
-                                            telemetryMap)) {
-
-
-                                        this.answered = true;
-                                    }
+                                if (intentProcessor.processIntent(
+                                        requestInfo,
+                                        requestInfo.getAiid(),
+                                        memoryIntent,
+                                        currentResult,
+                                        telemetryMap)) {
+                                    this.answered = true;
                                 }
                             }
                         }
