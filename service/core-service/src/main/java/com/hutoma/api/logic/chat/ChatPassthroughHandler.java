@@ -33,8 +33,11 @@ public class ChatPassthroughHandler implements IChatHandler {
     private boolean hasPassthrough;
 
     @Inject
-    public ChatPassthroughHandler(final AIChatServices chatServices, final WebHooks webhooks, final Tools tools,
-                                  final ChatLogger chatLogger, final ILogger logger,
+    public ChatPassthroughHandler(final AIChatServices chatServices,
+                                  final WebHooks webhooks,
+                                  final Tools tools,
+                                  final ChatLogger chatLogger,
+                                  final ILogger logger,
                                   final FeatureToggler featureToggler) {
         this.chatServices = chatServices;
         this.webHooks = webhooks;
@@ -77,8 +80,6 @@ public class ChatPassthroughHandler implements IChatHandler {
             this.hasPassthrough = true;
 
 
-
-            ChatResult chatResult = new ChatResult(requestInfo.getQuestion());
             final ChatRequestInfo chatInfo = new ChatRequestInfo(
                     new AiIdentity(requestInfo.getDevId(), requestInfo.getAiid()),
                     requestInfo.getChatId(), requestInfo.getQuestion(),
@@ -87,13 +88,14 @@ public class ChatPassthroughHandler implements IChatHandler {
 
 
             try {
-                WebHookResponse response = this.webHooks.executePassthroughWebhook(passthrough, chatResult, chatInfo);
+                WebHookResponse response = this.webHooks.executePassthroughWebhook(
+                        passthrough, currentResult, chatInfo);
 
                 if (response != null) {
                     // copy the text reply
-                    chatResult.setAnswer(response.getText());
+                    currentResult.setAnswer(response.getText());
                     // and copy the whole response to include any rich content
-                    chatResult.setWebHookResponse(response);
+                    currentResult.setWebHookResponse(response);
                 }
             } catch (WebHooks.WebHookExternalException callException) {
                 // Log net exception details
@@ -117,19 +119,17 @@ public class ChatPassthroughHandler implements IChatHandler {
             }
 
             // set the chat response time to the whole duration since the start of the request until now
-            chatResult.setElapsedTime((this.tools.getTimestamp() - startTime) / 1000.d);
+            currentResult.setElapsedTime((this.tools.getTimestamp() - startTime) / 1000.d);
 
-            telemetryMap.add("RequestDuration", chatResult.getElapsedTime());
-            telemetryMap.add("ResponseSent", chatResult.getAnswer());
-            telemetryMap.add("Score", chatResult.getScore());
+            telemetryMap.add("RequestDuration", currentResult.getElapsedTime());
+            telemetryMap.add("ResponseSent", currentResult.getAnswer());
+            telemetryMap.add("Score", currentResult.getScore());
 
             // log the results
             this.chatLogger.logUserTraceEvent(LOGFROM, "ApiChat", devIdString, telemetryMap);
             this.logger.logUserTraceEvent(LOGFROM, "Chat", devIdString,
                     LogMap.map("AIID", requestInfo.getAiid())
                             .put("SessionId", requestInfo.getChatId()));
-
-            return chatResult;
         }
 
         return currentResult;
