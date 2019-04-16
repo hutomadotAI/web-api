@@ -28,14 +28,14 @@ public class DatabaseFeatures extends Database {
                     .executeQuery();
             while (rs.next()) {
                 String value = rs.getString("devid");
-                UUID devId = StringUtils.isEmpty(value) ? null : UUID.fromString(value);
+                UUID devId = StringUtils.isEmpty(value) ? null : UUID.fromString(value.trim());
                 value = rs.getString("aiid");
-                UUID aiid = StringUtils.isEmpty(value) ? null : UUID.fromString(value);
+                UUID aiid = StringUtils.isEmpty(value) ? null : UUID.fromString(value.trim());
                 DatabaseFeature feature = new DatabaseFeature(
                         devId,
                         aiid,
-                        rs.getString("feature"),
-                        rs.getString("state")
+                        rs.getString("feature") == null ? null : rs.getString("feature").trim(),
+                        rs.getString("state") == null ? null : rs.getString("state").trim()
                 );
                 features.add(feature);
             }
