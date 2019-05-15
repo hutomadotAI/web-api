@@ -1,7 +1,9 @@
 substitutions:
   _TWO_PART_VERSION: "0.1" 
   _GITHUB_USERNAME: "hutomadotAI" 
-  _CONTAINER_SUBFOLDER: "db" 
+  _DB_CONTAINER_SUBFOLDER: "db" 
+  _API_CONTAINER_SUBFOLDER: "service/core-service" 
+  _CTRL_CONTAINER_SUBFOLDER: "service/controller-service" 
 
 # This container takes a while to build 
 timeout: 1600s
@@ -36,27 +38,6 @@ steps:
   - name: 'ssh'
     path: /root/.ssh
 
-#################################
-# Build DB
-#################################
-
-# Build the dockerfile with the latest cloned code.  
-- name: 'gcr.io/cloud-builders/docker'
-  args:
-  - 'build'
-  - '--tag=gcr.io/$PROJECT_ID/${REPO_NAME}_db:latest'
-  - '--file=./${_CONTAINER_SUBFOLDER}/Dockerfile'
-  - './${_CONTAINER_SUBFOLDER}'
-
-  # TODO: This has an issue that it might have had another commit since build trigger.  
-  #- './$REPO_NAME/hellonode'
-
-# Retag latest with git sha 
-- name: 'gcr.io/cloud-builders/docker'
-  args: ['tag',
-    'gcr.io/$PROJECT_ID/${REPO_NAME}_db:latest',
-    'gcr.io/$PROJECT_ID/${REPO_NAME}_db:$COMMIT_SHA']
-
 # Create semver tag 
 # TODO: Need to filter height from the commitid as another commit might have sneaked in after trigger fired.
 - name: gcr.io/cloud-builders/git
@@ -69,6 +50,27 @@ steps:
     ls -la
     echo ${_TWO_PART_VERSION}.$(git rev-list --count ${BRANCH_NAME}) > IMAGE_TAG
   
+#################################
+# Build DB
+#################################
+
+# Build the dockerfile with the latest cloned code.  
+- name: 'gcr.io/cloud-builders/docker'
+  args:
+  - 'build'
+  - '--tag=gcr.io/$PROJECT_ID/${REPO_NAME}_db:latest'
+  - '--file=./${_DB_CONTAINER_SUBFOLDER}/Dockerfile'
+  - './${_DB_CONTAINER_SUBFOLDER}'
+
+  # TODO: This has an issue that it might have had another commit since build trigger.  
+  #- './$REPO_NAME/hellonode'
+
+# Retag latest with git sha 
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['tag',
+    'gcr.io/$PROJECT_ID/${REPO_NAME}_db:latest',
+    'gcr.io/$PROJECT_ID/${REPO_NAME}_db:$COMMIT_SHA']
+
 # Push semver image - should all be cached
 - name: gcr.io/cloud-builders/docker
   entrypoint: /bin/bash
@@ -78,10 +80,78 @@ steps:
     cd $REPO_NAME
     docker tag gcr.io/$PROJECT_ID/${REPO_NAME}_db:latest gcr.io/$PROJECT_ID/${REPO_NAME}_db:$(cat IMAGE_TAG)
     docker push gcr.io/$PROJECT_ID/${REPO_NAME}_db:$(cat IMAGE_TAG)
-  
+
+#################################
+# Build core api
+#################################
+
+# Build the dockerfile with the latest cloned code.  
+- name: 'gcr.io/cloud-builders/docker'
+  args:
+  - 'build'
+  - '--tag=gcr.io/$PROJECT_ID/${REPO_NAME}_api:latest'
+  - '--file=./${_API_CONTAINER_SUBFOLDER}/Dockerfile'
+  - './${_API_CONTAINER_SUBFOLDER}'
+
+  # TODO: This has an issue that it might have had another commit since build trigger.  
+  #- './$REPO_NAME/hellonode'
+
+# Retag latest with git sha 
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['tag',
+    'gcr.io/$PROJECT_ID/${REPO_NAME}_api:latest',
+    'gcr.io/$PROJECT_ID/${REPO_NAME}_api:$COMMIT_SHA']
+
+# Push semver image - should all be cached
+- name: gcr.io/cloud-builders/docker
+  entrypoint: /bin/bash
+  args:
+  - '-c'
+  - |
+    cd $REPO_NAME
+    docker tag gcr.io/$PROJECT_ID/${REPO_NAME}_api:latest gcr.io/$PROJECT_ID/${REPO_NAME}_api:$(cat IMAGE_TAG)
+    docker push gcr.io/$PROJECT_ID/${REPO_NAME}_api:$(cat IMAGE_TAG)
+
+#################################
+# Build core api ctrl
+#################################
+
+# Build the dockerfile with the latest cloned code.  
+- name: 'gcr.io/cloud-builders/docker'
+  args:
+  - 'build'
+  - '--tag=gcr.io/$PROJECT_ID/${REPO_NAME}_ctrl:latest'
+  - '--file=./${_CTRL_CONTAINER_SUBFOLDER}/Dockerfile'
+  - './${_CTRL_CONTAINER_SUBFOLDER}'
+
+  # TODO: This has an issue that it might have had another commit since build trigger.  
+  #- './$REPO_NAME/hellonode'
+
+# Retag latest with git sha 
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['tag',
+    'gcr.io/$PROJECT_ID/${REPO_NAME}_ctrl:latest',
+    'gcr.io/$PROJECT_ID/${REPO_NAME}_ctrl:$COMMIT_SHA']
+
+# Push semver image - should all be cached
+- name: gcr.io/cloud-builders/docker
+  entrypoint: /bin/bash
+  args:
+  - '-c'
+  - |
+    cd $REPO_NAME
+    docker tag gcr.io/$PROJECT_ID/${REPO_NAME}_ctrl:latest gcr.io/$PROJECT_ID/${REPO_NAME}_ctrl:$(cat IMAGE_TAG)
+    docker push gcr.io/$PROJECT_ID/${REPO_NAME}_ctrl:$(cat IMAGE_TAG)
+
+
 # These are images that pushed as well
 images: ['gcr.io/$PROJECT_ID/${REPO_NAME}_db:latest',
-        'gcr.io/$PROJECT_ID/${REPO_NAME}_db:$COMMIT_SHA']
+        'gcr.io/$PROJECT_ID/${REPO_NAME}_db:$COMMIT_SHA',
+        'gcr.io/$PROJECT_ID/${REPO_NAME}_api:latest',
+        'gcr.io/$PROJECT_ID/${REPO_NAME}_api:$COMMIT_SHA',
+        'gcr.io/$PROJECT_ID/${REPO_NAME}_ctrl:latest',
+        'gcr.io/$PROJECT_ID/${REPO_NAME}_ctrl:$COMMIT_SHA'        
+        ]
 
 
 
