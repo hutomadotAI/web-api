@@ -44,7 +44,7 @@ steps:
 - name: 'gcr.io/cloud-builders/docker'
   args:
   - 'build'
-  - '--tag=gcr.io/$PROJECT_ID/$REPO_NAME_db:latest'
+  - '--tag=gcr.io/$PROJECT_ID/${REPO_NAME}_db:latest'
   - '--file=./${_CONTAINER_SUBFOLDER}/Dockerfile'
   - './${_CONTAINER_SUBFOLDER}'
 
@@ -54,8 +54,8 @@ steps:
 # Retag latest with git sha 
 - name: 'gcr.io/cloud-builders/docker'
   args: ['tag',
-    'gcr.io/$PROJECT_ID/$REPO_NAME_db:latest',
-    'gcr.io/$PROJECT_ID/$REPO_NAME_db:$COMMIT_SHA']
+    'gcr.io/$PROJECT_ID/${REPO_NAME}_db:latest',
+    'gcr.io/$PROJECT_ID/${REPO_NAME}_db:$COMMIT_SHA']
 
 # Create semver tag 
 # TODO: Need to filter height from the commitid as another commit might have sneaked in after trigger fired.
@@ -76,12 +76,12 @@ steps:
   - '-c'
   - |
     cd $REPO_NAME
-    docker tag gcr.io/$PROJECT_ID/$REPO_NAME_db:latest gcr.io/$PROJECT_ID/$REPO_NAME_db:$(cat IMAGE_TAG)
-    docker push gcr.io/$PROJECT_ID/$REPO_NAME_db:$(cat IMAGE_TAG)
+    docker tag gcr.io/$PROJECT_ID/${REPO_NAME}_db:latest gcr.io/$PROJECT_ID/${REPO_NAME}_db:$(cat IMAGE_TAG)
+    docker push gcr.io/$PROJECT_ID/${REPO_NAME}_db:$(cat IMAGE_TAG)
   
 # These are images that pushed as well
-images: ['gcr.io/$PROJECT_ID/$REPO_NAME_db:latest',
-        'gcr.io/$PROJECT_ID/$REPO_NAME_db:$COMMIT_SHA']
+images: ['gcr.io/$PROJECT_ID/${REPO_NAME}_db:latest',
+        'gcr.io/$PROJECT_ID/${REPO_NAME}_db:$COMMIT_SHA']
 
 
 
