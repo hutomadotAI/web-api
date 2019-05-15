@@ -1,0 +1,87 @@
+substitutions:
+  _TWO_PART_VERSION: "0.1" 
+  _GITHUB_USERNAME: "hutomadotAI" 
+  _CONTAINER_SUBFOLDER: "db" 
+
+# This container takes a while to build 
+timeout: 1600s
+
+steps:
+# Show some debug info - current state of folder.
+- name: 'gcr.io/cloud-builders/git'
+  entrypoint: '/bin/bash'
+  args:
+  - '-c'
+  - |
+    pwd
+    ls -la
+    echo ${_GITHUB_USERNAME}
+    echo ${_TWO_PART_VERSION}
+
+# Decrypt the ssh key.
+- name: 'gcr.io/opensource-239410/cloudbuild_sshkeys_image:latest'
+  entrypoint: '/workbench/decrypt.sh'
+  args: ['/workbench']
+  dir: '/workbench'
+  volumes:
+  - name: 'ssh'
+    path: /root/.ssh
+
+# Use git clone to get private repo.
+- name: 'gcr.io/cloud-builders/git'
+  args:
+  - clone
+  - git@github.com:${_GITHUB_USERNAME}/$REPO_NAME
+  volumes:
+  - name: 'ssh'
+    path: /root/.ssh
+
+#################################
+# Build DB
+#################################
+
+# Build the dockerfile with the latest cloned code.  
+- name: 'gcr.io/cloud-builders/docker'
+  args:
+  - 'build'
+  - '--tag=gcr.io/$PROJECT_ID/$REPO_NAME_db:latest'
+  - '--file=./${_CONTAINER_SUBFOLDER}/Dockerfile'
+  - './${_CONTAINER_SUBFOLDER}'
+
+  # TODO: This has an issue that it might have had another commit since build trigger.  
+  #- './$REPO_NAME/hellonode'
+
+# Retag latest with git sha 
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['tag',
+    'gcr.io/$PROJECT_ID/$REPO_NAME_db:latest',
+    'gcr.io/$PROJECT_ID/$REPO_NAME_db:$COMMIT_SHA']
+
+# Create semver tag 
+# TODO: Need to filter height from the commitid as another commit might have sneaked in after trigger fired.
+- name: gcr.io/cloud-builders/git
+  entrypoint: /bin/bash
+  args:
+  - '-c'
+  - |
+    cd $REPO_NAME
+    pwd
+    ls -la
+    echo ${_TWO_PART_VERSION}.$(git rev-list --count ${BRANCH_NAME}) > IMAGE_TAG
+  
+# Push semver image - should all be cached
+- name: gcr.io/cloud-builders/docker
+  entrypoint: /bin/bash
+  args:
+  - '-c'
+  - |
+    cd $REPO_NAME
+    docker tag gcr.io/$PROJECT_ID/$REPO_NAME_db:latest gcr.io/$PROJECT_ID/$REPO_NAME_db:$(cat IMAGE_TAG)
+    docker push gcr.io/$PROJECT_ID/$REPO_NAME_db:$(cat IMAGE_TAG)
+  
+# These are images that pushed as well
+images: ['gcr.io/$PROJECT_ID/$REPO_NAME_db:latest',
+        'gcr.io/$PROJECT_ID/$REPO_NAME_db:$COMMIT_SHA']
+
+
+
