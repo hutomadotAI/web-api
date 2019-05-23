@@ -5,47 +5,48 @@ volumes:
   api-svc_logs_store:
   boticon_store:
   log_fluent_store:
-  emb_store:
 
 services:
 
-  api-db:
+  hu_api_db:
     image: hu_api_db
     volumes:
     - api_store:/var/lib/mysql
     ports:
     - "13306:3306"
 
-  log-fluent:
+  fluentd:
     image: fluent/fluentd:v1.1.1-onbuild
     volumes:
     - log_fluent_store:/logs
     - "./fluentd/fluent.conf:/fluentd/etc/fluent.conf"
 
-  api-ctrl:
+  hu_api-ctrl:
     image: hu_api-controller
     depends_on:
-    - api-db
+    - hu_api_db
+    ports:
+    - "8081:8080"
     environment:
-    - API_CONNECTION_STRING=jdbc:mysql://api-db:3306/hutoma?user=hutoma_caller&password=%3EYR%22khuN*.gF)V4%23&zeroDateTimeBehavior=convertToNull
-    - API_LOGGING_FLUENT_HOST=log-fluent
+    - API_CONNECTION_STRING=jdbc:mysql://hu_api_db:3306/hutoma?user=hutoma_caller&password=%3EYR%22khuN*.gF)V4%23&zeroDateTimeBehavior=convertToNull
+    - API_LOGGING_FLUENT_HOST=fluentd
     - API_LOGGING_FLUENT_PORT=24224
 
-  api-svc:
+  hu_api-core:
     image: hu_api-core
     depends_on:
-    - api-db
+    - hu_api_db
     volumes:
     - api-svc_logs_store:/usr/local/tomcat/logs
     - boticon_store:/boticon
+    ports:
+    - "8080:8080"
     environment:
     - API_ENCODING_KEY="L0562EMBfnLadKy57nxo9btyi3BEKm9m+DoNvGcfZa+DjHsXwTl+BwCE4NeKEAagfkhYBFvhvJoAgtugSsQOfw=="
-    - API_CONNECTION_STRING=jdbc:mysql://api-db:3306/hutoma?user=hutoma_caller&password=%3EYR%22khuN*.gF)V4%23&zeroDateTimeBehavior=convertToNull
-    - API_LOGGING_FLUENT_HOST=log-fluent
+    - API_CONNECTION_STRING=jdbc:mysql://hu_api_db:3306/hutoma?user=hutoma_caller&password=%3EYR%22khuN*.gF)V4%23&zeroDateTimeBehavior=convertToNull
+    - API_LOGGING_FLUENT_HOST=fluentd
     - API_LOGGING_FLUENT_PORT=24224
-    - API_ENTITY_RECOGNIZER_URL=http://api-entity:9095/ner
-    - API_FIND_ENTITY_URL=http://api-entity:9095/findentities
     - API_RATELIMIT_CHAT_BURST=20.0
     - API_RATELIMIT_CHAT_FREQUENCY=0.1
-    - API_CONTROLLER_URL=http://api-ctrl:8080/v1
+    - API_CONTROLLER_URL=http://hu_api-ctrl:8080/v1
  
