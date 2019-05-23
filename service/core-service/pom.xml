@@ -15,7 +15,7 @@
     <name>core-service</name>
 
     <properties>
-        <project.component.fasterxml-jackson.version>2.9.8</project.component.fasterxml-jackson.version>
+        <project.component.fasterxml-jackson.version>2.9.9</project.component.fasterxml-jackson.version>
     </properties>
 
 
@@ -55,6 +55,8 @@
                     <assemblyAnalyzerEnabled>false</assemblyAnalyzerEnabled>
                     <!-- Skip artifacts not bundled in distribution (provided scope) -->
                     <skipProvidedScope>true</skipProvidedScope>
+                    <skipTestScope>true</skipTestScope>
+                    <skipSystemScope>true</skipSystemScope>
                     <cveValidForHours>${project.component.dependency-check-maven.cve-valid-for-hours}</cveValidForHours>
                     <suppressionFiles>${project.parent.basedir}/src/main/resources/dep-check/dep-check-suppressions.xml</suppressionFiles>
                     <failBuildOnCVSS>4</failBuildOnCVSS>
@@ -484,7 +486,7 @@
         <dependency>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-project-info-reports-plugin</artifactId>
-            <version>2.9</version>
+            <version>3.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.maven.plugins</groupId>
