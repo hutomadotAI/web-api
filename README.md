@@ -10,6 +10,8 @@ The Hu:toma API lets you access and control your bots programmatically. The onli
 
 The API uses Json Web Tokens (JWT) to securely authenticate and authorize each request while maintaining low overhead and the ability to be used across different domains. Each developer is assigned a pair of JWT tokens, which also include in their payload the plan the developer is subscribed to. This means that if you switch plans at some stage, the tokens will change.
 
+The web API is part of the Conversational AI Platform and will be also installed if you follow the instructions posted in our [main repo](https://github.com/hutomadotAI/Hutoma-Conversational-AI-Platform)
+
 # API Documentation
 API documentation can be found at https://help.hutoma.ai/
 
