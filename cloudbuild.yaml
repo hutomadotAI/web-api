@@ -9,20 +9,25 @@ steps:
 
 # Build the API (all dependent services) - ignore CVEs and checks as these should have been run previously
 - name: "gcr.io/cloud-builders/mvn:3.3.9-jdk-8"
-  args: ['package', '-f', 'service/pom.xml', '-Dfindbugs.skip=true', '-Dcheckstyle.skip', '-Djacoco.skip=true', '-Ddependency-check.skip=true']
+  args: ['package',
+         '-f', 'service/pom.xml',
+         '-Dfindbugs.skip=true', '-Dcheckstyle.skip', '-Djacoco.skip=true', '-Ddependency-check.skip=true']
 
 # Build the images
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['build', '-t', 'eu.gcr.io/hutoma-backend/api/db:$BRANCH_NAME-$SHORT_SHA', 'db']
+  args: ['build', '-t', 'eu.gcr.io/hutoma-backend/api/db:$BRANCH_NAME-$SHORT_SHA', '-t', 'eu.gcr.io/hutoma-backend/api/db:latest', 'db']
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['build', '-t', 'eu.gcr.io/hutoma-backend/api/service:$BRANCH_NAME-$SHORT_SHA', 'service/core-service']
+  args: ['build', '-t', 'eu.gcr.io/hutoma-backend/api/service:$BRANCH_NAME-$SHORT_SHA', '-t', 'eu.gcr.io/hutoma-backend/api/service:latest', 'service/core-service']
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['build', '-t', 'eu.gcr.io/hutoma-backend/api/controller:$BRANCH_NAME-$SHORT_SHA', 'service/controller-service']
+  args: ['build', '-t', 'eu.gcr.io/hutoma-backend/api/controller:$BRANCH_NAME-$SHORT_SHA', '-t', 'eu.gcr.io/hutoma-backend/api/controller:latest', 'service/controller-service']
 
 # Push the images to the internal repo
 images: ['eu.gcr.io/hutoma-backend/api/db:$BRANCH_NAME-$SHORT_SHA',
+         'eu.gcr.io/hutoma-backend/api/db:latest',
          'eu.gcr.io/hutoma-backend/api/service:$BRANCH_NAME-$SHORT_SHA',
-         'eu.gcr.io/hutoma-backend/api/controller:$BRANCH_NAME-$SHORT_SHA'
+         'eu.gcr.io/hutoma-backend/api/service:latest',
+         'eu.gcr.io/hutoma-backend/api/controller:$BRANCH_NAME-$SHORT_SHA',
+         'eu.gcr.io/hutoma-backend/api/controller:latest'
         ]
 
 
