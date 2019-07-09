@@ -436,26 +436,14 @@ public class IntentProcessor {
             // At this point we have localEntityCandidateMatches - Map of strings to List<entity names> (in scope only)
             // And localEntityNameLabelMap - map of entityName to entityLabel (in scope only)
 
-            ChatState chatState = chatResult.getChatState();
             // If there are any candidateValues remaining with only one possible match, use that one
             for (Map.Entry<String, List<String>> candidate : localEntityCandidateMatches.entrySet()) {
                 if (candidate.getValue().size() == 1) {
                     String entityName = candidate.getValue().get(0);
-                    //String entityLabel = localEntityNameLabelMap.get(entityName);
                     String entityValue = candidate.getKey();
                     // Update the entity list
-                    //chatState.getEntityValues().put(entityName, entityValue);
-                    entities.add(new Pair<String, String>(entityName, entityValue));
+                    entities.add(new Pair<>(entityName, entityValue));
 
-                    // Dont update chat context here - as we've now appended to the single list of entities
-                    // the context and persistance will be correctly updated automatically
-
-                    // Also need to update the entity labels in chatContext, but that is indexed on entity-label
-                    // If the variable already exists, make sure the lifespan is maintained
-                    //chatContext.setValue(entityLabel, entityValue,
-                    //        chatContext.isSet(entityLabel)
-                    //                ? chatContext.getVariable(entityLabel).getLifespanTurns()
-                    //                : ChatContext.ChatVariableValue.DEFAULT_LIFESPAN_TURNS);
                     logger.logInfo("IntentProcessor",
                             String.format("Added entity value %s from entity value matching", entityValue));
                 }
@@ -529,8 +517,12 @@ public class IntentProcessor {
                                 String.format("Entity %s for intent %s does not specify any prompts",
                                         currentIntent.getName(), variable.getName()));
                     } else {
-                        promptForVariable(variable, chatResult, log);
-                        handledIntent = true;
+                        if (variable.getTimesPrompted() < variable.getTimesToPrompt()) {
+                            promptForVariable(variable, chatResult, log);
+                            handledIntent = true;
+                        } else {
+                            handledIntent = false;
+                        }
 
                         // we had to prompt, set the variables filled flag to false
                         allVariablesFilled = false;
