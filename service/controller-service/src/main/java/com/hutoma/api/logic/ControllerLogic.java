@@ -119,7 +119,7 @@ public class ControllerLogic {
                 .filter(x -> !x.getVerifiedEndpointMap().isEmpty())
                 .map(ControllerBase::getServiceIdentity)
                 .collect(Collectors.toSet());
-        return new ApiServersAvailable(valid);
+        return new ApiServersAvailable(valid).setSuccessStatus();
     }
 
 }
