@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.1.xsd">
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
 
     <suppress>
         <notes><![CDATA[
@@ -23,6 +23,7 @@
         <gav regex="true">^com\.jcraft:jsch\.*$</gav>
         <cve>CVE-2016-5725</cve>
     </suppress>
+
     <suppress>
         <notes><![CDATA[
    File name: jsch.agentproxy.core-0.0.6.jar
@@ -109,6 +110,95 @@
         <sha1>3178f73569fd7a1e5ffc464e680f7a8cc784b85a</sha1>
         <cve>CVE-2018-1000840</cve>
     </suppress>
+
+
+    <!--
+    Suppressions for Findbugs' dependencies
+    -->
+    <suppress>
+        <notes><![CDATA[
+   file name: dom4j-1.6.1.jar
+   ]]></notes>
+        <sha1>5d3ccc056b6f056dbf0dddfdf43894b9065a8f94</sha1>
+        <vulnerabilityName>CVE-2018-1000632</vulnerabilityName>
+    </suppress>
+
+    <suppress>
+        <notes><![CDATA[
+   file name: struts-core-1.3.8.jar
+   ]]></notes>
+        <sha1>66178d4a9279ebb1cd1eb79c10dc204b4199f061</sha1>
+        <vulnerabilityName>CVE-2011-5057</vulnerabilityName>
+        <vulnerabilityName>CVE-2012-0391</vulnerabilityName>
+        <vulnerabilityName>CVE-2012-0392</vulnerabilityName>
+        <vulnerabilityName>CVE-2012-0393</vulnerabilityName>
+        <vulnerabilityName>CVE-2012-0394</vulnerabilityName>
+        <vulnerabilityName>CVE-2012-0838</vulnerabilityName>
+        <vulnerabilityName>CVE-2013-1965</vulnerabilityName>
+        <vulnerabilityName>CVE-2013-1966</vulnerabilityName>
+        <vulnerabilityName>CVE-2013-2115</vulnerabilityName>
+        <vulnerabilityName>CVE-2013-2134</vulnerabilityName>
+        <vulnerabilityName>CVE-2013-2135</vulnerabilityName>
+        <vulnerabilityName>CVE-2014-0094</vulnerabilityName>
+        <vulnerabilityName>CVE-2014-0112</vulnerabilityName>
+        <vulnerabilityName>CVE-2014-0113</vulnerabilityName>
+        <vulnerabilityName>CVE-2014-0114</vulnerabilityName>
+        <vulnerabilityName>CVE-2015-0899</vulnerabilityName>
+        <vulnerabilityName>CVE-2015-5169</vulnerabilityName>
+        <vulnerabilityName>CVE-2016-0785</vulnerabilityName>
+        <vulnerabilityName>CVE-2016-1181</vulnerabilityName>
+        <vulnerabilityName>CVE-2016-1182</vulnerabilityName>
+        <vulnerabilityName>CVE-2016-4003</vulnerabilityName>
+    </suppress>
+
+    <suppress>
+        <notes><![CDATA[
+   file name: struts-tiles-1.3.8.jar
+   ]]></notes>
+        <sha1>6d212f8ea5d908bc9906e669428b7694dff60785</sha1>
+        <vulnerabilityName>CVE-2012-0394</vulnerabilityName>
+        <vulnerabilityName>CVE-2013-2115</vulnerabilityName>
+        <vulnerabilityName>CVE-2014-0114</vulnerabilityName>
+        <vulnerabilityName>CVE-2015-0899</vulnerabilityName>
+        <vulnerabilityName>CVE-2016-0785</vulnerabilityName>
+        <vulnerabilityName>CVE-2016-1181</vulnerabilityName>
+        <vulnerabilityName>CVE-2016-1182</vulnerabilityName>
+    </suppress>
+
+    <suppress>
+        <notes><![CDATA[
+   file name: struts-taglib-1.3.8.jar
+   ]]></notes>
+        <sha1>e87e9817bdf03c2367fb5f6d5ead953db2df4c21</sha1>
+        <vulnerabilityName>CVE-2012-0394</vulnerabilityName>
+        <vulnerabilityName>CVE-2013-2115</vulnerabilityName>
+        <vulnerabilityName>CVE-2014-0114</vulnerabilityName>
+        <vulnerabilityName>CVE-2015-0899</vulnerabilityName>
+        <vulnerabilityName>CVE-2016-0785</vulnerabilityName>
+        <vulnerabilityName>CVE-2016-1181</vulnerabilityName>
+        <vulnerabilityName>CVE-2016-1182</vulnerabilityName>
+    </suppress>
+
+    <suppress>
+        <notes><![CDATA[
+   file name: plexus-archiver-3.4.jar
+   ]]></notes>
+        <sha1>d99cffd480e050d87d93defa605a959a15cbb611</sha1>
+        <vulnerabilityName>CVE-2018-1002200</vulnerabilityName>
+    </suppress>
+
+
+    <!-- Suppressions for maven-site-plugin
+    -->
+    <suppress>
+        <notes><![CDATA[
+   file name: commons-compress-1.11.jar
+   ]]></notes>
+        <sha1>f43ce4c878078cbcfbb061353aa672a4c8e81443</sha1>
+        <cve>CVE-2018-11771</cve>
+        <cve>CVE-2018-1324</cve>
+    </suppress>
+
 
 </suppressions>
 
