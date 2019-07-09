@@ -14,7 +14,6 @@ import javax.inject.Inject;
 public class ControllerGeneric extends ControllerBase {
 
     private final QueueProcessor queueProcessor;
-    private ServiceIdentity serviceIdentity; // Helpful for debugging
 
     @Inject
     ControllerGeneric(final ControllerConfig config,
@@ -42,8 +41,9 @@ public class ControllerGeneric extends ControllerBase {
     }
 
     @Override
-    public void initialize(final ServiceIdentity serviceIdentity) {
-        this.serviceIdentity = serviceIdentity;
+    public void initialize(ServiceIdentity serviceIdentity) {
+        super.initialize(serviceIdentity);
         this.queueProcessor.initialise(this, serviceIdentity);
     }
+
 }

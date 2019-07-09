@@ -86,9 +86,11 @@ public class ControllerAiml extends ControllerBase {
     }
 
     @Override
-    public void initialize(final ServiceIdentity serviceIdentity) {
-        this.queueProcessor.initialise(this,
-                new ServiceIdentity(BackendServerType.AIML, SupportedLanguage.EN, ServiceIdentity.DEFAULT_VERSION));
+    public void initialize(ServiceIdentity serviceIdentity) {
+        ServiceIdentity newServiceIdentity = new ServiceIdentity(
+                BackendServerType.AIML, SupportedLanguage.EN, ServiceIdentity.DEFAULT_VERSION);
+        super.initialize(newServiceIdentity);
+        this.queueProcessor.initialise(this, newServiceIdentity);
     }
 
     @Override

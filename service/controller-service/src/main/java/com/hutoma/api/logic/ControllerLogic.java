@@ -11,6 +11,8 @@ import com.hutoma.api.controllers.ServerTracker;
 
 import javax.inject.Inject;
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class ControllerLogic {
 
@@ -107,4 +109,17 @@ public class ControllerLogic {
         }
         return trackerInfoMap;
     }
+
+    /***
+     * Get a set of service identities for anything we have a server for
+     * @return
+     */
+    public ApiResult getServices() {
+        Set<ServiceIdentity> valid = this.controllerMap.getAllControllers().stream()
+                .filter(x -> !x.getVerifiedEndpointMap().isEmpty())
+                .map(ControllerBase::getServiceIdentity)
+                .collect(Collectors.toSet());
+        return new ApiServersAvailable(valid);
+    }
+
 }

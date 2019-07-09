@@ -1,10 +1,7 @@
 package com.hutoma.api.endpoints;
 
 import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.containers.ApiResult;
-import com.hutoma.api.containers.ApiServerEndpoint;
-import com.hutoma.api.containers.ApiServerEndpointMulti;
-import com.hutoma.api.containers.ApiServerTrackerInfoMap;
+import com.hutoma.api.containers.*;
 import com.hutoma.api.logic.ControllerLogic;
 import com.hutoma.api.validation.ControllerParameter;
 import com.hutoma.api.validation.ControllerParameterFilter;
@@ -136,6 +133,23 @@ public class ControllerEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAllEndpoints(@Context ContainerRequestContext requestContext) {
         ApiResult result = this.controllerLogic.getAllEndpoints();
+        return result.getResponse(serializer).build();
+    }
+
+    @GET
+    @Path("health/services")
+    @ValidateControllerParameters({})
+    @StatusCodes({
+            @ResponseCode(code = HttpURLConnection.HTTP_OK, condition = "Succeeded."),
+            @ResponseCode(code = HttpURLConnection.HTTP_INTERNAL_ERROR, condition = "Internal error")
+    })
+    @ResourceMethodSignature(
+            queryParams = {},
+            output = ServiceIdentity[].class
+    )
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getServiceIdentities(@Context ContainerRequestContext requestContext) {
+        ApiResult result = this.controllerLogic.getServices();
         return result.getResponse(serializer).build();
     }
 }

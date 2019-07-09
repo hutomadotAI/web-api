@@ -2,6 +2,7 @@ package com.hutoma.api.controllers;
 
 import com.hutoma.api.common.ControllerConfig;
 import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.connectors.BackendServerType;
 import com.hutoma.api.connectors.IServerEndpoint;
 import com.hutoma.api.connectors.NoServerAvailableException;
 import com.hutoma.api.connectors.db.DatabaseAiStatusUpdates;
@@ -28,6 +29,7 @@ public abstract class ControllerBase extends ServerMetadata {
     private ServiceLocator serviceLocator;
     private HashSet<UUID> botExclusionList;
     ControllerConfig config;
+    private ServiceIdentity serviceIdentity;
 
     public ControllerBase(final ControllerConfig config,
                           final IThreadSubPool threadSubPool,
@@ -64,7 +66,13 @@ public abstract class ControllerBase extends ServerMetadata {
         return serverSessionID;
     }
 
-    public abstract void initialize(final ServiceIdentity serviceIdentity);
+    public void initialize(final ServiceIdentity serviceIdentity) {
+        this.serviceIdentity = serviceIdentity;
+    }
+
+    public ServiceIdentity getServiceIdentity() {
+        return serviceIdentity;
+    }
 
     public IServerEndpoint getUploadBackendEndpoint(UUID aiid)
             throws NoServerAvailableException {
