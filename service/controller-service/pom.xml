@@ -54,6 +54,7 @@
                     <cveValidForHours>${project.component.dependency-check-maven.cve-valid-for-hours}</cveValidForHours>
                     <suppressionFiles>${project.parent.basedir}/src/main/resources/dep-check/dep-check-suppressions.xml</suppressionFiles>
                     <failBuildOnCVSS>4</failBuildOnCVSS>
+                    <skipSystemScope>true</skipSystemScope>
                 </configuration>
                 <executions>
                     <execution>
