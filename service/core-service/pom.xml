@@ -48,29 +48,6 @@
                 </goals>
             </plugin>
             <plugin>
-                <groupId>org.owasp</groupId>
-                <artifactId>dependency-check-maven</artifactId>
-                <version>${project.component.dependency-check-maven.version}</version>
-                <configuration>
-                    <assemblyAnalyzerEnabled>false</assemblyAnalyzerEnabled>
-                    <!-- Skip artifacts not bundled in distribution (provided scope) -->
-                    <skipProvidedScope>true</skipProvidedScope>
-                    <skipTestScope>true</skipTestScope>
-                    <skipSystemScope>true</skipSystemScope>
-                    <cveValidForHours>${project.component.dependency-check-maven.cve-valid-for-hours}</cveValidForHours>
-                    <suppressionFiles>${project.parent.basedir}/src/main/resources/dep-check/dep-check-suppressions.xml</suppressionFiles>
-                    <failBuildOnCVSS>4</failBuildOnCVSS>
-                </configuration>
-                <executions>
-                    <execution>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
                 <version>${project.component.maven-checkstyle.version}</version>

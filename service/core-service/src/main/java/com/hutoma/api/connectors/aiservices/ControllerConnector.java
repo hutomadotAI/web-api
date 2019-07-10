@@ -7,10 +7,7 @@ import com.hutoma.api.common.SupportedLanguage;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.*;
 import com.hutoma.api.connectors.chat.ChatBackendConnector;
-import com.hutoma.api.containers.ApiServerEndpoint;
-import com.hutoma.api.containers.ApiServerEndpointMulti;
-import com.hutoma.api.containers.ApiServerTrackerInfoMap;
-import com.hutoma.api.containers.ServiceIdentity;
+import com.hutoma.api.containers.*;
 import com.hutoma.api.containers.sub.AiIdentity;
 import com.hutoma.api.containers.sub.ServerEndpointRequestMulti;
 import com.hutoma.api.logging.ILogger;
@@ -192,6 +189,30 @@ public abstract class ControllerConnector {
         }
 
         return new HashMap<>();
+    }
+
+    /***
+     * Call controller instance to get a list of available services
+     * @param serializer
+     * @return
+     */
+    public ApiServersAvailable getServiceIdentities(final JsonSerializer serializer) {
+
+        try (Response response = getRequest("/health/services", Collections.emptyMap()).get()) {
+            if (response.getStatus() == HttpURLConnection.HTTP_OK) {
+                response.bufferEntity();
+                ApiServersAvailable result = (ApiServersAvailable) serializer.deserialize(
+                        (InputStream) response.getEntity(), ApiServersAvailable.class);
+                return result;
+            } else {
+                this.logger.logDebug(LOGFROM,
+                        String.format("ctrl health/services failed with HTTP %d", response.getStatus()));
+            }
+        } catch (Exception ex) {
+            this.logger.logDebug(LOGFROM,
+                    String.format("ctrl health/services failed with %s", ex.toString()));
+        }
+        return new ApiServersAvailable(Collections.emptyList());
     }
 
     Map<String, ServerTrackerInfo> getVerifiedEndpointMap(final SupportedLanguage supportedLanguage,
