@@ -56,7 +56,7 @@ public class ServerMonitor extends TimerTask {
         }
     }
 
-    void monitorServer() {
+    protected void monitorServer() {
 
         ApiServersAvailable serversAvailable = controllerConnector.getServiceIdentities(this.jsonSerializer);
 
@@ -92,18 +92,18 @@ public class ServerMonitor extends TimerTask {
         this.lastKnownStatus = currentStatus;
     }
 
-    private void languageStatusUp(LanguageStatus languageStatus) {
+    protected void languageStatusUp(LanguageStatus languageStatus) {
         this.logger.logInfo(LOGFROM, String.format("Ready to serve chat in language:%s%s",
                     languageStatus.getLanguage(), languageStatus.hasAiml()? " (+AIML)": ""),
                 LogMap.map("lang", languageStatus).put("status", languageStatus.getSignature()));
     }
 
-    private void languageStatusDown(SupportedLanguage language) {
+    protected void languageStatusDown(SupportedLanguage language) {
         this.logger.logInfo(LOGFROM, String.format("Chat server offline for language:%s", language),
                 LogMap.map("lang", language));
     }
 
-    private void languageStatusChanged(LanguageStatus languageStatus) {
+    protected void languageStatusChanged(LanguageStatus languageStatus) {
         this.logger.logInfo(LOGFROM, String.format("Status changed serving chat in language:%s%s",
                 languageStatus.getLanguage(), languageStatus.hasAiml()? " (+AIML)": ""),
                 LogMap.map("lang", languageStatus).put("status", languageStatus.getSignature()));
