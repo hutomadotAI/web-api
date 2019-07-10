@@ -6,15 +6,14 @@ import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.SupportedLanguage;
 import com.hutoma.api.connectors.BackendServerType;
 import com.hutoma.api.connectors.aiservices.ControllerConnector;
+import com.hutoma.api.connectors.aiservices.ServiceStatusConnector;
 import com.hutoma.api.containers.ApiServersAvailable;
 import com.hutoma.api.containers.ServiceIdentity;
 import com.hutoma.api.logging.ILogger;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 
-import java.security.Provider;
 import java.util.*;
 
 import static org.mockito.Mockito.*;
@@ -23,7 +22,7 @@ public class TestServerMonitor {
 
     ILogger fakeLogger;
     Config fakeConfig;
-    ControllerConnector fakeControllerConnector;
+    ServiceStatusConnector fakeControllerConnector;
 
     ServerMonitorWrapper serverMonitor;
 
@@ -33,9 +32,9 @@ public class TestServerMonitor {
         public LanguageStatus changed = null;
         public SupportedLanguage down = null;
 
-        public ServerMonitorWrapper(Timer timer, ILogger logger, Config config,
-                                    ControllerConnector controllerConnector, JsonSerializer jsonSerializer) {
-            super(timer, logger, config, controllerConnector, jsonSerializer);
+        public ServerMonitorWrapper(ILogger logger, Config config,
+                                    ServiceStatusConnector controllerConnector, JsonSerializer jsonSerializer) {
+            super(logger, config, controllerConnector, jsonSerializer);
         }
 
         public void clear() {
@@ -69,9 +68,9 @@ public class TestServerMonitor {
     public void setup() {
         this.fakeLogger = mock(ILogger.class);
         this.fakeConfig = mock(Config.class);
-        this.fakeControllerConnector = mock(ControllerConnector.class);
+        this.fakeControllerConnector = mock(ServiceStatusConnector.class);
         this.respondWithNothing();
-        this.serverMonitor = new ServerMonitorWrapper(null, fakeLogger, fakeConfig,
+        this.serverMonitor = new ServerMonitorWrapper(fakeLogger, fakeConfig,
                 fakeControllerConnector, null);
     }
 

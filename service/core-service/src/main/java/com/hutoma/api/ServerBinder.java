@@ -52,6 +52,7 @@ public class ServerBinder extends AbstractBinder {
         bind(ThreadSubPool.class).to(IThreadSubPool.class);
         bind(TrackedThreadSubPool.class).to(ITrackedThreadSubPool.class);
         bind(QueryFilter.class).to(QueryFilter.class);
+        bind(ServerMonitor.class).to(ServerMonitor.class);
 
         // logging
         bind(CentralLogger.class).to(ILogger.class).in(Singleton.class);
@@ -128,6 +129,7 @@ public class ServerBinder extends AbstractBinder {
         bind(AIChatServices.class).to(AIChatServices.class);
         bind(ChatAimlConnector.class).to(ChatAimlConnector.class);
         bind(ChatEmbConnector.class).to(ChatEmbConnector.class);
+        bind(ServiceStatusConnector.class).to(ServiceStatusConnector.class);
         bind(EntityRecognizerService.class).to(EntityRecognizerService.class);
         bind(AimlServicesConnector.class).to(AimlServicesConnector.class);
         bind(EmbServicesConnector.class).to(EmbServicesConnector.class);

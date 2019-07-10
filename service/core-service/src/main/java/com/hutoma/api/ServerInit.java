@@ -24,6 +24,7 @@ public class ServerInit implements ApplicationEventListener {
     private ServiceLocator serviceLocator;
 
     private ILogger logger;
+    private ServerMonitor serverMonitor;
 
     /**
      * Application event handler.
@@ -97,6 +98,11 @@ public class ServerInit implements ApplicationEventListener {
             this.logger.initialize(config);
             DatabaseConnectionPool connectionPool = this.serviceLocator.getService(DatabaseConnectionPool.class);
             connectionPool.borrowConnection().close();
+
+            // start the server monitor to check status every few seconds
+            this.serverMonitor = this.serviceLocator.getService(ServerMonitor.class);
+            this.serverMonitor.initialise();
+
             this.logger.logInfo(LOGFROM, "initialisation finished");
         } catch (Exception e) {
             this.logger.logError(LOGFROM, "initialisation error: " + e.toString());

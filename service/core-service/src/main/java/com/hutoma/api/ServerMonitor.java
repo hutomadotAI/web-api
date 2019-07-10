@@ -4,7 +4,7 @@ import com.hutoma.api.common.Config;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.SupportedLanguage;
 import com.hutoma.api.connectors.BackendServerType;
-import com.hutoma.api.connectors.aiservices.ControllerConnector;
+import com.hutoma.api.connectors.aiservices.ServiceStatusConnector;
 import com.hutoma.api.containers.ApiServersAvailable;
 import com.hutoma.api.containers.ServiceIdentity;
 import com.hutoma.api.logging.ILogger;
@@ -17,19 +17,18 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class ServerMonitor extends TimerTask {
 
     private final AtomicBoolean runMonitor;
-    private final Timer timer;
+    private Timer timer;
     private final ILogger logger;
     private final Config config;
-    private final ControllerConnector controllerConnector;
+    private final ServiceStatusConnector controllerConnector;
     private final JsonSerializer jsonSerializer;
     private HashMap<SupportedLanguage, LanguageStatus> lastKnownStatus;
 
     private static final String LOGFROM = "servermonitor";
 
     @Inject
-    public ServerMonitor(Timer timer, ILogger logger, Config config,
-                         ControllerConnector controllerConnector, JsonSerializer jsonSerializer) {
-        this.timer = timer;
+    public ServerMonitor(ILogger logger, Config config,
+                         ServiceStatusConnector controllerConnector, JsonSerializer jsonSerializer) {
         this.logger = logger;
         this.config = config;
         this.controllerConnector = controllerConnector;
@@ -39,6 +38,7 @@ public class ServerMonitor extends TimerTask {
     }
 
     public void initialise() {
+        this.timer = new Timer();
         this.timer.schedule(this, 0, config.getControllerHealthCheckEveryMs());
     }
 
