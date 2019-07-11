@@ -7,10 +7,7 @@ import com.hutoma.api.common.SupportedLanguage;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.*;
 import com.hutoma.api.connectors.chat.ChatBackendConnector;
-import com.hutoma.api.containers.ApiServerEndpoint;
-import com.hutoma.api.containers.ApiServerEndpointMulti;
-import com.hutoma.api.containers.ApiServerTrackerInfoMap;
-import com.hutoma.api.containers.ServiceIdentity;
+import com.hutoma.api.containers.*;
 import com.hutoma.api.containers.sub.AiIdentity;
 import com.hutoma.api.containers.sub.ServerEndpointRequestMulti;
 import com.hutoma.api.logging.ILogger;
@@ -35,7 +32,7 @@ import java.util.UUID;
  */
 public abstract class ControllerConnector {
 
-    private static final String LOGFROM = "controllerconnector";
+    static final String LOGFROM = "controllerconnector";
     private static final String PARAM_SERVER_TYPE = "serverType";
     private static final String PARAM_SERVER_LANGUAGE = "serverLanguage";
     private static final String PARAM_SERVER_VERSION = "serverVersion";
@@ -45,7 +42,7 @@ public abstract class ControllerConnector {
 
     private final Config config;
     private final JerseyClient jerseyClient;
-    private final ILogger logger;
+    final ILogger logger;
     private final Tools tools;
 
     @Inject
@@ -200,6 +197,7 @@ public abstract class ControllerConnector {
         return getVerifiedEndpointMap(buildServiceIdentityFromParams(supportedLanguage, version), serializer);
     }
 
+
     /**
      * Gets a map of the verified endpoints for a given backend server type.
      *
@@ -250,7 +248,7 @@ public abstract class ControllerConnector {
         return request;
     }
 
-    private Invocation.Builder getRequest(final String path, final Map<String, String> queryParams) {
+    Invocation.Builder getRequest(final String path, final Map<String, String> queryParams) {
         return this.getRequest(path, queryParams, CONNECTION_TIMEOUT, READ_TIMEOUT);
     }
 

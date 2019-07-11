@@ -10,6 +10,8 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Singleton
 public class ControllerMap {
@@ -59,10 +61,25 @@ public class ControllerMap {
         }
     }
 
+    /***
+     * Get a collection of all controllers that except AIML
+     * @return
+     */
     public Collection<ControllerBase> getAllDynamicControllers() {
         return controllerMap.values();
     }
 
+    /***
+     * Get a full list of controllers
+     * @return
+     */
+    public Collection<ControllerBase> getAllControllers() {
+        Collection<ControllerBase> dynamicControllers = this.getAllDynamicControllers();
+        if (this.controllerAiml == null) {
+            return dynamicControllers;
+        }
+        return Stream.concat(dynamicControllers.stream(), Stream.of(this.controllerAiml)).collect(Collectors.toList());
+    }
 
     /**
      * Gets an existing controller or creates a new one if it doesn't exist.

@@ -1,5 +1,6 @@
 package com.hutoma.api.containers;
 
+import com.google.gson.annotations.SerializedName;
 import com.hutoma.api.common.SupportedLanguage;
 import com.hutoma.api.connectors.BackendServerType;
 
@@ -7,8 +8,13 @@ public class ServiceIdentity {
 
     public static final String DEFAULT_VERSION = "default";
 
+    @SerializedName("server_type")
     private BackendServerType serverType;
+
+    @SerializedName("language")
     private SupportedLanguage language;
+
+    @SerializedName("version")
     private String version;
 
     public ServiceIdentity(final BackendServerType serverType,

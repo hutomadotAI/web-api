@@ -308,4 +308,12 @@ public class Config extends CommonConfig implements ILoggerConfig, IThreadConfig
         List<String> stringList = getCSList("languages_available");
         return stringList == null ? Collections.singletonList("en") : stringList;
     }
+
+    /***
+     * How often to poll the controller to see what services are running
+     * @return
+     */
+    public long getControllerHealthCheckEveryMs() {
+        return 2000L;
+    }
 }

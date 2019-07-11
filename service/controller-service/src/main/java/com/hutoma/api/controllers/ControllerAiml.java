@@ -36,6 +36,7 @@ public class ControllerAiml extends ControllerBase {
                           final QueueProcessor queueProcessor) {
         super(config, threadSubPool, serviceLocator, logger);
         this.queueProcessor = queueProcessor;
+        this.initialize();
     }
 
     /***
@@ -85,10 +86,10 @@ public class ControllerAiml extends ControllerBase {
                 String.format("no AIML server registered to service AIML aiid %s", aiid.toString()));
     }
 
-    @Override
-    public void initialize(final ServiceIdentity serviceIdentity) {
-        this.queueProcessor.initialise(this,
-                new ServiceIdentity(BackendServerType.AIML, SupportedLanguage.EN, ServiceIdentity.DEFAULT_VERSION));
+    public void initialize() {
+        ServiceIdentity newServiceIdentity = new ServiceIdentity(
+                BackendServerType.AIML, SupportedLanguage.EN, ServiceIdentity.DEFAULT_VERSION);
+        super.initialize(newServiceIdentity);
     }
 
     @Override
