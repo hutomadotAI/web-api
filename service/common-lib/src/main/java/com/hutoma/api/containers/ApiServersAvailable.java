@@ -4,6 +4,9 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.Collection;
 
+/***
+ * List of available servers and their capabilities
+ */
 public class ApiServersAvailable extends ApiResult {
 
     @SerializedName("servers")

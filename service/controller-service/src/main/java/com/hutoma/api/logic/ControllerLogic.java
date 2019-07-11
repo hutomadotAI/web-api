@@ -99,6 +99,19 @@ public class ControllerLogic {
         return new ApiServerTrackerInfoMap(trackerInfoMap).setSuccessStatus();
     }
 
+    /***
+     * Get a set of service identities for anything we have a server for
+     * @return
+     */
+    public ApiResult getServices() {
+        // get a set of connected servers that are verified and active
+        Set<ServiceIdentity> valid = this.controllerMap.getAllControllers().stream()
+                .filter(x -> !x.getVerifiedEndpointMap().isEmpty())
+                .map(ControllerBase::getServiceIdentity)
+                .collect(Collectors.toSet());
+        return new ApiServersAvailable(valid).setSuccessStatus();
+    }
+
     private static Map<String, ServerTrackerInfo> getTrackerInfoFromMap(final Map<String, ServerTracker> trackerMap) {
         Map<String, ServerTrackerInfo> trackerInfoMap = new HashMap<>();
         for (Map.Entry<String, ServerTracker> entry : trackerMap.entrySet()) {
@@ -110,16 +123,5 @@ public class ControllerLogic {
         return trackerInfoMap;
     }
 
-    /***
-     * Get a set of service identities for anything we have a server for
-     * @return
-     */
-    public ApiResult getServices() {
-        Set<ServiceIdentity> valid = this.controllerMap.getAllControllers().stream()
-                .filter(x -> !x.getVerifiedEndpointMap().isEmpty())
-                .map(ControllerBase::getServiceIdentity)
-                .collect(Collectors.toSet());
-        return new ApiServersAvailable(valid).setSuccessStatus();
-    }
 
 }

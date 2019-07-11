@@ -32,6 +32,7 @@ public class ServiceStatusConnector extends ControllerConnector {
      * @param serializer
      * @return
      */
+    @SuppressWarnings("RCN_REDUNDANT_NULLCHECK_WOULD_HAVE_BEEN_A_NPE")
     public ApiServersAvailable getServiceIdentities(final JsonSerializer serializer) {
 
         try (Response response = getRequest("/health/services", Collections.emptyMap()).get()) {
