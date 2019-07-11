@@ -95,7 +95,7 @@ public class ServerMonitor extends TimerTask {
     protected void languageStatusUp(LanguageStatus languageStatus) {
         this.logger.logInfo(LOGFROM, String.format("Ready to serve chat in language:%s%s",
                     languageStatus.getLanguage(), languageStatus.hasAiml()? " (+AIML)": ""),
-                LogMap.map("lang", languageStatus).put("status", languageStatus.getSignature()));
+                LogMap.map("lang", languageStatus.getLanguage()).put("status", languageStatus.getSignature()));
     }
 
     protected void languageStatusDown(SupportedLanguage language) {
@@ -106,7 +106,7 @@ public class ServerMonitor extends TimerTask {
     protected void languageStatusChanged(LanguageStatus languageStatus) {
         this.logger.logInfo(LOGFROM, String.format("Status changed serving chat in language:%s%s",
                 languageStatus.getLanguage(), languageStatus.hasAiml()? " (+AIML)": ""),
-                LogMap.map("lang", languageStatus).put("status", languageStatus.getSignature()));
+                LogMap.map("lang", languageStatus.getLanguage()).put("status", languageStatus.getSignature()));
     }
 
     public class LanguageStatus {
