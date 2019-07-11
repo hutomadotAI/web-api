@@ -48,6 +48,29 @@
                 </goals>
             </plugin>
             <plugin>
+                <groupId>org.owasp</groupId>
+                <artifactId>dependency-check-maven</artifactId>
+                <version>${project.component.dependency-check-maven.version}</version>
+                <configuration>
+                    <assemblyAnalyzerEnabled>false</assemblyAnalyzerEnabled>
+                    <!-- Skip artifacts not bundled in distribution (provided scope) -->
+                    <skipProvidedScope>true</skipProvidedScope>
+                    <skipTestScope>true</skipTestScope>
+                    <skipSystemScope>true</skipSystemScope>
+                    <cveValidForHours>${project.component.dependency-check-maven.cve-valid-for-hours}</cveValidForHours>
+                    <suppressionFiles>${project.parent.basedir}/src/main/resources/dep-check/dep-check-suppressions.xml</suppressionFiles>
+                    <failBuildOnCVSS>4</failBuildOnCVSS>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
                 <version>${project.component.maven-checkstyle.version}</version>
@@ -336,7 +359,7 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>${project.component.fasterxml-jackson.version}</version>
+            <version>${project.component.fasterxml-jackson.version}.1</version>
         </dependency>
 
         <dependency>
@@ -517,7 +540,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>findbugs-maven-plugin</artifactId>
-                <version>3.0.1</version>
+                <version>3.0.5</version>
                 <configuration>
                     <!--
                         Enables analysis which takes more memory but finds more bugs.
@@ -566,7 +589,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>findbugs-maven-plugin</artifactId>
-                <version>3.0.4</version>
+                <version>3.0.5</version>
                 <configuration>
                     <xmlOutput>true</xmlOutput>
                     <xmlOutputDirectory>target/site</xmlOutputDirectory>
