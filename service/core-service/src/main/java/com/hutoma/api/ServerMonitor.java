@@ -144,7 +144,7 @@ public class ServerMonitor extends TimerTask {
     }
 
     /***
-     * Internal class that keeps track of status per kanguage
+     * Internal class that keeps track of status per language
      */
     public static class LanguageStatus {
 

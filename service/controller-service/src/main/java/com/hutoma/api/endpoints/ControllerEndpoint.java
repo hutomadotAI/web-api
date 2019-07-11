@@ -145,7 +145,7 @@ public class ControllerEndpoint {
     })
     @ResourceMethodSignature(
             queryParams = {},
-            output = ServiceIdentity[].class
+            output = ApiServersAvailable.class
     )
     @Produces(MediaType.APPLICATION_JSON)
     public Response getServiceIdentities(@Context ContainerRequestContext requestContext) {
