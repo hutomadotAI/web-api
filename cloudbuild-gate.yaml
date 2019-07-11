@@ -1,0 +1,13 @@
+# This container takes a while to build 
+timeout: 1600s
+
+steps:
+
+# Clone the repo
+- name: 'gcr.io/cloud-builders/git'
+  args: ['clone', 'https://github.com/hutomadotAI/web-api.git']
+
+# Build the API (all dependent services) with all included checks
+- name: "gcr.io/cloud-builders/mvn:3.3.9-jdk-8"
+  args: ['package',
+         '-f', 'service/pom.xml']
