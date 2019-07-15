@@ -180,13 +180,8 @@ public class EntityLogic {
             Set<String> referreingAis = new HashSet<>();
             List<ApiIntent> allIntents = this.database.getAllIntents(devid);
             for (ApiIntent intent : allIntents) {
-                if (featureToggler.getStateForAiid(
-                        devid,
-                        aiid,
-                        "per-bot-entities") == FeatureToggler.FeatureState.T1) {
-                    if (!intent.getAiid().equals(aiid)) {
-                        continue;
-                    }
+                if (!intent.getAiid().equals(aiid)) {
+                    continue;
                 }
                 if (intent.getVariables() != null && !intent.getVariables().isEmpty()) {
                     for (IntentVariable variable : intent.getVariables()) {

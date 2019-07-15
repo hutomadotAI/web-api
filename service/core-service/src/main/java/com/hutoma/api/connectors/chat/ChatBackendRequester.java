@@ -148,55 +148,34 @@ public class ChatBackendRequester implements Callable<InvocationResult> {
         long startTime = this.tools.getTimestamp();
         Response response;
 
-        if (featureToggler.getStateForAiid(
-                this.ai.getDevId(),
-                this.ai.getAiid(),
-                "entity-value-replacement") == FeatureToggler.FeatureState.T1) {
-            logger.logUserTraceEvent("ChatBackendRequester",
-                    "entity-value-replacement feature requested",
-                    this.ai.getDevId().toString());
-            // Construct payload
-            EntityPayload body = new EntityPayload();
-            body.conversation = chatParamsThisAi.get("q");
-            body.entities = this.chatState.getCandidateValues();
-            String bodyJson = serializer.serialize(body);
+        // Construct payload
+        EntityPayload body = new EntityPayload();
+        body.conversation = chatParamsThisAi.get("q");
+        body.entities = this.chatState.getCandidateValues();
+        String bodyJson = serializer.serialize(body);
 
-            logger.logUserTraceEvent("ChatBackendRequester",
-                    "sending: " + bodyJson,
-                    this.ai.getDevId().toString());
+        logger.logUserTraceEvent("ChatBackendRequester",
+                "sending: " + bodyJson,
+                this.ai.getDevId().toString());
 
-            target = this.jerseyClient
-                    .target(endpointResponse.getServerUrl())
-                    .path(this.ai.getDevId().toString())
-                    .path(this.ai.getAiid().toString())
-                    .path("chat_v2");
+        target = this.jerseyClient
+                .target(endpointResponse.getServerUrl())
+                .path(this.ai.getDevId().toString())
+                .path(this.ai.getAiid().toString())
+                .path("chat_v2");
 
-            // ChatId is required for AIML so sessions can be distinguished
-            if (chatParamsThisAi.containsKey("chatId")) {
-                String chatId = chatParamsThisAi.get("chatId");
-                if (StringUtils.isNotEmpty(chatId)) {
-                    target = target.queryParam("chatId", chatId);
-                }
+        // ChatId is required for AIML so sessions can be distinguished
+        if (chatParamsThisAi.containsKey("chatId")) {
+            String chatId = chatParamsThisAi.get("chatId");
+            if (StringUtils.isNotEmpty(chatId)) {
+                target = target.queryParam("chatId", chatId);
             }
-            response = target
-                    .request()
-                    .property(CONNECT_TIMEOUT, (int) this.config.getBackendConnectCallTimeoutMs())
-                    .property(READ_TIMEOUT, (int) timeRemaining)
-                    .post(Entity.json(bodyJson));
-        } else {
-            target = this.jerseyClient
-                    .target(endpointResponse.getServerUrl())
-                    .path(this.ai.getDevId().toString())
-                    .path(this.ai.getAiid().toString())
-                    .path("chat");
-
-            target = addTargetParameters(endpointResponse, chatParamsThisAi, target);
-
-            response = target.request()
-                    .property(CONNECT_TIMEOUT, (int) this.config.getBackendConnectCallTimeoutMs())
-                    .property(READ_TIMEOUT, (int) timeRemaining)
-                    .get();
         }
+        response = target
+                .request()
+                .property(CONNECT_TIMEOUT, (int) this.config.getBackendConnectCallTimeoutMs())
+                .property(READ_TIMEOUT, (int) timeRemaining)
+                .post(Entity.json(bodyJson));
 
         // whatever the response, buffer it and close the underlying structure
         if (response != null) {

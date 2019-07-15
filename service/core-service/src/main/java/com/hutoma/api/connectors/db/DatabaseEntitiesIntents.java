@@ -39,9 +39,6 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
 
     public List<Entity> getEntities(final UUID devid, final UUID aiid) throws DatabaseException {
         String aiidString = aiid.toString();
-        if (this.featureToggler.getStateforDev(devid, "per-bot-entities") != FeatureToggler.FeatureState.T1) {
-            aiidString = emptyAiid;
-        }
 
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("getEntities", 2).add(devid).add(aiidString);
@@ -81,9 +78,6 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
 
     public ApiEntity getEntity(final UUID devid, final String entityName, final UUID aiid) throws DatabaseException {
         String aiidString = aiid.toString();
-        if (this.featureToggler.getStateforDev(devid, "per-bot-entities") != FeatureToggler.FeatureState.T1) {
-            aiidString = emptyAiid;
-        }
 
         try (DatabaseTransaction transaction = this.transactionProvider.get()) {
             try {
@@ -147,9 +141,6 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
     public int getEntityValuesCountForDevExcludingEntity(final UUID devId, final String entityName, final UUID aiid)
             throws DatabaseException {
         String aiidString = aiid.toString();
-        if (this.featureToggler.getStateforDev(devId, "per-bot-entities") != FeatureToggler.FeatureState.T1) {
-            aiidString = emptyAiid;
-        }
 
         try (DatabaseCall call = this.callProvider.get()) {
             call.initialise("getEntityValuesCountForDevExcludingEntity", 3)
@@ -247,10 +238,6 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
         }
 
         String aiidString = aiid.toString();
-        if (this.featureToggler.getStateforDev(devid, "per-bot-entities") != FeatureToggler.FeatureState.T1) {
-            aiidString = emptyAiid;
-        }
-
         try {
             // add or update the entity
             transaction.getDatabaseCall().initialise("addUpdateEntity", 5)
@@ -310,10 +297,6 @@ public class DatabaseEntitiesIntents extends DatabaseAI {
     public boolean deleteEntityByName(final UUID devid, final UUID aiid, final String name,
                                       DatabaseTransaction transaction) throws DatabaseException {
         String aiidString = aiid.toString();
-        if (this.featureToggler.getStateforDev(devid, "per-bot-entities") != FeatureToggler.FeatureState.T1) {
-            aiidString = emptyAiid;
-        }
-
         boolean createTrans = transaction == null;
         if (createTrans) {
             transaction = this.transactionProvider.get();
