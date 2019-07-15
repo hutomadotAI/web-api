@@ -191,18 +191,13 @@ public class IntentProcessor {
                         // the allowed number of prompts
                         intentsToClear.add(currentIntent);
 
-                        if (featureToggler.getStateForAiid(
-                                chatInfo.getDevId(),
-                                chatInfo.getAiid(),
-                                "followup-intent-failure") == FeatureToggler.FeatureState.T1) {
-                            logger.logInfo("IntentProcessor", "Following up on failure of intent "
-                                    + intent.getIntentName());
-                            if (!intent.getIntentOutConditionals().isEmpty()) {
-                                // We want to assume it has fulfilled it's purpose if we have additional logic.
-                                notifyIntentFulfilled(
-                                        chatResult, currentIntent, chatInfo.getAiid(), intent, telemetryMap);
-                                handledIntent = true;
-                            }
+                       logger.logInfo("IntentProcessor",
+                               String.format("Following up on failure of intent %s", intent.getIntentName()));
+                        if (!intent.getIntentOutConditionals().isEmpty()) {
+                            // We want to assume it has fulfilled it's purpose if we have additional logic.
+                            notifyIntentFulfilled(
+                                    chatResult, currentIntent, chatInfo.getAiid(), intent, telemetryMap);
+                            handledIntent = true;
                         }
                     } else {
                         promptForVariable(mv, chatResult, intentLog);
