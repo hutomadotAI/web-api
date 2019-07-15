@@ -405,8 +405,6 @@ public class IntentProcessor {
         // This function is called with a list of memory variables - that will either be all entities linked
         // to the current intent, or a singleton if we've previously been prompted for an entity, so filter to that
         HashMap<String, List<String>> localEntityCandidateMatches = new HashMap<>();
-        // Keep a mapping of entity names to entity labels for this intent, for later
-        //HashMap<String, String> localEntityNameLabelMap = new HashMap<>();
 
         // Loop through the supplied variables only (to handle the case of this being a prompted run)
         for (MemoryVariable variable : memoryVariables) {
@@ -423,14 +421,11 @@ public class IntentProcessor {
                         newEntities.add(variable.getName());
                         localEntityCandidateMatches.put(candidate.getKey(), newEntities);
                     }
-                    //localEntityNameLabelMap.put(variable.getName(), variable.getLabel());
                 }
             }
         }
 
         // At this point we have localEntityCandidateMatches - Map of strings to List<entity names> (in scope only)
-        // And localEntityNameLabelMap - map of entityName to entityLabel (in scope only)
-
         // If there are any candidateValues remaining with only one possible match, use that one
         for (Map.Entry<String, List<String>> candidate : localEntityCandidateMatches.entrySet()) {
             if (candidate.getValue().size() == 1) {
