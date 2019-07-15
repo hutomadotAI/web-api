@@ -51,16 +51,7 @@ public class ExternalEntityRecognizer implements IEntityRecognizer {
         final SupportedLanguage language = chatInfo.getAiIdentity().getLanguage();
         List<Pair<String, String>> result = new ArrayList<>();
 
-        // Protect SimpleEntityRecognizer call behind a toggle
-        if (featureToggler.getStateForAiid(chatInfo.getDevId(),
-                chatInfo.getAiid(),
-                "no-simple-er") != FeatureToggler.FeatureState.T1) {
-            // Call the simple regex entity recognizer for custom entities
-            result.addAll(SimpleEntityRecognizer.regexFindEntities(chatLine, customEntities));
-        }
-
         // Call the external entity recognizer for system entities
-
         List<RecognizedEntity> systemEntities = this.service.getEntities(chatLine, language);
         for (RecognizedEntity re : systemEntities) {
             if (!re.getCategory().equalsIgnoreCase(NUMBER_ENTITY_NAME)) {

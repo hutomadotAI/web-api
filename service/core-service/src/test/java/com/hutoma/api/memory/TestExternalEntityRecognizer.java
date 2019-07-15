@@ -53,14 +53,21 @@ public class TestExternalEntityRecognizer {
 
     @Test
     public void testExternal_recognizeOneEntity() {
-        when(this.fakeService.getEntities(any(), any())).thenReturn(Collections.emptyList());
-        TestSimpleEntityRecognizer.recognizeOneEntity(this.recognizer);
+        final String varName = "NAME";
+        final String varValue = "VALUE";
+        when(this.fakeService.getEntities(any(), any())).thenReturn(Collections.singletonList(new RecognizedEntity(varName, varValue)));
+        TestSimpleEntityRecognizer.recognizeOneEntity(this.recognizer, varName, varValue);
     }
 
     @Test
     public void testExternal_recognizeMultipleEntities() {
-        when(this.fakeService.getEntities(any(), any())).thenReturn(Collections.emptyList());
-        TestSimpleEntityRecognizer.recognizeMultipleEntities(this.recognizer);
+        final String[] varNames = {"var1", "var2"};
+        final String[] varValues = {"value1", "value2"};
+        when(this.fakeService.getEntities(any(), any())).thenReturn(Arrays.asList(
+                new RecognizedEntity(varNames[0], varValues[0]),
+                new RecognizedEntity(varNames[1], varValues[1])
+        ));
+        TestSimpleEntityRecognizer.recognizeMultipleEntities(this.recognizer, varNames, varValues);
     }
 
     @Test
@@ -72,17 +79,21 @@ public class TestExternalEntityRecognizer {
             this.add(new MemoryVariable(varNames[1], Arrays.asList(varValues[1], "K")));
             this.add(new MemoryVariable("some other", Arrays.asList("X", "Y")));
         }};
-        List<RecognizedEntity> systemEntities = new ArrayList<RecognizedEntity>() {{
+        List<RecognizedEntity> recognized = new ArrayList<RecognizedEntity>() {{
+            this.add(new RecognizedEntity(varNames[0], varValues[0]));
+            this.add(new RecognizedEntity(varNames[1], varValues[1]));
             this.add(new RecognizedEntity("sys.var1", "system1"));
             this.add(new RecognizedEntity("sys.var2", "system2"));
         }};
 
 
-        when(this.fakeService.getEntities(any(), any())).thenReturn(systemEntities);
+        when(this.fakeService.getEntities(any(), any())).thenReturn(recognized);
         when(this.fakeChatInfo.getQuestion()).thenReturn(
                 String.format("CustomEntities %s and %s and SystemEntities %s and %s",
-                varValues[1], varValues[0],
-                systemEntities.get(0).getValue(), systemEntities.get(0).getValue()));
+                        recognized.get(0).getCategory(),
+                        recognized.get(1).getCategory(),
+                        recognized.get(2).getCategory(),
+                        recognized.get(3).getCategory()));
         when(this.fakeChatInfo.getAiIdentity().getLanguage()).thenReturn(SupportedLanguage.EN);
 
         List<Pair<String, String>> r = this.recognizer.retrieveEntities(
@@ -91,16 +102,9 @@ public class TestExternalEntityRecognizer {
         Assert.assertEquals(4, r.size());
         // Note - the order is currently defined by the order on the MemoryVariable list,
         // and not on the string being parsed
-        int index = 0;
-        for (int i = 0; i < varNames.length; i++) {
-            Assert.assertEquals(varNames[index], r.get(index).getA());
-            Assert.assertEquals(varValues[index], r.get(index).getB());
-            index++;
-        }
-        for (int i = 0; i < systemEntities.size(); i++) {
-            Assert.assertEquals(systemEntities.get(i).getCategory(), r.get(index).getA());
-            Assert.assertEquals(systemEntities.get(i).getValue(), r.get(index).getB());
-            index++;
+        for (int i = 0; i < recognized.size(); i++) {
+            Assert.assertEquals(recognized.get(i).getCategory(), r.get(i).getA());
+            Assert.assertEquals(recognized.get(i).getValue(), r.get(i).getB());
         }
 
     }

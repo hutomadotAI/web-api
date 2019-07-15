@@ -2,10 +2,12 @@ package com.hutoma.api.memory;
 
 import com.hutoma.api.common.SupportedLanguage;
 import com.hutoma.api.containers.sub.ChatRequestInfo;
+import com.hutoma.api.containers.sub.RecognizedEntity;
 import com.hutoma.api.logging.ILogger;
 import com.hutoma.api.common.Pair;
 import com.hutoma.api.containers.sub.MemoryVariable;
 
+import edu.emory.mathcs.backport.java.util.Collections;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -15,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -31,17 +34,17 @@ public class TestSimpleEntityRecognizer {
 
     @Test
     public void testRecognizeOneEntity() {
-        recognizeOneEntity(recognizer);
+        recognizeOneEntity(recognizer, "NAME", "VALUE");
     }
 
     @Test
     public void testRecognizeMultipleEntities() {
-        recognizeMultipleEntities(recognizer);
+        final String[] varNames = {"var1", "var2"};
+        final String[] varValues = {"value1", "value2"};
+        recognizeMultipleEntities(recognizer, varNames, varValues);
     }
 
-    public static void recognizeOneEntity(final IEntityRecognizer recognizer) {
-        final String variableName = "NAME";
-        final String variableValue = "VARIABLE";
+    public static void recognizeOneEntity(final IEntityRecognizer recognizer, final String variableName, final String variableValue) {
         List<MemoryVariable> l = new ArrayList<MemoryVariable>() {{
             this.add(new MemoryVariable(variableName, Arrays.asList(variableValue, "another value")));
         }};
@@ -56,14 +59,12 @@ public class TestSimpleEntityRecognizer {
         Assert.assertEquals(variableValue, r.get(0).getB());
     }
 
-    public static void recognizeMultipleEntities(final IEntityRecognizer recognizer) {
-        final String[] varNames = {"var1", "var2"};
-        final String[] varValues = {"value1", "value2"};
-        List<MemoryVariable> l = new ArrayList<MemoryVariable>() {{
-            this.add(new MemoryVariable(varNames[0], Arrays.asList("A", varValues[0], "B")));
-            this.add(new MemoryVariable(varNames[1], Arrays.asList(varValues[1], "K")));
-            this.add(new MemoryVariable("some other", Arrays.asList("X", "Y")));
-        }};
+    public static void recognizeMultipleEntities(final IEntityRecognizer recognizer, final String[] varNames, final String[] varValues) {
+        List<MemoryVariable> l = new ArrayList<>();
+        for (int i = 0; i < varNames.length; i++) {
+            l.add(new MemoryVariable(varNames[i], Arrays.asList("A", varValues[i], "B")));
+        }
+        l.add(new MemoryVariable("some other", Arrays.asList("X", "Y")));
 
         ChatRequestInfo fakeChatInfo = mock(ChatRequestInfo.class, Mockito.RETURNS_DEEP_STUBS);
         when(fakeChatInfo.getQuestion()).thenReturn(

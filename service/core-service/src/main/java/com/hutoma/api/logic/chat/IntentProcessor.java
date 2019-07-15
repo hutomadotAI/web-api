@@ -398,55 +398,44 @@ public class IntentProcessor {
 
         // we have a potential list of entities from the above call. need also to consider the candidate
         // entity values from chat entity value handler
-        if (featureToggler.getStateForAiid(
-                chatInfo.getDevId(),
-                chatInfo.getAiid(),
-                "entity-value-replacement") == FeatureToggler.FeatureState.T1) {
-            logger.logInfo("IntentProcessor",
-                    "Checking for entity value matching for intent "
-                            + intent.getIntentName());
+        logger.logInfo("IntentProcessor",
+                String.format("Checking for entity value matching for intent %s", intent.getIntentName()));
 
-            // We need to filter the relevant candidates and then count how many we have left
-            // This function is called with a list of memory variables - that will either be all entities linked
-            // to the current intent, or a singleton if we've previously been prompted for an entity, so filter to that
-            HashMap<String, List<String>> localEntityCandidateMatches = new HashMap<>();
-            // Keep a mapping of entity names to entity labels for this intent, for later
-            //HashMap<String, String> localEntityNameLabelMap = new HashMap<>();
+        // We need to filter the relevant candidates and then count how many we have left
+        // This function is called with a list of memory variables - that will either be all entities linked
+        // to the current intent, or a singleton if we've previously been prompted for an entity, so filter to that
+        HashMap<String, List<String>> localEntityCandidateMatches = new HashMap<>();
 
-            // Loop through the supplied variables only (to handle the case of this being a prompted run)
-            for (MemoryVariable variable : memoryVariables) {
-                // Loop through the list of values to entity names from ER
-                for (Map.Entry<String, List<String>> candidate :
-                        chatResult.getChatState().getCandidateValues().entrySet()) {
-                    // If the entity name is in the list of entity names from the candidate matches then...
-                    if (candidate.getValue().contains(variable.getName())) {
-                        // ...we need to consider this value
-                        if (localEntityCandidateMatches.containsKey(candidate.getKey())) {
-                            localEntityCandidateMatches.get(candidate.getKey()).add(variable.getName());
-                        } else {
-                            List<String> newEntities = new ArrayList<String>();
-                            newEntities.add(variable.getName());
-                            localEntityCandidateMatches.put(candidate.getKey(), newEntities);
-                        }
-                        //localEntityNameLabelMap.put(variable.getName(), variable.getLabel());
+        // Loop through the supplied variables only (to handle the case of this being a prompted run)
+        for (MemoryVariable variable : memoryVariables) {
+            // Loop through the list of values to entity names from ER
+            for (Map.Entry<String, List<String>> candidate :
+                    chatResult.getChatState().getCandidateValues().entrySet()) {
+                // If the entity name is in the list of entity names from the candidate matches then...
+                if (candidate.getValue().contains(variable.getName())) {
+                    // ...we need to consider this value
+                    if (localEntityCandidateMatches.containsKey(candidate.getKey())) {
+                        localEntityCandidateMatches.get(candidate.getKey()).add(variable.getName());
+                    } else {
+                        List<String> newEntities = new ArrayList<String>();
+                        newEntities.add(variable.getName());
+                        localEntityCandidateMatches.put(candidate.getKey(), newEntities);
                     }
                 }
             }
+        }
 
-            // At this point we have localEntityCandidateMatches - Map of strings to List<entity names> (in scope only)
-            // And localEntityNameLabelMap - map of entityName to entityLabel (in scope only)
+        // At this point we have localEntityCandidateMatches - Map of strings to List<entity names> (in scope only)
+        // If there are any candidateValues remaining with only one possible match, use that one
+        for (Map.Entry<String, List<String>> candidate : localEntityCandidateMatches.entrySet()) {
+            if (candidate.getValue().size() == 1) {
+                String entityName = candidate.getValue().get(0);
+                String entityValue = candidate.getKey();
+                // Update the entity list
+                entities.add(new Pair<>(entityName, entityValue));
 
-            // If there are any candidateValues remaining with only one possible match, use that one
-            for (Map.Entry<String, List<String>> candidate : localEntityCandidateMatches.entrySet()) {
-                if (candidate.getValue().size() == 1) {
-                    String entityName = candidate.getValue().get(0);
-                    String entityValue = candidate.getKey();
-                    // Update the entity list
-                    entities.add(new Pair<>(entityName, entityValue));
-
-                    logger.logInfo("IntentProcessor",
-                            String.format("Added entity value %s from entity value matching", entityValue));
-                }
+                logger.logInfo("IntentProcessor",
+                        String.format("Added entity value %s from entity value matching", entityValue));
             }
         }
 

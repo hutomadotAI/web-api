@@ -64,122 +64,96 @@ public class ChatEntityValueHandler implements IChatHandler {
                 .put("Language", aiIdentity.getLanguage())
                 .put("Version", aiIdentity.getServerVersion());
 
-        // Call the old entity recognition (this includes system entities)
-        //List<MemoryVariable> mvEntities = new ArrayList<MemoryVariable>() {};
-        //List<Pair<String, String>> entitiesFromNER = getEntitiesFromNER(requestInfo, mvEntities);
+        EntityRecognizerMessage toSend = new EntityRecognizerMessage();
 
-        // Check if this feature applies
-        if (featureToggler.getStateForAiid(
-                aiIdentity.getDevId(),
-                aiIdentity.getAiid(),
-                "entity-value-replacement") == FeatureToggler.FeatureState.T1) {
-            logger.logInfo(LOGFROM, "entity-value-replacement feature requested", logMap);
-            EntityRecognizerMessage toSend = new EntityRecognizerMessage();
-
-            boolean regexEnabled = false;
-            // Are we using regex entities for this call?
-            if (featureToggler.getStateForAiid(
-                    aiIdentity.getDevId(),
-                    aiIdentity.getAiid(),
-                    "regex-entity") == FeatureToggler.FeatureState.T1) {
-                logger.logInfo(LOGFROM, "regex-entity feature requested", logMap);
-                regexEnabled = true;
+        int numberStandardEntities = 0;
+        int numberRegexEntities = 0;
+        try {
+            // Query DB for relevant entities and entity values
+            List<Entity> entities = this.dbEntities.getEntities(requestInfo.getDevId(), aiIdentity.getAiid());
+            for (Entity e : entities) {
+                ApiEntity entity = this.dbEntities
+                        .getEntity(requestInfo.getDevId(), e.getName(), aiIdentity.getAiid());
+                if (entity.getEntityValueType() == EntityValueType.LIST) {
+                    // Handle custom regular entities
+                    toSend.getEntities().put(e.getName(), entity.getEntityValueList());
+                    numberStandardEntities++;
+                } else if (entity.getEntityValueType() == EntityValueType.REGEX) {
+                    // Handle regex entities if we're supposed to for this call
+                        toSend.getRegexEntities().put(e.getName(), entity.getEntityValueList().get(0));
+                        numberRegexEntities++;
+                }
+                // Don't currently handle system entities
             }
 
-            int numberStandardEntities = 0;
-            int numberRegexEntities = 0;
+            toSend.setConversation(requestInfo.getQuestion());
+            logger.logUserTraceEvent(LOGFROM,
+                    "Entities to serialize",
+                    requestInfo.getDevId().toString(),
+                    LogMap.map("entities", serializer.serialize(toSend)));
+
+            // Time findEntities call
+            EntityRecognizerMessage candidateEntityValues = null;
+            String jsonResponse = null;
             try {
-                // Query DB for relevant entities and entity values
-                List<Entity> entities = this.dbEntities.getEntities(requestInfo.getDevId(), aiIdentity.getAiid());
-                for (Entity e : entities) {
-                    ApiEntity entity = this.dbEntities
-                            .getEntity(requestInfo.getDevId(), e.getName(), aiIdentity.getAiid());
-                    if (entity.getEntityValueType() == EntityValueType.LIST) {
-                        // Handle custom regular entities
-                        toSend.getEntities().put(e.getName(), entity.getEntityValueList());
-                        numberStandardEntities++;
-                    } else if (entity.getEntityValueType() == EntityValueType.REGEX) {
-                        // Handle regex entities if we're supposed to for this call
-                        if (regexEnabled) {
-                            toSend.getRegexEntities().put(e.getName(), entity.getEntityValueList().get(0));
-                            numberRegexEntities++;
-                        }
-                    }
-                    // Don't currently handle system entities
+                final long startTimeStamp = this.tools.getTimestamp();
+                jsonResponse = entityRecognizerService.findEntities(serializer.serialize(toSend),
+                     aiIdentity.getLanguage());
+                // Just in case something odd has happened with the ER
+                if (jsonResponse == null) {
+                    throw new ChatLogic.ChatFailedException(ApiError.getInternalServerError(
+                        "Empty response returned from EntityRecognizer findentities"));
                 }
-
-                toSend.setConversation(requestInfo.getQuestion());
+                // We have a response so log perf and data
+                logger.logPerf(LOGFROM,
+                        "findEntities call time",
+                        logMap.put("Duration", this.tools.getTimestamp() - startTimeStamp)
+                            .put("Number of string entities", numberStandardEntities)
+                            .put("Number of regex entities", numberRegexEntities));
                 logger.logUserTraceEvent(LOGFROM,
-                        "Entities to serialize",
+                        "Entity matches from ER",
                         requestInfo.getDevId().toString(),
-                        LogMap.map("entities", serializer.serialize(toSend)));
+                        LogMap.map("entity replacements", jsonResponse));
 
-                // Time findEntities call
-                EntityRecognizerMessage candidateEntityValues = null;
-                String jsonResponse = null;
-                try {
-                    final long startTimeStamp = this.tools.getTimestamp();
-                    jsonResponse = entityRecognizerService.findEntities(serializer.serialize(toSend),
-                         aiIdentity.getLanguage());
-                    // Just in case something odd has happened with the ER
-                    if (jsonResponse == null) {
-                        throw new ChatLogic.ChatFailedException(ApiError.getInternalServerError(
-                            "Empty response returned from EntityRecognizer findentities"));
-                    }
-                    // We have a response so log perf and data
-                    logger.logPerf(LOGFROM,
-                            "findEntities call time",
-                            logMap.put("Duration", this.tools.getTimestamp() - startTimeStamp)
-                                .put("Number of string entities", numberStandardEntities)
-                                .put("Number of regex entities", numberRegexEntities));
-                    logger.logUserTraceEvent(LOGFROM,
-                            "Entity matches from ER",
-                            requestInfo.getDevId().toString(),
-                            LogMap.map("entity replacements", jsonResponse));
-
-                    candidateEntityValues = (EntityRecognizerMessage) serializer.deserialize(jsonResponse,
-                            EntityRecognizerMessage.class);
-                } catch (EntityRecognizerService.EntityRecognizerException ex) {
-                    if (ex.getReason()
-                            == EntityRecognizerService.EntityRecognizerException.EntityRecognizerError.INVALID_REGEX) {
-                        logger.logError(LOGFROM,
-                                "Invalid regex found in stored entity",
-                                logMap);
-                    } else {
-                        logger.logError(LOGFROM,
-                                "Unexpected error from EntityRecognizer",
-                                logMap);
-                    }
-                } catch (Exception ex) {
-                    logger.logUserExceptionEvent(LOGFROM,
-                            "Problem deserializing the response from ER",
-                            requestInfo.getDevId().toString(),
-                            ex,
-                            LogMap.map("Response", jsonResponse));
+                candidateEntityValues = (EntityRecognizerMessage) serializer.deserialize(jsonResponse,
+                        EntityRecognizerMessage.class);
+            } catch (EntityRecognizerService.EntityRecognizerException ex) {
+                if (ex.getReason()
+                        == EntityRecognizerService.EntityRecognizerException.EntityRecognizerError.INVALID_REGEX) {
+                    logger.logError(LOGFROM,
+                            "Invalid regex found in stored entity",
+                            logMap);
+                } else {
+                    logger.logError(LOGFROM,
+                            "Unexpected error from EntityRecognizer",
+                            logMap);
                 }
-
-                if (candidateEntityValues != null) {
-                    for (Map.Entry<String, List<String>> entry : candidateEntityValues.getEntities().entrySet()) {
-                        String entityValue = entry.getKey();
-                        List<String> entityNames = entry.getValue();
-
-                        // Store these in chat state to revisit later
-                        currentResult.getChatState().getCandidateValues().put(entityValue, entityNames);
-                    }
-                }
-
-            } catch (DatabaseException ex) {
-                // Log and continue
-                logger.logUserExceptionEvent("ChatEntityValueHandler",
-                        "Problem loading entities from database",
+            } catch (Exception ex) {
+                logger.logUserExceptionEvent(LOGFROM,
+                        "Problem deserializing the response from ER",
                         requestInfo.getDevId().toString(),
-                        ex);
+                        ex,
+                        LogMap.map("Response", jsonResponse));
             }
-            return currentResult;
-        } else {
-            // If this feature is disabled, do nothing
-            return currentResult;
+
+            if (candidateEntityValues != null) {
+                for (Map.Entry<String, List<String>> entry : candidateEntityValues.getEntities().entrySet()) {
+                    String entityValue = entry.getKey();
+                    List<String> entityNames = entry.getValue();
+
+                    // Store these in chat state to revisit later
+                    currentResult.getChatState().getCandidateValues().put(entityValue, entityNames);
+                }
+            }
+
+        } catch (DatabaseException ex) {
+            // Log and continue
+            logger.logUserExceptionEvent("ChatEntityValueHandler",
+                    "Problem loading entities from database",
+                    requestInfo.getDevId().toString(),
+                    ex);
         }
+        return currentResult;
     }
 
     @Override
