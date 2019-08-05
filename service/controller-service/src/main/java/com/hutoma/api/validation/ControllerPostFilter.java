@@ -111,7 +111,7 @@ public class ControllerPostFilter extends ControllerParameterFilter implements C
                 if (aiStatus.getAiEngineLanguage() == null) {
                     aiStatus.setAiEngineLanguage(SupportedLanguage.EN);
                 }
-                if (StringUtils.isEmpty(aiStatus.getAiEngineVersion())) {
+                if (Tools.isEmpty(aiStatus.getAiEngineVersion())) {
                     aiStatus.setAiEngineVersion(ServiceIdentity.DEFAULT_VERSION);
                 }
                 request.setProperty(ControllerParameter.AiStatusJson.toString(), aiStatus);
@@ -131,7 +131,7 @@ public class ControllerPostFilter extends ControllerParameterFilter implements C
                 if (serverRegistration.getLanguage() == null) {
                     serverRegistration.setLanguage(SupportedLanguage.EN);
                 }
-                if (StringUtils.isEmpty(serverRegistration.getVersion())) {
+                if (Tools.isEmpty(serverRegistration.getVersion())) {
                     serverRegistration.setVersion(ServiceIdentity.DEFAULT_VERSION);
                 }
                 request.setProperty(ControllerParameter.ServerRegistration.toString(), serverRegistration);
@@ -145,7 +145,7 @@ public class ControllerPostFilter extends ControllerParameterFilter implements C
                 if (serverAffinity.getLanguage() == null) {
                     serverAffinity.setLanguage(SupportedLanguage.EN);
                 }
-                if (StringUtils.isEmpty(serverAffinity.getVersion())) {
+                if (Tools.isEmpty(serverAffinity.getVersion())) {
                     serverAffinity.setVersion(ServiceIdentity.DEFAULT_VERSION);
                 }
                 request.setProperty(ControllerParameter.ServerAffinity.toString(), serverAffinity);

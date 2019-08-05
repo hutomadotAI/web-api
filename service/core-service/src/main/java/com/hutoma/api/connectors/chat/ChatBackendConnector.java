@@ -88,7 +88,7 @@ public abstract class ChatBackendConnector {
         for (AiIdentity ai : ais) {
             UUID aiid = ai.getAiid();
             ApiServerEndpointMulti.ServerEndpointResponse endpoint = endpointMap.get(aiid);
-            if ((endpoint == null) || (StringUtils.isEmpty(endpoint.getServerUrl()))) {
+            if (endpoint == null || Tools.isEmpty(endpoint.getServerUrl())) {
                 throw new NoServerAvailableException(String.format("No server available for %s for %s on %s",
                         aiid.toString(), RequestFor.Chat.toString(), this.getServerType().value()));
             }

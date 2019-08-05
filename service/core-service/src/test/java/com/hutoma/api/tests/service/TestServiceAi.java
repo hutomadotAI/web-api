@@ -3,6 +3,7 @@ package com.hutoma.api.tests.service;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Pair;
 import com.hutoma.api.common.TestDataHelper;
+import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.BackendEngineStatus;
 import com.hutoma.api.connectors.BackendServerType;
 import com.hutoma.api.connectors.BackendStatus;
@@ -507,7 +508,7 @@ public class TestServiceAi extends ServiceTestBase {
                         "   }" +
                         "}",
                 description,
-                StringUtils.isEmpty(entities) ? "" : ("," + entities));
+                Tools.isEmpty(entities) ? "" : ("," + entities));
     }
 
     private ApiAi checkMaskedTrainingStatus(

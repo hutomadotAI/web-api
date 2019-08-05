@@ -5,6 +5,7 @@ import com.hutoma.api.access.RateLimit;
 import com.hutoma.api.access.Role;
 import com.hutoma.api.access.Secured;
 import com.hutoma.api.common.JsonSerializer;
+import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.*;
 import com.hutoma.api.containers.sub.AiBot;
 import com.hutoma.api.containers.sub.BotStructure;
@@ -296,7 +297,7 @@ public class AIEndpoint {
                 voice,
                 ParameterFilter.getLocale(requestContext),
                 ParameterFilter.getTimezone(requestContext),
-                StringUtils.isEmpty(defaultResponses)
+                Tools.isEmpty(defaultResponses)
                         ? new ArrayList<>()
                         : this.serializer.deserializeListAutoDetect(defaultResponses),
                 passthroughUrl);

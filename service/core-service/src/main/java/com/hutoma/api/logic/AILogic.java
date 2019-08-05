@@ -136,7 +136,7 @@ public class AILogic {
             throw new IllegalArgumentException("transaction");
         }
 
-        if (StringUtils.isEmpty(handoverMessage) && errorThresholdHandover >= 0) {
+        if (Tools.isEmpty(handoverMessage) && errorThresholdHandover >= 0) {
             return ApiError.getBadRequest("Must specify a handover message when specifying a handover threshold");
         }
 
@@ -971,7 +971,7 @@ public class AILogic {
             LogMap logMap = LogMap.map("AIID", aiid);
             ApiAi ai;
 
-            if (StringUtils.isEmpty(engineVersion)) {
+            if (Tools.isEmpty(engineVersion)) {
                 ai = transaction == null
                         ? this.databaseAi.getAIWithStatus(devid, aiid, this.jsonSerializer)
                         : this.databaseAi.getAIWithStatus(devid, aiid, this.jsonSerializer, transaction);
@@ -1073,7 +1073,7 @@ public class AILogic {
                                 .put("Message", result.getStatus().getInfo()));
                 // The info from an error on CreateAI should already be customer-friendly, so just
                 // pass it back to the user if there is already one.
-                throw new BotImportException(org.apache.commons.lang.StringUtils.isEmpty(result.getStatus().getInfo())
+                throw new BotImportException(Tools.isEmpty(result.getStatus().getInfo())
                         ? IMPORT_GENERIC_ERROR
                         : result.getStatus().getInfo());
             }

@@ -116,7 +116,7 @@ public class ChatBackendRequester implements Callable<InvocationResult> {
                     // make sure that we got a valid endpoint back from the controller
                     serverEndpointResponse = endpointMap.get(this.ai.getAiid());
                     if ((serverEndpointResponse == null)
-                            || StringUtils.isEmpty(serverEndpointResponse.getServerIdentifier())) {
+                            || Tools.isEmpty(serverEndpointResponse.getServerIdentifier())) {
 
                         // if not, throw a descriptive exception
                         throw new NoServerAvailableException.ServiceTooBusyException(alreadyTried);

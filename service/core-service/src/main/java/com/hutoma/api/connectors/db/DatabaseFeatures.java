@@ -1,5 +1,6 @@
 package com.hutoma.api.connectors.db;
 
+import com.hutoma.api.common.Tools;
 import com.hutoma.api.logging.ILogger;
 import org.apache.commons.lang.StringUtils;
 
@@ -28,9 +29,9 @@ public class DatabaseFeatures extends Database {
                     .executeQuery();
             while (rs.next()) {
                 String value = rs.getString("devid");
-                UUID devId = StringUtils.isEmpty(value) ? null : UUID.fromString(value.trim());
+                UUID devId = Tools.isEmpty(value) ? null : UUID.fromString(value.trim());
                 value = rs.getString("aiid");
-                UUID aiid = StringUtils.isEmpty(value) ? null : UUID.fromString(value.trim());
+                UUID aiid = Tools.isEmpty(value) ? null : UUID.fromString(value.trim());
                 DatabaseFeature feature = new DatabaseFeature(
                         devId,
                         aiid,

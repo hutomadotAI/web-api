@@ -350,8 +350,8 @@ public class ChatLogic {
             if ((variables != null) && (!variables.isEmpty())) {
                 this.chatState = this.chatStateHandler.getState(devId, aiid, chatUuid);
                 for (Map.Entry<String, String> v : variables.entrySet()) {
-                    if (StringUtils.isEmpty(v.getKey())
-                            || (StringUtils.isEmpty(v.getValue()))) {
+                    if (Tools.isEmpty(v.getKey())
+                            || Tools.isEmpty(v.getValue())) {
                         return ApiError.getBadRequest("Invalid variable");
                     } else {
                         this.chatState.getChatContext().setValue(v.getKey(), v.getValue(),

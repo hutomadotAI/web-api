@@ -55,7 +55,7 @@ public class ChatPassthroughHandler implements IChatHandler {
 
         String passthrough = this.chatServices.getAIPassthroughUrl(requestInfo.getDevId(), requestInfo.getAiid());
 
-        if (!StringUtils.isEmpty(passthrough)) {
+        if (!Tools.isEmpty(passthrough)) {
             // Add telemetry for the request
             final UUID devId = requestInfo.getDevId();
             final String devIdString = devId.toString();

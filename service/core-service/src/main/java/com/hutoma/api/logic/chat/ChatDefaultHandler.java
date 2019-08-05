@@ -1,5 +1,6 @@
 package com.hutoma.api.logic.chat;
 
+import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.AiStrings;
 import com.hutoma.api.containers.sub.ChatHandoverTarget;
 import com.hutoma.api.containers.sub.ChatRequestInfo;
@@ -53,7 +54,7 @@ public class ChatDefaultHandler implements IChatHandler {
             if (state.getBadAnswersCount() >= state.getAi().getErrorThresholdHandover()) {
                 state.setChatTarget(ChatHandoverTarget.Other);
                 state.setBadAnswersCount(0);
-                if (!StringUtils.isEmpty(state.getAi().getHandoverMessage())) {
+                if (!Tools.isEmpty(state.getAi().getHandoverMessage())) {
                     currentResult.setAnswer(state.getAi().getHandoverMessage());
                 } else {
                     currentResult.setAnswer(null);

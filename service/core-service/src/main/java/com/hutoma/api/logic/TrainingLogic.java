@@ -1,10 +1,6 @@
 package com.hutoma.api.logic;
 
-import com.hutoma.api.common.Config;
-import com.hutoma.api.common.FeatureToggler;
-import com.hutoma.api.common.HTMLExtractor;
-import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.common.SupportedLanguage;
+import com.hutoma.api.common.*;
 import com.hutoma.api.connectors.BackendServerType;
 import com.hutoma.api.connectors.BackendStatus;
 import com.hutoma.api.connectors.aiservices.AIServices;
@@ -344,7 +340,7 @@ public class TrainingLogic {
         LogMap logMap = LogMap.map("AIID", aiid);
         try {
 
-            ApiAi ai = StringUtils.isEmpty(overridenEngineVersion)
+            ApiAi ai = Tools.isEmpty(overridenEngineVersion)
                     ? this.databaseAi.getAIWithStatus(devid, aiid, this.jsonSerializer)
                     : this.databaseAi.getAIWithStatusForEngineVersion(devid, aiid, overridenEngineVersion,
                     this.jsonSerializer);
@@ -352,7 +348,7 @@ public class TrainingLogic {
                 this.logger.logUserTraceEvent(LOGFROM, "UpdateTraining - AI not found", devidString, logMap);
                 return ApiError.getNotFound();
             }
-            String engineVersion = StringUtils.isEmpty(overridenEngineVersion)
+            String engineVersion = Tools.isEmpty(overridenEngineVersion)
                     ? ai.getEngineVersion() : overridenEngineVersion;
             logMap.add("EngineVersion", engineVersion);
             if (!allowRetrainReadonlyBot && ai.isReadOnly()) {

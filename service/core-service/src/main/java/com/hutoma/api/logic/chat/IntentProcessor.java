@@ -3,6 +3,7 @@ package com.hutoma.api.logic.chat;
 import com.hutoma.api.common.Config;
 import com.hutoma.api.common.FeatureToggler;
 import com.hutoma.api.common.Pair;
+import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.WebHooks;
 import com.hutoma.api.connectors.db.DatabaseException;
 import com.hutoma.api.containers.ApiIntent;
@@ -91,7 +92,7 @@ public class IntentProcessor {
         // Exit if we can't execute intent
         ApiIntent intent = this.intentHandler.getIntent(aiidForMemoryIntents, currentIntent.getName());
         if (!canExecuteIntent(intent, chatResult)) {
-            if (StringUtils.isEmpty(intent.getConditionsFallthroughMessage())) {
+            if (Tools.isEmpty(intent.getConditionsFallthroughMessage())) {
                 return false;
             } else {
                 chatResult.setScore(chatContext.getIntentScore());
@@ -745,7 +746,7 @@ public class IntentProcessor {
                 chatResult.setWebHookResponse(response);
 
                 // log and set the text if there was any
-                if (!StringUtils.isEmpty(response.getText())) {
+                if (!Tools.isEmpty(response.getText())) {
                     // copy the text reply
                     chatResult.setAnswer(response.getText());
                     // and copy the whole response to include any rich content
