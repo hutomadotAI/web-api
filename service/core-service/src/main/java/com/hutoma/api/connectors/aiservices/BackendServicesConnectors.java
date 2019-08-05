@@ -18,8 +18,10 @@ public class BackendServicesConnectors {
     private final List<ConnectorItem> connectors = new ArrayList<>();
 
     @Inject
-    BackendServicesConnectors(final EmbServicesConnector embServicesConnector) {
+    BackendServicesConnectors(final EmbServicesConnector embServicesConnector,
+                              final Doc2ChatServicesConnector doc2ChatServicesConnector) {
         this.connectors.add(new ConnectorItem(embServicesConnector, BackendServerType.EMB, false));
+        this.connectors.add(new ConnectorItem(doc2ChatServicesConnector, BackendServerType.DOC2CHAT, false));
     }
 
     public void startTraining(final AiServicesQueue queueServices,

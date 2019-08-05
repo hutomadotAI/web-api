@@ -101,6 +101,7 @@ public class ServerBinder extends AbstractBinder {
         bind(ChatRequestTrigger.class).to(ChatRequestTrigger.class);
         bind(ChatAimlHandler.class).to(ChatAimlHandler.class);
         bind(ChatEmbHandler.class).to(ChatEmbHandler.class);
+        bind(ChatDoc2ChatHandler.class).to(ChatDoc2ChatHandler.class);
         bind(ContextVariableExtractor.class).to(ContextVariableExtractor.class);
         bind(ChatDefaultHandler.class).to(ChatDefaultHandler.class);
         bind(ChatConnectors.class).to(ChatConnectors.class);
@@ -129,10 +130,12 @@ public class ServerBinder extends AbstractBinder {
         bind(AIChatServices.class).to(AIChatServices.class);
         bind(ChatAimlConnector.class).to(ChatAimlConnector.class);
         bind(ChatEmbConnector.class).to(ChatEmbConnector.class);
+        bind(ChatDoc2ChatConnector.class).to(ChatDoc2ChatConnector.class);
         bind(ServiceStatusConnector.class).to(ServiceStatusConnector.class);
         bind(EntityRecognizerService.class).to(EntityRecognizerService.class);
         bind(AimlServicesConnector.class).to(AimlServicesConnector.class);
         bind(EmbServicesConnector.class).to(EmbServicesConnector.class);
+        bind(Doc2ChatServicesConnector.class).to(Doc2ChatServicesConnector.class);
         bind(AiServicesQueue.class).to(AiServicesQueue.class);
         bind(ChatBackendRequester.class).to(ChatBackendRequester.class);
         bind(BackendServicesConnectors.class).to(BackendServicesConnectors.class);

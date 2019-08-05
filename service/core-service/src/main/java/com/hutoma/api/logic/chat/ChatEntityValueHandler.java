@@ -80,8 +80,8 @@ public class ChatEntityValueHandler implements IChatHandler {
                     numberStandardEntities++;
                 } else if (entity.getEntityValueType() == EntityValueType.REGEX) {
                     // Handle regex entities if we're supposed to for this call
-                        toSend.getRegexEntities().put(e.getName(), entity.getEntityValueList().get(0));
-                        numberRegexEntities++;
+                    toSend.getRegexEntities().put(e.getName(), entity.getEntityValueList().get(0));
+                    numberRegexEntities++;
                 }
                 // Don't currently handle system entities
             }
