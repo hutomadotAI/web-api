@@ -4,6 +4,7 @@ import com.google.gson.reflect.TypeToken;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Pair;
 import com.hutoma.api.common.SupportedLanguage;
+import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.BackendStatus;
 import com.hutoma.api.containers.*;
 import com.hutoma.api.containers.sub.*;
@@ -417,7 +418,7 @@ public class DatabaseAI extends Database {
         try {
             ApiAi ai = getAI(devId, aiid, serializer, transaction);
             if (ai != null) {
-                String engineVersion = StringUtils.isEmpty(overridenEngineVersion)
+                String engineVersion = Tools.isEmpty(overridenEngineVersion)
                         ? ai.getEngineVersion() : overridenEngineVersion;
 
                 Locale locale = ai.getLanguage();
@@ -869,7 +870,7 @@ public class DatabaseAI extends Database {
             confidenceThreshold = ai.getConfidence();
         }
         String contextJson = rs.getString("context");
-        ChatContext context = StringUtils.isEmpty(contextJson)
+        ChatContext context = Tools.isEmpty(contextJson)
                 ? new ChatContext()
                 : (ChatContext) jsonSerializer.deserialize(contextJson, ChatContext.class);
         ChatState chatState = new ChatState(
@@ -886,7 +887,7 @@ public class DatabaseAI extends Database {
         chatState.setChatId(UUID.fromString(rs.getString("chat_id")));
         Type memoryIntentListType = new TypeToken<List<MemoryIntent>>() {
         }.getType();
-        List<MemoryIntent> currentIntents = StringUtils.isEmpty(intentsJson)
+        List<MemoryIntent> currentIntents = Tools.isEmpty(intentsJson)
                 ? new ArrayList<>()
                 : jsonSerializer.deserializeList(intentsJson, memoryIntentListType);
         chatState.setCurrentIntents(currentIntents);
@@ -896,7 +897,7 @@ public class DatabaseAI extends Database {
         String webhookSessionsJson = rs.getString("webhook_sessions");
         Type webhookSessionsListType = new TypeToken<List<WebHookSession>>() {
         }.getType();
-        List<WebHookSession> webhookSessions = StringUtils.isEmpty(webhookSessionsJson)
+        List<WebHookSession> webhookSessions = Tools.isEmpty(webhookSessionsJson)
                 ? new ArrayList<>()
                 : jsonSerializer.deserializeList(webhookSessionsJson, webhookSessionsListType);
         chatState.setWebhookSessions(webhookSessions);

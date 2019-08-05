@@ -1,6 +1,7 @@
 package com.hutoma.api.containers.sub;
 
 import com.hutoma.api.common.SupportedLanguage;
+import com.hutoma.api.common.Tools;
 import com.hutoma.api.containers.ServiceIdentity;
 import org.apache.commons.lang.StringUtils;
 
@@ -44,7 +45,7 @@ public class AiIdentity {
     }
 
     public String getServerVersion() {
-        if (StringUtils.isEmpty(this.serverVersion)) {
+        if (Tools.isEmpty(this.serverVersion)) {
             return ServiceIdentity.DEFAULT_VERSION;
         }
         return this.serverVersion;

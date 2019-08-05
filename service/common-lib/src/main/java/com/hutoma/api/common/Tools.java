@@ -151,4 +151,8 @@ public class Tools {
     public static double toOneDecimalPlace(double input) {
         return Math.round(input * 10.0d) / 10.0d;
     }
+
+    public static boolean isEmpty(String str) {
+        return str == null || str.length() == 0;
+    }
 }

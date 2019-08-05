@@ -131,7 +131,7 @@ public class ControllerQueryFilter extends ControllerParameterFilter implements 
     }
 
     private static SupportedLanguage validateLanguage(final String language) throws ParameterValidationException {
-        if (StringUtils.isEmpty(language)) {
+        if (Tools.isEmpty(language)) {
             return SupportedLanguage.EN;
         }
         Optional<SupportedLanguage> value = Arrays.stream(SupportedLanguage.values())
@@ -143,7 +143,7 @@ public class ControllerQueryFilter extends ControllerParameterFilter implements 
     }
 
     private static String validateServerVersion(final String version) throws ParameterValidationException {
-        if (StringUtils.isEmpty(version)) {
+        if (Tools.isEmpty(version)) {
             return ServiceIdentity.DEFAULT_VERSION;
         }
         if (version.length() > 10) {
