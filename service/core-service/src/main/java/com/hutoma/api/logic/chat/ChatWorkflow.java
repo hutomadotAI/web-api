@@ -25,6 +25,7 @@ public class ChatWorkflow {
                         final ChatIntentHandler intentHandler,
                         final ChatRequestTrigger requestBETrigger,
                         final ChatEmbHandler embHandler,
+                        final ChatDoc2ChatHandler doc2ChatHandler,
                         final ChatAimlHandler aimlHandler,
                         final ChatDefaultHandler defaultHandler,
                         final SysAnyCommandsHandler sysAnyCommandsHandler) {
@@ -38,6 +39,7 @@ public class ChatWorkflow {
                 sysAnyCommandsHandler,
                 requestBETrigger,
                 embHandler,
+                doc2ChatHandler,
                 aimlHandler,
                 defaultHandler
         );

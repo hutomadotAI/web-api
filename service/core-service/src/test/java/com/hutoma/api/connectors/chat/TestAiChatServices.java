@@ -61,7 +61,10 @@ public class TestAiChatServices {
         this.fakeRequestEmb = mock(ChatEmbConnector.class);
         this.fakeRequestAiml = mock(ChatAimlConnector.class);
         this.threadSubPool = mock(TrackedThreadSubPool.class);
-        this.fakeChatConnectors = new ChatConnectors(this.fakeRequestAiml, this.fakeRequestEmb);
+        this.fakeChatConnectors = new ChatConnectors(
+                this.fakeRequestAiml,
+                this.fakeRequestEmb,
+                mock(ChatDoc2ChatConnector.class));
 
         this.chatServices = new AIChatServices(
                 this.fakeDatabaseAi, mock(ILogger.class), fakeConfig, mock(JsonSerializer.class),

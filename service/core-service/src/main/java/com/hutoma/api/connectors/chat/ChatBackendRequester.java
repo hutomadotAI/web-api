@@ -144,9 +144,7 @@ public class ChatBackendRequester implements Callable<InvocationResult> {
             chatParamsThisAi.put("topic", this.chatState.getTopic());
         }
 
-        JerseyWebTarget target;
-        long startTime = this.tools.getTimestamp();
-        Response response;
+        final long startTime = this.tools.getTimestamp();
 
         // Construct payload
         EntityPayload body = new EntityPayload();
@@ -158,7 +156,7 @@ public class ChatBackendRequester implements Callable<InvocationResult> {
                 "sending: " + bodyJson,
                 this.ai.getDevId().toString());
 
-        target = this.jerseyClient
+        JerseyWebTarget target = this.jerseyClient
                 .target(endpointResponse.getServerUrl())
                 .path(this.ai.getDevId().toString())
                 .path(this.ai.getAiid().toString())
@@ -171,7 +169,7 @@ public class ChatBackendRequester implements Callable<InvocationResult> {
                 target = target.queryParam("chatId", chatId);
             }
         }
-        response = target
+        Response response = target
                 .request()
                 .property(CONNECT_TIMEOUT, (int) this.config.getBackendConnectCallTimeoutMs())
                 .property(READ_TIMEOUT, (int) timeRemaining)

@@ -80,6 +80,7 @@ public class TestAiServicesClient {
     private ThreadPool threadPool;
     private AiServicesQueue fakeQueueServices;
     private EmbServicesConnector fakeEmbServicesConnector;
+    private Doc2ChatServicesConnector fakeDoc2ChatServicesConnector;
     private BackendServicesConnectors fakeConnectors;
 
     @BeforeClass
@@ -105,13 +106,16 @@ public class TestAiServicesClient {
         this.fakeTools = mock(Tools.class);
         this.fakeQueueServices = mock(AiServicesQueue.class);
         this.fakeEmbServicesConnector = mock(EmbServicesConnector.class);
+        this.fakeDoc2ChatServicesConnector = mock(Doc2ChatServicesConnector.class);
 
         when(this.fakeConfig.getThreadPoolMaxThreads()).thenReturn(32);
         when(this.fakeConfig.getThreadPoolIdleTimeMs()).thenReturn(10000L);
         when(this.fakeConfig.getBackendTrainingCallTimeoutMs()).thenReturn(20000L);
         this.threadPool = new ThreadPool(this.fakeConfig, this.fakeLogger);
 
-        this.fakeConnectors = new BackendServicesConnectors(this.fakeEmbServicesConnector);
+        this.fakeConnectors = new BackendServicesConnectors(
+                this.fakeEmbServicesConnector,
+                this.fakeDoc2ChatServicesConnector);
 
         this.aiServices = new AIServices(this.fakeDatabaseAi, this.fakeDatabaseEntitiesIntents, this.fakeLogger,
                 this.fakeConfig, this.fakeSerializer,
@@ -143,6 +147,8 @@ public class TestAiServicesClient {
     @Test
     public void testUploadTraining() throws AIServices.AiServicesException, NoServerAvailableException {
         when(this.fakeEmbServicesConnector.getBackendTrainingEndpoint(any(), any()))
+                .thenReturn(getFakeServerEndpoint(LOCAL_WEB_ENDPOINT));
+        when(this.fakeDoc2ChatServicesConnector.getBackendTrainingEndpoint(any(), any()))
                 .thenReturn(getFakeServerEndpoint(LOCAL_WEB_ENDPOINT));
         // Need to have a real serializer here to transform the ai info
         AIServices thisAiServices = new AIServices(this.fakeDatabaseAi, this.fakeDatabaseEntitiesIntents,

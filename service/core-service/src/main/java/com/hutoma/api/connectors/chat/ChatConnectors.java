@@ -3,6 +3,7 @@ package com.hutoma.api.connectors.chat;
 import com.hutoma.api.connectors.BackendServerType;
 import com.hutoma.api.connectors.BackendStatus;
 import com.hutoma.api.connectors.NoServerAvailableException;
+import com.hutoma.api.connectors.aiservices.Doc2ChatServicesConnector;
 import com.hutoma.api.containers.sub.AiIdentity;
 import com.hutoma.api.containers.sub.ChatResult;
 import com.hutoma.api.containers.sub.ChatState;
@@ -19,9 +20,11 @@ public class ChatConnectors {
 
     @Inject
     ChatConnectors(final ChatAimlConnector backendAimlConnector,
-                   final ChatEmbConnector backendEmbConnector) {
+                   final ChatEmbConnector backendEmbConnector,
+                   final ChatDoc2ChatConnector chatDoc2ChatConnector) {
         this.connectorMap.put(BackendServerType.AIML, new ChatConnectorItem(backendAimlConnector, false));
         this.connectorMap.put(BackendServerType.EMB, new ChatConnectorItem(backendEmbConnector, false));
+        this.connectorMap.put(BackendServerType.DOC2CHAT, new ChatConnectorItem(chatDoc2ChatConnector, false));
     }
 
     public Map<UUID, ChatResult> awaitBackend(final BackendServerType serverType, final int remainingTime,

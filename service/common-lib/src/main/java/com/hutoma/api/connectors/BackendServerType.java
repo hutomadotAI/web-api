@@ -11,7 +11,10 @@ public enum BackendServerType {
     AIML("aiml"),
 
     @SerializedName("emb")
-    EMB("emb");
+    EMB("emb"),
+
+    @SerializedName("doc2chat")
+    DOC2CHAT("doc2chat");
 
     private final String value;
 
