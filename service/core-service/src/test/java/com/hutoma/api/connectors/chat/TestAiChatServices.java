@@ -1,9 +1,6 @@
 package com.hutoma.api.connectors.chat;
 
-import com.hutoma.api.common.Config;
-import com.hutoma.api.common.JsonSerializer;
-import com.hutoma.api.common.TestDataHelper;
-import com.hutoma.api.common.Tools;
+import com.hutoma.api.common.*;
 import com.hutoma.api.connectors.BackendEngineStatus;
 import com.hutoma.api.connectors.BackendServerType;
 import com.hutoma.api.connectors.BackendStatus;
@@ -69,7 +66,7 @@ public class TestAiChatServices {
         this.chatServices = new AIChatServices(
                 this.fakeDatabaseAi, mock(ILogger.class), fakeConfig, mock(JsonSerializer.class),
                 mock(Tools.class), this.fakeConfig, mock(JerseyClient.class),
-                this.threadSubPool, this.fakeChatConnectors);
+                this.threadSubPool, this.fakeChatConnectors, mock(FeatureToggler.class));
     }
 
     @Test

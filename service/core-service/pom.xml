@@ -418,8 +418,8 @@
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
             <version>${project.component.junit.version}</version>
-            <type>jar</type>
-            <scope>test</scope>
+
+
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>

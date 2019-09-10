@@ -13,8 +13,8 @@ public enum BackendServerType {
     @SerializedName("emb")
     EMB("emb"),
 
-    @SerializedName("doc2chat")
-    DOC2CHAT("doc2chat");
+    @SerializedName("d2c")
+    DOC2CHAT("d2c");
 
     private final String value;
 

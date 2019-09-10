@@ -123,7 +123,7 @@ public class ControllerQueryFilter extends ControllerParameterFilter implements 
 
     private static BackendServerType validateServerType(final String serverType) throws ParameterValidationException {
         Optional<BackendServerType> value = Arrays.stream(BackendServerType.values())
-                .filter(x -> x.name().equalsIgnoreCase(serverType)).findFirst();
+                .filter(x -> x.value().equalsIgnoreCase(serverType)).findFirst();
         if (value.isPresent()) {
             return value.get();
         }

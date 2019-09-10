@@ -1,6 +1,7 @@
 package com.hutoma.api.connectors.chat;
 
 import com.hutoma.api.common.Config;
+import com.hutoma.api.common.FeatureToggler;
 import com.hutoma.api.common.JsonSerializer;
 import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.*;
@@ -35,6 +36,7 @@ public class AIChatServices extends ServerConnector {
     private final Config config;
     private final DatabaseAI databaseAi;
     private final ChatConnectors chatConnectors;
+    private final FeatureToggler featureToggler;
 
     private long requestDeadline;
 
@@ -44,11 +46,13 @@ public class AIChatServices extends ServerConnector {
                           final JsonSerializer serializer,
                           final Tools tools, final Config config, final JerseyClient jerseyClient,
                           final ITrackedThreadSubPool threadSubPool,
-                          final ChatConnectors chatConnectors) {
+                          final ChatConnectors chatConnectors,
+                          final FeatureToggler featureToggler) {
         super(logger, connectConfig, serializer, tools, jerseyClient, threadSubPool);
         this.config = config;
         this.databaseAi = databaseAi;
         this.chatConnectors = chatConnectors;
+        this.featureToggler = featureToggler;
     }
 
     /***
@@ -124,6 +128,16 @@ public class AIChatServices extends ServerConnector {
 
         if (!embAIs.isEmpty()) {
             this.chatConnectors.issueChatRequests(BackendServerType.EMB, parameters, embAIs, chatState);
+        }
+
+        if (this.featureToggler.getStateForAiid(aiIdentity.getDevId(), aiIdentity.getAiid(),
+                "show_knowledge_base") == FeatureToggler.FeatureState.T1
+                && canChatWith.contains(BackendServerType.DOC2CHAT)) {
+            this.chatConnectors.issueChatRequests(
+                    BackendServerType.DOC2CHAT,
+                    parameters,
+                    Collections.singletonList(aiIdentity),
+                    chatState);
         }
     }
 

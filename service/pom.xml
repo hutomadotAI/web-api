@@ -27,13 +27,13 @@
         <project.component.junit.version>5.2.0</project.component.junit.version>
         <project.component.checkstyle.version>8.22</project.component.checkstyle.version>
         <project.component.maven-checkstyle.version>3.0.0</project.component.maven-checkstyle.version>
-        <project.component.maven-site-plugin.version>3.7.1</project.component.maven-site-plugin.version>
+        <project.component.maven-site-plugin.version>3.8.2</project.component.maven-site-plugin.version>
         <project.component.findbugs.version>3.0.5</project.component.findbugs.version>
         <project.component.mockito.version>2.19.0</project.component.mockito.version>
         <project.component.surefire.version>2.22.0</project.component.surefire.version>
         <project.component.jacoco.version>0.8.1</project.component.jacoco.version>
         <project.component.jersey-test-framework-provider-grizzly2.version>2.27</project.component.jersey-test-framework-provider-grizzly2.version>
-        <project.component.dependency-check-maven.version>5.1.0</project.component.dependency-check-maven.version>
+        <project.component.dependency-check-maven.version>5.2.1</project.component.dependency-check-maven.version>
         <project.component.dependency-check-maven.cve-valid-for-hours>36</project.component.dependency-check-maven.cve-valid-for-hours>
         <!-- Documentation related component versions -->
         <project.component.enunciate.version>2.11.1</project.component.enunciate.version>
