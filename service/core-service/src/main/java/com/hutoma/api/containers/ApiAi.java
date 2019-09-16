@@ -1,6 +1,7 @@
 package com.hutoma.api.containers;
 
 import com.google.gson.annotations.SerializedName;
+import com.hutoma.api.common.FeatureToggler;
 import com.hutoma.api.connectors.BackendEngineStatus;
 import com.hutoma.api.connectors.BackendServerType;
 import com.hutoma.api.connectors.BackendStatus;
@@ -10,6 +11,7 @@ import com.hutoma.api.containers.sub.UITrainingState;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.joda.time.DateTime;
 
+import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -338,12 +340,17 @@ public class ApiAi extends ApiResult {
             BackendEngineStatus emb = this.backendStatus.getEngineStatus(BackendServerType.EMB);
             TrainingStatus embStatus = emb.getTrainingStatus();
             this.phase1Progress = clampProgress(embStatus, emb.getTrainingProgress());
-
             this.summaryStatusReal = getSummaryTrainingStatus(embStatus);
-
-            // depending on which servers are in what state for the bot,
-            // we can determine whether we can chat with it or not
             this.canChat = UITrainingState.canChat(embStatus);
+
+            BackendEngineStatus doc2chat = this.backendStatus.getEngineStatus(BackendServerType.DOC2CHAT);
+            TrainingStatus doc2chatStatus = doc2chat.getTrainingStatus();
+            if (doc2chatStatus == TrainingStatus.AI_TRAINING) {
+                this.phase1Progress += clampProgress(doc2chatStatus, doc2chat.getTrainingProgress());
+                this.phase1Progress /= 2;
+                this.canChat = this.canChat && UITrainingState.canChat(doc2chatStatus);
+                this.summaryStatusReal = TrainingStatus.AI_TRAINING;
+            }
         }
 
         this.summaryStatusPublic = this.summaryStatusReal;
