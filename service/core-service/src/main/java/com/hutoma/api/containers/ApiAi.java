@@ -347,7 +347,10 @@ public class ApiAi extends ApiResult {
             TrainingStatus doc2chatStatus = doc2chat.getTrainingStatus();
             if (doc2chatStatus == TrainingStatus.AI_TRAINING) {
                 this.phase1Progress += clampProgress(doc2chatStatus, doc2chat.getTrainingProgress());
-                this.phase1Progress /= 2;
+                if (embStatus != TrainingStatus.AI_UNDEFINED) {
+                    // Split the training progress with EMB only if it's in use
+                    this.phase1Progress /= 2;
+                }
                 this.canChat = this.canChat && UITrainingState.canChat(doc2chatStatus);
                 this.summaryStatusReal = TrainingStatus.AI_TRAINING;
             }
