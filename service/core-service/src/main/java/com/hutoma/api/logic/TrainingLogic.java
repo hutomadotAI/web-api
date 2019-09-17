@@ -371,11 +371,6 @@ public class TrainingLogic {
                     try {
                         String trainingMaterials = this.aiServices.getTrainingMaterialsCommon(devid, aiid,
                                 this.jsonSerializer);
-                        if (trainingMaterials == null || trainingMaterials.isEmpty()) {
-                            this.logger.logUserTraceEvent(LOGFROM, "UpdateTraining - no training data",
-                                    devidString, logMap);
-                            return ApiError.getBadRequest("There is no training data.");
-                        }
                         this.aiServices.uploadTraining(ai.getBackendStatus(),
                                 new AiIdentity(devid, aiid, availableLanguage.get(), engineVersion),
                                 trainingMaterials);

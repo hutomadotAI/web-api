@@ -440,13 +440,7 @@ public class TestTrainingLogic {
             throws DatabaseException, AIServices.AiServicesException {
         verifyUpdateTraining_withIntents("");
     }
-
-    @Test
-    public void testUpdateTraining_noFileToUpload_noIntents()
-            throws DatabaseException, AIServices.AiServicesException {
-        verifyUpdateTraining_noIntents(null);
-    }
-
+    
     @Test
     public void testUpdateTraining_withFileToUpload_noIntents()
             throws DatabaseException, AIServices.AiServicesException {

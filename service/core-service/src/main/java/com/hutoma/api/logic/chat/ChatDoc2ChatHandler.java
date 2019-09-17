@@ -2,6 +2,7 @@ package com.hutoma.api.logic.chat;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.hutoma.api.common.FeatureToggler;
+import com.hutoma.api.common.Tools;
 import com.hutoma.api.connectors.BackendServerType;
 import com.hutoma.api.connectors.ServerConnector;
 import com.hutoma.api.connectors.chat.AIChatServices;
@@ -60,7 +61,10 @@ public class ChatDoc2ChatHandler extends ChatGenericBackend implements IChatHand
             Map<UUID, ChatResult> allResults = chatServices.awaitBackend(BackendServerType.DOC2CHAT);
             if (allResults != null) {
                 ChatResult chatResult = allResults.get(requestInfo.getAiid());
-                if (chatResult.getAnswer() != null) {
+                telemetryMap.add("D2C.Response",
+                        chatResult.getAnswer() != null ? chatResult.getAnswer().trim() : "(null)");
+                telemetryMap.add("D2C.score", chatResult.getScore());
+                if (!Tools.isEmpty(chatResult.getAnswer()) && chatResult.getScore() > 0.0) {
                     // remove trailing newline
                     resultToReturn.setAnswer(chatResult.getAnswer().trim());
                     resultToReturn.setScore(chatResult.getScore());
