@@ -10,8 +10,7 @@ steps:
 # Build the API (all dependent services) - ignore CVEs and checks as these should have been run previously
 - name: "gcr.io/cloud-builders/mvn:3.3.9-jdk-8"
   args: ['package',
-         '-f', 'service/pom.xml',
-         '-Dfindbugs.skip=true', '-Dcheckstyle.skip', '-Djacoco.skip=true', '-Ddependency-check.skip=true']
+         '-f', 'service/pom.xml']
 
 # Build the images
 - name: 'gcr.io/cloud-builders/docker'
